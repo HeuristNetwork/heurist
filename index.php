@@ -18,18 +18,20 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+define('IS_INDEX_PAGE',true);
 define('PDIR','');
 
 require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
+
+if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+        print '<script type="text/javascript" src="ext/fancytree/jquery.fancytree-all.min.js"></script>';
+}else{
+        print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
+}   
 ?>
 
         <!-- it is needed in preference dialog -->
         <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
-        
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>
-        <!--
-        <script type="text/javascript" src="ext/fancytree/jquery.fancytree-all.min.js"></script>
-        -->
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 

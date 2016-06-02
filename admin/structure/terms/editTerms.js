@@ -1286,7 +1286,7 @@ function EditTerms() {
             "&domain="+_currentDomain;
             */
 
-            var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/importDefTerms.php?db="+ _db +
+            var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/import/importDefTerms.php?db="+ _db +
                         "&trm_ID="+term_id;
             
             Hul.popupURL(top, sURL, {
@@ -1297,6 +1297,7 @@ function EditTerms() {
                 //width: 500,
                 height: 460,
                 width: 800,
+                'context_help':top.HEURIST.baseURL_V3+'context_help/defTerms.html #import',
                 callback: _import_complete
             });
             

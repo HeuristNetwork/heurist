@@ -27,13 +27,11 @@
 
 require_once(dirname(__FILE__)."/../../hserver/System.php");
 
-$is_index_page = defined('PDIR');
-
-if($is_index_page){
+if(defined('IS_INDEX_PAGE')){
     //if PDIR is defined this script is main (root)
     define('ERROR_REDIR','hserver/utilities/list_databases.php');
 }else{
-    define('PDIR','../../');
+    if(!defined('PDIR')) define('PDIR','../../');
     define('ERROR_REDIR','errorPage.php');
 }
 
@@ -50,7 +48,7 @@ if(@$_REQUEST['db']){
 
 if(!$isSystemInited){
 
-    if($is_index_page){
+    if(defined('IS_INDEX_PAGE')){
         require (ERROR_REDIR);
     }else{
         $err = $system->getError();
@@ -95,16 +93,23 @@ var _time_start = _time_debug;
 //console.log('ipage start');
 </script>       
 
-        <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
-        <script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.fileupload.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.iframe-transport.min.js"></script>
-<!--
+<?php
+if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+?>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-file-upload/js/jquery.fileupload.js"></script>
--->        
+<?php
+}else{
+?>
+        <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.fileupload.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.iframe-transport.min.js"></script>
+<?php
+}
+?>
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         

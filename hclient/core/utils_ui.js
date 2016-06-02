@@ -38,6 +38,7 @@ createUserGroupsSelect - get SELECT for list of given groups, othewise loads lis
 createEntitySelector - get id-name selector for specified entity
 
 Other UI functions    
+initDialogHintButtons - add show hint and context buttons into dialog header
 initHintButton - button to show/hide hints
 initHelper - Inits helper div (slider) and button   
 
@@ -850,22 +851,26 @@ top.HEURIST4.ui = {
     },
 
     // Init button that show/hide help tips
-    initDialogHintButtons: function($dialog, helpcontent_url){
+    initDialogHintButtons: function($dialog, helpcontent_url, hideHelpButton){
         
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         
-        var $help_button = $('<div>').button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
+        if(!hideHelpButton){
+            var $help_button = $('<div>').button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
                     .addClass('dialog-title-button')
                     .css({'right':'48px'})
                     .appendTo(titlebar)
                     .on('click', top.HEURIST4.ui.switchHintState);
+        }
 
-        var $info_button = $('<div>')
+        if(helpcontent_url){                    
+            var $info_button = $('<div>')
                     .addClass('dialog-title-button')
                     .css({'right':'26px'})
                     .appendTo(titlebar);
                     
-        top.HEURIST4.ui.initHelper($info_button, null, helpcontent_url);
+            top.HEURIST4.ui.initHelper($info_button, null, helpcontent_url);
+        }
                     
     },
                         

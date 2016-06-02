@@ -503,6 +503,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         if(!options["title"]){
                             $dlg.dialog( "option", "title", content.document.title );
                         }      
+                        if(options["context_help"]){
+                            top.HEURIST4.ui.initDialogHintButtons($dlg, options["context_help"], true);
+                        }
                         
                         
                         /*

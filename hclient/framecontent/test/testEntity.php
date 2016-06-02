@@ -21,7 +21,9 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once(dirname(__FILE__)."/initPage.php");
+define('PDIR','../../../');    
+    
+require_once(dirname(__FILE__)."/../initPage.php");
 ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/fancytree/skin-themeroller/ui.fancytree.css" />
         <script type="text/javascript" src="<?php echo PDIR;?>ext/fancytree/jquery.fancytree-all.min.js"></script>

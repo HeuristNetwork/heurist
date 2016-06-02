@@ -1,4 +1,4 @@
-<?php
+&nbsp;<?php
 /**
 * 
 * fileGet.php - 1) get image for given entity, record ID, version and color 
@@ -38,51 +38,76 @@ if($path){
 $entity_name = @$_REQUEST['entity'];
 $recID = @$_REQUEST['recID'];
 $db = @$_REQUEST['db'];
+$filename = @$_REQUEST['file'];
+
+$error = null;
 
 if(!$db){
-    $system->addError(HEURIST_INVALID_REQUEST, "Db parameter is not defined");
+    $error = "Db parameter is not defined";
 }else 
-if(!$entity_name){
-    $system->addError(HEURIST_INVALID_REQUEST, "Entity parameter is not defined");
+if(!$entity_name && !$filename){
+    $error = "Entity parameter is not defined";
+}else 
+if(!$filename){
+    $error = "File name not defined"; //to get file from scratch
 }else
-if(!($recID>0)){
-    $system->addError(HEURIST_INVALID_REQUEST, "Entity ID is not defined");
+if($entity_name && !($recID>0)){
+    $error = "Entity ID is not defined";
 }else{
 
     $system = new System(); //without db connection
     $system->initPathConstants($db);
+    
+    if($filename){ //download from scratch
+        
+        $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
 
-    $filename = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
+        $content_type = null;//'image/'.$file_ext;
+        
+    }else{
 
-    $version  = @$_REQUEST['version'];
-    if($version=='thumbnail' || $version=='icon'){
-        $filename =  $filename.$version.'/';   
-    }
-    //find file by recID
-    $filename = $filename.$recID.'.';
-    
-    $exts = array('png','jpg','jpeg','gif');
-    
-    $file_read = HEURIST_DIR.'hclient/assets/13x13.gif';
-    $file_ext = 'gif';
-    
-    foreach ($exts as $ext) {
-       
-        if(file_exists($filename.$ext)){
-            $file_read = $filename.$ext;
-            $file_ext = $ext;
-            break;
-        }        
+        $filename = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
+
+        $version  = @$_REQUEST['version'];
+        if($version=='thumbnail' || $version=='icon'){
+            $filename =  $filename.$version.'/';   
+        }
+        //find file by recID
+        $filename = $filename.$recID.'.';
+        
+        $exts = array('png','jpg','jpeg','gif');
+        
+        $file_read = HEURIST_DIR.'hclient/assets/13x13.gif';
+        $file_ext = 'gif';
+        
+        foreach ($exts as $ext) {
+           
+            if(file_exists($filename.$ext)){
+                $file_read = $filename.$ext;
+                $file_ext = $ext;
+                break;
+            }        
+        }
+        
+        $content_type = 'image/'.$file_ext;
     }
     
     ob_start();    
-    header('Content-type: image/'.$file_ext);
+    if($content_type) header('Content-type: '.$content_type);
     header('Pragma: public');
     header('Content-Length: ' . filesize($file_read));
     @ob_clean();
     flush();        
     readfile($file_read);
     
+}
+
+if($error){
+    if(!$entity_name){ //print error as text
+        print $error;
+    }else{ //@todo return error image
+    
+    }
 }
 ?>
 

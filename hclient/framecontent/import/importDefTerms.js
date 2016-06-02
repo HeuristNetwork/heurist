@@ -34,7 +34,7 @@ function hImportDefTerms(_trm_ParentTermID) {
     function _init(_trm_ParentTermID){
     
         trm_ParentTermID = _trm_ParentTermID;
-        
+
         if(trm_ParentTermID>0){
             //find parent entry
             var allterms;
@@ -92,8 +92,8 @@ function hImportDefTerms(_trm_ParentTermID) {
         
         //buttons
         var btnUploadFile = $('#btnUploadFile')
-                    .css({'width':'120px'})
-                    .button({label: top.HR('Upload File'), icons:{secondary: "ui-icon-circle-arrow-s"}})
+                    .css({'xwidth':'120px','font-size':'0.8em'})
+                    .button({label: top.HR('Upload File')})  //icons:{secondary: "ui-icon-circle-arrow-e"}
                     .click(function(e) {
                             uploadWidget.click();
                         });
@@ -105,16 +105,26 @@ function hImportDefTerms(_trm_ParentTermID) {
                         });
         var btnStartImport = $('#btnImportData')
                     .css({'width':'120px'})
-                    .button({label: top.HR('Start Import'), icons:{secondary: "ui-icon-circle-arrow-n"}})
+                    .button({label: top.HR('Start Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doPost();
                         });
+        top.HEURIST4.util.setDisabled(btnStartImport, true);
+         
+        var src_content = ''; 
+        
+        $('#sourceContent').keyup(function(e){
+            if(src_content != $(this).val().trim()){
+                src_content = $(this).val().trim();
+                _setCurtain( src_content==''?1:2 );
+            }
+        })                        
     
     
             uploadWidget.fileupload({
     url: top.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
     formData: [ {name:'db', value: top.HAPI4.database}, 
-                {name:'entity', value:'temp'},
+                {name:'entity', value:'temp'}, //to place file into scratch folder
                 {name:'max_file_size', value:'1024*1024'}],
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
     autoUpload: true,
@@ -130,8 +140,21 @@ function hImportDefTerms(_trm_ParentTermID) {
                     if(file.error){
                         $('#sourceContent').val(file.error);
                     }else{
-                        $('#sourceContent').load(file.url, function(){
+                        
+                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')+'&db='+top.HAPI4.database;
+                        
+                        $('#sourceContent').load(url_get, function(){
+                            _setCurtain( 2 );
+                            //alert('loaded! '+file.url);
                             //$.ajax({url:file.deleteUrl, type:'DELETE'});
+                            
+/*
+deleteUrl:"http://127.0.0.1/h4-ao/hserver/utilities/fileUpload.php?file=Book_ansi.txt"
+name:Book_ansi.txt
+url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
+*/                            
+                            
+                            
                         });
                     }
                 });
@@ -177,27 +200,28 @@ function hImportDefTerms(_trm_ParentTermID) {
             
             //noothing defined
             var content = $('#sourceContent').val();
+
+            _setCurtain(2);
             
             if(content==''){
                 //$(recordList).resultList('updateResultSet', new hRecordSet());
             }else{
             
-        
                         var request = { content: content,
                                         csv_delimiter: $('#csv_delimiter').val(),
                                         csv_enclosure: $('#csv_enclosure').val(),
                                         csv_linebreak: $('#csv_linebreak').val(),
                                         id: top.HEURIST4.util.random()
                                        };
+                                       
 
                         top.HAPI4.parseCSV(request, function( response ){
 
-                            $('.column_roles').empty();
                             //that.loadanimation(false);
                             if(response.status == top.HAPI4.ResponseStatus.OK){
                                
                                
-                                var container = $('#divStep2').empty();
+                                var container = $('#divParsePreview');    
                                 var tbl  = $('<table>').appendTo(container);
                                 var i,j;
                                 _parseddata = response.data;
@@ -221,6 +245,9 @@ function hImportDefTerms(_trm_ParentTermID) {
                                 if(maxcol>0){
                                     $('#field_term').val(0);
                                     _doPrepare();
+                                    _setCurtain(3);
+                                }else{
+                                    top.HEURIST4.msg.showMsgErr(response);
                                 }
                                 
                             }else{
@@ -229,6 +256,23 @@ function hImportDefTerms(_trm_ParentTermID) {
 
                         });
             }
+    }
+    
+    function _setCurtain(step){
+        
+        if(step<3){
+            $('#divCurtain').show();   
+            $('.column_roles').empty();
+            $('#divParsePreview').empty();
+            $('#preparedInfo').empty();
+        }
+        if(step==1){
+            $('#divCurtain').css('left','200px');
+        }else if(step==2){
+            $('#divCurtain').css('left','350px');
+        }else if(step==3){
+            $('#divCurtain').hide();   
+        }
     }
 
     //
@@ -246,13 +290,13 @@ function hImportDefTerms(_trm_ParentTermID) {
         
             var field_term = $('#field_term').val();
             if(field_term<0){
-                msg = 'Term(Label) must be always defined';
+                msg = '<span style="color:red">Term(Label) must be always defined</span>';
             }else{
                 
             
                 var field_code = $('#field_code').val();
                 var field_desc = $('#field_desc').val();
-                var i, record, skip_na = 0, skip_dup = 0, labels = [];
+                var i, record, skip_na = 0, skip_dup = 0, skip_long = 0, labels = [];
                         
                 for(i in _parseddata){
                     
@@ -269,7 +313,10 @@ function hImportDefTerms(_trm_ParentTermID) {
                         {
                                 skip_dup++;
                         }else{
-                       
+                            
+                            if(lbl.length>500){
+                                skip_long++;    
+                            }
                             labels.push(lbl.toLowerCase());
                             record['trm_Label'] = lbl;
                             record['trm_ParentTermID'] = trm_ParentTermID;
@@ -291,17 +338,30 @@ function hImportDefTerms(_trm_ParentTermID) {
                     }
                 }//for
                 
-                msg = 'Ready to import: '+_prepareddata.length+' entr'+((_prepareddata.length>1)?'ies':'y');
+                if(_prepareddata.length==0){
+                    msg = '<span style="color:red">No valid data to import</span>';   
+                }else{
+                    msg = 'Ready to import: '+_prepareddata.length+' entr'+((_prepareddata.length>1)?'ies':'y');
+                }
+                if(skip_na>0 || skip_dup>0 || skip_long>0){
+                    msg = msg + '<br>Term(label)';
+                }
                 if(skip_na>0){
-                    msg = msg + '<br>Label is not defined for '+skip_na+' row'+((skip_na>1)?'s':'');    
+                    msg = msg + '<br> is not defined for '+skip_na+' row'+((skip_na>1)?'s':'');    
                 }
                 if(skip_dup>0){
-                    msg = msg + '<br>Label is duplicated for '+skip_dup+' row'+((skip_dup>1)?'s':'');    
+                    msg = msg + '<br> is duplicated for '+skip_dup+' row'+((skip_dup>1)?'s':'');    
                 }
+                if(skip_long>0){
+                    msg = msg + '<br> is very long (>500 chars) for '+skip_long+' row'+((skip_long>1)?'s':'');    
+                }
+                
                 
             }
         
         }
+        
+        top.HEURIST4.util.setDisabled($('#btnImportData'), (_prepareddata.length<1));
         
         $('#preparedInfo').html(msg);
     }

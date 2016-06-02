@@ -86,6 +86,7 @@ if($response!=null){
             'upload_dir' => HEURIST_FILESTORE_DIR.'scratch/',
             'upload_url' => HEURIST_FILESTORE_URL.'scratch/',
             'max_file_size' => @$_REQUEST['max_file_size'],
+            // 'unique_filename' => false,  force unique file name
             //'image_versions' => array()
             //'print_response' => false,
             //'download_via_php' => 1
@@ -115,7 +116,7 @@ if($response!=null){
     
     $options['print_response'] = false;
     
-    $upload_handler = new UploadHandler($options);
+    $upload_handler = new UploadHandler($options);  // from 3d party uploader
     
     //@todo set print_response=false
     //and send to client standard HEURIST response
@@ -134,7 +135,9 @@ if($response!=null){
     header('Content-type: application/json');
     print json_encode($response);
     
-    
+//
+//  verification of uploaded file - @todo integrate with UploadHandler
+//    
 function postmode_file_selection() {
 
     $param_name = 'file';

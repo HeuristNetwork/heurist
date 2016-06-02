@@ -956,3 +956,9 @@ background: #8ea9b9
     height:16px;
     width:16px;
 }
+
+.semitransparent{
+    background-color: rgba(100, 100, 100, 0.6);
+    background:-moz-linear-gradient(center top , rgba(100, 100, 100, 0.6), rgba(100, 100, 100, 0.9)) repeat scroll 0 0 transparent;
+    background:-webkit-gradient(linear, left top, left bottom, from(rgba(100, 100, 100, 0.6)), to(rgba(100, 100, 100, 0.9)));
+}

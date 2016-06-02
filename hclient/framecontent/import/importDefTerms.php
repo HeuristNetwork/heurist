@@ -18,8 +18,10 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    
+define('PDIR','../../../');    
 
-require_once(dirname(__FILE__)."/initPage.php");
+require_once(dirname(__FILE__)."/../initPage.php");
 ?>
         <script type="text/javascript" src="importDefTerms.js"></script>
 
@@ -40,28 +42,29 @@ require_once(dirname(__FILE__)."/initPage.php");
     <body class="ui-heurist-bg-light" style="overflow:hidden;">
 
 <div style="position:absolute;width:200px; height:100%;  border-right:1px lightgray solid" id="divStep1">
-    <div class="ent_header" style="height:6em;">
-        <h2>1. Upload your data or paste content in area below</h2>
-        
+    <div class="ent_header" style="height:5em;">
+        <h2>Step 1<br>Paste content in area below</h2>
+        <h2 style="position:absolute;bottom:6px;">or</h2>
         <input type="file" id="uploadFile" style="display:none">
-        <div id="btnUploadFile" style="position:absolute;bottom:2px;">Upload File</div>
+        <div id="btnUploadFile" style="position:absolute;bottom:6px;left:3em">Upload File</div>
     </div>
-    <textarea id="sourceContent" class="ent_content_full" style="top:6em;width:100%;resize:none">
+    <textarea id="sourceContent" class="ent_content_full" style="top:5em;width:100%;resize:none">
     
     </textarea>
 </div>
 <div style="position:absolute;left:200px;width:150px; height:100%; border-right:1px lightgray solid">
-    <div class="ent_header" style="height:6em;">
-        <h2>2. Define parse parameters and click</h2>
+    <div class="ent_header" style="height:5em;">
+        <h2>Step 2</h2>
         <div id="btnParseData" style="position:absolute;bottom:2px;">Start Parse</div>
     </div>
-    <fieldset class="ent_content_full" style="top:6em;padding-top:2em;">
+    <fieldset class="ent_content_full" style="top:5em;padding-top:2em;">
             <div>
                 <label>Field separator:</label>
                 <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;">
                         <option value="," selected>comma</option>
                         <option value="tab">tab</option>
                         <option value=";">semicolon</option>
+                        <option value="space">space</option>
                 </select>
             </div>
             <div>
@@ -73,50 +76,57 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div>
                 <label>Line separator:</label>
                     <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;">
-                        <option selected value="1">No lines</option>
+                        <option selected value="auto">auto detect</option>
+                        <option value="1">No lines</option>
                         <option value="2">No lines. Group by 2</option>
                         <option value="3">No lines. Group by 3</option>
+                        <!--
                         <option value="win">Windows</option>
                         <option value="nix">Unix</option>
                         <option value="max">Mac</option>
+                        -->
                     </select>
             </div>
     </fieldset>            
 </div>
 <div style="position:absolute;left:350px;height:100%;right:150px; border-right:1px lightgray solid" >
-    <div class="ent_header" style="height:6em;">
-        <h2>3. Data to be imported</h2>
-        <div id="preparedInfo" style="position:absolute;bottom:2px;"> <!-- div to shw results of data preparation -->
-            
-        </div>
+    <div class="ent_header" style="height:5em;">
+        <h2 style="position:absolute;bottom:6px;">Preview data to be imported</h2>
     </div>
-    <div class="ent_content_full" style="top:6em;padding-top:20px;font-size:0.9em" id="divStep2">
+    <div class="ent_content_full" style="top:6em;font-size:0.9em;" id="divParsePreview">
     </div>
 </div>
-<div style="position:absolute;right:0px;height:100%;width:150px;">
-    <div class="ent_header" style="height:6em;">
-        <h2>4. Define column roles and click</h2>
-        <div id="btnImportData" style="position:absolute;bottom:2px;">Start Import</div>
+<div style="position:absolute;right:0px;height:100%;width:150px;" id="
+">
+    <div class="ent_header" style="height:5em;">
+        <h2>Step 3<br>Select field order<br>(Term is required)</h2>
     </div>
-    <fieldset class="ent_content_full" style="top:6em;padding-top:2em;">
+    <fieldset class="ent_content" style="top:5em;padding-top:2em;">
            
             <div>
-                <label>Term(Label)</label><br>
+                <label style="color:red">Term(Label)</label><br>
                 <select id="field_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
                 </select>
             </div>
             <div>
-                <label>Term Code</label><br>
+                <label>Standard Code</label><br>
                 <select id="field_code" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
                 </select>
             </div>
             <div>
-                <label>Term Description</label><br>
+                <label>Description</label><br>
                 <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
                 </select>
             </div>
-</fieldset> 
+            
+            <div id="preparedInfo"> <!-- div to show results of data preparation --></div>
+    </fieldset> 
+    <div class="ent_footer" style="text-align:center">
+        <div id="btnImportData" xstyle="position:absolute;bottom:2px;">Start Import</div>
+    </div>
 </div>
-
+<div id="divCurtain" style="position:absolute;right:0px;height:100%;left:200px;" class="semitransparent">
+<!-- curtain -->
+</div>
 </body>
 </html>

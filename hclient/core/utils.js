@@ -289,6 +289,9 @@ top.HEURIST4.util = {
         return e;
     },
 
+    //
+    // we have to reduce the usage to minimum. Need to implement method in hapi
+    //
     sendRequest: function(url, request, caller, callback){
 
         if(!request.db){
@@ -615,6 +618,9 @@ top.HEURIST4.util = {
         return hash;    
     },
     
+    //
+    // download given url as a file (repalcement of usage A)
+    //
     downloadURL: function(url) {
         $idown = $('#idown');
         if ($idown.length>0) {
@@ -624,6 +630,9 @@ top.HEURIST4.util = {
         }
     },
     
+    //
+    // download content of given element (for example text area) as a text file
+    //
     downloadInnerHtml: function (filename, ele, mimeType) {
         
         var elHtml = $(ele).html();
