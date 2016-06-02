@@ -1814,14 +1814,45 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             termCode,
             arrterm = [];
 
+            
+            function getFullTermLabel(term, domain, withVocab){
+
+                var fi = top.HEURIST.terms['fieldNamesToIndex'];// .treesByDomain[datatype];
+                var parent_id = term[ fi['trm_ParentTermID'] ];
+
+                var parent_label = '';
+
+                if(parent_id!=null && parent_id>0){
+                    term_parent = top.HEURIST.terms['termsByDomainLookup'][domain][parent_id];
+                    if(term_parent){
+                        if(!withVocab){
+                            parent_id = term_parent[ fi['trm_ParentTermID'] ];
+                            if(!(parent_id>0)){
+                                return term[ fi['trm_Label']];
+                            }
+                        }
+                        
+                        parent_label = getFullTermLabel(term_parent, domain, withVocab);    
+                        if(parent_label) parent_label = parent_label + '.';
+                    }    
+                }
+                return parent_label + term[ fi['trm_Label']];
+            }
+            
+            
             for(termID in termSubTree) { // For every term in 'term'
                 termName = "";
                 termCode = "";
 
                 if(localLookup[termID]){
-                    termName = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
+                    if(depth<1){
+                        termName = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
+                    }else{
+                        termName = getFullTermLabel(localLookup[termID], datatype, false);
+                    }
                     termCode = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Code']];
                     hasImage = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Image']];
+                    
 
                     if(top.HEURIST.util.isempty(termCode)){
                         termCode = '';
