@@ -678,7 +678,7 @@ function _add_term_val($res, $val){
     return $res;
 }
 
-
+/*
 function getFullTermLabel($term, $domain){
 
     global $dtTerms;
@@ -697,7 +697,7 @@ function getFullTermLabel($term, $domain){
     }
     return $parent_label.$term[ $fi['trm_Label']];
 }
-
+*/
 
 
 
@@ -779,7 +779,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                 $term = $dtTerms['termsByDomainLookup'][$domain][$value];
 
                                 //IJ wants to show terms for all parents
-                                $term_full = getFullTermLabel($term, $domain);
+                                $term_full = getFullTermLabel($dtTerms, $term, $domain, true);
 
                                 $res_id = _add_term_val($res_id, $value);
                                 $res_cid = _add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);

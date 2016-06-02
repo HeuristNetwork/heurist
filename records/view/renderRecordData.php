@@ -428,14 +428,18 @@ function print_private_details($bib) {
                 if ($bd['dty_Type'] == 'enum') {
 
                     if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
-                        $bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
+                        $term = $terms['termsByDomainLookup']['enum'][$bd['val']];
+                        $bd['val'] = output_chunker(getFullTermLabel($terms, $term, 'enum', false));
+                        //$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
                     }else{
                         $bd['val'] = "";
                     }
 
                 }else if ($bd['dty_Type'] == 'relationtype') {
 
-                    $bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
+                    $term = $terms['termsByDomainLookup']['relation'][$bd['val']];
+                    $bd['val'] = output_chunker(getFullTermLabel($terms, $term, 'relation', false));
+                    //$bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
 
                 }else if ($bd['dty_Type'] == 'date') {
 

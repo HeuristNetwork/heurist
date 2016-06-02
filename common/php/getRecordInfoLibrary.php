@@ -896,6 +896,31 @@ function getTermByLabel($label){
     return false;
 }
 
+
+function getFullTermLabel($dtTerms, $term, $domain, $withVocab=false){
+
+    $fi = $dtTerms['fieldNamesToIndex'];
+    $parent_id = $term[ $fi['trm_ParentTermID'] ];
+
+    $parent_label = '';
+
+    if($parent_id!=null && $parent_id>0){
+        $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
+        if($term_parent){
+            if(!$withVocab){
+                $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
+                if(!($parent_id>0)){
+                    return $term[ $fi['trm_Label']];
+                }
+            }
+            
+            $parent_label = getFullTermLabel($dtTerms, $term_parent, $domain, $withVocab);    
+            if($parent_label) $parent_label = $parent_label.'.';
+        }    
+    }
+    return $parent_label.$term[ $fi['trm_Label']];
+}
+
 /**
 * return array of recType table column names
 */
@@ -906,6 +931,7 @@ function getRectypeColNames() {
         "rty_ReferenceURL", "rty_AlternativeRecEditor", "rty_Type", "rty_ShowURLOnEditForm", "rty_ShowDescriptionOnEditForm",
         "rty_Modified", "rty_LocallyModified", "rty_ConceptID");
 }
+
 /**
 * get name to index map for columns
 * @param     array $columns array of strings
