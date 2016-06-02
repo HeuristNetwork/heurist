@@ -17,13 +17,25 @@
             $termID = $_REQUEST['trm_ID'];
             $domain = $_REQUEST['domain'];
             $format = @$_REQUEST['format'];
-            if(!in_array($format, array('txt','html'))){
+            
+            $format = 'csv';
+            if(!in_array($format, array('csv','txt','html'))){
                 $format = 'html';    
             }
             
             $term = @$terms['termsByDomainLookup'][$domain][$termID];
             
             if($term){
+                
+                if($format=='csv'){
+                ob_start();    
+                header('Content-type: text/csv; charset=utf-8');
+                header('Pragma: public');
+                header('Content-Disposition: attachment; filename="heurist_vocabulary.csv"');
+                //header('Content-Length: ' . filesize($file_read));
+                @ob_clean();
+                flush();                  
+                }
                 
                 $children = getTermInTree($termID);
                 
@@ -46,14 +58,50 @@
     }
 
 function printTerm($termID, $lvl){
-    global $format;
+    global $format, $terms;
     
-    $label = getTermById($termID);
+    //$label = getTermById($termID);
     
-    if($format=='html'){
-        print '<div style="padding-left:'.($lvl*20).'px">'.$label.'</div>';
-    }else{
-        print str_repeat(' ',$lvl*5).$label."\n";
+    $domain = 'enum';
+    $term = @$terms['termsByDomainLookup']['enum'][$termID];
+    if(null==$term){
+        $domain = 'relation';
+        $term = @$terms['termsByDomainLookup']['relation'][$termID];
+    }
+    if($term){
+        $fi = $terms['fieldNamesToIndex'];
+        
+        $label = $term[$fi['trm_Label']];
+                    
+        if($format=='csv'){
+            //Term, Internal code, Parent term, Parent internal code, Standard Code, Description
+            //parent term = Humanities.Arts.Undergrad
+            
+            $parent_term_label = ''; 
+            $parent_id = $term[$fi['trm_ParentTermID']];
+            if($lvl>0 && $parent_id>0){
+                $parent_term = @$terms['termsByDomainLookup'][$domain][$parent_id];
+                if($parent_term){
+                    $parent_term_label = '"'.getFullTermLabel($terms, $parent_term, $domain, true).'"';
+                }else{
+                    $parent_id = '';
+                }
+            }else{
+                $parent_id = '';
+            }
+            
+            $description = ($term[$fi['trm_Description']])?'"'.$term[$fi['trm_Description']].'"':''; 
+            
+            $line = array('"'.$label.'"', $termID, $parent_term_label, $parent_id, $term[$fi['trm_Code']],
+                            $description);  
+    
+            print implode(',',$line)."\n";
+            
+        }else if($format=='html'){
+            print '<div style="padding-left:'.($lvl*20).'px">'.$label.'</div>';
+        }else{
+            print str_repeat(' ',$lvl*5).$label."\n";
+        }
     }
 }
 function printBranch($tree, $lvl){
@@ -63,4 +111,29 @@ function printBranch($tree, $lvl){
         printBranch($children, $lvl+1);
     }
 }    
+//@todo - move to db_structure
+function getFullTermLabel($dtTerms, $term, $domain, $withVocab=false){
+
+    $fi = $dtTerms['fieldNamesToIndex'];
+    $parent_id = $term[ $fi['trm_ParentTermID'] ];
+
+    $parent_label = '';
+
+    if($parent_id!=null && $parent_id>0){
+        $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
+        if($term_parent){
+            if(!$withVocab){
+                $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
+                if(!($parent_id>0)){
+                    return $term[ $fi['trm_Label']];
+                }
+            }
+            
+            $parent_label = getFullTermLabel($dtTerms, $term_parent, $domain, $withVocab);    
+            if($parent_label) $parent_label = $parent_label.'.';
+        }    
+    }
+    return $parent_label.$term[ $fi['trm_Label']];
+}
+
 ?>
