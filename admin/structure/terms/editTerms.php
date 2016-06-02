@@ -170,22 +170,6 @@
 
                         </div>
                         
-            <div  class="dtyField" id="divImage">
-                            <div style="float:left;">
-                                <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">
-                                    Image (~400x400):</label>
-                <div style="vertical-align: middle;display:inline-block;">
-                    <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
-                    </div>
-                </div>
-                            
-                <input id="btnClearImage" type="button" value="Clear"
-                                title="Remove image" 
-                                style="margin-top:10px;vertical-align: top;"
-                                onClick="{editTerms.clearImage()}"/>
-                
-            </div>                        
-
                         <div class="dtyField">
                             <label class="dtyLabel" style="vertical-align: top;">Description of term</label>
                             <textarea id="edDescription" rows="3"  style="width:350px; margin-top:5px;" title=""
@@ -220,6 +204,32 @@
                         </div>
                         <input id="edInverseTermId" type="hidden"/>
 
+                        
+            <div  class="dtyField" id="divImage">
+                <div style="float:left;">
+                    <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">Image (~400x400):</label>
+                </div>
+                <div style="vertical-align: middle;display:inline-block;">
+                    <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
+                    </div>
+                </div>
+                
+                <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top;"
+                        onClick="{editTerms.clearImage(); return false;}">
+                        <img src="../../../common/images/cross-grey.png" style="vertical-align:top;width:12px;height:12px">Clear image</a>
+<!--                            
+                <input id="btnClearImage" type="button" value="Clear"
+                                title="Remove image" 
+                                style="margin-top:10px;vertical-align: top;"
+                                onClick="{editTerms.clearImage()}"/>
+-->                                
+                
+                <div style="padding-left:105;padding-top:3px; font-size:smaller;">
+                    Images can be used to provide a visual description of a term such as an architectural or clothing style, structural position, artefact type or soil texture"
+                </div>
+            </div>                        
+
+                        
 
                         <!--
                         NOTE: button labelling is set in the JS file

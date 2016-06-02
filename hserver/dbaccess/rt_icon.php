@@ -63,7 +63,9 @@
             header('Content-type: text/javascript');
             //header('Content-type: text/html');
             if (@$_REQUEST['deletemode']=='1'){
-                unlink($filename);
+                if(file_exists($filename)){
+                    unlink($filename);
+                }
                 print '{"res":"ok"}';
             }else{
                 print '{"res":"notfound"}';
