@@ -405,11 +405,11 @@ function EditTerms() {
                 Dom.get('edCode').value = node.data.termcode;
                 
                 //image
-                if(node.data.id>0){
+                if(node.data.id>0){                                       
                     var curtimestamp = (new Date()).getMilliseconds();
                     Dom.get('termImage').innerHTML =
             '<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
-            '<img id="imgThumb" src="'+
+            '<img id="imgThumb" style="max-width: 380px;" src="'+
             top.HEURIST.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
             '"></a>';
                     Dom.get('termImage').style.display = 'block';

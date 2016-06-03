@@ -107,9 +107,14 @@ class DbEntityBase
         
         //start transaction
         $mysqli = $this->system->get_mysqli();
+        
         $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
         if($keep_autocommit===true) $mysqli->autocommit(FALSE);
-        $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
+        if (strnatcmp(phpversion(), '5.5') >= 0) {
+            $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
+        }
+        
+        
         
         foreach($this->records as $rec_idx => $record){
             

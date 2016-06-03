@@ -34,7 +34,8 @@
                 header('Content-Disposition: attachment; filename="heurist_vocabulary.csv"');
                 //header('Content-Length: ' . filesize($file_read));
                 @ob_clean();
-                flush();                  
+                flush();  
+                print "Term,Internal code,Parent term,Parent internal code,Standard Code,Description\n";
                 }
                 
                 $children = getTermInTree($termID);
@@ -74,6 +75,7 @@ function printTerm($termID, $lvl){
         $label = $term[$fi['trm_Label']];
                     
         if($format=='csv'){
+            
             //Term, Internal code, Parent term, Parent internal code, Standard Code, Description
             //parent term = Humanities.Arts.Undergrad
             
