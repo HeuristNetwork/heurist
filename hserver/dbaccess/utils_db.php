@@ -224,6 +224,37 @@
     }
     
     /**
+    * returns all rows as two dimensional array
+    * 
+    * @param mixed $mysqli
+    * @param mixed $query
+    * @param mixed $withindex 
+    * @return []
+    */
+    function mysql__select_all($mysqli, $query, $withindex=true) {
+        $result = null;
+        if($mysqli){
+            $res = $mysqli->query($query);
+            if ($res){
+                $result = array();
+                while ($row = $res->fetch_row()){
+                    if($withindex){
+                        $result[$row[0]] = stripAccents(trim($row[1]));
+                    }else{
+                        array_push($result, $row);
+                    }
+                }
+                $res->close();
+
+            }else{
+            }
+        }
+        return $result;
+    }
+    
+    
+    
+    /**
     * delete record for given table
     *
     * returns record ID in case success or error message
@@ -433,5 +464,34 @@
             return $res;
     }
 
+    //
+    //
+    //
+    function my_strtr($inputStr, $from, $to, $encoding = 'UTF-8') {
+        $inputStrLength = mb_strlen($inputStr, $encoding);
 
+        $translated = '';
+
+        for($i = 0; $i < $inputStrLength; $i++) {
+            $currentChar = mb_substr($inputStr, $i, 1, $encoding);
+
+            $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);
+
+            if($translatedCharPos === false) {
+                $translated .= $currentChar;
+            }
+            else {
+                $translated .= mb_substr($to, $translatedCharPos, 1, $encoding);
+            }
+        }
+
+        return $translated;
+    }
+
+    //
+    //
+    //
+    function stripAccents($stripAccents){
+        return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
+    }    
 ?>

@@ -1,0 +1,1220 @@
+/**
+* Class to import records from CSV
+* 
+* @param _imp_ID - id of import session
+* @returns {Object}
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+function hImportRecordsCSV(_imp_ID, _max_upload_size) {
+    var _className = "ImportRecordsCSV",
+    _version   = "0.4",
+
+    imp_ID,   //import session
+    imp_session,  //json with session parameters
+    
+    currentId,  //currect record id in import tabel to PREVIEW data
+    upload_file_name,  //file on server with original uploaded data
+    encoded_file_name; //file on server with UTF8 encoded data
+    
+    function _init(_imp_ID, _max_upload_size){
+    
+        imp_ID = _imp_ID;
+        
+        //init STEP 1  - upload
+        
+        //buttons
+        var btnUploadFile = $('#btnUploadData')
+                    .css({'width':'120px'})
+                    .button({label: top.HR('Upload Data'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .click(_uploadData);
+
+        //get list of sessions and fill selector                        
+        var selImportID = $('#selImportId').change(function(e){
+           if(e.target.value>0){
+                imp_ID = e.target.value;      
+                _loadSession();    
+           }
+        });
+        top.HEURIST4.ui.createEntitySelector( selImportID.get(0), 
+                    {entity:'SysImportSessions', filter_group:'0,'+top.HAPI4.currentUser['ugr_ID']}, 
+                    top.HR('select uploaded file...'),
+                    function(){
+                        top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), selImportID.find('option').length<2 );
+                    });
+                        
+        $('#btnClearAllSessions').click(_doClearAllSessions);
+            
+        //upload file to server and store intemp file
+        var uploadData = null;
+        var pbar_div = $('#progressbar_div');
+        var pbar = $('#progressbar');
+        var progressLabel = pbar.find('.progress-label').text('');
+        pbar.progressbar({value:0});
+                
+        $('#progress_stop').button().on({click: function() {
+                if(uploadData && uploadData.abort) uploadData.abort();
+        }});
+                
+        var uploadWidget = $('#uploadFile');
+        
+        var btnUploadFile = $('#btnUploadFile')
+                    .css({'width':'120px'})
+                    .button({label: top.HR('Upload File'), icons:{secondary: "ui-icon-circle-arrow-n"}})
+                    .click(function(e) {
+                            uploadWidget.click();
+                        });
+                
+                
+                uploadWidget.fileupload({
+        url: top.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
+        formData: [ {name:'db', value: top.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
+                    {name:'max_file_size', value: _max_upload_size},
+                    {name:'entity', value:'temp'}],  //just place file into scratch folder
+        //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+        autoUpload: true,
+        sequentialUploads:false,
+        dataType: 'json',
+        //dropZone: $input_img,
+        add: function (e, data) {  
+        
+            uploadData = data;//keep this object to use conviniece methods (abort for instance)
+            data.submit(); 
+
+        },
+        //send: function (e, data) {},
+        //start: function(e, data){},
+        //change: function(){},
+        error: function (jqXHR, textStatus, errorThrown) {
+            //!!! $('#upload_form_div').show();
+            _showStep(1);
+            pbar_div.hide();
+            if(textStatus!='abort'){
+                top.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
+            }
+        },
+        done: function (e, response) {
+
+                //!!! $('#upload_form_div').show();                
+                pbar_div.hide();       //hide progress bar
+                response = response.result;
+                if(response.status==top.HAPI4.ResponseStatus.OK){
+                    var data = response.data;
+                    $.each(data.files, function (index, file) {
+                        if(file.error){
+                            top.HEURIST4.msg.showMsgErr(file.error);
+                        }else{
+                            /*
+                            $('#divParsePreview').load(file.url, function(){
+                            //$.ajax({url:file.deleteUrl, type:'DELETE'});
+                            }); */
+                            
+                            upload_file_name = file.name;
+                            top.HEURIST4.util.setDisabled($('#csv_encoding'), false);
+                            _showStep(2);
+                            
+                            top.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
+                            $('#divParsePreview').empty();
+                            $('#divFieldRoles').empty();
+                            
+                            //_doParse(1);
+                        }
+                    });
+                }else{
+                    _showStep(1);
+                    top.HEURIST4.msg.showMsgErr(response.message);
+                }
+                
+                //need to reassign  event handler since widget creates temp input
+                var inpt = this;
+                btnUploadFile.off('click');
+                btnUploadFile.on({click: function(){
+                            $(inpt).click();
+                }});                
+           
+        },//done                    
+        progressall: function (e, data) { // to implement
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    progressLabel = pbar.find('.progress-label').text(data.loaded+' / '+data.total);
+                    pbar.progressbar({value: progress});
+                    if (data.total>_max_upload_size && uploadData) {
+                            uploadData.abort();
+                            top.HEURIST4.msg.showMsgErr(
+                            'Sorry, this file exceeds the upload '
+                            //+ ((max_file_size<max_post_size)?'file':'(post data)')
+                            + ' size limit set for this server ('
+                            + Math.round(max_size/1024/1024) + ' MBytes). '
+                            +'Please reduce the file size, or ask your system administrator to increase the upload limit.'
+                            );
+                    }else if(!pbar_div.is(':visible')){
+                        //!!! $('#upload_form_div').hide();
+                        _showStep(0);
+                        pbar_div.show();
+                    }
+                }                            
+                
+                            });                        
+
+                        
+        //init STEP 2  - preview, select field roles and parse
+        $('#btnBackToStart2')
+                    .css({'width':'160px'})
+                    .button({label: top.HR('Back to start'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .click(function(e) {
+                            //@todo - remove temp file
+                            _showStep(1);
+                            $('#selImportId').val('');
+                        });
+                        
+        $('#btnParseStep1')
+                    .css({'width':'160px'})
+                    .button({label: top.HR('Preview Parse'), icons:{secondary: "ui-icon-circle-arrow-s"}})
+                    .click(function(e) {
+                            _doParse(1);
+                        });
+
+        $('#btnParseStep2')
+                    .css({'width':'180px'})
+                    .button({label: top.HR('Confirm and Proceed'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .click(function(e) {
+                           _doParse(2); 
+                        });
+        top.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
+                        
+                        
+        //init STEP 3 - matching and import
+        $('#btnBackToStart')
+                    .css({'width':'160px'})
+                    .button({label: top.HR('Back to start'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .click(function(e) {
+                            _showStep(1);
+                        });
+        $('#btnDownloadFile')
+                    .css({'width':'180px'})
+                    .button({label: top.HR('Download data to file'), icons:{secondary: "ui-icon-circle-arrow-s"}})
+                    .click(function(e) {
+                            
+                        });
+        $('#btnClearFile')
+                    .css({'width':'160px'})
+                    .button({label: top.HR('Clear uploaded file'), icons:{secondary: "ui-icon-circle-close"}})
+                    .click(function(e) {
+                            
+                        });
+                        
+        var selRectypeID = $('#sa_rectype').change(_initFieldMapppingSelectors);               
+        top.HEURIST4.ui.createRectypeSelect( selRectypeID.get(0), null, top.HR('select...') );
+        
+        //init navigation links
+        $.each($('.navigation'), function(idx, item){
+            $(item).click( _getValuesFromImportTable );
+        })
+
+        //session id is defined - go to 3d step at once        
+        if(imp_ID>0){
+              _loadSession();
+        }
+        _showStep(1);
+        
+        
+        //--------------------------- action buttons init
+
+        $('#btnMatchingSkip')
+                    .css({'width':'250px'})
+                    .button({label: top.HR('Import as new (skip matching)') })
+                    .click(function(e) {
+                            _doMatching( true, null );
+                        });
+        $('#btnMatchingStart')
+                    .css({'width':'250px'})
+                    .button({label: top.HR('Match against existing records'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .click(function(e) {
+                            _doMatching( false, null );
+                        });
+
+        $('#btnBackToMatching')
+                    .css({'width':'250px'})
+                    .button({label: top.HR('Back: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .click(function(e) {
+                            _showStep(3);
+                        });
+        
+        $('#btnBackToMatching2')
+                    .css({'width':'250px'})
+                    .button({label: top.HR('Back: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .click(function(e) {
+                            _showStep(3);
+                        });
+                        
+        $('#btnResolveAmbiguous')
+                    .css({'width':'250px'})
+                    .button({label: top.HR('Resolve ambiguous matches')})
+                    .click(function(e) {
+                            _showRecords('disamb');
+                        });
+                        
+
+        $('#btnPrepareStart')
+                    .css({'width':'250px'})
+                    .button({label: top.HR('Prepare Insert/Update'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .click(function(e) {
+                            _doPrepare();
+                        });
+
+        $('#btnImportStart')
+                    .css({'width':'250px'})
+                    .button({label: top.HR('Start Insert/Update'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .click(function(e) {
+                            _doImport();
+                        });
+                        
+    }
+
+    //
+    // Remove all sessions
+    //
+    function _doClearAllSessions(){
+        
+        top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), true);
+        top.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportSessions', recID:0},
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            $('#selImportId').empty();
+                            top.HEURIST4.msg.showMsgDlg('Import sessions were cleared');
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                            top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), false);
+                        }
+                    });
+    }
+
+    //
+    //
+    //
+    function _loadSession(){
+        
+        if(imp_ID>0){
+        
+            var request = {
+                    'a'          : 'search',
+                    'entity'     : 'SysImportSessions',
+                    'details'    : 'list',
+                    'imp_ID'     : imp_ID
+            };
+            
+            top.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        
+                            $('#sa_rectype').val('');
+                            
+                            var resp = new hRecordSet( response.data );
+                            var record = resp.getFirstRecord();
+                            var ses = resp.fld(record, 'imp_session');
+                            //DEBUG $('#divFieldMapping2').html( ses );
+                            
+                            imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
+                            
+                            //init field mapping table
+                            _initFieldMapppingTable();
+
+                            _showStep(3);
+                            
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+            );        
+        
+        
+        }
+    }
+
+    //
+    // init field mapping table - main table to work with 
+    //
+    function _initFieldMapppingTable(){
+    
+        $('#tblFieldMapping > tbody').empty();
+        
+                        
+        var sIndexes = "",
+            sRemain = "",
+            sProcessed = "",
+            i = 0,
+            len = (imp_session && imp_session['columns'])?imp_session['columns'].length:0;
+            
+        var recStruc = top.HEURIST4.rectypes;    
+
+        for (i=0; i < len; i++) {
+
+            var isProcessed = !top.HEURIST4.util.isnull(imp_session['mapping']['field_'+i]);
+            var isIndex =  !top.HEURIST4.util.isnull(imp_session['indexes']['field_'+i]);
+            
+            //checkbox that marks 'in use'
+            var s = '<tr><td width="75px" align="center">&nbsp;<span style="display:none;">'
+                    +'<input type="checkbox" id="cbsa_dt_'+i+'" value="'+i+'"/></span></td>';
+
+            // count of unique values
+            s = s + '<td  width="75px" align="center">'+imp_session['uniqcnt'][i]+'</td>';
+
+            // column names                 padding-left:15px;  <span style="max-width:290px"></span>
+            s = s + '<td style="width:300px;class="truncate">'+imp_session['columns'][i]+'</td>';
+
+            // mapping selector
+            s = s + '<td style="width:300px;">&nbsp;<span style="display:none;">'
+                + '<select id="sa_dt_'+i+'" style="width:280px; font-size: 1em;" '
+                + (isIndex?'class="indexes"':'')+'></select></span>';
+            
+            // add name of field that was used in mapping
+            if(isProcessed){ // already selected
+                s = s + '<span id="sa_used_'+i+'" style="display:none;">'+isProcessed+'</span>';
+            
+                /*$rt_dt = explode(".",$isProcessed);
+                $recTypeName = $recStruc['names'][$rt_dt[0]]; //['commonFields'][ $idx_rt_name ];
+                $dt_Name = intval($rt_dt[1])>0?$recStruc['typedefs'][$rt_dt[0]]['dtFields'][$rt_dt[1]][$idx_dt_name]:$rt_dt[1];
+                $s = $s.'<td class="truncate">'.$recTypeName.' '.$dt_Name.'  ('.$rt_dt[0].'.'.$rt_dt[1].')</td>';
+                */
+            }
+            s = s + '</td>';
+
+            // cell for value
+            s = s + '<td id="impval'+i+'" style="text-align: left;padding-left: 16px;">&nbsp;</td></tr>';
+
+            if(isIndex){
+                      sIndexes = sIndexes +s;
+            }else if(isProcessed){
+                      sProcessed = sProcessed +s;
+            }else{
+                      sRemain = sRemain +s;
+            }
+        }//for
+        
+        if(sIndexes!=''){
+            sIndexes = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Identifiers (Pointer fields)</b></td></tr>'
+                +sIndexes;
+        }
+        if(sRemain!=''){
+            sRemain = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Remaining Data</b></td></tr>'
+                +sRemain;
+        }
+        if(sProcessed!=''){
+            sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Already used</b></td></tr>'
+                +sProcessed;
+        }
+        
+        $('#tblFieldMapping > tbody').html(sIndexes+sRemain+sProcessed);
+        
+        //init listeners
+        $("input[id^='cbsa_dt_']").change(function(e){
+            var cb = $(e.target);
+            var idx = cb.val();//attr('id').substr(8);
+            if(cb.is(':checked')){
+                $('#sa_used_'+idx).hide();
+                $('#sa_dt_'+idx).parent().show();
+            }else{
+                $('#sa_used_'+idx).show();
+                $('#sa_dt_'+idx).parent().hide();
+            }
+            
+        });
+        
+        _getValuesFromImportTable();            
+    }    
+    
+    //
+    // by recordtype ID 
+    //
+    function _getFieldIndexForIdentifier(rtyID){
+            var i;
+            var keyfields = Object.keys(imp_session['indexes']);
+            for (i=0;i<keyfields.length;i++){
+                if(imp_session['indexes'][keyfields[i]] == rtyID){
+                    var idx = keyfields[i].substr(6); //field_
+                    return idx;
+                }
+            }
+            return -1;
+    }
+    
+    //
+    // init field mapping selectors after change of rectype
+    //
+    function _initFieldMapppingSelectors(){
+        
+        var sels = $("select[id^='sa_dt_']"); //all selectors
+        
+        var cbs = $("input[id^='cbsa_dt_']"); //all checkboxes
+        cbs.attr('checked', false).attr('disabled', false);
+        $("span[id^='sa_used_']").show();
+        sels.parent().hide();
+        
+        //fill selectors with fields of selected record type
+        var rtyID = $("#sa_rectype").val();
+        var keyfield_sel = '';
+        
+        if(rtyID>0){
+            cbs.parent().show(); //show checkboxes
+            
+            //find key/index field for selected record type
+            var idx = _getFieldIndexForIdentifier(rtyID);
+            if(idx>=0){
+                    keyfield_sel = 'sa_dt_'+idx;
+                    $("#cbsa_dt_"+idx).attr('checked', true).attr('disabled',true);
+                    $('#sa_used_'+idx).hide();
+                    $('#sa_dt_'+idx).parent().show(); //show selector
+            }
+            
+        }else{
+            cbs.parent().hide();
+        }
+        
+        var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
+        allowed.splice(allowed.indexOf("separator"),1);
+        allowed.splice(allowed.indexOf("file"),1);
+        allowed.splice(allowed.indexOf("resource"),1);
+        //allowed.splice(allowed.indexOf("relmarker"),1);
+        //allowed.splice(allowed.indexOf("geo"),1);
+        var topitems = [{key:'',title:'...'},{key:'url',title:'Record URL'},{key:'scratchpad',title:'Record Notes'}];
+        
+        var allowed2 = ['resource'];
+        var topitems2 = [{key:'',title:'...'}]; 
+
+        $.each(sels, function (idx, item){
+            var $item = $(item);
+            if($item.attr('id')==keyfield_sel){
+                top.HEURIST4.ui.createSelector(item, [{key:'id',title:'Record ID'}] );
+            }else{
+                top.HEURIST4.ui.createRectypeDetailSelect(item, rtyID, 
+                    $item.hasClass('indexes')?allowed2:allowed, 
+                    $item.hasClass('indexes')?topitems2:topitems);    
+            }
+        });
+        
+
+        //for selected record type key field does not exist
+        if(keyfield_sel==''){
+            
+        }
+        
+    }
+    
+    
+    //
+    // Loads values for record from import table (preview values in main table)
+    //
+    function _getValuesFromImportTable(event){
+        
+        if(!imp_session) return;
+        
+        var currentTable = imp_session['import_table']; 
+        var recCount     = Number(imp_session['reccount']); 
+        
+        
+        if(currentTable && recCount>0){
+            
+            var dest = 0;
+            if(event){
+                dest = $(event.target).attr('data-dest');  
+            } 
+            
+            if(Number(dest)==0){
+                currentId=1;
+            }else if(dest=='last'){
+                currentId = recCount;
+            }else{
+                dest = Number(dest);
+                if(isNaN(dest)){
+                    currentId = 1;
+                }else{
+                    currentId = currentId + dest;
+                }
+            }
+            if(currentId<1) {
+                currentId=1;
+            }else if (currentId>recCount){
+                currentId = recCount;
+            }
+
+            $.ajax({
+                url: top.HAPI4.basePathV3+'import/delimited/importCSV.php',
+                type: "POST",
+                data: {recid: currentId, table:currentTable, db:top.HAPI4.database},
+                dataType: "json",
+                cache: false,
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    //alert('Error connecting server. '+textStatus);
+                },
+                success: function( response, textStatus, jqXHR ){
+                    if(response){
+
+                        var i;
+                        $("#current_row").html(response[0]);
+
+                        for(i=1; i<response.length;i++){
+                            if(top.HEURIST4.util.isnull(response[i])){
+                                sval = "&nbsp;";
+                            }else{
+
+                                var isIndex =  !top.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
+                                
+                                var sval = response[i].substr(0,100);
+
+                                if(isIndex && response[i]<0){
+                                    sval = "&lt;New Record&gt;";
+                                }else if(sval==""){
+                                    sval = "&nbsp;";
+                                }else if(response[i].length>100){ //add ... 
+                                    sval = sval + '&#8230;';
+                                }
+                            }
+
+                            if($("#impval"+(i-1)).length>0)
+                                $("#impval"+(i-1)).html(sval);
+                        }
+                    }
+                }
+            });
+        }
+        return false;
+    }
+    
+    //
+    // upload data that was pasted in textarea
+    //
+    function _uploadData(){
+        
+        var csvdata = $('#sourceContent').val();
+        
+        if(csvdata){
+            
+            _showStep(0);
+        
+            var request = { action: 'step0',
+                              data: csvdata,
+                                id: top.HEURIST4.util.random()
+                               };
+            top.HAPI4.parseCSV(request, function( response ){
+                
+                //that.loadanimation(false);
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                
+                    upload_file_name = response.data.filename; //filename only
+                    $('#csv_encoding').val('UTF-8');
+                    top.HEURIST4.util.setDisabled($('#csv_encoding'), true);
+                    _showStep(2);
+                    
+                    top.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
+                    $('#divParsePreview').empty();
+                    $('#divFieldRoles').empty();
+                    
+                    //_doParse(1);
+                    
+                }else{
+                    _showStep(1);
+                    top.HEURIST4.msg.showMsgErr(response);
+                }
+
+            });        
+        
+        }else{
+            top.HEURIST4.msg.showMsgErr('Paste csv/tsv to content area first');    
+        }
+    }
+    
+    //
+    // parse CSV on server side
+    // step1 - encode and get preview
+    // step2 - field roles, prepare and save into file 
+    //
+    function _doParse(step){
+        /*    
+        keyfield
+        datefield
+        memofield
+        */
+        
+                _showStep(0);
+        
+                var request = { action: step==2?'step2':'step1',
+                                csv_delimiter: $('#csv_delimiter').val(),
+                                csv_linebreak: $('#csv_linebreak').val(),
+                                csv_enclosure: $('#csv_enclosure').val(),
+                                csv_mvsep: $('#csv_mvsep').val(),
+                                csv_dateformat: $('#csv_dateformat').val(),
+                                csv_encoding: $('#csv_encoding').val(),
+                                id: top.HEURIST4.util.random()
+                               };
+
+                var container  = $('#divParsePreview');
+                var container2 = $('#divFieldRoles');
+                               
+                if(step==1){
+                    request['upload_file_name'] = upload_file_name; //filename only
+                    
+                    encoded_file_name = '';
+                    top.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
+                    container.empty();
+                    container2.empty();
+                }else{
+                    request['encoded_filename'] = encoded_file_name; //full path
+                    request['original_filename'] = upload_file_name; //filename only
+                    request['keyfield'] = {};
+                    request['datefield'] = [];
+                    var ele = $.find("input[id^='id_field_']");
+                    $.each(ele, function(idx, item){
+                            if($(item).is(':checked')){
+                                var rectypeid = $('#id_rectype_'+item.value).val();
+                                if(!rectypeid){
+                                    rectypeid = 0;
+                                }
+                                request['keyfield']['field_'+item.value] = rectypeid;
+                            }
+                    }); 
+                    
+                    ele = $.find("input[id^='d_field_']");
+                    $.each(ele, function(idx,item){
+                            if($(item).is(':checked')){
+                                request['datefield'].push(item.value )   
+                            }
+                    }); 
+                }               
+                 
+                
+
+                top.HAPI4.parseCSV(request, function( response ){
+                    
+                    _showStep(2);                    
+                    //that.loadanimation(false);
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                       
+                        if(jQuery.type(response.data) === "string"){
+                            $( top.HEURIST4.msg.createAlertDiv(response.data)).appendTo(container);
+                            return;
+                        }
+                        
+                        
+//{filename,col_count,errors:  , err_encoding: , fields:, values:}                            
+//errors:  "cnt"=>count($fields), "no"=>$line_no, "line"
+//err_encoding: "no"=>$line_no, "line"
+                        var tbl,i,j,
+                            haveErrors = false;
+
+                        
+                        //something went wrong - index fields have wrong values, problem with encoding or column number mismatch
+                        var container3 = container.find('#error_messages');
+                        if(container3.length==0){
+                            container3 = $('<div>',{id:'error_messages'}).appendTo(container);
+                        }else{
+                            container3.empty();
+                        }
+
+                        if(top.HEURIST4.util.isArrayNotEmpty(response.data['err_colnums'])){
+
+                            var msg = 'Wrong field count in parsed data. Expected field count '
+                                        +response.data['col_count']
+                                        +'. Either change parse parameters or correct source data';
+                            $( top.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
+
+                            tbl  = $('<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>')
+                                    .addClass('tbpreview')
+                                    .appendTo(container3);
+                                    
+                            for(i in response.data.err_colnums){
+
+                                $('<tr><td>'+response.data.err_colnums[i]['no']+'</td>'
+                                    +'<td>'+response.data.err_colnums[i]['cnt']+'</td>'
+                                    +'<td>'+response.data.err_colnums[i]['line']+'</td></tr>').appendTo(tbl);
+                            }         
+                            $('<hr>').appendTo(container3);
+                            haveErrors = true;
+                        }
+                        if(top.HEURIST4.util.isArrayNotEmpty(response.data['err_encoding'])){
+
+                            var msg = ' Wrong encoding detected in import file. At least '
+                                        +response.data['err_encoding'].length
+                                        +'lines have such issue';
+                                
+                            $( top.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
+
+                            tbl  = $('<table><tr><th>Line#</th><th>Raw data</th></tr>')
+                                    .addClass('tbpreview')
+                                    .appendTo(container3);
+                                    
+                            for(i in response.data.err_encoding){
+                                $('<tr><td>'+response.data.err_encoding[i]['no']+'</td>'
+                                    +'<td>'+response.data.err_encoding[i]['line']+'</td></tr>').appendTo(tbl);
+                            }         
+                            $('<hr>').appendTo(container3);
+                            haveErrors = true;
+                        }
+                        
+                        if(response.data['err_keyfields']){
+                            var keyfields = Object.keys( response.data['err_keyfields'] );
+                            if(keyfields.length>0){
+
+                                var msg = 'Field you marked as identifier contain wrong or out of range values';
+                                    
+                                $( top.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
+
+                                tbl  = $('<table><tr><th>Field</th><th>Non integer values</th><th>Out of range</th></tr>')
+                                    .addClass('tbpreview')
+                                    .appendTo(container3);
+                                
+                                for (i=0;i<keyfields.length;i++){
+                                    
+                                    var issues = response.data['err_keyfields'][keyfields[i]];
+                                
+                                    $('<tr><td>'+response.data['fields'][keyfields[i]]+'</td>'
+                                        +'<td>'+issues[0]+'</td><td>'+issues[1]+'</td></tr>').appendTo(tbl);
+                                }         
+                            }
+                            $('<hr>').appendTo(container3);
+                            haveErrors = true;
+                        }
+
+                        top.HEURIST4.util.setDisabled( $('#btnParseStep2'), haveErrors);
+                        
+                        //preview parser
+                        if(response.data.step==1 && response.data.values){
+                                
+                            encoded_file_name = response.data.encoded_filename;
+                                      
+                            $('<h2 style="margin:10px">'+top.HR('Parse results.')
+                                    +(response.data.values.length<100?'':' First 100 rows')
+                                    +'</h2>').appendTo(container);
+
+                            tbl  = $('<table>').addClass('tbpreview').appendTo(container);
+                            
+                            var _parseddata = response.data.values;
+                            var maxcol = 0;
+                            
+                            var tr  = '<tr>'
+                            for(i in response.data.fields){
+                                tr = tr+'<th>'+response.data.fields[i]+'</th>';
+                            }                   
+                            tr  = tr+'</tr>';     
+                            $(tr).appendTo(tbl);
+                            for(i in response.data.values){
+                                
+                                if(top.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
+                                    tr  = '<tr>';
+                                    for(j in _parseddata[i]){
+                                        tr = tr+'<td>'+_parseddata[i][j]+'</td>';
+                                    }
+                                    tr  = tr+'</tr>';
+                                    maxcol = Math.max(maxcol,_parseddata[i].length);
+                                    $(tr).appendTo(tbl);
+                                }
+                            }
+                            
+                            
+                            //<tr><th>Column</th><th>Is date?</th><th>Is key?</th><th>For record type</th></tr>
+                            //add header for list of columns
+                            tbl  = $('<table>').addClass('tbfields').appendTo(container2);
+                           
+                            //fill list of columns
+                            for(i in response.data.fields){
+                                $('<tr><td style="width:200px">'+response.data.fields[i]+'</td>'
+                                +'<td style="width:50px;text-align:center"><input type="checkbox" id="d_field_'+i+'" value="'+i+'"/></td>'
+                                +'<td style="width:50px;text-align:center"><input type="checkbox" id="id_field_'+i+'" value="'+i+'"/></td>'
+                                +'<td style="width:200px"><select id="id_rectype_'
+                                +i+'" class="text ui-widget-content ui-corner-all" style="visibility:hidden"></select></td></tr>').appendTo(tbl);
+                            }         
+                            
+                            
+                            var select_rectype = $("select[id^='id_rectype']");
+                            $.each(select_rectype, function(idx, item){
+                                top.HEURIST4.ui.createRectypeSelect( item, null, 'select...' );    
+                            });
+                            
+                            $("input[id^='id_field']").change(function(evt){
+                                top.HEURIST4.util.setDisabled( $('#btnParseStep2'), false );
+                                $("select[id='id_rectype_"+$(evt.target).attr('id').substr(9)+"']")
+                                        .css('visibility', $(evt.target).is(':checked')?'visible':'hidden');            
+                            });
+                            
+
+                        }else if(response.data.import_id>0){
+                            
+                            imp_ID = response.data.import_id;      
+                            if($('#selImportId > option').length<1){
+                            top.HEURIST4.ui.addoption($('#selImportId').get(0), null, top.HR('select uploaded file...'));    
+                            }
+                            top.HEURIST4.ui.addoption($('#selImportId').get(0), imp_ID, response.data.import_name);
+                            _loadSession();    
+                        }
+                        
+                    }else{
+                        top.HEURIST4.msg.showMsgErr(response);
+                    }
+
+                });
+    }
+ 
+    //
+    // Find records in Heurist database and assign record id to identifier field in import table
+    //
+    function _doMatching( isSkipMatch, disamb_resolv ){
+        
+        var rtyID = $("#sa_rectype").val();
+        if(rtyID>0){
+        
+            var sWarning = '';
+            var haveMapping = false; 
+            //do we have id field?
+            var key_idx = _getFieldIndexForIdentifier(rtyID); 
+            //do we have field to match?
+            var field_mapping = {};
+            if(!isSkipMatch){
+                var ele = $("input[id^='cbsa_dt_']");
+                
+                $.each(ele, function(idx, item){
+                    var item = $(item);
+                    if(item.is(':checked')){ // && item.val()!=key_idx){
+                        var field_type_id = $('#sa_dt_'+item.val()).val();
+                        if(field_type_id){
+                            field_mapping[item.val()] = field_type_id;
+                            if(item.val()!=key_idx) haveMapping = true;
+                        }
+                    }
+                });
+            }
+                //verify setting
+                // id is defined
+                // mapping defined -> values in id field will be overwritten
+                //         not defined -> use value in id field
+                // id is not defined
+                // mapping defined ->  new field will be created
+                //         not defined -> import as new     
+            
+                if(key_idx>=0){
+                    if(haveMapping){
+                        if(disamb_resolv==null){
+                        sWarning = 'You choose to match the incoming data and selected the existing identification field "'
+                                +imp_session['columns'][key_idx]
+                                +'".<br>It means it will be filled with new values.<br><br>Proceed?';
+                        }
+                    }else{
+//@todo here and on server side
+// match against id field, set to -1 if not found                        
+                        /*
+                        sWarning = '<h3>WARNING</h3>'
+     + (isSkipMatch?'':'You have not selected any colulm to field mappping<br><br>')                   
+     +'By choosing not to match the incoming data, you will create '
+     + 'XYZ(TODO!!!!)' //imp_session['uniqcnt'][key_idx]
+     +' new records - that is one record for every unique value in identification field.<br><br>Proceed without matching?';
+     */
+     //+'If a value is repeated in many rows of your input data it will create multiple rows even though you are using it as the key field';     
+                    }
+                }else{
+                    if(haveMapping){
+                        sWarning = '';
+                    }else{
+                        sWarning = '<h3>WARNING</h3>'
+     + (isSkipMatch?'':'You have not selected any colulm to field mappping<br><br>')                   
+     +'By choosing not to match the incoming data, you will create '
+     +imp_session['reccount']+' new records - that is one record for every row.<br><br>Proceed without matching?';
+                    }
+                }
+            
+            
+            if(sWarning){
+                top.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart , "Confirmation");
+            }else{
+                __doMatchingStart();
+            }
+
+       function __doMatchingStart(){      
+            var request = {
+                imp_ID    : imp_ID,
+                action    : 'step3',
+                sa_rectype: rtyID,
+                mapping   : field_mapping
+            };
+            if(key_idx>=0){
+                request['idfield']=imp_session['columns'][key_idx]; //key_idx;            
+            }
+            if(disamb_resolv!=null){
+                request['disamb_resolv']=disamb_resolv;          
+            }
+            
+            _showStep(0);
+        
+            top.HAPI4.parseCSV(request, 
+                    function(response){
+                        
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            
+                            _showStep(3);
+                            
+                            imp_session = response.data; //assign to global var
+
+                            var res = imp_session['validation'];
+                            
+                            $('#mr_cnt_update').text(res['count_update']);                                 
+                            $('#mr_cnt_insert').text(res['count_insert']);                                 
+                            if(res['count_update_rows']>0){
+                                $('#mr_cnt_update_rows').text(res['count_update_rows']);                                     
+                                $('.mr_update').show();                                     
+                            }else{
+                                $('.mr_update').hide();                                     
+                            }
+                            if(res['count_insert_rows']>0){
+                                $('#mr_cnt_insert_rows').text(res['count_insert_rows']);                                     
+                                $('.mr_insert').show();                                     
+                            }else{
+                                $('.mr_insert').hide();                                     
+                            }
+                            
+                            var disambig_keys = Object.keys(res['disambiguation']);
+                            
+                            if(disambig_keys.length>0){
+                                //imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
+                                $('#mr_cnt_disamb').text(disambig_keys.length);                                 
+                                $('#mr_cnt_disamb').parent().show();
+                                
+                                top.HEURIST4.msg.showMsgErr('One or more rows in your file match multiple records in the database. '+
+                        'Please click on "Rows with ambiguous match" to view and resolve these ambiguous matches.<br><br> '+
+                        'If you have many such ambiguities you may need to select adidtional key fields or edit the incoming '+
+                        'data file to add further matching information.');
+                        
+                                $('.step3 > .normal').hide();
+                                $('.step3 > .need_resolve').show();
+                        
+                        
+                            }else{
+                                
+                                if(!(key_idx>=0)){
+                                    //recreate selectors
+                                    _initFieldMapppingTable();
+                                    _initFieldMapppingSelectors();
+                                }
+                                _getValuesFromImportTable();
+                                
+                                $('#mr_cnt_disamb').parent().hide();
+                                _showStep(4);                    
+                            }
+                            $('#divMatchingResult').show();
+                            
+                        }else{
+                            _showStep(3);
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+            );        
+        }
+        
+            
+        
+        }else{
+            top.HEURIST4.msg.showMsgErr(top.HR('You have to select record type'));
+            $("#sa_rectype").focus();
+        }
+        
+    }         
+    
+    
+    function _doPrepare(){
+        
+    } 
+    
+    
+    function _doImport(){
+        
+    } 
+     
+     
+    //
+    //  Compose table and show it in popup
+    // 
+    function _showRecords(mode){
+        
+        var res = imp_session['validation'];
+        var s = '';
+        var container = $('#divPopupPreview');
+        var dlg_options = {};
+        var $dlg;
+        
+        if(mode=='disamb'){
+            
+            s = '<div>The following rows match with multiple records. This may be due to the existence of duplicate '
+            +'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
+            +'the incoming rows against existing data records.</div><br/><br/>'
+            +'<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>Count</th><th>Records in Heurist</th></tr>';
+
+            
+            var buttons = {};
+            buttons[top.HR('Confirm and cotinue to assign IDs')]  = function() {
+                    
+                    var keyvalues = Object.keys(res['disambiguation']);
+                    var disamb_resolv = {};  //recid=>keyvalue
+                    $dlg.find('.sel_disamb').each(function(idx, item){
+                         disamb_resolv[$(item).val()] = keyvalues[$(item).attr('data-key')];
+                    });
+
+                    $dlg.dialog( "close" );
+                    
+                    _doMatching(false, disamb_resolv);
+                }; 
+            buttons[top.HR('Close')]  = function() {
+                    $dlg.dialog( "close" );
+            };
+            
+            dlg_options = {
+                title:'Disambiguation',
+                buttons: buttons
+                };
+            
+            var j, i=0, keyvalues = Object.keys(res['disambiguation']);
+            
+            for(i=0;i<keyvalues.length;i++){
+
+                var keyvalue = keyvalues[i].split(imp_session['csv_mvsep']);
+                keyvalue.shift(); //remove first element
+                keyvalue = keyvalue.join(';&nbsp;&nbsp;');
+                
+                //list of heurist records
+                var disamb = res['disambiguation'][keyvalues[i]];
+                var recIds = Object.keys(disamb);
+                        
+                s = s + '<tr><td>'+keyvalue+'</td><td>'+recIds.length+'</td><td>'+
+                        '<select class="sel_disamb" data-key="'+i+'">';                
+
+                for(j=0;j<recIds.length;j++){
+                    s = s +  '<option value="'+recIds[j]+'">[rec# '+recIds[j]+'] '+disamb[recIds[j]]+'</option>';
+                }
+                s = s + '</select>&nbsp;'
+                + '<a href="#" onclick="{window.open(\''+top.HAPI4.basePathV4+'?db='+top.HAPI4.database
+                + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records</a></td></tr>';
+            }
+            
+            s = s + '</table><br><br>'
+            +'<div>Please select from the possible matches in the dropdowns. You may not be able to determine the correct records'
+            +' if you have used an incomplete set of fields for matching.</div>';
+            
+        }else if(res['count_'+mode+'_rows']>0){
+            
+            dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
+            
+            s = '<table class="tbmain" width="100%"><thead><tr>'; 
+
+            if(mode=="update"){
+                s = s + '<th width="30px">Record ID</th>';
+            }       
+            s = s + '<th width="20px">Line #</th>';
+
+            //HEADER - field names
+            var j,i=0, fieldnames = Object.keys(res['mapped_fields']);
+            for(;i<fieldnames.length;i++){
+                
+                var colname = imp_session['columns'][fieldnames[i].substr(6)];
+                s = s + '<th>'+colname+'</th>';
+            }
+
+            s = s + '</tr></thead>';
+            
+            //BODY
+            var records = res['recs_'+mode];
+            for(i=0;i<records.length;i++){
+
+                var row = records[i];
+                s = s + "<tr>";
+                for(j=0;j<row.length;j++){
+                    s = s +  '<td class="truncate">'+(row[j]?row[j]:"&nbsp;")+'</td>';
+                }
+                s = s + "</tr>";
+            }
+            
+            s = s + '</table>';
+            
+            
+        }
+        
+        if(s!=''){
+            dlg_options['element'] = container.get(0);
+            container.html(s);
+            $dlg = top.HEURIST4.msg.showElementAsDialog(dlg_options);
+        }
+        
+        
+        
+        
+    } 
+
+    //
+    //
+    //
+    function _onUpdateModeSet(){
+            if ($("#sa_upd2").is(":checked")) {
+                $("#divImport2").css('display','block');
+            }else{
+                $("#divImport2").css('display','none');
+            }
+    }
+    
+    //
+    // navigation
+    // 0 - progress
+    // 1 - select file to upload
+    // 2 - preview and field roles as data and id
+    // 3 - matching
+    // 4 - import
+    //
+    function _showStep(page){
+        $("div[id^='divStep']").hide();
+        $("#divStep"+(page>2?3:page)).show();
+        $('#divMatchingResult').hide();
+        
+        if(page==1){
+            $('#selImportId').val('');  //clear selection
+        }else if(page>2){  //matching and import
+        
+            $('.step'+page).show();
+            $('.step'+(page==4?3:4)).hide();
+            $('#divPrepareResult').hide();
+            
+            if(page==3){
+                $('.step3 > .normal').show();
+                $('.step3 > .need_resolve').hide();
+            }else{
+                _onUpdateModeSet();
+            }
+            
+        }
+    }
+    
+    //public members
+    var that = {
+
+        getClass: function () {return _className;},
+        isA: function (strClass) {return (strClass === _className);},
+        getVersion: function () {return _version;},
+
+        showRecords: function (mode) {_showRecords(mode)},
+        
+        onUpdateModeSet:function (event){
+            _onUpdateModeSet();
+        }
+        
+    }
+
+    _init(_imp_ID, _max_upload_size);
+    return that;  //returns object
+}
+    

@@ -618,6 +618,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
     ." FROM ".implode(",",$select_query_update_from)
     ." WHERE ".implode(" and ",$select_query_update_where);
 
+    
     $search_stmt = $mysqli->prepare($search_query);
 
     $params_dt = str_repeat('s',count($sel_fields));
@@ -644,7 +645,6 @@ function matchingMultivalues($mysqli, $imp_session, $params){
             $is_update = false;
             $is_insert = false;
 
-
             $multivalue = $row[$multivalue_field_name_idx];
 
             $ids = array();
@@ -652,6 +652,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
             $values = getMultiValues($multivalue, $params['csv_enclosure'], $params['csv_mvsep']);
 
             foreach($values as $idx=>$value){
+                
                 $row[$multivalue_field_name_idx] = $value;
                 //verify that not empty
                 $fc = $row;
@@ -665,6 +666,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
 
                 $keyvalue = implode($params['csv_mvsep'], $fc);  //csv_mvsep - separator
 
+//error_log($keyvalue.'  ='.implode(' ',$row));                 
 
                 if(!@$pairs[$keyvalue]){  //was $value && $value!="" &&
                     //search for ID
@@ -888,12 +890,16 @@ function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
 // import functions =====================================
 
-
 /**
 * 1) Performs mapping validation (required fields, enum, pointers, numeric/date)
 * 2) Counts matched (update) and new records
 *
 * @param mixed $mysqli
+*/
+/*
+sa_rectype
+ignore_insert = 1
+recid_field   - field_X
 */
 function validateImport($mysqli, $imp_session, $params){
 
@@ -902,7 +908,8 @@ function validateImport($mysqli, $imp_session, $params){
         "count_insert"=>0,       //records to be inserted
         "count_update_rows"=>0,
         "count_insert_rows"=>0,  //row that are source of insertion
-        "count_error"=>0, "error"=>array() );
+        "count_error"=>0, 
+        "error"=>array() );
 
     //get rectype to import
     $recordType = @$params['sa_rectype'];

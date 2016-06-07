@@ -161,6 +161,58 @@ class DbSysImportSessions extends DbEntityBase
         
         return $ret;
     } 
+
+
+    //
+    //
+    //
+    public function delete(){
+        
+        if(!$this->_validatePermission()){
+            return false;
+        }
+        
+        $rec_ID = $this->data['recID'];
+        $rec_ID = intval(@$rec_ID);
+        if($rec_ID>0){        
+            $where = " where imp_id=".$rec_ID;
+        }else{
+            $where = " where imp_id>0";
+        }
+        
+        $mysqli = $this->system->get_mysqli();
+
+        $res = mysql__select_all($mysqli,
+                "select imp_id, imp_session from sysImportSessions".$where);
+
+        if(!$res){
+            $this->system->addError(HEURIST_NOT_FOUND, 
+                "No data found. Cannot delete from import sessions table");
+            return false;
+        }
+
+        //drop import data
+        foreach($res as $id => $session){
+
+            $session = json_decode($session, true);
+            $query = "drop table IF EXISTS ".$session['import_table'];
+
+            if (!$mysqli->query($query)) {
+                $this->system->addError(HEURIST_DB_ERROR, 
+                        'Cannot drop import session table: '.$session['import_table'].' '.$mysqli->error);
+                return false;
+            }
+        }
+
+        if (!$mysqli->query("delete from sysImportSessions ".$where)) {
+                $this->system->addError(HEURIST_DB_ERROR, 
+                        'Cannot delete data from list of imported files', $mysqli->error);
+              return false;
+        }else{
+              return true;
+        }
+    }
+
     
 }
 ?>

@@ -623,10 +623,14 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
             $(element).show().appendTo($dlg);
 
+            var body = $(this.document).find('body');
+            var dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
+            
+            
             var opts = {
                     autoOpen: true,
                     width : (options.width>0?options.width+20:690),
-                    height: (options.height>0?options.height+20:690),
+                    height: (options.height>0?options.height+20:dim.h),
                     modal: true,
                     resizable: (options['no-resize']==true),
                     //draggable: false,

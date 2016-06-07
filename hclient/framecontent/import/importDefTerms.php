@@ -19,6 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     
+define('LOGIN_REQUIRED',1);
 define('PDIR','../../../');    
 
 require_once(dirname(__FILE__)."/../initPage.php");
@@ -83,7 +84,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <!--
                         <option value="win">Windows</option>
                         <option value="nix">Unix</option>
-                        <option value="max">Mac</option>
+                        <option value="mac">Mac</option>
                         -->
                     </select>
             </div>

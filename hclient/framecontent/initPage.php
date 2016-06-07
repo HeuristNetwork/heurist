@@ -32,7 +32,7 @@ if(defined('IS_INDEX_PAGE')){
     define('ERROR_REDIR','hserver/utilities/list_databases.php');
 }else{
     if(!defined('PDIR')) define('PDIR','../../');
-    define('ERROR_REDIR','errorPage.php');
+    define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
 }
 
 $error_msg = '';
@@ -53,8 +53,25 @@ if(!$isSystemInited){
     }else{
         $err = $system->getError();
         $error_msg = @$err['message']?$err['message']:'';
-        header('Location: '.ERROR_REDIR.'?msg='.rawurlencode($error_msg));
+        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($error_msg));
     }
+    exit();
+}
+
+$login_warning = 'To perform this action you must be logged in';
+
+//
+// to limit access to particular page
+// define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php"); 
+//
+if(defined('LOGIN_REQUIRED') && !$system->is_logged_in()){    
+    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning));
+    exit();
+}else if(defined('MANAGER_REQUIRED') && !$system->is_admin()){    
+    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Administrator of group \'Database Managers\''));
+    exit();
+}else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){    
+    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Database Owner'));
     exit();
 }
 

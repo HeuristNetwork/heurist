@@ -43,10 +43,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/initPage.php");
+define('LOGIN_REQUIRED',1);
 
-//verify that user is logged in
-$system->loginRequired();
+require_once(dirname(__FILE__)."/initPage.php");
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];

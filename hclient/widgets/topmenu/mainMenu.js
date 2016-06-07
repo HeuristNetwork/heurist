@@ -474,6 +474,8 @@ $.widget( "heurist.mainMenu", {
             top.HAPI4.SystemMgr.is_logged(this._editPreferences); p=true;
         }else if(action == "menu-database-refresh"){
             this._refreshLists( true ); p=true;
+        }else if(action == "menu-import-csv"){ // Result set
+            top.HAPI4.SystemMgr.is_logged(function(){that.importCSV()}); p=true;
         }else if(action == "menu-export-hml-0"){ // Result set
             top.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,false,false)}); p=true; // isAll, includeRelated, ishuni
         }else if(action == "menu-export-hml-1"){ //selected
@@ -506,6 +508,21 @@ $.widget( "heurist.mainMenu", {
     },
 
 
+    importCSV: function(){
+        
+           var url = top.HAPI4.basePathV4 + "hclient/framecontent/import/importRecordsCSV.php?db="+ top.HAPI4.database;
+           
+           var body = $(this.document).find('body');
+           var dim = {h:body.innerHeight(), w:body.innerWidth()};
+           
+           top.HEURIST4.msg.showDialog(url, {    
+                title: 'Import Records from CSV/TSV',
+                height: dim.h-5,
+                width: dim.w-5,
+                'context_help':top.HAPI4.basePathV4+'context_help/importRecordsCSV.html #content'
+                //callback: _import_complete
+            });
+    },
 
     _addNewRecord: function(){
 
