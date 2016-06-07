@@ -311,7 +311,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             var request = {
                     'a'          : 'search',
-                    'entity'     : 'SysImportSessions',
+                    'entity'     : 'sysImportSessions',
                     'details'    : 'list',
                     'imp_ID'     : imp_ID
             };

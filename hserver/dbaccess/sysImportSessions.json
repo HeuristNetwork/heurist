@@ -14,7 +14,7 @@
 
         "sel_actions": [{"key":"edit", "title":"Edit"},
                         {"key":"delete", "title":"Delete"}],
-        "btn_actions": [{"key":"add", "title":"Add New Session"}],
+        "btn_actions": [{"key":"add", "title":"Add New Session!"}],
 
         "reference_query": {},
         
