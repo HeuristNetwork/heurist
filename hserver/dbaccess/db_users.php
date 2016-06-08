@@ -103,7 +103,7 @@
             $user = user_getByField($mysqli, 'ugr_Name', $username);
             if(null==$user) $user = user_getByField($system->get_mysqli(), 'ugr_Name', $username);
             if(null==$user) {
-                $system->addError(HEURIST_REQUEST_DENIED,  "Incorrect username / email");
+                $system->addError(HEURIST_NOT_FOUND,  "It is not possible to recover password. Username / email, you specified, not found");
 
             }else{
                 //do not update password if mail is not enabled
