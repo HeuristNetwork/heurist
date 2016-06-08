@@ -37,30 +37,48 @@ require_once(dirname(__FILE__)."/../initPage.php");
         
         
         </script>
+        <style>
+            .tbmain th
+            {
+                font-weight:bold;
+            }
+            .tbmain td, .tbmain th
+            {
+                border-left: 1px solid lightgray;
+                padding:2px;
+                text-align:left;
+            }
+            .tbmain
+            {
+                border-collapse:collapse;
+                font-size: 1em;
+            }        
+        </style>
+        
     </head>
 
     <!-- HTML -->
     <body class="ui-heurist-bg-light" style="overflow:hidden;">
-
-<div style="position:absolute;width:200px; height:100%;  border-right:1px lightgray solid" id="divStep1">
+<div style="width:100%;height:60%;position:absolute;top:0">
+<div style="position:absolute;left:0;right:300px; height:100%;  border-right:1px lightgray solid" id="divStep1">
     <div class="ent_header" style="height:5em;">
         <h2>Step 1<br>Paste content in area below</h2>
         <h2 style="position:absolute;bottom:6px;">or</h2>
         <input type="file" id="uploadFile" style="display:none">
         <div id="btnUploadFile" style="position:absolute;bottom:6px;left:3em">Upload File</div>
     </div>
-    <textarea id="sourceContent" class="ent_content_full" style="top:5em;width:100%;resize:none">
+    <textarea id="sourceContent" class="ent_content_full" style="top:5em;width:100%;resize:none;padding:0.5em;border:none">
     
     </textarea>
 </div>
-<div style="position:absolute;left:200px;width:150px; height:100%; border-right:1px lightgray solid">
+<div style="position:absolute;right:150px;width:150px; height:100%; border-right:1px lightgray solid">
     <div class="ent_header" style="height:5em;">
         <h2>Step 2</h2>
-        <div id="btnParseData" style="position:absolute;bottom:2px;">Start Parse</div>
+        <div id="btnParseData" style="position:absolute;bottom:2px;">Analyse</div>
     </div>
     <fieldset class="ent_content_full" style="top:5em;padding-top:2em;">
             <div>
-                <label>Field separator:</label>
+                <label for="csv_delimiter">Field separator:</label>
                 <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;">
                         <option value="," selected>comma</option>
                         <option value="tab">tab</option>
@@ -69,13 +87,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 </select>
             </div>
             <div>
-                <label>Fields enclosed in:</label>
+                <label for="csv_enclosure">Fields enclosed in:</label>
                 <select id="csv_enclosure" class="text ui-widget-content ui-corner-all" style="width:120px;">
                         <option selected value='2'>"</option><option value="1">'</option>
                 </select>
             </div>
             <div>
-                <label>Line separator:</label>
+                <label for="csv_linebreak">Line separator:</label>
                     <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;">
                         <option selected value="auto">auto detect</option>
                         <option value="1">No lines</option>
@@ -88,24 +106,20 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         -->
                     </select>
             </div>
+            <div>
+                <input id="csv_header" class="text ui-widget-content ui-corner-all" type="checkbox" value="1" checked>
+                <label for="csv_header">Labels in line 1:</label>
+            </div>
     </fieldset>            
 </div>
-<div style="position:absolute;left:350px;height:100%;right:150px; border-right:1px lightgray solid" >
-    <div class="ent_header" style="height:5em;">
-        <h2 style="position:absolute;bottom:6px;">Preview data to be imported</h2>
-    </div>
-    <div class="ent_content_full" style="top:6em;font-size:0.9em;" id="divParsePreview">
-    </div>
-</div>
-<div style="position:absolute;right:0px;height:100%;width:150px;" id="
-">
+<div style="position:absolute;right:0px;height:100%;width:150px;"> 
     <div class="ent_header" style="height:5em;">
         <h2>Step 3<br>Select field order<br>(Term is required)</h2>
     </div>
     <fieldset class="ent_content" style="top:5em;padding-top:2em;">
            
             <div>
-                <label style="color:red">Term(Label)</label><br>
+                <label style="color:red">Term (Label)</label><br>
                 <select id="field_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
                 </select>
             </div>
@@ -120,14 +134,27 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 </select>
             </div>
             
-            <div id="preparedInfo"> <!-- div to show results of data preparation --></div>
+            
     </fieldset> 
     <div class="ent_footer" style="text-align:center">
-        <div id="btnImportData" xstyle="position:absolute;bottom:2px;">Start Import</div>
+        <div id="btnImportData">Import</div>
     </div>
 </div>
-<div id="divCurtain" style="position:absolute;right:0px;height:100%;left:200px;" class="semitransparent">
+<div id="divCurtain" style="position:absolute;right:0px;height:100%;width:300px;" class="semitransparent">
 <!-- curtain -->
 </div>
+</div>
+
+<div style="width:100%;height:40%;position:absolute;bottom:0" >
+    <div class="ent_header" style="height:1.5em;">
+        <h2 style="display:inline-block">Preview data to be imported</h2>
+        <div id="preparedInfo" style="display:inline-block"> <!-- div to show results of data preparation --></div>
+    </div>
+    <div class="ent_content_full" style="top:2em;font-size:0.9em;" id="divParsePreview">
+    </div>
+</div>
+
+
+
 </body>
 </html>

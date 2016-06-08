@@ -1310,6 +1310,15 @@ function EditTerms() {
     function _import_complete(context){
         if(!Hul.isnull(context) && !Hul.isnull(context.terms))
         {
+            
+            if(top.HEURIST4 && top.HEURIST4.msg){
+            top.HEURIST4.msg.showMsgDlg(context.result.length
+                                + ' term'
+                                + (context.result.length>1?'s were':' was')
+                                + ' added.', null, 'Terms imported');
+            }
+            
+            
             top.HEURIST.terms = context.terms;
             var res = context.result,
             ind,

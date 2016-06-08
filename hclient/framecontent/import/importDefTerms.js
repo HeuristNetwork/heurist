@@ -24,7 +24,7 @@ function hImportDefTerms(_trm_ParentTermID) {
     var _className = "ImportDefTerms",
     _version   = "0.4",
     
-    _parseddata,
+    _parseddata = null,
     _prepareddata,
     
     trm_ParentTermID,
@@ -99,16 +99,19 @@ function hImportDefTerms(_trm_ParentTermID) {
                         });
         var btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
-                    .button({label: top.HR('Start Parse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: top.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doParse();
                         });
         var btnStartImport = $('#btnImportData')
                     .css({'width':'120px'})
-                    .button({label: top.HR('Start Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: top.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doPost();
                         });
+                        
+        $('#csv_header').change(_redrawPreviewTable);                        
+                        
         top.HEURIST4.util.setDisabled(btnStartImport, true);
          
         var src_content = ''; 
@@ -194,6 +197,103 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
 
     
     //
+    //
+    //
+    function _redrawPreviewTable(){
+        
+            if(_parseddata==null) return;
+        
+            var i, j, maxcol = 0;
+            for(i in _parseddata){
+                if(top.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
+                    maxcol = Math.max(maxcol,_parseddata[i].length);
+                }
+            }
+           
+            var container = $('#divParsePreview').empty();    
+            var tbl  = $('<table>')
+                        .addClass('tbmain')
+                        .appendTo(container);
+                        
+            //HEADER FIELDS            
+            var headers = [], ifrom=0;
+            if( $('#csv_header').is(':checked') ){
+                for(i=0;i<_parseddata.length;i++){
+                    if(top.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
+                        
+                        for(j=0;j<maxcol;j++){
+                            if(j>=_parseddata[i].length || top.HEURIST4.util.isempty(_parseddata[i][j])){
+                                headers.push('column '+j);     
+                            }else{
+                                headers.push(_parseddata[i][j]); 
+                            }
+                        }
+                        ifrom = i+1;
+                        break;
+                    }
+                }
+            }else{
+                for(j=0;j<maxcol;j++){
+                    headers.push('column '+j);
+                }
+            }
+            
+            //TABLE HEADER
+            var tr  = $('<tr>').appendTo(tbl);
+            for(j=0;j<maxcol;j++){
+                
+                var cs = {};
+                if(maxcol>3){
+                    cs['width'] = ((j==0)?20:((j==maxcol-1)?40:10))+'%';
+                }
+                
+                $('<th>').css(cs)
+                    .addClass('truncate')
+                            .text(headers[j]).appendTo(tr);
+            }
+            
+            //TABLE BODY
+            for(i=ifrom;i<_parseddata.length;i++){
+                var tr  = $('<tr>').appendTo(tbl);
+                if(top.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
+                    for(j=0;j<maxcol;j++){
+                        
+                        $('<td>').addClass('truncate')
+                            .text(j<_parseddata[i].length?_parseddata[i][j]:' ').appendTo(tr);
+                    }
+                }
+            }
+            
+            //COLUMN ROLES SELECTORS
+            $('.column_roles').empty();
+            for(j=-1; j<maxcol; j++){
+                var opt = $('<option>',{value:j, text:(j<0)?'select...':headers[j]});                                    
+                opt.appendTo($('#field_term'));
+                opt.clone().appendTo($('#field_code'));
+                opt.clone().appendTo($('#field_desc'));
+            }
+            if(maxcol>0){
+                $('#field_term').val(0);
+                
+                //AUTODETECT COLUMN ROLES by name
+                for(j=0;j<maxcol;j++){
+                    var s = headers[j].toLowerCase();
+                    if(s=='term' || s=='label'){
+                        $('#field_term').val(j);
+                    }else if(s=='code' || s=='standard code'){
+                        $('#field_code').val(j);
+                    }else if(s=='description'){
+                        $('#field_desc').val(j);
+                    }
+                }
+                
+                _doPrepare();
+                _setCurtain(3);
+            }
+        
+    }
+    
+    //
     // parse CSV on server side
     //
     function _doParse(){
@@ -219,36 +319,11 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
 
                             //that.loadanimation(false);
                             if(response.status == top.HAPI4.ResponseStatus.OK){
-                               
-                               
-                                var container = $('#divParsePreview');    
-                                var tbl  = $('<table>').appendTo(container);
-                                var i,j;
+
                                 _parseddata = response.data;
-                                var maxcol = 0;
-                                for(i in _parseddata){
-                                    var tr  = $('<tr>').appendTo(tbl);
-                                    if(top.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
-                                        for(j in _parseddata[i]){
-                                            $('<td>').css('border','1px solid gray').text(_parseddata[i][j]).appendTo(tr);
-                                        }
-                                        maxcol = Math.max(maxcol,_parseddata[i].length);
-                                    }
-                                }
                                 
-                                for(i=-1; i<maxcol; i++){
-                                    var opt = $('<option>',{value:i, text:(i<0)?'select...':'column '+(i+1)});                                    
-                                    opt.appendTo($('#field_term'));
-                                    opt.clone().appendTo($('#field_code'));
-                                    opt.clone().appendTo($('#field_desc'));
-                                }
-                                if(maxcol>0){
-                                    $('#field_term').val(0);
-                                    _doPrepare();
-                                    _setCurtain(3);
-                                }else{
-                                    top.HEURIST4.msg.showMsgErr(response);
-                                }
+                                _redrawPreviewTable();
+                                
                                 
                             }else{
                                 top.HEURIST4.msg.showMsgErr(response);
@@ -267,15 +342,15 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
             $('#preparedInfo').empty();
         }
         if(step==1){
-            $('#divCurtain').css('left','200px');
+            $('#divCurtain').css('width','300px');
         }else if(step==2){
-            $('#divCurtain').css('left','350px');
+            $('#divCurtain').css('width','150px');
         }else if(step==3){
             $('#divCurtain').hide();   
         }
     }
-
-    //
+                                      
+                                      
     // prepare update array
     //
     function _doPrepare(){
@@ -298,14 +373,22 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                 var field_desc = $('#field_desc').val();
                 var i, record, skip_na = 0, skip_dup = 0, skip_long = 0, labels = [];
                         
-                for(i in _parseddata){
+                var hasHeader = $('#csv_header').is(':checked');
+                i = hasHeader?1:0;        
+                        
+                for(;i<_parseddata.length;i++){
                     
                     record = {};
                     
-                    if(field_term<_parseddata[i].length && !top.HEURIST4.util.isempty(_parseddata[i][field_term].trim())){
-                        
-                        var lbl = _parseddata[i][field_term].trim();
-                        
+                    if(field_term>=_parseddata[i].length) continue;
+                    
+                    var lbl = null;
+                    
+                    if(!top.HEURIST4.util.isempty(_parseddata[i][field_term])){
+                        lbl = _parseddata[i][field_term].trim();
+                    }
+                    
+                    if(!top.HEURIST4.util.isempty(lbl)){
                         
                         //verify duplication in parent term and in already added
                         if(trm_ParentChildren.indexOf(lbl.toLowerCase())>=0 || 
@@ -341,19 +424,19 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                 if(_prepareddata.length==0){
                     msg = '<span style="color:red">No valid data to import</span>';   
                 }else{
-                    msg = 'Ready to import: '+_prepareddata.length+' entr'+((_prepareddata.length>1)?'ies':'y');
+                    msg = '  Ready to import: n='+_prepareddata.length;//+' entr'+((_prepareddata.length>1)?'ies':'y');
                 }
                 if(skip_na>0 || skip_dup>0 || skip_long>0){
-                    msg = msg + '<br>Term(label)';
+                    msg = msg + '&nbsp;&nbsp;Term (label) is';
                 }
                 if(skip_na>0){
-                    msg = msg + '<br> is not defined for '+skip_na+' row'+((skip_na>1)?'s':'');    
+                    msg = msg + ' not defined for '+skip_na+' row'+((skip_na>1)?'s;':';');    
                 }
                 if(skip_dup>0){
-                    msg = msg + '<br> is duplicated for '+skip_dup+' row'+((skip_dup>1)?'s':'');    
+                    msg = msg + ' duplicated for '+skip_dup+' row'+((skip_dup>1)?'s;':';');    
                 }
                 if(skip_long>0){
-                    msg = msg + '<br> is very long (>500 chars) for '+skip_long+' row'+((skip_long>1)?'s':'');    
+                    msg = msg + ' very long (>500 chars) for '+skip_long+' row'+((skip_long>1)?'s':'');    
                 }
                 
                 
@@ -361,7 +444,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
         
         }
         
-        top.HEURIST4.util.setDisabled($('#btnImportData'), (_prepareddata.length<1));
+        top.HEURIST4.util.setDisabled($('#btnImportData'), (_prepareddata.length<1 || _prepareddata.length==skip_na));
         
         $('#preparedInfo').html(msg);
     }
@@ -390,13 +473,14 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
 
                             var recIDs = response.data;
                             
+                            top.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
+                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                /*    
                             top.HEURIST4.msg.showMsgDlg(recIDs.length
                                 + ' term'
                                 + (recIDs.length>1?'s were':' was')
                                 + ' added.', null, 'Terms imported'); // Title was an unhelpful and inelegant "Info"
-                                
-                            top.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                */    
                                     window.close( {result:recIDs, parent:trm_ParentTermID, terms:response.data.terms } );
                                 }else{
                                     top.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');

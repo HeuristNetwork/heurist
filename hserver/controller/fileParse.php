@@ -607,6 +607,8 @@ function parse_content(){
         }
 
 //error_log(print_r($content,true));
+        //remove spaces
+        $content = trim(preg_replace('/([\s])\1+/', ' ', $content));
         
         $lines = str_getcsv($content, $lb); 
         

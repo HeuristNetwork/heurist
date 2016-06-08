@@ -65,17 +65,17 @@ function get_config_bytes($val) {
         
         </script>
         <style type="text/css">
-            .tbmain th
-            {
-                border-left: 1px solid lightgray;
-                border-bottom: none;
-                padding:2px;
-            }
             .subh
             {
                 border-left: 1px solid lightgray;
                 border-bottom: 1px solid lightgray;
                 border-top: 1px solid lightgray;
+            }
+            .tbmain th
+            {
+                border-left: 1px solid lightgray;
+                border-bottom: none;
+                padding:2px;
             }
             .tbmain td
             {
