@@ -71,7 +71,7 @@
     *
     *
     * @param mixed $rectypeids null means all, otherwise comma separated list of ids
-    * @param mixed $imode  0 - only names and groupnames
+    * @param mixed $imode  0 - only names and groupnames  (default)
     *                      1 - only structure (@TODO NO NAMES!!!!)
     *                      2 - full, both headers and structures
     */

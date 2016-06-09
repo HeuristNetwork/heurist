@@ -18,8 +18,21 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-
+    /*
+        recordAdd  - create temporary record for given user
+        recordSave - Save record
+        recordDelete  - TODO!!!
+        
+        isWrongAccessRights - validate parameter values
+        isWrongOwnership
+        recordCanChangeOwnerwhipAndAccess  - Verifies access right value and is the current user able to change ownership for given record
+        recordSetOwnerwhipAndAccess - change access rights and ownership for record
+        
+    
+        recordUpdateTitle - TODO!!!
+        prepareDetails - validate records detail (need to combine with validators in fileParse)
+    
+    */
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/db_users.php');
     require_once (dirname(__FILE__).'/db_structure.php');
@@ -146,7 +159,11 @@
     }
 
     /**
-    * put your comment there...
+    * Save record
+    *   1) prepareDetails
+    *   2) add or update header
+    *   3) remove old details, add new details
+    *   4) recordUpdateTitle
     *
     * @param mixed $system
     * @param mixed $record
@@ -358,7 +375,7 @@
     }
 
     /**
-    * verifies access right value and is the current user able to change ownership for given record
+    * Verifies access right value and is the current user able to change ownership for given record
     *
     * @param mixed $system
     * @param mixed $recID

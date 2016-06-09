@@ -1107,8 +1107,178 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             s = s + '</table><br><br>'
             +'<div>Please select from the possible matches in the dropdowns. You may not be able to determine the correct records'
             +' if you have used an incomplete set of fields for matching.</div>';
+        
+        }else if(mode=='error'){    //------------------------------------------------------------------------------------------- 
+
+                var is_missed = false;
+                var tabs = res['error'];
+                var k = 0;
+
+                if(tabs.length>1){
+
+                    s = s + '<div id="tabs_records"><ul>';
+                    
+                    for (;k<tabs.length;k++){
+                        var colname = imp_session['columns'][tabs[k]['field_checked'].substr(6)];
+                        s = s + '<li><a href="#rec__'+k+'" style="color:red">'
+                                    +colname+'<br><span style="font-size:0.7em">'
+                                    +tabs[k]['short_message']+'</span></a></li>';
+                    }
+                    s = s + '</ul>';
+                }
+
+                for (k=0;k<tabs.length;k++){
+                    var rec_tab = tabs[k];
+                    s = s + '<div id="rec__'+k+'">'
+
+                    var cnt = rec_tab['count_error'];
+                    var records = rec_tab['recs_error'];
+
+                    if(cnt>records.length){
+                        s = s + "<div class='error'><b>Only the first "+records.length+" of "+cnt+" rows are shown</b></div>";
+                    }
+
+                    var checked_field  = rec_tab['field_checked'];
+
+                    var ismultivalue = checked_field && imp_session['multivals'][checked_field.substr(6)];//highlight errors individually
+                    
+                    s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br/><br/></div>";
+
+                    var is_missed = (rec_tab['err_message'].indexOf('a value must be supplied')>0);
+
+
+                    //all this code only for small asterics
+                    var rtyID = $("#sa_rectype").val();
+                    var recStruc = null;
+                    var idx_reqtype;
+                    
+                    if(rtyID){
+                        recStruc = top.HEURIST4.rectypes['typedefs'][rtyID]['dtFields'];
+                        idx_reqtype = top.HEURIST4.rectypes['dtFieldNamesToIndex']['rst_RequirementType'];
+                    }
+
+
+                    var detDefs = top.HEURIST4.detailtypes;
+                    var detLookup = detDefs['lookups'];
+                    detDefs = detDefs['typedefs'];
+                    var idx_dt_type = detDefs['fieldNamesToIndex']['dty_Type'];
+    /*
+        //find distinct terms values
+        $is_enum = false;
+        if(!$is_missed){
+            $err_col = 0;
+            $m = 1;
+            foreach($mapped_fields as $field_name=>$dt_id) {
+                if($field_name==$checked_field && @$detDefs[$dt_id]){
+                    $err_col = $m;
+
+                    $dttype = $detDefs[$dt_id]['commonFields'][$idx_dt_type];
+                    $is_enum = ($dttype=='enum' || $dttype=='relationtype');
+                    break;
+                }
+                $m++;
+            }
+
+            if($is_enum){
+                $distinct_value = array();
+                if($records && is_array($records)) {
+                    foreach ($records as $row) {
+                        $value = $row[$err_col];
+                        if(!in_array($value, $distinct_value)){
+                            array_push($distinct_value, $value);
+                        }
+                    }
+                }
+
+                if(count($distinct_value)>0){
+                    //print distinct term values
+                    print '<div style="display:none;padding-bottom:10px;" id="distinct_terms_'.$k.'"><br>';
+                    foreach ($distinct_value as $value) {
+                        print '<div style="margin-left:30px;">'.$value.' </div>';
+                    }
+                    print '</div>';
+                    print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.
+                    $k.'\'),{\'no-close\':false, \'no-titlebar\':false });}">Get list of unrecognised terms</a>'.
+                    ' (can be imported into terms tree)<br/>&nbsp;</div>';
+                }
+            }
+
+        }//end find distinct terms values
+    */
+                s = s + '<table class="tbmain" width="100%"><thead><tr>' 
+                        + '<th width="20px">Line #</th>';
+
+                //HEADER - only error field
+                var err_col = 0;
+                
+                //var mapped_fields = imp_session['validation']['mapped_fields'];
+                var j, i, fieldnames = Object.keys(res['mapped_fields']);
+
+                for(i=0;i<fieldnames.length;i++){
+                
+                    var colname = imp_session['columns'][fieldnames[i].substr(6)];
+                    if(colname == checked_field){
+                        
+                        var dt_id = res['mapped_fields'][fieldnames[i]];
+                        
+                        if(recStruc[dt_id][idx_reqtype] == "required"){
+                            colname = colname + "*";
+                        }
+                        /* @TODO generate term selector
+                        if(is_enum){
+                            $showlink = '&nbsp;<a href="#" onclick="{showTermListPreview('.$dt_id.')}">show list of terms</a>';
+                        }else{
+                            $showlink = '';
+                        }
+                        
+                        if($is_enum){
+                            $colname = $colname."<div id='termspreview".$dt_id."'></div>"; //container for
+                        }
+                        */
+                        
+                        
+                        s = s + '<th style="color:red">'+colname
+                             + '<br><font style="font-size:10px;font-weight:normal">'
+                             + (dt_id>0?detLookup[detDefs[dt_id]['commonFields'][idx_dt_type]] :dt_id)
+                             + '</th>';
+                             
+                        err_col = i;
+                        break;
+                    }
+                }
+
+                s = s + '<th>Record content</th></tr></thead>';
+                
+                //BODY
+                for(i=0;i<records.length;i++){
+
+                    var row = records[i];
+                    s = s + '<tr><td class="truncate">'+row[0]+'</td>'; //line#
+                    if(is_missed){
+                        s = s + "<td style='color:red'>&lt;missing&gt;</td>";
+                    } else if(ismultivalue){
+                        s = s + "<td class='truncate'>"+row[err_col]+"</td>";
+                    } else {
+                        s = s + "<td class='truncate' style='color:red'>"+row[err_col]+"</td>";
+                    }
+                    //TODO - print row content of line
+                    /*
+                    for(j=0;j<row.length;j++){
+                        s = s +  '<td class="truncate">'+(row[j]?row[j]:"&nbsp;")+'</td>';
+                    }
+                    */
+                    s = s + "<td>&nbsp;</td></tr>";
+                }
             
-        }else if(res['count_'+mode+'_rows']>0){
+                s = s + '</table></div>';
+                
+            }//tabs
+
+            if(tabs.length>1){
+                s = s + '</div>';
+            }
+            
+        }else if(res['count_'+mode+'_rows']>0){ //-------------------------------------------------------------------------------
             
             dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
             
@@ -1120,7 +1290,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             s = s + '<th width="20px">Line #</th>';
 
             //HEADER - field names
-            var j,i=0, fieldnames = Object.keys(res['mapped_fields']);
+            var j, i=0, fieldnames = Object.keys(res['mapped_fields']);
             for(;i<fieldnames.length;i++){
                 
                 var colname = imp_session['columns'][fieldnames[i].substr(6)];
@@ -1142,18 +1312,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             }
             
             s = s + '</table>';
-            
-            
         }
         
         if(s!=''){
             dlg_options['element'] = container.get(0);
             container.html(s);
+            
+            if(container.find("#tabs_records").length>0){
+                    $("#tabs_records").tabs();
+            }
+            
             $dlg = top.HEURIST4.msg.showElementAsDialog(dlg_options);
         }
-        
-        
-        
         
     } 
 

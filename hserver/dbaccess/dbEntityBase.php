@@ -48,7 +48,9 @@ class DbEntityBase
     */
     protected $records;
     
-        
+    //
+    // cconstructor - load configuration from json file
+    //    
     function __construct( $system, $data ) {
        $this->system = $system;
        $this->data = $data;
@@ -56,15 +58,17 @@ class DbEntityBase
     }
 
     //
-    //
+    // verify that entity is valid 
+    // configuration is loaded
+    // fields is not empty array
     //
     public function isvalid(){
         return is_array($this->config) && is_array($this->fields) && count($this->fields)>0;
     }
 
     //
+    // config getter
     //
-    ///
     public function config(){
         return $this->config;
     }
@@ -74,17 +78,16 @@ class DbEntityBase
     //
     public function save(){
 
-        //extract records
+        //extract records from parameter data
         if(!$this->prepareRecords()){
                 return false;    
         }
         
-        //validate permission
+        //validate permission for current user
         if(!$this->_validatePermission()){
             return false;
         }
-        
-//error_log(print_r($this->records, true));        
+
         //validate values and check mandatory fields
         foreach($this->records as $record){
         
@@ -320,7 +323,7 @@ class DbEntityBase
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Missed 'fields' parameter. Fields are not defined");
                 return false;    
         }
-        //detect wehter this is milti record save
+        //detect wheter this is milti record save
         if(array_keys($this->data['fields']) !== range(0, count($this->data['fields']) - 1)){
             $this->records = array();
             $this->records[0] = $this->data['fields']; 

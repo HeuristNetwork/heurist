@@ -2,7 +2,7 @@
 
     /**
     * Class to update records details in batch
-    * 
+    * to be renamed since in coinside with name scheme for entity
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

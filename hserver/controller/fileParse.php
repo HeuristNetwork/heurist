@@ -1,6 +1,6 @@
 <?php
     /**
-    *  CSV parser for content from client side
+    * Interface for CSV parse and import 
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -16,6 +16,57 @@
     * Unless required by applicable law or agreed to in writing, software distributed under the License is
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
+    */
+    
+    /*
+    parameter
+    
+    content
+        function parse_content - parse CSV from content parameter and returns parsed array (used in import terms)
+        
+    action
+    1) step0
+        parse_step0   save CSV form "data" parameter into temp file in scratch folder, returns filename
+                     (used to post pasted csv to server side)    
+
+    2) step1
+        parse_step1  check encoding, save file in new encoding invoke parse_step2 with limit 100 to get parse preview
+    
+    3) step2 
+        parse_step2 -  if limit>100 returns first 100 lines to preview parse (used after set of parse parameters)
+                       otherwise (used after set of field roles) 
+                            remove spaces, convert dates, validate identifies, find memo and multivalues
+                            if id and date fields are valid invokes parse_db_save
+                            otherwise returns error array and first 100 
+                            
+        parse_db_save - save content of file into import table, create session object and saves it to sysImportSessions table, returns session
+
+        saveSession - saves session object into  sysImportSessions table (todo move to entity class SysImportSessions)
+        getImportSession - get session from sysImportSessions  (todo move to entity class SysImportSessions)
+
+    -------------------
+    
+        getMultiValues  - split multivalue field
+        trim_lower_accent - trim and remove accent characters
+
+    -------------------
+    
+    4) step3
+        assignRecordIds -  Assign record ids to field in import table (negative if not found)
+                findRecordIds - find exisiting /matching records in heurist db by provided mapping 
+                
+    5) step4 
+        validateImport - verify mapping parameter for valid detailt values (numeric,date,enum,pointers)
+        
+            getWrongRecords
+            validateEnumerations
+            validateResourcePointers
+            validateNumericField
+            validateDateField
+        
+    
+    
+    
     */
 require_once(dirname(__FILE__)."/../System.php");
 require_once (dirname(__FILE__).'/../dbaccess/dbSysImportSessions.php');
@@ -54,6 +105,7 @@ if(!$system->init(@$_REQUEST['db'])){
         
         }else if($action=='step4'){ // import
         
+            $res = validateImport($_REQUEST);
         
         }else if(@$_REQUEST['content']){    
             $res = parse_content(); 
@@ -78,20 +130,6 @@ print json_encode($response);
 exit();
 //--------------------------------------
 
-// parse_step0   save content into file
-//  0a) csv content -> $upload_file_name     returns to client only filename 
-//  0b) in UploadHandler uploaded file -> $upload_file_name
-
-// parse_step1 - check encoding, save file in new encoding invoke parse_prepare with limit
-// 1) encode file into UTF8  returns  $encoded_file_name (may be the same as $upload_file_name)
-// 
-
-// parse_step2 - read file, remove spaces, convert dates, validate identifies, find memo and multivalues, save file or return preview array
-// get full path to file in UTF8
-
-
-// parse_db_save - save file into table
-
 function parse_step0(){
     global $system;
         $content = @$_REQUEST['data'];
@@ -105,7 +143,7 @@ function parse_step0(){
         $res = file_put_contents($upload_file_name, trim($content));
         unset($content);
         if(!$res){
-            $system->addError(HEURIST_UNKNOWN_ERROR, 'Cant save temporary file '.$upload_file_name);                
+            $system->addError(HEURIST_ERROR, 'Cant save temporary file '.$upload_file_name);                
             return false;
         }
         
@@ -133,7 +171,7 @@ function parse_step1(){
             else $s = ' could not be read';
             
         if($s){
-            $system->addError(HEURIST_UNKNOWN_ERROR, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);                
+            $system->addError(HEURIST_ERROR, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);                
             return false;
         }
     }
@@ -146,7 +184,8 @@ function parse_step1(){
     $line = fgets($handle, 1000000);
     fclose($handle);
     if(!$line){
-        return "Empty header line";
+        $system->addError(HEURIST_ERROR, 'Empty header line');
+        return false;
     }
 
     //detect encoding and convert entire file to UTF8
@@ -154,22 +193,26 @@ function parse_step1(){
 
         $line = mb_convert_encoding( $line, 'UTF-8', $csv_encoding);
         if(!$line){
-            return 'Your file can\'t be converted to UTF-8. '
-            .'Please open it in any advanced editor and save with UTF-8 text encoding';
+            $system->addError(HEURIST_ERROR, 'Your file can\'t be converted to UTF-8. '
+                .'Please open it in any advanced editor and save with UTF-8 text encoding');
+            return false;
         }
 
         $content = file_get_contents($upload_file_name);
         $content = mb_convert_encoding( $content, 'UTF-8' );
         if(!$content){
-            return 'Your file can\'t be converted to UTF-8. '
-            .'Please open it in any advanced editor and save with UTF-8 text encoding';
+            $system->addError(HEURIST_ERROR, 'Your file can\'t be converted to UTF-8. '
+                .'Please open it in any advanced editor and save with UTF-8 text encoding');
+            return false;
         }
         
         $encoded_file_name = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $original_filename);
         $res = file_put_contents($encoded_file_name, $content);
         unset($content);
         if(!$res){
-            return 'Cant save temporary file (with UTF-8 encoded csv data) '.$encoded_file_name;
+            $system->addError(HEURIST_ERROR, 
+                'Cant save temporary file (with UTF-8 encoded csv data) '.$encoded_file_name);
+            return false;
         }
     }else{
         $encoded_file_name = $upload_file_name; 
@@ -183,6 +226,10 @@ function parse_step1(){
 // read file, remove spaces, convert dates, validate identifies, find memo and multivalues
 // $encoded_filename - csv data in UTF8 - full path
 // $original_filename - originally uploaded filename 
+
+// $limit if >0 returns first 100 lines
+// otherwise convert dates, validate identifies, find memo and multivalues
+// if there are no errors invokes  parse_db_save
 //
 function parse_step2($encoded_filename, $original_filename, $limit){
 
@@ -236,7 +283,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
             else $s = ' could not be read';
             
         if($s){
-            $system->addError(HEURIST_UNKNOWN_ERROR, 'Temporary file '.$encoded_filename. $s);                
+            $system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename. $s);                
             return false;
         }
     }
@@ -252,10 +299,13 @@ function parse_step2($encoded_filename, $original_filename, $limit){
         //get filename for prepared filename with converted dates and removed spaces
         $prepared_filename = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $encoded_filename);  //HEURIST_SCRATCHSPACE_DIR
         if (!is_writable($prepared_filename)) {
-            return "Cannot save prepared csv data: $prepared_filename";
+            $system->addError(HEURIST_ERROR, 'Cannot save prepared csv data: '.$prepared_filename);                
+            return false;
+            
         }
         if (!$handle_wr = fopen($prepared_filename, 'w')) {
-            return "Cannot open file to save prepared csv data: $prepared_filename";
+            $system->addError(HEURIST_ERROR, 'Cannot open file to save prepared csv data: '.$prepared_filename);                
+            return false;
         }
     }
 
@@ -282,7 +332,10 @@ function parse_step2($encoded_filename, $original_filename, $limit){
             if($len>200){
                 fclose($handle);
                 if($handle_wr) fclose($handle_wr);
-                return "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.";
+                
+                $system->addError(HEURIST_ERROR, 
+                    "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.");                
+                return false;
             }            
         }else{
             $line_no++;
@@ -429,7 +482,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
 }
 
 //
-//  save file into table returns session
+//  save content of file into import table, create session object and saves ti to sysImportSessions table, returns session
 //
 function parse_db_save($preproc){
     global $system;
@@ -558,6 +611,54 @@ function saveSession($system, $imp_session){
         $imp_session["import_id"] = $imp_id;
         return $imp_session;
     }
+}
+
+
+//
+// load session configuration
+//
+function getImportSession($imp_ID){
+    global $system;
+    
+    
+    if($imp_ID && is_numeric($imp_ID)){
+
+        $res = mysql__select_array($system->get_mysqli(),
+            "select imp_session, imp_table from sysImportSessions where imp_id=".$imp_ID);
+
+        $session = json_decode($res[0], true);
+        $session["import_id"] = $imp_ID;
+        $session["import_file"] = $res[1];
+        if(!@$session["import_table"]){ //backward capability
+            $session["import_table"] = $res[1];
+        }
+
+        return $session;
+    }else{
+        $system->addError(HEURIST_NOT_FOUND, 'Import session #'.$imp_ID.' not found');
+        return false;
+    }
+    
+/*    new way
+    $entity = new DbSysImportSessions( $system, array('details'=>'list','imp_ID'=>$imp_ID) );
+    $res = $entity->search();
+    if( is_bool($res) && !$res ){
+        return $res; //error - can not get import session
+    }
+    if(!@$res['records'][$imp_ID]){
+        $system->addError(HEURIST_NOT_FOUND, 'Import session #'.$imp_ID.' not found');
+        return false;
+    }
+    
+    $session = json_decode(@$res['records'][$imp_ID][1], true);
+    $session["import_id"] = $imp_ID;
+    $session["import_file"] = @$res['records'][$imp_ID][0];
+    if(!@$session["import_table"]){ //backward capability
+            $session["import_table"] = @$res['records'][$imp_ID][0];
+    }
+    
+    return $session;
+*/    
 }
 
 //
@@ -855,52 +956,6 @@ function findRecordIds($imp_session, $params){
     return $imp_session;
 }
 
-//
-// load session configuration
-//
-function getImportSession($imp_ID){
-    global $system;
-    
-    
-    if($imp_ID && is_numeric($imp_ID)){
-
-        $res = mysql__select_array($system->get_mysqli(),
-            "select imp_session, imp_table from sysImportSessions where imp_id=".$imp_ID);
-
-        $session = json_decode($res[0], true);
-        $session["import_id"] = $imp_ID;
-        $session["import_file"] = $res[1];
-        if(!@$session["import_table"]){ //backward capability
-            $session["import_table"] = $res[1];
-        }
-
-        return $session;
-    }else{
-        $system->addError(HEURIST_NOT_FOUND, 'Import session #'.$imp_ID.' not found');
-        return false;
-    }
-    
-/*    new way
-    $entity = new DbSysImportSessions( $system, array('details'=>'list','imp_ID'=>$imp_ID) );
-    $res = $entity->search();
-    if( is_bool($res) && !$res ){
-        return $res; //error - can not get import session
-    }
-    if(!@$res['records'][$imp_ID]){
-        $system->addError(HEURIST_NOT_FOUND, 'Import session #'.$imp_ID.' not found');
-        return false;
-    }
-    
-    $session = json_decode(@$res['records'][$imp_ID][1], true);
-    $session["import_id"] = $imp_ID;
-    $session["import_file"] = @$res['records'][$imp_ID][0];
-    if(!@$session["import_table"]){ //backward capability
-            $session["import_table"] = @$res['records'][$imp_ID][0];
-    }
-    
-    return $session;
-*/    
-}
 
 
 /**
@@ -1063,6 +1118,7 @@ function  trim_lower_accent2(&$item, $key){
     $item = trim_lower_accent($item);
 }
 
+
 // import functions =====================================
 
 /**
@@ -1072,44 +1128,57 @@ function  trim_lower_accent2(&$item, $key){
 * @param mixed $mysqli
 */
 /*
-sa_rectype
-ignore_insert = 1
+sa_rectype    - rectype ID
+ignore_insert = 1  
 recid_field   - field_X
-mapping
+mapping       - field index => $field_type
 */
-function validateImport($mysqli, $imp_session, $params){
+function validateImport($params){
 
+    global $system;
+    
+    //get rectype to import
+    $rty_ID = @$params['sa_rectype'];
+    if(intval($rty_ID)<1){
+        $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong value');
+        return false;
+    }
+    
+    $imp_session = getImportSession($params['imp_ID']);
+
+    if( is_bool($imp_session) && !$imp_session ){
+        return false; //error - can not get import session
+    }
+    
     //add result of validation to session
-    $imp_session['validation'] = array( "count_update"=>0,
+    $imp_session['validation'] = array( 
+        "count_update"=>0,
         "count_insert"=>0,       //records to be inserted
         "count_update_rows"=>0,
         "count_insert_rows"=>0,  //row that are source of insertion
         "count_error"=>0, 
-        "error"=>array() );
+        "error"=>array(),
+        "recs_insert"=>array(),     //full record
+        "recs_update"=>array() );
 
+        
     //get rectype to import
-    $recordType = @$params['sa_rectype'];
+    
     $id_field = @$params['recid_field']; //record ID field is always defined explicitly
     $ignore_insert = (@$params['ignore_insert']==1); //ignore new records
 
-    if(intval($recordType)<1){
-        $system->addError(HEURIST_INVALID_REQUEST, 'Record type is not defined');
-        return false;
-    }
     if(array_search($id_field, $imp_session['columns'])===false){
         $system->addError(HEURIST_INVALID_REQUEST, 'Identification field is not defined');
         return false;
     }
 
     $import_table = $imp_session['import_table'];
-
     $cnt_update_rows = 0;
     $cnt_insert_rows = 0;
 
     $mapping_params = @$params['mapping'];
 
-    $mapping = array();  // fieldtype ID => fieldname in import table
-    $mapped_fields = array(); //reverse $field_name = >  $field_type
+    $mapping = array();  // fieldtype => fieldname in import table
     $sel_query = array();
     
     if(is_array($mapping_params) && count($mapping_params)>0){
@@ -1118,7 +1187,8 @@ function validateImport($mysqli, $imp_session, $params){
             $field_name = "field_".$index;
 
             $mapping[$field_type] = $field_name;
-            $mapped_fields[$field_name] = $field_type;
+            
+            $imp_session['validation']['mapped_fields'][$field_name] = $field_type;
 
             //all mapped fields - they will be used in validation query
             array_push($sel_query, $field_name);
@@ -1128,30 +1198,26 @@ function validateImport($mysqli, $imp_session, $params){
         return false;
     }
 
-
-    $imp_session['validation']['mapped_fields'] = $mapped_fields;
-
-
         $cnt_recs_insert_nonexist_id = 0;
 
         // validate selected record ID field
         // in case id field is not created on match step (it is from original set of columns)
         // we have to verify that its values are valid
-        if(!@$imp_session['indexes'][$id_field]){
+        if(FALSE && !@$imp_session['indexes'][$id_field]){
 
             //find recid with different rectype
             $query = "select imp_id, ".implode(",",$sel_query).", ".$id_field
             ." from ".$import_table
             ." left join Records on rec_ID=".$id_field
-            ." where rec_RecTypeID<>".$recordType;
-            // TPDO: I'm not sure whether message below has been correctly interpreted
-            $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+            ." where rec_RecTypeID<>".$rty_ID;
+            // TODO: I'm not sure whether message below has been correctly interpreted
+            $wrong_records = getWrongRecords( $query, $imp_session,
                 "Your input data contain record IDs in the selected ID column for existing records which are not numeric IDs. ".
                 "The import cannot proceed until this is corrected.","Incorrect record types", $id_field);
             if(is_array($wrong_records) && count($wrong_records)>0) {
                 $wrong_records['validation']['mapped_fields'][$id_field] = 'id';
                 $imp_session = $wrong_records;
-            }else if($wrong_records) {
+            }else if($wrong_records===false) {
                 return $wrong_records;
             }
 
@@ -1161,7 +1227,7 @@ function validateImport($mysqli, $imp_session, $params){
                 ." from ".$import_table
                 ." left join Records on rec_ID=".$id_field
                 ." where ".$id_field.">0 and rec_ID is null";
-                $row = mysql__select_array2($mysqli, $query);
+                $row = mysql__select_array($mysqli, $query);
                 if($row && $row[0]>0){
                     $cnt_recs_insert_nonexist_id = $row[0];
                 }
@@ -1171,47 +1237,40 @@ function validateImport($mysqli, $imp_session, $params){
         // find records to update
         $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
         ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
-        $row = mysql__select_array2($mysqli, $select_query);
-        if($row){
+        $cnt = mysql__select_value($mysqli, $select_query);
+        if( $cnt>0 ){
 
-            if( $row[0]>0 ){
-
-                $imp_session['validation']['count_update'] = $row[0];
-                $imp_session['validation']['count_update_rows'] = $row[0];
-                //find first 100 records to display
+                $imp_session['validation']['count_update'] = $cnt;
+                $imp_session['validation']['count_update_rows'] = $cnt;
+                //find first 100 records to preview
                 $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
                 ." FROM ".$import_table
                 ." left join Records on rec_ID=".$id_field
                 ." WHERE rec_ID is not null and ".$id_field.">0"
                 ." ORDER BY ".$id_field." LIMIT 5000";
-                $imp_session['validation']['recs_update'] = mysql__select_array3($mysqli, $select_query, false);
+                $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query, false);
 
-            }
-
-        }else{
-            return "SQL error: Cannot execute query to calculate number of records to be updated!";
         }
 
         if(!$ignore_insert){
 
             // find records to insert
             $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
-            $row = mysql__select_array2($mysqli, $select_query);
-            if($row){
-                if( $row[0]>0 ){
-                    $imp_session['validation']['count_insert'] = $row[0];
-                    $imp_session['validation']['count_insert_rows'] = $row[0];
+            $cnt1 = mysql__select_value($mysqli, $select_query);
+            $select_query = "SELECT count(*) FROM ".$import_table.' WHERE '.$id_field.' IS NULL'; //$id_field." is null OR ".
+            $cnt2 = mysql__select_value($mysqli, $select_query);
+            if( $cnt1+$cnt2>0 ){
+                    $imp_session['validation']['count_insert'] = $cnt1+$cnt2;
+                    $imp_session['validation']['count_insert_rows'] = $cnt1+$cnt2;
 
                     //find first 100 records to display
-                    $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field."<0 LIMIT 5000";
-                    $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
-                }
-            }else{
-                return "SQL error: Cannot execute query to calculate number of records to be inserted";
+                    $select_query = 'SELECT imp_id, '.implode(',',$sel_query)
+                            .' FROM '.$import_table.' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
+                    $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query, false);
             }
         }
         //additional query for non-existing IDs
-        if($cnt_recs_insert_nonexist_id>0){
+        if($cnt_recs_insert_nonexist_id>0){  //NOT USED
 
             $imp_session['validation']['count_insert_nonexist_id'] = $cnt_recs_insert_nonexist_id;
             $imp_session['validation']['count_insert'] = $imp_session['validation']['count_insert']+$cnt_recs_insert_nonexist_id;
@@ -1221,7 +1280,7 @@ function validateImport($mysqli, $imp_session, $params){
             ." FROM ".$import_table
             ." LEFT JOIN Records on rec_ID=".$id_field
             ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 5000";
-            $res = mysql__select_array3($mysqli, $select_query, false);
+            $res = mysql__select_all($mysqli, $select_query, false);
             if($res && count($res)>0){
                 if(@$imp_session['validation']['recs_insert']){
                     $imp_session['validation']['recs_insert'] = array_merge($imp_session['validation']['recs_insert'], $res);
@@ -1234,7 +1293,7 @@ function validateImport($mysqli, $imp_session, $params){
 
 
     // fill array with field in import table to be validated
-    $recStruc = getRectypeStructures(array($recordType));
+    $recStruc = dbs_GetRectypeStructures($system, $rty_ID, 2);
     $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
     $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
 
@@ -1264,13 +1323,12 @@ function validateImport($mysqli, $imp_session, $params){
 
 
     //loop for all fields in record type structure
-    foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
+    foreach ($recStruc[$rty_ID]['dtFields'] as $ft_id => $ft_vals) {
 
-
-        //find among mappings
+        //find fields with given field type among mappings
         $field_name = @$mapping[$ft_id];
-        if(!$field_name){
-            $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true); //from previous session
+        if(!$field_name){ //???????
+            $field_name = array_search($rty_ID.".".$ft_id, $imp_session["mapping"], true); //from previous session
         }
 
         if(!$field_name && $ft_vals[$idx_fieldtype] == "geo"){
@@ -1280,8 +1338,8 @@ function validateImport($mysqli, $imp_session, $params){
             $field_name1 = @$mapping[$ft_id."_lat"];
             $field_name2 = @$mapping[$ft_id."_long"];
             if(!$field_name1 && !$field_name2){
-                $field_name1 = array_search($recordType.".".$ft_id."_lat", $imp_session["mapping"], true);
-                $field_name2 = array_search($recordType.".".$ft_id."_long", $imp_session["mapping"], true);
+                $field_name1 = array_search($rty_ID.".".$ft_id."_lat", $imp_session["mapping"], true);
+                $field_name2 = array_search($rty_ID.".".$ft_id."_long", $imp_session["mapping"], true);
             }
 
             if($ft_vals[$idx_reqtype] == "required"){
@@ -1367,7 +1425,9 @@ function validateImport($mysqli, $imp_session, $params){
         ($imp_session['validation']['count_insert']>0   // there are records to be inserted
             //  || ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
-            return "Mapping: ".implode(",", $missed);
+            
+            $system->addError(HEURIST_ERROR, 'Need to map required fields: '.implode(",", $missed));
+            return false;
     }
 
     if($id_field){ //validate only for defined records IDs
@@ -1388,7 +1448,7 @@ function validateImport($mysqli, $imp_session, $params){
         ." where ".$only_for_specified_id."(".$query_reqs_where[$k].")"; // implode(" or ",$query_reqs_where);
         $k++;
         
-        $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+        $wrong_records = getWrongRecords($query, $imp_session,
             "This field is required - a value must be supplied for every record",
             "Missing Values", $field);
         if(is_array($wrong_records)) {
@@ -1415,7 +1475,7 @@ function validateImport($mysqli, $imp_session, $params){
             }
 
 
-        }else if($wrong_records) {
+        }else if($wrong_records===false) {
             return $wrong_records;
         }
     }
@@ -1439,7 +1499,7 @@ function validateImport($mysqli, $imp_session, $params){
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = validateEnumerations($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType,
+            $wrong_records = validateEnumerations($query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $rty_ID,
                 "Term list values read must match existing terms defined for the field", "Invalid Terms");
 
         }else{
@@ -1448,7 +1508,7 @@ function validateImport($mysqli, $imp_session, $params){
             ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
             ." where ".$only_for_specified_id."(".$query_enum_where[$k].")";  //implode(" or ",$query_enum_where);
             
-            $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+            $wrong_records = getWrongRecords($query, $imp_session,
                 "Term list values read must match existing terms defined for the field",
                 "Invalid Terms", $field);
         }
@@ -1458,7 +1518,7 @@ function validateImport($mysqli, $imp_session, $params){
         //if($wrong_records) return $wrong_records;
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
-        }else if($wrong_records) {
+        }else if($wrong_records===false) {
             return $wrong_records;
         }
     }
@@ -1473,13 +1533,13 @@ function validateImport($mysqli, $imp_session, $params){
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = validateResourcePointers($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType);
+            $wrong_records = validateResourcePointers($query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $rty_ID);
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
             ." where ".$only_for_specified_id."(".$query_res_where[$k].")"; //implode(" or ",$query_res_where);
-            $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+            $wrong_records = getWrongRecords($query, $imp_session,
                 "Record pointer field values must reference an existing record in the database",
                 "Invalid Pointers", $field);
         }
@@ -1489,7 +1549,7 @@ function validateImport($mysqli, $imp_session, $params){
         //"Fields mapped as resources(pointers)".$hwv,
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
-        }else if($wrong_records) {
+        }else if($wrong_records===false) {
             return $wrong_records;
         }
     }
@@ -1505,14 +1565,14 @@ function validateImport($mysqli, $imp_session, $params){
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = validateNumericField($mysqli, $query, $imp_session, $field, $idx);
+            $wrong_records = validateNumericField($query, $imp_session, $field, $idx);
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table "
             ." where ".$only_for_specified_id."(".$query_num_where[$k].")";
 
-            $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+            $wrong_records = getWrongRecords($query, $imp_session,
                 "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
                 "Invalid Numerics", $field);
         }
@@ -1522,7 +1582,7 @@ function validateImport($mysqli, $imp_session, $params){
         // "Fields mapped as numeric".$hwv,
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
-        }else if($wrong_records) {
+        }else if($wrong_records===false) {
             return $wrong_records;
         }
     }
@@ -1538,13 +1598,13 @@ function validateImport($mysqli, $imp_session, $params){
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = validateDateField($mysqli, $query, $imp_session, $field, $idx);
+            $wrong_records = validateDateField( $query, $imp_session, $field, $idx);
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table "
             ." where ".$only_for_specified_id."(".$query_date_where[$k].")"; //implode(" or ",$query_date_where);
-            $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+            $wrong_records = getWrongRecords($query, $imp_session,
                 "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
                 "Invalid Dates", $field);
         }
@@ -1553,7 +1613,7 @@ function validateImport($mysqli, $imp_session, $params){
         //"Fields mapped as date".$hwv,
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
-        }else if($wrong_records) {
+        }else if($wrong_records===false) {
             return $wrong_records;
         }
     }
@@ -1561,7 +1621,7 @@ function validateImport($mysqli, $imp_session, $params){
     //7. TODO Verify geo fields
 
     return $imp_session;
-}
+} //end validateImport
 
 
 /**
@@ -1573,8 +1633,10 @@ function validateImport($mysqli, $imp_session, $params){
 * @param mixed $imp_session
 * @param mixed $fields_checked
 */
-function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsage, $fields_checked){
+function getWrongRecords($query, $imp_session, $message, $short_messsage, $fields_checked){
 
+    global $system;
+    $mysqli = $system->get_mysqli();
 //error_log('valquery: '.$query);
 
     $res = $mysqli->query($query." LIMIT 5000");
@@ -1603,9 +1665,10 @@ function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsag
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        $system->addError(HEURIST_DB_ERROR, 'Cannot perform validation query: '.$query, $mysqli->error);
+        return false;
     }
-    return null;
+    return null; //no error records - validation passed
 }
 
 
@@ -1622,8 +1685,9 @@ function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsag
 * @param mixed $message - error message
 * @param mixed $short_messsage
 */
-function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $message, $short_messsage){
-
+function validateEnumerations($query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $message, $short_messsage){
+    global $system;
+    $mysqli = $system->get_mysqli();
 
     $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
 
@@ -1689,7 +1753,8 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        $system->addError(HEURIST_DB_ERROR, 'Cannot perform validation query: '.$query, $mysqli->error);
+        return false;
     }
     return null;
 }
@@ -1706,8 +1771,10 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
 * @param mixed $field_idx - index of validation field in query result (to get value)
 * @param mixed $recStruc - record type structure
 */
-function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType){
+function validateResourcePointers( $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType){
 
+    global $system;
+    $mysqli = $system->get_mysqli();
 
     $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
     $idx_pointer_types = $recStruc['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
@@ -1757,7 +1824,8 @@ function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        $system->addError(HEURIST_DB_ERROR, 'Cannot perform validation query: '.$query, $mysqli->error);
+        return false;
     }
     return null;
 }
@@ -1772,8 +1840,11 @@ function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked
 * @param mixed $fields_checked - name of field to be verified
 * @param mixed $field_idx - index of validation field in query result (to get value)
 */
-function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $field_idx){
+function validateNumericField( $query, $imp_session, $fields_checked, $field_idx){
 
+    global $system;
+    $mysqli = $system->get_mysqli();
+    
     $res = $mysqli->query($query." LIMIT 5000");
 
     if($res){
@@ -1816,7 +1887,8 @@ function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $f
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        $system->addError(HEURIST_DB_ERROR, 'Cannot perform validation query: '.$query, $mysqli->error);
+        return false;
     }
     return null;
 }
@@ -1831,8 +1903,11 @@ function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $f
 * @param mixed $fields_checked - name of field to be verified
 * @param mixed $field_idx - index of validation field in query result (to get value)
 */
-function validateDateField($mysqli, $query, $imp_session, $fields_checked, $field_idx){
+function validateDateField( $query, $imp_session, $fields_checked, $field_idx){
 
+    global $system;
+    $mysqli = $system->get_mysqli();
+    
     $res = $mysqli->query($query." LIMIT 5000");
 
     if($res){
@@ -1887,7 +1962,8 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        $system->addError(HEURIST_DB_ERROR, 'Cannot perform validation query: '.$query, $mysqli->error);
+        return false;
     }
     return null;
 }

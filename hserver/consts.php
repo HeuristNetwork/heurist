@@ -97,6 +97,7 @@ $talkToSysAdmin="Please advise your system administrator or email info - at - He
 */
 define("HEURIST_INVALID_REQUEST", "invalid");    // The Request provided was invalid.
 define("HEURIST_NOT_FOUND", "notfound");         // The requested object not found.
+define("HEURIST_ERROR", "error");                // General error: wrong data, file i/o
 define("HEURIST_OK", "ok");                      // The response contains a valid Result.
 define("HEURIST_REQUEST_DENIED", "denied");      // The webpage is not allowed to use the service.
 define("HEURIST_UNKNOWN_ERROR", "unknown");      // A request could not be processed due to a server error. The request may succeed if you try again.
