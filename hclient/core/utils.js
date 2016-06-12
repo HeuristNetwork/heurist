@@ -307,14 +307,23 @@ top.HEURIST4.util = {
             cache: false,
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
-                    callback(caller, {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
-                        message: jqXHR.responseText });
+                    if(caller){
+                        callback(caller, {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                                message: jqXHR.responseText });
+                    }else{
+                        callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                                message: jqXHR.responseText });
+                    }
                 }
                 //message:'Error connecting server '+textStatus});
             },
             success: function( response, textStatus, jqXHR ){
                 if(callback){
-                    callback(caller, response);
+                    if(caller){
+                        callback(caller, response);
+                    }else{
+                        callback(response);    
+                    }
                 }
             }
         });

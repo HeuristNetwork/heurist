@@ -64,9 +64,10 @@
             validateNumericField
             validateDateField
         
+    5) step5
+        doImport - do import - add/update records in heurist database
     
-    
-    
+
     */
 require_once(dirname(__FILE__)."/../System.php");
 require_once (dirname(__FILE__).'/../dbaccess/dbSysImportSessions.php');
@@ -103,9 +104,13 @@ if(!$system->init(@$_REQUEST['db'])){
             
 //error_log(print_r($res,true));            
         
-        }else if($action=='step4'){ // import
+        }else if($action=='step4'){ // validate import - check field values
         
             $res = validateImport($_REQUEST);
+        
+        }else if($action=='step5'){ // perform import
+                
+            //$res = doImport($_REQUEST);
         
         }else if(@$_REQUEST['content']){    
             $res = parse_content(); 
@@ -188,18 +193,29 @@ function parse_step1(){
         return false;
     }
 
-    //detect encoding and convert entire file to UTF8
+    //detect encoding and convert entire file to UTF8 
+    // WARNING: it checks header (first line) only. It may happen that file has non UTF characters in body
     if( $csv_encoding!='UTF-8' || !mb_check_encoding( $line, 'UTF-8' ) ){
 
-        $line = mb_convert_encoding( $line, 'UTF-8', $csv_encoding);
+        //try to convert ONE line only - to check is it possible       
+        if($csv_encoding!='UTF-8'){
+             $line = mb_convert_encoding( $line, 'UTF-8', $csv_encoding);
+        }else{
+             $line = mb_convert_encoding( $line, 'UTF-8');
+        }
         if(!$line){
             $system->addError(HEURIST_ERROR, 'Your file can\'t be converted to UTF-8. '
                 .'Please open it in any advanced editor and save with UTF-8 text encoding');
             return false;
         }
 
+        //convert entire file
         $content = file_get_contents($upload_file_name);
-        $content = mb_convert_encoding( $content, 'UTF-8' );
+        if($csv_encoding!='UTF-8'){
+            $content = mb_convert_encoding( $content, 'UTF-8', $csv_encoding);
+        }else{
+            $content = mb_convert_encoding( $content, 'UTF-8');
+        }
         if(!$content){
             $system->addError(HEURIST_ERROR, 'Your file can\'t be converted to UTF-8. '
                 .'Please open it in any advanced editor and save with UTF-8 text encoding');
@@ -1128,8 +1144,11 @@ function  trim_lower_accent2(&$item, $key){
 * @param mixed $mysqli
 */
 /*
+params:
+
+imp_ID        - import session id
 sa_rectype    - rectype ID
-ignore_insert = 1  
+ignore_insert = 1  or 0 
 recid_field   - field_X
 mapping       - field index => $field_type
 */
@@ -1167,7 +1186,7 @@ function validateImport($params){
     $id_field = @$params['recid_field']; //record ID field is always defined explicitly
     $ignore_insert = (@$params['ignore_insert']==1); //ignore new records
 
-    if(array_search($id_field, $imp_session['columns'])===false){
+    if(@$imp_session['columns'][substr($id_field,6)]==null){
         $system->addError(HEURIST_INVALID_REQUEST, 'Identification field is not defined');
         return false;
     }
@@ -1198,6 +1217,8 @@ function validateImport($params){
         return false;
     }
 
+    $mysqli = $system->get_mysqli();
+    
         $cnt_recs_insert_nonexist_id = 0;
 
         // validate selected record ID field
@@ -1294,6 +1315,7 @@ function validateImport($params){
 
     // fill array with field in import table to be validated
     $recStruc = dbs_GetRectypeStructures($system, $rty_ID, 2);
+    $recStruc = $recStruc['typedefs'];
     $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
     $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
 

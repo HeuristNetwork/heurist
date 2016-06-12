@@ -416,22 +416,6 @@ $.widget( "heurist.resultListMenu", {
         var str = JSON.stringify(_data);
         var baseurl = top.HAPI4.basePathV3 + "search/actions/actionHandler.php";   //vsn 3 action handler
 
-        /* it cannot parse reponse properly
-        var request = {db:top.HAPI4.database, data: str, action: action }
-        $.ajax({
-        url: baseurl,
-        type: "POST",
-        data: request,
-        dataType: "json",
-        cache: false,
-        error: function(jqXHR, textStatus, errorThrown ) {
-        var context = {problem:jqXHR.responseText};
-        _requestCallBack();
-        },
-        success: (typeof cbAction == "function" ? cbAction : _requestCallBack)
-        });*/
-
-
         var callback = (typeof cbAction == "function" ? cbAction : _requestCallBack);
         var params = "db="+top.HAPI4.database+"&action="+action+"&data=" + encodeURIComponent(str);
         top.HEURIST.util.getJsonData(baseurl, callback, params);

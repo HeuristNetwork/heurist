@@ -550,9 +550,18 @@ top.HEURIST4.ui = {
     * rtyIDs - record type ID otherwise returns all field types grouped by field groups
     * allowedlist - of data types to this list 
     */
-    createRectypeDetailSelect: function(selObj, rtyIDs, allowedlist, topOptions) {
+    createRectypeDetailSelect: function(selObj, rtyIDs, allowedlist, topOptions, options ) {
 
         top.HEURIST4.ui.createSelector(selObj, topOptions);
+        
+        var showDetailType = false;
+        var addLatLongForGeo = false;
+        var requriedHighlight = false;
+        if(options){  //at the moment it is implemented for single rectype only
+            showDetailType    = options['show_dt_name'];
+            addLatLongForGeo  = options['show_latlong'];
+            requriedHighlight = options['show_required'];
+        }
 
         var dtyID, details;
         
@@ -615,7 +624,8 @@ top.HEURIST4.ui = {
             }
             
             
-        }else if((top.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
+        }else 
+        if((top.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
             //structure not defined
             var rectype = Number((top.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
             
@@ -626,7 +636,8 @@ top.HEURIST4.ui = {
             details = rectypes.dtFields;
 
             var fi = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-            fit = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
+            fit = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'],
+            fir = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType'];
 
             var arrterm = [];
 
@@ -636,10 +647,20 @@ top.HEURIST4.ui = {
                     if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
                     {
                         var name = details[dtyID][fi];
+                        
+                        if(showDetailType){
+                            name = name + ' ['+top.HEURIST4.detailtypes.lookups[ details[dtyID][fit] ]+']';
+                        }
 
                         if(!top.HEURIST4.util.isnull(name)){
-                            arrterm.push([dtyID, name]);
+                            arrterm.push([dtyID, name, (details[dtyID][fir]=="required") ]);
                         }
+                        
+                        if(addLatLongForGeo && details[dtyID][fit]=="geo"){
+                            arrterm.push([ dtyID+'_long', name+' Longitude', false ]);
+                            arrterm.push([ dtyID+'_lat', name+' Latitude', false ]);
+                        }
+                        
                     }
                 }
             }
@@ -649,7 +670,10 @@ top.HEURIST4.ui = {
             //add to select
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) {
-                top.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
+                var opt = top.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
+                if(arrterm[i][2] && requriedHighlight){
+                    opt.className = "required";
+                }
             }
 
         }else{ //show all detail types

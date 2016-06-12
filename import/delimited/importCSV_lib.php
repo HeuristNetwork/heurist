@@ -926,29 +926,53 @@ function validateImport($mysqli, $imp_session, $params){
     $cnt_insert_rows = 0;
 
     //get field mapping and selection query from _REQUEST(params)
-    $mapping = array();  // fieldtype ID => fieldname in import table
-    $mapped_fields = array();
-    $sel_query = array();
-    foreach ($params as $key => $field_type) {
-        if(strpos($key, "sa_dt_")===0 && $field_type){
-            //get index
-            $index = substr($key,6);
-            $field_name = "field_".$index;
+    if(@$params['mapping']){    //new way
+        $mapping_params = @$params['mapping'];
 
-            //all mapped fields - they will be used in validation query
-            array_push($sel_query, $field_name);
-            $mapping[$field_type] = $field_name;
+        $mapping = array();  // fieldtype => fieldname in import table
+        $sel_query = array();
+        
+        if(is_array($mapping_params) && count($mapping_params)>0){
+            foreach ($mapping_params as $index => $field_type) {
+            
+                $field_name = "field_".$index;
 
-            $mapped_fields[$field_name] = $field_type;
+                $mapping[$field_type] = $field_name;
+                
+                $imp_session['validation']['mapped_fields'][$field_name] = $field_type;
+
+                //all mapped fields - they will be used in validation query
+                array_push($sel_query, $field_name);
+            }
+        }else{
+            return 'Mapping is not defined';
         }
-    }
-    if(count($sel_query)<1){
-        return "mapping not defined";
+    }else{
+    
+        $mapping = array();  // fieldtype ID => fieldname in import table
+        $mapped_fields = array();
+        $sel_query = array();
+        foreach ($params as $key => $field_type) {
+            if(strpos($key, "sa_dt_")===0 && $field_type){
+                //get index
+                $index = substr($key,6);
+                $field_name = "field_".$index;
+
+                //all mapped fields - they will be used in validation query
+                array_push($sel_query, $field_name);
+                $mapping[$field_type] = $field_name;
+
+                $mapped_fields[$field_name] = $field_type;
+            }
+        }
+        if(count($sel_query)<1){
+            return "mapping not defined";
+        }
+    
+        $imp_session['validation']['mapped_fields'] = $mapped_fields;
     }
 //error_log(' validation upd:'.$cnt_update_rows.'  to insert '.$cnt_insert_rows);
-
-
-    $imp_session['validation']['mapped_fields'] = $mapped_fields;
+    
 
     // calculate the number of records to insert, update and insert with existing ids
     // @todo - it has been implemented for non-multivalue indexes only
@@ -1027,17 +1051,20 @@ function validateImport($mysqli, $imp_session, $params){
             // find records to insert
             $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
             $row = mysql__select_array2($mysqli, $select_query);
-            if($row){
-                if( $row[0]>0 ){
-                    $imp_session['validation']['count_insert'] = $row[0];
-                    $imp_session['validation']['count_insert_rows'] = $row[0];
+            $cnt = ($row && $row[0]>0)?intval($row[0]):0;
+
+            $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
+            $row = mysql__select_array2($mysqli, $select_query);
+            $cnt = $cnt + (($row && $row[0]>0)?intval($row[0]):0);
+
+            if( $cnt>0 ){
+                    $imp_session['validation']['count_insert'] = $cnt;
+                    $imp_session['validation']['count_insert_rows'] = $cnt;
 
                     //find first 100 records to display
-                    $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field."<0 LIMIT 5000";
+                    $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table
+                            .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
                     $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
-                }
-            }else{
-                return "SQL error: Cannot execute query to calculate number of records to be inserted";
             }
         }
         //additional query for non-existing IDs
@@ -1198,7 +1225,7 @@ function validateImport($mysqli, $imp_session, $params){
         ($imp_session['validation']['count_insert']>0   // there are records to be inserted
             //  || ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
-            return "Mapping: ".implode(",", $missed);
+            return 'Need to map required fields: '.implode(",", $missed);
     }
 
     if($id_field){ //validate only for defined records IDs
@@ -1491,7 +1518,7 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
                     if (!$term_id)
                     {//not found
                         $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."AAAA</font>");
+                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
                     }else{
                         array_push($newvalue, $r_value);
                     }
@@ -1731,7 +1758,7 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
 * @param mixed $imp_session
 * @param mixed $params
 */
-function doImport($mysqli, $imp_session, $params){
+function doImport($mysqli, $imp_session, $params, $mode_output){
 
     global $rep_processed,$rep_added,$rep_updated,$rep_skipped,$wg_id,$rec_visibility;
 
@@ -1757,25 +1784,41 @@ function doImport($mysqli, $imp_session, $params){
         return "record type not defined";
     }
 
-    //get field mapping and selection query from _REQUEST(params)
     $field_types = array();  // idx => fieldtype ID
     $sel_query = array();
-    foreach ($params as $key => $field_type) {
-        if(strpos($key, "sa_dt_")===0 && $field_type){  //search for values of field selector
-            //get index
-            $index = substr($key,6);
-            $field_name = "field_".$index;
-
-            //all mapped fields - they will be used in validation query
-            array_push($sel_query, $field_name);
-            array_push($field_types, $field_type);
+    
+    //get field mapping and selection query from _REQUEST(params)
+    if(@$params['mapping']){    //new way
+        $mapping = @$params['mapping'];// idx => fieldtype ID
+        
+        if(is_array($mapping) && count($mapping)>0){
+            foreach ($mapping as $index => $field_type) {
+                $field_name = "field_".$index;
+                array_push($field_types, $field_type);
+                array_push($sel_query, $field_name);
+            }
+        }else{
+            return 'Mapping is not defined';
         }
-    }
-    if(count($sel_query)<1){
-        return "mapping not defined";
-    }
+    }else{
+    
+        foreach ($params as $key => $field_type) {
+            if(strpos($key, "sa_dt_")===0 && $field_type){  //search for values of field selector
+                //get index
+                $index = substr($key,6);
+                $field_name = "field_".$index;
 
+                //all mapped fields - they will be used in validation query
+                array_push($sel_query, $field_name);
+                array_push($field_types, $field_type);
+            }
+        }
+        if(count($sel_query)<1){
+            return "mapping not defined";
+        }
 
+    }
+    
     //indexes
     $recStruc = getRectypeStructures(array($recordType));
     $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
@@ -1802,8 +1845,13 @@ function doImport($mysqli, $imp_session, $params){
     if($id_field){  //index field defined - add to list of columns
         $id_field_idx = count($field_types); //last one
 
-        $select_query = $select_query." WHERE (".
-        ($ignore_insert? $id_field.">0":"NOT(".$id_field." is null OR ".$id_field."='')").") ORDER BY ".$id_field;
+        if($ignore_insert){
+            $select_query = $select_query." WHERE (".$id_field.">0) ORDER BY ".$id_field;
+        }
+        /*       
+        ($ignore_insert? $id_field.">0"
+                       : "NOT(".$id_field." is null OR ".$id_field."='')").") ORDER BY ".$id_field;
+        */
     }else{
         if($ignore_insert){
             return "id field not defined";
@@ -1847,8 +1895,10 @@ function doImport($mysqli, $imp_session, $params){
         $step = ceil($tot_count/10);
         if($step>10) $step = 10;
         else if($step<1) $step=1;
-
-
+        
+        $csv_mvsep = @$params['csv_mvsep']?$params['csv_mvsep']:$imp_session['csv_mvsep'];
+        $csv_enclosure = @$params['csv_enclosure']?$params['csv_enclosure']:$imp_session['csv_enclosure'];
+                                   
         $previos_recordId = null;
         $recordId = null;
         $details = array();
@@ -1863,7 +1913,7 @@ function doImport($mysqli, $imp_session, $params){
 
             //split multivalue index field
             if($id_field && @$row[$id_field_idx]){ //id field defined - detect insert or update
-                $id_field_values = explode($params['csv_mvsep'],$row[$id_field_idx]);
+                $id_field_values = explode($csv_mvsep, $row[$id_field_idx]);
             }else{
                 $id_field_values = array(null);
             }
@@ -1949,8 +1999,8 @@ function doImport($mysqli, $imp_session, $params){
                             $fieldtype_type = $ft_vals[$idx_fieldtype];
                         }
 
-                        if(strpos($row[$index],$params['csv_mvsep'])!==false){
-                            $values = getMultiValues($row[$index], $params['csv_enclosure'], $params['csv_mvsep']);
+                        if(strpos($row[$index], $csv_mvsep)!==false){
+                            $values = getMultiValues($row[$index], $csv_enclosure, $csv_mvsep);
 
                             //  if this is multivalue index field we have to take only current value
                             if($is_mulivalue_index && @$imp_session['indexes_keyfields'][$id_field][$sel_query[$index]] && $idx2<count($values)){
@@ -2123,7 +2173,7 @@ function doImport($mysqli, $imp_session, $params){
 
                 $rep_processed++;
 
-                if ($rep_processed % $step == 0) {
+                if ($mode_output=='html' && $rep_processed % $step == 0) {
                     ob_start();
                     if($first_time){
                         print '<script type="text/javascript">$("#div-progress").hide();</script>';
@@ -2136,7 +2186,7 @@ function doImport($mysqli, $imp_session, $params){
             }//foreach multivalue index
 
             if($is_mulivalue_index && is_array($new_record_ids) && count($new_record_ids)>0){
-                updateRecIds($import_table, end($row), $id_field, $new_record_ids, $params['csv_mvsep']);
+                updateRecIds($import_table, end($row), $id_field, $new_record_ids, $csv_mvsep);
                 $new_record_ids = array(); //to save in import table
             }
 
@@ -2150,11 +2200,23 @@ function doImport($mysqli, $imp_session, $params){
         if(!$id_field){
             array_push($imp_session['uniqcnt'], $rep_added);
         }
-        print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";
-        if($rep_skipped>0){
-            print '<p>'.$rep_skipped.' rows skipped</p>';
-        }
+        
+        if($mode_output=='array'){
 
+            return array(
+              'processed'=>$rep_processed,
+              'inserted'=>$rep_added,
+              'updated'=>$rep_updated,
+              'total'=>$tot_count,
+              'skipped'=>$rep_skipped
+            );            
+        }else{
+        
+            print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";
+            if($rep_skipped>0){
+                print '<p>'.$rep_skipped.' rows skipped</p>';
+            }
+        }
 
     }
 

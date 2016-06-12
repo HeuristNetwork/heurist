@@ -37,6 +37,38 @@ set_time_limit(0);
 $mysqli = mysqli_connection_overwrite(DATABASE);
 mysql_connection_overwrite(DATABASE); //for getRecordInfoLibrary
 
+if(@$_REQUEST["action"]=='step4' || @$_REQUEST["action"]=='step5'){ //case for new UI
+
+    if(!is_admin()){
+        $response = array("status"=>'denied','message'=>'');
+    }else{
+    
+        $imp_session = get_import_session($mysqli, @$_REQUEST["imp_ID"]);
+        if(!is_array($imp_session)){
+            $response = array("status"=>'error', "message"=> $imp_session);
+        }else{
+
+            if ($_REQUEST["action"]=='step4') {
+                $res = validateImport($mysqli, $imp_session, $_REQUEST);
+            }else{
+                $res = doImport($mysqli, $imp_session, $_REQUEST, 'array'); 
+            }
+            
+            if(is_array($res)){
+                $response = array("status"=>'ok', "data"=> $res);
+            }else{
+                $response = array("status"=>'error', "message"=>$res);
+            }
+        }
+    }
+
+//error_log(print_r($response,true));
+    
+    header('Content-type: application/json;charset=UTF-8');
+    print json_encode($response);
+    exit();
+}//end case for new UI
+
 
 $post_max_size = get_config_bytes(ini_get('post_max_size'));
 $file_max_size = get_config_bytes(ini_get('upload_max_filesize'));
@@ -506,7 +538,7 @@ if(is_array($imp_session)){
 
                 $res = validateImport($mysqli, $imp_session, $_REQUEST);
 
-            }else if($step==3){  //create records - load to import data to database
+            }else if($step==3){  //create records - load from import data to database
                 $mode_import_result = ' style="display:none"';
                 ?>
 
@@ -518,7 +550,7 @@ if(is_array($imp_session)){
                         <?php
                         ob_flush();flush();
 
-                        $res = doImport($mysqli, $imp_session, $_REQUEST);
+                        $res = doImport($mysqli, $imp_session, $_REQUEST, 'html');
                         ?>
                     </div>
                     <br /><br />

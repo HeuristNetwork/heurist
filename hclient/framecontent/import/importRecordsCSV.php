@@ -333,7 +333,7 @@ function get_config_bytes($val) {
     
         </div>
         <h2 class="step3" style="padding-top: 0.5em;">Step 1: Match fields and create Heurist IDs</h2>
-        <h2 class="step4" style="padding-top: 0.5em;display:none;">Step 2: Update records / Create new as required</h2>
+        <h2 class="step4 step5" style="padding-top: 0.5em;display:none;">Step 2: Update records / Create new as required</h2>
         
         <fieldset>
         <div>
@@ -392,14 +392,14 @@ function get_config_bytes($val) {
                                         <td width="50" class="mr_update">rows:</td>
                                         <td width="50" class="mr_update" id="mr_cnt_update_rows"></td>
                                         <td width="50" class="mr_update"><a href="#" onclick="importRecordsCSV.showRecords('update')">show</a></td>
-                                        <td width="120" class="mr_update"><a href="#" onclick="importRecordsCSV.downloadRecords('update')">download</a></td>
+                                        <td width="50" class="mr_update"><a href="#" onclick="importRecordsCSV.downloadRecords('update')">download</a></td>
                                     </tr>
                                     <tr><td>New records to create</td>
-                                        <td id="mr_cnt_insert"></td>
-                                        <td class="mr_insert">rows:</td>
-                                        <td class="mr_insert" id="mr_cnt_insert_rows"></td>
-                                        <td class="mr_insert"><a href="#" onclick="importRecordsCSV.showRecords('insert')">show</a></td>
-                                        <td class="mr_insert"><a href="#" onclick="importRecordsCSV.downloadRecords('insert')">download</a></td>
+                                        <td width="50" id="mr_cnt_insert"></td>
+                                        <td width="50" class="mr_insert">rows:</td>
+                                        <td width="50" class="mr_insert" id="mr_cnt_insert_rows"></td>
+                                        <td width="50" class="mr_insert"><a href="#" onclick="importRecordsCSV.showRecords('insert')">show</a></td>
+                                        <td width="50" class="mr_insert"><a href="#" onclick="importRecordsCSV.downloadRecords('insert')">download</a></td>
                                     </tr>
                                     <tr style="display:none"><td style="color:red">Ambiguous matches</td>
                                         <td>&nbsp;</td>
@@ -407,7 +407,7 @@ function get_config_bytes($val) {
                                         <td style="color:red" id="mr_cnt_disamb"></td>
                                         <td><a href="#" onclick="importRecordsCSV.showRecords('disamb')">show</a></td>
                                     </tr>
-                                    <tr style="display:none"><td style="color:red">Errors</td>
+                                    <tr style="display:none"><td style="color:red">Field errors</td>
                                         <td>&nbsp;</td>
                                         <td>rows:</td>
                                         <td style="color:red" id="mr_cnt_error"></td>
@@ -421,7 +421,7 @@ function get_config_bytes($val) {
             Prepare results
         </div>
         
-        <div  id="divImportSetting" class="step4" style="position:absolute;top:3em;right:20px;display:none;">
+        <div  id="divImportSetting" class="step5" style="position:absolute;top:3em;right:20px;display:none;">
             <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
                 (existing values are not duplicated)</label><br>
@@ -452,21 +452,21 @@ function get_config_bytes($val) {
 
             <div id="btnBackToMatching2" class="need_resolve"
                 title="">
-                Back: Match Again</div>
+                Back: Match Again 2</div>
             <div id="btnResolveAmbiguous" class="need_resolve"
                 title="">
                 Resolve ambiguous matches</div>
             
         </div>
         
-        <div  id="divActionsImport" style="display:none;" class="action_buttons step4">
+        <div  id="divActionsImport" style="display:none;" class="action_buttons step4 step5">
             <div id="btnBackToMatching"
                 title="">
-                Back: Match Again</div>
-            <div id="btnPrepareStart"
+                Back: Match Again 1</div>
+            <div id="btnPrepareStart" class="step4"
                 title="">
                 Prepare Insert/Update</div>
-            <div id="btnImportStart" style="display:none"
+            <div id="btnImportStart" style="display:none" class="step5"
                 title="">
                 Start Insert/Update</div>
         </div>
