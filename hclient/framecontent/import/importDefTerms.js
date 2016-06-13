@@ -104,7 +104,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                             _doParse();
                         });
         var btnStartImport = $('#btnImportData')
-                    .css({'width':'120px'})
+                    .css({'width':'110px'})
                     .button({label: top.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doPost();
@@ -342,9 +342,9 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
             $('#preparedInfo').empty();
         }
         if(step==1){
-            $('#divCurtain').css('width','300px');
+            $('#divCurtain').css('width','400px');
         }else if(step==2){
-            $('#divCurtain').css('width','150px');
+            $('#divCurtain').css('width','200px');
         }else if(step==3){
             $('#divCurtain').hide();   
         }
@@ -420,11 +420,14 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                         skip_na++;
                     }
                 }//for
+
+                $('#preparedInfo2').html('');
                 
                 if(_prepareddata.length==0){
                     msg = '<span style="color:red">No valid data to import</span>';   
                 }else{
-                    msg = '  Ready to import: n='+_prepareddata.length;//+' entr'+((_prepareddata.length>1)?'ies':'y');
+                    //msg = 'Ready to import: n='+_prepareddata.length;//+' entr'+((_prepareddata.length>1)?'ies':'y');
+                    $('#preparedInfo2').html('n='+_prepareddata.length);
                 }
                 if(skip_na>0 || skip_dup>0 || skip_long>0){
                     msg = msg + '&nbsp;&nbsp;Term (label) is';

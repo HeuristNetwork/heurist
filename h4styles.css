@@ -186,6 +186,7 @@ fieldset > div, .input-row{
 }
 
 fieldset > div > input.text, fieldset > div > select.text{
+    margin-top: 0.3em;
     margin-bottom: 0.5em;
 }
 fieldset > div > input[type=radio]{
