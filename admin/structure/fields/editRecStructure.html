@@ -209,7 +209,9 @@
                 border:2px solid #62A7F8 !important;
                 */
             }
-            
+            .yui-dt th{
+                vertical-align: baseline !important;
+            }
         </style>
     </head>
 
@@ -217,9 +219,9 @@
         <h2 id="recordTitle" style="margin:10px 0"></h2>
         
         <div  id="divTitleMask">
-            <div style="display:inline-block;vertical-align:top">
-                 <label for="rty_TitleMask">Constructed Title</label><br/>
-                 <span><button onClick="editStructure.doEditTitleMask(false)">Edit mask</button></span>
+            <div style="display:inline-block;vertical-align:top;font-weight:bold">
+                 <label for="rty_TitleMask">Constructed<br>title mask</label><br/>
+                 <!-- <span><button onClick="editStructure.doEditTitleMask(false)">Edit mask</button></span> -->
             </div>
             <textarea readonly cols="450" id="rty_TitleMask" rows="2" 
                 style="width:720px;height:40px;display:inline-block; background-color: lightgray;"></textarea>
@@ -249,13 +251,13 @@
                   <i>Click row to edit field specifications. Drag arrows at left to change the order in the form. Click + icon to insert headings/fields.</i>
                   <br/>
                   To see the effects of record structure changes on the data entry form, keep a record open in the record edit form<br/>
-                  and simply hit Reload to view the revised form - changes here take effect immediately, there is no need to hit [Done]
+                  and simply hit Reload to view the revised form - changes here take effect immediately, there is no need to hit [Save]
             </span>
 
             <span style="float:right; text-align:right">
                 <!--<input type="button" value="Back to list of record types" onClick="{window.history.back();}"/>-->
                 <!-- input type="button" value="Preview" onClick="editStructure.initPreview()"/ -->
-                <input type="button" value="Done" onClick="editStructure.closeWin();"/>
+                <input type="button" value="Save" onClick="editStructure.closeWin();"/>
             </span>
         </div>
 

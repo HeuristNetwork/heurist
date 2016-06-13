@@ -76,8 +76,9 @@ function EditRecStructure() {
         '</div>'+
 
         '<span style="float:right; text-align:right">'+
-        '<a href="#" onclick="{onEditRecordType();}">edit general description<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>'+
-        '<input type="button" value="Done" onClick="editStructure.closeWin();"/>'+
+        '<a href="#" onclick="{onEditRecordType();}">edit general description<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;'+
+        '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>'+
+        '<input type="button" value="Save" onClick="editStructure.closeWin();"/>'+
         '</span>'+
         
         '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;display:none;\">'+
@@ -85,7 +86,7 @@ function EditRecStructure() {
         'title="Insert an existing field into the data entry form for this record type" class="add"/>'+
         // note class=add --> global.css add-button, is set to float:right, but class adds the + to the button      ; margin:0 5px
         // Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
-        // '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
+        // '<input type="button" value="Save" onclick="onUpdateStructureOnServer(true)"/>'+
         //'Add existing fields where possible &nbsp;&nbsp; '+
         '</div>';    
 
