@@ -158,14 +158,18 @@ _time_debug = new Date().getTime() / 1000;
                 
            }
 
+           //
+           // Performs inital search: parameters from request or from user preferences
+           //
            function onInitCompleted_PerformSearch(){
                 
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
                 if(!top.HEURIST4.util.isempty(qsearch)){
                     var qdomain = '<?=@$_REQUEST['w']?>';
+                    var rules = '<?=@$_REQUEST['rules']?>';
                     if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
-                    var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
+                    var request = {q: qsearch, w: qdomain, f: 'map', rules: rules, source:'init' };
                     //top.HEURIST4.query_request = request;
                     setTimeout(function(){
                             top.HAPI4.SearchMgr.doSearch(document, request);
