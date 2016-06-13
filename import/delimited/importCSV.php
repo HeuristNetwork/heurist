@@ -1053,7 +1053,7 @@ if(is_array($imp_session)){
                     ?>
                 </table>
 
-            </div>
+            </div>      
         </div>
 
     </div>

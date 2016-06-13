@@ -1051,7 +1051,6 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         }
 
 
-
         //top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
         var idx_maxval = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
         var idx_dtype  = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
@@ -1203,10 +1202,10 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                             }
 
                             rt_term.label =  '<div style="padding-left:10px;"><b>' + (child[k].rt_name?child[k].rt_name:child[k].rt_id+' name N/A') +
-                            '</b>&nbsp;(<a href="javascript:void(0)" '+
+                            '</b>&nbsp;(<span '+
                             'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
                             'onClick="showReps.insertRectypeIf(\''+term.id+'\',' + child[k].rt_id +
-                            ', \'' + (child[k].rt_name?child[k].rt_name.replace("'", "\\'"):'') + '\')">if</a>)';
+                            ', \'' + (child[k].rt_name?child[k].rt_name.replace("'", "\\'"):'') + '\')">if</span>)';
 
                             //'onClick="showReps.insertRectypeIf(\''+term.this_id+'\', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
 
@@ -1256,11 +1255,13 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             term.id = _variables[i].rt_id;  //record type
             term.this_id = 'r';
             term.parent_id = null;
-
-            term.label =  '<div style="padding-left:10px;"><b>' +_variables[i].rt_name +
-            '</b>&nbsp;(<a href="javascript:void(0)" '+
+                                                                 
+            term.label =  '<div style="padding-left:10px;"><b>' + _variables[i].rt_name +
+            '</b>'+
+            '&nbsp;(<span '+
             'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
-            'onClick="showReps.insertRectypeIf(\'r\', ' + _variables[i].rt_id + ', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
+            'onClick="showReps.insertRectypeIf(\'r\', ' + _variables[i].rt_id + ', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</span>)';
+            
             //'onClick="showReps.insertRectypeIf(\'r\', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
 
             term.label =  term.label + '</div>';
@@ -1271,6 +1272,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             __createChildren(topLayerNode, _variables[i], 'r', 'r', true, false);
 
+            $('#varsTree').find('.ygtvlabel').css('margin-left',0);
         }//for  _variables
 
         //TODO tv.subscribe("labelClick", _onNodeClick);
@@ -1282,6 +1284,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             first_node.focus();
             first_node.toggle();
         }
+        $('.ygtvlabel').css('margin-left',0); //otherwise ff renders wrong
     }
 
 

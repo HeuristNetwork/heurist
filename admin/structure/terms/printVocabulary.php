@@ -84,7 +84,7 @@ function printTerm($termID, $lvl){
             if($lvl>0 && $parent_id>0){
                 $parent_term = @$terms['termsByDomainLookup'][$domain][$parent_id];
                 if($parent_term){
-                    $parent_term_label = '"'.getFullTermLabel($terms, $parent_term, $domain, true).'"';
+                    $parent_term_label = '"'.getFullTermLabel($terms, $parent_term, $domain, false).'"';
                 }else{
                     $parent_id = '';
                 }

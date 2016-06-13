@@ -779,7 +779,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                 $term = $dtTerms['termsByDomainLookup'][$domain][$value];
 
                                 //IJ wants to show terms for all parents
-                                $term_full = getFullTermLabel($dtTerms, $term, $domain, true);
+                                $term_full = getFullTermLabel($dtTerms, $term, $domain, false);
 
                                 $res_id = _add_term_val($res_id, $value);
                                 $res_cid = _add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
