@@ -427,7 +427,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                     msg = '<span style="color:red">No valid data to import</span>';   
                 }else{
                     //msg = 'Ready to import: n='+_prepareddata.length;//+' entr'+((_prepareddata.length>1)?'ies':'y');
-                    $('#preparedInfo2').html('n='+_prepareddata.length);
+                    $('#preparedInfo2').html('n = '+_prepareddata.length);
                 }
                 if(skip_na>0 || skip_dup>0 || skip_long>0){
                     msg = msg + '&nbsp;&nbsp;Term (label) is';

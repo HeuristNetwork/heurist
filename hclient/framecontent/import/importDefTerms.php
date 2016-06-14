@@ -69,9 +69,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <input type="file" id="uploadFile" style="display:none">
         <div id="btnUploadFile" style="position:absolute;bottom:6px;left:3em">Upload File</div>
     </div>
-    <textarea id="sourceContent" class="ent_content_full" style="top:5em;width:100%;resize:none;padding:0.5em;border:none">
+    <textarea id="sourceContent" rows="0" cols="0" class="ent_content_full" 
+    style="top:5em;width:100%;resize:none;padding:0.5em;border:none"></textarea>
     
-    </textarea>
+    
 </div>
 <div style="position:absolute;right:200px;width:200px; height:100%; border-right:1px lightgray solid">
     <div class="ent_header" style="height:5em;">
@@ -108,9 +109,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         -->
                     </select>
             </div>
-            <div>
+            <div style="padding-top:1em;">
                 <input id="csv_header" 
-                    style="margin:0 0.5em 0 0"
+                    style="margin:1em 0.5em 0 0"
                     class="text ui-widget-content ui-corner-all" type="checkbox" value="1" checked>
                 <label for="csv_header">Labels in line 1</label>
             </div>
@@ -143,7 +144,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
     </fieldset> 
     <div class="ent_footer" style="padding-left:1em">
         <div id="btnImportData">Import</div>
-        <div id="preparedInfo2" style="display:inline-block;font-weight:bold"></div>
+        <div id="preparedInfo2" style="display:inline-block;font-weight:bold;font-size:1.1em"></div>
     </div>
 </div>
 <div id="divCurtain" style="position:absolute;right:0px;height:100%;width:400px;" class="semitransparent">
@@ -152,11 +153,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
 </div>
 
 <div style="width:100%;height:40%;position:absolute;bottom:0" >
-    <div class="ent_header" style="height:1.5em;border-bottom:none;border-top:1px solid lightgray;">
-        <h2 style="display:inline-block">Preview data to be imported</h2>
+    <div class="ent_header" style="height:2em;border-bottom:none;border-top:1px solid lightgray;">
+        <h2 style="display:inline-block;padding-top:0.5em">Preview data to be imported</h2>
         <div id="preparedInfo" style="float:right"> <!-- div to show results of data preparation --></div>
     </div>
-    <div class="ent_content_full" style="top:2em;font-size:0.9em;" id="divParsePreview">
+    <div class="ent_content_full" style="top:2.5em;font-size:0.9em;" id="divParsePreview">
     </div>
 </div>
 

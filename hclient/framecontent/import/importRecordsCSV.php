@@ -138,9 +138,7 @@ function get_config_bytes($val) {
         <h2 style="display:inline-block;padding:5px;width:230px;text-align:right;">Paste delimited data in area below</h2>
         <div id="btnUploadData">Upload Data</div>
     </div>
-    <textarea id="sourceContent" class="ent_content_full" style="top:14em;width:100%;resize:none">
-    
-    </textarea>
+    <textarea id="sourceContent" class="ent_content_full" style="top:14em;width:100%;resize:none"></textarea>
 </div>
 <!-- STEP 2 parse uploaded data -->
 <div style="width:100%; height:100%;display:none;" id="divStep2">
