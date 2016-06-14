@@ -419,7 +419,7 @@ function get_config_bytes($val) {
             Prepare results
         </div>
         
-        <div  id="divImportSetting" class="step5" style="position:absolute;top:3em;right:20px;display:none;">
+        <div  id="divImportSetting" class="step5" style="position:absolute;top:4em;right:20px;display:none;">
             <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
                 (existing values are not duplicated)</label><br>
@@ -441,14 +441,14 @@ function get_config_bytes($val) {
     
         <div  id="divActionsMatching" class="action_buttons step3">
             
-            <div id="btnMatchingSkip" class="normal"
+            <div id="btnMatchingSkip" class="normal" style="margin-right:20px"
                 title="">
                 Import as new (skip matching)</div>
             <div id="btnMatchingStart" class="normal"
                 title="">
                 Match against existing records</div>
 
-            <div id="btnBackToMatching2" class="need_resolve"
+            <div id="btnBackToMatching2" class="need_resolve" style="margin-right:20px"
                 title="">
                 Back: Match Again 2</div>
             <div id="btnResolveAmbiguous" class="need_resolve"
@@ -458,7 +458,7 @@ function get_config_bytes($val) {
         </div>
         
         <div  id="divActionsImport" style="display:none;" class="action_buttons step4 step5">
-            <div id="btnBackToMatching"
+            <div id="btnBackToMatching" style="margin-right:20px"
                 title="">
                 Back: Match Again 1</div>
             <div id="btnPrepareStart" class="step4"

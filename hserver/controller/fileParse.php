@@ -245,7 +245,7 @@ function parse_step1(){
 
 // $limit if >0 returns first 100 lines
 // otherwise convert dates, validate identifies, find memo and multivalues
-// if there are no errors invokes  parse_db_save
+// if there are no errors invokes  parse_db_save - to dave csv into database
 //
 function parse_step2($encoded_filename, $original_filename, $limit){
 
@@ -601,6 +601,11 @@ function parse_db_save($preproc){
         "uniqcnt"=>$uniqcnt,   //count of uniq values per column
         "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype
         "indexes"=>$preproc['keyfields'] );  //names of columns in importtable that contains record_ID
+        
+    //new parameters to replace mapping and indexes_keyfields    
+    $session['rectype'] =  0; //main rectype    
+    $session['mapping_keys'] = array(); // rectype1:{idx:fieldtype,.....}, rectype2:{}     
+    $session['mapping_flds'] = array(); // rectype1:{idx:fieldtype,.....}, rectype2:{} 
 
     $session = saveSession($system, $session);
     if(count($warnings)>0){
@@ -1013,7 +1018,7 @@ function assignRecordIds($params){
         $pairs = $imp_session['validation']['pairs'];     //keyvalues => record id - count number of unique values
         $disambiguation = $imp_session['validation']['disambiguation'];
     }else{
-        return $imp_session;
+        return $imp_session; //error
     }
 
     if(count($disambiguation)>0){
@@ -1030,7 +1035,7 @@ function assignRecordIds($params){
 
     if(!$id_fieldname || $id_fieldname=="null"){
         $rectype = dbs_GetRectypeByID($mysqli, $rty_ID);
-        $id_fieldname = $rectype['rty_Name'].' ID'; //not defined - create new one
+        $id_fieldname = $rectype['rty_Name'].' ID'; //not defined - create new identification field
     }
     $index = array_search($id_fieldname, $imp_session['columns']); //find it among existing columns
     if($index!==false){ //this is existing field
@@ -1064,11 +1069,20 @@ function assignRecordIds($params){
     //define field as index in session
     @$imp_session['indexes'][$id_field] = $rty_ID;
 
-    //to keep mapping for index field
+    //to keep mapping for index field  - OLD
     if(!@$imp_session['indexes_keyfields']){
         $imp_session['indexes_keyfields'] = array();
     }
     $imp_session['indexes_keyfields'][$id_field] = @$imp_session['validation']['mapped_fields'];
+
+    //to keep mapping for index field
+    if(!@$imp_session['indexes_keyfields']){
+        $imp_session['mapping_keys'] = array();
+    }
+    
+    if(!@$params['skip_match']){
+        $imp_session['mapping_keys'][$rty_ID] = @$params['mapping'];
+    }
 
 
     if(count($records)>0){
@@ -1087,7 +1101,43 @@ function assignRecordIds($params){
         }
     
     }else{
-        $imp_session['validation']['count_insert'] = $imp_session['reccount'];
+        //find records to inset and update if matching is skipped
+        
+        // find records to update
+        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
+        ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
+        $cnt = mysql__select_value($mysqli, $select_query);
+        if( $cnt>0 ){
+
+                $imp_session['validation']['count_update'] = $cnt;
+                $imp_session['validation']['count_update_rows'] = $cnt;
+                //find first 100 records to display
+                $select_query = "SELECT ".$id_field.", imp_id FROM ".$import_table
+                ." left join Records on rec_ID=".$id_field
+                ." WHERE rec_ID is not null and ".$id_field.">0"
+                ." ORDER BY ".$id_field." LIMIT 5000";
+                $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query, false);
+        }
+
+        // find records to insert
+        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0";
+        $cnt = mysql__select_value($mysqli, $select_query);
+
+        $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
+        $cnt2 = mysql__select_value($mysqli, $select_query);
+        $cnt = $cnt + (($cnt2>0)?intval($cnt2):0);
+
+        if( $cnt>0 ){
+                $imp_session['validation']['count_insert'] = $cnt;
+                $imp_session['validation']['count_insert_rows'] = $cnt;
+
+                //find first 100 records to display
+                $select_query = "SELECT imp_id FROM ".$import_table
+                        .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
+                $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query, false);
+        }
+        
+        //$imp_session['validation']['count_insert'] = $imp_session['reccount'];
     }
 
     $ret_session = $imp_session;

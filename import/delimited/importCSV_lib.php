@@ -1786,6 +1786,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
     $field_types = array();  // idx => fieldtype ID
     $sel_query = array();
+    $mapping = array();
     
     //get field mapping and selection query from _REQUEST(params)
     if(@$params['mapping']){    //new way
@@ -1811,6 +1812,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                 //all mapped fields - they will be used in validation query
                 array_push($sel_query, $field_name);
                 array_push($field_types, $field_type);
+                $mapping[$index] = $field_type;
             }
         }
         if(count($sel_query)<1){
@@ -2201,17 +2203,16 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
             array_push($imp_session['uniqcnt'], $rep_added);
         }
         
-        if($mode_output=='array'){
-
-            return array(
+        $import_report = array(                
               'processed'=>$rep_processed,
               'inserted'=>$rep_added,
               'updated'=>$rep_updated,
               'total'=>$tot_count,
               'skipped'=>$rep_skipped
             );            
-        }else{
-        
+
+        if($mode_output!='array'){
+
             print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";
             if($rep_skipped>0){
                 print '<p>'.$rep_skipped.' rows skipped</p>';
@@ -2221,9 +2222,15 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
     }
 
     //save mapping into import_sesssion
+    if(!@$imp_session['mapping_flds']){
+        $imp_session['mapping_flds'] = array();
+    }
+    $imp_session['mapping_flds'][$recordType] = $mapping;
+    
+    $imp_session['import_report'] = $import_report;
 
     return saveSession($mysqli, $imp_session);
-}
+} //end doImport
 
 
 //
