@@ -77,8 +77,8 @@ function EditRecStructure() {
 
         '<span style="float:right; text-align:right">'+
         '<a href="#" onclick="{onEditRecordType();}">edit general description<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;'+
-        '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>'+
-        '<input type="button" value="Save" onClick="editStructure.closeWin();"/>'+
+        '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;&nbsp;&nbsp;'+
+        '<input type="button" value="Save/Close" onClick="editStructure.closeWin();"/>'+
         '</span>'+
         
         '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;display:none;\">'+

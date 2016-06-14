@@ -510,8 +510,8 @@ function RectypeManager() {
                     if(elLink.hash === "#search") {
                         window.open(top.HEURIST.baseURL_V4+'?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
                     }else if(elLink.hash === "#edit_rectype") {
-                        _onAddEditRecordType(rectypeID, 0);
-                        // TO REMOVE editRectypeWindow(rectypeID);
+                        _editRecStructure(rectypeID);
+                        //2016-06-14 Ian req _onAddEditRecordType(rectypeID, 0);
                     } else if(elLink.hash === "#edit_sctructure") {
                         _editRecStructure(rectypeID);
                     }else if(elLink.hash === "#edit_icon") {
