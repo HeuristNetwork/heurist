@@ -557,10 +557,12 @@ top.HEURIST4.ui = {
         var showDetailType = false;
         var addLatLongForGeo = false;
         var requriedHighlight = false;
+        var selectedValue = null;
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name'];
             addLatLongForGeo  = options['show_latlong'];
             requriedHighlight = options['show_required'];
+            selectedValue     = options['selected_value'];
         }
 
         var dtyID, details;
@@ -722,6 +724,9 @@ top.HEURIST4.ui = {
 
         }
 
+        if(selectedValue){
+            $(selObj).val(selectedValue);
+        }
 
         return selObj;
     },

@@ -520,7 +520,9 @@ function refValues($arr) {
     return $arr;
 }
 
-
+//
+// works with temporary table tmpUsrSession that allows trace long server side process like smarty report or csv import
+//
 function updateProgress($mysqli, $session_id, $is_init, $value){
     
     //mysql_connection_overwrite(DATABASE);

@@ -118,8 +118,11 @@ function ShowReps() {
 
         //converts Heurist.tmap structure to timemap structure
         //HEURIST.tmap = context;
-        var div_rep = document.getElementById("rep_container");//Dom.get("rep_container");
-        div_rep.innerHTML = context;
+        var iframe = document.getElementById("rep_container_frame");//Dom.get("rep_container");
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(context);
+        iframe.contentWindow.document.close();
+        //div_rep.innerHTML = context;
 
         _needSelection = (context.indexOf("Select records to see template output")>0);
     }

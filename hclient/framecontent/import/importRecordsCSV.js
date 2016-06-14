@@ -217,7 +217,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                         });
                         
-        var selRectypeID = $('#sa_rectype').change(_initFieldMapppingSelectors);               
+        var selRectypeID = $('#sa_rectype').change(_initFieldMapppingTable);               
         top.HEURIST4.ui.createRectypeSelect( selRectypeID.get(0), null, top.HR('select...') );
         
         //init navigation links
@@ -358,14 +358,34 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             sRemain = "",
             sProcessed = "",
             i = 0,
-            len = (imp_session && imp_session['columns'])?imp_session['columns'].length:0;
+            len = (imp_session && imp_session['columns'])?imp_session['columns'].length:0,
+            indexes_keyfields = {};
+            
+        //find index field for selected record type    
+        var rtyID = $("#sa_rectype").val();
+
+        var keyfields = Object.keys(imp_session['indexes']);
+        for (i=0;i<keyfields.length;i++){
+            if(imp_session['indexes'][keyfields[i]] == rtyID){
+                indexes_keyfields = imp_session['indexes_keyfields'][keyfields[i]];
+                break;
+            }
+        }
             
         var recStruc = top.HEURIST4.rectypes;    
 
         for (i=0; i < len; i++) {
 
-            var isProcessed = !top.HEURIST4.util.isnull(imp_session['mapping']['field_'+i]);
+            var isProcessed = false; 
             var isIndex =  !top.HEURIST4.util.isnull(imp_session['indexes']['field_'+i]);
+            
+            if(currentStep==3){ //matching
+                if(imp_session['indexes']){
+                    isProcessed = imp_session['indexes']['field_'+i]!= rtyID && !top.HEURIST4.util.isnull(indexes_keyfields['field_'+i]);  
+                }
+            }else{ //import
+                isProcessed = !top.HEURIST4.util.isnull(imp_session['mapping']['field_'+i]);
+            }
             
             //checkbox that marks 'in use'
             var s = '<tr><td width="75px" align="center">&nbsp;<span style="display:none;">'
@@ -379,11 +399,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
             // mapping selector
             s = s + '<td style="width:300px;">&nbsp;<span style="display:none;">'
-                + '<select id="sa_dt_'+i+'" style="width:280px; font-size: 1em;" '
+                + '<select id="sa_dt_'+i+'" style="width:280px; font-size: 1em;" data-field="'+i+'" '
                 + (isIndex?'class="indexes"':'')+'></select></span>';
             
             // add name of field that was used in mapping
-            if(isProcessed){ // already selected
+            if(isProcessed){ // already was used in mapping
                 s = s + '<span id="sa_used_'+i+'" style="display:none;">'+isProcessed+'</span>';
             
                 /*$rt_dt = explode(".",$isProcessed);
@@ -435,6 +455,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
         });
         
+        //init selectors
+        _initFieldMapppingSelectors();
+        //load data
         _getValuesFromImportTable();            
     }    
     
@@ -453,6 +476,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             return -1;
     }
     
+    
+    
     //
     // init field mapping selectors after change of rectype
     //
@@ -467,7 +492,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         //fill selectors with fields of selected record type
         var rtyID = $("#sa_rectype").val();
-        var keyfield_sel = '';
+        var keyfield_sel = '', 
+            indexes_keyfields = {}; //already matched
         
         if(rtyID>0){
             cbs.parent().show(); //show checkboxes
@@ -479,6 +505,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     $("#cbsa_dt_"+idx).attr('checked', true).attr('disabled',true);
                     $('#sa_used_'+idx).hide();
                     $('#sa_dt_'+idx).parent().show(); //show selector
+                    
+                    // find mathched fields
+                    var keyfields = Object.keys(imp_session['indexes']);
+                    for (i=0;i<keyfields.length;i++){
+                        if(imp_session['indexes'][keyfields[i]] == rtyID){
+                            indexes_keyfields = imp_session['indexes_keyfields'][keyfields[i]];
+                            break;
+                        }
+                    }
+                    
             }
             
         }else{
@@ -504,10 +540,25 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             if($item.attr('id')==keyfield_sel){
                 top.HEURIST4.ui.createSelector(item, [{key:'id',title:'Record ID'}] );  //the only option for current id field
             }else{
-                top.HEURIST4.ui.createRectypeDetailSelect(item, rtyID, 
+                
+                var field_idx = $(item).attr('data-field');
+                var dt_id = (currentStep==3)?indexes_keyfields['field_'+field_idx]:null;
+                var selected_value = (!top.HEURIST4.util.isnull(dt_id))?dt_id:null;
+                
+                var sel = top.HEURIST4.ui.createRectypeDetailSelect(item, rtyID, 
                     $item.hasClass('indexes')?allowed2:allowed, 
                     $item.hasClass('indexes')?topitems2:topitems,
-                    {show_dt_name:true, show_latlong:(currentStep==4), requriedHighlight:(currentStep==4)});    
+                    {show_dt_name:true, 
+                     show_latlong:(currentStep==4), 
+                     show_required:(currentStep==4)});    
+                    
+               if(!top.HEURIST4.util.isnull(selected_value)){
+                        $("#cbsa_dt_"+field_idx).attr('checked', true);
+                        $('#sa_used_'+field_idx).hide();
+                        $(item).parent().show(); //show selector
+                        $(item).val(dt_id);
+               }
+                    
             }
         });
         
@@ -1012,9 +1063,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 if(!(key_idx>=0)){
                                     //recreate selectors
                                     _initFieldMapppingTable();
-                                    _initFieldMapppingSelectors();
+                                    //_initFieldMapppingSelectors();
                                 }
-                                _getValuesFromImportTable();
+                                //_getValuesFromImportTable();
                                 
                                 $('#mr_cnt_disamb').parent().hide();
                                 _showStep(4);                    
