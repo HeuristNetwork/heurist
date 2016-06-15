@@ -21,6 +21,16 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+
+1. Create empty database with blankDBStructure.sql
+2. Empty sysIdentification, sysTableLastUpdated, sysUsrGrpLinks, sysUGrps, defLanguages
+3. Copy ALL tables  
+4. reset reginfo
+5. Create indexes and procedures
+6. Copy db folder and update file path in recUploadedFiles
+
+*/
 
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');

@@ -183,14 +183,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         
         $('#btnParseStep1')
                     .css({'width':'160px'})
-                    .button({label: top.HR('Preview Parse'), icons:{secondary: "ui-icon-circle-arrow-s"}})
+                    .button({label: top.HR('Analyse data'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doParse(1);
                         });
 
         $('#btnParseStep2')
                     .css({'width':'180px'})
-                    .button({label: top.HR('Confirm and Proceed'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: top.HR('Continue'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                            _doParse(2); 
                         });
@@ -284,6 +284,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     .click(function(e) {
                             _doImport();
                         });
+          
+          $(window).resize( function(e)
+          {
+                _adjustButtonPos();
+          });          
                         
     }
 
@@ -430,11 +435,25 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
         });
         
+        _adjustButtonPos();
         //init selectors
         _initFieldMapppingSelectors();
         //load data
         _getValuesFromImportTable();            
     }    
+
+    //
+    //
+    //    
+    function _adjustButtonPos(){
+        //adjust position of footer with action buttons  
+        var content = $('#divFieldMapping');
+        var btm = $('#divStep3').height() - (content.position().top + $('#tblFieldMapping').height());
+        btm = (btm<150) ?150 :btm;
+
+        content.css('bottom', btm-20);
+        $('#divImportActions').height(btm-20);
+    }
     
     //
     // by recordtype ID 
@@ -858,8 +877,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             //fill list of columns
                             for(i in response.data.fields){
                                 $('<tr><td style="width:200px">'+response.data.fields[i]+'</td>'
-                                +'<td style="width:50px;text-align:center"><input type="checkbox" id="d_field_'+i+'" value="'+i+'"/></td>'
                                 +'<td style="width:50px;text-align:center"><input type="checkbox" id="id_field_'+i+'" value="'+i+'"/></td>'
+                                +'<td style="width:50px;text-align:center"><input type="checkbox" id="d_field_'+i+'" value="'+i+'"/></td>'
                                 +'<td style="width:200px"><select id="id_rectype_'
                                 +i+'" class="text ui-widget-content ui-corner-all" style="visibility:hidden"></select></td></tr>').appendTo(tbl);
                             }         
@@ -869,11 +888,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             $.each(select_rectype, function(idx, item){
                                 top.HEURIST4.ui.createRectypeSelect( item, null, 'select...' );    
                             });
+
+                            $("input[id^='d_field']").change(function(evt){
+                                var cb = $(evt.target); 
+                                top.HEURIST4.util.setDisabled( $('#id_field_'+cb.val()), cb.is(':checked') );
+                            });
                             
                             $("input[id^='id_field']").change(function(evt){
+                                var cb = $(evt.target);
                                 top.HEURIST4.util.setDisabled( $('#btnParseStep2'), false );
-                                $("select[id='id_rectype_"+$(evt.target).attr('id').substr(9)+"']")
-                                        .css('visibility', $(evt.target).is(':checked')?'visible':'hidden');            
+                                top.HEURIST4.util.setDisabled( $('#d_field_'+cb.val()), cb.is(':checked') );
+                                $("select[id='id_rectype_"+ cb.val()+"']")    //attr('id').substr(9)
+                                        .css('visibility',  cb.is(':checked')?'visible':'hidden');            
                             });
                             
 

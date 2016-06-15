@@ -119,7 +119,7 @@ function get_config_bytes($val) {
     </head>
 
     <!-- HTML -->
-    <body class="ui-heurist-bg-light" style="overflow:hidden;">
+    <body class="ui-heurist-bg-light" style="overflow:hidden;min-height:400px">
 
 <!-- STEP 1 upload data/select session -->    
 <div style="width:100%; height:100%;" id="divStep1">
@@ -142,14 +142,16 @@ function get_config_bytes($val) {
 </div>
 <!-- STEP 2 parse uploaded data -->
 <div style="width:100%; height:100%;display:none;" id="divStep2">
-    <div class="ent_header" style="height:26em;">
+    <div class="ent_header" style="height:26em;padding-top:1em;">
     
         <div id="btnBackToStart2"
+                style="margin-left:2em;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                 Back to start</div>
-    
-        <h2 style="padding: 10px 0 10px;">Define parse parameters</h2>
-        <fieldset style="display:inline-block;width:380px">
+        <!--
+        <h2 style="padding: 10px 0 10px 2em;">Define parse parameters</h2>
+        -->
+        <fieldset style="width:380px">
                 <div>
                     <div class="header" style="min-width: 50px;"><label>Encoding:</label></div>
                     <div class="input-cell">        
@@ -285,22 +287,23 @@ function get_config_bytes($val) {
                 </div>
                 
                 
-                <div id="btnParseStep1" style="position:absolute;bottom:2px;left:50px">Preview Parse</div>
+                <div id="btnParseStep1" style="position:absolute;bottom:2px;left:2em">Analyse data</div>
         </fieldset>            
-        <div style="position:absolute;width:520px;right:10px;top:3em;bottom:0">
+        <div style="position:absolute;width:520px;left:440px;top:1.2em;bottom:0">
                 <div class="ent_header" style="border:none">
-                    <h2>and Field roles as Identifiers and Dates</h2><br>
+                    <h2>Specify identifier and date columns</h2><br>
+                    <div style="font-weight:bold;padding-bottom:1em">Identifiers columns are those that contain a Heurist record ID</div>
                     <table class="tbfields" style="font-weight:bold"><tr>
                                 <td style="width:200px">Column</td>
-                                <td style="width:50px;text-align:center">Is date?</td>
-                                <td style="width:50px;text-align:center">Is key?</td>
-                                <td style="width:200px">For record type</td></tr></table>
+                                <td style="width:50px;text-align:center">Identifier</td>
+                                <td style="width:50px;text-align:center">Date</td>
+                                <td style="width:200px">IDs for which record type?</td></tr></table>
                 </div>
-                <div class="ent_content" id="divFieldRoles" style="top:3.5em;padding: 0.2em 0.5em;">
+                <div class="ent_content" id="divFieldRoles" style="top:6em;padding: 0.2em 0.5em;">
                     list of field roles
                 </div>
                 <div  class="ent_footer">
-                    <div id="btnParseStep2" style="position:absolute;bottom:2px;right:10px">Parse and Proceed</div>
+                    <div id="btnParseStep2" style="position:absolute;bottom:2px;right:80px">Continue</div>
                 </div>
         </div>
         
@@ -311,10 +314,11 @@ function get_config_bytes($val) {
 </div>
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;" id="divStep3">
-    <div class="ent_header" style="height:11.5em;border:none;">
+    <div class="ent_header" style="height:12.5em;border:none;padding-top:1em;">
     
         <div>
             <div id="btnBackToStart"
+                style="margin-left:2em;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                 Back to start</div>
             <div id="btnDownloadFile"
@@ -330,8 +334,11 @@ function get_config_bytes($val) {
             </div>    
     
         </div>
-        <h2 class="step3" style="padding-top: 0.5em;">Step 1: Match fields and create Heurist IDs</h2>
-        <h2 class="step4 step5" style="padding-top: 0.5em;display:none;">Step 2: Update records / Create new as required</h2>
+
+        <div style="padding-top:0.8em;margin-left:2em;">
+            <h2 class="step3">Step 1: Match fields and create Heurist IDs</h2>
+            <h2 class="step4 step5" style="display:none;">Step 2: Update records / Create new as required</h2>
+        </div>
         
         <fieldset>
         <div>
@@ -365,7 +372,7 @@ function get_config_bytes($val) {
             </thead>
         </table>    
     </div>
-    <div class="ent_content" style="padding: 0em 0.5em;bottom:16em;top:12.2em" id="divFieldMapping">
+    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:13.2em" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
@@ -378,7 +385,7 @@ function get_config_bytes($val) {
                     </tbody>
                 </table>    
     </div>
-    <div class="ent_footer" style="height:16em;padding: 0em 0.5em;">
+    <div class="ent_footer" style="height:11em;padding: 0em 0.5em;" id="divImportActions">
 
         <div id="divFieldMapping2"></div>
         
