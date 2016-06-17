@@ -92,11 +92,11 @@
             }
 
             print "<h2>FILE MANAGEMENT</h2>";
-            print "<p>Members of the database managers group can upload ".
-                "multiple files and/or large files to the database scratch space. <br>";
-            print "Most commonly, files will be uploaded prior ".
-                "to importing data from them or running the in situ multimedia import.<br>";
-            print "The function is restricted to database managers to reduce the risk of ".
+            print "<p>This function allows members of the database managers group to upload ".
+                "multiple files and/or large files to the database scratch space<br>";
+            print "and delete files from that space. Most commonly files will be uploaded prior ".
+                "to importing data from them or running the in situ import of images.<br>";
+            print "The function is restricted to database owners/managers to reduce the risk of ".
                 "other users filling the database with unwanted material.<br>";
             print "</p>";
 
@@ -167,13 +167,14 @@
                 // TODO: we should eliminate any duplicate extensions which might have been added by the user
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
-                    print ("<p>If you wish to upload files to a directory other than the scratch space, define the folders on the database administration page <br />".
-                        "(in Database > Advanced Properties > Additional Folders for indexing), where you can also add additional file extensions.</p>");
+                    print ("<p><b>If you wish to upload files to a directory other than the scratch space, define the folders in <br />".
+                        "Database administration page > Database > Advanced Properties > Additional Folders for indexing.<br />".
+                        "You may also add additional file extensions.</b></p>");
                 }else{
                     print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";
                 }
-                
-                print  "<br/><p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=3' "
+
+                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=3' "
                     ." title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>"
                     ."Click here to set media/upload folders</a></p>";
 
@@ -206,12 +207,10 @@
                         <span>Add files...</span>
                         <input type="file" name="files[]" multiple>
                     </span>
-                    <button type="submit" class="start">Start uploads</button>
-                    <button type="reset" class="cancel">Cancel uploads</button>
-                    <!-- Ian 17/6/16 It's quite confusing what these are for
-                    <button type="button" class="delete">Delete selected</button>
+                    <button type="submit" class="start">Start upload</button>
+                    <button type="reset" class="cancel">Cancel upload</button>
+                    <button type="button" class="delete">Delete</button>
                     <input type="checkbox" class="toggle">
-                    -->
                     <!-- The global file processing state -->
                     <span class="fileupload-process"></span>
                 </div>
@@ -251,7 +250,7 @@
                 </td>
                 <td>
                 {% if (!i && !o.options.autoUpload) { %}
-                <button class="start" disabled>Upload</button>
+                <button class="start" disabled>Start</button>
                 {% } %}
             {% if (!i) { %}
                 <button class="cancel">Cancel</button>
@@ -278,7 +277,7 @@
             <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
             </p>
             {% if (file.error) { %}
-                <div><span class="error">Upload error</span> {%=file.error%}</div>
+                <div><span class="error">Error</span> {%=file.error%}</div>
                 {% } %}
                 </td>
                 <td>
@@ -287,10 +286,8 @@
                 <td>
                 <button class="delete" data-type="{%=file.deleteType%}"
                 data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %}
-                data-xhr-fields='{"withCredentials":true}'{% } %}>Remove</button>
-                <!-- another confuising control - presumably meant to be a selection checkbox for multiple removals
+                data-xhr-fields='{"withCredentials":true}'{% } %}>Delete</button>
                 <input type="checkbox" name="delete" value="1" class="toggle">
-                -->
                 </td>
                 </tr>
                 {% } %}

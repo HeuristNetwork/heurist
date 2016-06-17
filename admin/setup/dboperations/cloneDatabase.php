@@ -21,18 +21,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/*
-  Cloning workflow:
-
-    1. Create empty database with blankDBStructure.sql
-    2. Empty sysIdentification, sysTableLastUpdated, sysUsrGrpLinks, sysUGrps, defLanguages
-    3. Copy ALL tables  
-    4. reset reginfo
-    5. Create indexes and procedures
-    6. Copy db folder and update file path in recUploadedFiles
-
-*/
-
 
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
@@ -127,7 +115,7 @@ if(mysql_error()) {
 
             <div id="loading" style="display:none">
                 <img alt="cloning ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
-                <strong><span id="divProgress">&nbsp; Cloning of database may take a few minutes for large databases </span></strong>
+                <strong><span id="divProgress">&nbsp; Cloning of database will take a few seconds </span></strong>
             </div>
             <div id="mainform">
 
