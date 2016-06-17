@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.2.7"; // sets current program version number, determined by Heurist development lead
+$version = "4.2.8"; // sets current program version number, determined by Heurist development lead
 
+// Vsn 4.2.8 17 Jun 2016  Further small fixes 
 // Vsn 4.2.7 14 May 2016  Further small fixes 
 // Vsn 4.2.6 26 Apr 2016  Complete revisoon of core definitions, lots of small fixes to mapping and structue management
 // Vsn 4.2.5 19 Mar 2016  Further fixes including serious problem with Win 10 (not saving subsidiary records)
