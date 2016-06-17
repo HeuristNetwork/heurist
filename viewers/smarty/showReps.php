@@ -40,6 +40,8 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+/* TODO: rename to showReports.php */
+
 
 define('ISSERVICE',1);
 define('SEARCH_VERSION', 1);
@@ -477,7 +479,7 @@ function save_report_output2($tpl_source){
                 $link = HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".HEURIST_DBNAME."&publish=3&id=".$rps_recid;
                 ?>
 
-                <p style="font-size: 14px;">You may view the content of report by click hyperlinks below:<br />
+                <p style="font-size: 14px;">View the generated files by clicking the links below:<br /><br />
                 HTML: <a href="<?=$link?>" target="_blank" style="font-weight: bold;"><?=$link?></a><br />
                 Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;"><?=$link?>&mode=js</a><br />
 
@@ -497,9 +499,9 @@ function save_report_output2($tpl_source){
             }
 
 
-            ?><br /><br />
-            If you wish to publish the link to the report, which returns dynamic report output, copy the code below.
-            <br />
+            ?><br />
+            To publish the report as dynamic (generated on-the-fly) output, use the code below.
+            <br /><br />
             URL:<br />
             <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 70%; height: 60px;"
                 id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"><?=$surl?></textarea>
