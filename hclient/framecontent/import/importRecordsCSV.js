@@ -59,7 +59,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     });
                         
         $('#btnClearAllSessions').click(_doClearAllSessions);
-            
+        
         //upload file to server and store intemp file
         var uploadData = null;
         var pbar_div = $('#progressbar_div');
@@ -217,8 +217,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                         });
                         
-        var selRectypeID = $('#sa_rectype').change(_initFieldMapppingTable);               
-        top.HEURIST4.ui.createRectypeSelect( selRectypeID.get(0), null, top.HR('select...') );
+        $('#sa_rectype').change(_initFieldMapppingTable);               
+        $('#btnSetPrimaryRecType').click(_doSetPrimaryRecType);
         
         //init navigation links
         $.each($('.navigation'), function(idx, item){
@@ -340,7 +340,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             //init field mapping table
                             _showStep(3);
-                            _initFieldMapppingTable();
+                            _loadRectypeDependencies();
                             
                         }else{
                             top.HEURIST4.msg.showMsgErr(response);
@@ -351,7 +351,85 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         }
     }
+    
+    //
+    //  open dialog to choose primary record type
+    //
+    function _doSetPrimaryRecType(){
+        
+        
+            if($('#sa_primary_rectype > options').length==0){
+                top.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, top.HR('select...') );
+                $('#sa_primary_rectype').change( function(){ _loadRectypeDependencies( $('#sa_primary_rectype').val() ); });
+            }
+        
+            var $dlg, buttons = {};
+            
+            buttons[top.HR('Confirm')]  = function() {
+                    
+                    $dlg.dialog( "close" );
+                    
+                    if($('#sa_primary_rectype').val()!=imp_session['primary_rectype']){
+                        imp_session['primary_rectype'] = $('#sa_primary_rectype').val();    
+                        _loadRectypeDependencies();
+                    }
+                    
+                }; 
+            buttons[top.HR('Close')]  = function() {
+                    $dlg.dialog( "close" );
+            };
+        
+            var dlg_options = {
+                title:'Select primary record type',
+                element: document.getElementById('divSelectPrimaryRecType'),
+                buttons: buttons
+                };
+            $dlg = top.HEURIST4.msg.showElementAsDialog(dlg_options);
+        
+    }
 
+    //
+    //  load list of record types as tree into sa_rectype
+    //
+    function _loadRectypeDependencies( preview_rty_ID ){
+    
+            var is_preview = (preview_rty_ID>0);
+            //main rectype is not defined - open select dialog
+            if( !is_preview &&  top.HEURIST4.util.isempty(imp_session['primary_rectype'])){
+                 _doSetPrimaryRecType();
+                 return;
+            }
+        
+            //request to server to get all dependencies for given primary record type
+            var request = { action: 'set_primary_rectype',
+                            is_preview: is_preview,
+                            rty_ID: is_preview?preview_rty_ID:imp_session['primary_rectype'],
+                            imp_ID: imp_ID,
+                                id: top.HEURIST4.util.random()
+                               };
+            top.HAPI4.parseCSV(request, function( response ){
+                
+                //that.loadanimation(false);
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                
+                    var rectypes = response.data;
+                    
+                    if(is_preview){
+                        top.HEURIST4.ui.createRectypeTreeSelect( $('#sa_rectypes_preview').get(0), rectypes, null, 0);    
+                    }else{
+                        //fill sa_rectype select with list of rectypes
+                        top.HEURIST4.ui.createRectypeTreeSelect( $('#sa_rectype').get(0), rectypes, 'select..', 0);
+                    }
+                    
+                }else{
+                    _showStep(1);
+                    top.HEURIST4.msg.showMsgErr(response);
+                }
+
+            });        
+
+    }    
+    
     //
     // init field mapping table - main table to work with 
     //

@@ -123,11 +123,11 @@ function get_config_bytes($val) {
 
 <!-- STEP 1 upload data/select session -->    
 <div style="width:100%; height:100%;" id="divStep1">
-    <div class="ent_header" style="height:16em;">
+    <div class="ent_header" style="height:16em;padding:20px;">
         <h2 style="display:inline-block;padding:5px;width:230px;text-align:right;">Select previously uploaded file</h2>
             <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
             <a href="#" id="btnClearAllSessions"
-                            style="margin-right: 10px;">Clear all files</a>        
+                            style="margin-left: 10px;">Clear all files</a>        
 
         <h2 style="padding:10 0 10 80">OR</h2>
         <h2 style="display:inline-block;padding:5px;width:230px;text-align:right;">Upload new file (CSV/TSV)</h2>
@@ -314,7 +314,7 @@ function get_config_bytes($val) {
 </div>
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;" id="divStep3">
-    <div class="ent_header" style="height:12.5em;border:none;padding-top:1em;">
+    <div class="ent_header" style="height:11.5em;border:none;padding-top:1em;">
     
         <div>
             <div id="btnBackToStart"
@@ -348,10 +348,12 @@ function get_config_bytes($val) {
                 <div class="input-div">
                     <select id="sa_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
                     </select>
+                    <a href="#" id="btnSetPrimaryRecType"
+                            style="margin-left: 10px;">Change primary type</a>        
                 </div>
-                <div class="heurist-helper1" style="display: block;">
+                <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
-                </div>
+                </div -->
             </div>        
         </div>                    
         </fieldset>
@@ -372,7 +374,7 @@ function get_config_bytes($val) {
             </thead>
         </table>    
     </div>
-    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:13.2em" id="divFieldMapping">
+    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:12.2em" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
@@ -491,6 +493,33 @@ function get_config_bytes($val) {
 </div>
 
 <div id="divPopupPreview" style="display:none">
+</div>
+
+<div id="divSelectPrimaryRecType" style="display:none">
+        <fieldset>
+        <div>
+            <div class="header optional" style="min-width: 150px; width: 150px;"><label>Select record type:</label></div>
+            <div class="input-cell">
+                <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
+                <div class="input-div">
+                    <select id="sa_primary_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
+                    </select>
+                </div>
+                <div class="heurist-helper1" style="display: block;">
+                    If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
+                </div>
+            </div>        
+        </div>                    
+        <div style="padding-top: 2em;">
+            <div class="header optional" style="vertical-align: top;min-width: 150px; width: 150px;">
+                <label>Dependency tree:</label>
+            </div>
+            <div class="input-div">
+                <select id="sa_rectypes_preview" size="10" style="min-width:80%">
+                </select>
+            </div>
+        </div>                    
+        </fieldset>
 </div>
 
 

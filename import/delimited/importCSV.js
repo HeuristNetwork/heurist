@@ -939,6 +939,7 @@ function createRectypeSelect(selObj, rectypeList, topOptions) {
     return selObj;
 }
 
+
 //
 // create detailtype SELECT element (see h4/utils)
 //

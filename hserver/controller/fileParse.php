@@ -24,6 +24,9 @@
     content
         function parse_content - parse CSV from content parameter and returns parsed array (used in import terms)
         
+    set_primary_rectype
+        set main rectype for given session and returns list of dependent rectypes    
+        
     action
     1) step0
         parse_step0   save CSV form "data" parameter into temp file in scratch folder, returns filename
@@ -72,6 +75,7 @@
 require_once(dirname(__FILE__)."/../System.php");
 require_once (dirname(__FILE__).'/../dbaccess/dbSysImportSessions.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_structure.php');
+require_once (dirname(__FILE__).'/../dbaccess/db_structure_tree.php');
 set_time_limit(0);
     
 $response = null;
@@ -114,6 +118,10 @@ if(!$system->init(@$_REQUEST['db'])){
         
         }else if(@$_REQUEST['content']){    
             $res = parse_content(); 
+            
+        }else if($action=='set_primary_rectype'){    
+            $res = setPrimaryRectype(@$_REQUEST['imp_ID'], @$_REQUEST['rty_ID']);
+            
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missed or wrong");                
             $res = false;
@@ -603,11 +611,11 @@ function parse_db_save($preproc){
         "indexes"=>$preproc['keyfields'] );  //names of columns in importtable that contains record_ID
         
     //new parameters to replace mapping and indexes_keyfields    
-    $session['rectype'] =  0; //main rectype    
+    $session['primary_rectype'] =  0; //main rectype    
     $session['mapping_keys'] = array(); // rectype1:{idx:fieldtype,.....}, rectype2:{}     
     $session['mapping_flds'] = array(); // rectype1:{idx:fieldtype,.....}, rectype2:{} 
 
-    $session = saveSession($system, $session);
+    $session = saveSession($session);
     if(count($warnings)>0){
         $session['load_warnings'] = $warnings;
     }
@@ -617,7 +625,9 @@ function parse_db_save($preproc){
 //
 // @todo save session as entity method
 //
-function saveSession($system, $imp_session){
+function saveSession($imp_session){
+    global $system;
+    
     $mysqli = $system->get_mysqli();
 
     $imp_id = mysql__insertupdate($mysqli, "sysImportSessions", "imp",
@@ -682,6 +692,28 @@ function getImportSession($imp_ID){
 */    
 }
 
+//
+//
+//
+function setPrimaryRectype($imp_ID, $rty_ID){
+
+     global $system;
+    
+     //set session   
+     $imp_session = getImportSession($imp_ID);
+     if($imp_session==false){
+         return false;
+     }
+     //save session with new ID
+     if($imp_session['primary_rectype']!=$rty_ID){
+         $imp_session['primary_rectype'] = $rty_ID;
+         saveSession($imp_session);    
+     }
+     //get dependent record types
+     return dbs_GetRectypeStructureTree($system, $rty_ID, 5, 'resource');
+     
+}
+                                        
 //
 // parse csv from content parameter (for terms import)
 //
@@ -1142,7 +1174,7 @@ function assignRecordIds($params){
 
     $ret_session = $imp_session;
     unset($imp_session['validation']);  //save session without validation info
-    saveSession($system, $imp_session);
+    saveSession($imp_session);
     return $ret_session;
 }
 

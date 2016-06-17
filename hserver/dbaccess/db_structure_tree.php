@@ -36,21 +36,21 @@
     * Returns  
     * {
     *   id          : rectype id, field id in form fNNN, name of default rectype field
-    *   text        : rectype or field display name
+    *   title        : rectype or field display name
     *   type        : rectype|Relationship|field type|term
     *   children    : []  // array of fields
     * }
     * 
     * @param mixed $system
     * @param mixed $rectypeids
-    * @param mixed $mode  3 - all, 4 - for faceted search (with type names)
+    * @param mixed $mode  5 - fields only (no header fields), 3 - all, 4 - for faceted search (with type names)
     */
     function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=null){
 
         global $dbs_rtStructs, $dbs_lookups;
 
         if($fieldtypes==null){
-            $fieldtypes = array('integer','date','freetext','year','float');
+            $fieldtypes = array('integer','date','freetext','year','float','enum','resource','relmarker');
         }else if(!is_array($fieldtypes)){
             $fieldtypes = explode(",",$fieldtypes);
         }
@@ -115,6 +115,7 @@
         $children = array();
         
         //add default fields
+        if($mode<5){
         if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));
         array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  
             'title'=>"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
@@ -125,6 +126,7 @@
         if($mode==3) {
             array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
             array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
+        }
         }
 
         if($recTypeId && is_numeric($recTypeId)){
@@ -282,6 +284,9 @@
         //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
         //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
 
+        if (($mode==3) ||  in_array($detailType, $fieldtypes)) //$fieldtypes - allowed types
+        {
+            
         switch ($detailType) {
             /* @TODO
             case 'file':
@@ -311,7 +316,7 @@
             case 'resource': // link to another record type
             case 'relmarker':
 
-                if($recursion_depth<2){
+                if(($mode==5 && $recursion_depth<6) || $recursion_depth<2){
 
 
 
@@ -334,7 +339,7 @@
                             
                             $pointerRecTypeId = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
                             $rectype_ids = explode(",", $pointerRecTypeId);
-
+                            
                             if($pointerRecTypeId=="" || count($rectype_ids)==0){ //unconstrainded
 
                                 $res = __getRecordTypeTree($system, null, $recursion_depth+1, $mode, $fieldtypes);
@@ -368,11 +373,9 @@
                 break;
 
             default:
-                if (($mode==3) ||  in_array($detailType, $fieldtypes)) //$fieldtypes - allowed types
-                {
                     $res = array();
-                }
         }//end switch
+        }
 
         if(is_array($res)){
 

@@ -32,6 +32,7 @@ createTermSelectExt2  - the same but parameters are passed as options object
 createRectypeGroupSelect - get SELECT for record type groups
 createRectypeSelect - get SELECT for record types   
 createRectypeDetailSelect - get SELECT for details of given recordtype
+createRectypeTreeSelect - get SELECT for hierarchy of record types   
     
 createUserGroupsSelect - get SELECT for list of given groups, othewise loads list of groups for current user    
 
@@ -543,6 +544,65 @@ top.HEURIST4.ui = {
         return selObj;
     },
 
+    //
+    // get selector for record types tree
+    //
+    // rectypeTree - constraint options to this list, otherwise show entire list of rectypes separated by groups
+    //   id          : rectype id
+    //   text        : name
+    //   type        : "rectype"
+    //   children    : []  // array of fields
+    //
+    createRectypeTreeSelect: function(selObj, rectypeTree, topOptions, indent) {
+
+        if(!indent) indent=0;
+        
+        if(indent==0){
+            top.HEURIST4.ui.createSelector(selObj, topOptions);
+            if($.isArray(rectypeTree) && rectypeTree.length>0){
+                rectypeTree = rectypeTree[0];
+            }
+        }
+
+        var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
+        
+        var index, rectypeName, is_used = false;
+
+        var rectypes = top.HEURIST4.rectypes;
+        if(!rectypes) return selObj;
+        
+        var one_constraint = (rectypeTree.type=='resource' && rectypeTree.rt_ids!='' 
+                            && !top.HEURIST4.util.isArrayNotEmpty(rectypeTree.children))
+        
+                
+        if(rectypeTree.type=='rectype' ||  one_constraint){
+        
+            if(rectypeTree.type=='rectype'){
+                rectypeName = rectypeTree.title;    
+            }else{                           
+                rectypeName = rectypes.names[rectypeTree.rt_ids];
+            }
+            
+            
+            if(isNotFirefox && indent>0){
+                var a = new Array( ((indent<7)?indent:7)*2 );
+                rectypeName = a.join('. ') + rectypeName;
+            }
+            
+            var opt = top.HEURIST4.ui.addoption(selObj, rectypeTree.key, rectypeName); 
+            opt.className = "depth" + (indent<7)?indent:7;
+            opt.depth = indent;        
+            is_used = true;
+        }
+        
+        if(top.HEURIST4.util.isArrayNotEmpty(rectypeTree.children))
+        for (index=0;index<rectypeTree.children.length;index++){
+               top.HEURIST4.ui.createRectypeTreeSelect(selObj, rectypeTree.children[index], null, 
+                    indent+(is_used?1:0) );
+        }
+
+        return selObj;
+    },
     
     /**
     * get SELECT for details of given recordtype
