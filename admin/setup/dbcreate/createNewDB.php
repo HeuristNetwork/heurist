@@ -553,6 +553,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             </div>
 
                             <!-- 7 July 2015: Replaced HuNI & FAIMS inbuilt templates with access to registered databases as templates -->
+                            <!-- 17 June 2016: Decided to remove this option - the risks of perpetuating bad structures is too high
                             <input type="radio" name="dbtype" value="1" id="rb2" onclick="getRegisteredDatabases()"/><label for="rb2"
                                 class="labelBold"  style="padding-left: 2em;">Use a registered database as template</label>
                             <div style="padding-left: 38px;width:600px">
@@ -562,11 +563,10 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 for the HuNI and FAIMS infrastructure projects,
                                 as well as community servers maintained by other research groups.
                             </div>
-
                             <div id="registered_dbs"  style="max-height:150px;overflow-y:auto;overflow-x:hidden;margin-top:10px;
                                 background:url(../../../hclient/assets/loading-animation-white.gif) no-repeat center center;">
-                                <!-- list of registered DATABASEs  -->
                             </div>
+                            -->
 
                             <div id="nextSteps"
                                 style="padding-left: 38px; wdith:620px;display:none">
@@ -594,11 +594,12 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                         value=<?=(is_logged_in()?prepareDbName():'')?>
                                         >
                                 </b>
-                                -
+                                <b>_</b>
                                 <input type="text" maxlength="64" size="30" name="dbname"  onkeypress="{onKeyPress(event);}">
                                 <input id="btnCreateDb" type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
-                                <div style="padding-top:1em; max-width:500px"><i>no spaces or punctuation other than underscore. The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
-                                    databases so that they are easily identified and appear together in the list of databases.</i></div>
+                                <div style="padding-top:1em; max-width:500px">No spaces or punctuation other than underscore. Database names are case-sensitive. 
+                                <p><i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for personal
+                                databases so that they are easily identified and appear together in the list of databases.</i></p></div>
                             </div>
 
                         </div>
@@ -991,20 +992,19 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         }
                     }
 
-
-
+                
                     ?>
                     <div  style='padding:0px 0 10px 0; font-size:larger;'>
-                        <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>
+                        <h2 style='padding-bottom:10px'>Congratulations, your new database  [ <?php echo $newDBName;?>  ]  has been created</h2>
                         <?php
                         if(@$_REQUEST['db']!='' && @$_REQUEST['db']!=null){
                             ?>
                             <p style="padding-left:10px"><strong>Admin username:</strong> <?php echo $name ?></p>
-                            <p style="padding-left:10px"><strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>
+                            <p style="padding-left:10px"><strong>Admin password:</strong> &#60;<i>same as the account you are currently logged in as</i>&#62;</p>
                             <?php
                         }
                         ?>
-                        <p style="padding-left:10px">Click here to log in to your new database:</p>
+                        <p style="padding-left:10px">Log into your new database with the following link:</p>
                         <p style="padding-left:6em"><b><a href="<?php echo HEURIST_BASE_URL."?db=".$newDBName; ?>"
                                     title="" onclick="{closeDialog()}" target="blank">
                                     <?php echo HEURIST_BASE_URL."?db=".$newDBName; ?>
@@ -1013,7 +1013,9 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         <p style="padding-left:6em">
                             After logging in to your new database, we suggest you import some additional entity types from one of the<br />
                             curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
-                            using Database &gt; Structure &gt; Acquire from Databases or Database &gt; Structure &gt; Acquire from Templates</p>
+                            using Database &gt; Structure &gt; Acquire from Databases 
+                            <!--or Database &gt; Structure &gt; Acquire from Templates -->
+                            </p>
                     </div>
                     <?php
                     // TODO: automatically redirect to the new database in a new window

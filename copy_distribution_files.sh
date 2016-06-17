@@ -1,5 +1,7 @@
 #! /bin/sh
 
+# If you get 'file not found' when you try to run this script, it is due to the file being converted to DoS format (ctrl-M line endings)
+
 # copy_distribution_files.sh: Creates a distribution package in h4-build from a Heurist working directory
 # This file is intended for internal use of the development team and should normally be deleted from the install package.
 
