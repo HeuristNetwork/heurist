@@ -653,7 +653,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
                     $bd = fetch_relation_details($reln['dtl_RecID'], false);
                     array_push($dtValue, $bd);
                 }
-
+                
                 $dt = getDetailForSmarty(-1, $dtValue, 1, $recTypeID, $record["recID"]);
                 if($dt){
                     $record = array_merge($record, $dt);
@@ -917,31 +917,37 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                     $recordID = $value['id'];
                                 }
 
+                                $res0 = null;
                                 //get full record info
                                 if(@$loaded_recs[$recordID]){
+                                    
                                     //already loaded
-                                    $rec0 = $loaded_recs[$recordID];
-                                    $rec0["recOrder"] = count($res);
-                                    array_push($res, $rec0);
+                                    $res0 = $loaded_recs[$recordID];
 
-                                    $rectypeID = $rec0['recTypeID'];
+                                    $rectypeID = $res0['recTypeID'];
 
                                 }else{
 
                                     $record = loadRecord($recordID, false, true); //from search/getSearchResults.php
-
-                                    $res0 = null;
+                                    
                                     if(true){  //load linked records dynamically
                                         $res0 = getRecordForSmarty($record, $recursion_depth+1, $order_sub); //@todo - need to
                                         $order_sub++;
                                     }
-
-                                    if($res0){
-
-                                        if($rectypeID==null && @$res0['recRecTypeID']){
+                                    if($rectypeID==null && $res0 && @$res0['recRecTypeID']){
                                             $rectypeID = $res0['recRecTypeID'];
-                                        }
+                                    }
+                                }
+                                
+                                
+                                if($res0){
 
+                                        //unset rel fields to avoid conflic if this records was already loaded
+                                        if(@$res0["recRelationType"] ) unset($res0["recRelationType"]);
+                                        if(@$res0["recRelationNotes"] ) unset($res0["recRelationNotes"]);
+                                        if(@$res0["recRelationStartDate"] ) unset($res0["recRelationStartDate"]);
+                                        if(@$res0["recRelationEndDate"] ) unset($res0["recRelationEndDate"]);
+                                        
                                         //add relationship specific variables
                                         if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
                                             $res0["recRelationType"] = $value['RelTerm'];
@@ -956,13 +962,13 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                                 $res0["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
                                             }
                                         }
-
+                                        
                                         $loaded_recs[$recordID] = $res0;
                                         $res0["recOrder"] = count($res);
                                         array_push($res, $res0);
 
-                                    }
                                 }
+
                             }
                         }//for each repeated value
 
@@ -978,6 +984,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                             }*/
 
 
+//DEBUG2 if($recID==5434)    error_log('recid '.$recID.'   '.print_r($res, true));                            
 
                             if(@$dtname){
 

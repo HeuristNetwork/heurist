@@ -55,6 +55,7 @@ class DbEntityBase
        $this->system = $system;
        $this->data = $data;
        $this->_readConfig();
+       $this->init();
     }
 
     //
@@ -66,6 +67,12 @@ class DbEntityBase
         return is_array($this->config) && is_array($this->fields) && count($this->fields)>0;
     }
 
+    //
+    // config getter
+    //
+    public function init(){
+    }
+    
     //
     // config getter
     //

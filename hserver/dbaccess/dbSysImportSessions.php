@@ -27,6 +27,32 @@ require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 class DbSysImportSessions extends DbEntityBase
 {
+    private $is_table_exists = true;  
+    
+    
+    public function init(){
+        
+        $mysqli = $this->system->get_mysqli();
+    
+        $query = "CREATE TABLE IF NOT EXISTS `sysImportSessions` (
+        `imp_ID` int(11) unsigned NOT NULL auto_increment,
+        `ugr_ID` int(11) unsigned NOT NULL default 0,
+        `imp_table` varchar(255) NOT NULL default '',
+        `imp_session` text,
+        PRIMARY KEY  (`imp_ID`))";
+        if (!$mysqli->query($query)) {
+            $this->is_table_exists = false;
+        }
+        
+    }
+
+    /**
+    */
+    public function isvalid(){
+        return $this->is_table_exists && parent::isvalid();
+    }
+    
+    
     /**
     *  search import sessions
     * 

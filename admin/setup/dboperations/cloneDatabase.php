@@ -33,7 +33,6 @@
 
 */
 
-
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
