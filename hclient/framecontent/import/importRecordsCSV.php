@@ -123,26 +123,28 @@ function get_config_bytes($val) {
 
 <!-- STEP 1 upload data/select session -->    
 <div style="width:100%; height:100%;" id="divStep1">
-    <div class="ent_header" style="height:16em;padding:20px;">
-        <h2 style="display:inline-block;padding:5px;width:230px;text-align:right;">Select previously uploaded file</h2>
+    <div class="ent_header" style="height:18em;padding:20px;">
+        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
             <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
             <a href="#" id="btnClearAllSessions"
                             style="margin-left: 10px;">Clear all files</a>        
 
-        <h2 style="padding:10 0 10 80">OR</h2>
-        <h2 style="display:inline-block;padding:5px;width:230px;text-align:right;">Upload new file (CSV/TSV)</h2>
+        <h2 style="padding:10 0 10 120">OR</h2>
+        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Upload new file (CSV/TSV)</h2>
             <input type="file" id="uploadFile" style="display:none">
             <div id="btnUploadFile">Upload File</div>
         
-        <h2 style="padding:10 0 10 80">OR</h2>
-        <h2 style="display:inline-block;padding:5px;width:230px;text-align:right;">Paste delimited data in area below</h2>
+        <h2 style="padding:10 0 10 120">OR</h2>
+        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Paste delimited data in area below</h2>
         <div id="btnUploadData">Upload Data</div>
     </div>
-    <textarea id="sourceContent" class="ent_content_full" style="top:14em;width:100%;resize:none"></textarea>
+    <div class="ent_content_full" style="top:17em;width:100%;">
+        <textarea id="sourceContent" style="height:100%;width:100%;resize:none;"></textarea>
+    </div>
 </div>
 <!-- STEP 2 parse uploaded data -->
 <div style="width:100%; height:100%;display:none;" id="divStep2">
-    <div class="ent_header" style="height:26em;padding-top:1em;">
+    <div class="ent_header" style="height:27em;padding-top:1em;">
     
         <div id="btnBackToStart2"
                 style="margin-left:2em;"
@@ -287,10 +289,10 @@ function get_config_bytes($val) {
                 </div>
                 
                 
-                <div id="btnParseStep1" style="position:absolute;bottom:2px;left:2em">Analyse data</div>
+                <div id="btnParseStep1" style="position:absolute;bottom:1em;left:2em">Analyse data</div>
         </fieldset>            
         <div style="position:absolute;width:520px;left:440px;top:1.2em;bottom:0">
-                <div class="ent_header" style="border:none">
+                <div class="ent_header" style="border:none;display:none" id="divFieldRolesHeader">
                     <h2>Specify identifier and date columns</h2><br>
                     <div style="font-weight:bold;padding-bottom:1em">Identifiers columns are those that contain a Heurist record ID</div>
                     <table class="tbfields" style="font-weight:bold"><tr>
@@ -303,12 +305,12 @@ function get_config_bytes($val) {
                     list of field roles
                 </div>
                 <div  class="ent_footer">
-                    <div id="btnParseStep2" style="position:absolute;bottom:2px;right:80px">Continue</div>
+                    <div id="btnParseStep2" style="position:absolute;bottom:1em;right:80px">Continue</div>
                 </div>
         </div>
         
     </div>
-    <div class="ent_content_full" style="top:26em;padding:0.5em" id="divParsePreview">
+    <div class="ent_content_full" style="top:27em;padding:0.5em" id="divParsePreview">
     
     </div>
 </div>
@@ -349,7 +351,7 @@ function get_config_bytes($val) {
                     <select id="sa_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
                     </select>
                     <a href="#" id="btnSetPrimaryRecType"
-                            style="margin-left: 10px;">Change primary type</a>        
+                            style="margin-left: 10px; display:none;">Change primary type</a>        
                 </div>
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
@@ -504,19 +506,22 @@ function get_config_bytes($val) {
                 <div class="input-div">
                     <select id="sa_primary_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
                     </select>
-                </div>
-                <div class="heurist-helper1" style="display: block;">
-                    If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
+                </div>              
+                <div class="heurist-helper1" style="display: block; padding-bottom: 1em;">
+                    The primary record type is the one represented by each row of the input file. Additional record types may be imported  from selected columns prior to import of the primary, as determined by the dependencies below.
                 </div>
             </div>        
         </div>                    
-        <div style="padding-top: 2em;">
+        <div>
             <div class="header optional" style="vertical-align: top;min-width: 150px; width: 150px;">
-                <label>Dependency tree:</label>
+                <label>Dependencies:</label>
             </div>
             <div class="input-div">
-                <select id="sa_rectypes_preview" size="10" style="min-width:80%">
+                <select id="sa_rectypes_preview" size="6" style="min-width:80%">
                 </select>
+                <div class="heurist-helper1" style="display: block;">
+                    The creation of the primary record type from rows in the input file depends on the prior identification of other entities which will be connected via pointer fields or relationships. The tree above shows the dependencies of the primary record type determined from its pointer and relationship marker fields. Where an input entity matches an existing record, its ID value will be recorded in an ID field which can be used subsequently as a pointer field value; where no existing record is matched a new record is created and the new ID recorded
+                 </div>
             </div>
         </div>                    
         </fieldset>

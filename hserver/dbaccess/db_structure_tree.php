@@ -316,7 +316,7 @@
             case 'resource': // link to another record type
             case 'relmarker':
 
-                if(($mode==5 && $recursion_depth<6) || $recursion_depth<2){
+                if(($mode==5 && $recursion_depth<4) || $recursion_depth<2){
 
 
 
@@ -343,6 +343,7 @@
                             if($pointerRecTypeId=="" || count($rectype_ids)==0){ //unconstrainded
 
                                 $res = __getRecordTypeTree($system, null, $recursion_depth+1, $mode, $fieldtypes);
+                                //$res['constraint'] = 0;
 
                             }else{ //constrained pointer
 
@@ -351,6 +352,7 @@
 
                                 if(count($rectype_ids)>1){
                                     $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
+                                    $res['constraint'] = count($rectype_ids);
                                     $res['children'] = array();
                                 }
 
@@ -359,9 +361,11 @@
                                     if(count($rectype_ids)==1){//exact one rectype constraint
                                         //avoid redundant level in tree
                                         $res = $rt_res;
+                                        $res['constraint'] = 1;
                                         $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                                     }else if($rt_res!=null){
                                         array_push($res['children'], $rt_res);
+                                        $res['constraint'] = count($rt_res);
                                     }
                                 }
                             

@@ -46,6 +46,20 @@ top.HEURIST4.util = {
         }
 
     },
+    
+    //
+    //remove ian's trailing &gt; used to designate a pointer field and replace consistently with >>
+    //
+    trim_IanGt: function(name){
+            if(name){
+                name = name.trim();
+                if(name.substr(name.length-1,1)=='>') name = name.substr(0,name.length-2);
+                return name;
+            }else{
+                return '';
+            }
+    },
+    
 
     isNumber: function (n) {
         //return typeof n === 'number' && isFinite(n);

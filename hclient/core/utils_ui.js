@@ -571,16 +571,17 @@ top.HEURIST4.ui = {
         var rectypes = top.HEURIST4.rectypes;
         if(!rectypes) return selObj;
         
-        var one_constraint = (rectypeTree.type=='resource' && rectypeTree.rt_ids!='' 
-                            && !top.HEURIST4.util.isArrayNotEmpty(rectypeTree.children))
-        
+        var parent_Name = top.HEURIST4.util.trim_IanGt(rectypeTree.title);
                 
-        if(rectypeTree.type=='rectype' ||  one_constraint){
-        
+        if(rectypeTree.type=='rectype' ||  rectypeTree.constraint==1){
+            
+            var recTypeID = rectypeTree.key;
             if(rectypeTree.type=='rectype'){
-                rectypeName = rectypeTree.title;    
-            }else{                           
-                rectypeName = rectypes.names[rectypeTree.rt_ids];
+                rectypeName = parent_Name+((indent>0 && parent_Name!=rectypeTree.parent)?(' as '+rectypeTree.parent):'');    
+            }else {                           
+                recTypeID = rectypeTree.rt_ids;
+                rectypeName = rectypes.names[rectypeTree.rt_ids]+
+                        ((rectypes.names[rectypeTree.rt_ids]!=parent_Name)?(' as '+parent_Name):'');
             }
             
             
@@ -589,7 +590,7 @@ top.HEURIST4.ui = {
                 rectypeName = a.join('. ') + rectypeName;
             }
             
-            var opt = top.HEURIST4.ui.addoption(selObj, rectypeTree.key, rectypeName); 
+            var opt = top.HEURIST4.ui.addoption(selObj, recTypeID, rectypeName); 
             opt.className = "depth" + (indent<7)?indent:7;
             opt.depth = indent;        
             is_used = true;
@@ -597,7 +598,9 @@ top.HEURIST4.ui = {
         
         if(top.HEURIST4.util.isArrayNotEmpty(rectypeTree.children))
         for (index=0;index<rectypeTree.children.length;index++){
-               top.HEURIST4.ui.createRectypeTreeSelect(selObj, rectypeTree.children[index], null, 
+               var child = rectypeTree.children[index];
+               child.parent = parent_Name;
+               top.HEURIST4.ui.createRectypeTreeSelect(selObj, child, null, 
                     indent+(is_used?1:0) );
         }
 

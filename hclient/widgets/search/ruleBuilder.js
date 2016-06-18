@@ -296,14 +296,6 @@ $.widget( "heurist.ruleBuilder", {
     //update relation and target selectors
     _onSelectRectype: function(event){
 
-        //remove ian's trailing &gt; used to designate a pointer field and replace consistently with >>
-        function __trimeIanGt(name){
-            name = name.trim();
-            if(name.substr(name.length-1,1)=='>') name = name.substr(0,name.length-2);
-            return name;
-        }
-
-
         var rt_ID = this.select_source_rectype.val(); //event.target.value;
 
         //find all relation types
@@ -345,7 +337,7 @@ $.widget( "heurist.ruleBuilder", {
 
                     if(!top.HEURIST4.util.isempty(name)){
 
-                        name = __trimeIanGt(name);
+                        name = top.HEURIST4.util.trim_IanGt(name);
 
                         //find constraints
                         var constraints = details[dtyID][fi_rectypes];
@@ -393,7 +385,7 @@ $.widget( "heurist.ruleBuilder", {
 
                             if(!top.HEURIST4.util.isempty(name)){
 
-                                name = __trimeIanGt(name);
+                                name = top.HEURIST4.util.trim_IanGt(name);
 
                                 //find constraints
                                 var constraints = details[dtyID][fi_rectypes];
@@ -431,7 +423,7 @@ $.widget( "heurist.ruleBuilder", {
                                 if(isnotfound){ //it means this is reverse
 
                                     name = top.HEURIST4.detailtypes.typedefs[dtyID].commonFields[1];
-                                    name = __trimeIanGt(name);
+                                    name = top.HEURIST4.util.trim_IanGt(name);
 
                                     var rt_name = alldetails[rtyID].commonFields[0];
 

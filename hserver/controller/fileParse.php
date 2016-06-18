@@ -120,7 +120,7 @@ if(!$system->init(@$_REQUEST['db'])){
             $res = parse_content(); 
             
         }else if($action=='set_primary_rectype'){    
-            $res = setPrimaryRectype(@$_REQUEST['imp_ID'], @$_REQUEST['rty_ID']);
+            $res = setPrimaryRectype(@$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'], @$_REQUEST['is_preview']);
             
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missed or wrong");                
@@ -695,7 +695,7 @@ function getImportSession($imp_ID){
 //
 //
 //
-function setPrimaryRectype($imp_ID, $rty_ID){
+function setPrimaryRectype($imp_ID, $rty_ID, $is_preview){
 
      global $system;
     
@@ -705,9 +705,9 @@ function setPrimaryRectype($imp_ID, $rty_ID){
          return false;
      }
      //save session with new ID
-     if($imp_session['primary_rectype']!=$rty_ID){
+     if(!($is_preview==1 || $imp_session['primary_rectype']==$rty_ID)){
          $imp_session['primary_rectype'] = $rty_ID;
-         saveSession($imp_session);    
+         $res = saveSession($imp_session);    
      }
      //get dependent record types
      return dbs_GetRectypeStructureTree($system, $rty_ID, 5, 'resource');
