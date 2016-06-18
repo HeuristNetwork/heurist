@@ -219,6 +219,14 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
             <!-- already referenced above <link rel="stylesheet" type="text/css" href="../../../h4styles.css"> -->
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+            
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    var ele = document.getElementById("dbname");
+                    if(ele) ele.focus();
+                });
+            </script>
+            
             <?php
         }
         ?>
@@ -316,6 +324,9 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 if(ele.value==""){
                     ele.value = document.getElementById("ugr_Name").value.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,'');
                 }
+                
+                ele = document.getElementById("dbname");
+                if(ele) ele.focus();
             }
 
 
@@ -595,7 +606,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                         >
                                 </b>
                                 <b>_</b>
-                                <input type="text" maxlength="64" size="30" name="dbname"  onkeypress="{onKeyPress(event);}">
+                                <input type="text" maxlength="64" size="30" id="dbname" name="dbname"  onkeypress="{onKeyPress(event);}">
                                 <input id="btnCreateDb" type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
                                 <div style="padding-top:1em; max-width:500px">No spaces or punctuation other than underscore. Database names are case-sensitive. 
                                 <p><i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for personal
