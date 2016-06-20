@@ -26,6 +26,10 @@
         
     set_primary_rectype
         set main rectype for given session and returns list of dependent rectypes    
+
+    records
+        get records from import table    
+
         
     action
     1) step0
@@ -121,6 +125,24 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='set_primary_rectype'){    
             $res = setPrimaryRectype(@$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'], @$_REQUEST['is_preview']);
+            
+        }else if($action=='records'){    
+            
+            if(!@$_REQUEST['table']){
+                $system->addError(HEURIST_INVALID_REQUEST, '"table" parameter is not defined');                  
+            }
+
+            if(@$_REQUEST['imp_ID']){
+                $res = getRecordsFromImportTable($_REQUEST['table'], $_REQUEST['imp_ID']);    
+            }else{
+                $res = getRecordsFromImportTable2($_REQUEST['table'], 
+                            @$_REQUEST['id_field'],       
+                            (@$_REQUEST['is_insert']!=0), //by default insert
+                            @$_REQUEST['mapping'],
+                            @$_REQUEST['offset'], 
+                            @$_REQUEST['limit']
+                            );    
+            }
             
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missed or wrong");                
@@ -1052,6 +1074,11 @@ function assignRecordIds($params){
     }else{
         return $imp_session; //error
     }
+    
+    //keep counts 
+    if(!@$imp_session['counts']){
+        $imp_session['counts'] = array();
+    }
 
     if(count($disambiguation)>0){
         return $imp_session; //"It is not possible to proceed because of disambiguation";
@@ -1098,24 +1125,6 @@ function assignRecordIds($params){
         }
     }
     
-    //define field as index in session
-    @$imp_session['indexes'][$id_field] = $rty_ID;
-
-    //to keep mapping for index field  - OLD
-    if(!@$imp_session['indexes_keyfields']){
-        $imp_session['indexes_keyfields'] = array();
-    }
-    $imp_session['indexes_keyfields'][$id_field] = @$imp_session['validation']['mapped_fields'];
-
-    //to keep mapping for index field
-    if(!@$imp_session['indexes_keyfields']){
-        $imp_session['mapping_keys'] = array();
-    }
-    
-    if(!@$params['skip_match']){
-        $imp_session['mapping_keys'][$rty_ID] = @$params['mapping'];
-    }
-
 
     if(count($records)>0){
         //update ID values in import table - repalce id to found
@@ -1133,7 +1142,7 @@ function assignRecordIds($params){
         }
     
     }else{
-        //find records to inset and update if matching is skipped
+        //find records to insert and update if matching is skipped
         
         // find records to update
         $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
@@ -1143,12 +1152,16 @@ function assignRecordIds($params){
 
                 $imp_session['validation']['count_update'] = $cnt;
                 $imp_session['validation']['count_update_rows'] = $cnt;
+                
+                /*
                 //find first 100 records to display
                 $select_query = "SELECT ".$id_field.", imp_id FROM ".$import_table
                 ." left join Records on rec_ID=".$id_field
                 ." WHERE rec_ID is not null and ".$id_field.">0"
                 ." ORDER BY ".$id_field." LIMIT 5000";
-                $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query, false);
+                $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query);
+                */
+                $imp_session['validation']['recs_update'] = array(); //do not send all records to client side
         }
 
         // find records to insert
@@ -1163,14 +1176,40 @@ function assignRecordIds($params){
                 $imp_session['validation']['count_insert'] = $cnt;
                 $imp_session['validation']['count_insert_rows'] = $cnt;
 
+                /*
                 //find first 100 records to display
                 $select_query = "SELECT imp_id FROM ".$import_table
                         .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
-                $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query, false);
+                $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
+                */
+                $imp_session['validation']['recs_insert'] = array(); //do not send all records to client side
         }
         
         //$imp_session['validation']['count_insert'] = $imp_session['reccount'];
     }
+    
+    //define field as index in session
+    @$imp_session['indexes'][$id_field] = $rty_ID;
+
+    //to keep mapping for index field  - OLD
+    if(!@$imp_session['indexes_keyfields']){
+        $imp_session['indexes_keyfields'] = array();
+    }
+    $imp_session['indexes_keyfields'][$id_field] = @$imp_session['validation']['mapped_fields'];
+
+    //to keep mapping for index field
+    if(!@$imp_session['mapping_keys']){
+        $imp_session['mapping_keys'] = array();
+    }
+    
+    if(@$params['skip_match']!=1){
+        $imp_session['mapping_keys'][$rty_ID] = @$params['mapping'];
+    }
+    
+    $imp_session['counts'][$rty_ID] = array(
+                    $imp_session['validation']['count_update'], $imp_session['validation']['count_update_rows'],
+                    $imp_session['validation']['count_insert'], $imp_session['validation']['count_insert_rows']);
+    
 
     $ret_session = $imp_session;
     unset($imp_session['validation']);  //save session without validation info
@@ -1214,6 +1253,69 @@ function  trim_lower_accent($item){
 
 function  trim_lower_accent2(&$item, $key){
     $item = trim_lower_accent($item);
+}
+
+/**
+* load records from import table
+* 
+* @param mixed $rec_id
+* @param mixed $import_table
+*/
+function getRecordsFromImportTable($import_table, $imp_ids){
+    global $system;
+
+    $mysqli = $system->get_mysqli();
+    
+    if(is_array($imp_ids)){
+        $imp_ids = implode(',',$imp_ids);
+    }
+    
+    $query = "SELECT * FROM $import_table WHERE imp_id IN ($imp_ids)";
+    $res = mysql__select_array($mysqli, $query);
+    return $res;
+}
+
+function getRecordsFromImportTable2($import_table, $id_field, $is_insert, $mapping, $offset, $limit=100 ){
+    global $system;
+
+    $mysqli = $system->get_mysqli();
+
+    if(!$id_field){
+        $where  = '1';
+        $order_field = 'imp_id';
+    }else if($is_insert){
+        $where  = " ($id_field<0 OR $id_field IS NULL) ";
+        $order_field = $id_field;
+    }else{
+        $where  = " ($id_field>0) ";
+        $order_field = $id_field;
+    }
+    
+    if(!($offset>0)) $offset = 0;
+    if(!($limit>0)) $limit = 100;
+    
+    if($mapping){
+        $field_idx = array_keys($mapping);
+        
+        $sel_fields = array($order_field);
+        
+        foreach($field_idx as $idx){
+            if('field_'.$idx!=$id_field)
+                array_push($sel_fields, 'field_'.$idx);        
+        }
+        if($is_insert && count($sel_fields)>1){
+            $order_field = $sel_fields[1];    
+        }
+        
+        $sel_fields = (($is_insert)?'DISTINCT ':'').implode(',',$sel_fields);
+    }else{
+        $sel_fields = '*';
+    }
+    
+    
+    $query = "SELECT $sel_fields FROM $import_table WHERE $where ORDER BY $order_field LIMIT $limit OFFSET $offset";
+    $res = mysql__select_all($mysqli, $query, 0, 30);
+    return $res;
 }
 
 
@@ -1345,6 +1447,8 @@ function validateImport($params){
 
                 $imp_session['validation']['count_update'] = $cnt;
                 $imp_session['validation']['count_update_rows'] = $cnt;
+                
+                /*
                 //find first 100 records to preview
                 $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
                 ." FROM ".$import_table
@@ -1352,6 +1456,8 @@ function validateImport($params){
                 ." WHERE rec_ID is not null and ".$id_field.">0"
                 ." ORDER BY ".$id_field." LIMIT 5000";
                 $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query, false);
+                */
+                $imp_session['validation']['recs_update'] = array();
 
         }
 
@@ -1366,10 +1472,12 @@ function validateImport($params){
                     $imp_session['validation']['count_insert'] = $cnt1+$cnt2;
                     $imp_session['validation']['count_insert_rows'] = $cnt1+$cnt2;
 
-                    //find first 100 records to display
+                    /*find first 100 records to display
                     $select_query = 'SELECT imp_id, '.implode(',',$sel_query)
                             .' FROM '.$import_table.' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
                     $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query, false);
+                    */
+                    $imp_session['validation']['recs_insert'] = array();
             }
         }
         //additional query for non-existing IDs
@@ -1379,6 +1487,7 @@ function validateImport($params){
             $imp_session['validation']['count_insert'] = $imp_session['validation']['count_insert']+$cnt_recs_insert_nonexist_id;
             $imp_session['validation']['count_insert_rows'] = $imp_session['validation']['count_insert'];
 
+            /*
             $select_query = "SELECT imp_id, ".implode(",",$sel_query)
             ." FROM ".$import_table
             ." LEFT JOIN Records on rec_ID=".$id_field
@@ -1390,7 +1499,8 @@ function validateImport($params){
                 }else{
                     $imp_session['validation']['recs_insert'] = $res;
                 }
-            }
+            }*/
+            $imp_session['validation']['recs_insert'] = array();
         }
 
 

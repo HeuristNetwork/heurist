@@ -370,7 +370,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         var ele = $(event.target);
                         var sleEle = ele.parents('#divSelectPrimaryRecType').find('#sa_rectypes_preview');
                         _loadRectypeDependencies( sleEle.get(0), ele.val() ); 
-console.log('on change '+ele.val());                        
                 });
             }
         
@@ -540,11 +539,12 @@ console.log('on change '+ele.val());
             
         });
         
-        _adjustButtonPos();
         //init selectors
         _initFieldMapppingSelectors();
         //load data
         _getValuesFromImportTable();            
+        //
+        
     }    
 
     //
@@ -663,8 +663,62 @@ console.log('on change '+ele.val());
             
         }
         
+        
+        //show counts
+        if(rtyID>0){
+            
+            counts = _getInsertUpdateCounts();
+            
+            $('#mrr_cnt_update').text(counts[0]);                                 
+            $('#mrr_cnt_insert').text(counts[2]);                                 
+            if(counts[1]>0){
+                $('#mrr_cnt_update_rows').text(counts[1]);                                     
+                $('.mrr_update').show();                                     
+            }else{
+                $('.mrr_update').hide();                                     
+            }
+            if(counts[3]>0){
+                $('#mrr_cnt_insert_rows').text(counts[3]);                                     
+                $('.mrr_insert').show();                                     
+            }else{
+                $('.mrr_insert').hide();                                     
+            }
+
+        
+            $('#divFieldMapping2').show();
+        }else{
+            $('#divFieldMapping2').hide();
+        }
+        
+        
+        
     }
     
+    function _getInsertUpdateCounts(){
+        
+        var rtyID = $("#sa_rectype").val();
+        if(rtyID>0){
+            
+            var counts = imp_session['counts'];
+            if(counts) counts = counts[rtyID];
+            if(!counts) {
+                counts = [0,0,0,0];
+                //reccount - total records in import table
+                //uniqcnt - unique values per column
+                var idx = _getFieldIndexForIdentifier(rtyID);
+                if(idx>=0){
+                    counts[2] = counts[3] = imp_session['uniqcnt'][idx];
+                }else{
+                    //all to be inserted
+                    counts[2] = counts[3] = imp_session['reccount'];
+                }
+            }
+            return counts;
+        }else{
+            return null;
+        }
+        
+    }
     
     //
     // Loads values for record from import table (preview values in main table)
@@ -701,7 +755,56 @@ console.log('on change '+ele.val());
             }else if (currentId>recCount){
                 currentId = recCount;
             }
+            
+            
+            var request = { action: 'records',
+                            imp_ID: currentId,
+                            table:currentTable,
+                            id: top.HEURIST4.util.random()
+                               };
+            
+            top.HAPI4.parseCSV(request, function( response ){
+                
+                //that.loadanimation(false);
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                
+                    var response = response.data;
+                    
+                        var i;
+                        $("#current_row").html(response[0]);
 
+                        for(i=1; i<response.length;i++){
+                            if(top.HEURIST4.util.isnull(response[i])){
+                                sval = "&nbsp;";
+                            }else{
+
+                                var isIndex =  !top.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
+                                
+                                var sval = response[i].substr(0,100);
+
+                                if(isIndex && response[i]<0){
+                                    sval = "&lt;New Record&gt;";
+                                }else if(sval==""){
+                                    sval = "&nbsp;";
+                                }else if(response[i].length>100){ //add ... 
+                                    sval = sval + '&#8230;';
+                                }
+                            }
+
+                            if($("#impval"+(i-1)).length>0)
+                                $("#impval"+(i-1)).html(sval);
+                        }
+
+                    
+                }else{
+                    _showStep(1);
+                    top.HEURIST4.msg.showMsgErr(response);
+                }
+
+            });        
+            
+            
+/*
             $.ajax({
                 url: top.HAPI4.basePathV3+'import/delimited/importCSV.php',
                 type: "POST",
@@ -740,8 +843,11 @@ console.log('on change '+ele.val());
                         }
                     }
                 }
-            });
+            });*/
         }
+        
+        _adjustButtonPos();
+        
         return false;
     }
     
@@ -1118,7 +1224,7 @@ console.log('on change '+ele.val());
                 action    : 'step3',
                 sa_rectype: rtyID,
                 mapping   : field_mapping,
-                skip_match: isSkipMatch
+                skip_match: isSkipMatch?1:0
             };
             if(key_idx>=0){
                 request['idfield']=imp_session['columns'][key_idx]; //key_idx;            
@@ -1404,8 +1510,177 @@ console.log('on change '+ele.val());
                 });
         
     } 
+
+    //
+    //  Request to server side and get records for insert ot update from import table
+    // 
+    function _showRecords2(mode, is_download){
      
+        var s = '';
+        var container = $('#divPopupPreview');
+        var dlg_options = {};
+        var $dlg;
+        var offset = 0, limit=10, 
+            recCount = _getInsertUpdateCounts(),
+            start_idx = 0;
+            
+        if(recCount==null) return;
+        
+        recCount = recCount[mode=='insert'?3:1];
+        
+        
+        dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
+        
+        s = '<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
+            +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="first" class="ui-icon ui-icon-seek-first"/></a>'
+            +'<a href="#" class="navigation2" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>'
+            +'<div style="display: inline-block;vertical-align: super;">Range <span id="current_range"></span></div>'
+            +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>'
+            +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a></div>';
+        
+            
+        s = s + '<div class="ent_content_full"><table class="tbmain" style="font-size:0.9em" width="100%"><thead><tr>'; 
+
+        var id_field = null;         
+        var rtyID = $("#sa_rectype").val();
+        
+        var index_field_idx = _getFieldIndexForIdentifier(rtyID);
+        if(index_field_idx>=0){
+             id_field = 'field_'+index_field_idx;
+        }
      
+        
+        var mapping_flds = null;
+        if(currentStep!=3){  //import step
+            mapping_flds = (imp_session['mapping_flds'])?imp_session['mapping_flds'][rtyID]:{};
+        }
+        if(!mapping_flds || $.isEmptyObject(mapping_flds)){
+            mapping_flds = (imp_session['mapping_keys'])?imp_session['mapping_keys'][rtyID]:{};
+        }
+        //var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'][rtyID];
+        if(!mapping_flds) mapping_flds = {};
+        
+        
+        //HEADER - field names
+        var j, i=0, fieldnames = Object.keys(mapping_flds);
+        
+        if(mode=="update"){
+            s = s + '<th width="30px">Record ID</th>';
+        }else if(fieldnames.length==0) {
+            s = s + '<th width="30px">Line #</th>';
+        }else{
+            start_idx = 1;
+        }
+        
+        if(fieldnames.length>0){
+            for(;i<fieldnames.length;i++){
+                var colname = imp_session['columns'][fieldnames[i]];
+                if(fieldnames[i]!=index_field_idx){
+                    s = s + '<th>'+colname+'</th>';
+                }
+            }
+        }else{  //all
+        
+            fieldnames = imp_session['columns'];
+            for(;i<fieldnames.length;i++){
+                var colname = fieldnames[i];
+                s = s + '<th>'+colname+'</th>';
+            }
+        }
+
+        s = s + '</tr></thead><tbody></tbody></table></div></div>';
+        
+        dlg_options['element'] = container.get(0);
+        container.html(s);
+            
+        $dlg = top.HEURIST4.msg.showElementAsDialog(dlg_options);
+        
+        $.each($dlg.find('.navigation2'), function(idx, item){
+            $(item).click( __loadRecordsFromImportTable );
+        })
+        
+        
+        __loadRecordsFromImportTable();
+        
+        
+        function __loadRecordsFromImportTable(event){
+        
+            if(!imp_session) return;
+            
+            var currentTable = imp_session['import_table']; 
+        
+            if(currentTable && recCount>0){
+            
+                    var dest = 0;
+                    if(event){
+                        dest = $(event.target).attr('data-dest');  
+                    } 
+                    
+                    
+                    if(Number(dest)=='first'){
+                        offset = 0;
+                    }else if(dest=='last'){
+                        offset = Math.floor(recCount/limit) * limit;
+                    }else{
+                        dest = Number(dest);
+                        if(isNaN(dest)){
+                            offset = 0;
+                        }else{
+                            offset = offset + dest*limit;
+                        }
+                    }
+                    if (offset>recCount){
+                        offset = Math.floor(recCount/limit) * limit;
+                    }                    
+                    if(offset<0){
+                        offset = 0;
+                    }
+
+                    var request = { action: 'records',
+                                    id_field: id_field,
+                                    mapping: mapping_flds,
+                                    is_insert: (mode=='insert')?1:0,
+                                    is_download: (is_download)?1:0,
+                                    offset: offset,
+                                    limit: limit,
+                                    table:currentTable,
+                                    mapping:mapping_flds,
+                                    id: top.HEURIST4.util.random()
+                                       };
+                    
+                    top.HAPI4.parseCSV(request, function( response ){
+                        
+                        //that.loadanimation(false);
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        
+                                var response = response.data;
+                                
+                                var table = $dlg.find('.tbmain > tbody');
+                            
+                                var i,j, s = '';
+                                 $dlg.find("#current_range").html( offset+1)+':'+(offset+limit) );
+
+                                for(i=0; i<response.length;i++){
+                                    var row = response[i];
+                                    if(start_idx>0) row.shift();
+                                    s = s+'<tr>';
+                                    s = s+'<td>'+ row.join('</td><td>') +'</td>';
+                                    s = s+'</tr>';
+                                }
+                                
+                                table.html(s);
+                            
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+
+                    });        
+            }
+        }
+        
+     
+    }
+    
     //
     //  Compose table and show it in popup
     // 
@@ -1753,6 +2028,7 @@ console.log('on change '+ele.val());
         getVersion: function () {return _version;},
 
         showRecords: function (mode) {_showRecords(mode)},
+        showRecords2: function (mode, is_download) {_showRecords2(mode, is_download)},
         
         onUpdateModeSet:function (event){
             _onUpdateModeSet();

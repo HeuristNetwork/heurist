@@ -228,19 +228,24 @@
     * 
     * @param mixed $mysqli
     * @param mixed $query
-    * @param mixed $withindex 
+    * @param mixed $mode 
+    *                   0 - 2 dim array of records
+    *                   1 - array of records with index from first column
     * @return []
     */
-    function mysql__select_all($mysqli, $query, $withindex=true) {
+    function mysql__select_all($mysqli, $query, $mode=0, $i_trim=0) {
         $result = null;
         if($mysqli){
             $res = $mysqli->query($query);
             if ($res){
                 $result = array();
                 while ($row = $res->fetch_row()){
-                    if($withindex){
-                        $result[$row[0]] = stripAccents(trim($row[1]));
+                    if($mode==1){
+                        $rec_id = array_shift($row);
+                        if($i_trim>0) array_walk($row, 'trim_item', $i_trim);
+                        $result[$rec_id] = $row;  //stripAccents(trim($row[1]));
                     }else{
+                        if($i_trim>0) array_walk($row, 'trim_item', $i_trim);
                         array_push($result, $row);
                     }
                 }
@@ -462,6 +467,11 @@
             }
 
             return $res;
+    }
+
+    
+    function trim_item(&$item, $key, $len){
+        $item = substr(trim($item),0,$len);
     }
 
     //

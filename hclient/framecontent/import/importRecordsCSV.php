@@ -71,25 +71,6 @@ function get_config_bytes($val) {
                 border-bottom: 1px solid lightgray;
                 border-top: 1px solid lightgray;
             }
-            .tbmain th
-            {
-                border-left: 1px solid lightgray;
-                border-bottom: none;
-                padding:2px;
-            }
-            .tbmain td
-            {
-                border-left: 1px solid lightgray;
-                padding:2px;
-            }
-            .tbmain
-            {
-                border-top: 1px solid gray;
-                border-right: 1px solid gray;
-                border-bottom: 1px solid gray;
-                border-left: 1px solid gray;
-                font-size: 1em;
-            }        
             .tbpreview{
                 font-size:0.9em;
                 margin:10px;                
@@ -351,7 +332,7 @@ function get_config_bytes($val) {
                     <select id="sa_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
                     </select>
                     <a href="#" id="btnSetPrimaryRecType"
-                            style="margin-left: 10px; display:none;">Change primary type</a>        
+                            style="margin-left: 10px; xdisplay:none;">Change primary type</a>        
                 </div>
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
@@ -391,7 +372,26 @@ function get_config_bytes($val) {
     </div>
     <div class="ent_footer" style="height:11em;padding: 0em 0.5em;" id="divImportActions">
 
-        <div id="divFieldMapping2"></div>
+        <div id="divFieldMapping2" style="display:none;">
+            <table class="tbresults">
+                <tbody>
+                                    <tr><td width="130">**Records matched</td>
+                                        <td width="50" id="mrr_cnt_update"></td>
+                                        <td width="50" class="mrr_update">rows:</td>
+                                        <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
+                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
+                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
+                                    </tr>
+                                    <tr><td>**New records to create</td>
+                                        <td width="50" id="mrr_cnt_insert"></td>
+                                        <td width="50" class="mrr_insert">rows:</td>
+                                        <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>
+                                        <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',false)">show</a></td>
+                                        <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',true)">download</a></td>
+                                    </tr>
+                </tbody>
+            </table>
+        </div>
         
         <div id="divMatchingResult" style="display:none;">
             <table class="tbresults">

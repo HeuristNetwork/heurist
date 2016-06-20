@@ -209,7 +209,7 @@ class DbSysImportSessions extends DbEntityBase
         $mysqli = $this->system->get_mysqli();
 
         $res = mysql__select_all($mysqli,
-                "select imp_id, imp_session from sysImportSessions".$where);
+                "select imp_id, imp_session from sysImportSessions".$where, 1);
 
         if(!$res){
             $this->system->addError(HEURIST_NOT_FOUND, 
