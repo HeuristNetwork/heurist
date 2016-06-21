@@ -2188,6 +2188,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
             }//foreach multivalue index
 
             if($is_mulivalue_index && is_array($new_record_ids) && count($new_record_ids)>0){
+                //save record ids in import table
                 updateRecIds($import_table, end($row), $id_field, $new_record_ids, $csv_mvsep);
                 $new_record_ids = array(); //to save in import table
             }
@@ -2209,8 +2210,23 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
               'updated'=>$rep_updated,
               'total'=>$tot_count,
               'skipped'=>$rep_skipped
-            );            
+            );   
 
+        //update counts array                
+        if(!@$imp_session['counts']) $imp_session['counts'] = array();
+        $prev = array(0,0,0,0);
+        if(@$imp_session['counts'][$recordType]){
+            $prev = $imp_session['counts'][$recordType];
+        }
+        $imp_session['counts'][$recordType] = array(
+              $rep_updated+$rep_added, $rep_processed, 0,0
+        );                                                                
+        if($ignore_insert){
+            $imp_session['counts'][$recordType][2] = $prev[2];
+            $imp_session['counts'][$recordType][3] = $prev[3];
+        }
+        
+                                                                         
         if($mode_output!='array'){
 
             print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";

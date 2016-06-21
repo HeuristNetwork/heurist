@@ -44,21 +44,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     .button({label: top.HR('Upload Data'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(_uploadData);
 
-        //get list of sessions and fill selector                        
-        var selImportID = $('#selImportId').change(function(e){
-           if(e.target.value>0){
-                imp_ID = e.target.value;      
-                _loadSession();    
-           }
-        });
-        top.HEURIST4.ui.createEntitySelector( selImportID.get(0), 
-                    {entity:'SysImportSessions', filter_group:'0,'+top.HAPI4.currentUser['ugr_ID']}, 
-                    top.HR('select uploaded file...'),
-                    function(){
-                        top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), selImportID.find('option').length<2 );
-                    });
-                        
-        $('#btnClearAllSessions').click(_doClearAllSessions);
+       $('#btnClearAllSessions').click(_doClearSession);
         
         //upload file to server and store intemp file
         var uploadData = null;
@@ -197,6 +183,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         });
         top.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
         $('#divFieldRolesHeader').hide();
+        
+        //get list of sessions and fill selector                        
+        var selImportID = $('#selImportId').change(function(e){
+           if(e.target.value>0){
+                imp_ID = e.target.value;      
+                _loadSession();    
+           }
+        });
+        top.HEURIST4.ui.createEntitySelector( selImportID.get(0), 
+                    {entity:'SysImportSessions', filter_group:'0,'+top.HAPI4.currentUser['ugr_ID']}, 
+                    top.HR('select uploaded file...'),
+                    function(){
+                        top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), selImportID.find('option').length<2 );
+                    });
+        
                         
         //init STEP 3 - matching and import
         $('#btnBackToStart')
@@ -209,13 +210,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     .css({'width':'180px'})
                     .button({label: top.HR('Download data to file'), icons:{secondary: "ui-icon-circle-arrow-s"}})
                     .click(function(e) {
-                            
+                            _showRecords2('all', true)  
                         });
         $('#btnClearFile')
                     .css({'width':'160px'})
                     .button({label: top.HR('Clear uploaded file'), icons:{secondary: "ui-icon-circle-close"}})
                     .click(function(e) {
-                            
+                            _doClearSession(true);
                         });
                         
         $('#sa_rectype').change(_initFieldMapppingTable);               
@@ -228,9 +229,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
         //session id is defined - go to 3d step at once        
         if(imp_ID>0){
-              _loadSession();
+            _loadSession();
+        }else{
+            _showStep(1);
         }
-        _showStep(1);
         
         
         //--------------------------- action buttons init
@@ -296,14 +298,30 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     // Remove all sessions
     //
-    function _doClearAllSessions(){
+    function _doClearSession(is_current){
+        
+        if(is_current==true){
+             recID = imp_ID;
+        }else{
+             recID = 0;
+        }
         
         top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), true);
-        top.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportSessions', recID:0},
+        top.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportSessions', recID:recID},
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
-                            $('#selImportId').empty();
-                            top.HEURIST4.msg.showMsgDlg('Import sessions were cleared','Info');
+                            if(is_current==true){
+                                $('#selImportId > option[value="'+recID+'"]').remove();
+                                
+                                if($('#selImportId > option').length>1){
+                                    top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), false);
+                                }
+                                _showStep(1);
+                                top.HEURIST4.msg.showMsgDlg('Import session was cleared','Info');
+                            }else{
+                                $('#selImportId').empty();
+                                top.HEURIST4.msg.showMsgDlg('Import sessions were cleared','Info');
+                            }
                         }else{
                             top.HEURIST4.msg.showMsgErr(response);
                             top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), false);
@@ -1165,9 +1183,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     var item = $(item);
                     if(item.is(':checked')){ // && item.val()!=key_idx){
                         var field_type_id = $('#sa_dt_'+item.val()).val();
-                        if(field_type_id){
+                        if(field_type_id && item.val()!=key_idx){
                             field_mapping[item.val()] = field_type_id;
-                            if(item.val()!=key_idx) haveMapping = true;
+                            haveMapping = true;
                         }
                     }
                 });
@@ -1526,20 +1544,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
         if(recCount==null) return;
         
-        recCount = recCount[mode=='insert'?3:1];
-        
-        
-        dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
-        
-        s = '<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
-            +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="first" class="ui-icon ui-icon-seek-first"/></a>'
-            +'<a href="#" class="navigation2" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>'
-            +'<div style="display: inline-block;vertical-align: super;">Range <span id="current_range"></span></div>'
-            +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>'
-            +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a></div>';
-        
-            
-        s = s + '<div class="ent_content_full"><table class="tbmain" style="font-size:0.9em" width="100%"><thead><tr>'; 
+        recCount = mode=='all'?imp_session['reccount']:recCount[mode=='insert'?3:1];
 
         var id_field = null;         
         var rtyID = $("#sa_rectype").val();
@@ -1560,45 +1565,59 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         //var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'][rtyID];
         if(!mapping_flds) mapping_flds = {};
         
+        if(!is_download){
         
-        //HEADER - field names
-        var j, i=0, fieldnames = Object.keys(mapping_flds);
-        
-        if(mode=="update"){
-            s = s + '<th width="30px">Record ID</th>';
-        }else if(fieldnames.length==0) {
-            s = s + '<th width="30px">Line #</th>';
-        }else{
-            start_idx = 1;
-        }
-        
-        if(fieldnames.length>0){
-            for(;i<fieldnames.length;i++){
-                var colname = imp_session['columns'][fieldnames[i]];
-                if(fieldnames[i]!=index_field_idx){
+            dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
+            
+            s = '<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
+                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="first" class="ui-icon ui-icon-seek-first"/></a>'
+                +'<a href="#" class="navigation2" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>'
+                +'<div style="display: inline-block;vertical-align: super;">Range <span id="current_range"></span></div>'
+                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>'
+                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a></div>';
+            
+                
+            s = s + '<div class="ent_content_full"><table class="tbmain" style="font-size:0.9em" width="100%"><thead><tr>'; 
+
+            //HEADER - field names
+            var j, i=0, fieldnames = Object.keys(mapping_flds);
+            
+            if(mode=="update"){
+                s = s + '<th width="30px">Record ID</th>';
+            }else if(fieldnames.length==0) {
+                s = s + '<th width="30px">Line #</th>';
+            }else{
+                start_idx = 1;
+            }
+            
+            if(fieldnames.length>0){
+                for(;i<fieldnames.length;i++){
+                    var colname = imp_session['columns'][fieldnames[i]];
+                    if(fieldnames[i]!=index_field_idx){
+                        s = s + '<th>'+colname+'</th>';
+                    }
+                }
+            }else{  //all
+            
+                fieldnames = imp_session['columns'];
+                for(;i<fieldnames.length;i++){
+                    var colname = fieldnames[i];
                     s = s + '<th>'+colname+'</th>';
                 }
             }
-        }else{  //all
-        
-            fieldnames = imp_session['columns'];
-            for(;i<fieldnames.length;i++){
-                var colname = fieldnames[i];
-                s = s + '<th>'+colname+'</th>';
-            }
-        }
 
-        s = s + '</tr></thead><tbody></tbody></table></div></div>';
-        
-        dlg_options['element'] = container.get(0);
-        container.html(s);
+            s = s + '</tr></thead><tbody></tbody></table></div></div>';
             
-        $dlg = top.HEURIST4.msg.showElementAsDialog(dlg_options);
+            dlg_options['element'] = container.get(0);
+            container.html(s);
+                
+            $dlg = top.HEURIST4.msg.showElementAsDialog(dlg_options);
+            
+            $.each($dlg.find('.navigation2'), function(idx, item){
+                $(item).click( __loadRecordsFromImportTable );
+            })
         
-        $.each($dlg.find('.navigation2'), function(idx, item){
-            $(item).click( __loadRecordsFromImportTable );
-        })
-        
+        }
         
         __loadRecordsFromImportTable();
         
@@ -1632,49 +1651,69 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     if (offset>recCount){
                         offset = Math.floor(recCount/limit) * limit;
                     }                    
-                    if(offset<0){
+                    if(offset<0){        
                         offset = 0;
                     }
 
                     var request = { action: 'records',
                                     id_field: id_field,
                                     mapping: mapping_flds,
-                                    is_insert: (mode=='insert')?1:0,
-                                    is_download: (is_download)?1:0,
-                                    offset: offset,
-                                    limit: limit,
+                                    mode: mode,
+                                    output: (is_download)?'csv':'json',
+                                    offset: is_download?0:offset,
+                                    limit: is_download?0:limit,
                                     table:currentTable,
                                     mapping:mapping_flds,
                                     id: top.HEURIST4.util.random()
                                        };
+                                       
+                    if(is_download){
+
+                       request['db'] = top.HAPI4.database;
+                       request['mapping'] = JSON.stringify(request['mapping']);
+                        
+                       var keys = Object.keys(request) 
+                       var params = [];
+                       for(var k=0;k<keys.length;k++){
+                           if(!top.HEURIST4.util.isempty(request[keys[k]])){
+                                params.push(keys[k]+'='+request[keys[k]]);
+                           }
+                       }
+                       var params = params.join('&');
+                       var url = top.HAPI4.basePathV4 + 'hserver/controller/fileParse.php?'+params;
+                        
+                       top.HEURIST4.util.downloadURL(url);
+                        
+                    }else{
                     
-                    top.HAPI4.parseCSV(request, function( response ){
-                        
-                        //that.loadanimation(false);
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
-                        
-                                var response = response.data;
-                                
-                                var table = $dlg.find('.tbmain > tbody');
+                        top.HAPI4.parseCSV(request, function( response ){
                             
-                                var i,j, s = '';
-                                 $dlg.find("#current_range").html( offset+1)+':'+(offset+limit) );
-
-                                for(i=0; i<response.length;i++){
-                                    var row = response[i];
-                                    if(start_idx>0) row.shift();
-                                    s = s+'<tr>';
-                                    s = s+'<td>'+ row.join('</td><td>') +'</td>';
-                                    s = s+'</tr>';
-                                }
-                                
-                                table.html(s);
+                            //that.loadanimation(false);
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
                             
-                        }else{
-                            top.HEURIST4.msg.showMsgErr(response);
-                        }
+                                    var response = response.data;
+                                    
+                                    var table = $dlg.find('.tbmain > tbody');
+                                
+                                    var i,j, s = '';
+                                    $dlg.find("#current_range").html( (offset+1)+':'+(offset+limit) );
 
-                    });        
+                                    for(i=0; i<response.length;i++){
+                                        var row = response[i];
+                                        if(start_idx>0) row.shift();
+                                        s = s+'<tr>';
+                                        s = s+'<td>'+ row.join('</td><td>') +'</td>';
+                                        s = s+'</tr>';
+                                    }
+                                    
+                                    table.html(s);
+                                
+                            }else{
+                                top.HEURIST4.msg.showMsgErr(response);
+                            }
+
+                        });        
+                    }
             }
         }
         
@@ -2003,6 +2042,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         if(page==1){
             $('#selImportId').val('');  //clear selection
+            imp_ID = 0;
         }else if(page>2){  //matching and import
         
             $("div[class*='step'],h2[class*='step']").hide();

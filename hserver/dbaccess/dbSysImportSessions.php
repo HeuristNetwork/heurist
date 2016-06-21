@@ -218,7 +218,8 @@ class DbSysImportSessions extends DbEntityBase
         }
 
         //drop import data
-        foreach($res as $id => $session){
+        foreach($res as $row){
+        foreach($row as $id => $session){
 
             $session = json_decode($session, true);
             $query = "drop table IF EXISTS ".$session['import_table'];
@@ -228,6 +229,7 @@ class DbSysImportSessions extends DbEntityBase
                         'Cannot drop import session table: '.$session['import_table'].' '.$mysqli->error);
                 return false;
             }
+        }
         }
 
         if (!$mysqli->query("delete from sysImportSessions ".$where)) {

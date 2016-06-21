@@ -131,17 +131,35 @@ if(!$system->init(@$_REQUEST['db'])){
             if(!@$_REQUEST['table']){
                 $system->addError(HEURIST_INVALID_REQUEST, '"table" parameter is not defined');                  
             }
-
+            
+            
             if(@$_REQUEST['imp_ID']){
-                $res = getRecordsFromImportTable($_REQUEST['table'], $_REQUEST['imp_ID']);    
+                $res = getRecordsFromImportTable1($_REQUEST['table'], $_REQUEST['imp_ID']);    
             }else{
                 $res = getRecordsFromImportTable2($_REQUEST['table'], 
                             @$_REQUEST['id_field'],       
-                            (@$_REQUEST['is_insert']!=0), //by default insert
+                            @$_REQUEST['mode'], //all, insert, update
                             @$_REQUEST['mapping'],
                             @$_REQUEST['offset'], 
-                            @$_REQUEST['limit']
+                            @$_REQUEST['limit'],
+                            @$_REQUEST['output']
                             );    
+            }
+            
+            if($res && @$_REQUEST['output']=='csv'){
+            
+                // Open a memory "file" for read/write...
+                $fp = fopen('php://temp', 'r+');
+                $sz = 0; 
+                foreach ($res as $idx=>$row) {
+                    $sz = $sz + fputcsv($fp, $row, ',', '"');
+                }
+                rewind($fp);
+                // read the entire line into a variable...
+                $data = fread($fp, $sz+1);            
+                fclose($fp);
+            
+                $res = $data;
             }
             
         }else{
@@ -158,10 +176,32 @@ if(!$system->init(@$_REQUEST['db'])){
    }
 }
 
-header('Content-type: application/json;charset=UTF-8');
 
-//DEBUG error_log('RESP'.json_encode($response)); 
-print json_encode($response);
+if(@$_REQUEST['output']=='csv'){
+
+
+    if($_REQUEST['output']=='csv'){
+        header('Content-Type: text/plain;charset=UTF-8');    
+        header('Pragma: public');
+        header('Content-Disposition: attachment; filename="import.csv"'); //import_name
+    }
+    
+    if($response['status']==HEURIST_OK){
+        header('Content-Length: ' . strlen($response['data']));
+        print $response['data'];
+        
+    }else{
+        print $response['message'].'. ';
+        print 'status: '.$response['status'];
+    }
+    
+                
+}else{
+
+    header('Content-type: application/json;charset=UTF-8');
+    //DEBUG error_log('RESP'.json_encode($response)); 
+    print json_encode($response);
+}
 exit();
 //--------------------------------------
 
@@ -1261,7 +1301,7 @@ function  trim_lower_accent2(&$item, $key){
 * @param mixed $rec_id
 * @param mixed $import_table
 */
-function getRecordsFromImportTable($import_table, $imp_ids){
+function getRecordsFromImportTable1($import_table, $imp_ids){
     global $system;
 
     $mysqli = $system->get_mysqli();
@@ -1275,15 +1315,15 @@ function getRecordsFromImportTable($import_table, $imp_ids){
     return $res;
 }
 
-function getRecordsFromImportTable2($import_table, $id_field, $is_insert, $mapping, $offset, $limit=100 ){
+function getRecordsFromImportTable2($import_table, $id_field, $mode, $mapping, $offset, $limit=100, $output ){
     global $system;
 
     $mysqli = $system->get_mysqli();
 
-    if(!$id_field){
+    if($id_field==null || $id_field=='' || $id_field=='null' || $mode=='all'){
         $where  = '1';
         $order_field = 'imp_id';
-    }else if($is_insert){
+    }else if($mode=='insert'){
         $where  = " ($id_field<0 OR $id_field IS NULL) ";
         $order_field = $id_field;
     }else{
@@ -1292,9 +1332,15 @@ function getRecordsFromImportTable2($import_table, $id_field, $is_insert, $mappi
     }
     
     if(!($offset>0)) $offset = 0;
-    if(!($limit>0)) $limit = 100;
+    if(!is_int($limit)) $limit = 100;
+
+    if($mapping!=null && !is_array($mapping)){
+        $mapping = json_decode($mapping, true);
+    }
     
-    if($mapping){
+    if($mapping && count($mapping)>0){
+        
+        
         $field_idx = array_keys($mapping);
         
         $sel_fields = array($order_field);
@@ -1303,18 +1349,22 @@ function getRecordsFromImportTable2($import_table, $id_field, $is_insert, $mappi
             if('field_'.$idx!=$id_field)
                 array_push($sel_fields, 'field_'.$idx);        
         }
-        if($is_insert && count($sel_fields)>1){
+        if($mode=='insert' && count($sel_fields)>1){
             $order_field = $sel_fields[1];    
         }
         
-        $sel_fields = (($is_insert)?'DISTINCT ':'').implode(',',$sel_fields);
+        $sel_fields = 'DISTINCT '.implode(',',$sel_fields);
     }else{
         $sel_fields = '*';
     }
     
     
-    $query = "SELECT $sel_fields FROM $import_table WHERE $where ORDER BY $order_field LIMIT $limit OFFSET $offset";
-    $res = mysql__select_all($mysqli, $query, 0, 30);
+    $query = "SELECT $sel_fields FROM $import_table WHERE $where ORDER BY $order_field";
+    if($limit>0){
+        $query = $query." LIMIT $limit OFFSET $offset";
+    }
+    
+    $res = mysql__select_all($mysqli, $query, 0, ($output=='csv'?0:30) );
     return $res;
 }
 
