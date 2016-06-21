@@ -2690,6 +2690,8 @@ console.log('heurist not defined');
 
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = function(bdValue, needClear){
 
+        var bd_Values = [];
+        
         if(needClear){
             //find and remove previous selector
             var parent = this.inputCell,
@@ -2706,6 +2708,7 @@ console.log('heurist not defined');
             }
 
             for (i = 0; i < this.inputs.length; i++) {
+                bd_Values.push(this.inputs[i].value);
                 parent.removeChild(this.inputs[i]); //this.inputs.shift()
             }
             
@@ -2741,13 +2744,37 @@ console.log('heurist not defined');
             allTerms = 0;
             disabledTerms = "";
         }
+        
+        var newInput;
 
-        var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
-                                this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
-                                (bdValue && bdValue.value ? bdValue.value : null), true);
+        if(bd_Values.length>0){
+        
+            for (var k = 0; k < bd_Values.length; k++) {
+                    newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
+                            this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
+                            bd_Values[k], true);
 
-        this.addInputHelper.call(this, bdValue, newInput);
-        newInput.style.width = "auto";
+                    this.addInputHelper.call(this, {value:bd_Values[k]}, newInput);
+                    newInput.style.width = "auto";         
+                    
+                    if(this.inputs.length>1){
+                            var br = this.document.createElement("div");
+                            br.style.height = "3px";
+                            br.className = "repeat-separator";
+                            this.inputCell.insertBefore(br, newInput);
+                    }
+            }
+            
+        }else{
+        
+            newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
+                    this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
+                    (bdValue && bdValue.value ? bdValue.value : null), true);
+
+            this.addInputHelper.call(this, bdValue, newInput);
+            newInput.style.width = "auto";
+
+        }
 
         //move span before prompt div
         if(this.linkSpan){
