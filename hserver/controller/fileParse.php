@@ -761,15 +761,17 @@ function setPrimaryRectype($imp_ID, $rty_ID, $is_preview){
 
      global $system;
     
-     //set session   
-     $imp_session = getImportSession($imp_ID);
-     if($imp_session==false){
-         return false;
-     }
-     //save session with new ID
-     if(!($is_preview==1 || $imp_session['primary_rectype']==$rty_ID)){
-         $imp_session['primary_rectype'] = $rty_ID;
-         $res = saveSession($imp_session);    
+     if(!($is_preview==1)){
+        //get session   
+        $imp_session = getImportSession($imp_ID);
+        if($imp_session==false){
+                return false;
+        }
+        if($imp_session['primary_rectype']!=$rty_ID){
+            //save session with new ID
+            $imp_session['primary_rectype'] = $rty_ID;
+            $res = saveSession($imp_session);    
+        }
      }
      //get dependent record types
      return dbs_GetRectypeStructureTree($system, $rty_ID, 5, 'resource');

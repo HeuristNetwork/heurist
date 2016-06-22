@@ -95,7 +95,11 @@ function get_config_bytes($val) {
                position: absolute;
                right:20px;
                top:2px;
-            }   
+            } 
+            .rt_arrow{
+                display: inline-block;
+                vertical-align: middle;  
+            }
         </style>
     </head>
 
@@ -297,7 +301,7 @@ function get_config_bytes($val) {
 </div>
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;" id="divStep3">
-    <div class="ent_header" style="height:11.5em;border:none;padding-top:1em;">
+    <div class="ent_header" style="height:11.3em;border:none;padding-top:1em;">
     
         <div>
             <div id="btnBackToStart"
@@ -329,10 +333,11 @@ function get_config_bytes($val) {
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
+                    <div id="sa_rectype_sequence"></div>
                     <select id="sa_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
                     </select>
                     <a href="#" id="btnSetPrimaryRecType"
-                            style="margin-left: 10px; xdisplay:none;">Change primary type</a>        
+                            style="margin-left: 10px;display:none;">Change primary type</a>        
                 </div>
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
@@ -357,7 +362,7 @@ function get_config_bytes($val) {
             </thead>
         </table>    
     </div>
-    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:12.2em" id="divFieldMapping">
+    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:12em" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
@@ -517,11 +522,15 @@ function get_config_bytes($val) {
                 <label>Dependencies:</label>
             </div>
             <div class="input-div">
+                <div id="dependencies_preview">
+                </div>    
+            <!--
                 <select id="sa_rectypes_preview" size="6" style="min-width:80%">
                 </select>
                 <div class="heurist-helper1" style="display: block;">
                     The creation of the primary record type from rows in the input file depends on the prior identification of other entities which will be connected via pointer fields or relationships. The tree above shows the dependencies of the primary record type determined from its pointer and relationship marker fields. Where an input entity matches an existing record, its ID value will be recorded in an ID field which can be used subsequently as a pointer field value; where no existing record is matched a new record is created and the new ID recorded
                  </div>
+            -->
             </div>
         </div>                    
         </fieldset>
