@@ -98,7 +98,14 @@ function get_config_bytes($val) {
             } 
             .rt_arrow{
                 display: inline-block;
-                vertical-align: middle;  
+                vertical-align: middle;
+                padding:0 0.5em;
+            }
+            .select_rectype{
+                cursor:pointer;
+                display: inline-block;
+                font-weight:bold !important;
+                padding:0.2em;
             }
         </style>
     </head>
@@ -301,24 +308,30 @@ function get_config_bytes($val) {
 </div>
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;" id="divStep3">
-    <div class="ent_header" style="height:11.3em;border:none;padding-top:1em;">
+    <div class="ent_header" style="height:11.7em;border:none;padding-top:1em;">
     
         <div>
             <div id="btnBackToStart"
                 style="margin-left:2em;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                 Back to start</div>
-            <div id="btnDownloadFile"
-                title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
-                Download data to file</div>
+                
+            <div style="display: inline-block; font-size:1.1em; padding-left:10em">
+                Primary record type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
+            </div>    
                 
             <div id="btnClearFile"  style="float: right;"
                 title="Clear the data for this uploaded file from the server">
                 Clear uploaded file</div>
                 
-            <div class="heurist-helper1" style="float: right; padding: 0.5em;">
+            <div class="heurist-helper1" style="float: right; padding:0.5em;">
                 Note: Data is retained between sessions until cleared
             </div>    
+
+            <div id="btnDownloadFile" style="float: right;"
+                title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
+                Download data to file</div>
+
     
         </div>
 
@@ -329,7 +342,7 @@ function get_config_bytes($val) {
         
         <fieldset>
         <div>
-            <div class="header optional" style="min-width: 100px; width: 100px;"><label>Select record type:</label></div>
+            <!-- div class="header optional" style="min-width: 100px; width: 100px;"><label>Select record type:</label></div -->
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
@@ -362,7 +375,7 @@ function get_config_bytes($val) {
             </thead>
         </table>    
     </div>
-    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:12em" id="divFieldMapping">
+    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:12.3em" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
@@ -502,7 +515,7 @@ function get_config_bytes($val) {
 <div id="divPopupPreview" style="display:none">
 </div>
 
-<div id="divSelectPrimaryRecType" style="display:none">
+<div id="divSelectPrimaryRecType" style="display:none;height:100%" class="">
         <fieldset>
         <div>
             <div class="header optional" style="min-width: 150px; width: 150px;"><label>Select record type:</label></div>
@@ -522,15 +535,13 @@ function get_config_bytes($val) {
                 <label>Dependencies:</label>
             </div>
             <div class="input-div">
-                <div id="dependencies_preview">
+                <div id="dependencies_preview" class="ui-widget-content" style="min-height:1.8em;padding: 0.4em;">
                 </div>    
-            <!--
-                <select id="sa_rectypes_preview" size="6" style="min-width:80%">
-                </select>
-                <div class="heurist-helper1" style="display: block;">
+                
+                <div class="heurist-helper1" style="display: block;padding-top:0.5em">
+                    Check record types to be imported. <span style="color:red">Red</span> indicates required pointer field<br>
                     The creation of the primary record type from rows in the input file depends on the prior identification of other entities which will be connected via pointer fields or relationships. The tree above shows the dependencies of the primary record type determined from its pointer and relationship marker fields. Where an input entity matches an existing record, its ID value will be recorded in an ID field which can be used subsequently as a pointer field value; where no existing record is matched a new record is created and the new ID recorded
                  </div>
-            -->
             </div>
         </div>                    
         </fieldset>

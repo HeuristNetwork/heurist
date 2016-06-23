@@ -338,6 +338,7 @@
                             }
                             
                             $pointerRecTypeId = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
+                            $is_required      = ($dtValue[$rst_fi['rst_RequirementType']]=='required');
                             $rectype_ids = explode(",", $pointerRecTypeId);
                             
                             if($pointerRecTypeId=="" || count($rectype_ids)==0){ //unconstrainded
@@ -370,6 +371,7 @@
                                 }
                             
                             }
+                            $res['required'] = $is_required;
 
                     }
                 }

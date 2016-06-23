@@ -352,7 +352,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         
                             //clear selectors
                             $('#sa_rectype').empty().val('');
-                            $('#sa_rectypes_preview').empty().val('');
+                            $('#dependencies_preview').empty();
+                            $('#lblPrimaryRecordType').empty();
+                            $('#sa_rectype_sequence').empty();
                             
                             var resp = new hRecordSet( response.data );
                             var record = resp.getFirstRecord();
@@ -360,7 +362,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             //DEBUG $('#divFieldMapping2').html( ses );
                             
                             imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
-                            
                             
                             //init field mapping table
                             _showStep(3);
@@ -386,10 +387,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             if($('#sa_primary_rectype > options').length==0){
                 top.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, top.HR('select...') );
+
                 $('#sa_primary_rectype').change( function(event){ 
                         var ele = $(event.target);
                         //var sleEle = ele.parents('#divSelectPrimaryRecType').find('#sa_rectypes_preview');
-                        
                         var sleEle = ele.parents('#divSelectPrimaryRecType').find('#dependencies_preview');
                         _loadRectypeDependencies( sleEle.get(0), ele.val() ); 
                 });
@@ -414,16 +415,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             var dlg_options = {
                 title:'Select primary record type and dependencies',
-                height:'700px',
+                height: 460,
                 element: document.getElementById('divSelectPrimaryRecType'),
                 buttons: buttons
                 };
             $dlg = top.HEURIST4.msg.showElementAsDialog(dlg_options);
+            $dlg.addClass('ui-heurist-bg-light');
         
     }
 
     //
-    //  load list of record types as tree into sa_rectype
+    // load list of record types as tree into sa_rectype
+    //
+    // preview - show dependencies in popup where we select primary rectype
     //
     function _loadRectypeDependencies( selEle, preview_rty_ID ){
             
@@ -435,12 +439,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                  return;
             }
         
-            /*if(is_preview){
-                selEle = $('#sa_rectypes_preview').get(0)
-            }else{
-                selEle = $('#sa_rectype').get(0)
-            }*/    
-            
             //request to server to get all dependencies for given primary record type
             var request = { action: 'set_primary_rectype',
                             is_preview: (is_preview?1:0),
@@ -456,13 +454,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                 
                     var rectypes = response.data;
-                    var rtOrder = _fillDependencyList(rectypes, {levels:{}, fields:{} }, 0);    
+                    var rtOrder = _fillDependencyList(rectypes, {levels:{}, fields:{}, depend:{} }, 0);    
+                    //fields - resourse fields
+                    //depend - only required dependencies 
                     
-                    var rt_ids = Object.keys(rtOrder['levels']), isfound, depth = 0;
+                    var i, j, rt_ids = Object.keys(rtOrder['levels']), isfound, depth = 0;
                     
-                    if(is_preview){
-                         //fill dependecires list
+                    if(is_preview){  //in popup dialog where we choose primary rectype
+                         //fill dependecies list
                          var ele = $(selEle).empty();
+                         var primary_rt = 0;
                          
                          do{
                      
@@ -472,14 +473,28 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                  if(rtOrder['levels'][recTypeID] == depth){
                                      isfound = true;
                                      
-                                     $('<div>x&nbsp;'+ depth + ' ' + top.HEURIST4.rectypes.names[recTypeID] +'</div>').appendTo(ele);
+                                     $('<div>' 
+                                        + '<input type="checkbox" class="rt_select" data-rt="'+recTypeID+'" '+
+                                        + (depth==0?'checked="checked" disabled="disabled"':'')+'><b>'
+                                        + top.HEURIST4.rectypes.names[recTypeID] 
+                                        + '</b></div>').appendTo(ele);
                                      
                                      var rt_fields = rtOrder['fields'][recTypeID];
                                      if(rt_fields){
                                          for (j=0;j<rt_fields.length;j++){
-                                            $(rt_fields[j]).appendTo(ele);
+                                               var field = rt_fields[j];
+                                               $('<div>'+
+                                               '<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
+                                               + '<i style="'+(field['required']?'color:red':'')+'">' +field['title']
+                                               + '</i><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
+                                               + field['rt_title'] +'</div>')
+                                                .appendTo(ele);
                                          }
-                                     } 
+                                     }
+                                     
+                                     if(depth==0){ 
+                                        primary_rt = recTypeID
+                                     }
                                  }
                                 
                              }
@@ -489,11 +504,99 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                          
                          if(rt_ids.length==1){
                             ele.text('No dependencies found');
+                         }else{
+                             
+                             
+                            function __rt_checkbox_click(rt_checkbox){                                      
+                            
+                                    //keep id of clicked to avoid disability
+                                     var i, j, keep_id = rt_checkbox.attr('data-rt');
+                                    
+                                    //all rt that will be checked and disabled
+                                     var rt_depend_all = [];
+                                     
+                                     //get required fields for rectypes that are already marked
+                                     $.each(ele.find('.rt_select:checked'),function(idx, item){
+                                             var recTypeID = $(item).attr('data-rt');    
+                                             rt_depend_all.push(recTypeID);
+                                     });
+                                     top.HEURIST4.util.setDisabled( ele.find('.rt_select'), false);
+                                     
+                                     // find all dependent rectypes
+                                     rt_depend_all = _getCrossDependencies(rtOrder['depend'], rt_depend_all, []);
+
+                                     //                                     
+                                     if(!rt_checkbox.is(':checked')){
+                                         
+                                         //disable if marked rt has marked parent 
+                                         for(i=0;i<rt_depend_all.length;i++){
+                                             
+                                             var recTypeID = rt_depend_all[i];
+                                             
+                                             var depth = rtOrder['levels'][recTypeID],
+                                                 need_disable = false;
+                                             
+                                             if(depth==0){ 
+                                                 need_disable = true;
+                                             }else{
+                                                 //find previous level
+                                                 // rt_ids = Object.keys(rtOrder['levels'])
+                                                 for(j=0;j<rt_depend_all.length;j++){
+                                                    if(i!=j  //not itself
+                                                        && (rtOrder['levels'][rt_depend_all[j]]==depth-1)    //from prev level
+                                                        && (rtOrder['depend'][rt_depend_all[j]].indexOf(recTypeID)>=0))
+                                                    {
+                                                        need_disable = true;
+                                                        break;    
+                                                    }
+                                                 }
+                                             }
+                                             
+                                             if(need_disable){
+                                                  var cb = ele.find('.rt_select[data-rt="'+recTypeID+'"]');
+                                                  top.HEURIST4.util.setDisabled(cb, true);
+                                             }
+
+                                         }                                         
+                                         
+                                        /*
+                                        var rt_depend_unchecked = _getCrossDependencies(rtOrder['depend'], rt_depend_enable, []);
+                                     
+                                        //find difference - these rectypes will NOT be disabled   
+                                        for(i=0;i<rt_depend_unchecked.length;i++){
+                                            if(rt_depend_all.indexOf(rt_depend_unchecked[i])<0){
+                                                 rt_depend_enable.push(rt_depend_unchecked[i]);
+                                            }
+                                        }
+                                        */
+                                     }
+                                     
+                                     //mark and disable all of them
+                                     for(i=0;i<rt_depend_all.length;i++){
+                                            var cb = ele.find('.rt_select[data-rt="'+rt_depend_all[i]+'"]');
+                                            cb.prop('checked',true);
+                                            if(keep_id!=rt_depend_all[i]){
+                                                top.HEURIST4.util.setDisabled(cb, true);
+                                            }
+                                     }
+                                }                            
+ 
+                            ele.find('.rt_select').click(
+                                function(event){ __rt_checkbox_click($(event.target)) }
+                            );
+                            //click and disable first (primary) record type
+                            
+                            var cb = ele.find('.rt_select[data-rt="'+primary_rt+'"]');
+                            cb.prop('checked',true);
+                            __rt_checkbox_click(cb); //does not work.trigger('click'); //.click();
+                            top.HEURIST4.util.setDisabled(cb, true);
+                            
                          }
-                    }else{
+                    }else{ //in main form
+                        
                          var ele1 = $('#sa_rectype_sequence').empty();
                          var ele2 = $('#sa_rectype').empty().hide();
-                         var s = '';
+                         var s = '', first_rt = 0;
 
                          do{
                      
@@ -507,10 +610,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                      if(s!=''){
                                          s = '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'+s;
                                      }       
-                                     s = '<a href="#" class="select_rectype" data-recid="'
-                                            +recTypeID+'">' + title +'</a>'+s;
+                                     s = '<h2 class="select_rectype" data-rt="'
+                                            +recTypeID+'">' + title +'</h2>'+s;
                                      
                                      top.HEURIST4.ui.addoption(ele2.get(0), recTypeID, title); 
+                                     
+                                     if(depth==0){
+                                         $('#lblPrimaryRecordType').text(title);
+                                     }
+                                     first_rt = recTypeID;
                                  }
                                  
                              }
@@ -521,9 +629,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                          $(s).appendTo(ele1);
                          
                          $('.select_rectype').click(function(event){
-                               ele2.val($(event.target).attr('data-recid'));
+                               $('.select_rectype').removeClass('ui-state-focus');
+                               $(event.target).addClass('ui-state-focus');
+                               ele2.val($(event.target).attr('data-rt'));
                                _initFieldMapppingTable();
                          });
+                         
+                         //select first in sequence
+                         if(first_rt>0){
+                            $('.select_rectype[data-rt="'+first_rt+'"]').click();    
+                         }
                         
                         //top.HEURIST4.ui.createRectypeTreeSelect(selEle, rectypes, null, 0);    
                         _initFieldMapppingTable();    
@@ -539,6 +654,31 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     }    
     
     
+    //
+    // rt_depend_all - rectypes marked initially
+    // rtOrder - rtOrder['depend']
+    //
+    function _getCrossDependencies(rtOrder, rt_depend_all, result_depend){
+        
+        var i, recTypeID;            
+        for(i=0;i<rt_depend_all.length;i++){
+            
+            recTypeID =  rt_depend_all[i];
+            
+            if(result_depend.indexOf(recTypeID)<0){
+                result_depend.push(recTypeID);
+                if(rtOrder[recTypeID]){ //has required dependent rectypes
+                    var result_depend = _getCrossDependencies(rtOrder, rtOrder[recTypeID], result_depend);    
+                }
+            }
+        }
+
+        return result_depend;
+    }
+    
+    //
+    // returns list of rectypes with level (depth) and list of resource fields
+    //
     function _fillDependencyList(rectypeTree, rtOrder, depth){
          //var ele = $(selEle);
          
@@ -559,42 +699,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
          }else  if (rectypeTree.constraint==1) { 
             currentTypeID = rectypeTree.rt_ids;   
          }
-         
-         /*
-         if(rectypeTree.type=='rectype'){
-             recTypeID = rectypeTree.key;
-             
-            if(rtOrder[recTypeID]){
-                return rtOrder;
-            }else{
-                $('<div>x&nbsp;'+depth+'&nbsp;'+ title +'</div>').appendTo(ele);
-                rtOrder[recTypeID] = depth;
-            }
-             
-         }else if (rectypeTree.constraint==1) { 
-             
-            recTypeID = rectypeTree.rt_ids;
-            var rectypeName = rectypes.names[rectypeTree.rt_ids];
-            $('<div>&nbsp;&nbsp;&nbsp;>>' +title+ ' -> '+ rectypeName +'</div>').appendTo(ele);
-             
-            if(!rtOrder[recTypeID]){
-                rtOrder[recTypeID] = depth;
-                $('<div>x&nbsp;'+ rectypeName +'</div>').appendTo(ele);
-            }
 
-         }else if (rectypeTree.constraint>1) {
-             
-            var ids = rectypeTree.rt_ids.split(',');
-            var rectypeNames = [];
-            for (i=0;i<ids.length;i++){
-                rectypeNames.push(rectypes.names[ids[i]]);
-            }
-            $('<div>&nbsp;&nbsp;&nbsp;>>' +title+ ' -> '+ rectypeNames.join('|') +'</div>').appendTo(ele);
-             
-         }*/
-         
-         
-         var rt_fields = [];
+         var rt_fields = [], //resourse fields
+             rt_depend = []; //dependent rectypes 
          
          //list all resourse fields
          if(top.HEURIST4.util.isArrayNotEmpty(rectypeTree.children)){
@@ -615,13 +722,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 rtOrder['levels'][recTypeID] = depth+1;
                             }
                        }
-                       rt_fields.push('<div>&nbsp;&nbsp;&nbsp;> ' +title+ ' -> '+ rectypeNames.join('|') +'</div>');
-                       //$('<div>&nbsp;&nbsp;&nbsp;> ' +title+ ' -> '+ rectypeNames.join('|') +'</div>').appendTo(ele);
+                       
+                       rt_fields.push({title:title,rt_ids:ids,rt_title:rectypeNames.join('|'),required:field['required']});
+                       if(field['required']) rt_depend = $.unique(rt_depend.concat(ids));
                    }
              }
              
               if(currentTypeID && !rtOrder['fields'][currentTypeID] && rt_fields.length>0){   //!!!
-                    rtOrder['fields'][currentTypeID] = rt_fields; 
+                    rtOrder['fields'][currentTypeID] = rt_fields;
+                    rtOrder['depend'][currentTypeID] = rt_depend; //only required dependencies 
               }
              
              for (j=0;j<rectypeTree.children.length;j++){
@@ -630,11 +739,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
              }
          }
          
-         if(depth==0){ //print out
-         
-         }
-         
-         
+
          return rtOrder;
     }
     
@@ -1529,7 +1634,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         });
             
         if(!haveMapping){
-            top.HEURIST4.msg.showMsgErr(top.HR('You have to select at least one column to map heurist record field'));
+            top.HEURIST4.msg.showMsgErr(top.HR('To perform an import you have to map at least one column to heurist record field'));
             return;
         }
         
@@ -1636,7 +1741,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         });
             
         if(!haveMapping){
-            top.HEURIST4.msg.showMsgErr(top.HR('You have to select at least one column to map heurist record field'));
+            top.HEURIST4.msg.showMsgErr(top.HR('To perform an import you have to map at least one column to heurist record field'));
             return;
         }
         
