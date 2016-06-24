@@ -907,7 +907,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
                         foreach ($dtValue as $key => $value){
 
-                            if($recursion_depth<$max_allowed_depth && (array_key_exists('id',$value) || array_key_exists('RelatedRecID',$value)))
+                            if($recursion_depth<$max_allowed_depth && 
+                                    (array_key_exists('id',$value) || array_key_exists('RelatedRecID',$value)))
                             {
 
                                 //this is record ID
@@ -917,6 +918,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                     $recordID = $value['id'];
                                 }
 
+                                
+//error_log('relrecid '.$recordID);                                
                                 $res0 = null;
                                 //get full record info
                                 if(@$loaded_recs[$recordID]){
@@ -926,6 +929,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
                                     $rectypeID = $res0['recTypeID'];
 
+//error_log('already loaded '.print_r($res0,true));                                    
+                                    
                                 }else{
 
                                     $record = loadRecord($recordID, false, true); //from search/getSearchResults.php
@@ -933,6 +938,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                     if(true){  //load linked records dynamically
                                         $res0 = getRecordForSmarty($record, $recursion_depth+1, $order_sub); //@todo - need to
                                         $order_sub++;
+//error_log('load '.print_r($res0,true));                                    
+                                        
                                     }
                                     if($rectypeID==null && $res0 && @$res0['recRecTypeID']){
                                             $rectypeID = $res0['recRecTypeID'];
@@ -942,7 +949,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                 
                                 if($res0){
 
-                                        //unset rel fields to avoid conflic if this records was already loaded
+                                        //unset rel fields to avoid conflict if this records was already loaded
                                         if(@$res0["recRelationType"] ) unset($res0["recRelationType"]);
                                         if(@$res0["recRelationNotes"] ) unset($res0["recRelationNotes"]);
                                         if(@$res0["recRelationStartDate"] ) unset($res0["recRelationStartDate"]);

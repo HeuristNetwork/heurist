@@ -970,7 +970,7 @@ background: #8ea9b9
     border-left: 1px solid lightgray;
     border-bottom: none;
     padding:2px;
-}
+}                           
 .tbmain td
 {
     border-left: 1px solid lightgray;
@@ -984,3 +984,8 @@ background: #8ea9b9
     border-left: 1px solid gray;
     font-size: 1em;
 }        
+.rt_arrow{
+    display: inline-block;
+    vertical-align: middle;
+    padding:0 0.5em;
+}

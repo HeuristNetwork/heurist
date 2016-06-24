@@ -96,12 +96,7 @@ function get_config_bytes($val) {
                right:20px;
                top:2px;
             } 
-            .rt_arrow{
-                display: inline-block;
-                vertical-align: middle;
-                padding:0 0.5em;
-            }
-            .select_rectype{
+            .select_rectype_seq{
                 cursor:pointer;
                 display: inline-block;
                 font-weight:bold !important;
@@ -318,6 +313,9 @@ function get_config_bytes($val) {
                 
             <div style="display: inline-block; font-size:1.1em; padding-left:10em">
                 Primary record type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
+                <a href="#" id="btnSetPrimaryRecType"
+                            title="Change primary record type"
+                            style="margin-left:10px;font-size:0.9em;text-decoration:none;color:gray">reset</a>        
             </div>    
                 
             <div id="btnClearFile"  style="float: right;"
@@ -342,15 +340,13 @@ function get_config_bytes($val) {
         
         <fieldset>
         <div>
-            <!-- div class="header optional" style="min-width: 100px; width: 100px;"><label>Select record type:</label></div -->
+            <div class="header optional" style="min-width: 60px; width: 60px;"><label>Importing:</label></div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
                     <div id="sa_rectype_sequence"></div>
                     <select id="sa_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
                     </select>
-                    <a href="#" id="btnSetPrimaryRecType"
-                            style="margin-left: 10px;display:none;">Change primary type</a>        
                 </div>
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
@@ -393,14 +389,14 @@ function get_config_bytes($val) {
         <div id="divFieldMapping2" style="display:none;">
             <table class="tbresults">
                 <tbody>
-                                    <tr><td width="130">**Records matched</td>
+                                    <tr><td width="130">Records matched</td>
                                         <td width="50" id="mrr_cnt_update"></td>
                                         <td width="50" class="mrr_update">rows:</td>
                                         <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
                                         <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
                                         <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
                                     </tr>
-                                    <tr><td>**New records to create</td>
+                                    <tr><td>New records to create</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
                                         <td width="50" class="mrr_insert">rows:</td>
                                         <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>
@@ -414,14 +410,14 @@ function get_config_bytes($val) {
         <div id="divMatchingResult" style="display:none;">
             <table class="tbresults">
                 <tbody>
-                                    <tr><td width="130">Records matched</td>
+                                    <tr style="display: none;"><td width="130">(old version)Records matched</td>
                                         <td width="50" id="mr_cnt_update"></td>
                                         <td width="50" class="mr_update">rows:</td>
                                         <td width="50" class="mr_update" id="mr_cnt_update_rows"></td>
                                         <td width="50" class="mr_update"><a href="#" onclick="importRecordsCSV.showRecords('update')">show</a></td>
                                         <td width="50" class="mr_update"><a href="#" onclick="importRecordsCSV.downloadRecords('update')">download</a></td>
                                     </tr>
-                                    <tr><td>New records to create</td>
+                                    <tr style="display: none;"><td>(old version)New records to create</td>
                                         <td width="50" id="mr_cnt_insert"></td>
                                         <td width="50" class="mr_insert">rows:</td>
                                         <td width="50" class="mr_insert" id="mr_cnt_insert_rows"></td>

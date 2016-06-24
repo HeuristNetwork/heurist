@@ -596,7 +596,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         
                          var ele1 = $('#sa_rectype_sequence').empty();
                          var ele2 = $('#sa_rectype').empty().hide();
-                         var s = '', first_rt = 0;
+                         var s = '';
+                         var rt_sequence = [];
 
                          do{
                      
@@ -607,18 +608,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                      isfound = true;
                                      var title = top.HEURIST4.rectypes.names[recTypeID];
 
+                                     var s_count = _getInsertUpdateCountsForSequence(recTypeID);                                     
+
                                      if(s!=''){
                                          s = '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'+s;
                                      }       
-                                     s = '<h2 class="select_rectype" data-rt="'
-                                            +recTypeID+'">' + title +'</h2>'+s;
+                                     s = '<h2 class="select_rectype_seq" data-rt="'
+                                            +recTypeID + '">' + title + '<span data-cnt="1" id="rt_count_'
+                                            +recTypeID + '">' + s_count + '</span></h2>'+s;
                                      
                                      top.HEURIST4.ui.addoption(ele2.get(0), recTypeID, title); 
                                      
                                      if(depth==0){
                                          $('#lblPrimaryRecordType').text(title);
                                      }
-                                     first_rt = recTypeID;
+                                     rt_sequence.push(recTypeID);
                                  }
                                  
                              }
@@ -628,16 +632,41 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                          
                          $(s).appendTo(ele1);
                          
-                         $('.select_rectype').click(function(event){
-                               $('.select_rectype').removeClass('ui-state-focus');
-                               $(event.target).addClass('ui-state-focus');
-                               ele2.val($(event.target).attr('data-rt'));
-                               _initFieldMapppingTable();
+                         $('.select_rectype_seq').click(function(event){
+                             
+                                
+                                var sp = $(event.target)
+                                if($(event.target).attr('data-cnt')>0){
+                                    sp = $(event.target).parent();
+                                }
+
+                                //is previous record type have matched records
+                                var rtyID = sp.attr('data-rt');
+                                var idx = rt_sequence.indexOf(rtyID);
+                                var prevRtyID = idx==rt_sequence.length-1?0:rt_sequence[idx+1];
+                                var counts = _getInsertUpdateCounts(prevRtyID); 
+                                if(counts==null || counts[0]>0){
+                                     __changeRectype();
+                                }else{
+                                    var sWarning = 
+                                    'By skipping earlier steps in the workflow you may have not have the required '
+                                    +'record identifiers to use in record pointer fields. This may be OK if your aim '
+                                    +'is simply to update fields other than pointer fields';
+                                    //  [ Proceed ]  [ Cancel ]
+                                    top.HEURIST4.msg.showMsgDlg(sWarning, __changeRectype , "Confirmation");                                    
+                                }
+                                
+                                function __changeRectype(){
+                                    $('.select_rectype_seq').removeClass('ui-state-focus');
+                                    sp.addClass('ui-state-focus');
+                                    ele2.val(sp.attr('data-rt'));
+                                    _initFieldMapppingTable();
+                                }
                          });
                          
                          //select first in sequence
-                         if(first_rt>0){
-                            $('.select_rectype[data-rt="'+first_rt+'"]').click();    
+                         if(rt_sequence.length>0){
+                            $('.select_rectype_seq[data-rt="'+rt_sequence[rt_sequence.length-1]+'"]').click();    
                          }
                         
                         //top.HEURIST4.ui.createRectypeTreeSelect(selEle, rectypes, null, 0);    
@@ -955,7 +984,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         //show counts
         if(rtyID>0){
             
-            counts = _getInsertUpdateCounts();
+            //show counts in count table 
+            counts = _getInsertUpdateCounts(rtyID);
             
             $('#mrr_cnt_update').text(counts[0]);                                 
             $('#mrr_cnt_insert').text(counts[2]);                                 
@@ -971,7 +1001,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             }else{
                 $('.mrr_insert').hide();                                     
             }
-
+            
+            //show counts in sequence list
+            var s_count = _getInsertUpdateCountsForSequence(rtyID);
+            $('#rt_count_'+rtyID).html(s_count);
         
             $('#divFieldMapping2').show();
         }else{
@@ -982,9 +1015,25 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
     }
     
-    function _getInsertUpdateCounts(){
+    //
+    // show insert/update count in sequence of record types
+    //
+    function _getInsertUpdateCountsForSequence(rtyID){
+    
+         var counts = _getInsertUpdateCounts(rtyID);                                     
+         var s_count = '';
+         if(counts[2]!=imp_session['reccount']){
+             s_count = '  [ '+(counts[2]>0?('<span title="to be inserted">'+counts[2]+'/</span>'):'')+counts[0]+' ]';
+         }
+         return s_count;
+    }
+    
+    //
+    // return counts array from imp_session, set it to default values if it is not defined
+    //
+    function _getInsertUpdateCounts(rtyID){
         
-        var rtyID = $("#sa_rectype").val();
+        //if(!rtyID) rtyID = $("#sa_rectype").val();
         if(rtyID>0){
             
             var counts = imp_session['counts'];
@@ -1390,7 +1439,25 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             }         
                             
                             
-                            var select_rectype = $("select[id^='id_rectype']");
+                            function __isAllRectypesSelectedForIdFields(){
+                                    
+                                    var res = false;
+                                    var ele = $.find("input[id^='id_field_']");
+                                    $.each(ele, function(idx, item){
+                                            if($(item).is(':checked')){
+                                                var rectypeid = $('#id_rectype_'+item.value).val();
+                                                if(!rectypeid){
+                                                    res = true;
+                                                    return false;
+                                                }
+                                            }
+                                    }); 
+                                    return res;                                    
+                            }
+                            
+                            var select_rectype = $("select[id^='id_rectype']").change(function(evt){
+                                top.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
+                            });
                             $.each(select_rectype, function(idx, item){
                                 top.HEURIST4.ui.createRectypeSelect( item, null, 'select...' );    
                             });
@@ -1406,8 +1473,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 $('#divFieldRolesHeader').show();
 
                                 top.HEURIST4.util.setDisabled( $('#d_field_'+cb.val()), cb.is(':checked') );
-                                $("select[id='id_rectype_"+ cb.val()+"']")    //attr('id').substr(9)
+                                $("select[id='id_rectype_"+ cb.val()+"']")  
                                         .css('visibility',  cb.is(':checked')?'visible':'hidden');            
+                            
+                                top.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
                             });
                             
 
@@ -1634,7 +1703,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         });
             
         if(!haveMapping){
-            top.HEURIST4.msg.showMsgErr(top.HR('To perform an import you have to map at least one column to heurist record field'));
+            top.HEURIST4.msg.showMsgErr(
+'You have not mapped any columns in the incoming data to fields in the record, '
++'so the records created would be empty. Please select the fields which should '
++'be imported into "'+top.HEURIST4.rectypes.names[rtyID]+'" records.');
+            
+            
             return;
         }
         
@@ -1741,7 +1815,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         });
             
         if(!haveMapping){
-            top.HEURIST4.msg.showMsgErr(top.HR('To perform an import you have to map at least one column to heurist record field'));
+            top.HEURIST4.msg.showMsgErr(
+'You have not mapped any columns in the incoming data to fields in the record, '
++'so the records created would be empty. Please select the fields which should '
++'be imported into "'+top.HEURIST4.rectypes.names[rtyID]+'" records.');
             return;
         }
         
@@ -1804,12 +1881,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     // 
     function _showRecords2(mode, is_download){
      
+        var rtyID = $("#sa_rectype").val();
         var s = '';
         var container = $('#divPopupPreview');
         var dlg_options = {};
         var $dlg;
         var offset = 0, limit=10, 
-            recCount = _getInsertUpdateCounts(),
+            recCount = _getInsertUpdateCounts(rtyID),
             start_idx = 0;
             
         if(recCount==null) return;
@@ -1817,7 +1895,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         recCount = mode=='all'?imp_session['reccount']:recCount[mode=='insert'?3:1];
 
         var id_field = null;         
-        var rtyID = $("#sa_rectype").val();
         
         var index_field_idx = _getFieldIndexForIdentifier(rtyID);
         if(index_field_idx>=0){
