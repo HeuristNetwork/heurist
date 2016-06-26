@@ -386,6 +386,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     
     function refreshMapDocument(){
         var recID = $("#map-doc-select").val();
+        $("#map-doc-select").val(recID);
         if(recID>0){
             $("#map-doc-select").change();
         }
@@ -465,8 +466,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                 </select>
             </span>
             <span id="mapToolbar" class="map-inited" style="display:none">
-                <button id="btnMapRefresh" disabled="disabled" title="Refresh/reload current Map Document">Refresh current map</button>
-                <button id="btnMapEdit" disabled="disabled" title="Edit current Map Document record (Select the desired map in the dropdown)">Edit current map</button>
+                <button id="btnMapRefresh" xxxdisabled="disabled" title="Refresh/reload current Map Document">Refresh current map</button>
+                <button id="btnMapEdit" xxxdisabled="disabled" title="Edit current Map Document record (Select the desired map in the dropdown)">Edit current map</button>
                 <button id="btnMapNew" title="Create new Map Document - a record that describes map features and defines what layers will be visible (will be included)">New map document</button>
                 <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>
                 <button id="btnMapDataSource" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>

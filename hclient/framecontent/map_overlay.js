@@ -56,47 +56,56 @@ function _loadMapDocuments(startup_mapdocument) {
             source: 'map-doc-select'};
             
         var ele = $("#map-doc-select");
-        ele.empty();
+        if(ele.length>0){
+        
+            ele.empty();
+            var btnMapRefresh = $("#btnMapRefresh");
+            var btnMapEdit = $("#btnMapEdit");
+            top.HEURIST4.util.setDisabled(btnMapEdit, true);
+            top.HEURIST4.util.setDisabled(btnMapRefresh, true);
             
-        //perform search
-        top.HAPI4.RecordMgr.search(request, function(response){
-            
-            if(response.status == top.HAPI4.ResponseStatus.OK){
-                var resdata = new hRecordSet(response.data);
+                    // select listener - load map documents
+                    ele.change(function(e) {
+                        //if(current_map_document_id == $(this).val()) return;
+                        current_map_document_id = $(this).val();
+                        _loadMapDocumentById();
+                    });
                 
-                ele.append("<option value='-1'>"+(resdata.length()>0?'select...':'none available')+"</option>");
+            //perform search
+            top.HAPI4.RecordMgr.search(request, function(response){
                 
-                var idx, records = resdata.getRecords();
-                for(idx in records){
-                    if(idx)
-                    {
-                        var record = records[idx];
-                        var recID  = resdata.fld(record, 'rec_ID'),
-                            recName = resdata.fld(record, 'rec_Title');
-                            
-                        ele.append("<option value='"+recID+"'>"+recName+"</option>");
-                    }
-                }//for
-                // select listener - load map documents
-                ele.change(function(e) {
-                    //if(current_map_document_id == $(this).val()) return;
-                    current_map_document_id = $(this).val();
-                    _loadMapDocumentById();
-                });
-                /*ele.click(function(e) {
-                    current_map_document_id = null;
-                    $(this).change();
-                });*/
-            
-                if(startup_mapdocument > 0){
-                    $("#map-doc-select").val(startup_mapdocument);
-                    //_loadMapDocumentById(startup_mapdocument);
-                }
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                    var resdata = new hRecordSet(response.data);
+                    
+                    ele.append("<option value='-1'>"+(resdata.length()>0?'select...':'none available')+"</option>");
+                    
+                    var idx, records = resdata.getRecords();
+                    for(idx in records){
+                        if(idx)
+                        {
+                            var record = records[idx];
+                            var recID  = resdata.fld(record, 'rec_ID'),
+                                recName = resdata.fld(record, 'rec_Title');
+                                
+                            ele.append("<option value='"+recID+"'>"+recName+"</option>");
+                        }
+                    }//for
 
-            }else{
-                top.HEURIST4.msg.showMsgErr(response);
-            }
-        });
+                    /*ele.click(function(e) {
+                        current_map_document_id = null;
+                        $(this).change();
+                    });*/
+                
+                    if(startup_mapdocument > 0){
+                        _loadMapDocumentById_init(startup_mapdocument);
+                    }
+
+                }else{
+                    top.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+        
+        }  //ele.length
     
     
 /* OLD JJ code    
@@ -147,21 +156,9 @@ function _loadMapDocuments(startup_mapdocument) {
 //
 //
 function _loadMapDocumentById() {
-//console.log('load document '+mapdocument_id);
-
-        /* to avoid recursion
-        var mapdocs = $("#map-doc-select");
-        if(mapdocument_id){
-            if(mapdocs.val()==mapdocument_id){
-                return;
-            }
-            mapdocs.val(mapdocument_id);
-        }else{
-            mapdocument_id = mapdocs.val();
-        }
-        current_map_document_id = mapdocument_id;
-        */
         
+console.log('load '+current_map_document_id);    
+    
         // Clean old data
         $('#map_extents').hide();
         _removeMapDocumentOverlays();
@@ -1461,6 +1458,23 @@ HeuristOverlay.prototype.onRemove = function() {
         
     }
 
+    //
+    //
+    //    
+    function _loadMapDocumentById_init(mapdocument_id){
+        
+            var ele = $("#map-doc-select");
+            if(ele.length>0){ //load document by selection in list
+                ele.val(mapdocument_id); 
+                //$("#map-doc-select").change();
+            }
+            //if selector is hidden - onchange event does not work
+            if(current_map_document_id != mapdocument_id){
+                current_map_document_id = mapdocument_id;
+                _loadMapDocumentById();      
+            }
+    }
+
     //public members
     var that = {
         getClass: function () {return _className;},
@@ -1468,8 +1482,7 @@ HeuristOverlay.prototype.onRemove = function() {
         getVersion: function () {return _version;},
         
         loadMapDocumentById: function(mapdocument_id){
-            $("#map-doc-select").val(mapdocument_id);
-            //_loadMapDocumentById(mapdocument_id);    
+            _loadMapDocumentById_init(mapdocument_id);
         },
         
         addQueryLayer: function(params){

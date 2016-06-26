@@ -444,7 +444,22 @@ function get_config_bytes($val) {
             Prepare results
         </div>
         
-        <div  id="divImportSetting" class="step5" style="position:absolute;top:4em;right:20px;display:none;">
+        <div  id="divMatchingSetting" class="step3" style="width:30%;position:absolute;top:4em;right:20px;display:none;">
+            <input type="radio" checked="" name="sa_match" id="sa_match0" value="0" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
+            <label for="sa_match0">Normal Matching</label><br>                                                            
+
+            <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
+            <label for="sa_match1">Match Heurist ID</label><br>
+
+            <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
+            <label for="sa_match2">Skip matching (all new records)</label>
+            
+            <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;">
+            </div>
+        </div>
+        
+        
+        <div  id="divImportSetting" class="step5" style="width:30%;position:absolute;top:4em;right:20px;display:none;">
             <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
                 (existing values are not duplicated)</label><br>
@@ -466,12 +481,14 @@ function get_config_bytes($val) {
     
         <div  id="divActionsMatching" class="action_buttons step3">
             
+            <!--
             <div id="btnMatchingSkip" class="normal" style="margin-right:20px"
                 title="">
                 Import as new (skip matching)</div>
+            -->
             <div id="btnMatchingStart" class="normal"
                 title="">
-                Match against existing records</div>
+                Start Matching</div>
 
             <div id="btnBackToMatching2" class="need_resolve" style="margin-right:20px"
                 title="">

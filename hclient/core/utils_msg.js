@@ -187,8 +187,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     //
     // MAIN method
     // buttons - callback function or objects of buttons for dialog option
+    // title - either string for title, or object {title:, yes: ,no, cancel, }
     //
-    showMsgDlg: function(message, buttons, title, position_to_element, isPopupDlg){
+    showMsgDlg: function(message, buttons, labels, position_to_element, isPopupDlg){
 
         if(!$.isFunction(top.HR)){
             alert(message);
@@ -230,26 +231,36 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             }
         }
 
-        if(!title) title = ''; // was an unhelpful and inelegant "Info"
+        var title = 'Heurist',
+            lblYes = top.HR('Yes'),
+            lblNo =  top.HR('No'),
+            lblOk = top.HR('OK'),
+            lblCancel = top.HR('Cancel');
+        
+        if($.isPlainObject(labels)){
+            if(labels.title)  title = labels.title;
+            if(labels.yes)    lblYes = labels.yes;
+            if(labels.no)     lblNo = labels.no;
+            if(labels.ok)     lblOk = labels.ok;
+            if(labels.cancel) lblCancel = labels.cancel;
+        }
+        
         if ($.isFunction(buttons)){ //}typeof buttons === "function"){
 
-            var titleYes = top.HR('Yes'),
-            titleNo = top.HR('No'),
             callback = buttons;
 
             buttons = {};
-            buttons[titleYes] = function() {
+            buttons[lblYes] = function() {
                 callback.call();
                 $dlg.dialog( "close" );
             };
-            buttons[titleNo] = function() {
+            buttons[lblNo] = function() {
                 $dlg.dialog( "close" );
             };
-        }else if(!buttons){
+        }else if(!buttons){    //buttons are not defined - the only one OK button
 
-            var titleOK = top.HR('OK');
             buttons = {};
-            buttons[titleOK] = function() {
+            buttons[lblOk] = function() {
                 $dlg.dialog( "close" );
             };
 

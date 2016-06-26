@@ -237,17 +237,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         //--------------------------- action buttons init
 
-        $('#btnMatchingSkip')
-                    .css({'width':'250px'})
-                    .button({label: top.HR('Import as new (skip matching)') })
-                    .click(function(e) {
-                            _doMatching( true, null );
-                        });
         $('#btnMatchingStart')
                     .css({'width':'250px'})
                     .button({label: top.HR('Match against existing records'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
-                            _doMatching( false, null );
+                            _doMatchingInit();
                         });
 
         $('#btnBackToMatching')
@@ -319,10 +313,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                     top.HEURIST4.util.setDisabled($('#btnClearAllSessions'), false);
                                 }
                                 _showStep(1);
-                                top.HEURIST4.msg.showMsgDlg('Import session was cleared','Info');
+                                top.HEURIST4.msg.showMsgDlg('Import session was cleared');
                             }else{
                                 $('#selImportId').empty();
-                                top.HEURIST4.msg.showMsgDlg('Import sessions were cleared','Info');
+                                top.HEURIST4.msg.showMsgDlg('Import sessions were cleared');
                             }
                         }else{
                             top.HEURIST4.msg.showMsgErr(response);
@@ -649,11 +643,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                      __changeRectype();
                                 }else{
                                     var sWarning = 
-                                    'By skipping earlier steps in the workflow you may have not have the required '
+                                    'By skipping earlier steps in the workflow you may not have the required '
                                     +'record identifiers to use in record pointer fields. This may be OK if your aim '
                                     +'is simply to update fields other than pointer fields';
                                     //  [ Proceed ]  [ Cancel ]
-                                    top.HEURIST4.msg.showMsgDlg(sWarning, __changeRectype , "Confirmation");                                    
+                                    top.HEURIST4.msg.showMsgDlg(sWarning, __changeRectype, {title:'Confirmation',yes:'Proceed',no:'Cancel'} );                                    
                                 }
                                 
                                 function __changeRectype(){
@@ -1500,7 +1494,48 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                 });
     }
+    
+    //
+    // Show remark/help according to current match mode and mapping in main table
+    //
+    function _onUpdateModeSet(){
+        
+        var shelp = '';
+        var rtyID = $("#sa_rectype").val();
+        if(rtyID>0){
+            
+            if($('#sa_match1').is(':checked')){ // normal matching
+                
+                 shelp = 'Please select one or more columns on which to match <b>'
+                 + top.HEURIST4.rectypes.names[rtyID]
+                 + '</b> in the incoming data against records already in the database. Matching sets the ID field "'
+                 + '" for existing records and allows the creation of new records for unmatched rows.';
+                
+                
+            }else if($('#sa_match2').is(':checked')){ // use id field
+                
+                shelp = '';
+                
+                
+            }else if($('#sa_match3').is(':checked')){  //skip matching
+
+                
+            }
+        
+        }
+        $('#divMatchingSettingHelp').html(shelp);
+    }
  
+    //
+    //
+    //
+    function _doMatchingInit(){
+        
+        isSkipMatch = $('#sa_match2').is(':checked');
+ 
+        _doMatching( isSkipMatch, null );
+
+    }
     //
     // Find records in Heurist database and assign record id to identifier field in import table
     //
@@ -1569,7 +1604,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
             
             if(sWarning){
-                top.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart , "Confirmation");
+                top.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart, {title:'Confirmation',yes:'Proceed',no:'Cancel'});
             }else{
                 __doMatchingStart();
             }
@@ -1682,7 +1717,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         }
         var key_idx = _getFieldIndexForIdentifier(rtyID); 
         if(!(key_idx>=0)){
-            top.HEURIST4.msg.showMsgErr(top.HR('You have to define identifier field for selected record type'));
+            top.HEURIST4.msg.showMsgErr('You must select a record identifier column for <b>'
+                +top.HEURIST4.rectypes.names[rtyID]
+                +'</b> in the first section below. This is used to identify the records to be created/updated');
             return;
         }
         
@@ -2418,6 +2455,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         showRecords2: function (mode, is_download) {_showRecords2(mode, is_download)},
         
         onUpdateModeSet:function (event){
+            _onUpdateModeSet();
+        },
+        onMatchModeSet:function (event){
             _onUpdateModeSet();
         }
         

@@ -686,9 +686,9 @@ function hLayout(args) {
             }else if(app.widgetname=='mainMenu'){
                 //DEBUG
                 widget = $content.mainMenu( options );
-            }else if(app.widgetname=='recordListExt'){
+            }else if(app.widgetname=='app_timemap'){
                 //DEBUG
-                widget = $content.recordListExt( options );
+                widget = $content.app_timemap( options );
             }else if(app.widgetname=='connections'){
                 //DEBUG
                 widget = $content.connections( options );

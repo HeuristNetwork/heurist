@@ -177,7 +177,7 @@ $.widget( "heurist.dh_maps", {
         + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
         + html_thumb
         + '<div title="'+recTitle+'" class="recordTitle">'
-        +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)
+        +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + " AAAAAA</a>") :recTitle)
         + '</div>'
         + '</div>';
 
