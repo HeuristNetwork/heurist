@@ -114,16 +114,19 @@ function get_config_bytes($val) {
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
             <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
             <a href="#" id="btnClearAllSessions"
+                title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
                             style="margin-left: 10px;">Clear all files</a>        
 
         <h2 style="padding:10 0 10 120">OR</h2>
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Upload new file (CSV/TSV)</h2>
             <input type="file" id="uploadFile" style="display:none">
-            <div id="btnUploadFile">Upload File</div>
+            <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
+                Upload File</div>
         
         <h2 style="padding:10 0 10 120">OR</h2>
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Paste delimited data in area below</h2>
-        <div id="btnUploadData">Upload Data</div>
+        <div id="btnUploadData"
+            title="Upload content of text area below to server side and use it as source for CSV/TSV import operation">Upload Data</div>
     </div>
     <div class="ent_content_full" style="top:17em;width:100%;">
         <textarea id="sourceContent" style="height:100%;width:100%;resize:none;"></textarea>
@@ -276,7 +279,8 @@ function get_config_bytes($val) {
                 </div>
                 
                 
-                <div id="btnParseStep1" style="position:absolute;bottom:1em;left:2em">Analyse data</div>
+                <div id="btnParseStep1" style="position:absolute;bottom:1em;left:2em" 
+                    title="By clicking on this button Heurist starts to analyse the header of uploaded CSV data according to your parse parameters, extracts column names and verifies encoding and tries to convert it to UTF8">Analyse data</div>
         </fieldset>            
         <div style="position:absolute;width:520px;left:440px;top:1.2em;bottom:0">
                 <div class="ent_header" style="border:none;display:none" id="divFieldRolesHeader">
@@ -292,7 +296,9 @@ function get_config_bytes($val) {
                     list of field roles
                 </div>
                 <div  class="ent_footer">
-                    <div id="btnParseStep2" style="position:absolute;bottom:1em;right:80px">Continue</div>
+                    <div id="btnParseStep2" style="position:absolute;bottom:1em;right:80px"
+                    title="Start upload your CSV data into temporary database table, converts it to UTF8, parses data and verifies ID columns for valid integer values"
+                    >Continue</div>
                 </div>
         </div>
         
@@ -334,8 +340,9 @@ function get_config_bytes($val) {
         </div>
 
         <div style="padding-top:0.8em;margin-left:2em;">
-            <h2 class="step3">Step 1: Match fields and create Heurist IDs</h2>
-            <h2 class="step4 step5" style="display:none;">Step 2: Update records / Create new as required</h2>
+            <h2 class="step3">Step 1: MATCHING</h2>
+            <h2 class="step4" style="display:none;">Step 2: FIELDS TO IMPORT</h2>
+            <h2 class="step5" style="display:none;">Step 3: INSERT/UPDATE</h2>
         </div>
         
         <fieldset>
@@ -444,22 +451,30 @@ function get_config_bytes($val) {
             Prepare results
         </div>
         
-        <div  id="divMatchingSetting" class="step3" style="width:30%;position:absolute;top:4em;right:20px;display:none;">
+        <div  id="divMatchingSetting" class="step3" style="width:45em;position:absolute;top:4em;right:20px;display:none">
             <input type="radio" checked="" name="sa_match" id="sa_match0" value="0" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
-            <label for="sa_match0">Normal Matching</label><br>                                                            
+            <label for="sa_match0" style="padding-right:3em">Match on column(s)</label>
 
             <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
-            <label for="sa_match1">Match Heurist ID</label><br>
+            <label for="sa_match1" style="padding-right:3em">Match Heurist ID</label>
 
             <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
             <label for="sa_match2">Skip matching (all new records)</label>
             
-            <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;">
+            <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em">
             </div>
         </div>
         
+        <div  id="divPrepareSetting" class="step4" style="width:45em;;position:absolute;top:4em;right:20px;display:none;">
+            <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
+            </div>
+        </div>
         
-        <div  id="divImportSetting" class="step5" style="width:30%;position:absolute;top:4em;right:20px;display:none;">
+        <div  id="divImportSetting" class="step5" style="width:51em;position:absolute;top:4em;right:20px;display:none;">
+            <div class="heurist-helper1" id="divImportSettingHelp" style="display:block;padding-bottom:1em">
+                You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.            
+            </div>
+
             <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
                 (existing values are not duplicated)</label><br>
@@ -486,29 +501,35 @@ function get_config_bytes($val) {
                 title="">
                 Import as new (skip matching)</div>
             -->
-            <div id="btnMatchingStart" class="normal"
-                title="">
-                Start Matching</div>
+            <div id="btnMatchingStart" class="normal" 
+                title="Start matching operation. Matching sets this ID field for existing records and allows the creation of new records for unmatched rows">Start Matching</div>
 
+            <div id="btnNextRecType1" style="display:none" class="skip_step" 
+                title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">Skip to next record type</div>
+                
             <div id="btnBackToMatching2" class="need_resolve" style="margin-right:20px"
-                title="">
+                title="Return to matching step to redefine mapping that may fix ambiguous matches">
                 Back: Match Again 2</div>
             <div id="btnResolveAmbiguous" class="need_resolve"
-                title="">
+                title="Show list of ambiguous matches, select the correct matching and continue import">
                 Resolve ambiguous matches</div>
             
         </div>
         
         <div  id="divActionsImport" style="display:none;" class="action_buttons step4 step5">
             <div id="btnBackToMatching" style="margin-right:20px"
-                title="">
+                title="Return to matching step to redefine record IDs">
                 Back: Match Again 1</div>
             <div id="btnPrepareStart" class="step4"
-                title="">
+                title="Verify that you map all required fields and that values in import table fit to constraints in Heurist database scheme">
                 Prepare Insert/Update</div>
             <div id="btnImportStart" style="display:none" class="step5"
-                title="">
+                title="Start real import data into Heurist database">
                 Start Insert/Update</div>
+                
+            <div id="btnNextRecType2" style="display:none" class="skip_step" 
+                title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">
+                Skip to next record type</div>
         </div>
         
     </div>

@@ -238,14 +238,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         //--------------------------- action buttons init
 
         $('#btnMatchingStart')
-                    .css({'width':'250px'})
-                    .button({label: top.HR('Match against existing records'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    //.css({'width':'250px'})
+                    .css({'font-weight':'bold'})  //Match against existing records
+                    .button({label: top.HR('Start Matching'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doMatchingInit();
                         });
 
         $('#btnBackToMatching')
-                    .css({'width':'250px'})
+                    //.css({'width':'250px'})
                     .button({label: top.HR('Back: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
                     .click(function(e) {
                             _showStep(3);
@@ -253,7 +254,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         });
         
         $('#btnBackToMatching2')
-                    .css({'width':'250px'})
+                    //.css({'width':'250px'})
                     .button({label: top.HR('Back: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
                     .click(function(e) {
                             _showStep(3);
@@ -261,7 +262,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         });
                         
         $('#btnResolveAmbiguous')
-                    .css({'width':'250px'})
+                    //.css({'width':'250px'})
+                    .css({'font-weight':'bold'})
                     .button({label: top.HR('Resolve ambiguous matches')})
                     .click(function(e) {
                             _showRecords('disamb');
@@ -269,14 +271,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         
 
         $('#btnPrepareStart')
-                    .css({'width':'250px'})
+                    //.css({'width':'250px'})
+                    .css({'font-weight':'bold'})
                     .button({label: top.HR('Prepare Insert/Update'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doPrepare();
                         });
 
         $('#btnImportStart')
-                    .css({'width':'250px'})
+                    //.css({'width':'250px'})
+                    .css({'font-weight':'bold'})
                     .button({label: top.HR('Start Insert/Update'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doImport();
@@ -906,6 +910,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         var mapping_flds = null;
         if(currentStep!=3){
             mapping_flds = (imp_session['mapping_flds'])?imp_session['mapping_flds'][rtyID]:{};
+        }else{
+            _onMatchModeSet();
         }
         if(!mapping_flds || $.isEmptyObject(mapping_flds)){
             mapping_flds = (imp_session['mapping_keys'])?imp_session['mapping_keys'][rtyID]:{};
@@ -1001,6 +1007,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             $('#rt_count_'+rtyID).html(s_count);
         
             $('#divFieldMapping2').show();
+            
+            //show hide skip to next rectype buttons
+            if((counts[2]==0 && counts[0]>0){
+                $('.skip_step').show();                
+            }else{
+                $('.skip_step').hide();                
+            }
+            
+            
         }else{
             $('#divFieldMapping2').hide();
         }
@@ -1496,34 +1511,78 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     }
     
     //
-    // Show remark/help according to current match mode and mapping in main table
+    // Show remarks/help according to current match mode and mapping in main table
     //
-    function _onUpdateModeSet(){
+    function _onMatchModeSet(){
         
         var shelp = '';
         var rtyID = $("#sa_rectype").val();
+        
         if(rtyID>0){
+            var key_idx = _getFieldIndexForIdentifier(rtyID); 
             
-            if($('#sa_match1').is(':checked')){ // normal matching
+            if(key_idx<0){
+                if($('#sa_match1').is(':checked')) $('#sa_match0').prop('checked', true);
+                top.HEURIST4.util.setDisabled($('#sa_match1'), true);
+                $('label[for="sa_match1"]').css('color','lightgray');
+            }else{
+                top.HEURIST4.util.setDisabled($('#sa_match1'), false);
+                $('label[for="sa_match1"]').css('color','');
+            }
+            
+            if($('#sa_match0').is(':checked')){ // normal matching
                 
                  shelp = 'Please select one or more columns on which to match <b>'
                  + top.HEURIST4.rectypes.names[rtyID]
-                 + '</b> in the incoming data against records already in the database. Matching sets the ID field "'
-                 + '" for existing records and allows the creation of new records for unmatched rows.';
-                
-                
-            }else if($('#sa_match2').is(':checked')){ // use id field
-                
-                shelp = '';
-                
-                
-            }else if($('#sa_match3').is(':checked')){  //skip matching
+                 + '</b> in the incoming data against records already in the database.<br>';
+                 
+                if(key_idx>=0){
+                    shelp = shelp + 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be overwritten.' 
+                }else{
+                    shelp = shelp + 'New identification field will be created.' 
+                }
 
+                shelp = shelp + ' Matching sets this ID field for existing records and allows '
+                    +'the creation of new records for unmatched rows.';
                 
+            }else if($('#sa_match1').is(':checked')){ // use id field
+                
+                shelp = 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be used.<br>';
+                
+                if(imp_session['counts'] && imp_session['counts'][rtyID] && imp_session['counts'][rtyID][1]>0){
+                       shelp = shelp + 'It appears that you already have <b>'
+                            + top.HEURIST4.rectypes.names[rtyID]
+                            + '</b>. '+counts[1]+' rows in import table that match for '
+                            + (counts[0]!=counts[1]?counts[0]:'')+' existing records';
+                      if(counts[2]>0){
+                            shelp = shelp + ' and '+counts[2]+' records will be added';       
+                      }
+                      shelp = shelp + '.';   
+                }else{
+                
+                    shelp = shelp + 'It does not match any <b>'
+                            +top.HEURIST4.rectypes.names[rtyID]+'</b> record, hence '
+                                +(imp_session['uniqcnt'][idx]>0
+                                        ?imp_session['uniqcnt'][idx]:imp_session['reccount'])
+                                +' records will be added.';
+                    
+                }
+                
+            }else if($('#sa_match2').is(':checked')){  //skip matching
+
+                shelp = 'By choosing not to match the incoming data, you will create '
+                    +imp_session['reccount']+' new <b>'
+                    +top.HEURIST4.rectypes.names[rtyID]+'</b> records - that is one record for every row in import file?';
+
+                if(key_idx>=0){
+                    shelp = shelp + ' The identification field "'+imp_session['columns'][key_idx]+'" will be filled with new record IDs.' 
+                }
             }
         
         }
         $('#divMatchingSettingHelp').html(shelp);
+        
+        
     }
  
     //
@@ -1603,7 +1662,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
             
             
-            if(sWarning){
+            if(false && sWarning){
                 top.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart, {title:'Confirmation',yes:'Proceed',no:'Cancel'});
             }else{
                 __doMatchingStart();
@@ -2398,11 +2457,34 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     //
     function _onUpdateModeSet(){
+        
             if ($("#sa_upd2").is(":checked")) {
                 $("#divImport2").css('display','block');
             }else{
                 $("#divImport2").css('display','none');
             }
+                
+            if(currentStep==4){ //prepare
+            
+                var rtyID = $("#sa_rectype").val();
+                var counts = _getInsertUpdateCounts(rtyID);
+               
+                var shelp = 'Now select the columns which you wish to import into fields in the <b>'
+                + top.HEURIST4.rectypes.names[rtyID]
+                + '</b>  records which are '
+                + (counts[2]>0?'created ':'')
+                + ((counts[0]>0 && counts[2]>0)?' or ':'')
+                + (counts[0]>0?'updated':'')
+                + (counts[2]>0?'. Since new records are to be created, make sure you select all relevant columns; '
+                                +'all Required fields must be mapped to a column.':'');
+                
+                shelp = shelp + '<br><br>Note that no changes are made to the database when you click the Prepare button.';
+                
+                $('#divPrepareSettingHelp').html(shelp);
+            }else{ //import
+                //$('#divImportSettingHelp').html();
+            }
+            
     }
     
     /*
@@ -2436,6 +2518,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             if(page==3){
                 $('.step3 > .normal').show();
                 $('.step3 > .need_resolve').hide();
+                _onMatchModeSet();
             }else{
                 //show either prepare import or start import
                 _onUpdateModeSet();
@@ -2458,7 +2541,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             _onUpdateModeSet();
         },
         onMatchModeSet:function (event){
-            _onUpdateModeSet();
+            _onMatchModeSet();
         }
         
     }

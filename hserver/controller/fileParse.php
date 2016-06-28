@@ -1566,6 +1566,7 @@ function validateImport($params){
     $dt_mapping = array(); //mapping to detail type ID
 
     $missed = array();
+    $missed_ptr = array();
     $query_reqs = array(); //fieldnames from import table
     $query_reqs_where = array(); //where clause for validation
 
@@ -1629,7 +1630,11 @@ function validateImport($params){
         }else
         if($ft_vals[$idx_reqtype] == "required"){
             if(!$field_name){
-                array_push($missed, $ft_vals[0]);
+                if($ft_vals[$idx_fieldtype] == "resource"){
+                    array_push($missed_ptr, $ft_vals[0]);    
+                }else{
+                    array_push($missed, $ft_vals[0]);    
+                }
             }else{
                 if($ft_vals[$idx_fieldtype] == "resource"){ //|| $ft_vals[$idx_fieldtype] == "enum"){
                     $squery = "not (".$field_name.">0)";
@@ -1687,12 +1692,20 @@ function validateImport($params){
     //ignore_required
 
     //1. Verify that all required field are mapped  =====================================================
-    if(count($missed)>0  &&
+    if( (count($missed)>0 || count($missed_ptr)>0)  &&
         ($imp_session['validation']['count_insert']>0   // there are records to be inserted
             //  || ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
+            $error = '';
+            if(count($missed)>0){
+                $error = 'You need to map columns to the following required fields: '.implode(',', $missed);    
+            }
+            if(count($missed_ptr)>0){
+                $error = $error.'<br>Record pointer fields( '.implode(',', $missed_ptr).' ) require a record identifier value (only shown in the dropdowns in the Identifiers section). Apparently you have to import a record types that are specified on previous steps of import sequence';    
+            }
             
-            $system->addError(HEURIST_ERROR, 'Need to map required fields: '.implode(",", $missed));
+            
+            $system->addError(HEURIST_ERROR, $error);
             return false;
     }
 
