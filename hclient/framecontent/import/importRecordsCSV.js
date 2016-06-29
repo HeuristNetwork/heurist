@@ -26,6 +26,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
     imp_ID,   //import session
     imp_session,  //json with session parameters
+    rt_sequence = [],
     
     currentStep, 
     currentId,  //currect record id in import tabel to PREVIEW data
@@ -285,6 +286,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     .click(function(e) {
                             _doImport();
                         });
+
+        $('#btnNextRecType1')
+                    .button({label: top.HR('Skip to next record type'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .click(function(e) {
+                            _skipToNextRecordType();
+                        });
+        $('#btnNextRecType2')
+                    .button({label: top.HR('Skip to next record type'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .click(function(e) {
+                            _showStep(3);
+                            _skipToNextRecordType();
+                        });
+                        
+
           
           $(window).resize( function(e)
           {
@@ -595,7 +610,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                          var ele1 = $('#sa_rectype_sequence').empty();
                          var ele2 = $('#sa_rectype').empty().hide();
                          var s = '';
-                         var rt_sequence = [];
+                         
+                         rt_sequence = []; //reset
 
                          do{
                      
@@ -631,35 +647,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                          $(s).appendTo(ele1);
                          
                          $('.select_rectype_seq').click(function(event){
-                             
-                                
+
                                 var sp = $(event.target)
                                 if($(event.target).attr('data-cnt')>0){
                                     sp = $(event.target).parent();
                                 }
-
-                                //is previous record type have matched records
-                                var rtyID = sp.attr('data-rt');
-                                var idx = rt_sequence.indexOf(rtyID);
-                                var prevRtyID = idx==rt_sequence.length-1?0:rt_sequence[idx+1];
-                                var counts = _getInsertUpdateCounts(prevRtyID); 
-                                if(counts==null || counts[0]>0){
-                                     __changeRectype();
-                                }else{
-                                    var sWarning = 
-                                    'By skipping earlier steps in the workflow you may not have the required '
-                                    +'record identifiers to use in record pointer fields. This may be OK if your aim '
-                                    +'is simply to update fields other than pointer fields';
-                                    //  [ Proceed ]  [ Cancel ]
-                                    top.HEURIST4.msg.showMsgDlg(sWarning, __changeRectype, {title:'Confirmation',yes:'Proceed',no:'Cancel'} );                                    
-                                }
+                             
+                                //get next rectype
+                                var rty_ID_next = sp.attr('data-rt');
                                 
-                                function __changeRectype(){
-                                    $('.select_rectype_seq').removeClass('ui-state-focus');
-                                    sp.addClass('ui-state-focus');
-                                    ele2.val(sp.attr('data-rt'));
-                                    _initFieldMapppingTable();
-                                }
+                                //get previous
+                                //var idx = rt_sequence.indexOf(rty_ID_next);
+                                //var rty_ID_prev = rt_sequence[(idx==rt_sequence.length-1?0:idx+1)];
+                                
+                                _skipToNextRecordType(rty_ID_next);
+
                          });
                          
                          //select first in sequence
@@ -678,8 +680,49 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
             });        
 
-    }    
+    }   
     
+    //
+    //
+    //
+    function _skipToNextRecordType(rty_ID_next){
+        
+            var rty_ID_prev = null;
+        
+            if(!rty_ID_next){ //not defined - take current and next
+                rty_ID_prev = $('#sa_rectype').val();
+                var idx = rt_sequence.indexOf(rty_ID_prev);
+                //get next
+                rty_ID_next = rt_sequence[(idx>0?idx-1:0)];
+            }else{
+                var idx = rt_sequence.indexOf(rty_ID_next);
+                //get prev
+                if(idx<rt_sequence.length-1){
+                    rty_ID_prev = rt_sequence[idx+1];
+                }
+            }
+        
+            //is previous record type have matched records?
+            var counts = _getInsertUpdateCounts(rty_ID_prev); 
+            if(counts==null || counts[0]>0){
+                 __changeRectype();
+            }else{
+                var sWarning = 
+                'By skipping earlier steps in the workflow you may not have the required '
+                +'record identifiers to use in record pointer fields. This may be OK if your aim '
+                +'is simply to update fields other than pointer fields';
+                
+                top.HEURIST4.msg.showMsgDlg(sWarning, __changeRectype, 
+                        {title:'Confirmation',yes:'Proceed',no:'Cancel'} );                                                             }
+            
+            function __changeRectype(){
+                $('h2.select_rectype_seq').removeClass('ui-state-focus');
+                $('h2.select_rectype_seq[data-rt="'+rty_ID_next+'"]').addClass('ui-state-focus');
+
+                $('#sa_rectype').val(rty_ID_next);
+                _initFieldMapppingTable();
+            }        
+    } 
     
     //
     // rt_depend_all - rectypes marked initially
@@ -785,7 +828,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             len = (imp_session && imp_session['columns'])?imp_session['columns'].length:0;
             
         //find index field for selected record type    
-        var rtyID = $("#sa_rectype").val();
+        var rtyID = $('#sa_rectype').val();
 
         var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'];
         if(mapping_flds) mapping_flds = mapping_flds[rtyID];
@@ -904,7 +947,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         sels.parent().hide();
         
         //fill selectors with fields of selected record type
-        var rtyID = $("#sa_rectype").val();
+        var rtyID = $('#sa_rectype').val();
         var keyfield_sel = '';
         
         var mapping_flds = null;
@@ -1008,19 +1051,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             $('#divFieldMapping2').show();
             
-            //show hide skip to next rectype buttons
-            if((counts[2]==0 && counts[0]>0){
+            //show hide skip to next rectype buttons if no insert, only update
+            if(counts[2]==0 && counts[0]>0){
                 $('.skip_step').show();                
             }else{
                 $('.skip_step').hide();                
             }
             
-            
         }else{
             $('#divFieldMapping2').hide();
+            $('.skip_step').hide();
         }
-        
-        
         
     }
     
@@ -1042,7 +1083,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     function _getInsertUpdateCounts(rtyID){
         
-        //if(!rtyID) rtyID = $("#sa_rectype").val();
+        //if(!rtyID) rtyID = $('#sa_rectype').val();
         if(rtyID>0){
             
             var counts = imp_session['counts'];
@@ -1516,7 +1557,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     function _onMatchModeSet(){
         
         var shelp = '';
-        var rtyID = $("#sa_rectype").val();
+        var rtyID = $('#sa_rectype').val();
         
         if(rtyID>0){
             var key_idx = _getFieldIndexForIdentifier(rtyID); 
@@ -1600,7 +1641,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     function _doMatching( isSkipMatch, disamb_resolv ){
         
-        var rtyID = $("#sa_rectype").val();
+        var rtyID = $('#sa_rectype').val();
         if(rtyID>0){
         
             var sWarning = '';
@@ -1725,20 +1766,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         'data file to add further matching information.');
                         
                                 $('.step3 > .normal').hide();
+                                $('.step3 > .skip_step').hide();
                                 $('.step3 > .need_resolve').show();
                         
                         
                             }else{
-                                
-                                /*
-                                if(!(key_idx>=0)){
-                                    //recreate selectors
-                                    _initFieldMapppingTable();
-                                    _initFieldMapppingSelectors();
-                                }
-                                _getValuesFromImportTable();
-                                */
-                                
+                                //ok - go to next step
                                 _showStep(4);
                                 _initFieldMapppingTable();
                                 $('#mr_cnt_disamb').parent().hide();
@@ -1758,7 +1791,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         }else{
             top.HEURIST4.msg.showMsgErr(top.HR('You have to select record type'));
-            $("#sa_rectype").focus();
+            $('#sa_rectype').focus();
         }
         
     }         
@@ -1768,10 +1801,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     function _doPrepare(){
         
-        var rtyID = $("#sa_rectype").val();
+        var rtyID = $('#sa_rectype').val();
         if(!(rtyID>0)){
             top.HEURIST4.msg.showMsgErr(top.HR('You have to select record type'));
-            $("#sa_rectype").focus();
+            $('#sa_rectype').focus();
             return;
         }
         var key_idx = _getFieldIndexForIdentifier(rtyID); 
@@ -1863,6 +1896,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             + 'It is better to fix these in the source file and then process it again, as uploading faulty data generally leads to major fix-up work.');                            
                     
                             $('.step3 > .normal').hide();
+                            $('.step3 > .skip_step').hide();
                             $('.step3 > .need_resolve').show();
                         }else{
                             _showStep(5);
@@ -1882,10 +1916,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     
     function _doImport(){
 
-        var rtyID = $("#sa_rectype").val();
+        var rtyID = $('#sa_rectype').val();
         if(!(rtyID>0)){
             top.HEURIST4.msg.showMsgErr(top.HR('You have to select record type'));
-            $("#sa_rectype").focus();
+            $('#sa_rectype').focus();
             return;
         }
         var key_idx = _getFieldIndexForIdentifier(rtyID); 
@@ -1977,7 +2011,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     // 
     function _showRecords2(mode, is_download){
      
-        var rtyID = $("#sa_rectype").val();
+        var rtyID = $('#sa_rectype').val();
         var s = '';
         var container = $('#divPopupPreview');
         var dlg_options = {};
@@ -2271,7 +2305,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
 
                     //all this code only for small asterics
-                    var rtyID = $("#sa_rectype").val();
+                    var rtyID = $('#sa_rectype').val();
                     var recStruc = null;
                     var idx_reqtype;
                     
@@ -2466,7 +2500,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
             if(currentStep==4){ //prepare
             
-                var rtyID = $("#sa_rectype").val();
+                var rtyID = $('#sa_rectype').val();
                 var counts = _getInsertUpdateCounts(rtyID);
                
                 var shelp = 'Now select the columns which you wish to import into fields in the <b>'

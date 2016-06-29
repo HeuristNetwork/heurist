@@ -1701,7 +1701,7 @@ function validateImport($params){
                 $error = 'You need to map columns to the following required fields: '.implode(',', $missed);    
             }
             if(count($missed_ptr)>0){
-                $error = $error.'<br>Record pointer fields( '.implode(',', $missed_ptr).' ) require a record identifier value (only shown in the dropdowns in the Identifiers section). Apparently you have to import a record types that are specified on previous steps of import sequence';    
+                $error = $error.'<br>Record pointer fields( '.implode(',', $missed_ptr).' ) require a record identifier value (only shown in the dropdowns in the Identifiers section). Apparently you have to import record types that are specified on previous steps of import sequence';    
             }
             
             
