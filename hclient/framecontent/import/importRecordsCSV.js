@@ -1743,9 +1743,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             //<tr><th>Column</th><th>Is date?</th><th>Is key?</th><th>For record type</th></tr>
                             //add header for list of columns
                             tbl  = $('<table>').addClass('tbfields').appendTo(container2);
-                           
+                          
+                            var id_suggestions = []; 
                             //fill list of columns
                             for(i in response.data.fields){
+                                
+                                if(response.data.fields[i].indexOf('ID')>=0 || 
+                                response.data.fields[i].toLowerCase().indexOf('identifier')>=0){
+                                    id_suggestions.push(i);
+                                }
+                                
                                 $('<tr><td style="width:200px">'+response.data.fields[i]+'</td>'
                                 +'<td style="width:50px;text-align:center"><input type="checkbox" id="id_field_'+i+'" value="'+i+'"/></td>'
                                 +'<td style="width:50px;text-align:center"><input type="checkbox" id="d_field_'+i+'" value="'+i+'"/></td>'
@@ -1794,6 +1801,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 top.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
                             });
                             
+                            for(i=0; i<id_suggestions.length; i++){
+                                $('#id_field_'+id_suggestions[i]).prop('checked',true);
+                                $('#id_field_'+id_suggestions[i]).change();
+                            }
+                            
 
                         }else if(response.data.import_id>0){
                             
@@ -1829,11 +1841,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
             if(key_idx<0){
                 if($('#sa_match1').is(':checked')) $('#sa_match0').prop('checked', true);
-                top.HEURIST4.util.setDisabled($('#sa_match1'), true);
-                $('label[for="sa_match1"]').css('color','lightgray');
+                //top.HEURIST4.util.setDisabled($('#sa_match1'), true);
+                //$('label[for="sa_match1"]').css('color','lightgray');
+                $('#sa_match1').hide();
+                $('label[for="sa_match1"]').hide();
             }else{
-                top.HEURIST4.util.setDisabled($('#sa_match1'), false);
-                $('label[for="sa_match1"]').css('color','');
+                $('#sa_match1').show();
+                $('label[for="sa_match1"]').show();
+                //top.HEURIST4.util.setDisabled($('#sa_match1'), false);
+                //$('label[for="sa_match1"]').css('color','');
             }
             
             if($('#sa_match0').is(':checked')){ // normal matching
