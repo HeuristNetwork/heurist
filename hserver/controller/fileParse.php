@@ -755,7 +755,8 @@ function getImportSession($imp_ID){
 }
 
 //
-//
+// 1. saves new primary rectype in session
+// 2. returns treeview strucuture for given rectype
 //
 function setPrimaryRectype($imp_ID, $rty_ID, $is_preview){
 
@@ -1701,7 +1702,7 @@ function validateImport($params){
                 $error = 'You need to map columns to the following required fields: '.implode(',', $missed);    
             }
             if(count($missed_ptr)>0){
-                $error = $error.'<br>Record pointer fields( '.implode(',', $missed_ptr).' ) require a record identifier value (only shown in the dropdowns in the Identifiers section). Apparently you have to import record types that are specified on previous steps of import sequence';    
+                $error = $error.'<br>Record pointer fields( '.implode(',', $missed_ptr).' ) require a record identifier value (only shown in the dropdowns in the Identifiers section). This error implies that you have not yet matched and/or imported record types that are specified in previous steps of the import workflow. Please start from the beginning. Please report the error to the Heurist developers if you think you have followed the workflow correctly.';    
             }
             
             

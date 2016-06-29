@@ -143,7 +143,7 @@ function get_config_bytes($val) {
         <!--
         <h2 style="padding: 10px 0 10px 2em;">Define parse parameters</h2>
         -->
-        <fieldset style="width:380px">
+        <fieldset style="width:380px;">
                 <div>
                     <div class="header" style="min-width: 50px;"><label>Encoding:</label></div>
                     <div class="input-cell">        
@@ -309,7 +309,7 @@ function get_config_bytes($val) {
 </div>
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;" id="divStep3">
-    <div class="ent_header" style="height:11.7em;border:none;padding-top:1em;">
+    <div class="ent_header" style="height:18em;border:none;padding-top:1em;">
     
         <div>
             <div id="btnBackToStart"
@@ -339,13 +339,7 @@ function get_config_bytes($val) {
     
         </div>
 
-        <div style="padding-top:0.8em;margin-left:2em;">
-            <h2 class="step3">Step 1: MATCHING</h2>
-            <h2 class="step4" style="display:none;">Step 2: FIELDS TO IMPORT</h2>
-            <h2 class="step5" style="display:none;">Step 3: INSERT/UPDATE</h2>
-        </div>
-        
-        <fieldset>
+        <fieldset style="padding-top:1.5em;padding-bottom:1.5em">
         <div>
             <div class="header optional" style="min-width: 60px; width: 60px;"><label>Importing:</label></div>
             <div class="input-cell">
@@ -361,7 +355,61 @@ function get_config_bytes($val) {
             </div>        
         </div>                    
         </fieldset>
-        <table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
+        
+        <img id="img_arrow1" src="../../assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
+        <img id="img_arrow2" src="../../assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
+        <img id="img_arrow3" src="../../assets/arrow.png" style="position:absolute;left:0px;display:none">        
+        
+        <div style="padding-left:4em" id="divheader">
+            <h2 class="step3">step 1: MATCHING</h2>
+            <h2 class="step4" style="display:none;">step 2: FIELDS TO IMPORT</h2>
+            <h2 class="step5" style="display:none;">step 3: INSERT/UPDATE</h2>
+        </div>
+<!-- radiogroup setting divs -->        
+        <div  id="divMatchingSetting" class="step3" style="padding-top:0.5em;margin-left:2em;width:45em;display:none">
+            <input type="radio" checked="" name="sa_match" id="sa_match0" value="0" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
+            <label for="sa_match0" style="padding-right:3em">Match on column(s)</label>
+
+            <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
+            <label for="sa_match1" style="padding-right:3em">Match Heurist ID</label>
+
+            <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
+            <label for="sa_match2">Skip matching (all new records)</label>
+
+            <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em">
+            </div>
+        </div>
+        <div  id="divPrepareSetting" class="step4" style="padding-top:0.5em;margin-left:2em;width:45em;display:none">
+            <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
+            </div>
+        </div>
+        
+        <div  id="divImportSetting" class="step5" style="padding-top:0.5em;margin-left:2em;width:51em;display:none">
+            <div class="heurist-helper1" id="divImportSettingHelp" style="display:block;padding-bottom:1em">
+                You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.            
+            </div>
+
+            <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
+            <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
+                (existing values are not duplicated)</label><br>
+
+            <input type="radio" name="sa_upd" id="sa_upd1" value="1" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
+            <label for="sa_upd1">Add new data only if field is empty (new data ignored for non-empty fields)</label><br>
+
+            <input type="radio" name="sa_upd" id="sa_upd2" value="2" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
+            <label for="sa_upd2">Add and replace all existing value(s) for the record with new data</label>
+            
+                    <div style="padding-left: 60px; font-size: 0.9em; vertical-align: top; display: none;" id="divImport2">
+                        <input type="radio" checked="" name="sa_upd2" id="sa_upd20" value="0" class="text">&nbsp;
+                        <label for="sa_upd20" style="font-size:0.9em;">Retain existing if no new data supplied for record</label><br>
+
+                        <input type="radio" name="sa_upd2" id="sa_upd21" value="1" class="text">&nbsp;
+                        <label for="sa_upd21" style="font-size:0.9em;">Delete existing even if no new data supplied for record</label>
+                    </div>            
+        </div>
+<!-- end radiogroup setting divs -->        
+        
+        <table class="tbmain" style="width:100%;position:absolute;bottom:0;" cellspacing="0" cellpadding="2">
             <thead><tr> <!-- Table headings -->
                 <th style="width:75px;">Use&nbsp;<br/>value</th>
                 <th style="width:75px;">Unique&nbsp;<br/>values</th>
@@ -378,7 +426,7 @@ function get_config_bytes($val) {
             </thead>
         </table>    
     </div>
-    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:12.3em" id="divFieldMapping">
+    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:19.1em" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
@@ -450,60 +498,15 @@ function get_config_bytes($val) {
         <div  id="divPrepareResult" style="display:none;">
             Prepare results
         </div>
-        
-        <div  id="divMatchingSetting" class="step3" style="width:45em;position:absolute;top:4em;right:20px;display:none">
-            <input type="radio" checked="" name="sa_match" id="sa_match0" value="0" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
-            <label for="sa_match0" style="padding-right:3em">Match on column(s)</label>
-
-            <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
-            <label for="sa_match1" style="padding-right:3em">Match Heurist ID</label>
-
-            <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
-            <label for="sa_match2">Skip matching (all new records)</label>
-            
-            <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em">
-            </div>
-        </div>
-        
-        <div  id="divPrepareSetting" class="step4" style="width:45em;;position:absolute;top:4em;right:20px;display:none;">
-            <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
-            </div>
-        </div>
-        
-        <div  id="divImportSetting" class="step5" style="width:51em;position:absolute;top:4em;right:20px;display:none;">
-            <div class="heurist-helper1" id="divImportSettingHelp" style="display:block;padding-bottom:1em">
-                You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.            
-            </div>
-
-            <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
-            <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
-                (existing values are not duplicated)</label><br>
-
-            <input type="radio" name="sa_upd" id="sa_upd1" value="1" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
-            <label for="sa_upd1">Add new data only if field is empty (new data ignored for non-empty fields)</label><br>
-
-            <input type="radio" name="sa_upd" id="sa_upd2" value="2" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
-            <label for="sa_upd2">Add and replace all existing value(s) for the record with new data</label>
-            
-                    <div style="padding-left: 60px; font-size: 0.9em; vertical-align: top; display: none;" id="divImport2">
-                        <input type="radio" checked="" name="sa_upd2" id="sa_upd20" value="0" class="text">&nbsp;
-                        <label for="sa_upd20" style="font-size:0.9em;">Retain existing if no new data supplied for record</label><br>
-
-                        <input type="radio" name="sa_upd2" id="sa_upd21" value="1" class="text">&nbsp;
-                        <label for="sa_upd21" style="font-size:0.9em;">Delete existing even if no new data supplied for record</label>
-                    </div>            
-        </div>
     
         <div  id="divActionsMatching" class="action_buttons step3">
             
-            <!--
-            <div id="btnMatchingSkip" class="normal" style="margin-right:20px"
-                title="">
-                Import as new (skip matching)</div>
-            -->
             <div id="btnMatchingStart" class="normal" 
-                title="Start matching operation. Matching sets this ID field for existing records and allows the creation of new records for unmatched rows">Start Matching</div>
-
+                title="Start matching operation. Matching sets this ID field for existing records and allows the creation of new records for unmatched rows">Match against existing records</div>
+<!--
+            <div id="btnMatchingSkip" class="normal" 
+                title="">Skip matching (import all as new)</div>
+-->                
             <div id="btnNextRecType1" style="display:none" class="skip_step" 
                 title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">Skip to next record type</div>
                 
