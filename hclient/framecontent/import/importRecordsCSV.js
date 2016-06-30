@@ -313,7 +313,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
           });          
                        
                        
-          //TEST           _doSetPrimaryRecType(); 
+          //TEST           
+          _doSetPrimaryRecType(); 
     }
 
     //
@@ -979,7 +980,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 var iright = selitem.offset().left + selitem.width()/2;
                 var itop = selitem.offset().top + selitem.height() + 7;
                 
-                $('#img_arrow3').css({left: ileft, top: iline_top+1 });
+                $('#img_arrow4').css({left: ileft, top: iline_top+1 });
+                $('#img_arrow3').css({left: ileft, top: iline_top+12 });
                 $('#img_arrow1').css({left: ileft, top: iline_top, width:(iright-ileft)});
                 $('#img_arrow2').css({left: iright, top: itop, height: iline_top-itop+2 });
                 $('img[id*="img_arrow"]').show();
@@ -1177,7 +1179,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         //adjust position of footer with action buttons  
         var content = $('#divFieldMapping');
         var btm = $('#divStep3').height() - (content.position().top + $('#tblFieldMapping').height());
-        btm = (btm<150) ?150 :btm;
+        btm = (btm<80) ?80 :btm;
 
         content.css('bottom', btm-20);
         $('#divImportActions').height(btm-20);
@@ -1856,7 +1858,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                  shelp = 'Please select one or more columns on which to match <b>'
                  + top.HEURIST4.rectypes.names[rtyID]
-                 + '</b> in the incoming data against records already in the database.<br>';
+                 + '</b> in the incoming data against records already in the database.<br><br>';
                  
                 if(key_idx>=0){
                     shelp = shelp + 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be overwritten.' 
@@ -1869,7 +1871,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
             }else if($('#sa_match1').is(':checked')){ // use id field
                 
-                shelp = 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be used.<br>';
+                shelp = 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be used.<br><br>';
                 
                 if(imp_session['counts'] && imp_session['counts'][rtyID] && imp_session['counts'][rtyID][1]>0){
                        shelp = shelp + 'It appears that you already have <b>'
@@ -1894,7 +1896,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                 shelp = 'By choosing not to match the incoming data, you will create '
                     +imp_session['reccount']+' new <b>'
-                    +top.HEURIST4.rectypes.names[rtyID]+'</b> records - that is one record for every row in import file?';
+                    +top.HEURIST4.rectypes.names[rtyID]+'</b> records - that is one record for every row in import file?<br><br>';
 
                 if(key_idx>=0){
                     shelp = shelp + ' The identification field "'+imp_session['columns'][key_idx]+'" will be filled with new record IDs.' 
