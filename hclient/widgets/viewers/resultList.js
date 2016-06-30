@@ -755,7 +755,13 @@ $.widget( "heurist.resultList", {
         }
 
         function __getOwnerName(ugr_id){
-            return top.HAPI4.sysinfo.db_usergroups[ugr_id];
+            if(ugr_id== top.HAPI4.currentUser.ugr_ID){
+                return top.HAPI4.currentUser.ugr_FullName;
+            }else if(top.HAPI4.sysinfo.db_usergroups[ugr_id]){
+                return top.HAPI4.sysinfo.db_usergroups[ugr_id];    
+            }else{
+                return 'user# '+ugr_id;
+            }
         }
 
         // Show owner group and accessibility to others as colour code
@@ -766,12 +772,26 @@ $.widget( "heurist.resultList", {
             // TODO: I think 0 should be treated like any other owner group in terms of public visibility
             var visibility = fld('rec_NonOwnerVisibility');
             // gray - hidden, green = viewable (logged in user) = default, orange = pending, red = public = most 'dangerous'
-            var clr  = (visibility=='hidden')? 'red': ((visibility=='viewable')? 'orange' : ((visibility=='pending')? 'green' : 'blue'));
-            var hint = __getOwnerName(owner_id)+', '+
-            ((visibility=='hidden')? 'private - hidden from non-owners': (visibility=='viewable')? 'visible to any logged-in user' : (visibility=='pending')? 'pending (viewable by anyone, changes pending)' : "public (viewable by anyone)");
+            var clr  = 'blue';
+            if(visibility=='hidden'){
+                clr = 'red';
+                visibility = 'private - hidden from non-owners';
+            }else if(visibility=='viewable'){
+                clr = 'orange';
+                visibility = 'visible to any logged-in user';
+            }else if(visibility=='pending'){
+                clr = 'green';
+                visibility = 'pending (viewable by anyone, changes pending)';
+            }else { //(visibility=='public')
+                clr = 'blue';
+                visibility = 'public (viewable by anyone)';
+            }
+            
+            var hint = __getOwnerName(owner_id)+', '+visibility;
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner" style="color:' + clr + '" title="' + hint + '">&nbsp;&nbsp;<b>' + owner_id + '</b></span>';
+            
         }
 
         // construct the line or block
