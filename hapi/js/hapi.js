@@ -3780,7 +3780,8 @@ var HeuristScholarDB = new HStorageManager();
 		newIframe.onload = function() {
 			var data;
 			try {
-				data = HAPI.XHR.evalJSON(HAPI.base64.decode(decodeURIComponent(newIframe.contentWindow.document.location.hash.substring(6))));	// #data=....
+                var sjson = HAPI.base64.decode(decodeURIComponent(newIframe.contentWindow.document.location.hash.substring(6)))
+				data = HAPI.XHR.evalJSON(sjson);	// #data=....
 			} catch (e) {
 				//				 setTimeout(function() { that.onload();},100);
 				 return; // return seems to try again

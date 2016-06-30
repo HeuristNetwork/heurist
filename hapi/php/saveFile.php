@@ -108,7 +108,9 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) &&  empty($_FILES) &&
 
 function jsonError($message) {
     mysql_query("rollback");
-    print "{\"error\":\"" . addslashes($message) . "\"}";
+    print json_encode(array('error'=>$message));
+    
+    //print "{\"error\":\"" . addslashes($message) . "\"}";
 }
 
 

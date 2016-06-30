@@ -3038,7 +3038,11 @@ console.log('heurist not defined');
         this.constructInput(inputDiv, bdValue);
     };
 
-
+    /*
+    upload workflow:
+    input type=file -> onchange -> uploadFileInput -> HAPI.saveFile( HSaver ) -> callback on complete: fileInputUploaded
+    
+    */
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(inputDiv, bdValue) {
         var thisRef = this;    // for great closure
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;

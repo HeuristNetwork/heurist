@@ -112,6 +112,7 @@
         );
                                              
         if (! $res) {
+            
             $uploadFileError = "Error inserting file metadata or unable to recognise uploaded file format. '.
                 'This generally means that the mime type for this file has not been defined for this database (common mime types are defined by default). '.
                 'Please add mime type from Database > Administration > Structure > Define mime types. '.
