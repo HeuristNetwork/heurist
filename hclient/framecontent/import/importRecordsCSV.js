@@ -313,8 +313,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
           });          
                        
                        
-          //TEST           
-          _doSetPrimaryRecType(); 
+          //TEST _doSetPrimaryRecType(); 
     }
 
     //
@@ -449,252 +448,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     // preview - show dependencies in popup where we select primary rectype
     //
-    function _loadRectypeDependencies_old( selEle, preview_rty_ID ){
-            
-            var is_preview = (preview_rty_ID>0);
-            
-            //main rectype is not defined - open select dialog
-            if(!( is_preview ||  imp_session['primary_rectype']>0)){
-                 _doSetPrimaryRecType(true);
-                 return;
-            }
-        
-            //request to server to get all dependencies for given primary record type
-            var request = { action: 'set_primary_rectype',
-                            is_preview: (is_preview?1:0),
-                            rty_ID: is_preview?preview_rty_ID:imp_session['primary_rectype'],
-                            imp_ID: imp_ID,
-                                id: top.HEURIST4.util.random()
-                               };
-                               
-                               
-            top.HAPI4.parseCSV(request, function( response ){
-                
-                //that.loadanimation(false);
-                if(response.status == top.HAPI4.ResponseStatus.OK){
-                
-                    var rectypes = response.data;
-                    var rtOrder = _fillDependencyList(rectypes, {levels:{}, fields:{}, depend:{} }, 0);    
-                    //fields - resourse fields
-                    //depend - only required dependencies 
-                    
-                    var i, j, rt_ids = Object.keys(rtOrder['levels']), isfound, depth = 0;
-                    
-                    if(is_preview){  //in popup dialog where we choose primary rectype
-                         //fill dependecies list
-                         var ele = $(selEle).empty();
-                         var primary_rt = 0;
-                         
-                         do{
-                     
-                             isfound = false;
-                             for (i=0;i<rt_ids.length;i++){
-                                 recTypeID = rt_ids[i];
-                                 if(rtOrder['levels'][recTypeID] == depth){
-                                     isfound = true;
-                                     
-                                     $('<div>' 
-                                        + '<input type="checkbox" class="rt_select" data-rt="'+recTypeID+'" '+
-                                        + (depth==0?'checked="checked" disabled="disabled"':'')+'><b>'
-                                        + top.HEURIST4.rectypes.names[recTypeID] 
-                                        + '</b></div>').appendTo(ele);
-                                     
-                                     var rt_fields = rtOrder['fields'][recTypeID];
-                                     if(rt_fields){
-                                         for (j=0;j<rt_fields.length;j++){
-                                               var field = rt_fields[j];
-                                               $('<div>'+
-                                               '<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
-                                               + '<i style="'+(field['required']?'color:red':'')+'">' +field['title']
-                                               + '</i><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
-                                               + field['rt_title'] +'</div>')
-                                                .appendTo(ele);
-                                         }
-                                     }
-                                     
-                                     if(depth==0){ 
-                                        primary_rt = recTypeID
-                                     }
-                                 }
-                                
-                             }
-                             depth++;
-                         
-                         }while(isfound);
-                         
-                         if(rt_ids.length==1){
-                            ele.text('No dependencies found');
-                         }else{
-                             
-                             
-                            function __rt_checkbox_click(rt_checkbox){                                      
-                            
-                                    //keep id of clicked to avoid disability
-                                     var i, j, keep_id = rt_checkbox.attr('data-rt');
-                                    
-                                    //all rt that will be checked and disabled
-                                     var rt_depend_all = [];
-                                     
-                                     //get required fields for rectypes that are already marked
-                                     $.each(ele.find('.rt_select:checked'),function(idx, item){
-                                             var recTypeID = $(item).attr('data-rt');    
-                                             rt_depend_all.push(recTypeID);
-                                     });
-                                     top.HEURIST4.util.setDisabled( ele.find('.rt_select'), false);
-                                     
-                                     // find all dependent rectypes
-                                     rt_depend_all = _getCrossDependencies(rtOrder['depend'], rt_depend_all, []);
-
-                                     //                                     
-                                     if(!rt_checkbox.is(':checked')){
-                                         
-                                         //disable if marked rt has marked parent 
-                                         for(i=0;i<rt_depend_all.length;i++){
-                                             
-                                             var recTypeID = rt_depend_all[i];
-                                             
-                                             var depth = rtOrder['levels'][recTypeID],
-                                                 need_disable = false;
-                                             
-                                             if(depth==0){ 
-                                                 need_disable = true;
-                                             }else{
-                                                 //find previous level
-                                                 // rt_ids = Object.keys(rtOrder['levels'])
-                                                 for(j=0;j<rt_depend_all.length;j++){
-                                                    if(i!=j  //not itself
-                                                        && (rtOrder['levels'][rt_depend_all[j]]==depth-1)    //from prev level
-                                                        && (rtOrder['depend'][rt_depend_all[j]].indexOf(recTypeID)>=0))
-                                                    {
-                                                        need_disable = true;
-                                                        break;    
-                                                    }
-                                                 }
-                                             }
-                                             
-                                             if(need_disable){
-                                                  var cb = ele.find('.rt_select[data-rt="'+recTypeID+'"]');
-                                                  top.HEURIST4.util.setDisabled(cb, true);
-                                             }
-
-                                         }                                         
-                                         
-                                        /*
-                                        var rt_depend_unchecked = _getCrossDependencies(rtOrder['depend'], rt_depend_enable, []);
-                                     
-                                        //find difference - these rectypes will NOT be disabled   
-                                        for(i=0;i<rt_depend_unchecked.length;i++){
-                                            if(rt_depend_all.indexOf(rt_depend_unchecked[i])<0){
-                                                 rt_depend_enable.push(rt_depend_unchecked[i]);
-                                            }
-                                        }
-                                        */
-                                     }
-                                     
-                                     //mark and disable all of them
-                                     for(i=0;i<rt_depend_all.length;i++){
-                                            var cb = ele.find('.rt_select[data-rt="'+rt_depend_all[i]+'"]');
-                                            cb.prop('checked',true);
-                                            if(keep_id!=rt_depend_all[i]){
-                                                top.HEURIST4.util.setDisabled(cb, true);
-                                            }
-                                     }
-                                }                            
- 
-                            ele.find('.rt_select').click(
-                                function(event){ __rt_checkbox_click($(event.target)) }
-                            );
-                            //click and disable first (primary) record type
-                            
-                            var cb = ele.find('.rt_select[data-rt="'+primary_rt+'"]');
-                            cb.prop('checked',true);
-                            __rt_checkbox_click(cb); //does not work.trigger('click'); //.click();
-                            top.HEURIST4.util.setDisabled(cb, true);
-                            
-                         }
-                    }else{ //in main form
-                        
-                         var ele1 = $('#sa_rectype_sequence').empty();
-                         var ele2 = $('#sa_rectype').empty().hide();
-                         var s = '';
-                         
-                         rt_sequence = []; //reset
-
-                         do{
-                     
-                             isfound = false;
-                             for (i=0;i<rt_ids.length;i++){
-                                 recTypeID = rt_ids[i];
-                                 if(rtOrder['levels'][recTypeID] == depth){
-                                     isfound = true;
-                                     var title = top.HEURIST4.rectypes.names[recTypeID];
-
-                                     var s_count = _getInsertUpdateCountsForSequence(recTypeID);                                     
-
-                                     if(s!=''){
-                                         s = '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'+s;
-                                     }       
-                                     s = '<h2 class="select_rectype_seq" data-rt="'
-                                            +recTypeID + '">' + title + '<span data-cnt="1" id="rt_count_'
-                                            +recTypeID + '">' + s_count + '</span></h2>'+s;
-                                     
-                                     top.HEURIST4.ui.addoption(ele2.get(0), recTypeID, title); 
-                                     
-                                     if(depth==0){
-                                         $('#lblPrimaryRecordType').text(title);
-                                     }
-                                     rt_sequence.push(recTypeID);
-                                 }
-                                 
-                             }
-                             depth++;
-                         
-                         }while(isfound);
-                         
-                         $(s).appendTo(ele1);
-                         
-                         $('.select_rectype_seq').click(function(event){
-
-                                var sp = $(event.target)
-                                if($(event.target).attr('data-cnt')>0){
-                                    sp = $(event.target).parent();
-                                }
-                             
-                                //get next rectype
-                                var rty_ID_next = sp.attr('data-rt');
-                                
-                                //get previous
-                                //var idx = rt_sequence.indexOf(rty_ID_next);
-                                //var rty_ID_prev = rt_sequence[(idx==rt_sequence.length-1?0:idx+1)];
-                                
-                                _skipToNextRecordType(rty_ID_next);
-
-                         });
-                         
-                         //select first in sequence
-                         if(rt_sequence.length>0){
-                            $('.select_rectype_seq[data-rt="'+rt_sequence[rt_sequence.length-1]+'"]').click();    
-                         }
-                        
-                        //top.HEURIST4.ui.createRectypeTreeSelect(selEle, rectypes, null, 0);    
-                        _initFieldMapppingTable();    
-                    }
-                    
-                }else{
-                    _showStep(1);
-                    top.HEURIST4.msg.showMsgErr(response);
-                }
-
-            });        
-
-    }   
-
-
-    //
-    // load list of record types as tree into sa_rectype
-    //
-    // preview - show dependencies in popup where we select primary rectype
-    //
     function _loadRectypeDependencies( selEle, preview_rty_ID ){
             
             var is_preview = (preview_rty_ID>0);
@@ -720,7 +473,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                 
                     var rectypes = response.data;
-                    var rtOrder = _fillDependencyList(rectypes, {levels:{}, fields:{}, depend:{} }, 0);    
+                    var rtOrder = _fillDependencyList(rectypes, {levels:{}, fields:{}, depend:{}, idfields:{} }, 0);    
                     //fields - resourse fields
                     //depend - only required dependencies 
                     
@@ -742,8 +495,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                      $('<div>' 
                                         + '<input type="checkbox" class="rt_select" data-rt="'+recTypeID+'" '+
                                         + (depth==0?'checked="checked" disabled="disabled"':'')+'><b>'
-                                        + top.HEURIST4.rectypes.names[recTypeID] 
+                                        + rtOrder['levels'][recTypeID]  + ' ' +top.HEURIST4.rectypes.names[recTypeID] 
                                         + '</b></div>').appendTo(ele);
+                                     
+                                     
+                                     if(depth==0){ //add PRIMARY field
+                                               $('<div style="padding-left:2em">'+
+                                               '<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
+                                               + '<i>Primary record</i>'
+                                               + '<span class="id_fieldname">'
+                                               + top.HEURIST4.rectypes.names[recTypeID] +' ID</span></div>')
+                                                .appendTo(ele);
+                                     }
                                      
                                      var rt_fields = rtOrder['fields'][recTypeID];
                                      if(rt_fields){
@@ -753,7 +516,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                '<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
                                                + '<i style="'+(field['required']?'color:red':'')+'">' +field['title']
                                                + '</i><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
-                                               + field['rt_title'] +'</div>')
+                                               + field['rt_title'] 
+                                               //+ '<span class="id_fieldname rename" data-rt="'+recTypeID+'">'
+                                               //+ rtOrder['idfields'][recTypeID]+'</span>'
+                                               +'</div>')
                                                 .appendTo(ele);
                                          }
                                      }
@@ -856,7 +622,37 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             cb.prop('checked',true);
                             __rt_checkbox_click(cb); //does not work.trigger('click'); //.click();
                             top.HEURIST4.util.setDisabled(cb, true);
+
+                            //click to remame identification field                            
+                            function __idfield_rename(ele_span){
+
+                                //keep id of clicked to avoid disability
+                                var i, j, rtyID = ele_span.attr('data-rt');
+                                var idfield_name_old = ele_span.text();
+
+                                //show popup to rename
+                                top.HEURIST4.msg.showPrompt('Name of identifiecation field', function(idfield_name){
+                                    if(!top.HEURIST4.util.isempty(idfield_name)){
+                                        
+                                        //check uniqueness
+
+                                        //set span content
+                                        ele_span.html(idfield_name);
+                                        //change value in rtStruct
+                                        rtOrder['idfields'][rtyID] = idfield_name;
+
+                                    }
+                                });
+
+
+
+                            }
                             
+                            ele.find('.rename').click(
+                                function(event){ __idfield_rename($(event.target)) }
+                            );
+
+                         
                          }
                     }else{ //in main form
                         
@@ -1014,7 +810,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     }
     
     //
-    // returns list of rectypes with level (depth) and list of resource fields
+    // returns list of rectypes 
+    //  with level (depth) 
+    //    list of resource fields
+    //    list of dependent rectype
     //
     function _fillDependencyList(rectypeTree, rtOrder, depth){
          //var ele = $(selEle);
@@ -1055,12 +854,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             recTypeID = ids[i];
                             rectypeNames.push(rectypes.names[recTypeID]);
                             
-                            if(top.HEURIST4.util.isnull(rtOrder['levels'][recTypeID])){
-                                rtOrder['levels'][recTypeID] = depth+1;
+                            if(top.HEURIST4.util.isnull(rtOrder['levels'][recTypeID]) ||
+                                (rtOrder['levels'][recTypeID]>0 && rtOrder['levels'][recTypeID] < depth+1))
+                            {
+                                rtOrder['levels'][recTypeID] = depth+1;    
+                                rtOrder['idfields'][top.HEURIST4.rectypes.names[recTypeID]+' ID'] = recTypeID;
                             }
                        }
                        
-                       rt_fields.push({title:title,rt_ids:ids,rt_title:rectypeNames.join('|'),required:field['required']});
+                       rt_fields.push({title:title, rt_ids:ids, rt_title:rectypeNames.join('|'), required:field['required']});
                        if(field['required']) rt_depend = $.unique(rt_depend.concat(ids));
                    }
              }

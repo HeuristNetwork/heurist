@@ -25,7 +25,7 @@
         function parse_content - parse CSV from content parameter and returns parsed array (used in import terms)
         
     set_primary_rectype
-        set main rectype for given session and returns list of dependent rectypes    
+        set main rectype for given session and returns list of dependencies (resourse field->rectype)    
 
     records
         get records from import table    

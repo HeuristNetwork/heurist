@@ -97,10 +97,18 @@ function get_config_bytes($val) {
                top:2px;
             } 
             .select_rectype_seq{
-                cursor:pointer;
+                cursor: pointer;
                 display: inline-block;
                 font-weight:bold !important;
                 padding:0.2em;
+            }
+            .id_fieldname{
+               font-size: 0.9em;
+               color:olive;
+               padding-left:2em;
+            }
+            .rename{
+                cursor: pointer;
             }
         </style>
     </head>
