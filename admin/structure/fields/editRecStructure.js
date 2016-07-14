@@ -281,7 +281,7 @@ function EditRecStructure() {
                         "For non owner: " + oRecord.getData("rst_NonOwnerVisibility");
                         var type = oRecord.getData("dty_Type");
                         if(type=='separator'){
-                            $(elLiner).css("font-size","1.2em");
+                            $(elLiner).css({'font-size':'1.2em','font-weight':'bold'});
                         }
 
                     }

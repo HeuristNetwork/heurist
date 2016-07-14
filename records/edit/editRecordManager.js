@@ -481,7 +481,7 @@ function openWorkgroupChanger() {
 
     var linkPos = top.HEURIST.getPosition(document.getElementById("workgroup-edit"));
     top.HEURIST.util.popupElement(window, wgEditor,
-    { width: wgEditor.offsetWidth, height: wgEditor.offsetHeight, x: linkPos.x-200, y: linkPos.y+20, "no-titlebar": true, "no-resize": true });
+    { width: (wgEditor.offsetWidth<360?360:wgEditor.offsetWidth), height: wgEditor.offsetHeight, x: linkPos.x-200, y: linkPos.y+20, "no-titlebar": true, "no-resize": true });
     setTimeout(function() { wgVal.focus(); }, 0);
 }
 

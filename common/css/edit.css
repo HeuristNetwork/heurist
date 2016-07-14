@@ -143,9 +143,10 @@
 }
 
 #workgroup-editor {
-	width:320px !important;
+	max-width:340px !important;
 	height:270px !important;
 	padding:10px;
+    color:gray;
 }
 #workgroup-editor .detailRow {
 	padding:5px 0;
@@ -1157,7 +1158,4 @@ hr {
 }
 #quicklinks>ul>li>a{
     color: #ffffff !important;
-}
-#workgroup-editor{
-    color:gray;
 }

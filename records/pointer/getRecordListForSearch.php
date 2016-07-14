@@ -42,7 +42,7 @@
 */
 
 
-define("RESULT_LIMIT", 100);
+define("RESULT_LIMIT", 500);
 define('ISSERVICE',1);
 define("SAVE_URI", "disabled");
 

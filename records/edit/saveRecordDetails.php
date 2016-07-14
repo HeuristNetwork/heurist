@@ -789,7 +789,7 @@ class BibDetailGeographicInput extends BibDetailInput {
             return array();
     }
     function inputOK($postVal, $dtyID, $rtyID) {
-        if (! preg_match("/^(p point|r polygon|cl linestring|l linestring)\\s?\\(?\\(([-0-9.+, ]+?)\\)\\)?$/i", $postVal, $matches)) {
+        if (! preg_match("/^(p point|r polygon|c linestring|l linestring)\\s?\\(?\\(([-0-9.+, ]+?)\\)\\)?$/i", $postVal, $matches)) {
             if (! preg_match("/^(pl polygon)\\s?\\(\\(([-0-9.+, ]+?)\\)(?:,\\([-0-9.+, ]+?\\))?\\)$/i", $postVal, $matches)) {
                 return false;	// illegal value
             }
