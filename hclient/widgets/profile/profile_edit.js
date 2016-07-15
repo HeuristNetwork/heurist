@@ -271,9 +271,15 @@ $.widget( "heurist.profile_edit", {
             }
         });
         if(this.options.isregistration){
-            var ss = top.HEURIST4.msg.checkLength2( this.edit_form.find("#ugr_Captcha"), '', 1, 0 );
+        	//remove/trim spaces
+        	var ele = this.edit_form.find("#ugr_Captcha");
+        	var val = ele.val().trim().replace(/\s+/g,'');
+        	
+            var ss = top.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
             if(ss!=''){
                 err_text = err_text + ', Answer question below to prove you are human';
+            }else{
+				ele.val(val);
             }
         }
 
