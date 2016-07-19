@@ -313,7 +313,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
           });          
                        
                        
-          //TEST _doSetPrimaryRecType(); 
+          //TEST 
+          _doSetPrimaryRecType(); 
     }
 
     //
@@ -517,8 +518,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                + '<i style="'+(field['required']?'color:red':'')+'">' +field['title']
                                                + '</i><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
                                                + field['rt_title'] 
-                                               //+ '<span class="id_fieldname rename" data-rt="'+recTypeID+'">'
-                                               //+ rtOrder['idfields'][recTypeID]+'</span>'
+                                               + '<span class="id_fieldname rename" data-rt="'+recTypeID+'">'
+                                               + rtOrder['idfields'][recTypeID]+'</span>'
                                                +'</div>')
                                                 .appendTo(ele);
                                          }
@@ -810,10 +811,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     }
     
     //
-    // returns list of rectypes 
+    // returns list of field/rectypes 
+    // key:field/recctype
+    // levels  
+    
     //  with level (depth) 
     //    list of resource fields
-    //    list of dependent rectype
+    //    list of dependent rectype     
     //
     function _fillDependencyList(rectypeTree, rtOrder, depth){
          //var ele = $(selEle);

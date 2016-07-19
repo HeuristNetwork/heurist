@@ -922,14 +922,20 @@ if (! top.HEURIST.edit) {
         * @returns {top.HEURIST.edit.inputs.BibDetailFreetextInput}
         */
         createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
-            
-            if(!top) {
-console.log('top not defined');                
+
+            if(!top || !window) {
+console.log('top not defined');    
+				return;            
                 window.top = window.self;    
             }
             if(!top.HEURIST){
 console.log('heurist not defined'); 
             }               
+            
+            var rfr = null;
+            if($.isArray(detailTypeID)){
+				rfr = detailTypeID;
+            }else{
             
             // Get Detail Type info
             // 0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
@@ -944,6 +950,8 @@ console.log('heurist not defined');
             if (!rfr) {
                 rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,(fieldValues.length?fieldValues.length:null));
             }
+            
+			}
 
             var newInput;
             switch (dt[dtyFieldNamesIndexMap['dty_Type']]) {

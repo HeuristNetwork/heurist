@@ -58,7 +58,8 @@
                 var relatedRecords = top.HEURIST.edit.record.relatedRecords;
                 var relationsBody = document.getElementById("relations-tbody");
                 $(relationsBody).empty();
-                var relManager = new top.RelationManager(relationsBody,top.HEURIST.edit.record, relatedRecords,0,changeNotification,false,true);
+                var relManager = new top.RelationManager(relationsBody,top.HEURIST.edit.record, 
+                												relatedRecords,0,changeNotification,false,true);
                 
 				//repalce to jquery top.HEURIST.edit.calendarViewer = calendarViewer;
 				var elt = document.getElementById("relationship-type");

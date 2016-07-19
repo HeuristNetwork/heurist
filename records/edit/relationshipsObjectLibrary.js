@@ -380,7 +380,8 @@ if (!top.Relationship) {
             "",
             "relationtype",
             "",  //help text
-            YAHOO.lang.JSON.stringify(this.manager.relTerms),   //terms ids
+            //YAHOO.lang.
+            JSON.stringify(this.manager.relTerms),   //terms ids
             (this.manager.termHeadersList || ""), //non selectable
             0); // allowed record pointers
         var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
@@ -438,6 +439,7 @@ if (!top.Relationship) {
         //saveButton.style.fontSize = "2ex";
         saveButton.style.marginRight = "10px";
         saveButton.style.padding = "0px 3px";
+        saveButton.name = "savebutton";
         saveButton.value = "Add relationship";// relationship";
         saveButton.onclick = function() { thisRef.save(); };
 
@@ -703,7 +705,8 @@ if (!top.Relationship) {
     * @param supressHeaders a boolean indicating where to show headers for the different types of relations.
     * @param needAddToAggregation - if true - call from 'Relationships' tab, otherwise from main edit tab
     */
-    top.RelationManager = function(parentElement, record, relatedRecords, dtIDRelmarker, changeNotification, supressHeaders, needAddToAggregation) {
+    top.RelationManager = function(parentElement, record, relatedRecords, dtIDRelmarker, 
+    						changeNotification, supressHeaders, needAddToAggregation) {
         if (!parentElement || !record || isNaN(record.recID)) return null;
 
         this.supressHeaders = supressHeaders;
@@ -781,7 +784,7 @@ if (!top.Relationship) {
 
         var flatTermIDLookup = null;
         if (this.relTerms && typeof this.relTerms === "object" && dtIDRelmarker) {
-            flatTermIDLookup = YAHOO.lang.JSON.stringify(this.relTerms);
+            flatTermIDLookup = JSON.stringify(this.relTerms); //was YAHOO.lang.
             flatTermIDLookup = "," + flatTermIDLookup.match(/(\d+)/g).join(",") + ",";
             if (flatTermIDLookup === ",,"){
                 flatTermIDLookup = null;

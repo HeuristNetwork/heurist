@@ -850,6 +850,7 @@ function DetailTypeEditor() {
     }
 
 
+    
 
     /**
     * onChangeType - listener for datetype selector
@@ -1001,6 +1002,38 @@ function DetailTypeEditor() {
         onPreventChars: function(event) {
             _onPreventChars(event);
         },        
+        
+        //
+        //
+        onDataTypeClick: function(event){
+			
+		    var el = Dom.get("dty_Type"); //e.target;
+		    if(!el.value){
+		    	
+		    	
+			var body = $(this.document).find('body');
+            var dim = { h:700, w:Math.max(1200, body.innerWidth()-10) };		    	
+		    	
+            Hul.popupURL(window, top.HEURIST.baseURL_V3 +
+                "admin/structure/fields/selectFieldType.html?&db="+_db,
+                {
+                    "close-on-blur": false,
+                    //"no-resize": true,
+                    //"no-close": true, //hide close button
+                    title: 'Select data type of field',
+                    height: dim.h,
+                    width: dim.w,
+                    callback: function(context) {
+                        if(context!="") {
+                    		el.value = context;
+                        }
+                    }
+              });
+				
+		    }
+	
+		},
+        
         /**
         *	handles change type event
         */
