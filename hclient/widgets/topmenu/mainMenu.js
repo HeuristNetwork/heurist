@@ -471,7 +471,7 @@ $.widget( "heurist.mainMenu", {
         
         var p = false;
         if(action == "menu-profile-preferences"){
-            top.HAPI4.SystemMgr.is_logged(this._editPreferences); p=true;
+            top.HAPI4.SystemMgr.is_logged(function(){that._editPreferences()}); p=true;
         }else if(action == "menu-database-refresh"){
             this._refreshLists( true ); p=true;
         }else if(action == "menu-import-csv"){ // Result set
@@ -731,7 +731,7 @@ $.widget( "heurist.mainMenu", {
                     currentTheme = this.currentTheme;
             }});
 
-            //form prefs to ui
+            //from prefs to ui
             allFields.each(function(){
                 if(prefs[this.id] || top.HEURIST.displayPreferences[this.id]){
                     if($(this).hasClass('h3pref')){
@@ -750,8 +750,6 @@ $.widget( "heurist.mainMenu", {
                     }
                 };
             });
-
-
 
             //save to preferences
             function __doSave(){
@@ -781,7 +779,7 @@ $.widget( "heurist.mainMenu", {
                 if(top.HEURIST && top.HEURIST.util){
                     top.HEURIST.util.setDisplayPreference(h3pref, h3pref_val);
                 }
-
+                
                 //save preferences in session
                 top.HAPI4.SystemMgr.save_prefs(request,
                     function(response){
