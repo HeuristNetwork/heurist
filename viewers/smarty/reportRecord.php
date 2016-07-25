@@ -21,8 +21,15 @@ class ReportRecord {
        $this->loaded_recs = array();
     }    
     
-    public function getRecord($rec_ID, $smarty_obj=null) {
+    public function getRecord($rec, $smarty_obj=null) {
+
+        if(is_array($rec) && $rec['recID']){
+            $rec_ID = $rec['recID'];
+        }else{
+            $rec_ID = $rec;
+        }
         
+
         if(@$this->loaded_recs[$rec_ID]){
             return $this->loaded_recs[$rec_ID];
         }
