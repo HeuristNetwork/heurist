@@ -93,7 +93,7 @@ function executeSmartyTemplate($params){
     $execution_counter, $execution_total_counter, $session_id, $mysqli;
 
 
-    set_time_limit(0); //no limit
+    set_time_limit(0); //no script execution time limit
 
     mysql_connection_overwrite(DATABASE);
 

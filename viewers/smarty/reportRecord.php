@@ -176,6 +176,10 @@ class ReportRecord {
                 }
             }
             
+            if(count($this->loaded_recs)>2500){
+                $this->loaded_recs = array(); //reset to avoid memory overflow
+            }
+            
             $this->loaded_recs[$recordID] = $record; 
 
             return $record;
