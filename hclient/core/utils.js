@@ -644,13 +644,16 @@ top.HEURIST4.util = {
     //
     // download given url as a file (repalcement of usage A)
     //
-    downloadURL: function(url) {
+    downloadURL: function(url, callback) {
         $idown = $('#idown');
-        if ($idown.length>0) {
-            $idown.attr('src',url);
-        } else {
-            $idown = $('<iframe>', { id:'idown', src:url }).hide().appendTo('body');
+
+        if ($idown.length==0) {
+            $idown = $('<iframe>', { id:'idown' }).hide().appendTo('body');
         }
+        if ($.isFunction(callback)) {
+                $idown.on('load', callback);   
+        }
+        $idown.attr('src',url);
     },
     
     //

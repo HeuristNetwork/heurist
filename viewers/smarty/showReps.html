@@ -447,6 +447,7 @@
                 } );
 
             }
+            
 
             //
             function onShowEditor()
@@ -481,9 +482,32 @@
             }
 
             function onSaveOutput(){
-                if(top.HEURIST4){
-                    top.HEURIST4.util.downloadInnerHtml('heurist_report.html',$('#rep_container') );
+                
+                if(top.HEURIST && top.HEURIST.currentQuery_all && top.HEURIST4)
+                {
+                    var sel = document.getElementById('selTemplates');
+                    if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
+                    
+                    var template_file = sel.options[sel.selectedIndex].value; // by default first entry
+                    
+                    var currentSearchQuery = top.HEURIST.currentQuery_all.replace('"','%22');
+                    var surl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php?"+
+                        currentSearchQuery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
+                        
+                    $("#btnRepSave").hide();    
+                    top.HEURIST4.util.downloadURL(surl, function(){
+                        $("#btnRepSave").show();
+                    });
                 }
+                
+                /* OLD WAY - it saves only current output in UI
+                if(top.HEURIST4)
+                    
+                    var iframe = document.getElementById("rep_container_frame");
+                    var ele = $(iframe.contentWindow.document).find('body');
+                    top.HEURIST4.util.downloadInnerHtml('heurist_report.html', ele );
+                }
+                */
             }
             
             function onExportTemplate()

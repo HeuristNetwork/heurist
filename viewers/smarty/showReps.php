@@ -47,10 +47,6 @@ define('ISSERVICE',1);
 define('SEARCH_VERSION', 1);
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-//require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
-//require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
-//require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once(dirname(__FILE__).'/../../records/files/downloadFile.php');
 
 require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
@@ -112,6 +108,7 @@ function executeSmartyTemplate($params){
     $outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
     $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage']:null;
+
 
     $gparams = $params; //keep to use in other functions
 
@@ -219,6 +216,23 @@ function executeSmartyTemplate($params){
     }else{
         $content = $template_body;
     }
+    
+    //verify that template has new features
+    //need to detect $heurist->getRecord - if it is not found this is old version - show error message
+    if(strpos($content, '$heurist->getRecord(')===false){
+            
+           $error = '<p>To improve performance we have made some small changes to the report template specifications (Vsn 3, July 2016). You will need to add {$r = $heurist->getRecord($r)}  for the main record loop and similar expressions for record pointer loops.<br>Example: {$r.f103 = $heurist->getRecord($r.f103)}</p>'
+
+           .'<p>Please generate a new report to obtain an example of the syntax, or simply send your report template to support at HeuristNetwork dot org and we will adjust the template for you.</p>';
+           
+           if($publishmode>0 && $outputfile!=null){
+                save_report_output2($error);
+           }else{
+                echo $error;
+           }
+           exit();
+    }
+    
 
     $k = strpos($content, "{*depth");
     $kp = 8;
@@ -344,16 +358,15 @@ function executeSmartyTemplate($params){
         if(!$template_file){
             $template_file = 'test01.tpl';
         }
-
+        
         $smarty->debugging = false;
         $smarty->error_reporting = 0;
-        if($outputfile!=null){
-            $smarty->registerFilter('output','smarty_output_filter');
-        }else if($isJSout){
-            $smarty->registerFilter('output','add_javascript_wrap5');
-        }
 
-        // TODO: Remove, enable or explain: $smarty->unregisterFilter('post','add_javascript_wrap');
+        if($outputfile!=null){
+            $smarty->registerFilter('output', 'smarty_output_filter');
+        }else if($isJSout){
+            $smarty->registerFilter('output', 'add_javascript_wrap5');
+        }
     }
     //DEBUG   
     $smarty->registerFilter('post','smarty_post_filter');
@@ -417,8 +430,8 @@ function save_report_output2($tpl_source){
     $errors = null;
     $res_file = null;
 
+    if($publishmode<2){ //save into file - otherwise download with given file name
     //$publishmode = (array_key_exists("publish", $gparams))? intval($gparams['publish']):0;
-
     try{
 
         $path_parts = pathinfo($outputfile);
@@ -449,11 +462,11 @@ function save_report_output2($tpl_source){
 
     }catch(Exception $e)
     {
-
         $errors = $e->getMessage();
     }
+    }
 
-    if($publishmode==0){
+    if($publishmode!=1){
 
         if($errors!=null){
             $tpl_source = $tpl_source."<div style='color:#ff0000;font-weight:bold;'>$errors</div>";
@@ -463,9 +476,16 @@ function save_report_output2($tpl_source){
             header("Content-type: text/javascript");
             $tpl_res = add_javascript_wrap4($tpl_source);
         }else{
-            header("Content-type: text/html");
+            header("Content-type: text/html;charset=UTF-8");
             $tpl_res = $tpl_source;
         }
+        if($publishmode==2){
+            //set file name
+            header('Pragma: public');
+            header('Content-Disposition: attachment; filename="'.$outputfile.'"'); 
+            header('Content-Length: ' . strlen($tpl_res));
+        }
+
         echo $tpl_res;
 
     }else if ($publishmode==1){

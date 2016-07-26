@@ -146,6 +146,7 @@ function ShowReps() {
             document.getElementById('cbUseAllRecords1').value = _sQueryMode;
         }
 
+        top.HEURIST.insertPattern = _insertPattern;
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -475,6 +476,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                         '',
                         '{*------------------------------------------------------------*}',
                         '{foreach $results as $r} {* Start records loop, do not remove *}',
+                        '{$r = $heurist->getRecord($r)}',
                         '{*------------------------------------------------------------*}',
                         '',
                         '',
@@ -1303,7 +1305,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     }
 
     //
-    // 
+    // add loop opeartor for for multi-value field
     //
     function _addMagicLoopOperator(_nodep, varname){
         
@@ -1373,7 +1375,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     //
     function _insertRootForEach(){
         var textedit = Dom.get("edTemplateBody");
-        var _text = '{foreach $results as $r}\n\n  {if ($r.recOrder==0)}\n    \n  '+
+        var _text = '{foreach $results as $r}\n{$r = $heurist->getRecord($r)}\n\n  {if ($r.recOrder==0)}\n    \n  '+
         '{elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
 
         insertAtCursor(textedit, _text, false, -12);
@@ -1470,8 +1472,9 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
 
             case 99: // outer records loop
-                _text=  '\n\n {*------------------------------------------------------------*} \n' +
+                _text=  '\n\n{*------------------------------------------------------------*} \n' +
                 '{foreach $results as $r} {* Start records loop, do not remove *} \n' +
+                '{$r = $heurist->getRecord($r)}\n'+
                 '{*------------------------------------------------------------*} \n' +
                 ' \n\n' +
                 '  {* put the data you want output for each record here - insert the *} \n' +
@@ -1521,7 +1524,6 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     function _showInsertPopup( varid, isloop_level, elt ){
 
         top.HEURIST.insertVar = isloop_level==2?_insertSelectedVars_GP_repeatable:_insertSelectedVars;
-        top.HEURIST.insertPattern = _insertPattern;
         top.HEURIST.insertModifier = _insertModifier;
 
         if(isloop_level>0){
@@ -1630,9 +1632,9 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         var textedit = document.getElementById("edTemplateBody"),
         _text = "",
         _varid = varid,
-        _inloop = inloop;
-        _varname = "";
-
+        _inloop = inloop,
+        _varname = "",
+        _getrec = '';
 
         var _nodep = _findNodeById(varid);
 
@@ -1672,14 +1674,29 @@ this_id       : "term"
                 
             }else{
                 
+                var gp_node = _findNodeById(_nodep.parent_full_id);
+                if(gp_node && gp_node.data && gp_node.data.dtype=='resource'){
+                    _getrec = '{$'+_nodep.parent_full_id+
+                                    '=$heurist->getRecord($'+_nodep.parent_full_id+')}\n';
+                    //find if above cursor code already has such line             
+                    if(findAboveCursor(_getrec)) {
+                        _getrec = '';
+                    }
+                }
+                
+                if(_nodep.parent_full_id=='r.Relationship'){
+                    insertGetRelatedRecords();
+                }
+
+                
                 _varname = _nodep.id;
             }
 
 
             if(isif){
-                _text = _text + _addIfOperator(_nodep, _varname);
+                _text = _text + _getrec + _addIfOperator(_nodep, _varname);
             }else{
-                _text = _text + _addVariable(_nodep, _varname);
+                _text = _text + _getrec + _addVariable(_nodep, _varname);
             }
 
             // for loop we also add the variable in the loop
@@ -1711,9 +1728,15 @@ this_id       : "term"
             var arr_name = (_nodep.data.this_id==="r") ?"results" : _nodep.data.parent_id+'.'+_nodep.data.this_id+'s';
             var item_name = (_nodep.data.this_id==="r") ?"r" : _nodep.data.this_id;
             var remark = "{* "+_getVariableName(_nodep.data.id)+" *}";
-            var loopname = (_nodep.data=='enum')?'ptrloop':'valueloop';
+            var loopname = (_nodep.data.dtype=='enum')?'ptrloop':'valueloop';
+            var getrecord = (_nodep.data.dtype=='resource')? ('{$'+item_name+'=$heurist->getRecord($'+item_name+')}') :'';
+            
+            if(_nodep.data.id=='r.Relationship'){
+                insertGetRelatedRecords();
+            }
 
-            _text = "{foreach $"+arr_name+" as $"+item_name+" name="+loopname+"}"+remark+"\n  \n{/foreach}"+remark+"\n";
+            _text = "{foreach $"+arr_name+" as $"+item_name+" name="+loopname+"}"+remark+"\n  "+getrecord+"\n  "
+            +"\n{/foreach}"+remark+"\n";
         }
 
         if(_text!=="")    {
@@ -1781,6 +1804,69 @@ this_id       : "term"
     }
 
 
+    //
+    // returns false if token not found in current and lines until first "if" or "for" above
+    //
+    function findAboveCursor(token) {
+        
+        //for codemirror
+        var crs = codeEditor.getCursor();
+        //calculate required indent
+        var l_no = crs.line;
+        var line = "";
+        
+        token = token.trim();
+        
+        while (l_no>0){
+            line = codeEditor.getLine(l_no);
+            l_no--;
+            if(line.trim()=='') continue;
+
+            if(line.indexOf(token)>=0){
+                return true;   
+            }
+        
+            if(line.indexOf("{if")>=0 || line.indexOf("{foreach")>=0){
+                return false;   
+            }
+        }
+        
+        return false;   
+    }
+    
+    //
+    //
+    //
+    function insertGetRelatedRecords(){
+        
+        //find main loop and {$r = $heurist->getRecord($r)}
+        var l_count = codeEditor.lineCount();
+            l_no = 0, k = -1;
+        while (l_no<l_count){
+            line = codeEditor.getLine(l_no);
+            if(line.indexOf('$heurist->getRelatedRecords($r)}')>0){
+                return;//already inserted
+            }
+            l_no++;
+        }
+        
+        l_no = 0;    
+        while (l_no<l_count){
+            line = codeEditor.getLine(l_no);
+            k = line.indexOf('$heurist->getRecord($r)}');
+            if(k>=0){
+                
+                var s = '\n{$r.Relationships = $heurist->getRelatedRecords($r)}\n'+
+                '{$r.Relationship = (count($r.Relationships)>0)?$r.Relationships[0]:array()}\n';
+                
+                codeEditor.replaceRange(s, {line:l_no, ch:k+24}, {line:l_no, ch:k+24});
+                
+                break;
+            }
+            l_no++;
+        }
+    }
+    
 
     /**
     * myField, isApplyBreaks, cursorIndent - not used
