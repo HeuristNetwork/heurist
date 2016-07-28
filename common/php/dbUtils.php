@@ -607,32 +607,17 @@ function createDatabaseFolders($newDBName){
         $warnings = 1;
     }
 
-    
-    //create filethumbs
-    $filethumbs_folder = $uploadPath.'/filethumbs';
-    if (@mkdir($filethumbs_folder, 0777, true)) {
-        //copy htaccess
-        $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $filethumbs_folder.'/.htaccess');
-        if(!$res){
-            echo ("<h3>Warning:</h3> Cannot copy htaccess file for filethumbs folder in $uploadPath<br>");
-            $warnings = 1;
-        }
-    }else{
-        echo ("<h3>Warning:</h3> Unable to create file thumbnails folder to $uploadPath<br>");
-        $warnings = 1;
-    }
-    
-    
 
     // Create all the other standard folders required for the database
     // index.html files are added by createFolder to block index browsing
-    $warnings =+ createFolder($newDBName, "file_uploads","used to store uploaded files by default");
-    $warnings =+ createFolder($newDBName, "scratch","used to store temporary files");
-    $warnings =+ createFolder($newDBName, "hml-output","used to write published records as hml files");
-    $warnings =+ createFolder($newDBName, "html-output","used to write published records as generic html files");
-    $warnings =+ createFolder($newDBName, "generated-reports","used to write generated reports");
-    $warnings =+ createFolder($newDBName, "backup","used to write files for user data dump");
-    $warnings =+ createFolder($newDBName, "term-images","used for images illustrating terms");
+    $warnings =+ createFolder($newDBName, 'filethumbs', 'used to store thumbnails for uploaded files', true);
+    $warnings =+ createFolder($newDBName, 'file_uploads','used to store uploaded files by default');
+    $warnings =+ createFolder($newDBName, 'scratch', 'used to store temporary files');
+    $warnings =+ createFolder($newDBName, 'hml-output', 'used to write published records as hml files', true);
+    $warnings =+ createFolder($newDBName, 'html-output', 'used to write published records as generic html files', true);
+    $warnings =+ createFolder($newDBName, 'generated-reports', 'used to write generated reports');
+    $warnings =+ createFolder($newDBName, 'backup', 'used to write files for user data dump');
+    $warnings =+ createFolder($newDBName, 'term-images', 'used for images illustrating terms');
 
     if ($warnings > 0) {
         echo "<h2>Please take note of warnings above</h2>";
@@ -642,10 +627,10 @@ function createDatabaseFolders($newDBName){
 
 }
 
-
-
-
-function createFolder($newDBName, $name, $msg){
+//
+//
+//
+function createFolder($newDBName, $name, $msg, $allow_web_access=false){
 
     $uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
     if($name){
@@ -672,6 +657,15 @@ function createFolder($newDBName, $name, $msg){
     }
 
     add_index_html($folder); // index file to block directory browsing
+    
+    if($allow_web_access){
+        //copy htaccess
+        $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
+        if(!$res){
+            echo ("<h3>Warning:</h3> Cannot copy htaccess file for folder $folder<br>");
+            return 1;
+        }
+    }
 
     return 0;
 }

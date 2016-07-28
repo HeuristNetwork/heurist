@@ -377,6 +377,7 @@ define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
 
 testDirWriteableAndDefine('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . "filethumbs/", "Thumbnails directory");
 define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . 'filethumbs/');
+allowWebAccessForForlder( HEURIST_THUMB_URL );
 
 testDirWriteableAndDefine('HEURIST_SETTING_DIR', HEURIST_FILESTORE_DIR . "settings/", "Settings directory");
 
@@ -387,11 +388,12 @@ testDirWriteableAndDefine('HEURIST_XSL_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . "
 $path = @$sysValues['sys_hmlOutputDirectory'];
 if ($path) {
     $path = getRelativeFolder($path);
-    testDirWriteableAndDefine('HEURIST_HML_DIR', $documentRoot . $path, "HML output directory");
+    testDirWriteableAndDefine('HEURIST_HML_DIR', $documentRoot.$path, "HML output directory");
 }
 if (!defined('HEURIST_HML_DIR')) {
-    testDirWriteableAndDefine('HEURIST_HML_DIR', HEURIST_FILESTORE_DIR . 'hml-output/', "HML output directory");
+    testDirWriteableAndDefine('HEURIST_HML_DIR', HEURIST_FILESTORE_DIR.'hml-output/', "HML output directory");
 }
+allowWebAccessForForlder( HEURIST_HML_DIR );
 
 $path = @$sysValues['sys_htmlOutputDirectory'];
 if ($path) {
@@ -403,6 +405,7 @@ if (!defined('HEURIST_HTML_URL')) {
     testDirWriteableAndDefine('HEURIST_HTML_DIR', HEURIST_FILESTORE_DIR . 'html-output/', "HTML output directory");
     define('HEURIST_HTML_URL', HEURIST_FILESTORE_URL . 'html-output/');
 }
+allowWebAccessForForlder( HEURIST_HTML_URL );
 
 // FAIMS MODULES
 if(isset($defaultFaimsModulesPath)){
@@ -728,6 +731,15 @@ function testDirWriteableAndDefine($defString, $dir, $folderName, $tryMakeDir=tr
 
     return false;
 }
+//
+// copy htaccess
+//
+function allowWebAccessForForlder($folder){
+    if(file_exists($folder) && is_dir($folder) && !file_exists($folder.'/.htaccess')){
+        $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
+    }
+}
+
 
 
 function getRelativeFolder($upload){
