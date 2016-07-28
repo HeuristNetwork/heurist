@@ -17,6 +17,7 @@
 
 {*------------------------------------------------------------*}
 {foreach $results as $r} {* Start records loop, do not remove *}
+{$r = $heurist->getRecord($r)}
 {*------------------------------------------------------------*}
 
   {* put the data you want output for each record here - insert the *}
