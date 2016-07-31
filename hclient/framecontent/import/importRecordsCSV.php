@@ -103,7 +103,8 @@ function get_config_bytes($val) {
                 padding:0.2em;
             }
             .id_fieldname{
-               font-size: 0.9em;
+               font-size: 0.8em;
+               font-weight: normal;
                color:olive;
                padding-left:2em;
             }
@@ -349,13 +350,11 @@ function get_config_bytes($val) {
 
         <fieldset style="padding-top:1.5em;padding-bottom:1.5em">
         <div>
-            <div class="header optional" style="min-width: 60px; width: 60px;"><label>Importing:</label></div>
+            <div class="header optional" style="min-width: 60px; width: 60px;"><label style="vertical-align: top;">Importing:</label></div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
                     <div id="sa_rectype_sequence"></div>
-                    <select id="sa_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
-                    </select>
                 </div>
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure

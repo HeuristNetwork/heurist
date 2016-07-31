@@ -123,8 +123,9 @@ if(!$system->init(@$_REQUEST['db'])){
         }else if(@$_REQUEST['content']){    
             $res = parse_content(); 
             
-        }else if($action=='set_primary_rectype'){    
-            $res = setPrimaryRectype(@$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'], @$_REQUEST['is_preview']);
+        }else if($action=='set_primary_rectype'){
+            
+            $res = setPrimaryRectype(@$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'], @$_REQUEST['sequence']);
             
         }else if($action=='records'){    
             
@@ -669,13 +670,10 @@ function parse_db_save($preproc){
         "csv_enclosure"=>$preproc['csv_enclosure'],
         "csv_mvsep"=>$preproc['csv_mvsep'],
         "uniqcnt"=>$uniqcnt,   //count of uniq values per column
-        "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype
-        "indexes"=>$preproc['keyfields'] );  //names of columns in importtable that contains record_ID
+        "indexes"=>$preproc['keyfields'] );  //names of columns in import table that contains record_ID
         
     //new parameters to replace mapping and indexes_keyfields    
     $session['primary_rectype'] =  0; //main rectype    
-    $session['mapping_keys'] = array(); // rectype1:{idx:fieldtype,.....}, rectype2:{}     
-    $session['mapping_flds'] = array(); // rectype1:{idx:fieldtype,.....}, rectype2:{} 
 
     $session = saveSession($session);
     if(count($warnings)>0){
@@ -758,25 +756,26 @@ function getImportSession($imp_ID){
 // 1. saves new primary rectype in session
 // 2. returns treeview strucuture for given rectype
 //
-function setPrimaryRectype($imp_ID, $rty_ID, $is_preview){
+function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
 
      global $system;
     
-     if(!($is_preview==1)){
+     if($sequence!=null){
         //get session   
         $imp_session = getImportSession($imp_ID);
         if($imp_session==false){
                 return false;
         }
-        if($imp_session['primary_rectype']!=$rty_ID){
-            //save session with new ID
-            $imp_session['primary_rectype'] = $rty_ID;
-            $res = saveSession($imp_session);    
-        }
+        //save session with new ID
+        $imp_session['primary_rectype'] = $rty_ID;
+        $imp_session['sequence'] = $sequence;
+        $res = saveSession($imp_session);    
+        
+        return 'ok';
+     }else{
+        //get dependent record types
+        return dbs_GetRectypeStructureTree($system, $rty_ID, 5, 'resource');
      }
-     //get dependent record types
-     return dbs_GetRectypeStructureTree($system, $rty_ID, 5, 'resource');
-     
 }
                                         
 //
@@ -883,6 +882,7 @@ function findRecordIds($imp_session, $params){
 
     //get rectype to import
     $recordType = @$params['sa_rectype'];
+    $currentSeqIndex = @$params['seq_index'];
 
     //create search query  - based on mapping (search for  sa_keyfield_ - checkboxes in UI)
 
@@ -1094,7 +1094,9 @@ function assignRecordIds($params){
     
     //get rectype to import
     $rty_ID = @$params['sa_rectype'];
-    if(intval($rty_ID)<1){
+    $currentSeqIndex = @$params['seq_index'];
+    
+    if(intval($rty_ID)<1 || !(intval($currentSeqIndex)>=0)){
         $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong value');
         return false;
     }
@@ -1119,8 +1121,8 @@ function assignRecordIds($params){
     }
     
     //keep counts 
-    if(!@$imp_session['counts']){
-        $imp_session['counts'] = array();
+    if(!@$imp_session['sequence'][$currentSeqIndex]['counts']){
+        $imp_session['sequence'][$currentSeqIndex]['counts'] = array();
     }
 
     if(count($disambiguation)>0){
@@ -1136,8 +1138,9 @@ function assignRecordIds($params){
     $field_count = count($imp_session['columns']);
 
     if(!$id_fieldname || $id_fieldname=="null"){
-        $rectype = dbs_GetRectypeByID($mysqli, $rty_ID);
-        $id_fieldname = $rectype['rty_Name'].' ID'; //not defined - create new identification field
+        $id_fieldname = $imp_session['sequence'][$currentSeqIndex]['field'];
+        //$rectype = dbs_GetRectypeByID($mysqli, $rty_ID);
+        //$id_fieldname = $rectype['rty_Name'].' ID'; //not defined - create new identification field
     }
     $index = array_search($id_fieldname, $imp_session['columns']); //find it among existing columns
     if($index!==false){ //this is existing field
@@ -1234,22 +1237,16 @@ function assignRecordIds($params){
     //define field as index in session
     @$imp_session['indexes'][$id_field] = $rty_ID;
 
-    //to keep mapping for index field  - OLD
-    if(!@$imp_session['indexes_keyfields']){
-        $imp_session['indexes_keyfields'] = array();
-    }
-    $imp_session['indexes_keyfields'][$id_field] = @$imp_session['validation']['mapped_fields'];
-
     //to keep mapping for index field
-    if(!@$imp_session['mapping_keys']){
-        $imp_session['mapping_keys'] = array();
+    if(!@$imp_session['sequence'][$currentSeqIndex]['mapping_keys']){
+        $imp_session['sequence'][$currentSeqIndex]['mapping_keys'] = array();
     }
     
     if(@$params['skip_match']!=1){
-        $imp_session['mapping_keys'][$rty_ID] = @$params['mapping'];
+        $imp_session['sequence'][$currentSeqIndex]['mapping_keys'] = @$params['mapping'];
     }
     
-    $imp_session['counts'][$rty_ID] = array(
+    $imp_session['sequence'][$currentSeqIndex]['counts'] = array(
                     $imp_session['validation']['count_update'], $imp_session['validation']['count_update_rows'],
                     $imp_session['validation']['count_insert'], $imp_session['validation']['count_insert_rows']);
     
@@ -1385,6 +1382,8 @@ params:
 
 imp_ID        - import session id
 sa_rectype    - rectype ID
+seq_index - currentSeqIndex
+
 ignore_insert = 1  or 0 
 recid_field   - field_X
 mapping       - field index => $field_type
@@ -1395,6 +1394,8 @@ function validateImport($params){
     
     //get rectype to import
     $rty_ID = @$params['sa_rectype'];
+    $currentSeqIndex = @$params['seq_index'];
+
     if(intval($rty_ID)<1){
         $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong value');
         return false;
