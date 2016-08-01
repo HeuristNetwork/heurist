@@ -914,6 +914,12 @@ function validateImport($mysqli, $imp_session, $params){
     //get rectype to import
     $recordType = @$params['sa_rectype'];
 
+    $currentSeqIndex = @$params['seq_index'];
+    $sequence = null;
+    if($currentSeqIndex>=0 && @$imp_session['sequence'] && is_array(@$imp_session['sequence'][$currentSeqIndex])){
+        $sequence = $imp_session['sequence'][$currentSeqIndex];    
+    }
+    
     if(intval($recordType)<1){
         return "record type not defined";
     }
@@ -1120,6 +1126,11 @@ function validateImport($mysqli, $imp_session, $params){
 
     $numeric_regex = "'^([+-]?[0-9]+\.*)+'"; // "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
 
+    if($sequence){
+        $mapping_prev_session = @$sequence['mapping_keys']; //OR mapping_flds???
+    }else{
+        $mapping_prev_session = @$imp_session['mapping'];
+    }
 
     //loop for all fields in record type structure
     foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
@@ -1128,7 +1139,10 @@ function validateImport($mysqli, $imp_session, $params){
         //find among mappings
         $field_name = @$mapping[$ft_id];
         if(!$field_name){
-            $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true); //from previous session
+            
+            if(is_array($mapping_prev_session)){
+                $field_name = array_search($recordType.".".$ft_id, $mapping_prev_session, true); //from previous session    
+            }
         }
 
         if(!$field_name && $ft_vals[$idx_fieldtype] == "geo"){
@@ -1138,8 +1152,8 @@ function validateImport($mysqli, $imp_session, $params){
             $field_name1 = @$mapping[$ft_id."_lat"];
             $field_name2 = @$mapping[$ft_id."_long"];
             if(!$field_name1 && !$field_name2){
-                $field_name1 = array_search($recordType.".".$ft_id."_lat", $imp_session["mapping"], true);
-                $field_name2 = array_search($recordType.".".$ft_id."_long", $imp_session["mapping"], true);
+                $field_name1 = array_search($recordType.".".$ft_id."_lat", $mapping_prev_session, true);
+                $field_name2 = array_search($recordType.".".$ft_id."_long", $mapping_prev_session, true);
             }
 
             if($ft_vals[$idx_reqtype] == "required"){
@@ -1770,11 +1784,18 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
     //rectype to import
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
+    
+    $currentSeqIndex = @$params['seq_index'];
+    $use_sequence = false;
+    if($currentSeqIndex>=0 && @$imp_session['sequence'] && is_array(@$imp_session['sequence'][$currentSeqIndex])){
+        $use_sequence = true;    
+    }
+    
     $id_field = @$params['recid_field']; //record ID field is always defined explicitly
-
+    
     $id_field_not_defined = ($id_field==null || $id_field=='');
 
-    if($id_field && @$imp_session['indexes_keyfields'][$id_field]){
+    if($id_field && @$imp_session['indexes_keyfields'][$id_field]){  //indexes_keyfields not used anymore in new method
         $is_mulivalue_index = true;
     }else{
         $is_mulivalue_index = false;
@@ -1848,12 +1869,10 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
         $id_field_idx = count($field_types); //last one
 
         if($ignore_insert){
-            $select_query = $select_query." WHERE (".$id_field.">0) ORDER BY ".$id_field;
+            $select_query = $select_query." WHERE (".$id_field.">0) ";
         }
-        /*       
-        ($ignore_insert? $id_field.">0"
-                       : "NOT(".$id_field." is null OR ".$id_field."='')").") ORDER BY ".$id_field;
-        */
+        $select_query = $select_query." ORDER BY ".$id_field;
+        
     }else{
         if($ignore_insert){
             return "id field not defined";
@@ -2213,17 +2232,25 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
             );   
 
         //update counts array                
-        if(!@$imp_session['counts']) $imp_session['counts'] = array();
-        $prev = array(0,0,0,0);
-        if(@$imp_session['counts'][$recordType]){
-            $prev = $imp_session['counts'][$recordType];
-        }
-        $imp_session['counts'][$recordType] = array(
-              $rep_updated+$rep_added, $rep_processed, 0,0
-        );                                                                
+        $new_counts = array( $rep_updated+$rep_added, $rep_processed, 0,0 );
+                                                                        
         if($ignore_insert){
-            $imp_session['counts'][$recordType][2] = $prev[2];
-            $imp_session['counts'][$recordType][3] = $prev[3];
+            if($use_sequence){
+                $prev_counts = @$imp_session['sequence'][$currentSeqIndex]['counts'];
+            }else if(@$imp_session['counts'][$recordType]){
+                $prev_counts = $imp_session['counts'][$recordType];
+            }
+            if(is_array($prev_counts) && count($prev_counts)==4){
+                $new_counts[2] = $prev_counts[2];
+                $new_counts[3] = $prev_counts[3];
+            }
+        }
+        
+        if($use_sequence){
+            $imp_session['sequence'][$currentSeqIndex]['counts'] = $new_counts;         
+        }else{
+            if(!@$imp_session['counts']) $imp_session['counts'] = array();
+            $imp_session['counts'][$recordType] = $new_counts;
         }
         
                                                                          
@@ -2238,10 +2265,15 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
     }
 
     //save mapping into import_sesssion
-    if(!@$imp_session['mapping_flds']){
-        $imp_session['mapping_flds'] = array();
+    if($use_sequence){
+        $imp_session['sequence'][$currentSeqIndex]['mapping_flds'] = $mapping;         
+    }else{
+        //old way
+        if(!@$imp_session['mapping_flds']){
+            $imp_session['mapping_flds'] = array();
+        }
+        $imp_session['mapping_flds'][$recordType] = $mapping;
     }
-    $imp_session['mapping_flds'][$recordType] = $mapping;
     
     $imp_session['import_report'] = $import_report;
 

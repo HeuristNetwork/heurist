@@ -91,6 +91,11 @@ function get_config_bytes($val) {
                font-size: 1em;
                border:none;
             }
+            .tbresults{
+                border: 1px blue solid;
+                background-color: lightblue;
+                padding: 4px;
+            }
             .action_buttons{
                position: absolute;
                right:20px;
@@ -318,7 +323,7 @@ function get_config_bytes($val) {
 </div>
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;" id="divStep3">
-    <div class="ent_header" style="height:20em;border:none;padding-top:1em;">
+    <div class="ent_header" style="height:21em;border:none;padding-top:1em;">
     
         <div>
             <div id="btnBackToStart"
@@ -434,7 +439,7 @@ function get_config_bytes($val) {
             </thead>
         </table>    
     </div>
-    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:21.1em" id="divFieldMapping">
+    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:22.1em" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
@@ -469,7 +474,7 @@ function get_config_bytes($val) {
                 </tbody>
             </table>
         </div>
-        
+        <!-- old design of result table - to remove -->
         <div id="divMatchingResult" style="display:none;">
             <table class="tbresults">
                 <tbody>
@@ -520,7 +525,7 @@ function get_config_bytes($val) {
                 
             <div id="btnBackToMatching2" class="need_resolve" style="margin-right:20px"
                 title="Return to matching step to redefine mapping that may fix ambiguous matches">
-                Back: Match Again 2</div>
+                Back: Match Again</div>
             <div id="btnResolveAmbiguous" class="need_resolve"
                 title="Show list of ambiguous matches, select the correct matching and continue import">
                 Resolve ambiguous matches</div>
@@ -530,11 +535,11 @@ function get_config_bytes($val) {
         <div  id="divActionsImport" style="display:none;" class="action_buttons step4 step5">
             <div id="btnBackToMatching" style="margin-right:20px"
                 title="Return to matching step to redefine record IDs">
-                Back: Match Again 1</div>
-            <div id="btnPrepareStart" class="step4"
+                Back: Match Again</div>
+            <div id="btnPrepareStart" class="step4 step5"
                 title="Verify that you map all required fields and that values in import table fit to constraints in Heurist database scheme">
                 Prepare Insert/Update</div>
-            <div id="btnImportStart" style="display:none" class="step5"
+            <div id="btnImportStart" class="step4 step5"
                 title="Start real import data into Heurist database">
                 Start Insert/Update</div>
                 

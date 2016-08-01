@@ -63,7 +63,7 @@
                 findRecordIds - find exisiting /matching records in heurist db by provided mapping 
                 
     5) step4 
-        validateImport - verify mapping parameter for valid detailt values (numeric,date,enum,pointers)
+        validateImport - verify mapping parameter for valid detail values (numeric,date,enum,pointers)
         
             getWrongRecords
             validateEnumerations
