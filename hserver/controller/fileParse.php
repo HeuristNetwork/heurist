@@ -343,7 +343,14 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     $csv_mvsep     = $_REQUEST["csv_mvsep"];
     $csv_delimiter = $_REQUEST["csv_delimiter"];
     $csv_linebreak = $_REQUEST["csv_linebreak"];
-    $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';
+    if($_REQUEST["csv_enclosure"]==1){
+        $csv_enclosure = "'";    
+    }else if($_REQUEST["csv_enclosure"]=='none'){
+        $csv_enclosure = 'ʰ'; //rare character
+    }else {
+        $csv_enclosure = '"';    
+    }
+    
     $csv_dateformat = $_REQUEST["csv_dateformat"];
 
     if($csv_delimiter=="tab") {
@@ -996,7 +1003,11 @@ function findRecordIds($imp_session, $params){
                 $fc = $row;
                 //ART TEMP array_walk($fc, 'trim_lower_accent2');
 
-                $keyvalue = implode($imp_session['csv_mvsep'], $fc);  //csv_mvsep - separator
+                if($imp_session['csv_mvsep']=='none'){
+                    $keyvalue = $fc;
+                }else{
+                    $keyvalue = implode($imp_session['csv_mvsep'], $fc);  //csv_mvsep - separator
+                }
 
 //error_log($keyvalue.'  ='.implode(' ',$row));                 
 
@@ -1049,7 +1060,14 @@ function findRecordIds($imp_session, $params){
                     array_push($ids, $pairs[$keyvalue]);
                 }
             }//foreach multivalues
-            $records[$imp_id] = implode($imp_session['csv_mvsep'], $ids);   //IDS to be added to import table
+
+            if($imp_session['csv_mvsep']=='none'){
+                $records[$imp_id] = count($ids)>0?$ids[0]:'';
+            }else{
+                $records[$imp_id] = implode($imp_session['csv_mvsep'], $ids);   //IDS to be added to import table
+            }
+            
+            
 
             if($is_update) $cnt_update_rows++;
             if($is_insert) $cnt_insert_rows++;
@@ -1267,12 +1285,18 @@ function assignRecordIds($params){
 function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
     $nv = array();
-    $values =  explode($csv_mvsep, $values);
+    $values =  ($csv_mvsep=='none')?array($values) :explode($csv_mvsep, $values);
     if(count($values)==1){
         array_push($nv, trim($values[0]));
     }else{
 
-        $csv_enclosure = ($csv_enclosure==1)?"'":'"'; //need to remove quotes for multivalues fields
+        if($csv_enclosure==1){
+            $csv_enclosure = "'";    
+        }else if($csv_enclosure=='none'){
+            $csv_enclosure = 'ʰ'; //rare character
+        }else {
+            $csv_enclosure = '"';    
+        }
 
         foreach($values as $idx=>$value){
             if($value!=""){
@@ -2013,7 +2037,12 @@ function validateEnumerations($query, $imp_session, $fields_checked, $dt_id, $fi
             }
 
             if($is_error){
-                $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
+                if($imp_session['csv_mvsep']=='none'){
+                    $row[$field_idx] = count($newvalue)>0?$newvalue[0]:'';
+                }else{
+                    $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);    
+                }
+                
                 array_push($wrong_records, $row);
             }
         }
@@ -2084,7 +2113,11 @@ function validateResourcePointers( $query, $imp_session, $fields_checked, $dt_id
             }
 
             if($is_error){
-                $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
+                if($imp_session['csv_mvsep']=='none'){
+                    $row[$field_idx] = count($newvalue)>0?$newvalue[0]:'';
+                }else{
+                    $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);    
+                }
                 array_push($wrong_records, $row);
             }
         }
@@ -2148,7 +2181,11 @@ function validateNumericField( $query, $imp_session, $fields_checked, $field_idx
             }
 
             if($is_error){
-                $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
+                if($imp_session['csv_mvsep']=='none'){
+                    $row[$field_idx] = count($newvalue)>0?$newvalue[0]:'';
+                }else{
+                    $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);    
+                }
                 array_push($wrong_records, $row);
             }
         }
@@ -2223,7 +2260,11 @@ function validateDateField( $query, $imp_session, $fields_checked, $field_idx){
             }
 
             if($is_error){
-                $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
+                if($imp_session['csv_mvsep']=='none'){
+                    $row[$field_idx] = count($newvalue)>0?$newvalue[0]:'';
+                }else{
+                    $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);    
+                }
                 array_push($wrong_records, $row);
             }
         }

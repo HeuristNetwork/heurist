@@ -107,15 +107,6 @@ function get_config_bytes($val) {
                 font-weight:bold !important;
                 padding:0.2em;
             }
-            .id_fieldname{
-               font-size: 0.8em;
-               font-weight: normal;
-               color:olive;
-               padding-left:2em;
-            }
-            .rename{
-                cursor: pointer;
-            }
         </style>
     </head>
 
@@ -136,7 +127,7 @@ function get_config_bytes($val) {
             <input type="file" id="uploadFile" style="display:none">
             <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
                 Upload File</div>
-        
+            <span>The first line must have field names with correct number of fields</span>  
         <h2 style="padding:10 0 10 120">OR</h2>
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Paste delimited data in area below</h2>
         <div id="btnUploadData"
@@ -253,6 +244,7 @@ function get_config_bytes($val) {
                     <div class="input-cell">   
                         <select id="csv_enclosure" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option selected value='2'>"</option><option value="1">'</option>
+                            <option value="none">no enclosure</option>
                         </select>                         
                     </div>
                 </div>
@@ -275,6 +267,7 @@ function get_config_bytes($val) {
                             <option value=";">;</option>
                             <option value=":">:</option>
                             <option value="/">/</option>
+                            <option value="none">no separator</option>
                             <!-- option value=",">,</option -->
                         </select>
                     </div>
@@ -525,7 +518,7 @@ function get_config_bytes($val) {
                 
             <div id="btnBackToMatching2" class="need_resolve" style="margin-right:20px"
                 title="Return to matching step to redefine mapping that may fix ambiguous matches">
-                Back: Match Again</div>
+                Match Again</div>
             <div id="btnResolveAmbiguous" class="need_resolve"
                 title="Show list of ambiguous matches, select the correct matching and continue import">
                 Resolve ambiguous matches</div>
@@ -535,7 +528,7 @@ function get_config_bytes($val) {
         <div  id="divActionsImport" style="display:none;" class="action_buttons step4 step5">
             <div id="btnBackToMatching" style="margin-right:20px"
                 title="Return to matching step to redefine record IDs">
-                Back: Match Again</div>
+                Match Again</div>
             <div id="btnPrepareStart" class="step4 step5"
                 title="Verify that you map all required fields and that values in import table fit to constraints in Heurist database scheme">
                 Prepare Insert/Update</div>
@@ -565,7 +558,7 @@ function get_config_bytes($val) {
 <div id="divPopupPreview" style="display:none">
 </div>
 
-<div id="divSelectPrimaryRecType" style="display:none;height:100%" class="">
+<div id="divSelectPrimaryRecType" style="display:none;height:100%;" class="">
         <fieldset>
         <div>
             <div class="header optional" style="min-width: 150px; width: 150px;"><label>Select record type:</label></div>

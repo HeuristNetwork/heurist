@@ -488,6 +488,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             var dlg_options = {
                 title:'Select primary record type and dependencies',
                 height: 460,
+                width: 800,
                 element: document.getElementById('divSelectPrimaryRecType'),
                 buttons: buttons
                 };
@@ -617,8 +618,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                //check if index field already defined in preset
                                                var sname = _getColumnNameForPresetIndex(recTypeID);
                                      
-                                               $('<div style="padding-left:2em">'+
-                                               '<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
+                                               $('<div style="padding-left:2em">'
+                                               //+'<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
                                                + '<i>Primary record</i>'
                                                + '<span class="id_fieldname" data-res-rt="'+recTypeID+'">'
                                                + sname + '</span></div>')
@@ -634,16 +635,23 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                var field = rt_fields[j], sid_fields = '';
                                                //idfields
                                                for (rt_resourse in field['idfields']){
-                                                   sid_fields = sid_fields
-                                                        + '<span class="id_fieldname rename" data-res-rt="'+rt_resourse+'">'
-                                                        + field['idfields'][rt_resourse] + '</span>&nbsp;'; 
+                                                   sid_fields = sid_fields 
+                                                        + '<div style="padding-left:2em;display:table-row">'
+                                                        + '<span style="display:table-cell">'
+                                                        + (sid_fields==''
+                                                            ?'<i style="'+(field['required']?'color:red':'')+'">' +field['title'] + '</i>'
+                                                            :'') + '</span>'
+                                                        + '<span style="display:table-cell" class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
+                                                        + top.HEURIST4.rectypes.names[rt_resourse]
+                                                        + '<span style="display:table-cell" class="id_fieldname rename" data-res-rt="'+rt_resourse+'">'
+                                                        + field['idfields'][rt_resourse] + '</span></div>'; 
                                                }
                                                
-                                               $('<div style="padding-left:2em">'+
-                                               '<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
-                                               + '<i style="'+(field['required']?'color:red':'')+'">' +field['title']
-                                               + '</i><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
-                                               + field['rt_title']
+                                               $('<div style="padding-left:2em;">'
+                                               //+'<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
+                                               
+                                               //+ '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
+                                               //+ field['rt_title']
                                                + sid_fields
                                                +'</div>')
                                                 .appendTo(treeElement);
@@ -977,8 +985,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             len = (imp_session && imp_session['columns'])?imp_session['columns'].length:0;
 
         //find index field for selected id field
-        var mapping_flds = imp_session['sequence'][currentSeqIndex][(currentStep==3)?'mapping_keys':'mapping_flds'];
+        var stype = (currentStep==3)?'mapping_keys':'mapping_flds';
+        var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];
         if(!mapping_flds) mapping_flds = {};
+        
+        //all mapped fields - to place column in "proecessed" section
+        var all_mapped = [];
+        for  (i=0; i < imp_session['sequence'].length; i++) {
+            for  (var fid in imp_session['sequence'][i][stype]) {
+                if(all_mapped.indexOf(fid)<0) all_mapped.push(fid);
+            }
+        }
             
         var recStruc = top.HEURIST4.rectypes;    
         
@@ -997,7 +1014,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         for (i=0; i < len; i++) {
 
             var isIndex =  (i==idx_id_fieldname) || !top.HEURIST4.util.isnull(imp_session['indexes']['field_'+i]);
-            var isProcessed = !( isIndex || top.HEURIST4.util.isnull(mapping_flds[i]) );
+            var isProcessed = !( isIndex || all_mapped.indexOf(i)>=0 ); // top.HEURIST4.util.isnull(mapping_flds[i]) );
             
             //checkbox that marks 'in use'
             var s = '<tr><td width="75px" align="center">&nbsp;<span style="display:none;">'
@@ -1246,7 +1263,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
          var counts = _getInsertUpdateCounts(idx);                                     
          var s_count = '';
          if(counts[2]!=imp_session['reccount']){
-             s_count = '  [ '+(counts[2]>0?('<span title="to be inserted">'+counts[2]+'/</span>'):'')+counts[0]+' ]';
+             s_count = '  [ '+(counts[2]>0?('<span title="New records to create">'+counts[2]+'/</span>'):'')
+                            + '<span title="Records matched">'+counts[0]+'</span> ]';
          }
          return s_count;
     }
@@ -1505,8 +1523,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         if(top.HEURIST4.util.isArrayNotEmpty(response.data['err_colnums'])){
 
                             var msg = 'Wrong field count in parsed data. Expected field count '
-                                        +response.data['col_count']
-                                        +'. Either change parse parameters or correct source data';
+                                        + '(determined by the first line of the file) = '
+                                        + response.data['col_count']
+                                        + '. Either change parse parameters or correct source data';
                             $( top.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
 
                             tbl  = $('<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>')
@@ -1822,7 +1841,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             }
             
             if($('#sa_match0').is(':checked') && !haveMapping){
-                top.HEURIST4.msg.showMsgErr('It is not possible to proceed without setting any matching fields');
+                top.HEURIST4.msg.showMsgErr('Please select the fields on which you wish to match the data read '
+                        +'with records already in the database (if any)');
                 return;
             }
 
@@ -1923,8 +1943,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 $('#mr_cnt_disamb').text(disambig_keys.length);                                 
                                 $('#mr_cnt_disamb').parent().show();
                                 
-                                top.HEURIST4.msg.showMsgErr('One or more rows in your file match multiple records in the database. '+
-                        'Please click on "Rows with ambiguous match" to view and resolve these ambiguous matches.<br><br> '+
+                                top.HEURIST4.msg.showMsgErr('One or more rows in your file match multiple records in the database.<br>'+
+                        'Please click <b>Resolve ambiguous matches</b> to view and resolve these ambiguous matches.<br><br> '+
                         'If you have many such ambiguities you may need to select adidtional key fields or edit the incoming '+
                         'data file to add further matching information.');
                         
@@ -2155,7 +2175,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                           +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated']
                           +'</td></tr></table>';
                         
-                        top.HEURIST4.msg.showMsgDlg(msg);
+                        top.HEURIST4.msg.showMsgDlg(msg,nul,'Import result');
                         
                         //if everything is added - skip to next step
                         var counts = _getInsertUpdateCounts( currentSeqIndex );
