@@ -485,7 +485,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
-			height: 480,
+			height: 400,
 			width: 620,
 			callback: function(context) {
 				if(!Hul.isnull(context)){

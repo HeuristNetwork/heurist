@@ -123,12 +123,12 @@
     </div>
     <div class="dtyField">
         <label class="dtyLabel required" for="rps_Title">Title:</label>
-        <input id="rps_Title" style="width:400;" maxlength="64" />
+        <input id="rps_Title" style="width:150;" maxlength="64" />
         <div class="help prompt help1">
             <label>The title of scheduled report</label>
         </div>
     </div>
-    <div class="dtyField">
+    <div class="dtyField" style="display: none;">
         <label class="dtyLabel required" for="rps_Type">Type:</label>
         <select class="dtyValue" id="rps_Type" disabled="disabled">
             <option selected="selected">smarty</option>
@@ -137,7 +137,7 @@
             <label>Type of report</label>
         </div>
     </div>
-    <div class="dtyField">
+    <div class="dtyField" style="display: none;">
         <label class="dtyLabel" for="rps_FilePath">File path:</label>
         <input id="rps_FilePath" style="width:400;" maxlength="128" />
         <div class="help prompt help1">
@@ -146,7 +146,7 @@
     </div>
     <div class="dtyField">
         <label class="dtyLabel required" for="rps_FileName">File name:</label>
-        <input id="rps_FileName" style="width:400;" maxlength="64" />
+        <input id="rps_FileName" style="width:200px;" maxlength="64" />
         <div class="help prompt help1">
             <label>The base name of the report being published - will be compelted with file types</label>
         </div>
@@ -160,7 +160,7 @@
     </div>
     <div class="dtyField">
         <label class="dtyLabel required" for="rps_Template">Template:</label>
-        <select id="rps_Template" style="width:400;" maxlength="64"></select>
+        <select id="rps_Template" style="max-width:400;" maxlength="64"></select>
         <div class="help prompt help1">
             <label>The name of the template to be used in generating this report</label>
         </div>

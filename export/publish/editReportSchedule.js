@@ -93,7 +93,7 @@ function ReportScheduleEditor() {
         if(Hul.isnull(_entity)){
             _recID =  -1;
             //"rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes"
-            _entity = [-1,typeID,qlabel,'','','',hquery,templatefile,0];
+            _entity = [-1,typeID,qlabel,'','','',hquery,templatefile,1440];
         }
 
         _reload_templates();
