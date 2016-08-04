@@ -112,8 +112,11 @@
             <div class="input-row required">
                 <div class="input-header-cell">Data type:
                 </div>
-                <div class="input-cell"><select class="dtyValue" id="dty_Type"
-                		onclick="window.detailTypeEditor.onDataTypeClick(event)" 
+                <div class="input-cell">
+                    <input id="typeValue" style="width:200;" readonly="readonly" type="text"
+                        value="-- Click to select data type --"
+                        onclick="window.detailTypeEditor.onDataTypeClick(event)"> 
+                    <select class="dtyValue" id="dty_Type" disabled=disabled 
                 		onChange="window.detailTypeEditor.onChangeType(event)">
                     </select>
                     <div class="help prompt">The type of data to be recorded in this field. Note: in most cases this cannot be changed once set

@@ -144,6 +144,10 @@ function DetailTypeEditor() {
 
             $("#topdiv_closebtn").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
         }else{
+        
+            //var el = Dom.get("dty_Type");
+            //el.val(top.HEURIST.detailTypes.lookups[value]);
+            
             var el = Dom.get("dty_Type"),
             ftype = _detailType[fi.dty_Type];
 
@@ -639,9 +643,13 @@ function DetailTypeEditor() {
                 ?_detailType[fi.dty_FieldSetRectypeID]:_detailType[fi.dty_PtrTargetRectypeIDs]) );
 
         if (_dtyID<0){
+            $("#typeValue").show();
+            $("#dty_Type").hide();
             Dom.get("dty_ID").innerHTML = '<span style="color:#999">will be automatically assigned</span>';
             document.title = "Create new base field type";
         }else{
+            $("#typeValue").hide();
+            $("#dty_Type").show();
             Dom.get("dty_ID").innerHTML =  _dtyID;
             document.title = "Field Type # " + _dtyID+" '"+_detailType[fi.dty_Name]+"'";
 
@@ -1008,7 +1016,7 @@ function DetailTypeEditor() {
         onDataTypeClick: function(event){
 			
 		    var el = Dom.get("dty_Type"); //e.target;
-		    if(!el.value){
+		    if(true){ //}!el.value){
 		    	
 		    	
 			var body = $(this.document).find('body');
@@ -1024,8 +1032,10 @@ function DetailTypeEditor() {
                     height: dim.h,
                     width: dim.w,
                     callback: function(context) {
-                        if(context!="") {
+                        if(context!="" && context!=undefined) {
+                            Dom.get("typeValue").value = top.HEURIST.detailTypes.lookups[context];
                     		el.value = context;
+                            //_onChangeType(event);
                         }
                     }
               });

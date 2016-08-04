@@ -69,11 +69,13 @@ $(document).ready(function() {
         } //for
 */	
 
-	if($.isFunction(top.HEURIST.is_admin)){
+    if(!top){
+        return;
+    }else if($.isFunction(top.HEURIST.is_admin)){
 		  onScriptsReady();
 	}else{
 		
-    dbname = top.HEURIST.getQueryVar("db");
+        dbname = top.HEURIST.getQueryVar("db");
     
 		    $.getMultiScripts([
 		          //'../../common/js/utilsLoad.js',
@@ -126,21 +128,27 @@ $(document).ready(function() {
 	
 	container = document.getElementById("inpt8");
 	input = top.HEURIST.edit.createInput(0, getFirstFieldWithType('resource'), null, [], container);
-	                                                                       
+	
+                                                                           
 	container = document.getElementById("inpt9");
 	//input = top.HEURIST.edit.createInput(1, getFirstFieldWithType('relmarker'), null, [], container);
-	var record = {recID:-1,title:'',rectype:2,isTemporary:true}
+/*	var record = {recID:-1,title:'',rectype:2,isTemporary:true}
     var relManager = new top.RelationManager(container, record,[], 0, null, false, true);
 	$(relManager.addOtherTd).hide(); 
-	$(relManager.addOtherTd).find('a').click();
+	$(relManager.addOtherTd).find('a').click();*/
 	$(container).find('[name="savebutton"]').css('color','lightgray').prop('disabled','disabled');
+    
 	                                                                       
 	//$('.input-cell > input').css('width','30ex');
 	$('.in').css('width','30ex');
 	$('.resource-title').css('width','150px');
 	
 	$('.input-cell > .prompt').hide();
-	$('.input-header-cell').css('min-width','0');
+	$('.input-header-cell').css({'min-width':'0','width':'0','font-size':'0.8em'});
+    $('.input2-header-cell').css({'min-width':'0','font-size':'0.8em'});
+    $('#relationship-type').css({'font-size':'0.8em'});
+    $('.input-cell > .text').css({'font-size':'0.8em'});
+    $('.input-cell > span').css({'font-size':'0.8em'});
 	$('.separator > .input-header-cell').css('min-width','200px');
 	
 	$('#btnSelect').click(
