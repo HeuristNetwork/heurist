@@ -95,6 +95,10 @@ function ReportScheduleEditor() {
             //"rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes"
             _entity = [-1,typeID,qlabel,'','','',hquery,templatefile,1440];
         }
+        
+        Dom.get('rps_Title').onchange = function(event){
+            Dom.get('rps_FileName').value = top.HEURIST.util.cleanFilename(event.target.value);
+        }
 
         _reload_templates();
 

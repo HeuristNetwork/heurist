@@ -2386,7 +2386,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         return encodeURIComponent(text).replace(/%[A-F\d]{2}/g, 'U').length;
         //return (unescape(encodeURIComponent(s).length);
         
-    }
+    },
+    
+    cleanFilename: function(filename) {
+        filename = filename.replace(/\s+/gi, '-'); // Replace white space with dash
+        filename= filename.split(/[^a-zA-Z0-9\-\_\.]/gi).join('_');
+        return filename;
+    },
 };
 //-----------------------------------------------------------------------------------------------------
 if(top.HEURIST.registerEvent) //AJ: it would be better to remove from here

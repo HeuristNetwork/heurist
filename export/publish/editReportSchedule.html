@@ -145,15 +145,15 @@
         </div>
     </div>
     <div class="dtyField">
-        <label class="dtyLabel required" for="rps_FileName">File name:</label>
-        <input id="rps_FileName" style="width:200px;" maxlength="64" />
+        <label class="dtyLabel" for="rps_FileName">File name:</label>
+        <input id="rps_FileName" style="width:200px;" maxlength="64" disabled="disabled"/>
         <div class="help prompt help1">
             <label>The base name of the report being published - will be compelted with file types</label>
         </div>
     </div>
     <div class="dtyField">
-        <label class="dtyLabel required" for="rps_HQuery">Query:</label>
-        <input id="rps_HQuery" style="width:400;" maxlength="2000" />
+        <label class="dtyLabel required" for="rps_HQuery" style="vertical-align:top;">Query:</label>
+        <textarea id="rps_HQuery" style="width:400;resize: none" maxlength="2000" rows=3 cols=50></textarea>
         <div class="help prompt help1">
             <label>The Heurist query to be used in generating this report</label>
         </div>
