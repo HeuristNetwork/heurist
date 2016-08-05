@@ -277,11 +277,14 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                                 if (point.lon > maxLng) maxLng = point.lon;
                             }
                         }else{
-                                var point = item.getNativePlacemark().getPosition();
-                                if (point.lat() < minLat) minLat = point.lat();
-                                if (point.lat() > maxLat) maxLat = point.lat();
-                                if (point.lng() < minLng) minLng = point.lng();
-                                if (point.lng() > maxLng) maxLng = point.lng();
+                                var pm = item.getNativePlacemark();
+                                if(pm){
+                                    var point = pm.getPosition();
+                                    if (point.lat() < minLat) minLat = point.lat();
+                                    if (point.lat() > maxLat) maxLat = point.lat();
+                                    if (point.lng() < minLng) minLng = point.lng();
+                                    if (point.lng() > maxLng) maxLng = point.lng();
+                                }
                         }
                     }
                     

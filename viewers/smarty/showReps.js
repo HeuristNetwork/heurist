@@ -108,7 +108,6 @@ function ShowReps() {
         _setLayout(true, false);
     }
 
-
     /**
     * Inserts template output into container
     */
@@ -954,10 +953,17 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
             top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
             top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
+            _doExecuteFromEditor();
         }else if(isviewer){
             if(_kept_width>0)
                 top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width
             top.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
+            
+            var sel = document.getElementById('selTemplates');
+            if(sel.selectedIndex>=0){
+                var template_file = sel.options[sel.selectedIndex].value;
+                _reload(template_file);
+            }
         }
     }
 
