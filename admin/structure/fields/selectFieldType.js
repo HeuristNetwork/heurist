@@ -124,7 +124,12 @@ $(document).ready(function() {
 	input = top.HEURIST.edit.createInput(0, getFirstFieldWithType('file'), null, [], container);
 	
 	container = document.getElementById("inpt7");
-	input = top.HEURIST.edit.createInput(0, getFirstFieldWithType('separator'), null, [], container);
+    var dtyID = getFirstFieldWithType('separator');
+    var fld = top.HEURIST.detailTypes.typedefs[dtyID].commonFields;
+    var rfr = top.HEURIST.edit.createFakeFieldRequirement(fld,null,null,null,null,null);
+    rfr[0] = 'LIFE HISTORY';
+    rfr.push(dtyID)
+	input = top.HEURIST.edit.createInput(0, rfr, null, [], container);
 	
 	container = document.getElementById("inpt8");
 	input = top.HEURIST.edit.createInput(0, getFirstFieldWithType('resource'), null, [], container);

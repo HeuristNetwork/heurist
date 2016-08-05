@@ -864,6 +864,9 @@ if (! top.HEURIST.edit) {
             ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
             ffr[fieldIndexMap['rst_RequirementType']] = rstRequirementType ? rstRequirementType :'optional';
             ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");
+
+            ffr[fieldIndexMap['dty_Type']] = (dt?dt[dtyFieldNamesIndexMap['dty_Type']]:"freetext");
+
             return ffr;
         },
 
@@ -932,29 +935,34 @@ console.log('top not defined');
 console.log('heurist not defined'); 
             }               
             
-            var rfr = null;
+            var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+            var rfr = null, dtType, dt;
+            
             if($.isArray(detailTypeID)){
 				rfr = detailTypeID;
+                dt = top.HEURIST.detailTypes.typedefs[rfr[rfr.length-1]]['commonFields'];
+                dtType = dt[dtyFieldNamesIndexMap['dty_Type']];
             }else{
             
-            // Get Detail Type info
-            // 0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
-            // 6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
-            // 10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
-            var dt = top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
-            var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
-            var rfr = null;
-            if (rectypeID) {
-                rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
-            }
-            if (!rfr) {
-                rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,(fieldValues.length?fieldValues.length:null));
-            }
+                // Get Detail Type info
+                // 0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
+                // 6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
+                // 10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
+                dt = top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
+                var rfr = null;
+                if (rectypeID) {
+                    rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
+                }
+                if (!rfr) {
+                    rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,
+                                        (fieldValues.length?fieldValues.length:null));
+                }
             
+                dtType = dt[dtyFieldNamesIndexMap['dty_Type']];
 			}
 
             var newInput;
-            switch (dt[dtyFieldNamesIndexMap['dty_Type']]) {
+            switch (dtType) {
                 case "freetext":
                     newInput = new top.HEURIST.edit.inputs.BibDetailFreetextInput(recID, dt, rfr, fieldValues, container);
                     break;

@@ -57,7 +57,7 @@
 				width:32%;
 				vertical-align:top;
 				padding-left:10px;
-				min-width:340px;
+				min-width:280px;
         	}
         	.ft_col > h2{
         		padding-bottom:1em;
@@ -78,6 +78,9 @@
 				font-size:0.7em;
 				/*background-color: #ECF1fB !important;*/
 				margin-bottom:2em;
+                max-width:240px;
+                margin-left:30px;
+                margin-right:5px;
         	}
         </style>
     </head>
@@ -104,13 +107,13 @@
         
         <script src='../../../admin/structure/fields/selectFieldType.js'></script>
         
-		<div style="width:100%;height:100%;padding:10px 10px 10px 0;overflow:none">
-			
+        <i style="padding-left:10px">Please select a field type. Click on the example to view field behaviour.</i>
+		<div style="width:100%;height:90%;padding:10px 10px 10px 0;overflow:none">
 			<div class="ft_col">
 				<h2>Simple fields</h2>
 
 				<input type="radio" name="ft_type" id="t_enum" value="enum">
-			 	<label for="t_enum">Dropdowm (Terms)</label>
+			 	<label for="t_enum">Dropdown (Terms)</label>
 			    <div class="ft_notes">
 			    	A flat or hierarchical list of categories, gnearally from a single vocabulary eg. countries, languages, source, condition, material, colour. Use where the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
                	</div>

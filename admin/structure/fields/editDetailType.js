@@ -1020,7 +1020,7 @@ function DetailTypeEditor() {
 		    	
 		    	
 			var body = $(this.document).find('body');
-            var dim = { h:700, w:Math.max(1200, body.innerWidth()-10) };		    	
+            var dim = { h:700, w:980 };//Math.max(900, body.innerWidth()-10) };		    	
 		    	
             Hul.popupURL(window, top.HEURIST.baseURL_V3 +
                 "admin/structure/fields/selectFieldType.html?&db="+_db,
