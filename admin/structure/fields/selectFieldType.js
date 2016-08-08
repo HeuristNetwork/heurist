@@ -143,19 +143,30 @@ $(document).ready(function() {
 	$(relManager.addOtherTd).find('a').click();*/
 	$(container).find('[name="savebutton"]').css('color','lightgray').prop('disabled','disabled');
     
-	                                                                       
-	//$('.input-cell > input').css('width','30ex');
-	$('.in').css('width','30ex');
-	$('.resource-title').css('width','150px');
+
 	
-	$('.input-cell > .prompt').hide();
-	$('.input-header-cell').css({'min-width':'0','width':'0','font-size':'0.8em'});
+	$('.input-cell > .prompt').hide(); //hide help text
+	$('.input-header-cell').css({'width':'0','min-width':'15ex','font-size':'0.8em'});
     $('.input2-header-cell').css({'min-width':'0','font-size':'0.8em'});
     $('#relationship-type').css({'font-size':'0.8em'});
-    $('.input-cell > .text').css({'font-size':'0.8em'});
     $('.input-cell > span').css({'font-size':'0.8em'});
 	$('.separator > .input-header-cell').css('min-width','200px');
-	
+    
+    //reduce width of input elements	
+    var csobj = {'font-size':'0.8em','width':'25ex'};
+    $('.in').css(csobj);
+    $('.input-cell > .text').css(csobj);
+    $('.input-cell > textarea').css(csobj);
+    $('.file-resource-div > .resource-title').css(csobj);
+    $('.resource-div > .resource-title').css({'font-size':'0.8em','width':'20ex'});
+    $('.temporal-div img').css({'vertical-align':'baseline'});
+
+    $('input[name="ft_type"]').change(function(){
+        $('#btnSelect').removeProp('disabled');
+        $('#btnSelect').css('color','black');
+    });
+    
+    
 	$('#btnSelect').click(
 	   function(){
 	   	    var res = $('input[name="ft_type"]:checked').val();

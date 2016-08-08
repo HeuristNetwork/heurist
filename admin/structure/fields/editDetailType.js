@@ -1035,7 +1035,7 @@ function DetailTypeEditor() {
                         if(context!="" && context!=undefined) {
                             Dom.get("typeValue").value = top.HEURIST.detailTypes.lookups[context];
                     		el.value = context;
-                            //_onChangeType(event);
+                            _onChangeType(null);
                         }
                     }
               });
