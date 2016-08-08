@@ -1239,7 +1239,8 @@ function validateImport($mysqli, $imp_session, $params){
         ($imp_session['validation']['count_insert']>0   // there are records to be inserted
             //  || ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
-            return 'Need to map required fields: '.implode(",", $missed);
+            return 'The following fields are required fields. You will need to map 
+them to incoming data before you can import new records:<br><br>'.implode(",", $missed);
     }
 
     if($id_field){ //validate only for defined records IDs

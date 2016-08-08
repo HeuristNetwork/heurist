@@ -1724,7 +1724,8 @@ function validateImport($params){
         )){
             $error = '';
             if(count($missed)>0){
-                $error = 'You need to map columns to the following required fields: '.implode(',', $missed);    
+                $error = 'The following fields are required fields. You will need to map 
+them to incoming data before you can import new records:<br><br>'.implode(',', $missed);    
             }
             if(count($missed_ptr)>0){
                 $error = $error.'<br>Record pointer fields( '.implode(',', $missed_ptr).' ) require a record identifier value (only shown in the dropdowns in the Identifiers section). This error implies that you have not yet matched and/or imported record types that are specified in previous steps of the import workflow. Please start from the beginning. Please report the error to the Heurist developers if you think you have followed the workflow correctly.';    

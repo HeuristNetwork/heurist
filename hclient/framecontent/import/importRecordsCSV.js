@@ -382,8 +382,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
                             
                             //init field mapping table
-                            _showStep(3);
-                            _renderRectypeSequence();
+                            if(imp_session){
+                                var sequence = imp_session['sequence'];
+                                if(!sequence || $.isEmptyObject(sequence)){
+                                    _doSetPrimaryRecType(true);
+                                }else{
+                                    _renderRectypeSequence();
+                                }
+                            }
                             
                         }else{
                             top.HEURIST4.msg.showMsgErr(response);
@@ -509,9 +515,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         //sequence is not defined - select primary record type and define index field names
         if(!sequence || $.isEmptyObject(sequence)){
             _doSetPrimaryRecType(true);
-            return;
+            return false;
         }
         
+        _showStep(3);
         
          $('img[id*="img_arrow"]').hide();
          var ele1 = $('#sa_rectype_sequence').empty();
@@ -564,7 +571,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
          $('.select_rectype_seq[data-seq-order="'+initial_selection+'"]').click();    
         
          //_initFieldMapppingTable();    
-        
+        return true;
     }
     
     //
@@ -604,28 +611,29 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                  if(rtOrder['levels'][recTypeID] == depth){
                                      isfound = true;
                                      
-                                     $('<div>' 
+                                     var sRectypeItem = '<div>' 
                                         + '<input type="checkbox" class="rt_select" data-rt="'+recTypeID+'" '
                                         +  ' data-lvl="'+depth+'" '
-                                        + (depth==0?'checked="checked" disabled="disabled"':'')+'><b>'
-                                        //+ rtOrder['levels'][recTypeID]  + ' '
+                                        + (depth==0?'checked="checked" disabled="disabled"':'')
+                                        + '><b>'
                                         + top.HEURIST4.rectypes.names[recTypeID] 
-                                        + '</b></div>').appendTo(treeElement);
+                                        + '</b>';
                                      
                                      
                                      if(depth==0){ //add PRIMARY field
                                      
-                                               //check if index field already defined in preset
-                                               var sname = _getColumnNameForPresetIndex(recTypeID);
+                                            //check if index field already defined in preset
+                                            var sname = _getColumnNameForPresetIndex(recTypeID);
                                      
-                                               $('<div style="padding-left:2em">'
-                                               //+'<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
-                                               + '<i>Primary record</i>'
-                                               + '<span class="id_fieldname" data-res-rt="'+recTypeID+'">'
-                                               + sname + '</span></div>')
-                                                .appendTo(treeElement);
+                                            sRectypeItem = sRectypeItem 
+                                               + ' (primary records type) ' 
+                                               + '<span class="id_fieldname" style="float:right"  data-res-rt="'+recTypeID+'">'
+                                               + sname + '</span>';
                                      }
                                      
+                                     
+                                     sRectypeItem = sRectypeItem + '</div>';
+                                     $(sRectypeItem).appendTo(treeElement);
                                      
                                      
                                      var rt_fields = rtOrder['rt_fields'][recTypeID];
@@ -636,18 +644,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                //idfields
                                                for (rt_resourse in field['idfields']){
                                                    sid_fields = sid_fields 
-                                                        + '<div style="padding-left:2em;display:table-row">'
+                                                        + '<div style="padding-left:20px;display:table-row">'
                                                         + '<span style="display:table-cell">'
                                                         + (sid_fields==''
                                                             ?'<i style="'+(field['required']?'color:red':'')+'">' +field['title'] + '</i>'
                                                             :'') + '</span>'
                                                         + '<span style="display:table-cell" class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
                                                         + top.HEURIST4.rectypes.names[rt_resourse]
-                                                        + '<span style="display:table-cell" class="id_fieldname rename" data-res-rt="'+rt_resourse+'">'
+                                                        + '<span style="display:table-cell;float:right" class="id_fieldname rename" data-res-rt="'+rt_resourse+'">'
                                                         + field['idfields'][rt_resourse] + '</span></div>'; 
                                                }
                                                
-                                               $('<div style="padding-left:2em;">'
+                                               $('<div style="padding-left:2em;display:table;width:90%">'
                                                //+'<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
                                                
                                                //+ '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
@@ -958,7 +966,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //check if index field already defined in preset
     function _getColumnNameForPresetIndex(recTypeID){
         
-        var k, sname = top.HEURIST4.rectypes.names[recTypeID] +' ID';
+        var k, sname = top.HEURIST4.rectypes.names[recTypeID] +' Heurist ID';
         var rts = Object.keys(imp_session['indexes']);
         for(k=0; k<rts.length; k++){
             if(imp_session['indexes'][rts[k]]==recTypeID){
@@ -986,14 +994,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
         //find index field for selected id field
         var stype = (currentStep==3)?'mapping_keys':'mapping_flds';
-        var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];
+        var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=field type id
         if(!mapping_flds) mapping_flds = {};
         
         //all mapped fields - to place column in "proecessed" section
         var all_mapped = [];
         for  (i=0; i < imp_session['sequence'].length; i++) {
             for  (var fid in imp_session['sequence'][i][stype]) {
-                if(all_mapped.indexOf(fid)<0) all_mapped.push(fid);
+                fld = Number(fid);
+                if(all_mapped.indexOf(fid)<0) all_mapped.push(Number(fid));
             }
         }
             
@@ -1014,7 +1023,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         for (i=0; i < len; i++) {
 
             var isIndex =  (i==idx_id_fieldname) || !top.HEURIST4.util.isnull(imp_session['indexes']['field_'+i]);
-            var isProcessed = !( isIndex || all_mapped.indexOf(i)>=0 ); // top.HEURIST4.util.isnull(mapping_flds[i]) );
+            var isProcessed = !(isIndex || all_mapped.indexOf(i)<0 ); // top.HEURIST4.util.isnull(mapping_flds[i]) );
             
             //checkbox that marks 'in use'
             var s = '<tr><td width="75px" align="center">&nbsp;<span style="display:none;">'
@@ -1263,8 +1272,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
          var counts = _getInsertUpdateCounts(idx);                                     
          var s_count = '';
          if(counts[2]!=imp_session['reccount']){
-             s_count = '  [ '+(counts[2]>0?('<span title="New records to create">'+counts[2]+'/</span>'):'')
-                            + '<span title="Records matched">'+counts[0]+'</span> ]';
+             s_count = '<span style="font-size:0.8em"> [ '+ '<span title="Records matched">'+counts[0]+'</span> ' 
+             +  (counts[2]>0?(', <span title="New records to create">'+counts[2]+' new</span>'):'')
+             + ']</span>';
          }
          return s_count;
     }
@@ -2175,7 +2185,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                           +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated']
                           +'</td></tr></table>';
                         
-                        top.HEURIST4.msg.showMsgDlg(msg,nul,'Import result');
+                        top.HEURIST4.msg.showMsgDlg(msg, null, 'Import result');
                         
                         //if everything is added - skip to next step
                         var counts = _getInsertUpdateCounts( currentSeqIndex );
