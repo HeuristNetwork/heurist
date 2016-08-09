@@ -116,15 +116,9 @@ function get_config_bytes($val) {
 <!-- STEP 1 upload data/select session -->    
 <div style="width:100%; height:100%;" id="divStep1">
     <div class="ent_header" style="height:28em;padding:20px;">
-        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
-            <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
-            <a href="#" id="btnClearAllSessions"
-                title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
-                            style="margin-left: 10px;">Clear all files</a>        
-
-        <h2 style="padding:10 0 10 120">OR</h2>
+    
         
-        <div style="padding:0 10 20 290">
+        <div style="padding:0 20 20 20">
         
             <p>
 Importing all but the simplest spreadsheet is a complex business. It is important to clean up the data as much as possible in advance, so that there is one row per entry and columns contain a single element of data (split concatenated values into separate columns; place notes about data items in a separate column, not appended to the data value). Coded columns should use a consistent set of codes. In addition to your spreadsheet program, you may find OpenRefine (<a href="http://openrefine.org" target="_blank">http://openrefine.org</a>) a useful tool for checking and correcting coded columns, splitting fields, georeferencing, finding URL references and so forth.
@@ -136,7 +130,15 @@ We strongly suggest editing the structure of the database to add any fields and 
 If you have missing data for Required fields, you may find it convenient to set those fields to Optional before importing, then set them back to Required, then use Database > Verify Structure and Data to get a list of the records which need correcting. Alternatively you will need to add some dummy value to the data, such as 'Missing', and search for this value after import.            
             </p>        
         
-        </div>        
+        </div>      
+    
+        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
+            <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
+            <a href="#" id="btnClearAllSessions"
+                title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
+                            style="margin-left: 10px;">Clear all files</a>        
+
+        <h2 style="padding:10 0 10 120">OR</h2>
         
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Upload new file (CSV/TSV)</h2>
             <input type="file" id="uploadFile" style="display:none">
@@ -597,7 +599,8 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <label>Dependencies:</label>
             </div>
             <div class="input-div">
-                <div id="dependencies_preview" class="ui-widget-content" style="min-height:1.8em;padding: 0.4em;">
+                <div id="dependencies_preview" xclass="ui-widget-content" 
+                    style="min-height:1.8em;padding: 0.4em; background-color:lightblue">
                 </div>    
                 
             </div>
