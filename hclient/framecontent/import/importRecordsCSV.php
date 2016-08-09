@@ -97,10 +97,13 @@ function get_config_bytes($val) {
                 padding: 4px;
             }
             .action_buttons{
-               position: absolute;
+               /*position: absolute;
                right:20px;
-               top:2px;
+               top:2px;*/
             } 
+            .action_buttons > div{
+                margin-left:1em;
+            }
             .select_rectype_seq{
                 cursor: pointer;
                 display: inline-block;
@@ -333,7 +336,7 @@ If you have missing data for Required fields, you may find it convenient to set 
 </div>
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;" id="divStep3">
-    <div class="ent_header" style="height:21em;border:none;padding-top:1em;">
+    <div class="ent_header" style="height:26em;border:none;padding-top:1em;">
     
         <div>
             <div id="btnBackToStart"
@@ -384,9 +387,55 @@ If you have missing data for Required fields, you may find it convenient to set 
         <img id="img_arrow4" src="../../assets/blackdot.png" width="2" style="position:absolute;left:0px;height:16px;display:none">        
         
         <div style="padding:1em 0 1em 4em" id="divheader">
-            <h2 class="step3">step 1: MATCHING</h2>
-            <h2 class="step4" style="display:none;">step 2: FIELDS TO IMPORT</h2>
-            <h2 class="step5" style="display:none;">step 3: INSERT/UPDATE</h2>
+            
+            <div  id="divActionsMatching" class="action_buttons step3">
+                
+                <h2 style="display:inline-block">step 1: MATCHING</h2>
+                
+                <div id="btnMatchingStart" class="normal" 
+                    title="Start matching operation. Matching sets this ID field for existing records and allows the creation of new records for unmatched rows">Match against existing records</div>
+
+                <div style="display:none" class="skip_step prompt">
+                    Click on list of record types to skip steps
+                </div>
+<!--    
+                <div id="btnNextRecType1" style="display:none" class="skip_step" 
+                    title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">Skip to next record type</div>
+-->                    
+                <div id="btnBackToMatching2" class="need_resolve" style="margin-right:20px"
+                    title="Return to matching step to redefine mapping that may fix ambiguous matches">
+                    Match Again</div>
+                <div id="btnResolveAmbiguous" class="need_resolve"
+                    title="Show list of ambiguous matches, select the correct matching and continue import">
+                    Resolve ambiguous matches</div>
+                
+            </div>
+            
+            <div  id="divActionsImport" style="display:none;" class="action_buttons step4 step5">
+                <div id="btnBackToMatching" style="margin-right:20px;display:inline-block;"
+                    title="Return to matching step to redefine record IDs">
+                    Match Again</div>
+                    
+                <h2 class="step4" style="display:none;">step 2: FIELDS TO IMPORT</h2>
+                <h2 class="step5" style="display:none;">step 3: INSERT/UPDATE</h2>
+                    
+                <div id="btnPrepareStart" class="step4 step5"
+                    title="Verify that you map all required fields and that values in import table fit to constraints in Heurist database scheme">
+                    Prepare Insert/Update</div>
+                <div id="btnImportStart" class="step4 step5"
+                    title="Start real import data into Heurist database">
+                    Start Insert/Update</div>
+                    
+                <div style="display:none" class="skip_step prompt">
+                    Click on list of record types to skip steps
+                </div>
+
+<!--                
+                <div id="btnNextRecType2" style="display:none" class="skip_step" 
+                    title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">
+                    Skip to next record type</div>
+-->            
+            </div>            
         </div>
 <!-- radiogroup setting divs -->        
         <div  id="divMatchingSetting" class="step3" style="padding-top:0.5em;margin-left:2em;display:none">
@@ -430,41 +479,9 @@ If you have missing data for Required fields, you may find it convenient to set 
                         <label for="sa_upd21" style="font-size:0.9em;">Delete existing even if no new data supplied for record</label>
                     </div>            
         </div>
-<!-- end radiogroup setting divs -->        
-        
-        <table class="tbmain" style="width:100%;position:absolute;bottom:0;" cellspacing="0" cellpadding="2">
-            <thead><tr> <!-- Table headings -->
-                <th style="width:75px;">Use&nbsp;<br/>value</th>
-                <th style="width:75px;">Unique&nbsp;<br/>values</th>
-                <th style="width:300px;">Column</th>
-                <th style="width:300px;">Column to Field Mapping</th>
-                <!-- last column allows step through imported data records-->
-                <th style="text-align: left;padding-left: 16px;">
-                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="0" class="ui-icon ui-icon-seek-first"/></a>
-                    <a href="#" class="navigation" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>
-                    <div style="display: inline-block;vertical-align: super;">Values in row <span id="current_row"></span></div>
-                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>
-                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a>
-                </th></tr>
-            </thead>
-        </table>    
-    </div>
-    <div class="ent_content" style="padding: 0em 0.5em;bottom:11em;top:22.1em" id="divFieldMapping">
-                <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
-                    <!-- <thead><tr>
-                        <th style="width:75px;">Use&nbsp;<br/>value</th>
-                        <th width="75px">Unique&nbsp;<br/>values</th>
-                        <th width="300px">Column</th>
-                        <th width="300px">Column to Field Mapping</th>
-                        <th></th></tr></thead> -->
-                    <tbody>
-                    
-                    </tbody>
-                </table>    
-    </div>
-    <div class="ent_footer" style="height:11em;padding: 0em 0.5em;" id="divImportActions">
+<!-- end radiogroup setting divs -->     
 
-        <div id="divFieldMapping2" style="display:none;">
+        <div id="divFieldMapping2" style="display:none;position:absolute;bottom:3em">
             <table class="tbresults">
                 <tbody>
                                     <tr><td width="130">Records matched</td>
@@ -484,80 +501,39 @@ If you have missing data for Required fields, you may find it convenient to set 
                 </tbody>
             </table>
         </div>
-        <!-- old design of result table - to remove -->
-        <div id="divMatchingResult" style="display:none;">
-            <table class="tbresults">
-                <tbody>
-                                    <tr style="display: none;"><td width="130">(old version)Records matched</td>
-                                        <td width="50" id="mr_cnt_update"></td>
-                                        <td width="50" class="mr_update">rows:</td>
-                                        <td width="50" class="mr_update" id="mr_cnt_update_rows"></td>
-                                        <td width="50" class="mr_update"><a href="#" onclick="importRecordsCSV.showRecords('update')">show</a></td>
-                                        <td width="50" class="mr_update"><a href="#" onclick="importRecordsCSV.downloadRecords('update')">download</a></td>
-                                    </tr>
-                                    <tr style="display: none;"><td>(old version)New records to create</td>
-                                        <td width="50" id="mr_cnt_insert"></td>
-                                        <td width="50" class="mr_insert">rows:</td>
-                                        <td width="50" class="mr_insert" id="mr_cnt_insert_rows"></td>
-                                        <td width="50" class="mr_insert"><a href="#" onclick="importRecordsCSV.showRecords('insert')">show</a></td>
-                                        <td width="50" class="mr_insert"><a href="#" onclick="importRecordsCSV.downloadRecords('insert')">download</a></td>
-                                    </tr>
-                                    <tr style="display:none"><td style="color:red">Ambiguous matches</td>
-                                        <td>&nbsp;</td>
-                                        <td>rows:</td>
-                                        <td style="color:red" id="mr_cnt_disamb"></td>
-                                        <td><a href="#" onclick="importRecordsCSV.showRecords('disamb')">show</a></td>
-                                    </tr>
-                                    <tr style="display:none"><td style="color:red">Field errors</td>
-                                        <td>&nbsp;</td>
-                                        <td>rows:</td>
-                                        <td style="color:red" id="mr_cnt_error"></td>
-                                        <td><a href="#" onclick="importRecordsCSV.showRecords('error')">show</a></td>
-                                    </tr>
-                </tbody>
-            </table>
-        </div>
-    
-        <div  id="divPrepareResult" style="display:none;">
-            Prepare results
-        </div>
-    
-        <div  id="divActionsMatching" class="action_buttons step3">
-            
-            <div id="btnMatchingStart" class="normal" 
-                title="Start matching operation. Matching sets this ID field for existing records and allows the creation of new records for unmatched rows">Match against existing records</div>
-<!--
-            <div id="btnMatchingSkip" class="normal" 
-                title="">Skip matching (import all as new)</div>
--->                
-            <div id="btnNextRecType1" style="display:none" class="skip_step" 
-                title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">Skip to next record type</div>
-                
-            <div id="btnBackToMatching2" class="need_resolve" style="margin-right:20px"
-                title="Return to matching step to redefine mapping that may fix ambiguous matches">
-                Match Again</div>
-            <div id="btnResolveAmbiguous" class="need_resolve"
-                title="Show list of ambiguous matches, select the correct matching and continue import">
-                Resolve ambiguous matches</div>
-            
-        </div>
+   
         
-        <div  id="divActionsImport" style="display:none;" class="action_buttons step4 step5">
-            <div id="btnBackToMatching" style="margin-right:20px"
-                title="Return to matching step to redefine record IDs">
-                Match Again</div>
-            <div id="btnPrepareStart" class="step4 step5"
-                title="Verify that you map all required fields and that values in import table fit to constraints in Heurist database scheme">
-                Prepare Insert/Update</div>
-            <div id="btnImportStart" class="step4 step5"
-                title="Start real import data into Heurist database">
-                Start Insert/Update</div>
-                
-            <div id="btnNextRecType2" style="display:none" class="skip_step" 
-                title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">
-                Skip to next record type</div>
-        </div>
-        
+        <table class="tbmain" style="width:100%;position:absolute;bottom:0;" cellspacing="0" cellpadding="2">
+            <thead><tr> <!-- Table headings -->
+                <th style="width:75px;">Use&nbsp;<br/>value</th>
+                <th style="width:75px;">Unique&nbsp;<br/>values</th>
+                <th style="width:300px;">Column</th>
+                <th style="width:300px;">Column to Field Mapping</th>
+                <!-- last column allows step through imported data records-->
+                <th style="text-align: left;padding-left: 16px;">
+                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="0" class="ui-icon ui-icon-seek-first"/></a>
+                    <a href="#" class="navigation" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>
+                    <div style="display: inline-block;vertical-align: super;">Values in row <span id="current_row"></span></div>
+                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>
+                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a>
+                </th></tr>
+            </thead>
+        </table>    
+    </div>
+    <div class="ent_content" style="padding: 0em 0.5em;bottom:0;top:27.1em" id="divFieldMapping">
+                <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
+                    <!-- <thead><tr>
+                        <th style="width:75px;">Use&nbsp;<br/>value</th>
+                        <th width="75px">Unique&nbsp;<br/>values</th>
+                        <th width="300px">Column</th>
+                        <th width="300px">Column to Field Mapping</th>
+                        <th></th></tr></thead> -->
+                    <tbody>
+                    
+                    </tbody>
+                </table>    
+    </div>
+    <div class="ent_footer" style="height:11em;padding: 0em 0.5em;display:none" id="divImportActions">
     </div>
 </div>
 

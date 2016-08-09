@@ -262,7 +262,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         $('#btnBackToMatching2')
                     //.css({'width':'250px'})
-                    .button({label: top.HR('step 1: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .button({label: top.HR('Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
                     .click(function(e) {
                             _showStep(3);
                             _initFieldMapppingTable();
@@ -293,6 +293,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             _doImport();
                         });
 
+/* repalced to help text                        
         $('#btnNextRecType1')
                     .button({label: top.HR('Skip to next record type'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
@@ -304,7 +305,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             _showStep(3);
                             _skipToNextRecordType();
                         });
-                        
+*/                        
 
           
           $(window).resize( function(e)
@@ -543,7 +544,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }       
                 s = '<h2 class="select_rectype_seq" data-seq-order="'
                         + i + '">' + title + '<span data-cnt="1" id="rt_count_'
-                        + i + '">' + s_count + '</span><br><span class="id_fieldname" style="padding-left:0em">'
+                        + i + '">' + s_count + '</span><br><span data-cnt="1" class="id_fieldname" style="padding-left:0em">'
                         +fieldname+'</h2>'+s;
                  
                 if(i==0){
@@ -593,7 +594,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                 
                     var rectypes = response.data;
-                    var rtOrder = _fillDependencyList(rectypes, {levels:{}, rt_fields:{}, depend:{} }, 0);    
+                    var rtOrder = _fillDependencyList(rectypes, {levels:{}, rt_fields:{}, depend:{} }, 0, {});    
                     //rt_fields - resourse fields
                     //depend - only required dependencies 
                     
@@ -891,11 +892,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //  rtOrder 
     //  levels:{},   rt_id:level - list of rectypes with level value - need for proper order in sequence
     //  depend:{},   rt_id:[array of depended rectypes]
-    //  rt_fields:{},   resourse fields per rectype - rt_id:{id:ft_id, title:title, rt_ids:ids, rt_title:rectypeNames.join('|'), required,
-    //                    idfields:{NAME:resourse_rectypeid}}
+    //  rt_fields:{},   resourse fields per rectype - rt_id:{id:ft_id, title:title, rt_ids:ids, 
+    //                     rt_title:rectypeNames.join('|'), required,
+    //                     idfields:{NAME:resourse_rectypeid}}
     //
     //
-    function _fillDependencyList(rectypeTree, rtOrder, depth){
+    function _fillDependencyList(rectypeTree, rtOrder, depth, uniq_fieldnames){
          //var ele = $(selEle);
          
         if(depth==0){
@@ -940,7 +942,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 rtOrder['levels'][recTypeID] = depth+1;    
                             }
                             
-                            idfields[recTypeID] = _getColumnNameForPresetIndex(recTypeID);
+                            var id_fieldname = _getColumnNameForPresetIndex(recTypeID);
+                            if(imp_session['primary_rectype']!=recTypeID){
+                                var pos = id_fieldname.indexOf('Heurist ID');
+                                if(id_fieldname.indexOf('Heurist ID')== id_fieldname.length-10){
+                                    if(uniq_fieldnames[id_fieldname]>0){
+                                        uniq_fieldnames[id_fieldname] = uniq_fieldnames[id_fieldname] + 1;
+                                        id_fieldname = id_fieldname + ' ' + uniq_fieldnames[id_fieldname];
+                                    }else{
+                                        uniq_fieldnames[id_fieldname] = 1;
+                                    }
+                                }
+                            }
+                            
+                            idfields[recTypeID] = id_fieldname;
+                            
                             //rtOrder['idfields'][field['key']] = top.HEURIST4.rectypes.names[recTypeID]+' ID';//recTypeID;
                        }
                        
@@ -957,7 +973,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
              
              for (j=0;j<rectypeTree.children.length;j++){
                   var child = rectypeTree.children[j];
-                  rtOrder = _fillDependencyList(child, rtOrder, depth+((currentTypeID>0)?1:0) );
+                  rtOrder = _fillDependencyList(child, rtOrder, depth+((currentTypeID>0)?1:0), uniq_fieldnames);
              }
          }
          
@@ -966,9 +982,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     }
     
     //check if index field already defined in preset
+    //
+    // imp_session['indexes'] = {field_1:10}  fieldname:recordtype_id
+    //
     function _getColumnNameForPresetIndex(recTypeID){
         
-        var k, sname = top.HEURIST4.rectypes.names[recTypeID] +' Heurist ID';
+        var k, sname = top.HEURIST4.rectypes.names[recTypeID] +' Heurist ID'; // this is default name for index field 
+                                                                              // to be added into import table
         var rts = Object.keys(imp_session['indexes']);
         for(k=0; k<rts.length; k++){
             if(imp_session['indexes'][rts[k]]==recTypeID){
@@ -977,6 +997,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 break;
             }
         }
+        
         return sname;
     }
 
@@ -1015,10 +1036,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         if (idx_id_fieldname<0) { //id field is not created
 
             sIndexes = '<tr><td width="75px" align="center">&nbsp;'
-                    + '<input type="checkbox" checked="checked" disabled="disabled"/></td>'
+                    //+ '<input type="checkbox" checked="checked" disabled="disabled"/>'
+                    + '</td>'
                     + '<td  width="75px" align="center">0</td>' // count of unique values
                     + '<td style="width:300px;class="truncate">'+imp_session['sequence'][currentSeqIndex]['field']+'</td>' // column name
-                    + '<td style="width:300px;">&nbsp;Column to be created as Record ID</td><td>&nbsp;</td></tr>';
+                    + '<td style="width:300px;">&nbsp;New column to hold Heurist record IDs</td><td>&nbsp;</td></tr>';
         }
         
 
@@ -1098,6 +1120,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     //    
     function _adjustButtonPos(){
+        /* todo - check how it works with new layout
         //adjust position of footer with action buttons  
         var content = $('#divFieldMapping');
         var btm = $('#divStep3').height() - (content.position().top + $('#tblFieldMapping').height());
@@ -1105,6 +1128,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
         content.css('bottom', btm-20);
         $('#divImportActions').height(btm-20);
+        */
     }
     
     //
@@ -1254,7 +1278,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
             //show hide skip to next rectype buttons if no insert, only update
             if(counts[2]==0 && counts[0]>0){
-                $('.skip_step').show();                
+                $('.skip_step').css('display','inline-block');                
             }else{
                 $('.skip_step').hide();                
             }
@@ -1972,7 +1996,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 $('#mr_cnt_disamb').parent().hide();
                                 
                             }
-                            //old version $('#divMatchingResult').show();
                             
                         }else{
                             _showStep(3);
@@ -2098,8 +2121,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             _showStep(5);
                         }
 
-                        //old version $('#divMatchingResult').show();
-                        
                     }else{
                         _showStep(4);
                         top.HEURIST4.msg.showMsgErr(response);
@@ -2698,6 +2719,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
             if(currentStep==4){ //prepare
             
+                $('h2.step4').css('display','inline-block');
+            
                 var rtyID = imp_session['sequence']['rectype'];
                 var counts = _getInsertUpdateCounts(currentSeqIndex);
                
@@ -2717,6 +2740,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 top.HEURIST4.util.setDisabled($('#btnPrepareStart'), false);
                 top.HEURIST4.util.setDisabled($('#btnImportStart'), true);
             }else{ //import
+            
+                $('h2.step5').css('display','inline-block');
                 top.HEURIST4.util.setDisabled($('#btnPrepareStart'), true);
                 top.HEURIST4.util.setDisabled($('#btnImportStart'), false);
                 //$('#divImportSettingHelp').html();
@@ -2738,7 +2763,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
-        $('#divMatchingResult').hide();
         $('#mr_cnt_error').parent().hide();
         $('#mr_cnt_disamb').parent().hide();
         
@@ -2749,7 +2773,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             $("div[class*='step'],h2[class*='step']").hide();
             $('.step'+page).show();
-            $('#divPrepareResult').hide();
             
             if(page==3){
                 $('.step3 > .normal').show();
