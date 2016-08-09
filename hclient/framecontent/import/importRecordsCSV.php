@@ -115,7 +115,7 @@ function get_config_bytes($val) {
 
 <!-- STEP 1 upload data/select session -->    
 <div style="width:100%; height:100%;" id="divStep1">
-    <div class="ent_header" style="height:18em;padding:20px;">
+    <div class="ent_header" style="height:28em;padding:20px;">
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
             <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
             <a href="#" id="btnClearAllSessions"
@@ -123,6 +123,21 @@ function get_config_bytes($val) {
                             style="margin-left: 10px;">Clear all files</a>        
 
         <h2 style="padding:10 0 10 120">OR</h2>
+        
+        <div style="padding:0 10 20 290">
+        
+            <p>
+Importing all but the simplest spreadsheet is a complex business. It is important to clean up the data as much as possible in advance, so that there is one row per entry and columns contain a single element of data (split concatenated values into separate columns; place notes about data items in a separate column, not appended to the data value). Coded columns should use a consistent set of codes. In addition to your spreadsheet program, you may find OpenRefine (<a href="http://openrefine.org" target="_blank">http://openrefine.org</a>) a useful tool for checking and correcting coded columns, splitting fields, georeferencing, finding URL references and so forth.
+            </p><br>
+            <p>
+We strongly suggest editing the structure of the database to add any fields and terms that you will require for the import, before attempting to load the data. If you start trying to load data without the appropriate fields in place you will find it frustrating having to exit the process repeatedly to add fields.
+            </p><br>
+            <p>
+If you have missing data for Required fields, you may find it convenient to set those fields to Optional before importing, then set them back to Required, then use Database > Verify Structure and Data to get a list of the records which need correcting. Alternatively you will need to add some dummy value to the data, such as 'Missing', and search for this value after import.            
+            </p>        
+        
+        </div>        
+        
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Upload new file (CSV/TSV)</h2>
             <input type="file" id="uploadFile" style="display:none">
             <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
@@ -133,7 +148,7 @@ function get_config_bytes($val) {
         <div id="btnUploadData"
             title="Upload content of text area below to server side and use it as source for CSV/TSV import operation">Upload Data</div>
     </div>
-    <div class="ent_content_full" style="top:17em;width:100%;">
+    <div class="ent_content_full" style="top:29em;width:100%;">
         <textarea id="sourceContent" style="height:100%;width:100%;resize:none;"></textarea>
     </div>
 </div>
@@ -571,6 +586,10 @@ function get_config_bytes($val) {
                 <div class="heurist-helper1" style="display: block; padding-bottom: 1em;">
                     The primary record type is the one represented by each row of the input file. Additional record types may be imported  from selected columns prior to import of the primary, as determined by the dependencies below.
                 </div>
+                <div class="heurist-helper1" style="display: block;padding-top:0.5em">
+                    The creation of the primary record type from rows in the input file depends on the prior identification of other entities which will be connected via pointer fields or relationships. The tree below shows the dependencies of the primary record type determined from its pointer and relationship marker fields. Where an input entity matches an existing record, its ID value will be recorded in an ID field which can be used subsequently as a pointer field value; where no existing record is matched a new record is created and the new ID recorded<br><br>
+                    Check record types to be imported. <span style="color:red">Red</span> indicates required pointer field
+                 </div>
             </div>        
         </div>                    
         <div>
@@ -581,10 +600,6 @@ function get_config_bytes($val) {
                 <div id="dependencies_preview" class="ui-widget-content" style="min-height:1.8em;padding: 0.4em;">
                 </div>    
                 
-                <div class="heurist-helper1" style="display: block;padding-top:0.5em">
-                    Check record types to be imported. <span style="color:red">Red</span> indicates required pointer field<br>
-                    The creation of the primary record type from rows in the input file depends on the prior identification of other entities which will be connected via pointer fields or relationships. The tree above shows the dependencies of the primary record type determined from its pointer and relationship marker fields. Where an input entity matches an existing record, its ID value will be recorded in an ID field which can be used subsequently as a pointer field value; where no existing record is matched a new record is created and the new ID recorded
-                 </div>
             </div>
         </div>                    
         </fieldset>

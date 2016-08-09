@@ -254,7 +254,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 */                        
         $('#btnBackToMatching')
                     //.css({'width':'250px'})
-                    .button({label: top.HR('Back: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .button({label: top.HR('step 1: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
                     .click(function(e) {
                             _showStep(3);
                             _initFieldMapppingTable();
@@ -262,7 +262,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         $('#btnBackToMatching2')
                     //.css({'width':'250px'})
-                    .button({label: top.HR('Back: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .button({label: top.HR('step 1: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
                     .click(function(e) {
                             _showStep(3);
                             _initFieldMapppingTable();
@@ -493,8 +493,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             var dlg_options = {
                 title:'Select primary record type and dependencies',
-                height: 460,
-                width: 800,
+                height: 640,
+                width: 900,
                 element: document.getElementById('divSelectPrimaryRecType'),
                 buttons: buttons
                 };
@@ -626,7 +626,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                             var sname = _getColumnNameForPresetIndex(recTypeID);
                                      
                                             sRectypeItem = sRectypeItem 
-                                               + ' (primary records type) ' 
+                                               + ' <span style="font-size:0.8em;font-weight:bold">(primary records type)</span>' 
                                                + '<span class="id_fieldname" style="float:right"  data-res-rt="'+recTypeID+'">'
                                                + sname + '</span>';
                                      }
@@ -644,18 +644,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                //idfields
                                                for (rt_resourse in field['idfields']){
                                                    sid_fields = sid_fields 
-                                                        + '<div style="padding-left:20px;display:table-row">'
-                                                        + '<span style="display:table-cell">'
+                                                        + '<div style="padding-left:2em;display:inline-block;">'
+                                                        + '<div style="min-width:150px;display:inline-block">'
                                                         + (sid_fields==''
                                                             ?'<i style="'+(field['required']?'color:red':'')+'">' +field['title'] + '</i>'
-                                                            :'') + '</span>'
-                                                        + '<span style="display:table-cell" class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
-                                                        + top.HEURIST4.rectypes.names[rt_resourse]
-                                                        + '<span style="display:table-cell;float:right" class="id_fieldname rename" data-res-rt="'+rt_resourse+'">'
-                                                        + field['idfields'][rt_resourse] + '</span></div>'; 
+                                                            :'') + '</div>'
+                                                        + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
+                                                        + top.HEURIST4.rectypes.names[rt_resourse] + '</div>' 
+                                                        
+                                                        + '<span style="float:right" class="id_fieldname rename" data-res-rt="'                                                                  + rt_resourse+'">' + field['idfields'][rt_resourse] + '</span><br>';
+                                                         
                                                }
                                                
-                                               $('<div style="padding-left:2em;display:table;width:90%">'
+                                               $('<div style="padding-left:2em;">'
                                                //+'<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
                                                
                                                //+ '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
@@ -663,6 +664,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                + sid_fields
                                                +'</div>')
                                                 .appendTo(treeElement);
+                                                
                                          }
                                      }
                                      
