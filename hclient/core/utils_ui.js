@@ -1052,7 +1052,12 @@ top.HEURIST4.ui = {
                                 var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
                                 var div_width  = Math.min(700, $(document.body).width() *0.8);
                                 
-                                var title = $helper_div.find('#content>h2').text();
+                                var title = 'Heurist context help';
+                                var head = $helper_div.find('#content>h2');
+                                if(head.length==1){
+                                    title = head.text();
+                                    head.empty();
+                                }
                             
                                 if(title!='') $helper_div.dialog('option','title',title);
                                 $helper_div.dialog('option', {width:div_width, height: div_height, position: divpos});

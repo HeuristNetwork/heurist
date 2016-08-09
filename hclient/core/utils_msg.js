@@ -635,13 +635,16 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             $(element).show().appendTo($dlg);
 
             var body = $(this.document).find('body');
-            var dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
+            //var dim = { h: Math.min((options.height>0?options.height:400), body.innerHeight()-10), 
+            //            w: Math.min((options.width>0?options.width:690), body.innerWidth()-10) };
             
+            var dim = { h: (options.height>0?options.height:400), 
+                        w: (options.width>0?options.width:690) };
             
             var opts = {
                     autoOpen: true,
-                    width : (options.width>0?options.width+20:690),
-                    height: (options.height>0?options.height+20:dim.h),
+                    width : dim.w,
+                    height: dim.h,
                     modal: true,
                     resizable: (options['no-resize']==true),
                     //draggable: false,
