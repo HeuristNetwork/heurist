@@ -1018,7 +1018,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     + '<input type="checkbox" checked="checked" disabled="disabled"/></td>'
                     + '<td  width="75px" align="center">0</td>' // count of unique values
                     + '<td style="width:300px;class="truncate">'+imp_session['sequence'][currentSeqIndex]['field']+'</td>' // column name
-                    + '<td style="width:300px;">&nbsp;Column to be created as Record ID</td><td>&nbsp;</td></tr>';
+                    + '<td style="width:300px;">&nbsp;New column to hold Heurist record IDs</td><td>&nbsp;</td></tr>';
         }
         
 
@@ -1440,7 +1440,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             });        
         
         }else{
-            top.HEURIST4.msg.showMsgErr('Paste csv/tsv to content area first');    
+            top.HEURIST4.msg.showMsgErr('Please paste comma or tab-separated data into the content area below');    
         }
     }
     
