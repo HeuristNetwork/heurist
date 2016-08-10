@@ -62,10 +62,8 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.2.10"; // sets current program version number, determined by Heurist development lead
+$version = "4.2.8"; // sets current program version number, determined by Heurist development lead
 
-// Vsn 4.2.10 9 Aug 2016  New CSV importer largely functional
-// Vsn 4.2.9 22 Jul 2016  First draft of new CSV importer
 // Vsn 4.2.8 17 Jun 2016  Further small fixes 
 // Vsn 4.2.7 14 May 2016  Further small fixes 
 // Vsn 4.2.6 26 Apr 2016  Complete revisoon of core definitions, lots of small fixes to mapping and structue management
