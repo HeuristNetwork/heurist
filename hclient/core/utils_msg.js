@@ -231,7 +231,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             }
         }
 
-        var title = '', // removed "Info" which is not usefu/ugly
+        var title = 'Info',
             lblYes = top.HR('Yes'),
             lblNo =  top.HR('No'),
             lblOk = top.HR('OK'),
