@@ -151,6 +151,8 @@ $(document).ready(function() {
     $('#relationship-type').css({'font-size':'0.8em'});
     $('.input-cell > span').css({'font-size':'0.8em'});
 	$('.separator > .input-header-cell').css('min-width','200px');
+    $('.input-row select').css({'max-width':'100px'});
+    
     
     //reduce width of input elements	
     var csobj = {'font-size':'0.8em','width':'25ex'};
