@@ -231,7 +231,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             }
         }
 
-        var title = 'Info',
+        var title = ' ',
             lblYes = top.HR('Yes'),
             lblNo =  top.HR('No'),
             lblOk = top.HR('OK'),
