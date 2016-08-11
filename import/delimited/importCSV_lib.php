@@ -1151,7 +1151,7 @@ function validateImport($mysqli, $imp_session, $params){
 
             $field_name1 = @$mapping[$ft_id."_lat"];
             $field_name2 = @$mapping[$ft_id."_long"];
-            if(!$field_name1 && !$field_name2){
+            if(!$field_name1 && !$field_name2 && is_array($mapping_prev_session)){
                 $field_name1 = array_search($recordType.".".$ft_id."_lat", $mapping_prev_session, true);
                 $field_name2 = array_search($recordType.".".$ft_id."_long", $mapping_prev_session, true);
             }

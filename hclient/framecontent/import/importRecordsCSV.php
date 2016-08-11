@@ -335,8 +335,9 @@ If you have missing data for Required fields, you may find it convenient to set 
     </div>
 </div>
 <!-- STEP 3 matching and import -->
-<div style="width:100%; height:100%;display:none;" id="divStep3">
-    <div class="ent_header" style="height:26em;border:none;padding-top:1em;">
+<div style="width:100%; height:100%;display:none;overflow:auto" id="divStep3">
+
+    <div class="ent_header" style="height:auto;border:none;padding-top:1em;padding-bottom:2.5em;min-width:970px">
     
         <div>
             <div id="btnBackToStart"
@@ -348,7 +349,8 @@ If you have missing data for Required fields, you may find it convenient to set 
                 Primary record type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
                 <a href="#" id="btnSetPrimaryRecType"
                             title="Change primary record type"
-                            style="margin-left:10px;font-size:0.9em;text-decoration:none;color:gray">reset</a>        
+                            style="display:none;margin-left:10px;font-size:0.9em;text-decoration:none;color:gray">reset</a>        
+                            <!-- todo restore this feature -->
             </div>    
                 
             <div id="btnClearFile"  style="float: right;"
@@ -419,6 +421,10 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <h2 class="step4" style="display:none;">step 2: FIELDS TO IMPORT</h2>
                 <h2 class="step5" style="display:none;">step 3: INSERT/UPDATE</h2>
                     
+                <div id="btnNextRecType2" style="display:none" class="skip_step" 
+                    title="All input rows have been matched to existing records. This probably means that you are simply matching existing records and don't need to update them">
+                    Skip update</div>
+                    
                 <div id="btnPrepareStart" class="step4 step5"
                     title="Verify that you map all required fields and that values in import table fit to constraints in Heurist database scheme">
                     Prepare Insert/Update</div>
@@ -430,11 +436,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                     Click on list of record types to skip steps
                 </div>
 
-<!--                
-                <div id="btnNextRecType2" style="display:none" class="skip_step" 
-                    title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">
-                    Skip to next record type</div>
--->            
+
             </div>            
         </div>
 <!-- radiogroup setting divs -->        
@@ -481,7 +483,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         </div>
 <!-- end radiogroup setting divs -->     
 
-        <div id="divFieldMapping2" style="display:none;position:absolute;bottom:3em">
+        <div id="divFieldMapping2" style="display:none;padding:0.5em 0;margin-left:2em;">
             <table class="tbresults">
                 <tbody>
                                     <tr><td width="130">Records matched</td>
@@ -503,7 +505,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         </div>
    
         
-        <table class="tbmain" style="width:100%;position:absolute;bottom:0;" cellspacing="0" cellpadding="2">
+        <table class="tbmain" style="width:100%;position:absolute;bottom:0" cellspacing="0" cellpadding="2">
             <thead><tr> <!-- Table headings -->
                 <th style="width:75px;">Use&nbsp;<br/>value</th>
                 <th style="width:75px;">Unique&nbsp;<br/>values</th>
@@ -520,7 +522,8 @@ If you have missing data for Required fields, you may find it convenient to set 
             </thead>
         </table>    
     </div>
-    <div class="ent_content" style="padding: 0em 0.5em;bottom:0;top:27.1em" id="divFieldMapping">
+    <!-- CONTENT : MAPPING TABLE COLUMNS TO HEURIST FIELDS  -->
+    <div class="ent_content" style="bottom:0;top:27.1em;padding: 0em 0.5em;" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
@@ -576,7 +579,7 @@ If you have missing data for Required fields, you may find it convenient to set 
             </div>
             <div class="input-div">
                 <div id="dependencies_preview" xclass="ui-widget-content" 
-                    style="min-height:1.8em;padding: 0.4em; background-color:lightblue">
+                    style="min-height:1.8em;padding: 0.4em; background-color:white">
                 </div>    
                 
             </div>
