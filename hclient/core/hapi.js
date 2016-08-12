@@ -121,6 +121,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         if(request.notes){
             request.notes = null; //unset to reduce traffic
         }
+        
+        
 
         var url = that.basePathV4+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 

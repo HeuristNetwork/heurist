@@ -688,7 +688,8 @@ class System {
         $islogged = ($userID != null);
         if($islogged){
 
-            if(!@$_SESSION[$this->dbname_full]['ugr_Groups']){
+            //@todo do not update session on every request, update in on user membership changes    
+            if(true || !@$_SESSION[$this->dbname_full]['ugr_Groups']){
                 $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
             }
             if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){
