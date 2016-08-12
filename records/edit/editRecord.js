@@ -2562,6 +2562,13 @@ console.log('heurist not defined');
             url += "&target_recordtype="+windowRef.parent.HEURIST.edit.record.rectypeID; //0317 top
         if (element.input.constrainrectype)
             url += "&t="+element.input.constrainrectype;
+        //keep parent ownership and visibility    
+
+        if(top.HEURIST.edit.record.workgroupID>=0 && top.HEURIST.edit.record.visibility){
+            url = url + "&ownership="+top.HEURIST.edit.record.workgroupID + 
+                        "&visibility="+top.HEURIST.edit.record.visibility;
+        }
+            
         top.HEURIST.util.popupURL(window, url, {
             title: 'Select Record',
             callback: function(bibID, bibTitle) {

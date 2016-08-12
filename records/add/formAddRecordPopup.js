@@ -75,7 +75,7 @@ window.HEURIST.edit = {
             var editFrame = document.getElementById("edit-frame");
             var contentWindow = editFrame.contentWindow;
             if (contentWindow) {
-
+                
                 var form = contentWindow.document.forms[0];
                 if (form && form.onsubmit  &&  ! form.onsubmit()) {
                     window.HEURIST.edit.save_in_progress = false;
@@ -117,13 +117,18 @@ var trgRecID = window.HEURIST.parameters["trgRecID"];
 var trgRecTitle = window.HEURIST.parameters["trgRecTitle"];
 var type = window.HEURIST.parameters["type"];
 var text = window.HEURIST.parameters["text"];
+var parentOwnership = window.HEURIST.parameters["ownership"];
+var parentVisibility = window.HEURIST.parameters["visibility"];
 
 if (! rectype) {  //rectype is not defined - select from dropdown
     var setInitialrectype = function() {
         var rectype = rectypeDropdown.options[rectypeDropdown.selectedIndex].value;
 
         var editFrame = document.getElementById("edit-frame");
-        editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype;
+        editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype+
+                    (parentOwnership? "&ownership="+parentOwnership : "") + 
+                    (parentVisibility? "&visibility="+parentVisibility : "");
+
         editFrame.style.display = "block";
 
         rectypeDropdown.onchange = setrectype;
@@ -174,7 +179,13 @@ if (! rectype) {  //rectype is not defined - select from dropdown
                     (type ? "&type="+type : "") +
                     (text ? "&text="+text : "") +
                     (trgRecID ? "&trgRecID="+trgRecID : "") +
-                    (trgRecTitle ? "&trgRecTitle="+trgRecTitle : "");
+                    (trgRecTitle ? "&trgRecTitle="+trgRecTitle : "") +
+                    (parentOwnership? "&ownership="+parentOwnership : "") + 
+                    (parentVisibility? "&visibility="+parentVisibility : "");
+                
+                
+
+                    
     editFrame.style.display = "block";
 
     //ART: no need anymore since name of record type is specified in title of popup

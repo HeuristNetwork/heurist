@@ -130,6 +130,9 @@
         <script language="JavaScript">
             // parse the parameter line for input parameters t = constrained type list and q = title of the record pointed to.
             window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
+            
+            var parentOwnership = window.HEURIST.parameters["ownership"];
+            var parentVisibility = window.HEURIST.parameters["visibility"];
 
             // check for type constraints
             var rectype = window.HEURIST.parameters["t"];
@@ -199,7 +202,9 @@
                 top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?fromadd=new_bib&rectype='+
                     recTypeId+
                     '&title='+document.getElementById('q').value+	// q is a string to match against rectitle so let's start with this in the title field
-                    '&db='+ _db,
+                    '&db='+ _db + 
+                    (parentOwnership? "&ownership="+parentOwnership : "") + 
+                    (parentVisibility? "&visibility="+parentVisibility : ""),
                     {	title: title,
                         callback: function(title, bd, bibID) {
                             if (bibID) {

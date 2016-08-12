@@ -288,6 +288,12 @@
                             defaultInputValues[top.HEURIST.magicNumbers['DT_NAME']] = [ { "value" : window.HEURIST.parameters["title"] } ];
                         }
                     }
+                    
+                    
+                    //set ownership and visibility from given parameters - usualy it is from parent record
+                    if (window.HEURIST.parameters["ownership"] && window.HEURIST.parameters["visibility"]) {
+                        setWorkgroupProperties( window.HEURIST.parameters["ownership"], window.HEURIST.parameters["visibility"] );
+                    }
 
                     if (window.HEURIST.parameters["addr"]) {
                         if (top.HEURIST.magicNumbers &&
