@@ -247,9 +247,9 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                             'ugl_UserID='.$user_id_insource.' and grp.ugr_Type != "User" order by ugl_GroupID');
 
                 }else{
+                    //reload page with login error
 
-
-                    header('Location: ' . HEURIST_BASE_URL . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
+                    print '<br/><font color="#ff0000">Incorrect Username / Password for source database</font></div></body></html>';
                     exit;
                 }
                 mysql_connection_overwrite(DATABASE);
@@ -319,6 +319,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                     print "<input name='username' value='$username' type='hidden'>";
                     print "<input name='password' value='$password' type='hidden'>";
                 }
+                print "<input type='hidden' name='samelogin' value='".(@$_REQUEST['samelogin']==0?0:1)."'/>";
                 print "<br /><input name='reportlevel' value='1' type='checkbox' checked='checked'>&nbsp;Report or import level: if checked, only show errors / do not import data<br>";
                 print "<br />Check the code mappings below, then click here:  <input type='button' value='Import data' onclick='{document.getElementById(\"mode\").value=5; document.forms[\"mappings\"].submit();}'>\n";
                 // alert(document.getElementById(\"mode\").value);
