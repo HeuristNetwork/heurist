@@ -349,15 +349,15 @@ If you have missing data for Required fields, you may find it convenient to set 
                 Primary record type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
                 <a href="#" id="btnSetPrimaryRecType"
                             title="Change primary record type"
-                            style="display:none;margin-left:10px;font-size:0.9em;text-decoration:none;color:gray">reset</a>        
-                            <!-- todo restore this feature -->
+                            style="margin-left:10px;font-size:0.9em;text-decoration:none;color:gray">reset</a>        
+                            <!-- display:none; todo restore this feature -->
             </div>    
                 
             <div id="btnClearFile"  style="float: right;"
                 title="Clear the data for this uploaded file from the server">
                 Clear uploaded file</div>
                 
-            <div class="heurist-helper1" style="float: right; padding:0.5em;">
+            <div id="helper1" class="heurist-helper1" style="float: right; padding:0.5em;">
                 Note: Data is retained between sessions until cleared
             </div>    
 

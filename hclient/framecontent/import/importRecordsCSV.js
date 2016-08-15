@@ -375,6 +375,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             $('#lblPrimaryRecordType').empty();
                             $('#sa_rectype_sequence').empty();
                             
+                            $('#dependencies_preview').css('background',$('#sa_primary_rectype').css('background'));
+                            
                             var resp = new hRecordSet( response.data );
                             var record = resp.getFirstRecord();
                             var ses = resp.fld(record, 'imp_session');
@@ -733,6 +735,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                  for(j=0;j<rt_depend_all.length;j++){
                                                     if(i!=j  //not itself
                                                         && (rtOrder['levels'][rt_depend_all[j]]==depth-1)    //from prev level
+                                                        &&  rtOrder['depend'][rt_depend_all[j]]
                                                         && (rtOrder['depend'][rt_depend_all[j]].indexOf(recTypeID)>=0))
                                                     {
                                                         need_disable = true;
@@ -744,6 +747,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                              if(need_disable && disable_dependent){
                                                   var cb = treeElement.find('.rt_select[data-rt="'+recTypeID+'"]');
                                                   top.HEURIST4.util.setDisabled(cb, true);
+                                                  cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                                              }
 
                                          }                                         
@@ -766,6 +770,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                             cb.prop('checked',true);
                                             if(keep_id!=rt_depend_all[i]){
                                                 top.HEURIST4.util.setDisabled(cb, true);
+                                                cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                                             }
                                      }
                                 }                            
@@ -779,6 +784,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             cb.prop('checked',true);
                             __rt_checkbox_click(cb, true); //does not work.trigger('click'); //.click();
                             top.HEURIST4.util.setDisabled(cb, true);
+                            cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
 
                             //click to remame identification field                            
                             function __idfield_rename(ele_span){
@@ -1165,8 +1171,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //    
     function _adjustTablePosition(){
         
+        var headerdiv = $('#helper1').parent();
+        if(headerdiv.width()<1245){
+            $('#helper1').hide();    
+        }else{
+            $('#helper1').show();    
+        }
+        if(headerdiv.width()<1000){
+            $('#btnClearFile').button({text: false}).css({'width':'auto'})
+        }else{
+            $('#btnClearFile').button({text: true}).css({'width':'160px'})
+        }
+
         _redrawArrow();
-        
+
         var pos = $('#divStep3 > .ent_header').height();
 
         $('#divStep3 > .ent_content').css({top:pos+40});
