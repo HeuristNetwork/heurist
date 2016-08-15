@@ -99,9 +99,9 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
             ?>
             <h2>FOR  ADVANCED USERS ONLY</h2>
             <p>
-                This script reads records from a source database of vsn 2 or vsn 3 format, maps the record type, field type and term codes to new values,
+                This script reads records from a source database of vsn 2 or later format, maps the record type, field type and term codes to new values,
                 and writes the records into the current logged-in database. It also transfers uploaded file records. It does not (at present) transfer tags and othe user data
-                The current database can already contain data, new records are appended and IDs adjsuted for records and files.
+                The current database can already contain data, new records are appended and IDs adjusted for records and files.
                 <br /><br />
                 If you find you are missing some record types, field types or terms from the Target database, click Save Settings, create the new record types/fields/terms that you need , then return to this function and click Load Settings. You may find it easier to import the record types you need from the Source database, as this also brings in all necessary fields and terms
                 <br /><br />
@@ -168,7 +168,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 if(!$is_h2){
                     print "<input name='h2' value='1' type='hidden'>";
                 }
-                print "<input type='submit' value='Switch to H".($is_h2?"3":"2")." databases' /><br/>";
+                print "<input type='submit' value='Switch to Heurist Vsn ".($is_h2?"3":"2")." databases' /><br/>";
                 print "</form>";
 
                 print "<form name='selectdb' action='getRecordsFromDB.php' method='post'>";
@@ -186,9 +186,10 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 print "</select>";
                 if(!$is_h2){
                     print "<div style=\"padding:5px;\">";
-                    print "Username:&nbsp;<input type='text' name='username' id='username' size='20' class='in'>&nbsp;&nbsp;";
-                    print "Password:&nbsp;<input type='password' name='password' size='20' class='in'>&nbsp;&nbsp;";
-                    print "Use the same as current:&nbsp;<input type='checkbox' checked='checked' name='samelogin' value='1'/>";
+                    print "<br /><input type='checkbox' checked='checked' name='samelogin' value='1'/>&nbsp;&nbsp;Use the same login details as current database";
+                    print "<br /><br />OR<br />";
+                    print "<br />&nbsp;&nbsp;&nbsp;&nbsp;Username:&nbsp;<input type='text' name='username' id='username' size='20' class='in'>&nbsp;&nbsp;";
+                    print "<br />&nbsp;&nbsp;&nbsp;&nbsp;Password:&nbsp;&nbsp;<input type='password' name='password' size='20' class='in'>&nbsp;&nbsp;";
 
                     if(@$_REQUEST['loginerror']=='1'){
                         print '<br/><font color="#ff0000">Incorrect Username / Password for source database</font>';
@@ -196,7 +197,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
                     print "</div>";
                 }
-                print "&nbsp;&nbsp;<input type='submit' value='Continue'/>";
+                print "<br />&nbsp;<br /><input type='submit' value='Continue - set field mappings'/>";
                 print "</form>";
                 exit;
             }
@@ -318,12 +319,15 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                     print "<input name='username' value='$username' type='hidden'>";
                     print "<input name='password' value='$password' type='hidden'>";
                 }
-                print "<input name='reportlevel' value='1' type='checkbox' checked='checked'>&nbsp;Report level: show errors only<br>";
-                print "Check the code mappings below, then click  <input type='button' value='Import data' onclick='{document.getElementById(\"mode\").value=5; document.forms[\"mappings\"].submit();}'>\n";
+                print "<br /><input name='reportlevel' value='1' type='checkbox' checked='checked'>&nbsp;Report or import level: if checked, only show errors / do not import data<br>";
+                print "<br />Check the code mappings below, then click here:  <input type='button' value='Import data' onclick='{document.getElementById(\"mode\").value=5; document.forms[\"mappings\"].submit();}'>\n";
                 // alert(document.getElementById(\"mode\").value);
+                
+        
+                print "&nbsp;&nbsp;&nbsp;&nbsp;<input type='button' value='Print mapping' onclick='{printMapping();}'>";
+                print "&nbsp;&nbsp;&nbsp;&nbsp;<input type='button' value='Save settings' onclick='{document.getElementById(\"mode\").value=3; document.forms[\"mappings\"].submit();}'>";
 
-                print "<input type='button' value='Print mapping' onclick='{printMapping();}'>&nbsp;";
-                print "<input type='button' value='Save settings' onclick='{document.getElementById(\"mode\").value=3; document.forms[\"mappings\"].submit();}'>";
+                print "<br /> <br />Please note: it may take a little while to load all the code mappings and set them to your saved values - please wait until all mappings have loaded.<br />";
 
                 $filename = HEURIST_FILESTORE_DIR."settings/importfrom_".$sourcedbname.".cfg";
 
