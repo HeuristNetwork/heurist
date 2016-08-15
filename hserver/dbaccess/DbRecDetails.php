@@ -78,7 +78,7 @@ class DbRecDetails
         $dtyID = $this->data['dtyID'];
         
         if (!( @$this->data['recIDs'])){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed: records");
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Insufficent data passed: records');
             return false;
         }
         

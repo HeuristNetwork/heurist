@@ -45,14 +45,7 @@ require_once (dirname(__FILE__).'/dbaccess/utils_file.php');
 * HEURIST_FILESTORE_DIR
 */
 class System {
-    /*
-    const INVALID_REQUEST = "invalid";    // The Request provided was invalid.
-    const NOT_FOUND = "notfound";         // The requested object not found.
-    const OK = "ok";                      // The response contains a valid Result.
-    const REQUEST_DENIED = "denied";      // The webpage is not allowed to use the service.
-    const UNKNOWN_ERROR = "unknown";       // A request could not be processed due to a server error. The request may succeed if you try again.
-    const SYSTEM_FATAL  = "system";        // System fatal configuration
-    */
+
 
     private $mysqli = null;
     private $dbname_full = null;

@@ -92,7 +92,7 @@ if(!$system->init(@$_REQUEST['db'])){
 }else{
     
    if(!$system->is_admin()){
-        $response = $system->addError(HEURIST_REQUEST_DENIED);
+        $response = $system->addError(HEURIST_REQUEST_DENIED, 'Administrator permissions are required');
    }else{
        
         $action = @$_REQUEST["action"];

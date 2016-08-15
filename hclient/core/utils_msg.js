@@ -35,12 +35,14 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     },
 
     showMsgErr: function(response, needlogin){
-        var msg = "";
+        var msg = '';
         if(typeof response === "string"){
             msg = response;
         }else{
             if(top.HEURIST4.util.isnull(response) || top.HEURIST4.util.isempty(response.message)){
-                msg = 'Error_Empty_Message';
+                if(response.status!=top.HAPI4.ResponseStatus.REQUEST_DENIED){
+                        msg = 'Error_Empty_Message';
+                }
             }else{
                 msg = response.message;
             }
@@ -67,11 +69,15 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 msg = msg + "<br><br>The number and/or set of request parameters is not valid. Please email the Heurist development team ( info at HeuristNetwork dot org)";
 
             }else if(response.status==top.HAPI4.ResponseStatus.REQUEST_DENIED){
+                
+                if(msg!='') msg = msg + '<br><br>';
 
                 if(needlogin && response.sysmsg==0){
-                    msg = msg + '<br><br>It appears you are not logged in or your session has been experied. You have to re-login';
-                }else{
-                    msg = msg + "<br><br>This action is not allowed for your current permissions";    
+                    msg = msg + 'It appears you are not logged in or your session has been experied. You have to re-login';
+                }else if(response.sysmsg==0){
+                    msg = msg + 'You must be logged in';    
+                }else{ 
+                    msg = msg + 'This action is not allowed for your current permissions';    
                 } 
                 
             }else if(response.status==top.HAPI4.ResponseStatus.DB_ERROR){
