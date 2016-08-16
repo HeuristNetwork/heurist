@@ -1287,7 +1287,6 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 $need_copy = false;
                 $externalFile = false;
 
-<<<<<<< HEAD
                 if (@$file['ulf_FilePath'] || @$file['ulf_FileName']) {
                     
                     $path = @$file['ulf_FilePath'].@$file['ulf_FileName'];
@@ -1317,16 +1316,9 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
         }else{
             $filename = $path;
         }
-//DEBUG print '<br>'.$filename;        
-                    
                     $need_copy = true;
                     
-=======
-                if ($file['ulf_FileName']) {
-                    // TODO: 16/8/16 attached files are not being found, path is coming out ../dbname/filename (filename is correct)
-                    $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
-                    $need_copy = ($file['ulf_FilePath'] == $_src_HEURIST_FILESTORE_DIR);
->>>>>>> origin/h4share
+
                 } else if ($file['ulf_ExternalFileReference']) {
                     $filename = $file['ulf_ExternalFileReference']; // post 18/11/11 proper file path and name
                     $need_copy = false;
