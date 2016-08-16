@@ -200,7 +200,7 @@ function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised,
         }
         // at least one missing field
         if($missed){
-            $msg = "Missing data for Required field(s) in '$rectypeName'. You may need to make fields optional. Missed data: ".$missed;
+            $msg = "Missing data for Required field(s) in '$rectypeName'. You may need to make fields optional. Missing data: ".$missed;
             if($modeImport==2){
                 warnSaveRec($msg);
             }else{

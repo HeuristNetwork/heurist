@@ -321,21 +321,21 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                     print "<input name='password' value='$password' type='hidden'>";
                 }
                 print "<input type='hidden' name='samelogin' value='".(@$_REQUEST['samelogin']==0?0:1)."'/>";
-                print "<br /><input name='reportlevel' value='1' type='checkbox' checked='checked'>&nbsp;Report or import level: if checked, only show errors / do not import data<br>";
+                print "<br /><input name='reportlevel' value='1' type='checkbox' checked='checked'>&nbsp;Report or import? if checked, only shows errors (does not import data)`<br>";
                 print "<br />Check the code mappings below, then click here:  <input type='button' value='Import data' onclick='{document.getElementById(\"mode\").value=5; document.forms[\"mappings\"].submit();}'>\n";
                 // alert(document.getElementById(\"mode\").value);
-                
-        
+
+
                 print "&nbsp;&nbsp;&nbsp;&nbsp;<input type='button' value='Print mapping' onclick='{printMapping();}'>";
                 print "&nbsp;&nbsp;&nbsp;&nbsp;<input type='button' value='Save settings' onclick='{document.getElementById(\"mode\").value=3; document.forms[\"mappings\"].submit();}'>";
-
-                print "<br /> <br />Please note: it may take a little while to load all the code mappings and set them to your saved values - please wait until all mappings have loaded.<br />";
 
                 $filename = HEURIST_FILESTORE_DIR."settings/importfrom_".$sourcedbname.".cfg";
 
                 if(file_exists($filename)){
-                    print "&nbsp;<input type='submit' value='Load settings' onclick='{document.getElementById(\"mode\").value=4; document.forms[\"mappings\"].submit();}'>\n";
+                    print "&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='Load settings' onclick='{document.getElementById(\"mode\").value=4; document.forms[\"mappings\"].submit();}'>\n";
                 }
+
+                print "<br /> <br />Please note: it may take a little while to load all the code mappings and set them to your saved values - please wait until all mappings have loaded.<br />";
 
                 print "<p><hr>\n";
 
@@ -772,7 +772,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
                 file_put_contents($filename, $str);
 
-                print "SETTINGS ARE SAVED!!!!";
+                print "SETTINGS HAVE BEEN SAVED";
                 createMappingForm($config);
             }
 
@@ -880,18 +880,18 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
                     $recordType = $_REQUEST['cbr'.$rt];
                     if(intval($recordType)<1) {
-                        print "<br>Record type $rt is not mapped";
+                        print "<br><b>Record type $rt is not mapped</b>";
                         ob_flush();flush(); // flush to screen
                         continue;
                     }
 
                     //@todo - add record type name
                     $rt_counter = 0;
-                    print "<br>Record type: $rt"; // tell user somethign is happening
+                    print "<br><br><br><b>Record type: $rt</b>"; // tell user something is happening
                     ob_flush();flush(); // flush to screen
-                    if($is_h2){
+                    if($is_h2){ // version 2 database
                         $query2 = "select `rec_id`,`rec_url` from `$sourcedb`.`records` Where `$sourcedb`.`records`.`rec_type`=$rt";
-                    }else{
+                    }else{ // vedrsion 3 or later
                         $query2 = "select `rec_ID`,`rec_URL` from $sourcedb.Records Where $sourcedb.Records.rec_RecTypeID=$rt";
                     }
                     if($user_rights){
@@ -900,7 +900,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
                     $res2 = mysql_query($query2);
                     if(!$res2) {
-                        print "<div  style='color:red;'>Bad query for records loop for source record type $rt</div>";
+                        print "<div  style='color:red;'><b>Bad query for records loop for source record type $rt</b></div>";
                         print "<br>Query: $query2";
                         ob_flush();flush(); // flush to screen
                         continue;
@@ -916,23 +916,20 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                         //select details and create details array
                         $rid = $row2[0]; //record id
 
-                        //				print "<br>".$rid."&nbsp;&nbsp;&nbsp;";
-
-                        if($is_h2){
+                        if($is_h2){ // Heurist version 2 database
                             $query3 = "SELECT `rd_type`, `rdt_type`, `rd_val`, `rd_file_id`, AsWKT(`rd_geo`)
                             FROM `$sourcedb`.`rec_details` rd, `$sourcedb`.`rec_detail_types` dt where rd.`rd_type`=dt.`rdt_id` and rd.`rd_rec_id`=$rid order by `rd_type`";
-                        }else{
+                        }else{ // version 3 or later
                             $query3 = "SELECT `dtl_DetailTypeID`, `dty_Type`, `dtl_Value`, `dtl_UploadedFileID`, AsWKT(`dtl_Geo`)
                             FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_DetailTypeID`=dt.`dty_ID` and rd.`dtl_RecID`=$rid order by `dtl_DetailTypeID`";
                         }
                         $res3 = mysql_query($query3);
                         // todo: check query was successful
                         if(!$res3) {
-                            print "<br>record ".$rid."&nbsp;&nbsp;&nbsp;<div  style='color:red;'>bad select of detail fields</div>";
+                            print "<br>record ".$rid."&nbsp;&nbsp;&nbsp;<div  style='color:red;'><b>bad select query for detail fields, data for this record may not be correct</b></div>";
                             print "<br>query: $query3";
                             ob_flush();flush(); // flush to screen
                             continue;
-                            //die ("<p>Sorry ...</p>");
                         }
 
                         $unresolved_records = array();
@@ -961,7 +958,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                             if(!array_key_exists('cbd'.$row3[0], $_REQUEST)) continue;
                             $key = $_REQUEST['cbd'.$row3[0]];
                             if(intval($key)<1) {
-                                if($rt==52){//debug
+                                if($rt==52){//debug  TODO: What the hell is this? What is rt 52?
                                     print "mapping not defined for detail (field) #".$dtid;
                                 }
                                 //mapping for this detail type is not specified
@@ -970,7 +967,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
                             $value = $row3[2];
 
-                            //determine the type of filedtype
+                            //determine the type of field type
                             if($row3[1]=='enum' || $row3[1]=='relationtype'){
 
                                 if($is_h2){
@@ -1007,10 +1004,10 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
                                 $value = $value." ".$row3[4]; // string   geotype+space+wkt
 
-                            }else if($row3[1]=='relmarker'){
+                            }else if($row3[1]=='relmarker'){ // no data stored for relationship markers
 
-                            }else if($row3[1]=='resource'){
-                                //find the id of record in destionation database among pairs of added records
+                            }else if($row3[1]=='resource'){ // record pointer field
+                                // find the id of record in destination database among pairs of added records
                                 if(array_key_exists($value, $added_records)){
                                     $value = $added_records[$value];
                                 }else{
@@ -1060,8 +1057,9 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                         if (@$out['error']) {
                             print "<br>Source record# ".$rid."&nbsp;&nbsp;&nbsp;";
                             print "=><div style='color:red'> Error: ".implode("; ",$out["error"])."</div>";
-                        }else{
 
+                        }else{
+                        
                             $new_recid = $out["bibID"];
                             $added_records[$rid] = $new_recid;
 
@@ -1071,19 +1069,19 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                                 $unresolved_pointers[$new_recid] = $unresolved_records;
                             }
 
-                            if(!$rep_errors_only){
-                                print "<br>".$rid."&nbsp;=>&nbsp;".$out["bibID"];
-
+                            if(!$rep_errors_only){ // in active writing mode
                                 if (@$out['warning']) {
                                     print "<br>Warning: ".implode("; ",$out["warning"]);
                                 }
+                                print "<br>saved: rec#".$rid."&nbsp;=>&nbsp;rec#".$out["bibID"];
+
                             }
 
                         }
                     }//while by record of particular record type
 
                     if($rt_counter>0){
-                        print "&nbsp;&nbsp;=> added $rt_counter records";
+                        print "&nbsp;&nbsp;=> added $rt_counter records<br>";
                     }
 
                     ob_flush();flush(); // flush to screen
@@ -1098,7 +1096,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
                 if(count($missed_terms2)>0){
                     print "<br><br>*********************************************************";
-                    print "<br>Mapping for these terms IDs is not specified<br>";
+                    print "<br>Mapping for these term IDs is not specified<br>";
                     print implode('<br>',$missed_terms2);
                 }
 
@@ -1109,7 +1107,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                     print "<br><br>*********************************************************";
                     print "<br>Finding and setting unresolved record pointers<br>";
                     if(!$rep_errors_only){
-                        print "<br>It reports in form: source RecID => now target pointer RecID => in Rec Id<br>";
+                        print "<br>Report is in the form: source RecID => new target pointer RecID => in Rec Id<br>";
                     }
 
                     //resolve record pointers
@@ -1280,7 +1278,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
                 $res = mysql_query("select * from $sourcedb.`recUploadedFiles` where ulf_ID=".$src_fileid);
                 if (mysql_num_rows($res) != 1) {
-                    print "<div  style='color:red;'>no entry for file id#".$src_fileid."</div>";
+                    print "<div  style='color:red;'>no entry (or multiple entries)for file id#".$src_fileid."</div>";
                     return null; // nothing returned if parameter does not match one and only one row
                 }
 
@@ -1289,6 +1287,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 $need_copy = false;
                 $externalFile = false;
 
+<<<<<<< HEAD
                 if (@$file['ulf_FilePath'] || @$file['ulf_FileName']) {
                     
                     $path = @$file['ulf_FilePath'].@$file['ulf_FileName'];
@@ -1322,6 +1321,12 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                     
                     $need_copy = true;
                     
+=======
+                if ($file['ulf_FileName']) {
+                    // TODO: 16/8/16 attached files are not being found, path is coming out ../dbname/filename (filename is correct)
+                    $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
+                    $need_copy = ($file['ulf_FilePath'] == $_src_HEURIST_FILESTORE_DIR);
+>>>>>>> origin/h4share
                 } else if ($file['ulf_ExternalFileReference']) {
                     $filename = $file['ulf_ExternalFileReference']; // post 18/11/11 proper file path and name
                     $need_copy = false;
