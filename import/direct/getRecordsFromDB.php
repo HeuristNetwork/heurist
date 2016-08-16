@@ -45,6 +45,7 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+//require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
 ?>
@@ -1275,7 +1276,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 $sourcedb = $db_prefix.$sourcedbname;
 
                 $_src_HEURIST_FILESTORE_DIR =  HEURIST_UPLOAD_ROOT.$sourcedbname.'/';
-
+                $_src_HEURIST_FILES_DIR =  HEURIST_UPLOAD_ROOT.$sourcedbname.'/file_uploads/';
 
                 $res = mysql_query("select * from $sourcedb.`recUploadedFiles` where ulf_ID=".$src_fileid);
                 if (mysql_num_rows($res) != 1) {
@@ -1288,9 +1289,39 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 $need_copy = false;
                 $externalFile = false;
 
-                if ($file['ulf_FileName']) {
-                    $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
-                    $need_copy = ($file['ulf_FilePath'] == $_src_HEURIST_FILESTORE_DIR);
+                if (@$file['ulf_FilePath'] || @$file['ulf_FileName']) {
+                    
+                    $path = @$file['ulf_FilePath'].@$file['ulf_FileName'];
+                    //add database media storage folder for relative paths
+                    //$filename = resolveFilePath($filename);
+        //the same as in resolveFilePath($filename); however instead of consts uses source db folders
+        if( $path && !file_exists($path) ){
+            chdir($_src_HEURIST_FILESTORE_DIR);  // relatively db root  HEURIST_FILESTORE_DIR
+            $fpath = realpath($path);
+            if(file_exists($fpath)){
+                $filename =  $fpath;
+            }else{
+                chdir($_src_HEURIST_FILES_DIR);          // relatively file_uploads 
+                $fpath = realpath($path);
+                if(file_exists($fpath)){
+                    $filename =  $fpath;
+                }else{
+                    //special case to support absolute path on file server
+                    if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
+                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
+                        if(file_exists($fpath)){
+                            $filename =$fpath;
+                        }
+                    }
+                }
+            }
+        }else{
+            $filename = $path;
+        }
+//DEBUG print '<br>'.$filename;        
+                    
+                    $need_copy = true;
+                    
                 } else if ($file['ulf_ExternalFileReference']) {
                     $filename = $file['ulf_ExternalFileReference']; // post 18/11/11 proper file path and name
                     $need_copy = false;
@@ -1319,10 +1350,10 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 }
 
                 if($need_copy){
-                    $newfilename = HEURIST_FILESTORE_DIR.$file['ulf_OrigFileName'];
+                    $newfilename = HEURIST_FILES_DIR.$file['ulf_OrigFileName'];
                     //if file in source upload dirtectiry copy it to destionation upload directory
                     if(!copy($filename, $newfilename)){
-                        print "<div  style='color:red;'>Can't copy file $fielname to ".HEURIST_FILESTORE_DIR."</div>";
+                        print "<div  style='color:red;'>Can't copy file $fielname to ".HEURIST_FILES_DIR."</div>";
                         ob_flush();flush(); // flush to screen
                         return null;
                     }
