@@ -137,7 +137,7 @@ function hLayout(args) {
     var grid_min_size = 200;
     var grid_step_size = 100;
     var app_counter = 0; //to maintain unique id for panels and tabs
-    var layout, $container;
+    //var layout, $container;
 
     /**
     * Finds layout by id
@@ -157,7 +157,7 @@ function hLayout(args) {
     //
     // north-west-east-south layout
     //
-    function _initLayoutCardinal(){
+    function _initLayoutCardinal(layout, $container){
 
         var layout_opts =  {
             applyDefaultStyles: true,
@@ -294,11 +294,11 @@ function hLayout(args) {
         //$('.ui-widget-content:first').css('background-color');
         $('body').css('background-color', bg_color);
 
-        layoutInitPane('north', bg_color);
-        layoutInitPane('west', bg_color);
-        layoutInitPane('east', bg_color);
-        layoutInitPane('south', bg_color);
-        layoutInitPane('center', bg_color);
+        layoutInitPane(layout, $container, 'north', bg_color);
+        layoutInitPane(layout, $container, 'west', bg_color);
+        layoutInitPane(layout, $container, 'east', bg_color);
+        layoutInitPane(layout, $container, 'south', bg_color);
+        layoutInitPane(layout, $container, 'center', bg_color);
 
         initDragDropListener();
 
@@ -357,7 +357,7 @@ function hLayout(args) {
     * @param layout
     * @param $container
     */
-    function _initLayoutFree(){
+    function _initLayoutFree(layout, $container){
 
         //pane - the base container for widgets/applications
 
@@ -391,7 +391,7 @@ function hLayout(args) {
         for (i=0; i<panes.length; i++){
             if(reserved.indexOf(panes[i])<0){
                  __layoutAddPane(panes[i]);
-                 layoutInitPane(panes[i], bg_color);
+                 layoutInitPane(layout, $container, panes[i], bg_color);
             }
         }
 
@@ -404,7 +404,7 @@ function hLayout(args) {
     * @param layout
     * @param $container
     */
-    function _initLayoutGridster(){
+    function _initLayoutGridster(layout, $container){
 
             if(!$.isFunction($('body').gridster)){
                 $.getScript(top.HAPI4.basePathV4+'ext/gridster/jquery.gridster.js', initLayoutGridster );
@@ -478,7 +478,7 @@ function hLayout(args) {
         for (i=0; i<panes.length; i++){
             if(reserved.indexOf(panes[i])<0){
                  __layoutAddPane(panes[i]);
-                 layoutInitPane( panes[i], bg_color );
+                 layoutInitPane( layout, $container, panes[i], bg_color );
             }
         }
 
@@ -494,13 +494,13 @@ function hLayout(args) {
     * @param pos
     * @param bg_color
     */
-    function layoutInitPane(pos, bg_color){
+    function layoutInitPane(layout, $container, pos, bg_color){
 
             if(layout[pos]){
 
                 var lpane = layout[pos];
 
-                var $pane = $('.ui-layout-'+pos);
+                var $pane = $container.find('.ui-layout-'+pos);
 
                 $pane.empty();
 
@@ -635,7 +635,7 @@ function hLayout(args) {
                 .appendTo($d);
             }
 
-            appAddContent($d, application, app.options);
+            appAddContent($d, application, app.options, app.css);
 
             $d.addClass('ui-widget-content')
             .addClass('ui-corner-all');
@@ -664,7 +664,7 @@ function hLayout(args) {
     * app - entry from widgets array
     * options - application options from layouts array - parameters to init application
     */
-    function appAddContent($app_container, app, options){
+    function appAddContent($app_container, app, options, app_css){
 
         var $content = $(document.createElement('div'));
         $content.attr('id', app.id+'_'+app_counter)
@@ -674,6 +674,26 @@ function hLayout(args) {
         if(app.isframe){
             $content.addClass('frame_container');
             $content.append('<iframe id="'+app.id+'_'+app_counter+'" src="'+app.url+'"></iframe>');
+        }else if(app.widgetname=='include_layout'){
+
+            var layout = layoutGetById(options.ref);
+            if(layout){
+
+                if(app_css){
+                    $.each(app_css, function(key, value){
+                        $content.css(key, value);
+                    });
+                }else if(app.resizable) {
+                    $content.css('width', '98%');
+                    $d.css('height', '98%');
+                }else {
+                    $content.css('width', '99%');
+                    $content.css('height', '99%');
+                }
+                
+                _initLayoutCardinal(layout, $content);
+            }
+            
         }else if (app.script && app.widgetname) {
 
             app.widget = $content;
@@ -699,6 +719,10 @@ function hLayout(args) {
 
                    widget = $content.search( options );
 
+            }else if(app.widgetname=='staticPage'){
+
+                   widget = $content.staticPage( options );
+                   
             }else if(app.widgetname=='dh_search'){
 
                    widget = $content.dh_search( options );
@@ -765,18 +789,20 @@ function hLayout(args) {
 
             var app = _appGetWidgetById(_app.appid);
 
-            var content_id;
-            if(_app.content_id){
-                content_id = _app.content_id; //already exists
-            }else{
-                app_counter++;
-                content_id = app.id+'_'+app_counter;
-            }
+            if(app){    
+                var content_id;
+                if(_app.content_id){
+                    content_id = _app.content_id; //already exists
+                }else{
+                    app_counter++;
+                    content_id = app.id+'_'+app_counter;
+                }
 
-            $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (top.HR(_app.name || app.name)) +'</a></li>')
+                $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (top.HR(_app.name || app.name)) +'</a></li>')
 
-            if(!_app.content_id){ //already exists
-                appAddContent($tab_ctrl, app, _app.options);
+                if(!_app.content_id){ //already exists
+                    appAddContent($tab_ctrl, app, _app.options, _app.css);
+                }
             }
 
         });
@@ -942,12 +968,9 @@ function hLayout(args) {
         return res;
     }
     
-    
-    
-
-    //**********************************************************
-
         var layout = layoutGetById(layoutid);
+    
+    //**********************************************************
 
         if(layout==null){
             top.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
