@@ -242,7 +242,8 @@ function parse_step1(){
     $handle = @fopen($upload_file_name, "r");
     if (!$handle) {
         $s = null;
-        if (! file_exists($upload_file_name)) $s = ' does not exist';
+        if (! file_exists($upload_file_name)) $s = ' does not exist.<br><br>'
+        .'Please clear your browser cache and try again. if problem persists please report immediately to Heurist developers (info at HeuristNetwork dot org)';
         else if (! is_readable($upload_file_name)) $s = ' is not readable';
             else $s = ' could not be read';
             
