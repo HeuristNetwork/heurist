@@ -116,9 +116,12 @@ $.widget( "heurist.mainMenu", {
 
 
         this._initMenu('Profile', this.divProfileItems);
-        this._initMenu('Database');
-        this._initMenu('Import');
-        this._initMenu('Export');
+        
+        if(top.HAPI4.sysinfo['layout']=='original'){
+            this._initMenu('Database');
+            this._initMenu('Import');
+            this._initMenu('Export');
+        }
         this._initMenu('Help');
         this.divMainMenuItems.menu();
         this.divProfileItems.menu();

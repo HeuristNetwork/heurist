@@ -251,17 +251,22 @@ $.widget( "heurist.search", {
 
         
         // Save search popup button
-        this.div_search_as_user2 = $('<div>')
-        .addClass('div-table-cell logged-in-only')
-        .appendTo( this.div_search );
+        var div_save_filter = $('<div>').addClass('div-table-cell logged-in-only');
+        
+        if(top.HAPI4.sysinfo['layout']=='original'){
+            div_save_filter.appendTo( this.div_search );
+        }else{
+            div_save_filter.insertBefore( this.div_search_header );
+        }
+        
 
         this.btn_search_save = $( "<button>", {
             text: top.HR("Save Filter"),
             title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
         })
         .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
-        .appendTo( this.div_search_as_user2 )
         .addClass('ui-heurist-btn-header1')
+        .appendTo(div_save_filter)
         .button({icons: {
             primary: "ui-icon-disk"
         }});
@@ -315,6 +320,8 @@ $.widget( "heurist.search", {
         
         
         // Manage structure button
+        if(top.HAPI4.sysinfo['layout']=='original'){
+            
         this.div_add_record = $('<div>')
             .addClass('div-table-cell logged-in-only')
             .appendTo( this.div_search );
@@ -335,7 +342,7 @@ $.widget( "heurist.search", {
                       afterclose: function(){top.HAPI4.SystemMgr.get_defs_all( false, that.document)}})
                 });
             });
-            
+        }    
         
 
         this.div_buttons = $('<div>')

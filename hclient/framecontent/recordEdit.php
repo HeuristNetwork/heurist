@@ -29,7 +29,7 @@
         <script type="text/javascript">
             var editing;
             
-            // Callback function on map initialization
+            // Callback function on initialization
             function onPageInit(success){
                 if(success){
                     var $container = $("<div>").appendTo($("body"));
