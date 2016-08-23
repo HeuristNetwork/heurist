@@ -39,10 +39,8 @@
         </script>
     </head>
     <body style="background-color:white">
-        <div style="width:280px;top:0;bottom:0;left:0;position:absolute;padding:5px;text-align:center">
-            <div id="btnVisualizeStructure" style="margin:10px 0" class="ui-heurist-btn-header1">Visualize Structure</div>
-            <br>
-            <ul id="menu_container" style="text-align:left;padding:2px"></ul>
+        <div style="width:280px;top:0;bottom:0;left:0;position:absolute;padding:5px;">
+            <ul id="menu_container" style="margin-top:10;padding:2px"></ul>
         </div>
         <div style="left:300px;right:0;top:0;bottom:20;position:absolute;overflow:auto">
             <iframe id="frame_container">

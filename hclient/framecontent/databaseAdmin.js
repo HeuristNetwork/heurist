@@ -29,12 +29,12 @@ function hDatabaseAdmin() {
     function _init(){
 
         //init buttons
-        $('#btnVisualizeStructure')
+        /*$('#btnVisualizeStructure')
                     .button({label: top.HR("Visualize Structure")})
                     .click(function(e) {
                              _showDbSummary()
                         });
-                        
+        */                
 
         _initMenu('Database', $('#menu_container'));        
         
@@ -163,8 +163,10 @@ function hDatabaseAdmin() {
         if (link.hasClass('refresh_structure')) {
                options['afterclose'] = this._refreshLists;
         }
-
         
+        if(event.target && $(event.target).attr('id')=='menulink-database-summary'){
+            _showDbSummary();
+        }else
         if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
             top.HAPI4.SystemMgr.is_logged(function(){

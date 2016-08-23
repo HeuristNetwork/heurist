@@ -84,6 +84,13 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 </li>
 
 <li style="padding-left:5px;">
+    <a href="hclient/framecontent/databaseSummary.php?popup=1" name="auto-popup" class="large"
+        onClick="{return false;}"  id="menulink-database-summary"
+        title="Take a look at the internal connections between record types in this database">
+        Visualise structure</a>
+</li>
+
+<li style="padding-left:5px;">
     <a href="admin/verification/listDatabaseErrors.php?popup=1" name="auto-popup" class="verylarge h3link"
         onClick="{return false;}"
         title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
@@ -108,13 +115,6 @@ Refresh</a>
 <li class="top-menu-only">-</li>
 
 <li class="top-menu-only">ANALYSE</li>
-
-<li style="padding-left:5px;" class="top-menu-only">
-    <a href="hclient/framecontent/databaseSummary.php?popup=1" name="auto-popup" class="large"
-        onClick="{return false;}"
-        title="Take a look at the internal connections between record types in this database">
-        Database summary</a>
-</li>
 
 <li style="padding-left:5px;" class="top-menu-only">
     <a href="viewers/crosstab/crosstabs.php" name="auto-popup" class="verylarge currentquery h3link"

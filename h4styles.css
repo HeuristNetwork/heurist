@@ -127,7 +127,7 @@ body {
     /*position: absolute;
     top: 46px;
     bottom: 2px;*/
-    padding: 2px !important;
+    padding: 0px !important;
 }
 .ui-tabs .ui-tabs-nav li a {
     padding: 0.2em 0.5em !important;

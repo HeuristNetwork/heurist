@@ -109,10 +109,11 @@ var cfg_layouts = [
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'6em',right:0, border:'none', '      background':'none', 'min-width':'75em'} },    //top panel
         ]},
-        center:{size:'100%', dropable:false, css:{'background-color':'white'},
-            tabs:[{dockable:true, dragable:false, resizable:false,
+        center:{size:'100%', dropable:false, css:{'background':'red !important'},
+            tabs:[{dockable:true, dragable:false, resizable:false, id:'main_header_tab',
+                //style: {'background-selected':'#ff0000', 'background-tab':'#00ff00', 'background-header':'#0000ff'},
                 apps:[
-                    {appid:'h4_static', name: 'Structure',
+                    {appid:'h4_static', name: 'Manage',
                         options:{url: 'hclient/framecontent/databaseAdmin.php?db=[dbname]', isframe:true}
                         ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, 'min-width':'75em'}}             
                     ,{appid:'h4_static', name: 'Add Data',

@@ -532,11 +532,12 @@ function hLayout(args) {
                     });
                 }
 
-
-                //init all tabs
+                //init all tabs on current pane
                 var containment_sel = '.ui-layout-'+pos+' > .ui-layout-content';
                 var $tabs = $( containment_sel+' > .tab_ctrl' ).tabs();
+                
                 appInitFeatures(containment_sel);
+                
             }
     } //end layoutInitPane
 
@@ -773,7 +774,11 @@ function hLayout(args) {
 
         //create
         $tab_ctrl = appCreatePanel($pane_content, tabcfg, false);
-        $tab_ctrl.addClass('tab_ctrl');
+        $tab_ctrl.addClass('tab_ctrl').css('border', 'none');
+        if(tabcfg && tabcfg.id){
+            $tab_ctrl.attr('data-id', tabcfg.id);
+        }
+        
 
         if(tabcfg.dockable){
             $tab_ctrl.addClass('dockable');
@@ -781,7 +786,7 @@ function hLayout(args) {
 
 
         var $ul = $(document.createElement('ul'));
-        $ul.addClass('sortable_tab_ul')
+        $ul.addClass('sortable_tab_ul').css({'border':'none', 'background':'red'})
         .appendTo($tab_ctrl);
 
         $.each(apps, function(idx, _app){
@@ -799,13 +804,21 @@ function hLayout(args) {
                 }
 
                 $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (top.HR(_app.name || app.name)) +'</a></li>')
-
+                
                 if(!_app.content_id){ //already exists
                     appAddContent($tab_ctrl, app, _app.options, _app.css);
                 }
             }
 
         });
+        
+        
+        if(tabcfg && tabcfg.style){
+            if(tabcfg.style['background-header']){
+                $tab_ctrl.attr('background-header', tabcfg.style['background-header']+' !important');
+                //$(tab_ctrl).find('ul').css('background',tabb.style['background-header']+' !important');    
+            }
+        }
 
         return $tab_ctrl;
     }
@@ -992,6 +1005,18 @@ function hLayout(args) {
         if(Hul.isempty(layout.type) || layout.type=='cardinal'){
 
             _initLayoutCardinal(layout, $container);
+            
+            //speical styles
+            var tab = $container.find('[data-id="main_header_tab"]');
+            if(tab.length>0){
+                $(tab).find('ul').css({'border':'none', 'background':'#8ea9b9'})
+                                                                         //#
+                //$(tab).find('.ui-tabs-panel').css('padding','0 !important');
+                //$(tab_ctrl).find('ul').css('background',tabb.style['background-header']+' !important');    
+            }
+            
+            
+            
 
         }else if(layout.type=='gridster'){
 
