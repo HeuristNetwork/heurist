@@ -88,7 +88,6 @@ function executeSmartyTemplate($params){
     global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams, $max_allowed_depth, $publishmode,
     $execution_counter, $execution_total_counter, $session_id, $mysqli;
 
-
     set_time_limit(0); //no script execution time limit
 
     mysql_connection_overwrite(DATABASE);
@@ -288,7 +287,7 @@ function executeSmartyTemplate($params){
         //v5.5+ $results =  array_column($records, 'recID');
         
         $results = array_map(function ($value) {
-                return  $value['recID'];
+                return  @$value['recID']?$value['recID']:array();
             }, $records);
         
 /*  OLD WAY        
