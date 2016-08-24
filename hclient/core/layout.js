@@ -22,7 +22,7 @@
 
 
 //
-// @todo - convert to Class
+// 
 //
 function hLayout(args) {
      var _className = "hLayout",
@@ -73,19 +73,38 @@ function hLayout(args) {
     }
     
     //
-    // implemented for tabs only
+    // put specified widget on top
+    //
+    // implemented for tabs only and if several same widgets are in layout it show first only
     //
     function _putAppOnTop( widgetname ){
         
         var app = _appGetWidgetByName( widgetname );
         if(Hul.isnull(app)) return;
         
-        var ele = $(app.widget);
+        var ele = $(app.widget);  //find panel with widget
+        if( ele.hasClass('ui-tabs-panel') ){
+            //get parent tab and make it active
+            $(ele.parent()).tabs( "option", "active", ele.index()-1 );
+        }
+    }
+
+    //
+    // we may use several widgets of the same type: staticPage or recordListExt for example
+    // put specific tab on top
+    // note: you have to define unique layout_id in layout_default.js
+    //
+    function _putAppOnTopById( layout_id ){
+        
+        if(Hul.isnull(layout_id)) return;
+        
+        //var $container = $(_containerid);
+        var ele = $('div[layout_id="'+layout_id+'"]');
         if( ele.hasClass('ui-tabs-panel') ){
             $(ele.parent()).tabs( "option", "active", ele.index()-1 );
         }
-        
     }
+
     
     //
     // action: close, open
@@ -614,8 +633,8 @@ function hLayout(args) {
 
         var $d = $(document.createElement('div'));
         $d.attr('id', 'pnl_'+app_counter)  //.css('border','solid')
-        .appendTo($pane_content);
-
+            .appendTo($pane_content);
+        
         if(app.dragable){
             $d.addClass('dragable');
         }
@@ -636,7 +655,7 @@ function hLayout(args) {
                 .appendTo($d);
             }
 
-            appAddContent($d, application, app.options, app.css);
+            appAddContent($d, application, app);
 
             $d.addClass('ui-widget-content')
             .addClass('ui-corner-all');
@@ -665,17 +684,27 @@ function hLayout(args) {
     * app - entry from widgets array
     * options - application options from layouts array - parameters to init application
     */
-    function appAddContent($app_container, app, options, app_css){
+    function appAddContent($app_container, app, appcfg){
+        
+      var options = appcfg.options, 
+          layout_id = appcfg.layout_id;
+          app_css = appcfg.css;
 
         var $content = $(document.createElement('div'));
         $content.attr('id', app.id+'_'+app_counter)
         .attr('widgetid', app.id)
         .appendTo($app_container);
+        
+        if(layout_id){
+            $content.attr('layout_id', layout_id);
+        }
+        
 
         if(app.isframe){
             $content.addClass('frame_container');
             $content.append('<iframe id="'+app.id+'_'+app_counter+'" src="'+app.url+'"></iframe>');
         }else if(app.widgetname=='include_layout'){
+            //nested layouts
 
             var layout = layoutGetById(options.ref);
             if(layout){
@@ -775,8 +804,8 @@ function hLayout(args) {
         //create
         $tab_ctrl = appCreatePanel($pane_content, tabcfg, false);
         $tab_ctrl.addClass('tab_ctrl').css('border', 'none');
-        if(tabcfg && tabcfg.id){
-            $tab_ctrl.attr('data-id', tabcfg.id);
+        if(tabcfg && tabcfg.layout_id){
+            $tab_ctrl.attr('layout_id', tabcfg.layout_id);
         }
         
 
@@ -786,7 +815,7 @@ function hLayout(args) {
 
 
         var $ul = $(document.createElement('ul'));
-        $ul.addClass('sortable_tab_ul').css({'border':'none', 'background':'red'})
+        $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
         .appendTo($tab_ctrl);
 
         $.each(apps, function(idx, _app){
@@ -806,16 +835,16 @@ function hLayout(args) {
                 $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (top.HR(_app.name || app.name)) +'</a></li>')
                 
                 if(!_app.content_id){ //already exists
-                    appAddContent($tab_ctrl, app, _app.options, _app.css);
+                    appAddContent($tab_ctrl, app, _app);
                 }
             }
 
         });
         
         
-        if(tabcfg && tabcfg.style){
+        if(tabcfg && tabcfg.style){    //@todo!!!!!
             if(tabcfg.style['background-header']){
-                $tab_ctrl.attr('background-header', tabcfg.style['background-header']+' !important');
+                //$tab_ctrl.attr('background-header', tabcfg.style['background-header']+' !important');
                 //$(tab_ctrl).find('ul').css('background',tabb.style['background-header']+' !important');    
             }
         }
@@ -1005,18 +1034,6 @@ function hLayout(args) {
         if(Hul.isempty(layout.type) || layout.type=='cardinal'){
 
             _initLayoutCardinal(layout, $container);
-            
-            //speical styles
-            var tab = $container.find('[data-id="main_header_tab"]');
-            if(tab.length>0){
-                $(tab).find('ul').css({'border':'none', 'background':'#8ea9b9'})
-                                                                         //#
-                //$(tab).find('.ui-tabs-panel').css('padding','0 !important');
-                //$(tab_ctrl).find('ul').css('background',tabb.style['background-header']+' !important');    
-            }
-            
-            
-            
 
         }else if(layout.type=='gridster'){
 
@@ -1026,6 +1043,38 @@ function hLayout(args) {
 
             _initLayoutFree(layout, $container);
 
+            
+            //speical styles case for default layout
+            //@todo - definition of styles for tab control via layuot_default.js
+            var tabb = $container.find('div[layout_id="main_header_tab"]');
+            if(tabb.length>0){
+                //$ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
+                
+                var tabheader = $(tabb).children('ul');
+                tabheader.css({'border':'none', 'background':'#8ea9b9'})
+                var lis = tabheader.children('li');
+                var count_lis = lis.length;
+                    lis.css({
+                            'font-weight': 'bold',
+                            'border': '2px solid black',
+                            'border-bottom-width': 0,
+                            'border-top-right-radius': '8px',
+                            'margin':'0 0 0 -4px'});
+                            
+                lis.each(function(idx,item){
+                   $(item).css('z-index',count_lis-idx);
+                   if(idx>0){
+                       $(item).css({'padding-left':4, 'border-left':'none'});
+                   }
+                });
+                
+                tabheader.parent().css({
+                   //'overflow-y': 'none',
+                   //'overflow-x': 'none',
+                   'background': '#8ea9b9' 
+                });
+            }
+            
         }
 
 
@@ -1053,6 +1102,10 @@ function hLayout(args) {
 
         putAppOnTop: function( widgetname ){
             _putAppOnTop( widgetname );
+        },
+
+        putAppOnTopById: function( widgetname ){
+            _putAppOnTopById( widgetname );
         },
         
         init: function(cfg_widgets, cfg_layouts){

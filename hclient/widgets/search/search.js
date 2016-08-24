@@ -59,7 +59,10 @@ $.widget( "heurist.search", {
         $.getScript(top.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'6em', 'min-width':'1100px'}).addClass('ui-heurist-header1');
+        this.element.css({'height':'6em', 'min-width':'1100px'});
+        if(top.HAPI4.sysinfo['layout']!='H4Default'){
+            this.element.addClass('ui-heurist-header1');
+        }
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
@@ -251,11 +254,12 @@ $.widget( "heurist.search", {
 
         
         // Save search popup button
-        var div_save_filter = $('<div>').addClass('div-table-cell logged-in-only');
+        var div_save_filter = $('<div>').addClass('div-table-cell logged-in-only')
         
         if(top.HAPI4.sysinfo['layout']=='original'){
             div_save_filter.appendTo( this.div_search );
         }else{
+            div_save_filter.css({'min-width': '200px'});
             div_save_filter.insertBefore( this.div_search_header );
         }
         
@@ -549,6 +553,15 @@ $.widget( "heurist.search", {
 
             top.HEURIST4.util.setDisabled(this.input_search, false);
             this.input_search.focus();
+            
+            //show if there is reulst
+            if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0) //
+            {
+                this.btn_search_save.show();
+            }else{
+                this.btn_search_save.hide();
+            }
+            
 
         }else if(e.type == top.HAPI4.Event.ON_STRUCTURE_CHANGE){
             if(this.search_assistant!=null){

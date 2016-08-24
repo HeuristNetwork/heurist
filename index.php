@@ -168,6 +168,13 @@ _time_debug = new Date().getTime() / 1000;
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
                 if(!top.HEURIST4.util.isempty(qsearch)){
+
+                    if(top.HAPI4.sysinfo['layout']=='H4Default'){
+                        //switch to FAP tab if q parameter is defined
+                        top.HAPI4.LayoutMgr.putAppOnTopById('FAP');
+                    }
+
+
                     var qdomain = '<?=@$_REQUEST['w']?>';
                     var rules = '<?=@$_REQUEST['rules']?>';
                     if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
