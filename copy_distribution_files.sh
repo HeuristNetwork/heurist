@@ -102,6 +102,12 @@ echo The installer and update scripts are accessed directly to download and inst
 cp *.sh /var/www/html/HEURIST/DISTRIBUTION
 cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
 
+# avoid problems with shellscripts having DoS line endings
+# TODO: need to do the same for installer directory shellscripts
+dos2unix install_heurist.sh
+dos2unix update_heurist.sh
+
+
 # PHP extensions verification function
 zip -j /var/www/html/HEURIST/DISTRIBUTION/verifyInstallation.zip admin/verification/verifyInstallation.php
 

@@ -82,11 +82,12 @@ $2 rm -f exemplars.tar.bz2
 
 cd /var/www/html
 $2 ln -s HEURIST/$1 $1
-cd HEURIST/$1
-$2 ln -s ../HEURIST_SUPPORT/external_h4 ext
-$2 ln -s ../../HEURIST_SUPPORT/external external
-$2 ln -s ../../HEURIST_SUPPORT/help help
 
+# Place simlinks in instance directory
+cd /var/www/html/HEURIST/$1
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 
 echo "Heurist unpacked"
 
