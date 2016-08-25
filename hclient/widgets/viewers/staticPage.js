@@ -86,18 +86,22 @@ $.widget( "heurist.staticPage", {
 
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
-            if(this.options.url.indexOf('http')<0){
-                var url = this.options.url.replace("[dbname]",  top.HAPI4.database);
-                url = url.replace("[layout]",  top.HAPI4.sysinfo['layout']);
-                this.options.url = top.HAPI4.basePathV4 + url;
 
-                //var that=this;
-                $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
-            }else{
+            var url = this.options.url.replace("[dbname]",  top.HAPI4.database);
+            url = url.replace("[layout]",  top.HAPI4.sysinfo['layout']);
+            if(this.options.url.indexOf('http://')<0){
+                this.options.url = top.HAPI4.basePathV4 + url;
+            }
+
+            
+            if(this.options.isframe){
                 if(!this.dosframe){
                     this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.div_content );
                 }
                 this.dosframe.attr('src', this.options.url);
+            }else{
+                //var that=this;
+                $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
             }
             this._loaded_url = this.options.url;
             //

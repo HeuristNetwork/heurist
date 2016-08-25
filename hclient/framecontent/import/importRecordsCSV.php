@@ -486,14 +486,18 @@ If you have missing data for Required fields, you may find it convenient to set 
         <div id="divFieldMapping2" style="display:none;padding:0.5em 0;margin-left:2em;">
             <table class="tbresults">
                 <tbody>
-                                    <tr><td width="130">Records matched</td>
+                                    <tr>
+                                        <td rowspan="2">
+                                            <h2 id="mrr_big">Existing: 586  New: 100</h2>
+                                        </td>
+                                        <td width="130" align=right>Existing:</td>
                                         <td width="50" id="mrr_cnt_update"></td>
                                         <td width="50" class="mrr_update">rows:</td>
                                         <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
                                         <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
                                         <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
                                     </tr>
-                                    <tr><td>New records to create</td>
+                                    <tr><td align=right>New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
                                         <td width="50" class="mrr_insert">rows:</td>
                                         <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>

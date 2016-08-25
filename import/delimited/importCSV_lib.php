@@ -902,6 +902,8 @@ ignore_insert = 1
 recid_field   - field_X
 */
 function validateImport($mysqli, $imp_session, $params){
+    
+    $is_json = ($params["action"]=='step4');
 
     //add result of validation to session
     $imp_session['validation'] = array( "count_update"=>0,

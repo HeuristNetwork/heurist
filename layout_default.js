@@ -76,7 +76,10 @@ var cfg_widgets = [
     {id:'dh_search', name:'Search Forms', widgetname:'dh_search', script:'hclient/widgets/digital_harlem/dh_search.js'},
     {id:'dh_maps', name:'Saved Maps', widgetname:'dh_maps', script:'hclient/widgets/digital_harlem/dh_maps.js'},
     {id:'dh_results', name:'Layers', widgetname:'dh_results', script:'hclient/widgets/digital_harlem/dh_results.js'},
-    {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'hclient/widgets/digital_harlem/dh_legend.js'}
+    {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'hclient/widgets/digital_harlem/dh_legend.js'},
+    
+    //fake app - reference to another layout to include
+    {id:'include_layout',name:'Inner Layout', widgetname:'include_layout'}
 
 ];
 
@@ -101,11 +104,41 @@ options - parameters to init application
 var cfg_layouts = [
 
     // Default layout - the standard Heurist interface, used if no parameter provided
-    {id:'H4Default', name:'Heurist Def', theme:'heurist', type:'cardinal',
+    {id:'H4Default', name:'Heurist Def v3', theme:'heurist', type:'free',
+        north_pane:{ dropable:true, 
+                css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
+                    'background':'none', 'min-width':'75em'}, 
+            apps:[{appid:'h3_mainMenu', hasheader:false, css:{border:'solid',width:'99%'} }]
+        },
+        center_pane:{ dropable:true, 
+                css:{position:'absolute', top:'6em',left:0,bottom:0,right:0, border:'none'},
+            tabs:[{dockable:false, dragable:false, resizable:false, layout_id:'main_header_tab',
+                ccs:{height:'99%',width:'99%',position:'absolute',left:0,right:0},
+
+                apps:[
+                    {appid:'h4_static', name: 'Manage record types / fields', 
+                        options:{url: 'hclient/framecontent/databaseAdmin.php?db=[dbname]', isframe:true}
+                        ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, 'min-width':'75em'}}             
+                    ,{appid:'h4_static', name: 'Add Data',
+                        options:{url: 'hclient/framecontent/databaseAddData.php?db=[dbname]', isframe:true}
+                        ,css:{position:'absolute', top:0,left:0,bottom:0,right:0,'min-width':'75em'}}
+                        
+                    ,{appid:'include_layout', name: 'Find-Analyse-Visualise', layout_id:'FAP',
+                        options:{ref: 'SearchAnalyze'}
+                        ,css:{position:'absolute', top:'2.5em',left:0,bottom:'0.2em',right:0,'font-size':'0.9em'}}
+                     ]
+            }]
+        }
+     },
+      
+
+    {id:'original', name:'Heurist Def Original', theme:'heurist', type:'cardinal',
         north:{size:'12em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'6em',right:0, border:'none', 'background':'none', 'min-width':'75em'} },    //top panel
-                {appid:'h4_search', hasheader:false, css:{position:'absolute', top:'6em', left:0, height:'6em', right:0, border:'none', 'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
+                {appid:'h4_search', hasheader:false, 
+                    css:{position:'absolute', top:'6em', left:0, height:'6em', right:0, border:'none', 
+                    'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
@@ -115,11 +148,39 @@ var cfg_layouts = [
                     {appid:'h3_recordListExt', name: 'Record View', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
                     {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
-                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}
-            ]}]
+                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}            ]}]
         }
     },
 
+
+    {id:'SearchAnalyze', name:'Search Analyze Publish', theme:'heurist', type:'cardinal',
+        north:{size:'6em', resizable:false, overflow:'hidden',
+            apps:[
+                {appid:'h4_search', hasheader:false, 
+                css:{position:'absolute', top:0, left:0, right:0,
+                border:'none', 'background':'white', 'min-width':'75em'}, 
+            options:{has_paginator:false, btn_visible_newrecord:false} }, 
+        ]},
+        west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, 
+                css:{border:'none', 'background':'none'},
+                options:{btn_visible_dbstructure:false} }]},  //saved searches
+        center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true,
+                     dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
+        east:{size:'50%', minsize:300, dropable:false,
+            tabs:[{dockable:true, dragable:false, resizable:false,
+                apps:[
+                    {appid:'h3_recordListExt', name: 'Record View', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
+                    {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
+                    {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
+                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}},
+                    {appid:'h4_static', name: 'Export',
+                        options:{url: 'hclient/framecontent/databaseExport.php?db=[dbname]', isframe:true}
+                        ,css:{position:'absolute', top:0,left:0,bottom:0,right:0,'min-width':'75em'}}
+                    
+            ]}]
+        }
+    },
+    
     // Position of widgets are specified in CSS, all widgets can be dragged around and repositioned
     /* This layout needs to be defiend spcifically to be useful
     {id:'FreeLayout', name:'Free example', theme:'heurist', type:'free',
@@ -157,15 +218,6 @@ var cfg_layouts = [
                 ]
             }]
         },
-        center:{minsize:300, dropable:false,
-            tabs:[{dockable:false, dragable:false, resizable:false,
-                apps:[
-                    {appid:'ha51', options:{layout:['map','timeline'], startup:50926, eventbased:false} } //mapping
-                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false, eventbased:false} }
-                    //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
-                ]
-            }]
-        },
         east:{size:300, minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
@@ -193,15 +245,6 @@ var cfg_layouts = [
         west:{size:270, resizable:false, apps:[
             //{appid:'h4_search', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false, isloginforced:false} },
             {appid:'dh_search', options:{UGrpID:1010}, hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
-        center:{minsize:300, dropable:false,
-            tabs:[{dockable:false, dragable:false, resizable:false,
-                apps:[
-                    {appid:'ha51', options:{layout:['map','timeline'], startup:50926, eventbased:false} } //mapping
-                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false, eventbased:false} }
-                    //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
-                ]
-            }]
-        },
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[

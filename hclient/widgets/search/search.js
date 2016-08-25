@@ -59,7 +59,10 @@ $.widget( "heurist.search", {
         $.getScript(top.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'6em', 'min-width':'1100px'}).addClass('ui-heurist-header1');
+        this.element.css({'height':'6em', 'min-width':'1100px'});
+        if(top.HAPI4.sysinfo['layout']!='H4Default'){
+            this.element.addClass('ui-heurist-header1');
+        }
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
@@ -251,17 +254,23 @@ $.widget( "heurist.search", {
 
         
         // Save search popup button
-        this.div_search_as_user2 = $('<div>')
-        .addClass('div-table-cell logged-in-only')
-        .appendTo( this.div_search );
+        var div_save_filter = $('<div>').addClass('div-table-cell logged-in-only')
+        
+        if(top.HAPI4.sysinfo['layout']=='original'){
+            div_save_filter.appendTo( this.div_search );
+        }else{
+            div_save_filter.css({'min-width': '200px'});
+            div_save_filter.insertBefore( this.div_search_header );
+        }
+        
 
         this.btn_search_save = $( "<button>", {
             text: top.HR("Save Filter"),
             title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
         })
         .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
-        .appendTo( this.div_search_as_user2 )
         .addClass('ui-heurist-btn-header1')
+        .appendTo(div_save_filter)
         .button({icons: {
             primary: "ui-icon-disk"
         }});
@@ -315,6 +324,8 @@ $.widget( "heurist.search", {
         
         
         // Manage structure button
+        if(top.HAPI4.sysinfo['layout']=='original'){
+            
         this.div_add_record = $('<div>')
             .addClass('div-table-cell logged-in-only')
             .appendTo( this.div_search );
@@ -335,7 +346,7 @@ $.widget( "heurist.search", {
                       afterclose: function(){top.HAPI4.SystemMgr.get_defs_all( false, that.document)}})
                 });
             });
-            
+        }    
         
 
         this.div_buttons = $('<div>')
@@ -542,6 +553,15 @@ $.widget( "heurist.search", {
 
             top.HEURIST4.util.setDisabled(this.input_search, false);
             this.input_search.focus();
+            
+            //show if there is reulst
+            if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0) //
+            {
+                this.btn_search_save.show();
+            }else{
+                this.btn_search_save.hide();
+            }
+            
 
         }else if(e.type == top.HAPI4.Event.ON_STRUCTURE_CHANGE){
             if(this.search_assistant!=null){

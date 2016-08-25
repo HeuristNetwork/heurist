@@ -51,13 +51,22 @@ $.widget( "heurist.svs_list", {
         this.search_faceted = $( "<div>", {id:this.element.attr('id')+'_search_faceted'} ).css({'height':'100%'}).appendTo( this.element ).hide();
 
 
-        this.div_header = $( "<div>" ).css({'width':'100%', 'padding-left':'2.5em', 'font-size':'0.9em'}) //, 'height':'2em', 'padding':'0.5em 0 0 2.2em'})
+        this.div_header = $( "<div>" ).css({'width':'100%', 'padding-top':'1em', 'font-size':'0.9em'}) //, 'height':'2em', 'padding':'0.5em 0 0 2.2em'})
         //.removeClass('ui-widget-content')
         .appendTo( this.search_tree );
 
+        var toppos = 1;
+        
+        if(top.HAPI4.sysinfo['layout']!='original'){
+            toppos = toppos + 1.5;
+            $('<div>'+top.HR('Saved Filters')+'</div>')
+                .css({'padding-left': '1.1em', 'font-size': '1.1em', 'font-weight': 'bold'})
+                .appendTo(this.div_header);
+        }
+        
         this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
         .addClass('logged-in-only heurist-helper1')
-        .appendTo( $( "<div>" ).css('height','1.3em').appendTo(this.div_header) )
+        .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding-left':'2.5em'}).appendTo(this.div_header) )
         //.appendTo( this.accordeon );
         if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
 
@@ -90,7 +99,7 @@ $.widget( "heurist.svs_list", {
 
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
 
-        var toppos = 1;
+        var toppos = 2.5;
         //if(this.options.btn_visible_dbstructure) toppos = toppos + 3;
         if(this.options.btn_visible_filter) toppos = toppos + 2;
         if(hasHeader) toppos = toppos + 2;
@@ -323,16 +332,15 @@ $.widget( "heurist.svs_list", {
         //all required scripts and data have been loaded - start update
 
         //add db summary as a first entry
-        if(this.options.btn_visible_dbstructure && this.helper_btm){
-            //8ea9b9
-            this.helper_btm.before(
-                $('<div>')
-                .attr('grpid',  'dbs').addClass('svs-acordeon')
-                .css('border','none')
-                .append( this._defineHeader(top.HR('Database Summary'), 'dbs').click( function(){ that._showDbSummary(); })
-            ) );
+        if(this.helper_btm && this.options.btn_visible_dbstructure){
+                //8ea9b9
+                this.helper_btm.before(
+                    $('<div>')
+                    .attr('grpid',  'dbs').addClass('svs-acordeon')
+                    .css('border','none')
+                    .append( this._defineHeader(top.HR('Database Summary'), 'dbs').click( function(){ that._showDbSummary(); })
+                ) );
 
-            //
         }
 
         if(islogged){

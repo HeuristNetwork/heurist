@@ -84,6 +84,13 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 </li>
 
 <li style="padding-left:5px;">
+    <a href="hclient/framecontent/databaseSummary.php?popup=1" name="auto-popup" class="large"
+        onClick="{return false;}"  id="menulink-database-summary"
+        title="Take a look at the internal connections between record types in this database">
+        Visualise structure</a>
+</li>
+
+<li style="padding-left:5px;">
     <a href="admin/verification/listDatabaseErrors.php?popup=1" name="auto-popup" class="verylarge h3link"
         onClick="{return false;}"
         title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
@@ -91,7 +98,7 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 </li>
 
 <li style="padding-left:5px;" id="menu-database-refresh">
-    <a href="#"
+    <a href="#" id="menulink-database-refresh"
         onClick="{return false;}" data-nologin="1" 
         title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
         Refresh</a>
@@ -105,18 +112,11 @@ Refresh</a>
 </li>
 -->
 
-<li>-</li>
+<li class="top-menu-only">-</li>
 
-<li>ANALYSE</li>
+<li class="top-menu-only">ANALYSE</li>
 
-<li style="padding-left:5px;">
-    <a href="hclient/framecontent/databaseSummary.php?popup=1" name="auto-popup" class="large"
-        onClick="{return false;}"
-        title="Take a look at the internal connections between record types in this database">
-        Database summary</a>
-</li>
-
-<li style="padding-left:5px;">
+<li style="padding-left:5px;" class="top-menu-only">
     <a href="viewers/crosstab/crosstabs.php" name="auto-popup" class="verylarge currentquery h3link"
         title="Tabulate one, two or three variables for the current query, with optional percentages, row and column totals" >
         Crosstabs analysis</a>
@@ -127,7 +127,7 @@ Refresh</a>
 <li>ADMINISTRATION</li>
 
 <li class="admin-only" style="padding-left:5px;">
-    <a  href="#"
+    <a  href="#" id="menulink-database-admin"
         onclick="{window.open(top.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.HAPI4.database, '_self'); return false;}"
         title="Full set of database administration functions, utilities and special project extensions">
         Full database administration, <br />utilities &amp; special functions</a>

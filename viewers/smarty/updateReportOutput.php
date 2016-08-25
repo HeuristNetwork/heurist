@@ -106,7 +106,7 @@ function doReport($row){
 
 	$outputfile = $dir.$filename;
 
-	if($publish==3){
+	if($publish==3){  //if published file already exists take it
 
 		$path_parts = pathinfo($outputfile);
 		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;

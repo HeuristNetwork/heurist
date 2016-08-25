@@ -78,6 +78,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/search/svs_list.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/resultList.js"></script>
 
+        <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
+        
         <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_search.js"></script>
         <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_maps.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
@@ -166,6 +168,13 @@ _time_debug = new Date().getTime() / 1000;
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
                 if(!top.HEURIST4.util.isempty(qsearch)){
+
+                    if(top.HAPI4.sysinfo['layout']=='H4Default'){
+                        //switch to FAP tab if q parameter is defined
+                        top.HAPI4.LayoutMgr.putAppOnTopById('FAP');
+                    }
+
+
                     var qdomain = '<?=@$_REQUEST['w']?>';
                     var rules = '<?=@$_REQUEST['rules']?>';
                     if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';

@@ -1323,6 +1323,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
             //show counts in count table 
             counts = _getInsertUpdateCounts( currentSeqIndex );
+
+            $('#mrr_big').html('Existing: ' +counts[0]+'&nbsp;&nbsp;&nbsp;New: '+counts[2]);                                 
             
             $('#mrr_cnt_update').text(counts[0]);                                 
             $('#mrr_cnt_insert').text(counts[2]);                                 
@@ -2271,7 +2273,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                         var imp_result = imp_session['import_report'];
                         
-                        var msg = 'Import of <b>'+top.HEURIST4.rectypes.names[rtyID]+'</b> records completed.<br><br>'
+                        var msg = ''
                           +'<table class="tbresults"><tr><td>Total rows in import table:</td><td>'+ imp_result['total']
                           +'</td></tr><tr><td>Processed:</td><td>'+ imp_result['processed']
                           +'</td></tr><tr><td>Skipped:</td><td>'+ imp_result['skipped']
@@ -2279,7 +2281,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                           +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated']
                           +'</td></tr></table>';
                         
-                        top.HEURIST4.msg.showMsgDlg(msg, null, 'Import result');
+                        top.HEURIST4.msg.showMsgDlg(msg, null, 'Import of '+top.HEURIST4.rectypes.names[rtyID]+' complete.');
                         
                         //if everything is added - skip to next step
                         var counts = _getInsertUpdateCounts( currentSeqIndex );
