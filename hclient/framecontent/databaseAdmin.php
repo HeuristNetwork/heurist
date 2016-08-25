@@ -37,12 +37,41 @@
                 }
             }            
         </script>
+        <style>
+    .menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: block;
+    outline: none;
+    border: none !important;
+    }        
+    .menu-list .ui-menu-item{    
+    position: relative;
+    margin: 0;
+    padding: 3px 1em 3px .4em;
+    cursor: pointer;
+    min-height: 0;
+    }
+    .menu-list .ui-menu-item a{    
+    display: block;
+    font-weight: normal;
+    line-height: 1.5;
+    min-height: 0;
+    padding: 2px 0.4em;
+    margin-right: 10px;
+    text-decoration: none;
+    }        
+    .menu-list .ui-menu-item a.selected{    
+        background:lightblue;
+    }
+        </style>
     </head>
     <body style="background-color:white">
         <div style="width:280px;top:0;bottom:0;left:0;position:absolute;padding:5px;">
             <ul id="menu_container" style="margin-top:10;padding:2px"></ul>
         </div>
-        <div style="left:300px;right:0;top:0;bottom:20;position:absolute;overflow:auto">
+        <div style="left:300px;right:0;top:0;bottom:20;position:absolute;overflow:auto;padding-top:5px;">
             <iframe id="frame_container">
             </iframe>
         </div>

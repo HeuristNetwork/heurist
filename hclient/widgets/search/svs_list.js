@@ -58,15 +58,15 @@ $.widget( "heurist.svs_list", {
         var toppos = 1;
         
         if(top.HAPI4.sysinfo['layout']!='original'){
-            toppos = toppos + 1.5;
+            toppos = toppos + 2.5;
             $('<div>'+top.HR('Saved Filters')+'</div>')
-                .css({'padding-left': '1.1em', 'font-size': '1.1em', 'font-weight': 'bold'})
+                .css({'padding-left': '1.1em', 'font-size': '1.4em', 'font-weight': 'bold', 'color':'rgb(142, 169, 185)'})
                 .appendTo(this.div_header);
         }
         
         this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
         .addClass('logged-in-only heurist-helper1')
-        .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding-left':'2.5em'}).appendTo(this.div_header) )
+        .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding-left':'1.4em'}).appendTo(this.div_header) )
         //.appendTo( this.accordeon );
         if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
 
@@ -99,7 +99,6 @@ $.widget( "heurist.svs_list", {
 
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
 
-        var toppos = 2.5;
         //if(this.options.btn_visible_dbstructure) toppos = toppos + 3;
         if(this.options.btn_visible_filter) toppos = toppos + 2;
         if(hasHeader) toppos = toppos + 2;

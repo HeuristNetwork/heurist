@@ -561,6 +561,7 @@ function hLayout(args) {
     } //end layoutInitPane
 
     function initDragDropListener(){
+        
         // listener for drag-n-droop
         // move tab to layout and create new tabcontrol
         $( ".pane_dropable" ).droppable({
@@ -813,10 +814,11 @@ function hLayout(args) {
             $tab_ctrl.addClass('dockable');
         }
 
-
-        var $ul = $(document.createElement('ul'));
-        $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
-        .appendTo($tab_ctrl);
+        var $ul = $(document.createElement('ul')).appendTo($tab_ctrl);
+        
+        if(tabcfg.sortable){
+            $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
+        }
 
         $.each(apps, function(idx, _app){
             //_app - reference to widget in layout tab list
@@ -907,7 +909,6 @@ function hLayout(args) {
             connectToSortable:'.sortable_tab_ul'
         });
 
-
         //move tab from one tab control to another
         $( containment_selector+" > .dockable > .ui-tabs-nav" ).droppable({
             accept: function(draggable){
@@ -958,13 +959,17 @@ function hLayout(args) {
 
             }
         });
-
+        
         // drag float tab controls around layout
         $( containment_selector+' > .dragable' ).draggable({
             stack: '.tab_ctrl',
             handle: '.sortable_tab_ul',
             containment: containment_selector //'.ui-layout-content'
         });
+
+        //to destrot use 'destroy' to disable $( '.ui-tabs-nav li' ).draggable('disable');
+        
+        
         $( '.tab_ctrl ul' ).disableSelection();
 
         //init resize feature
@@ -1048,23 +1053,28 @@ function hLayout(args) {
             //@todo - definition of styles for tab control via layuot_default.js
             var tabb = $container.find('div[layout_id="main_header_tab"]');
             if(tabb.length>0){
-                //$ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
                 
                 var tabheader = $(tabb).children('ul');
-                tabheader.css({'border':'none', 'background':'#8ea9b9'})
+                tabheader.css({'border':'none', 'background':'#8ea9b9', 'padding-top':'1em'})
+                
+                $(tabb).children('.ui-tabs-panel[layout_id!="FAP"]').css({position:'absolute', top:'4.01em',
+                        left:0,bottom:'0.2em',right:0, 'min-width':'75em',overflow:'hidden'});
+                
                 var lis = tabheader.children('li');
                 var count_lis = lis.length;
                     lis.css({
                             'font-weight': 'bold',
+                            'font-size': '1.2em',
                             'border': '2px solid black',
                             'border-bottom-width': 0,
                             'border-top-right-radius': '8px',
+                            'padding':'4 8 4 8',
                             'margin':'0 0 0 -4px'});
                             
                 lis.each(function(idx,item){
                    $(item).css('z-index',count_lis-idx);
                    if(idx>0){
-                       $(item).css({'padding-left':4, 'border-left':'none'});
+                       $(item).css({'padding-left':12, 'border-left':'none'});
                    }
                 });
                 
@@ -1073,6 +1083,15 @@ function hLayout(args) {
                    //'overflow-x': 'none',
                    'background': '#8ea9b9' 
                 });
+                
+                $('#content_center_pane').find('#pnl_2').css({position:'absolute', top:0,
+                        left:0,bottom:0,right:0,width:'',height:''});
+
+                $(window).resize();  
+                /*var clayout = $('#content_center_pane').find('div[layout_id="FAP"]');        
+                var myLayout = clayout.layout();
+                myLayout.resizeAll();*/
+                
             }
             
         }

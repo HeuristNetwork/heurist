@@ -36,7 +36,7 @@ function hDatabaseAdmin() {
                         });
         */                
 
-        _initMenu('Database', $('#menu_container'));        
+        _initMenu( 'Database2', $('#menu_container') );        
         
         $('#frame_container').attr('src', top.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+top.HAPI4.database);           }
 
@@ -62,11 +62,26 @@ function hDatabaseAdmin() {
         // Load content for all menus except Database when user is logged out
 
             $(parentdiv)
-            .addClass('ui-menu ui-widget ui-widget-content ui-corner-all')
             .load(top.HAPI4.basePathV4+'hclient/widgets/topmenu/mainMenu'+
                     name+'.html', function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
                 
+                $( parentdiv ).accordion({
+                        heightStyle: "content",
+                        collapsible: true
+                });
+                
+                $( parentdiv ).find('div')
+                    .addClass('menu-list')
+                    .css({'border-color':'white !important', 'background':'none'});   // ui-corner-all
+                $( parentdiv ).find('h3')
+                    .css({border:'none', 'background':'none'});
+                      
                 $(parentdiv).find('li').addClass('ui-menu-item');
+                
+                $(parentdiv).find('li').each(function(idx,item){
+                    $('<div class="svs-contextmenu ui-icon ui-icon-arrowthick-1-e"></div>').appendTo($(item));
+                });
+                
 
                 _initLinks(parentdiv);
             });
@@ -154,7 +169,7 @@ function hDatabaseAdmin() {
             options.height=dim.h*0.5;
             options.width=dim.w*0.8;
         }
-
+        
         var url = link.attr('href');
         if (link.hasClass('currentquery')) {
             url = url + that._current_query_string
@@ -168,13 +183,18 @@ function hDatabaseAdmin() {
             _showDbSummary();
         }else
         if(event.target && $(event.target).attr('data-nologin')!='1'){
+            
             //check if login
             top.HAPI4.SystemMgr.is_logged(function(){
                 //top.HEURIST4.msg.showDialog(url, options);
+                $('#menu_container').find('a').removeClass('selected');
+                link.addClass('selected');
                 $('#frame_container').attr('src', url); 
             });
         }else{
             //top.HEURIST4.msg.showDialog(url, options);
+            $('#menu_container').find('a').removeClass('selected');
+            link.addClass('selected');
             $('#frame_container').attr('src', url); 
         }        
         

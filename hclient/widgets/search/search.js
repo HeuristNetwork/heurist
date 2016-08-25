@@ -59,7 +59,7 @@ $.widget( "heurist.search", {
         $.getScript(top.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'6em', 'min-width':'1100px'});
+        this.element.css({'height':'5.8em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
         if(top.HAPI4.sysinfo['layout']!='H4Default'){
             this.element.addClass('ui-heurist-header1');
         }
@@ -265,14 +265,14 @@ $.widget( "heurist.search", {
         
 
         this.btn_search_save = $( "<button>", {
-            text: top.HR("Save Filter"),
+            text: top.HR("Save"),
             title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
         })
         .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
         .addClass('ui-heurist-btn-header1')
         .appendTo(div_save_filter)
         .button({icons: {
-            primary: "ui-icon-disk"
+            primary: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"
         }});
 
         this._on( this.btn_search_save, {  click: function(){

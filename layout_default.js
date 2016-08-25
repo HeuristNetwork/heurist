@@ -105,27 +105,27 @@ var cfg_layouts = [
 
     // Default layout - the standard Heurist interface, used if no parameter provided
     {id:'H4Default', name:'Heurist Def v3', theme:'heurist', type:'free',
-        north_pane:{ dropable:true, 
+        north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
                     'background':'none', 'min-width':'75em'}, 
-            apps:[{appid:'h3_mainMenu', hasheader:false, css:{border:'solid',width:'99%'} }]
+            apps:[{appid:'h3_mainMenu', hasheader:false, css:{border:'solid'} }] 
         },
-        center_pane:{ dropable:true, 
-                css:{position:'absolute', top:'6em',left:0,bottom:0,right:0, border:'none'},
-            tabs:[{dockable:false, dragable:false, resizable:false, layout_id:'main_header_tab',
-                ccs:{height:'99%',width:'99%',position:'absolute',left:0,right:0},
+        center_pane:{ dockable:false, dropable:false, dragable:false, 
+                css:{position:'absolute', top:'6em',left:0,bottom:0,right:0},
+            tabs:[{dockable:false, dropable:false, dragable:false, resizable:false, layout_id:'main_header_tab',
+                ccs:{position:'absolute', top:0,left:0,bottom:0,right:0,
+                                border:'3px solid green'}, //height:'99%',width:'99%'
 
                 apps:[
-                    {appid:'h4_static', name: 'Manage record types / fields', 
-                        options:{url: 'hclient/framecontent/databaseAdmin.php?db=[dbname]', isframe:true}
-                        ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, 'min-width':'75em'}}             
-                    ,{appid:'h4_static', name: 'Add Data',
-                        options:{url: 'hclient/framecontent/databaseAddData.php?db=[dbname]', isframe:true}
-                        ,css:{position:'absolute', top:0,left:0,bottom:0,right:0,'min-width':'75em'}}
-                        
-                    ,{appid:'include_layout', name: 'Find-Analyse-Visualise', layout_id:'FAP',
+                    {appid:'h4_static', name: 'Manage',  dragable:false,
+                        options:{url: 'hclient/framecontent/databaseAdmin.php?db=[dbname]', isframe:true}}
+                        //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0, 'min-width':'75em'}}             
+                    ,{appid:'h4_static', name: 'Add Data',  dragable:false,
+                        options:{url: 'hclient/framecontent/databaseAddData.php?db=[dbname]', isframe:true}}
+                        //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0,'min-width':'75em'}}
+                    ,{appid:'include_layout', name: 'Find-Analyse-Publish', layout_id:'FAP',dragable:false,
                         options:{ref: 'SearchAnalyze'}
-                        ,css:{position:'absolute', top:'2.5em',left:0,bottom:'0.2em',right:0,'font-size':'0.9em'}}
+                        ,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.1em',right:0,'font-size':'0.9em'}}
                      ]
             }]
         }
@@ -137,7 +137,7 @@ var cfg_layouts = [
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'6em',right:0, border:'none', 'background':'none', 'min-width':'75em'} },    //top panel
                 {appid:'h4_search', hasheader:false, 
-                    css:{position:'absolute', top:'6em', left:0, height:'6em', right:0, border:'none', 
+                    css:{position:'absolute', top:'6em', left:0, height:'6em', right:0, 
                     'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches

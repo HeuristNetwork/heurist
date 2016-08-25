@@ -857,7 +857,8 @@ ul > li > .svs-contextmenu {
     display: none;
     cursor: pointer;
     position:absolute;
-    right:2px;
+    top: 4px;
+    right: 2px;
     /*width:15px;
     padding-right:2px;*/
 }
