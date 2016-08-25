@@ -850,7 +850,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                             //download content of some folder from template database ======================
 
-                            $reg_url = str_replace("getDBStructureAsSQL", "getDBFolders", $reg_url); //replace to other script
+                            $reg_url = str_replace("getDBStructureAsSQL", "getDBFoldersForNewDB", $reg_url); //replace to other script
                             $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
 
                             if($data){
