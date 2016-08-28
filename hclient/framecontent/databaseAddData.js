@@ -28,28 +28,27 @@ function hDatabaseAddData() {
 
     function _init(){
 
-        
-        _initMenu('Import', $('#menu_container'));        
-        
-    }
+        var parentdiv = $('#menu_container').accordion({
+            heightStyle: "content",
+            collapsible: true
+        });
 
-    function _initMenu(name, parentdiv){
+        parentdiv.find('div')
+        .addClass('menu-list')
+        .css({'border-color':'white !important', 'background':'none'});   // ui-corner-all
+        $( parentdiv ).find('h3')
+        .css({border:'none', 'background':'none'});
 
-        var link;
+        parentdiv.find('li').addClass('ui-menu-item');
 
-        // Load content for all menus except Database when user is logged out
+        parentdiv.find('li').each(function(idx,item){
+            $('<div class="svs-contextmenu ui-icon ui-icon-arrowthick-1-e"></div>').appendTo($(item));
+        });
 
-            $(parentdiv)
-            .addClass('ui-menu ui-widget ui-widget-content ui-corner-all')
-            .load(top.HAPI4.basePathV4+'hclient/widgets/topmenu/mainMenu'+
-                    name+'.html', function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
-                
-                $(parentdiv).find('li').addClass('ui-menu-item');
+        _initLinks(parentdiv);
 
-                _initLinks(parentdiv);
-            });
-            
-            $('#frame_container').attr('src', top.HAPI4.basePathV4+'records/add/addRecordPopup.php?db='+top.HAPI4.database);             
+        //parentdiv.accordion('option', 'active', 1); //STRUCTURE
+        $('#menulink-add-record').click();
     }
     
     
@@ -108,6 +107,13 @@ function hDatabaseAddData() {
                 })
             }
         );
+        
+        
+        $('#menulink-add-record').click( //.attr('href', 
+            function(event){
+            }
+        );
+        
     }
 
     
@@ -155,7 +161,14 @@ function hDatabaseAddData() {
         }
 
 
-        if(event.target && $(event.target).attr('data-nologin')!='1'){
+        if(link.attr('id')=='menulink-add-record'){
+                
+                $('#menu_container').find('a').removeClass('selected');
+                link.addClass('selected');
+                $('#frame_container2').attr('src', url); 
+                event.preventDefault();
+                return false;
+        }else if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
             top.HAPI4.SystemMgr.is_logged(function(){top.HEURIST4.msg.showDialog(url, options);});
         }else{
@@ -179,3 +192,5 @@ function hDatabaseAddData() {
     return that;  //returns object
 }
     
+            
+   

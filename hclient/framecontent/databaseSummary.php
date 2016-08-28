@@ -279,7 +279,7 @@ if(!$system->init(@$_REQUEST['db']) ){
 
                 // VISUALISATION CALL  @todo - use abs path from HAPI4.basePathV4
                 var url = "../../hserver/controller/rectype_relations.php" + window.location.search;
-                console.log("Loading data from: " + url);
+//DEBUG                console.log("Loading data from: " + url);
                 d3.json(url, function(error, json_data) {
                     // Error check
                     if(error) {
@@ -390,7 +390,7 @@ if(!$system->init(@$_REQUEST['db']) ){
                     // Visualizes the data
                     function visualizeData() {
                         // Call plugin
-                        console.log("Calling plugin!");
+                        //DEBUG console.log("Calling plugin!");
                         var data_to_vis = getData(json_data);
                         
                         $("#visualisation").visualize({

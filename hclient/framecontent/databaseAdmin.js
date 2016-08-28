@@ -26,20 +26,6 @@ function hDatabaseAdmin() {
     var _className = "DatabaseAdmin",
     _version   = "0.4";
 
-    function _init(){
-
-        //init buttons
-        /*$('#btnVisualizeStructure')
-                    .button({label: top.HR("Visualize Structure")})
-                    .click(function(e) {
-                             _showDbSummary()
-                        });
-        */                
-
-        _initMenu( 'Database2', $('#menu_container') );        
-        
-        $('#frame_container').attr('src', top.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+top.HAPI4.database);           }
-
     //
     //
     //
@@ -54,38 +40,42 @@ function hDatabaseAdmin() {
 
     }
     
-    
-    function _initMenu(name, parentdiv){
+    //
+    //
+    //
+    function _init(){
 
-        var link;
+        //init buttons
+        /*$('#btnVisualizeStructure')
+        .button({label: top.HR("Visualize Structure")})
+        .click(function(e) {
+        _showDbSummary()
+        });
+        */                
 
-        // Load content for all menus except Database when user is logged out
+        var parentdiv = $('#menu_container').accordion({
+            heightStyle: "content",
+            collapsible: true
+        });
 
-            $(parentdiv)
-            .load(top.HAPI4.basePathV4+'hclient/widgets/topmenu/mainMenu'+
-                    name+'.html', function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
-                
-                $( parentdiv ).accordion({
-                        heightStyle: "content",
-                        collapsible: true
-                });
-                
-                $( parentdiv ).find('div')
-                    .addClass('menu-list')
-                    .css({'border-color':'white !important', 'background':'none'});   // ui-corner-all
-                $( parentdiv ).find('h3')
-                    .css({border:'none', 'background':'none'});
-                      
-                $(parentdiv).find('li').addClass('ui-menu-item');
-                
-                $(parentdiv).find('li').each(function(idx,item){
-                    $('<div class="svs-contextmenu ui-icon ui-icon-arrowthick-1-e"></div>').appendTo($(item));
-                });
-                
+        parentdiv.find('div')
+        .addClass('menu-list')
+        .css({'border-color':'white !important', 'background':'none'});   // ui-corner-all
+        $( parentdiv ).find('h3')
+        .css({border:'none', 'background':'none'});
 
-                _initLinks(parentdiv);
-            });
+        parentdiv.find('li').addClass('ui-menu-item');
 
+        parentdiv.find('li').each(function(idx,item){
+            $('<div class="svs-contextmenu ui-icon ui-icon-arrowthick-1-e"></div>').appendTo($(item));
+        });
+
+
+        _initLinks(parentdiv);
+
+        //$('#frame_container').attr('src', top.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+top.HAPI4.database);           }
+        parentdiv.accordion('option', 'active', 1); //STRUCTURE
+        $('#linkEditRectypes').click();
     }
     
     
@@ -142,42 +132,8 @@ function hDatabaseAdmin() {
     function _onPopupLink(event){
         
         var action = $(event.target).attr('id');
-        
-        var body = $(this.document).find('body');
-        var dim = {h:body.innerHeight   (), w:body.innerWidth()},
-        link = $(event.target);
-
-        var options = { title: link.html() };
-
-        if (link.hasClass('small')){
-            options.height=dim.h*0.6; options.width=dim.w*0.5;
-        }else if (link.hasClass('portrait')){
-            options.height=dim.h*0.8; options.width=dim.w*0.55;
-            if(options.width<700) options.width = 700;
-        }else if (link.hasClass('large')){
-            options.height=dim.h*0.8; options.width=dim.w*0.8;
-        }else if (link.hasClass('verylarge')){
-            options.height = dim.h*0.95;
-            options.width  = dim.w*0.95;
-        }else if (link.hasClass('fixed')){
-            options.height=dim.h*0.8; options.width=800;
-        }else if (link.hasClass('fixed2')){
-            if(dim.h>700){ options.height=dim.h*0.8;}
-            else { options.height=dim.h-40; }
-            options.width=800;
-        }else if (link.hasClass('landscape')){
-            options.height=dim.h*0.5;
-            options.width=dim.w*0.8;
-        }
-        
+        var link = $(event.target);
         var url = link.attr('href');
-        if (link.hasClass('currentquery')) {
-            url = url + that._current_query_string
-        }
-        
-        if (link.hasClass('refresh_structure')) {
-               options['afterclose'] = this._refreshLists;
-        }
         
         if(event.target && $(event.target).attr('id')=='menulink-database-summary'){
             _showDbSummary();

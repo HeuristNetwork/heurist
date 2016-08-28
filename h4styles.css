@@ -999,3 +999,35 @@ background: #8ea9b9
 .rename{
     cursor: pointer;
 }
+
+
+    #menu_container > h3{
+        font-weight:bold;
+        border-top: 1px solid lightblue !important;
+    }
+    .menu-list {
+        list-style: none;
+        margin: 0;
+        display: block;
+        outline: none;
+        border: none !important;
+    }        
+    .menu-list .ui-menu-item{    
+        position: relative;
+        margin: 0;
+        padding: 3px 1em 3px .4em;
+        cursor: pointer;
+        min-height: 0;
+    }
+    .menu-list .ui-menu-item a{    
+        display: block;
+        font-weight: normal;
+        line-height: 1.5;
+        min-height: 0;
+        padding: 2px 0.4em 0 20px;
+        margin-right: 10px;
+        text-decoration: none;
+    }        
+    .menu-list .ui-menu-item a.selected{    
+        background:lightblue;
+    }

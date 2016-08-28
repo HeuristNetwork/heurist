@@ -110,10 +110,28 @@ function hLayout(args) {
     // action: close, open
     // args - [pane, values] 
     //
-    function _cardinalPanel(action, args){
+    function _cardinalPanel(action, args, element){
+
+        var $container = null;
+        
+        //by default find parent of element with ui-layout-container clas
+        //find parent container
+        if(element){
+            $container = $(element).parents().find('.ui-layout-container')
+        }
+        //otherwise root container
+        if(!$container || $container.length==0){
+            $container = $(_containerid); 
+        }
      
-        var $container = $(_containerid);
-        if(!$.isFunction($container.layout)) return;
+        //if(!$.isFunction($container.layout)) return;
+        if(!$container.hasClass('ui-layout-container')) {
+            $container = $container.children().find('.ui-layout-container');
+        }
+        if(!$container || $container.length==0){
+            return;
+        }
+        
         
         var pane, 
             myLayout = $container.layout();
@@ -734,9 +752,9 @@ function hLayout(args) {
             if(app.widgetname=='resultList'){
                 //DEBUG
                 widget = $content.resultList( options );
-            }else if(app.widgetname=='mainMenu'){
+            }else if(app.widgetname=='recordListExt'){
                 //DEBUG
-                widget = $content.mainMenu( options );
+                widget = $content.recordListExt( options );
             }else if(app.widgetname=='app_timemap'){
                 //DEBUG
                 widget = $content.app_timemap( options );
@@ -1131,8 +1149,8 @@ function hLayout(args) {
             _init(cfg_widgets, cfg_layouts)
         },
         
-        cardinalPanel:function(pane, action){
-            return _cardinalPanel(pane, action);
+        cardinalPanel:function(pane, action, element){
+            return _cardinalPanel(pane, action, element);
         },
 
     }

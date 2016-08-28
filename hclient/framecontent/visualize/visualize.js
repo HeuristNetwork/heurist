@@ -268,7 +268,7 @@ function visualizeData() {
         addLabels("shadow", "#000");
         addLabels("namelabel", getSetting(setting_textcolor));
     }
-    console.log("EVERYTHING HAS BEEN ADDED");
+    //DEBUG console.log("EVERYTHING HAS BEEN ADDED");
 
     // Get everything into positon when gravity is off.
     if(getSetting(setting_gravity) == "off") {
