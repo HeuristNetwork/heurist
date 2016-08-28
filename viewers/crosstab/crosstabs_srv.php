@@ -93,6 +93,23 @@ function recordSearchMinMax($mysqli, $params){
    return $response;
 }
 
+function getWhereRecordIds($params){
+
+    $recIDs = null;
+    
+    if(@$params['recordset']){
+        if(is_array($params['recordset'])){
+            $recids = $params['recordset'];  
+        }else{
+            $recids = json_decode($params['recordset'], true);    
+        }
+        //$recIDs = explode(',',$recids['recIDs']);
+        $recIDs = $recids['recIDs'];
+    }
+    return $recIDs;
+}
+
+
 /**
 * finds the list of distict record IDs for given detail type "record pointer"
 *
@@ -103,26 +120,34 @@ function recordSearchDistictPointers($mysqli, $params){
 
     if(@$params['dt']){
 
+    $where = getWhereRecordIds($params);
         
-    if (function_exists('get_user_id')) {
-        $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
-                                      'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
+    if($where==null){
+        if (function_exists('get_user_id')) {
+            $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
+                                          'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
+        }else{
+            $wg_ids = null;
+        }
+
+        $search_type = (@$params['w']=="bookmark" || @$params['w']=="b")?$params['w']:"all";
+        
+        $where = parse_query($search_type, @$params['q'], null, $wg_ids, false);
+        
+        //remove order by
+        $pos = strrpos($where, " order by ");
+        if($pos){
+            $where = substr($where,0,$pos);
+        }
+        $where = '(select rec_ID '.$where.' )';
     }else{
-        $wg_ids = null;
-    }
-
-    $search_type = (@$parms['w']=="bookmark" || @$parms['w']=="b")?$parms['w']:"all";
-
-    $where = parse_query($search_type, @$params['q'], null, $wg_ids, false);
-
-    //remove order by
-    $pos = strrpos($where, " order by ");
-    if($pos){
-        $where = substr($where,0,$pos);
+        $where = '('.$where.')';
     }
     
     $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_Value and dtl_DetailTypeID="
-                        .$params['dt']." and dtl_RecID in (select rec_ID ".$where." ) order by rec_Title";
+                        .$params['dt']." and dtl_RecID in ".$where;
+        
+//DEBUG error_log($query);        
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -183,6 +208,7 @@ function getCrossTab($mysqli, $params){
     }
 
 
+    
     if (function_exists('get_user_id')) {
         $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
                                       'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
@@ -190,9 +216,14 @@ function getCrossTab($mysqli, $params){
         $wg_ids = null;
     }
 
-    $search_type = (@$parms['w']=="bookmark" || @$parms['w']=="b")?$parms['w']:"all";
+    $search_type = (@$params['w']=="bookmark" || @$params['w']=="b")?$params['w']:"all";
 
-    $where = parse_query($search_type, @$params['q'], null, $wg_ids, false);
+    $where = getWhereRecordIds($params);
+    if($where==null){
+        $where = parse_query($search_type, @$params['q'], null, $wg_ids, false);
+    }else{    
+        $where = parse_query($search_type, 'ids:'.$where, null, $wg_ids, false);
+    }
 
     //remove order by
     $pos = strrpos($where, " order by ");
@@ -203,6 +234,7 @@ function getCrossTab($mysqli, $params){
     $pos = strpos($where, " where ");
     $where_1 = substr($where,0,$pos);
     $where_2 = substr($where,$pos+7);
+    
 
 $query = "select d2.dtl_Value as rws, ".$columnfld.$mode." as cnt ".$pagefld." ".$where_1;
 
@@ -258,6 +290,8 @@ if($dt_col){
     }
 }
 
+//error_log($query);
+
         $res = $mysqli->query($query);
         if (!$res){
             $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
@@ -275,5 +309,4 @@ if($dt_col){
 return $response;
 
 }
-
 ?>

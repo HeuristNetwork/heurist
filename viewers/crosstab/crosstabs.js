@@ -23,20 +23,20 @@
 * @package     Heurist academic knowledge management system
 */
 
-var crosstabsAnlysis;
+var crosstabsAnalysis;
 
 //aliases
 var Hul = top.HEURIST.util;
 
 /**
-*  CrosstabsAnlysis - class for crosstab analysis                                           b
+*  CrosstabsAnalysis - class for crosstab analysis                                           b
 *
 * @author Artem Osmakov <osmakov@gmail.com>
 * @version 2013.0530
 */
-function CrosstabsAnlysis(_database, _query, _query_domain) {
+function CrosstabsAnalysis(_database, _query, _query_domain) {
 
-    var _className = "CrosstabsAnlysis";
+    var _className = "CrosstabsAnalysis";
 
     var recordtype;
     var fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
@@ -48,10 +48,18 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
     var database;
     var query_main;
     var query_domain;
+    
+    var _currentRecordset = null;
 
+    var _isPopupMode = false;
 
     function _init(_database, _query, _query_domain)
     {
+        if(top.HEURIST4 && !top.HEURIST4.util.isempty(_query)){
+            _isPopupMode = true;
+        }else{
+            $('#btnCancel').hide();
+        }
 
         database = _database;
         query_main = _query?_query:'';
@@ -69,6 +77,12 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
             }
         });
 
+        //hide left panel(saved searches) and maximize analysis
+        //var _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
+        //top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
+        //top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
+        
+        
     }
 
     /**
@@ -177,10 +191,21 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
         }else if(detailtype=="float" || detailtype=="integer"){
             //get min and max for this detail in database
 
-            var request = { a:'minmax', db: database, rt:recordtype , dt:detailid };
+            var request = { a:'minmax', db: database, rt:recordtype , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
 
             var baseurl = top.HEURIST.baseURL_V3 + "viewers/crosstab/crosstabs_srv.php";
             var params = "a=minmax&db=" + database+'&rt='+recordtype+'&dt='+detailid;
+            
+            /*
+            if(_currentRecordset!=null){
+                request['recordset'] = _currentRecordset;
+            }else{
+                request['q'] = query_main;
+                request['w'] = query_domain;
+            }
+            */
+            
+            /* OLD
             top.HEURIST.util.getJsonData(baseurl,
                 function(response){
                     if(response.status == "OK"){
@@ -200,25 +225,35 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                         alert(response.message);
                     }
                 }, params);
+            */    
+                
+           $.ajax({
+                url: baseurl,
+                type: "POST",
+                data: request,
+                dataType: "json",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                },
+                success: function( response, textStatus, jqXHR ){
+                    if(response.status == "OK"){
 
-            /*
-            Hul.callserver('crosstabs_srv.php', request,
+                        var val0 = parseFloat(response.data.min);
+                        var valmax = parseFloat(response.data.max);
 
-            function(response){
-            if(response.status == "OK"){
+                        if(isNaN(val0) || isNaN(valmax)){
+                            $container = clearIntervals(name);
+                            $container.html('There are no min max values for this field.');
+                        }else{
+                            fields3[name].values = [val0, valmax];
+                            calculateIntervals(name);
+                        }
 
-            var val0 = parseFloat(response.data.min);
-            var valmax = parseFloat(response.data.max);
-
-            fields3[name].values = [val0, valmax];
-
-            calculateIntervals(name);
-
-            }else{
-            alert(response.message);
-            }
-            }
-            );*/
+                    }else{
+                        alert(response.message);
+                    }
+                }
+            });                
 
             return;
 
@@ -231,6 +266,16 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
             var baseurl = top.HEURIST.baseURL_V3 + "viewers/crosstab/crosstabs_srv.php";
             var params = "a=pointers&db=" + database+'&rt='+recordtype+'&dt='+detailid+"&q="+query_main+"&w="+query_domain;
+            
+            if(_currentRecordset!=null){
+                request['recordset'] = _currentRecordset;
+            }else{
+                request['q'] = query_main;
+                request['w'] = query_domain;
+            }
+            
+            
+            /*
             top.HEURIST.util.getJsonData(baseurl,
                 function(response){
                     if(response.status == "OK"){
@@ -247,7 +292,32 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                     }else{
                         alert(response.message);
                     }
-                }, params);
+                }, params);*/
+                
+           $.ajax({
+                url: baseurl,
+                type: "POST",
+                data: request,
+                dataType: "json",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                },
+                success: function( response, textStatus, jqXHR ){
+                    if(response.status == "OK"){
+                        if(!response.data){
+                            fields3[name].values = [];
+                            $container = clearIntervals(name);
+                            $container.html('There are no pointer values for this field.');
+                        }else{
+                            fields3[name].values = response.data;
+                            calculateIntervals(name);
+                        }
+                    }else{
+                        alert(response.message);
+                    }
+                }
+            });                
+                
 
             return;
 
@@ -336,6 +406,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
         }
         renderIntervals(name);
+        _autoRetrieve();
     }
 
     /**
@@ -629,6 +700,25 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
     }
 
+    
+    function _autoRetrieve(){
+
+        if(!_isPopupMode){
+            if (_currentRecordset==null || _currentRecordset.resultCount<1){
+                _setMode(3);
+            }else{
+                _setMode(2);
+                
+                if(!recordtype || recordtype<1 || fields3.row.intervals.length<1 || fields3.row.field<1){
+                    //critical settings are not defined
+                    return;
+                }else{
+                    _doRetrieve();
+                }
+            }
+        }
+    }
+    
     /**
     * request to server for crosstab data
     */
@@ -662,53 +752,67 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                 return;
             }
             if(fields3.row.intervals.length<1){
-                alert('No intervals for field defined');
+                alert('No intervals for field "row" defined');
                 $('#cbRows').focus();
                 return;
             }
 
             $("#pmessage").html('Requesting...');
-            that.setMode(1);
-
-            var request = { a:'crosstab', db: database, rt:recordtype ,
-                dt_row:fields3.row.field, dt_rowtype:fields3.row.type, q:query_main, w:query_domain };
-
-            var params = "a=crosstab&db=" + database+'&rt='+recordtype+'&q='+query_main+'&w='+query_domain+
-            '&dt_row='+fields3.row.field+'&dt_rowtype='+fields3.row.type;
+            _setMode(1);
+            
+        var session_id = Math.round((new Date()).getTime()/1000);    
+        
+        var request = { a:'crosstab', db: database, 
+                rt:recordtype ,
+                dt_row:fields3.row.field, 
+                dt_rowtype:fields3.row.type,
+                session:session_id}
+            
+        if(_currentRecordset!=null){
+            request['recordset'] = _currentRecordset;
+        }else{
+            request['q'] = query_main;
+            request['w'] = query_domain;
+        }
+        
+        params = '';
 
             if(fields3.page.field>0){
 
                 if(fields3.page.intervals.length<1){
-                    alert('No intervals for field defined');
+                    alert('No intervals for field "page" defined');
                     $('#cbPages').focus();
+                    _setMode(2);
                     return;
                 }
 
-                request.dt_page = fields3.page.field;
-                request.dt_pagetype = fields3.page.type;
-
                 params = params + '&dt_page='+fields3.page.field;
                 params = params + '&dt_pagetype='+fields3.page.type;
+                
+                request['dt_page'] = fields3.page.field;
+                request['dt_pagetype'] = fields3.page.type;
             }
             if(fields3.column.field>0){
 
                 if(fields3.column.intervals.length<1){
-                    alert('No intervals for field defined');
+                    alert('No intervals for field "column" defined');
                     $('#cbColumn').focus();
+                    _setMode(2);
                     return;
                 }
 
-                request.dt_col = fields3.column.field;
-                request.dt_coltype = fields3.column.type;
-
                 params = params + '&dt_col='+fields3.column.field;
                 params = params + '&dt_coltype='+fields3.column.type;
+
+                request['dt_col'] = fields3.column.field;
+                request['dt_coltype'] = fields3.column.type;
             }
 
             var aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
             if(aggregationMode!="count" && $('#cbAggField').val()){
-                request.agg_mode = aggregationMode;
-                request.agg_field = $('#cbAggField').val();
+
+                request['agg_mode'] = aggregationMode;
+                request['agg_field'] = $('#cbAggField').val();
 
                 params = params + '&agg_mode='+aggregationMode;
                 params = params + '&agg_field='+request.agg_field;
@@ -718,18 +822,24 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
             inProgress = true;
             var to = setTimeout(function(){
                 to = 0;
-                that.setMode(0);
+                _setMode(0);
                 inProgress = false;
                 },20000);
 
+           function __hideProgress(){
+                clearTimeout(to);
+                to = 0;
+                inProgress = false;
+           }                     
+                
             var baseurl = top.HEURIST.baseURL_V3 + "viewers/crosstab/crosstabs_srv.php";
 
-            top.HEURIST.util.getJsonData(baseurl,
+            /*  OLD
+                top.HEURIST.util.getJsonData(baseurl,
                 function(response){
 
                     clearTimeout(to);
                     to = 0;
-
                     inProgress = false;
 
                     if(response.status == "OK"){
@@ -738,53 +848,36 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
 
                         records_resp = response.data;
-                        doRender();
+                        _doRender();
                     }else{
                         alert(response.message);
                     }
-                }, params);
+                }, params);*/
 
-
-            /*
-            Hul.callserver('crosstabs_srv.php', request,
-
-            function(response){
-            inProgress = false;
-
-            if(response.status == "OK"){
-
-            needServerRequest = false;
-
-
-            records_resp = response.data;
-            doRender();
-
-            /*
-            var val0 = parseFloat(response.data.min);
-            var valmax = parseFloat(response.data.max);
-
-            fields3[name].values = [val0, valmax];
-
-            var delta = Math.round((valmax - val0)/10);
-            var cnt = 0;
-            while (val0<valmax && cnt<9){
-            var val1 = (val0+delta>valmax)?valmax:val0+delta;
-
-            fields3[name].intervals.push( {name:val0+' ~ '+val1, description: val0+' ~ '+val1 , values:[ val0, val1 ] });  //minvalue, maxvalue
-            val0 = val1;
-            cnt++;
-            }
-            renderIntervals(name);
-            }else{
-            alert(response.message);
-            }
-            }
-            );
-            */
-
-
+                
+            $.ajax({
+                url: baseurl,
+                type: "POST",
+                data: request,
+                dataType: "json",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                    __hideProgress();
+                },
+                success: function( response, textStatus, jqXHR ){
+                    __hideProgress();
+                    if(response.status == "OK"){
+                        needServerRequest = false;
+                        records_resp = response.data;
+                        _doRender();
+                    }else{
+                        alert(response.message);
+                    }
+                }
+            });
+                
         }else{
-            doRender();
+            _doRender();
         }
 
     }
@@ -796,10 +889,10 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
     /**
     * render crosstab data as set of tables
     */
-    function doRender(){
+    function _doRender(){
 
         $("#pmessage").html('Rendering...');
-        that.setMode(1);
+        _setMode(1);
 
         var pages = fields3.page.intervals;
         var plen = pages.length;
@@ -808,7 +901,11 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
         $divres.hide();
         $divres.empty();
 
-        $divres.append('<div style="text-align:center"><button onclick="crosstabsAnlysis.setMode(0)">Back to form</button>&nbsp;&nbsp;<button onclick="crosstabsAnlysis.doPrint()">Print</button></div>');
+        if(_isPopupMode){
+        $divres.append('<div style="text-align:center"><button onclick="crosstabsAnalysis.setMode(0)">Back to form</button>&nbsp;&nbsp;<button onclick="crosstabsAnalysis.doPrint()">Print</button></div>');
+        }else{
+            $('#btnPrint').show();
+        }
 
         $divres.append('<div>Database name: '+database+'</div>');
         $divres.append('<div>Date and time: '+ (new Date()) +'</div>');
@@ -885,8 +982,8 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
         }
 
         $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
-        that.setMode(2);
-    }
+        _setMode(2);
+    }//_doRender
 
     /**
     * render particular page (group)
@@ -1476,6 +1573,30 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
         return reslist;
     }
+    
+    function _setMode(mode){
+
+        $("#inporgress").hide();
+        if(mode==3){
+            $("#divres").hide();
+            $("#qform").hide();
+            $("#div_empty").show();
+        }else{
+            $("#divres").show();
+            $("#qform").show();
+            $("#div_empty").hide();
+        }
+        if(mode==1){
+            $("#inporgress").show();
+            $("#divres").empty();
+            $('#btnPrint').hide();
+        }else if(mode==2){
+            //$("#divres").show();
+        }else{
+            //$("#qform").show();
+        }
+    }
+    
 
     //
     //public members
@@ -1496,6 +1617,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
         changeAggregationMode: function(){
             _changeAggregationMode();
+            _autoRetrieve();
         },
 
         resetIntervals: function(event){
@@ -1516,23 +1638,37 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
         },
 
         setMode: function(mode){
-            $("#inporgress").hide();
-            $("#divres").hide();
-            $("#qform").hide();
-            if(mode==1){
-                $("#inporgress").show();
-            }else if(mode==2){
-                $("#divres").show();
-            }else{
-                $("#qform").show();
-            }
+            _setMode(mode);
         },
 
         doPrint: function(){
             alert('Sorry. Not implemented yet');
+        },
+
+        assignRecordset: function(recordset){
+            if(recordset.resultCount<5000){
+                $('#btnUpdate').hide();
+            }else{
+                $('#btnUpdate').show();
+            }
+            _currentRecordset = recordset;
+            
+            //change value of rectype selector
+            if(!($('#cbRectypes').val()>0) && recordset['first_rt']>0){
+                $('#cbRectypes').val(recordset['first_rt']);
+                $('#cbRectypes').change();
+            }
+            
+            _autoRetrieve();
+        },
+        
+        autoRetrieve:function(){
+            _autoRetrieve();
+        },
+
+        doRender:function(){
+            _doRender();
         }
-
-
     };
 
     _init(_database, _query, _query_domain);  // initialize before returning

@@ -214,6 +214,12 @@ $.widget( "heurist.recordListExt", {
                 if (this.options.recordset!=null){
                     this._checkRecordsetLengthAndRunSmartyReport(-1);
                 }
+            }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
+                
+                if (this.options.recordset!=null){
+                    this._checkRecordsetLengthAndRunCrosstabsAnalysis(5000);
+                }
+                
             }else{
                 var showMap = this.dosframe[0].contentWindow.showMap;
                 if(showMap){ //not used anymore
@@ -281,6 +287,39 @@ $.widget( "heurist.recordListExt", {
 
         showReps.assignRecordset(recordset);
         showReps.processTemplate();
+    },
+    
+    _checkRecordsetLengthAndRunCrosstabsAnalysis: function(limit){
+/* @todo */
+        var crosstabs = this.dosframe[0].contentWindow.crosstabsAnalysis;
+        if(!crosstabs) return;
+
+        var recordset, recIDs_list = [];
+
+        if (this.options.recordset!=null) {
+
+            var tot_cnt = this.options.recordset.length();
+            top.HEURIST.totalQueryResultRecordCount = tot_cnt;
+
+            recIDs_list = this.options.recordset.getIds(limit);
+
+            var rectype_first = 0;
+            if(recIDs_list.length>0){
+                var rec = this.options.recordset.getFirstRecord();
+                rectype_first = this.options.recordset.fld(rec, 'rec_RecTypeID');
+            }
+
+            recordset = {"resultCount":tot_cnt, "recordCount":recIDs_list.length, 
+                                                "recIDs":recIDs_list.join(','), 'first_rt':rectype_first};
+
+        }else{
+            top.HEURIST.totalQueryResultRecordCount = 0;
+            recordset = {"resultCount":0,"recordCount":0,"recIDs":""};
+        }
+
+        crosstabs.assignRecordset(recordset);
+
     }
+    
 
 });
