@@ -1072,6 +1072,8 @@ function hLayout(args) {
             var tabb = $container.find('div[layout_id="main_header_tab"]');
             if(tabb.length>0){
                 
+                $(tabb).tabs({activate: function( event, ui ) { $(window).resize(); }});
+                
                 var tabheader = $(tabb).children('ul');
                 tabheader.css({'border':'none', 'background':'#8ea9b9', 'padding-top':'1em'})
                 
@@ -1105,7 +1107,7 @@ function hLayout(args) {
                 $('#content_center_pane').find('#pnl_2').css({position:'absolute', top:0,
                         left:0,bottom:0,right:0,width:'',height:''});
 
-                $(window).resize();  
+                  
                 /*var clayout = $('#content_center_pane').find('div[layout_id="FAP"]');        
                 var myLayout = clayout.layout();
                 myLayout.resizeAll();*/
