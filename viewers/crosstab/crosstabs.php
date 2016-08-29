@@ -47,12 +47,12 @@
         <div style="margin:0px auto; padding: 0.5em;">
 
             <div id="qform" class="disign-content" style="width:100%;">
-                <div style="position: absolute;top:20px;left:550px;width:200px"><img src="crosstabs_image.png"/></div>
+                <div style="position: absolute;top:20px;left:350px;width:200px"><img src="crosstabs_image.png"/></div>
 
                 <fieldset>
                     <div>
                         <div class="fldheader"><label for="cbRectypes">Show fields for</label></div>
-                        <div class="input-cell">
+                        <div class="input-cell" style="width:220px;">
                             <select id="cbRectypes" onchange="crosstabsAnalysis.onRectypeChange(event)" class="text ui-widget-content ui-corner-all"></select>
                             <div style="font-size: 0.9em;">Note: choice of record type determines the list of fields avaiable but does not filter the results - the analysis is based on all records in the result set</div>
                         </div>
@@ -130,11 +130,11 @@
                     </div>
 
                 </fieldset>
-                <div style="text-align:center;padding-top:1em; display:none;" id="btnPanels">
+                <div style="text-align:right;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
                     <span id="btnUpdate"><button onclick="crosstabsAnalysis.doRetrieve()">Update results</button></span>
                     <button onclick="crosstabsAnalysis.doSave()">Save specification</button>
                     <span id="btnCancel"><button onclick="crosstabsAnalysis.doCancel()">Cancel</button></span>
-                    <span id="btnPrint" style="display:none"><button onclick="crosstabsAnalysis.doPrint()">Print</button></span>
+                    <span id="btnPrint" style="display:none"><button onclick="crosstabsAnalysis.doPrint()">Print results</button></span>
                 </div>
             </div>
 

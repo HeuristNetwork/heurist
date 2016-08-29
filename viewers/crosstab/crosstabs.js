@@ -1514,19 +1514,71 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
         fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
 
         var details = rectypes.dtFields;
-        for (dtyID in details){
-            if(dtyID){
+        
+        if(true){
+            
+            //gather by group
+            var groups = {};
+            for (dtyID in details){
+                if(dtyID){
+                    
+                    var dtype = details[dtyID][fit];
 
-                if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
-                {
-                    var name = details[dtyID][fi];
-
-                    if(!Hul.isnull(name)){
-                        Hul.addoption(selObj, dtyID, name);
+                    if(allowedlist==null || allowedlist.indexOf(dtype)>=0)
+                    {
+                        if(groups[dtype]){
+                            groups[dtype].push(dtyID);
+                        }else{
+                            groups[dtype] = [dtyID];
+                        }
                     }
                 }
             }
+
+            var i,j, dtypes = Object.keys(groups);
+            for (i=0; i<dtypes.length; i++){
+                
+                var optgroup = document.createElement("optgroup");
+                optgroup.label = top.HEURIST.detailTypes.lookups[dtypes[i]];
+                selObj.appendChild(optgroup);
+                
+                for (j=0; j<groups[dtypes[i]].length; j++){
+                    
+                        dtyID =  groups[dtypes[i]][j];
+                        var name = details[dtyID][fi];
+                        if(!Hul.isnull(name)){
+                            
+                            var opt = new Option(name, dtyID);
+                            opt.className = "depth2";
+                            opt.depth = 2;
+                            optgroup.appendChild(opt);
+                            
+                            //Hul.addoption(selObj, dtyID, '...'+name);
+                        }
+                    
+                }
+                
+            }
+       
+        }else{
+            
+        
+            for (dtyID in details){
+                if(dtyID){
+
+                    if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
+                    {
+                        var name = details[dtyID][fi];
+
+                        if(!Hul.isnull(name)){
+                            Hul.addoption(selObj, dtyID, name);
+                        }
+                    }
+                }
+            }
+        
         }
+
 
         return selObj;
     }
