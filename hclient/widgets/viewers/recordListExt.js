@@ -217,7 +217,7 @@ $.widget( "heurist.recordListExt", {
             }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
                 
                 if (this.options.recordset!=null){
-                    this._checkRecordsetLengthAndRunCrosstabsAnalysis(5000);
+                    this._checkRecordsetLengthAndRunCrosstabsAnalysis(200);
                 }
                 
             }else{
@@ -301,7 +301,7 @@ $.widget( "heurist.recordListExt", {
             var tot_cnt = this.options.recordset.length();
             top.HEURIST.totalQueryResultRecordCount = tot_cnt;
 
-            recIDs_list = this.options.recordset.getIds(limit);
+            recIDs_list = this.options.recordset.getIds();//limit
 
             var rectype_first = 0;
             if(recIDs_list.length>0){

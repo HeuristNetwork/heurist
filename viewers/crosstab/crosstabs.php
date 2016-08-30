@@ -33,7 +33,6 @@
         <link rel=stylesheet href="crosstabs.css" media="all">
 
         <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-
     </head>
     <body style="padding:5px;overflow-x:auto;" class="popup">
 
@@ -138,7 +137,8 @@
                 </div>
             </div>
 
-            <div id="inporgress" style="display:none;" class="semitransparent">
+            <div id="inporgress" style="display:none;">
+                <div id="inporgress-loading"></div>
                 <div id="pmessage" class="progress-message">Requesting</div>
             </div>
 

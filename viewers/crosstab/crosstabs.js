@@ -38,6 +38,8 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
 
     var _className = "CrosstabsAnalysis";
 
+    var MAX_FOR_AUTO_RETRIEVE = 2000;
+    
     var recordtype;
     var fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
     //     intervals:{name: , description:, values:[  ] }
@@ -92,7 +94,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
 
         needServerRequest = true;
 
-        recordtype = event.target.value;
+        recordtype = Number(event.target.value);
 
         var allowedlist = ["enum", "integer", "float", "resource", "relationtype"];//, "date", "freetext"]; //"resource",
 
@@ -706,13 +708,14 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
         if(!_isPopupMode){
             if (_currentRecordset==null || _currentRecordset.resultCount<1){
                 _setMode(3);
-            }else{
+            }else if( _currentRecordset.resultCount < MAX_FOR_AUTO_RETRIEVE){
                 _setMode(2);
                 
-                if(!recordtype || recordtype<1 || fields3.row.intervals.length<1 || fields3.row.field<1){
+                if(!recordtype || isNaN(recordtype) || fields3.row.intervals.length<1 || Number(fields3.row.field)<1){
                     //critical settings are not defined
                     return;
                 }else{
+                    needServerRequest = true;
                     _doRetrieve();
                 }
             }
@@ -1698,17 +1701,18 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
         },
 
         assignRecordset: function(recordset){
-            if(recordset.resultCount<5000){
-                $('#btnUpdate').hide();
-            }else{
-                $('#btnUpdate').show();
-            }
+
             _currentRecordset = recordset;
-            
             //change value of rectype selector
             if(!($('#cbRectypes').val()>0) && recordset['first_rt']>0){
                 $('#cbRectypes').val(recordset['first_rt']);
                 $('#cbRectypes').change();
+            }
+
+            if(_currentRecordset.resultCount < MAX_FOR_AUTO_RETRIEVE){
+                $('#btnUpdate').hide();
+            }else{
+                $('#btnUpdate').show();
             }
             
             _autoRetrieve();
