@@ -551,8 +551,8 @@
                     if(count($details)<1){
                         print "<div style='color:red'>Warning: zotero id $zotero_itemid is skiiped. Details are not defined</div>";
                     }else{
-                        echo print_r($details, true);
-                        $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid);
+//DEBUG echo print_r($details, true);
+                        $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, true);
                         if($new_recid){
                             if(count($unresolved_records)>0){
                                 $unresolved_pointers[$new_recid] = $unresolved_records;
@@ -582,11 +582,14 @@
             print "<div style='color:red;padding-left:20px'>'".implode('<br>',$arr_ignored).'</div>';
         }
         if($cnt_ignored>0 || $isFailure){
-            print "<div>Please advise the Heurist development team - info at heuristnetwork dot org - of the circumstances so that we can provide a fix</div>";
+            print "<div><br>Please advise the Heurist development team - info at heuristnetwork dot org - of the circumstances so that we can provide a fix</div>";
         }
 
-        if(count($unresolved_pointers)>0)
-        print "<div><br>Create/update resource records</div>";
+        if(count($unresolved_pointers)>0){ 
+            //print "<div><br>Create/update resource records</div>";//ij: need hide this info
+            print "<br>";
+        
+        }
 
         ob_flush();flush();
 
@@ -861,7 +864,7 @@
 
         if($recource_recid==null){
             //such record not found - create new one
-            $recource_recid = addRecordFromZotero(null, $record_type, null, $details, null);
+            $recource_recid = addRecordFromZotero(null, $record_type, null, $details, null, false);
         }
 
         return $recource_recid;
@@ -945,7 +948,7 @@
     * @param mixed $details
     * @param mixed $zotero_itemid
     */
-    function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid){
+    function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo){
 
         global $rep_errors_only, $dt_SourceRecordID;
 
@@ -1001,7 +1004,10 @@
 
                 $new_recid = $out["bibID"];
 
-                print ($recId?"Updated":"Added")."&nbsp; #".$out["bibID"]."<br>";
+                if($is_echo){
+                    print '&nbsp;&nbsp;&nbsp;'.($recId?"Updated":"Added")."&nbsp; #".$out["bibID"];    
+                }
+                
 
                 if(!$rep_errors_only){
                     if (@$out['warning']) {
