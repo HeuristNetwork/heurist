@@ -532,7 +532,20 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
         return array("Field name '$field_name' was tested with Array of record types - bad parameter");
         // TODO: what does this error message mean? Make it comprehensible to the user
     }
-
+    
+    if(strcasecmp($field_name,'Record Title')==0){
+        $field_name = 'rectitle';
+    }else if(strcasecmp($field_name,'Record ID')==0){
+        $field_name = 'id';
+    }else if(strcasecmp($field_name,'Record TypeID')==0){
+        $field_name = 'rectypeid';
+    }else if(strcasecmp($field_name,'Record TypeName')==0){
+        $field_name = 'rectypename';
+    }else if(strcasecmp($field_name,'Record Modified')==0){
+        $field_name = 'modified';
+    }
+  
+    
     if (strcasecmp($field_name,'id')==0 ||
     strcasecmp($field_name,'rectitle')==0 ||
     strcasecmp($field_name,'modified')==0 ||
