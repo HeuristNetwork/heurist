@@ -50,7 +50,9 @@ $.widget( "heurist.mainMenu", {
         }
 
 
-        $("<div>").css({'font-size':'0.8em', 'text-align':'center', 'padding-top':'32px', 'width':'100%'}).text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_logo );
+        $("<div>")
+            .css({'font-size':'0.8em', 'text-align':'center', 'padding-top':'32px', 'width':'100%'})
+            .text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_logo );
 
         // bind click events
         this._on( this.div_logo, {
@@ -66,14 +68,49 @@ $.widget( "heurist.mainMenu", {
             }
         });
 
-        this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'padding-top':'2em', 'text-align':'center' }).appendTo(this.element);
-                  
-
-        $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
-            'background-position': 'left center',
-            'background-repeat': 'no-repeat',
-            'background-image': 'url("'+top.HAPI4.basePathV4+'hclient/assets/database.png")' })
+        this.div_dbname = $( "<div>")
+            .css({'float':'left', 'padding-left':'2em', 'margin-top':'2em', 'text-align':'center' })
+            .appendTo(this.element);
+            
+        if(top.HEURIST4.util.isArrayNotEmpty(top.HAPI4.sysinfo.dbrecent)){
+            
+            this.div_dbname.css({
+                'margin-left':'50px',
+                'background-position': 'left center',
+                'background-repeat': 'no-repeat',
+                'background-image': 'url("'+top.HAPI4.basePathV4+'hclient/assets/database.png")'});
+            
+            var wasCtrl = false;
+            var selObj = top.HEURIST4.ui.createSelector(null, top.HAPI4.sysinfo.dbrecent);        
+            $(selObj).css({'font-size':'1.3em', 'font-weight':'bold','border':'none' })
+            .click(function(event){
+                wasCtrl = event.shiftKey;
+//console.log('1'+wasCtrl+'  '+event.metaKey);                
+            })
+            .change(function(event){
+                if(top.HAPI4.database!=$(event.target).val()){
+                    var url =  top.HAPI4.basePathV4+'?db='+$(event.target).val();
+                    $(event.target).val(top.HAPI4.database);
+    //console.log('2'+wasCtrl);
+                    if(wasCtrl){
+                        location.href = url;
+                    }else{
+                        window.open(url, '_blank');
+                    }
+                }
+                $(event.target).blur();//remove focus
+            })
+            .addClass('ui-heurist-header2')
+            .val( top.HAPI4.database ).appendTo( this.div_dbname );
+        }else{
+            
+            $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
+                'background-position': 'left center',
+                'background-repeat': 'no-repeat',
+                'background-image': 'url("'+top.HAPI4.basePathV4+'hclient/assets/database.png")' })
             .text(top.HAPI4.database).appendTo( this.div_dbname );
+            
+        }
 
         /*$("<span>")
             .addClass('ui-icon ui-icon-database') //    .css({'margin-left':'50px'})

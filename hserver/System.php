@@ -441,8 +441,27 @@ class System {
         }
 
         if($this->mysqli && defined('HEURIST_DBNAME')){
+            
             $dbowner = user_getDbOwner($this->mysqli);
 
+            
+            $dbrecent = array();
+            if(@$user['ugr_ID']>0){
+                foreach ($_SESSION as $db=>$session){
+                    
+                    $user_id = @$_SESSION[$db]['ugr_ID'] ?$_SESSION[$db]['ugr_ID'] :@$_SESSION[$db.'.heurist']['user_id'];
+                    if($user_id == $user['ugr_ID']){
+                        if(strpos($db, HEURIST_DB_PREFIX)===0){
+                            $db = substr($db,strlen(HEURIST_DB_PREFIX));
+                        }
+                        array_push($dbrecent, $db);
+                    }
+                }
+            }
+       
+            
+            
+            
             $res = array(
                 "currentUser"=>$user,
                 "sysinfo"=>array(
@@ -456,7 +475,8 @@ class System {
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
                     "basePathV3"=>HEURIST_BASE_URL,
-                    "dbconst"=>$this->getLocalConstants()) //some record and detail types constants with local values specific for current db
+                    "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
+                    "dbrecent"=>$dbrecent) 
             );
 
         }else{

@@ -88,13 +88,18 @@ top.HEURIST4.ui = {
         }
 
         if(top.HEURIST4.util.isArray(topOptions)){
-            var idx;
+            var idx,key,title;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
                 {
                     if(idx){
-                        var key = topOptions[idx].key;
-                        var title = topOptions[idx].title;
+                        if(topOptions[idx].key && topOptions[idx].title){
+                            key = topOptions[idx].key;
+                            title = topOptions[idx].title;
+                        }else{
+                            key = topOptions[idx];
+                            title = topOptions[idx];
+                        }
                         if(!top.HEURIST4.util.isnull(title))
                         {
                             if(!top.HEURIST4.util.isnull(topOptions[idx].optgroup)){
