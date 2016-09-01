@@ -877,26 +877,27 @@
                     if(!dropped) {
                         dropped = true;
 
-                        top.HEURIST.util.popupURL(top,
-                            "<?=HEURIST_BASE_URL?>admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
-                                "close-on-blur": true,
-                                "no-resize": true,
-                                //"no-close": true,
-                                height: 100,
-                                width: 300,
-                                x: 10000,
-                                y: 10000,
-                                callback: function(context) {
-
-                                    if(redirect) {
-                                        window.location = "<?=HEURIST_BASE_URL?>admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
-                                    }
-                                }
-                        });
-
-
-                        //  processAction(0, "drop");
-                        //  alert("Dropping temporal database");
+                        var baseurl = "<?=HEURIST_BASE_URL?>admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>";
+                        
+           $.ajax({
+                url: baseurl,
+                type: "GET",
+                data: {},
+                dataType: "text",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                },
+                success: function( response, textStatus, jqXHR ){
+                    if(response == "OK"){
+                    }else{
+                        alert(response);
+                    }
+                    if(redirect) {
+                        window.location = "<?=HEURIST_BASE_URL?>admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
+                    }
+                }
+            });                
+                     
                     }
                 }
             </script>

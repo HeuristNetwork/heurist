@@ -828,10 +828,6 @@ function makeLogEntry( $name = "unknown", $id = "", $msg = "no message" ) {
 // Checks whether passed $tempDBName contains 'temp_', and if so, deletes the database
 function dropDB() {
 
-	echo "<html><head>";
-    echo '<meta http-equiv="content-type" content="text/html; charset=utf-8">';
-    echo "<link rel=stylesheet href='../../../common/css/global.css'></head>";
-	echo "<body class='popup'><div style='text-align:center;font-weight:bold;font-size:1.3em;padding-top:10px'>";
 
 	$message = "";
 	$res = true;
@@ -848,11 +844,16 @@ function dropDB() {
 		$res = false;
 	}
 
-	echo $message."</div>";
-
 	if($res){
-		echo "<script>setTimeout(function(){window.close();}, 1500);</script>";
+		//echo "<script>setTimeout(function(){window.close();}, 1500);</script>";
+        echo "OK";
 	}else{
+        echo $message;
+        /*
+        echo "<html><head>";
+        echo '<meta http-equiv="content-type" content="text/html; charset=utf-8">';
+        echo "<link rel=stylesheet href='../../../common/css/global.css'></head>";
+        echo "<body class='popup'><div style='text-align:center;font-weight:bold;font-size:1.3em;padding-top:10px'>";
 		echo "<script>setTimeout(function(){
 					if(window.frameElement.parentElement){
 						var ele = window.frameElement.parentElement.parentElement;
@@ -861,8 +862,10 @@ function dropDB() {
                 		ele.style.top = xy.y + 'px';
                 	}
 				}, 200);</script>";
+        echo "<div>$message</div>";
+        echo "</body></html>";
+        */
 	}
-	echo "</body></html>";
 
 }
 ?>
