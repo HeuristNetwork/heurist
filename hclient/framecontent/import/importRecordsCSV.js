@@ -620,10 +620,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                         + '<input type="checkbox" class="rt_select" data-rt="'+recTypeID+'" '
                                         +  ' data-lvl="'+depth+'" '
                                         + (depth==0?'checked="checked" disabled="disabled"':'')
-                                        + '><b>'
-                                        + top.HEURIST4.rectypes.names[recTypeID] 
-                                        + '</b>';
+                                        + '>';
+                                        
+                                     //get field name that refers to this recordtype
+                                     if(depth!=0){
+                                         
+                                         var fieldtitle = rtOrder['field_titles'][recTypeID];
+                                         if(fieldtitle){
+                                            sRectypeItem = sRectypeItem + '<div style="min-width:100px;display:inline-block">'
+                                                + '<i>'  + fieldtitle + '</i>'
+                                                + '</div>'                                     
+                                                + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'; 
+                                         }
+                                     }
                                      
+                                     sRectypeItem = sRectypeItem + top.HEURIST4.rectypes.names[recTypeID];
                                      
                                      if(depth==0){ //add PRIMARY field
                                      
@@ -930,6 +941,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //    list of dependent rectype     
     //
     //  rtOrder 
+    //
     //  levels:{},   rt_id:level - list of rectypes with level value - need for proper order in sequence
     //  depend:{},   rt_id:[array of depended rectypes]
     //  rt_fields:{},   resourse fields per rectype - rt_id:{id:ft_id, title:title, rt_ids:ids, 
@@ -960,6 +972,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
          var rt_fields = [], //resourse fields per rectype
              rt_depend = []; //dependent rectypes 
+         
+         //rec_id => fieldname that refers to this record type - this reference is ambiguate
+         if(!rtOrder['field_titles']){
+                rtOrder['field_titles'] = {};
+         }
+         
          
          //list all resourse fields
          if(top.HEURIST4.util.isArrayNotEmpty(rectypeTree.children)){
@@ -998,11 +1016,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             idfields[recTypeID] = id_fieldname;
                             
                             //rtOrder['idfields'][field['key']] = top.HEURIST4.rectypes.names[recTypeID]+' ID';//recTypeID;
+                            if(!rtOrder['field_titles'][recTypeID]){
+                                  rtOrder['field_titles'][recTypeID] = title;   
+                            }
                        }
                        
                        rt_fields.push({id:field['key'], title:title, rt_ids:ids, 
                                         rt_title:rectypeNames.join('|'), required:field['required'], idfields:idfields });
                        if(field['required']) rt_depend = $.unique(rt_depend.concat(ids));
+                       
+                       
+                       
                    }
              }
              
@@ -1010,7 +1034,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     rtOrder['rt_fields'][currentTypeID] = rt_fields;
                     rtOrder['depend'][currentTypeID] = rt_depend; //only required dependencies 
               }
-             
+              
              for (j=0;j<rectypeTree.children.length;j++){
                   var child = rectypeTree.children[j];
                   rtOrder = _fillDependencyList(child, rtOrder, depth+((currentTypeID>0)?1:0), uniq_fieldnames);
@@ -1792,6 +1816,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 $("select[id='id_rectype_"+ cb.val()+"']")  
                                         .css('visibility',  cb.is(':checked')?'visible':'hidden');            
                             
+                                var is_visible = $("input[id^='id_field']:checked").length>0;
+                            
+                                if(is_visible){$('#lbl_ID_select').show();}else{$('#lbl_ID_select').hide();}
+                            
                                 top.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
                             });
                             
@@ -2063,9 +2091,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         
                             }else{
                                 //ok - go to next step
-                                _showStep(4);
-                                _initFieldMapppingTable();
-                                $('#mr_cnt_disamb').parent().hide();
+                                var counts = _getInsertUpdateCounts( currentSeqIndex );
+                                if(currentSeqIndex>0 && counts[0]>0 && counts[2]==0){ //all records exsit and this is not primary record type
+                                    _skipToNextRecordType();   
+                                }else{
+                                    _showStep(4);
+                                    _initFieldMapppingTable();
+                                    $('#mr_cnt_disamb').parent().hide();
+                                }
                                 
                             }
                             
@@ -2182,9 +2215,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             $('#mr_cnt_error').text(res['count_error']);                                 
                             $('#mr_cnt_error').parent().show();
                             
-                            top.HEURIST4.msg.showMsgErr((res['count_error']==1?'One row':(res['count_error']+' rows'))
-                            +' in your file '+(res['count_error']==1?'has':'have')+' wrong values for fields you matched.<br><br> '
-                            + 'It is better to fix these in the source file and then process it again, as uploading faulty data generally leads to major fix-up work.');                            
+                            top.HEURIST4.msg.showMsgErr((res['count_error']==1?'There is one row':('There are '+res['count_error']+' rows'))
+                            +' with errors in your input.<br><br> '
+                            +' These could include unrecognised terms, invalid dates, unknown record pointers (no record with given ID), '
+                            +' missing required values and so forth.<br><br>'
+                            + 'It is better to fix these in the source file and then process it again, as uploading faulty data generally leads to major fix-up work.'
+                            + 'Click "Show errors" button  for a list of errors');                            
                     
                             $('.step3 > .normal').hide();
                             $('.step3 > .skip_step').hide();

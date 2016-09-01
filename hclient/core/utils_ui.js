@@ -93,12 +93,14 @@ top.HEURIST4.ui = {
                 for (idx in topOptions)
                 {
                     if(idx){
-                        if(topOptions[idx].key && topOptions[idx].title){
-                            key = topOptions[idx].key;
-                            title = topOptions[idx].title;
-                        }else{
+                        if(top.HEURIST4.util.isnull(topOptions[idx].key) && 
+                           top.HEURIST4.util.isnull(topOptions[idx].title))
+                        {
                             key = topOptions[idx];
                             title = topOptions[idx];
+                        }else{
+                            key = topOptions[idx].key;
+                            title = topOptions[idx].title;
                         }
                         if(!top.HEURIST4.util.isnull(title))
                         {
