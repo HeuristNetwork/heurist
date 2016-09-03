@@ -47,6 +47,12 @@ $.widget( "heurist.staticPage", {
             }
         });
 
+        
+        $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
+            that._loaded_url = null; //reload on login-logout
+            that._refresh();
+        });
+        
         that._refresh();
         //$(this.document).on(top.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {});
 
