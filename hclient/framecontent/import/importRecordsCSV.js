@@ -276,6 +276,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             _showRecords('disamb');
                         });
                         
+        $('#btnShowErrors')
+                    .css({'font-weight':'bold'})
+                    .button({label: top.HR('Show'), icons:{primary: "ui-icon-alert"}})
+                    .click(function(e) {
+                            _showRecords('error');
+                        });
 
         $('#btnPrepareStart')
                     //.css({'width':'250px'})
@@ -602,7 +608,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     //rt_fields - resourse fields
                     //depend - only required dependencies 
                     
-                    var i, j, rt_resourse, rt_ids = Object.keys(rtOrder['levels']), isfound, depth = 0;
+                    var i, j, rt_resourse, rt_ids = Object.keys(rtOrder['levels']), isfound, depth = 0, prev_depth = 0;
                     
                          //fill dependecies list in popup dialog where we choose primary rectype
                          treeElement.empty();
@@ -616,7 +622,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                  if(rtOrder['levels'][recTypeID] == depth){
                                      isfound = true;
                                      
-                                     var sRectypeItem = '<div>' 
+                                     var depth_separator = '';
+                                     if(prev_depth!=depth){
+                                         prev_depth = depth;
+                                         depth_separator = ';border-top:1px gray solid';
+                                     }
+                                     
+                                     var sRectypeItem = '<div style="'+(depth>0?'padding-top:1em':'')
+                                        + depth_separator+'">' 
                                         + '<input type="checkbox" class="rt_select" data-rt="'+recTypeID+'" '
                                         +  ' data-lvl="'+depth+'" '
                                         + (depth==0?'checked="checked" disabled="disabled"':'')
@@ -627,7 +640,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                          
                                          var fieldtitle = rtOrder['field_titles'][recTypeID];
                                          if(fieldtitle){
-                                            sRectypeItem = sRectypeItem + '<div style="min-width:100px;display:inline-block">'
+                                            sRectypeItem = sRectypeItem + '<div style="display:inline-block">'
                                                 + '<i>'  + fieldtitle + '</i>'
                                                 + '</div>'                                     
                                                 + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'; 
@@ -698,7 +711,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                              }
                              depth++;
                          
-                         }while(depth<10); //isfound);
+                         }while(depth<4); //isfound);
                          
                          if(rt_ids.length==1){
                             treeElement.text('No dependencies found');
@@ -2160,7 +2173,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 +'so the records created would be empty. Please select the fields which should '
 +'be imported into "'+top.HEURIST4.rectypes.names[rtyID]+'" records.');
             
-            
             return;
         }
         
@@ -2211,9 +2223,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         }
                         
                         if(res['count_error']>0){
-                            //imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
-                            $('#mr_cnt_error').text(res['count_error']);                                 
-                            $('#mr_cnt_error').parent().show();
+                            
+                            $('#mrr_error').text('Errors: '+res['count_error']);
+                            $('#prepareErrors').css('display:inline-block;');
                             
                             top.HEURIST4.msg.showMsgErr((res['count_error']==1?'There is one row':('There are '+res['count_error']+' rows'))
                             +' with errors in your input.<br><br> '
@@ -2874,7 +2886,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
-        $('#mr_cnt_error').parent().hide();
+        $('#prepareErrors').parent().hide();
         $('#mr_cnt_disamb').parent().hide();
         
         if(page==1){

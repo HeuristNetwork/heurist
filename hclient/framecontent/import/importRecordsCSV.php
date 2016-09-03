@@ -484,7 +484,7 @@ If you have missing data for Required fields, you may find it convenient to set 
 <!-- end radiogroup setting divs -->     
 
         <div id="divFieldMapping2" style="display:none;padding:0.5em 0;margin-left:2em;">
-            <table class="tbresults">
+            <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
                                         <td rowspan="2">
@@ -506,6 +506,10 @@ If you have missing data for Required fields, you may find it convenient to set 
                                     </tr>
                 </tbody>
             </table>
+            <div class="tbresults" id="prepareErrors" style="display:none;background-color:#ffaaaa;border-color:red;display:none">
+                <h2 id="mrr_error" style="display:inline-block">Errors: 0</h2>
+                <div id="btnShowErrors"></div>
+            </div>
         </div>
    
         
