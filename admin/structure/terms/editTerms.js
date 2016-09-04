@@ -1117,6 +1117,11 @@ function EditTerms() {
 
 
     }
+    
+    function _getTermLabel(domain, term_id){
+        var trm = top.HEURIST.terms.termsByDomainLookup[domain][term_id];
+        return (trm)?trm[top.HEURIST.terms.fieldNamesToIndex.trm_Label]:'';
+    }
 
     /**
     * Open popup and select term to be merged
@@ -1138,12 +1143,15 @@ function EditTerms() {
         /*if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
         }*/
+        
+        var name_with_path = _getTermLabel(_currentDomain, _keepCurrentParent) + '/' 
+                                + _getTermLabel(_currentDomain, retain_nodeid);
 
         Hul.popupURL(top, url,
             {
                 "close-on-blur": false,
                 "no-resize": true,
-                title: 'Select term to be merged',
+                title: 'Merge into: '+name_with_path,
                 height: 500,
                 width: 450,
                 callback: function(merge_nodeid) {

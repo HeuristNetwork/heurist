@@ -69,16 +69,21 @@ function SelectTermParent() {
 				_childTerm = top.HEURIST.parameters.child;
 				_currentDomain = top.HEURIST.parameters.domain;
                 _target_parent_id = top.HEURIST.parameters.parent;
+                
+                var childTermName = '';
+                if(_childTerm){
+                    childTermName = top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm]
+                                                [top.HEURIST.terms.fieldNamesToIndex.trm_Label];
+                }
 
                 if(top.HEURIST.parameters.mode==1){
-                    Dom.get('header1').innerHTML = 'Select the term you want to be merged';
+                    Dom.get('header1').innerHTML = 'Select term you wish to merge into term '+ childTermName;
                     Dom.get('btnSet').innerHTML = 'SELECT';
-                    Dom.get('divParentIsRoot').style.display = 'none';
+                    //Dom.get('divParentIsRoot').style.display = 'none';
                     Dom.get("childTermName").innerHTML = "";
                 }else
 				if(_childTerm){
-						Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+
-									top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm][top.HEURIST.terms.fieldNamesToIndex.trm_Label]+"</h2>";
+						Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+childTermName+"</h2>";
 				}else{
 						Dom.get("childTermName").innerHTML = "";
 				}
