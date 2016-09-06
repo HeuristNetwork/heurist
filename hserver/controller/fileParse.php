@@ -327,6 +327,11 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     $err_encoding = array();
     $err_keyfields = array();
     
+    $int_fields = array(); //array of fields with integer values
+    $num_fields = array(); //array of fields with numeric values
+    $empty_fields = array(); //array of fields with NULL/empty values
+    $empty75_fields = array(); //array of fields with NULL/empty values in 75% of lines
+    
     $memos = array();  //multiline fields
     $multivals = array();
     $values = array();
@@ -422,6 +427,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
 
         if($len==0){
             $header = $fields;
+            
             $len = count($fields);
             
             if($len>200){
@@ -432,6 +438,12 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                     "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.");                
                 return false;
             }            
+            
+            $int_fields = $fields; //assume all fields are integer
+            $num_fields = $fields; //assume all fields are numeric
+            $empty_fields = $fields; //assume all fields are empty
+            $empty75_fields = array_pad(array(),$len,0);
+            
         }else{
             $line_no++;
 
@@ -475,7 +487,9 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                             $field = date('Y-m-d H:i:s', $field);
                         }
                     }
-                    if($check_keyfield && @$keyfields['field_'.$k]!=null){
+                    
+                    //check integer value
+                    if(@$int_fields[$k] || ($check_keyfield && @$keyfields['field_'.$k]!=null)){
                         
                          if(!ctype_digit(strval($field))){ //is_integer
                             //not integer
@@ -484,16 +498,27 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                             }else{
                                 $err_keyfields[$k] = array(0,1);
                             }
+                            //exclude from array of fields with integer values
+                            if(@$int_fields[$k]) $int_fields[$k]=null;
+                            
                         }else if(intval($field)<1 || intval($field)>2147483646){ //max int value in mysql
-                                if(is_array(@$err_keyfields[$k])){  //out of range
-                                    $err_keyfields[$k][0]++;
-                                }else{
-                                    $err_keyfields[$k] = array(1,0);
-                                }
+                            if(is_array(@$err_keyfields[$k])){  //out of range
+                                $err_keyfields[$k][0]++;
+                            }else{
+                                $err_keyfields[$k] = array(1,0);
+                            }
+                            //exclude from array of fields with integer values
+                            if(@$int_fields[$k]) $int_fields[$k]=null;
                         }
-                        
                     }
-
+                    if(@$num_fields[$k] && !is_numeric($field)){
+                        $num_fields[$k]=null;
+                    }
+                    if($field==null || trim($field)==''){ //not empty
+                         $empty75_fields[$k]++;
+                    }else if(@$empty_fields[$k]){
+                         $empty_fields[$k]=null; //field has value
+                    }                    
 
                     //Doubling up as an escape for quote marks
                     $field = addslashes($field);
@@ -524,6 +549,15 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     if($handle_wr) fclose($handle_wr);
 
     //???? unlink($encoded_filename);
+    $empty75 = array();
+    $lines75 = $line_no*0.75;
+    foreach ($empty75_fields as $k=>$cnt){
+        if($cnt>=$lines75) $empty75[$k] = $cnt;
+    }
+    /*$empty_fields = array_keys($empty_fields);
+    $int_fields = array_keys($int_fields);
+    $num_fields = array_keys($num_fields);*/
+    
 
     if($limit>0){
         // returns encoded filename
@@ -533,6 +567,12 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                 "step"=>1, "col_count"=>$len, 
                 "err_colnums"=>$err_colnums, 
                 "err_encoding"=>$err_encoding, 
+                
+                "int_fields"=>$int_fields, 
+                "empty_fields"=>$empty_fields, 
+                "num_fields"=>$num_fields,
+                "empty75_fields"=>$empty75, 
+                
                 "fields"=>$header, "values"=>$values );    
     }else{
       
@@ -544,6 +584,12 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                 "err_colnums"=>$err_colnums, 
                 "err_encoding"=>$err_encoding, 
                 "err_keyfields"=>$err_keyfields, 
+                
+                "int_fields"=>$int_fields, 
+                "num_fields"=>$num_fields,
+                "empty_fields"=>$empty_fields, 
+                "empty75_fields"=>$empty75, 
+                
                 "memos"=>$memos, "multivals"=>$multivals, "fields"=>$header );    
         }else{
             //everything ok - proceed to save into db

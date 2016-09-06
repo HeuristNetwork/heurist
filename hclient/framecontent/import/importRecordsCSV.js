@@ -608,7 +608,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     //rt_fields - resourse fields
                     //depend - only required dependencies 
                     
-                    var i, j, rt_resourse, rt_ids = Object.keys(rtOrder['levels']), isfound, depth = 0, prev_depth = 0;
+                    var i, j, rt_resourse, rt_ids = Object.keys(rtOrder['levels']),
+                         isfound, depth=0, prev_depth = 0, found_levels=0;
                     
                          //fill dependecies list in popup dialog where we choose primary rectype
                          treeElement.empty();
@@ -710,8 +711,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 
                              }
                              depth++;
+                             if(isfound){
+                                 found_levels++;
+                             }
                          
-                         }while(depth<4); //isfound);
+                         }while(found_levels<4 && depth<10);
                          
                          if(rt_ids.length==1){
                             treeElement.text('No dependencies found');
@@ -1287,7 +1291,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             var idx = _getFieldIndexForIdentifier(currentSeqIndex);
             if(idx>=0){
                     keyfield_sel = 'sa_dt_'+idx;
-                    $("#cbsa_dt_"+idx).attr('checked', true).attr('disabled',true);
+                    $("#cbsa_dt_"+idx).prop('checked', true).attr('disabled',true);
                     $("#cbsa_dt_"+idx).parent().hide();
                     $('#sa_dt_'+idx).parent().show(); //show selector
             }
@@ -1334,7 +1338,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                      show_required:(currentStep==4)});    
                     
                if(!top.HEURIST4.util.isnull(selected_value)){
-                        $("#cbsa_dt_"+field_idx).attr('checked', true);
+                        $("#cbsa_dt_"+field_idx).prop('checked', true);
                         $(item).parent().show(); //show selector
                         $(item).val(dt_id);
                }
@@ -1784,7 +1788,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                     id_suggestions.push(i);
                                 }
                                 
+                                var stype = 'Text';
+                                if(response.data.int_fields && response.data.int_fields[i]){
+                                   stype = 'Integer'; 
+                                }else if (response.data.num_fields && response.data.num_fields[i]){
+                                   stype = 'Numeric';
+                                }else if (response.data.empty_fields && response.data.empty_fields[i]){
+                                   stype = 'Empty';
+                                }else if (response.data.empty75_fields && response.data.empty75_fields[i]){
+                                   stype = 'Empty &gt;75%';
+                                }
+                                
                                 $('<tr><td style="width:200px">'+response.data.fields[i]+'</td>'
+                                +'<td style="width:50px">'+stype+'</td>'
                                 +'<td style="width:50px;text-align:center"><input type="checkbox" id="id_field_'+i+'" value="'+i+'"/></td>'
                                 +'<td style="width:50px;text-align:center"><input type="checkbox" id="d_field_'+i+'" value="'+i+'"/></td>'
                                 +'<td style="width:200px"><select id="id_rectype_'
@@ -2089,8 +2105,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             if(disambig_keys.length>0){
                                 //imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
+                                /*
                                 $('#mr_cnt_disamb').text(disambig_keys.length);                                 
                                 $('#mr_cnt_disamb').parent().show();
+                                */
                                 
                                 top.HEURIST4.msg.showMsgErr('One or more rows in your file match multiple records in the database.<br>'+
                         'Please click <b>Resolve ambiguous matches</b> to view and resolve these ambiguous matches.<br><br> '+
@@ -2110,7 +2128,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 }else{
                                     _showStep(4);
                                     _initFieldMapppingTable();
-                                    $('#mr_cnt_disamb').parent().hide();
+                                    //$('#mr_cnt_disamb').parent().hide();
                                 }
                                 
                             }
@@ -2225,7 +2243,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         if(res['count_error']>0){
                             
                             $('#mrr_error').text('Errors: '+res['count_error']);
-                            $('#prepareErrors').css('display:inline-block;');
+                            $('#prepareErrors').show();//.css('display','inline-block');
                             
                             top.HEURIST4.msg.showMsgErr((res['count_error']==1?'There is one row':('There are '+res['count_error']+' rows'))
                             +' with errors in your input.<br><br> '
@@ -2238,6 +2256,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             $('.step3 > .skip_step').hide();
                             $('.step3 > .need_resolve').show();
                         }else{
+                            $('#prepareErrors').css('display','none');
                             _showStep(5);
                         }
 
@@ -2387,7 +2406,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
             
-            s = '<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
+            s = ''
+                +'<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
                 +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="first" class="ui-icon ui-icon-seek-first"/></a>'
                 +'<a href="#" class="navigation2" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>'
                 +'<div style="display: inline-block;vertical-align: super;">Range <span id="current_range"></span></div>'
@@ -2424,7 +2444,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
             }
 
-            s = s + '</tr></thead><tbody></tbody></table></div></div>';
+            s = s + '</tr></thead><tbody></tbody></table></div></div>'
+            +'<div class="loading semitransparent" style="display:none;width:100%;height:100%;poistion:absolute"></div>';
             
             dlg_options['element'] = container.get(0);
             container.html(s);
@@ -2503,9 +2524,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         
                     }else{
                     
+                        $dlg.find('.loading').show();
+                        $dlg.find('.ent_wrapper').hide();
+                        
+                        
                         top.HAPI4.parseCSV(request, function( response ){
                             
-                            //that.loadanimation(false);
+                            $dlg.find('.loading').hide();
+                            $dlg.find('.ent_wrapper').show();
+                            
                             if(response.status == top.HAPI4.ResponseStatus.OK){
                             
                                     var response = response.data;
@@ -2886,8 +2913,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
-        $('#prepareErrors').parent().hide();
-        $('#mr_cnt_disamb').parent().hide();
+        $('#prepareErrors').hide();
+        //$('#mr_cnt_disamb').parent().hide();
         
         if(page==1){
             $('#selImportId').val('');  //clear selection

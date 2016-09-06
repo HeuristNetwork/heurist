@@ -496,6 +496,13 @@ If you have missing data for Required fields, you may find it convenient to set 
                                         <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
                                         <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
                                         <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
+                                        <td rowspan="2">
+                                            <div id="prepareErrors" 
+                                                style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
+                                                <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Errors: 0</h2>
+                                                <div id="btnShowErrors"></div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr><td align=right>New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
@@ -506,10 +513,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                                     </tr>
                 </tbody>
             </table>
-            <div class="tbresults" id="prepareErrors" style="display:none;background-color:#ffaaaa;border-color:red;display:none">
-                <h2 id="mrr_error" style="display:inline-block">Errors: 0</h2>
-                <div id="btnShowErrors"></div>
-            </div>
+
         </div>
    
         
