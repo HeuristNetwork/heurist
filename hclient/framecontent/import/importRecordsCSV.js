@@ -611,12 +611,59 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     var i, j, rt_resourse, rt_ids = Object.keys(rtOrder['levels']),
                          isfound, depth=0, prev_depth = 0, found_levels=0;
                     
+                    var prev_rt = 0, primary_rt = 0;
+                    
+                    //get sort order for recordtypes by field order in structure
+                    rtOrder['orders'] = {};
+                    for (var rtid in rtOrder['rt_fields']){
+                        var flds = rtOrder['rt_fields'][rtid];
+                        rtOrder['orders'][rtid] = [];
+                        
+                        for (i=0;i<flds.length;i++){
+                            // rectypes referenced by this field
+                            rtOrder['orders'][rtid] = 
+                                rtOrder['orders'][rtid].concat(Object.keys(flds[i]['idfields']));
+                        }
+                    }
+                    
                          //fill dependecies list in popup dialog where we choose primary rectype
                          treeElement.empty();
-                         var primary_rt = 0;
                          
                          do{
-                     
+                             //find all record types for particular level 
+                             isfound = false;
+                             var rectypes = [];
+                             for (i=0;i<rt_ids.length;i++){
+                                 recTypeID = rt_ids[i];
+                                 if(rtOrder['levels'][recTypeID] == depth){
+                                     isfound = true;
+                                     rectypes.push(recTypeID);
+                                 }
+                             }//for
+                             
+                             if(isfound){
+                                 //sort  according to order of fields of last rectype from previous level
+                                 if(prev_rt>0){
+                                      var orders = rtOrder['orders'][prev_rt];
+                                      rectypes.sort(function(a,b){
+                                          var k1 = orders.indexOf(a);
+                                          var k2 = orders.indexOf(b);
+                                          if(k1>=0 && k2>=0){
+                                              return (k1-k2);
+                                          }else{
+                                              return (k1<k2)?1:-1;
+                                          }
+                                      });
+                                 }
+                                 for (i=0;i<rectypes.length;i++){
+                                      
+                                      recTypeID = rectypes[i];
+                                      var depth_separator = '';
+                                      if(i==0 && depth>0){
+                                          depth_separator = ';border-top:1px gray solid';
+                                      }
+                                     
+                             /* OLD way
                              isfound = false;
                              for (i=0;i<rt_ids.length;i++){
                                  recTypeID = rt_ids[i];
@@ -627,7 +674,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                      if(prev_depth!=depth){
                                          prev_depth = depth;
                                          depth_separator = ';border-top:1px gray solid';
-                                     }
+                                     }*/
                                      
                                      var sRectypeItem = '<div style="'+(depth>0?'padding-top:1em':'')
                                         + depth_separator+'">' 
@@ -682,7 +729,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                                         + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
                                                         + top.HEURIST4.rectypes.names[rt_resourse] + '</div>' 
                                                         
-                                                        + '<span style="float:right" class="id_fieldname rename" data-res-rt="'                                                                  + rt_resourse+'">' + field['idfields'][rt_resourse] + '</span><br>';
+                                                        + '<span style="float:right" class="id_fieldname rename" data-res-rt="'
+                                                        + rt_resourse+'">' + field['idfields'][rt_resourse] + '</span><br>';
                                                          
                                                }
                                                
@@ -707,13 +755,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                      if(depth==0){ 
                                         primary_rt = recTypeID
                                      }
-                                 }
-                                
-                             }
-                             depth++;
-                             if(isfound){
+                                 }//for
+                                 prev_rt = recTypeID;
                                  found_levels++;
-                             }
+                             } //is found
+                             depth++;
                          
                          }while(found_levels<4 && depth<10);
                          
