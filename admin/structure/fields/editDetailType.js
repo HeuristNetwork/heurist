@@ -442,7 +442,7 @@ function DetailTypeEditor() {
         }
 
         var el_sel = Dom.get("selVocab");
-        if(is_add_vocab || el_sel.value>0){ //add term to vocabulary
+        if(is_add_vocab || (el_sel && el_sel.value>0)){ //add term to vocabulary
 
             Hul.popupURL(top, top.HEURIST.baseURL_V3 +
                 "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
@@ -867,10 +867,10 @@ function DetailTypeEditor() {
     * Clears hidden fields for term tree and pointer in case of changing type
     * is invoked explicitely in _fromArrayToUI
     */
-    function _onChangeType(e){
+    function _onChangeType(event){
 
-        var el = Dom.get("dty_Type"); //e.target;
-        var isInitialCall = (e===null);
+        var el = Dom.get("dty_Type"); //event.target;
+        var isInitialCall = (event===null);
 
         //prevent setting outdated types for new field type
         if(!isInitialCall && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
@@ -1033,9 +1033,21 @@ function DetailTypeEditor() {
                     width: dim.w,
                     callback: function(context) {
                         if(context!="" && context!=undefined) {
-                            Dom.get("typeValue").value = top.HEURIST.detailTypes.lookups[context];
-                    		el.value = context;
-                            _onChangeType(null);
+                            
+                            var changeToNewType = true;
+                            if(((el.value==="resource") || (el.value==="relmarker") || (el.value==="enum"))  && el.value!==context){
+                                changeToNewType = confirm("If you change the type to '"+top.HEURIST.detailTypes.lookups[context]+ 
+                                    "' you will lose all your vocabulary settings for type '"+top.HEURIST.detailTypes.lookups[el.value]+
+                                    "'.\n\nAre you sure?");
+                            }
+
+                            if(changeToNewType) {
+                               Dom.get("typeValue").value = top.HEURIST.detailTypes.lookups[context];
+                               el.value = context;
+                                _onChangeType(null);
+                            }                            
+                                                
+                            
                         }
                     }
               });

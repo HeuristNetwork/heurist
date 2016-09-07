@@ -152,13 +152,13 @@ $(document).ready(function() {
     $('.input-cell > span').css({'font-size':'0.8em'});
 	$('.separator > .input-header-cell').css('min-width','200px');
     $('.input-row select').css({'max-width':'100px'});
-    
+    $('.input-row > .input-header-cell').text('Example: ');
     
     //reduce width of input elements	
     var csobj = {'font-size':'0.8em','width':'25ex'};
     $('.in').css(csobj);
     $('.input-cell > .text').css(csobj);
-    $('.input-cell > textarea').css(csobj);
+    $('.input-cell > textarea').css(csobj).css({'min-width': '20ex'});
     $('.file-resource-div > .resource-title').css(csobj);
     $('.resource-div > .resource-title').css({'font-size':'0.8em','width':'20ex'});
     $('.temporal-div img').css({'vertical-align':'baseline'});
