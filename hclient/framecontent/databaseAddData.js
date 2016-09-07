@@ -28,9 +28,10 @@ function hDatabaseAddData() {
 
     function _init(){
 
-        var parentdiv = $('#menu_container').accordion({
+        var parentdiv = $('.accordion_pnl').accordion({
             heightStyle: "content",
-            collapsible: true
+            collapsible: true, 
+            active: false
         });
 
         parentdiv.find('div')
@@ -163,7 +164,7 @@ function hDatabaseAddData() {
 
         if(link.attr('id')=='menulink-add-record'){
                 
-                $('#menu_container').find('a').removeClass('selected');
+                $('.accordion_pnl').find('a').removeClass('selected');
                 link.addClass('selected');
                 $('#frame_container2').attr('src', url); 
                 event.preventDefault();

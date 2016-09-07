@@ -53,9 +53,10 @@ function hDatabaseAdmin() {
         });
         */                
 
-        var parentdiv = $('#menu_container').accordion({
+        var parentdiv = $('.accordion_pnl').accordion({
             heightStyle: "content",
-            collapsible: true
+            collapsible: true, 
+            active: false
         });
 
         parentdiv.find('div')
@@ -74,7 +75,7 @@ function hDatabaseAdmin() {
         _initLinks(parentdiv);
 
         //$('#frame_container').attr('src', top.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+top.HAPI4.database);           }
-        parentdiv.accordion('option', 'active', 1); //STRUCTURE
+        $(parentdiv[1]).accordion('option', 'active', 0); //STRUCTURE
         $('#linkEditRectypes').click();
     }
     
@@ -143,13 +144,13 @@ function hDatabaseAdmin() {
             //check if login
             top.HAPI4.SystemMgr.is_logged(function(){
                 //top.HEURIST4.msg.showDialog(url, options);
-                $('#menu_container').find('a').removeClass('selected');
+                $('.accordion_pnl').find('a').removeClass('selected'); //was #menu_container
                 link.addClass('selected');
                 $('#frame_container').attr('src', url); 
             });
         }else{
             //top.HEURIST4.msg.showDialog(url, options);
-            $('#menu_container').find('a').removeClass('selected');
+            $('.accordion_pnl').find('a').removeClass('selected');
             link.addClass('selected');
             $('#frame_container').attr('src', url); 
         }        
