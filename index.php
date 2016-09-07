@@ -164,14 +164,26 @@ _time_debug = new Date().getTime() / 1000;
            // Performs inital search: parameters from request or from user preferences
            //
            function onInitCompleted_PerformSearch(){
-                
+               
+<?php
+     $db_total_records = mysql__select_value($system->get_mysqli(), 'select count(*) from Records');
+     echo 'var db_total_records='.($db_total_records>0?$db_total_records:0).';';  
+?>
+               
+               
                 if(top.HAPI4.sysinfo['layout']=='H4Default'){
                     //switch to FAP tab if q parameter is defined
-                    top.HAPI4.LayoutMgr.putAppOnTopById('FAP');
+                    if(db_total_records<1){
+                        showTipOfTheDay(false);   
+                    }else{
+                        top.HAPI4.LayoutMgr.putAppOnTopById('FAP');
+                    }
+                }else if(db_total_records<1){
+                    showTipOfTheDay(false);
                 }
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
-                if(!top.HEURIST4.util.isempty(qsearch)){
+                if(db_total_records>0 && !top.HEURIST4.util.isempty(qsearch)){
                     var qdomain = '<?=@$_REQUEST['w']?>';
                     var rules = '<?=@$_REQUEST['rules']?>';
                     if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
@@ -197,13 +209,7 @@ _time_debug = new Date().getTime() / 1000;
                 //if(!(top.HAPI4.sysinfo.db_total_records>0)){
                 //    showTipOfTheDay(false);
                 //}
-<?php
-     $db_total_records = mysql__select_value($system->get_mysqli(), 'select count(*) from Records');
-     if(!($db_total_records>0)){
-         echo 'showTipOfTheDay(false);';
-     }
-?>
-
+ 
 var fin_time = new Date().getTime() / 1000;
 //console.log('ipage finished '+( fin_time - _time_debug)+ '  total: '+(fin_time-_time_start));
 
