@@ -262,7 +262,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         dtFields[fi['rst_DisplayName']] = input_label;
         dtFields[fi['rst_RequirementType']] = 'optional';
         dtFields[fi['rst_MaxValues']] = 1;
-        dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resourse
+        dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resource
         //dtFields[fi['rst_DisplayWidth']] = 50;
         
         if(top.HEURIST4.util.isnull(init_value)) init_value = '';

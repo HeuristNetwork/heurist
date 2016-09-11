@@ -107,7 +107,7 @@ function get_config_bytes($val) {
             .select_rectype_seq{
                 cursor: pointer;
                 display: inline-block;
-                font-weight:bold !important;
+                /*font-weight:bold !important;*/
                 padding:0.2em;
             }
         </style>
