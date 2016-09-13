@@ -213,8 +213,28 @@ function parse_step0(){
             $system->addError(HEURIST_INVALID_REQUEST, "Parameter 'data' is missed");                
             return false;
         }
+        
+        //check if scratch folder exists
+        $res = folderExists(HEURIST_SCRATCH_DIR, true);
+    // -1  not exists
+    // -2  not writable
+    // -3  file with the same name cannot be deleted
+        
+        if($res<0){
+            $s='';
+            if($res==-1){
+                $s = 'Cant find folder "scratch" in database directory';
+            }else if($res==-2){
+                $s = 'Folder "scratch" in database directory is not writeable';
+            }else if($res==-3){
+                $s = 'Cant create folder "scratch" in database directory. It is not possible to delete file with the same name';
+            }
+            
+            $system->addError(HEURIST_ERROR, 'Cant save temporary file. '.$s);                
+            return false;
+        }
     
-        $upload_file_name = tempnam(HEURIST_FILESTORE_DIR.'scratch/', 'csv');
+        $upload_file_name = tempnam(HEURIST_SCRATCH_DIR, 'csv');
 
         $res = file_put_contents($upload_file_name, trim($content));
         unset($content);
@@ -327,10 +347,10 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     $err_encoding = array();
     $err_keyfields = array();
     
-    $int_fields = array(); //array of fields with integer values
-    $num_fields = array(); //array of fields with numeric values
-    $empty_fields = array(); //array of fields with NULL/empty values
-    $empty75_fields = array(); //array of fields with NULL/empty values in 75% of lines
+    $int_fields = array(); // array of fields with integer values
+    $num_fields = array(); // array of fields with numeric values
+    $empty_fields = array(); // array of fields with NULL/empty values
+    $empty75_fields = array(); // array of fields with NULL/empty values in 75% of lines
     
     $memos = array();  //multiline fields
     $multivals = array();
@@ -488,24 +508,31 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                         }
                     }
                     
+                    $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
                     //check integer value
-                    if(@$int_fields[$k] || ($check_keyfield && @$keyfields['field_'.$k]!=null)){
+                    if(@$int_fields[$k] || $check_keyfield_K){
                         
                          if(!ctype_digit(strval($field))){ //is_integer
                             //not integer
-                            if(is_array(@$err_keyfields[$k])){
-                                $err_keyfields[$k][1]++;
-                            }else{
-                                $err_keyfields[$k] = array(0,1);
+                            
+                            if($check_keyfield_K){
+                                if(is_array(@$err_keyfields[$k])){
+                                    $err_keyfields[$k][1]++;
+                                }else{
+                                    $err_keyfields[$k] = array(0,1);
+                                }
                             }
                             //exclude from array of fields with integer values
                             if(@$int_fields[$k]) $int_fields[$k]=null;
                             
                         }else if(intval($field)<1 || intval($field)>2147483646){ //max int value in mysql
-                            if(is_array(@$err_keyfields[$k])){  //out of range
-                                $err_keyfields[$k][0]++;
-                            }else{
-                                $err_keyfields[$k] = array(1,0);
+
+                            if($check_keyfield_K){
+                                if(is_array(@$err_keyfields[$k])){  //out of range
+                                    $err_keyfields[$k][0]++;
+                                }else{
+                                    $err_keyfields[$k] = array(1,0);
+                                }
                             }
                             //exclude from array of fields with integer values
                             if(@$int_fields[$k]) $int_fields[$k]=null;

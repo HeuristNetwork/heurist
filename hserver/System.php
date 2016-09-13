@@ -276,7 +276,9 @@ class System {
     }
 
 
-
+    //
+    //
+    //
     public function initPathConstants($dbname=null){
 
         global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
@@ -331,6 +333,8 @@ class System {
         define('HEURIST_TERM_ICON_DIR', HEURIST_FILESTORE_DIR . 'term-icons/');
         define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
 
+        define('HEURIST_SCRATCH_DIR', HEURIST_FILESTORE_DIR . 'scratch/');
+        folderCreate(HEURIST_SCRATCH_DIR, true);
 
         $folder = HEURIST_FILESTORE_DIR . 'settings/';
         if(folderCreate($folder, true)){
