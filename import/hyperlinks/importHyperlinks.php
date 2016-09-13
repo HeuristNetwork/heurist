@@ -573,6 +573,8 @@ function print_link($url, $title) {
 	global $linkno;
 	global $disambiguate_rec_ids;
 	global $notes;
+    
+    $url_visit = (strpos($url,'http://')===false)?'http://'.$url :$url;
 
 ?>
 <div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:90%;">
@@ -581,14 +583,14 @@ function print_link($url, $title) {
 		<input type="hidden" name="alt_title[<?= $linkno ?>]" value="<?= $title ?>" id="at<?= $linkno ?>">
 		<input type="hidden" name="link[<?= $linkno ?>]" value="<?= htmlspecialchars($url) ?>" id="u<?= $linkno ?>">
 
-  		&nbsp;&#91;<a href="<?= $url ?>" target="_blank"><span class="button">Visit</span></a>&#93;&nbsp;
+  		&nbsp;&#91;<a href="<?= $url_visit ?>" target="_blank"><span class="button">Visit</span></a>&#93;&nbsp;
 		<input type="button" style="padding-top: 2px;height:23px !important;font-weight:normal;font-size:1em;" name="lookup[<?= $linkno ?>]" value="Lookup Title" title="Lookup title from URL"
 			onClick="{lookup_revert(this, <?= $linkno ?>);}" id="lu<?= $linkno ?>">
 		<input type="hidden" name="kwd[<?= $linkno ?>]" value="<?= htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?= $linkno ?>">
 </div>
 
 <div class="input-row" style="padding-left: 60px;">
-  <a target=_blank href="<?= htmlspecialchars($url) ?>"><?= htmlspecialchars($url) ?></a>
+  <a target=_blank href="<?= $url_visit ?>"><?= htmlspecialchars($url) ?></a>
 </div>
 <div class="input-row" style="padding-left: 60px;">
 	<div style="display:inline-block;width:30px;vertical-align: middle;">

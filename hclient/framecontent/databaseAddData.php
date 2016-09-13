@@ -99,7 +99,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                         Harvest emails</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="import/hyperlinks/importHyperlinks.php" name="auto-popup" class="small h3link"
+                    <li style="padding-left:5px;"><a href="import/hyperlinks/importHyperlinks.php" name="auto-popup" class="h3link embed"
                         onClick="{return false;}"
                         title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
                         Import hyperlinks</a>

@@ -169,6 +169,19 @@ function hDatabaseAddData() {
                 $('#frame_container2').attr('src', url); 
                 event.preventDefault();
                 return false;
+                
+        }else if(link.hasClass('embed')) {
+        
+            //check if login
+            top.HAPI4.SystemMgr.is_logged(function(){
+                $('.accordion_pnl').find('a').removeClass('selected');
+                link.addClass('selected');
+                $('#frame_container2').attr('src', url); 
+                event.preventDefault();
+                return false;
+            });
+                
+                
         }else if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
             top.HAPI4.SystemMgr.is_logged(function(){top.HEURIST4.msg.showDialog(url, options);});
