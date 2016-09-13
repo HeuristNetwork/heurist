@@ -479,11 +479,11 @@ $.widget( "heurist.ruleBuilder", {
             //this.select_fields.show();
         }else if (arr_fields.length==1){
             //this.select_fields.hide();
-            this.select_fields.prop('disabled', true);
+            this.select_fields.prop('disabled', false); //true);
         }
 
         top.HEURIST4.ui.createSelector(this.select_fields.get(0), arr_fields);
-        this.select_fields.val('');
+        this.select_fields.prop("selectedIndex",0);//.val('');
         this._onSelectFieldtype();
 
         // TODO: remove big block of debug or old code
@@ -533,7 +533,8 @@ $.widget( "heurist.ruleBuilder", {
                         this.select_target_rectype.val(0);
                         this.select_target_rectype.prop('disabled', false);
                     }else{
-                        this.select_target_rectype.prop('disabled', true);
+                        //this.select_target_rectype.prop('disabled', true);
+                        this.select_target_rectype.prop('selectedIndex',0);
                     }
                     //this._arr_rectypes_subset = arr_field.rectypes;
                     is_not_selected = false;
