@@ -911,6 +911,8 @@ class Predicate {
 
     var $parent;
 
+    var $need_recursion = true;
+    
     function Predicate(&$parent, $value) {
         $this->parent = &$parent;
 
@@ -920,7 +922,11 @@ class Predicate {
 
     //$table_name=null
     function makeSQL() { return '1'; }
-
+    
+    
+    function stopRecursion() { 
+       $this->need_recursion = false; 
+    }
 
     //get the top most parent - the Query
     var $query;
@@ -1885,14 +1891,30 @@ class LinkedToParentPredicate extends Predicate {
 //
 class RelatedFromParentPredicate extends Predicate {
     function makeSQL() {
-
+        global $mysqli;
+        
+        $select_relto = null;
         $source_rty_ID = null;
         //if value is specified we search linked from specific source type and field
         if($this->value){
             $vals = explode('-', $this->value);
             if(count($vals)>1){
+                
                 $source_rty_ID = $vals[0];
                 $relation_type_ID = $vals[1];
+       
+                if($this->need_recursion){         
+                    //there is relationship term - need to find inverse value
+                    $res = $mysqli->query("select trm_InverseTermId from defTerms where trm_ID = $relation_type_ID");
+                    if($res){
+                        $inverseTermId = $res->fetch_row();
+                        $inverseTermId = @$inverseTermId[0];
+                        $relto = new RelatedToParentPredicate($this, $source_rty_ID.'-'.$inverseTermId);
+                        $relto->stopRecursion();
+                        $select_relto = $relto->makeSQL();
+                    }
+                }
+                
             }else{
                 $source_rty_ID = $vals[0];
                 $relation_type_ID = '';
@@ -1961,6 +1983,10 @@ class RelatedFromParentPredicate extends Predicate {
             
             $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
         }
+        
+        if($select_relto!=null){
+            $select = '('.$select.') OR ('.$select_relto.')';    
+        }
 
         return $select;
     }
@@ -1976,7 +2002,9 @@ class RelatedFromParentPredicate extends Predicate {
 //
 class RelatedToParentPredicate extends Predicate {
     function makeSQL() {
-
+        global $mysqli;
+        
+        $select_relto = null;
         $source_rty_ID = null;
         //if value is specified we search linked from specific source type and field
         if($this->value){
@@ -1984,6 +2012,19 @@ class RelatedToParentPredicate extends Predicate {
             if(count($vals)>1){
                 $source_rty_ID = $vals[0];
                 $relation_type_ID = $vals[1];
+                
+                if($this->need_recursion){         
+                    //there is relationship term - need to find inverse value
+                    $res = $mysqli->query("select trm_InverseTermId from defTerms where trm_ID = $relation_type_ID");
+                    if($res){
+                        $inverseTermId = $res->fetch_row();
+                        $inverseTermId = @$inverseTermId[0];
+                        $relto = new RelatedFromParentPredicate($this, $source_rty_ID.'-'.$inverseTermId);
+                        $relto->stopRecursion();
+                        $select_relto = $relto->makeSQL();
+                    }
+                }
+                
             }else{
                 $source_rty_ID = $vals[0];
                 $relation_type_ID = '';
@@ -2054,6 +2095,10 @@ class RelatedToParentPredicate extends Predicate {
             $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
         }
 
+        if($select_relto!=null){
+            $select = '('.$select.') OR ('.$select_relto.')';    
+        }
+        
         return $select;
     }
 }
