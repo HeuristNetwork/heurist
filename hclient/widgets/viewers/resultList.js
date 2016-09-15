@@ -258,6 +258,8 @@ $.widget( "heurist.resultList", {
             //.css({'position':'absolute','top':3,'left':2})
             .resultListMenu()
             .appendTo(this.div_toolbar);
+        }else{
+            this.div_toolbar.hide();
         }
 
 
