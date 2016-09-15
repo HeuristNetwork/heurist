@@ -42,6 +42,7 @@
 <?php
     $dbname = $_REQUEST['db'];
 
+    // Sandpit database is no longer needed, or used, from late 2015
     if ($dbname=='Heurist_Sandpit') {// we require a valid DB incase the user deletes all DBs
         print "<p>Deletion of Heurist_Sandpit is not supported through this interface as it is required for initial user registration.</p>";
         //"<p><a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=Heurist_Sandpit' >Return to Heurist</a>";

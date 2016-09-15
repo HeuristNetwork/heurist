@@ -244,7 +244,7 @@ if(!$needRegistration){
                         ?>
 
                         <table style="padding: 3px; border: 0px;" id="login-table">
-                            <?php
+                            <?php // sandpit database is no longer used or needed from late 2015
                             if(@$_REQUEST['register']==1 && HEURIST_DBNAME=="Heurist_Sandpit"){
                                 ?>
                                 <tr class="input-row">
