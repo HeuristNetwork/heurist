@@ -892,7 +892,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //preferences by default
                 that.currentUser['ugr_Preferences'] = {layout_language:'en',
                                          layout_theme: 'heurist',
-                                'search_detail_limit': 2000, 'help_on':'0'};
+                                'search_detail_limit': 2000, 'help_on':'0', 'userCompetencyLevel': 'beginner'};
             }
             if(top.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];
@@ -904,6 +904,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                     res = top.HEURIST.displayPreferences[name];
                 }
 
+                // TODO: redundancy: this duplicates same in System.php
                 if('search_detail_limit'==name){
                     if(!res && res<500 ) res = 500
                     else if(res>5000 ) res = 5000;

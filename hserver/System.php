@@ -841,6 +841,7 @@ class System {
 
         $res = @$_SESSION[$this->dbname_full]["ugr_Preferences"][$property];
 
+        // TODO: redundancy: this duplicates same in hapi.js
         if('search_detail_limit'==$property){
             if(!$res || $res<500 ) {$res = 500;}
             else if($res>5000 ) {$res = 5000;}

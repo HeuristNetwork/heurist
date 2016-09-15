@@ -89,8 +89,10 @@ $prefs = array(
     "defaultPrintView" => "default",
     "showSelectedOnlyOnMapAndSmarty" => "all", //by default show all records
 
+    
     // Properties which can be set in the Profile > Preferences dialogue
-    "savedSearchDest" => "",  //last saved search destination (workgroup id)
+    "userCompetencyLevel" => "beginner", // interface style eg. show advanced functions, help text etc. beginner|intermediate|advanced 
+    // not used "savedSearchDest" => "",  //last saved search destination (workgroup id)
     "defaultSearch" => "", // was "tag:Favourites", then sortby:-m after:\"1 week ago\"
     "searchQueryInBrowser" => "true", // was false, I presume for neatness. But less informative
 
@@ -100,8 +102,11 @@ $prefs = array(
     "findFuzzyMatches" => "false", //check similar records on addition
     "defaultMyBookmarksSearch" => "false", // hitting Enter will do a My Bookmarks search
     "showMyBookmarks" => "true", // turn on/off My Bookmarks heading in the navigation menu
+    
+    // deprcated in version 4
     "autoSelectRelated" => "false", // autoSelect related records
     "autoDeselectOtherLevels" => "true", // auto deselct other level before selecting current.
+    
     "relationship-optional-fields" => "false", //show optional fields for add relationship dialogue
     "tagging-popup" => "false", // popup a tagging dialogue if record saved without any tags -switch on/off in this popup or preferences
     "showAggregations" => "false", // show link Aggregations under My Bookmarks and All records in teh search navigation menu

@@ -1,6 +1,7 @@
 <!--
 /**
 * Set user's preferences for session
+* Replaces editPreferences.html in h3
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -49,6 +50,7 @@
         }
 
         //init bookmarklet
+        // NOTE: bookmarklet source is duplicated in /import/bookmarklet/bookmarkletSource.js
         sel = $("#bookmarklet-link");
         if(sel.length==1){ //global variable defined in layout_default.js
             sel.attr('href',
@@ -80,32 +82,35 @@
 
         <h3>Bookmarklet</h3>
         <div>
-            <label class="header">Drag this link on your bookmarks bar</label><b><u>
+            <label class="header">Drag this link to your browser bookmarks bar</label><b><u>
                     <a id="bookmarklet-link"
                         onclick="{alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;}"
                         title="Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites."
                         href="#"></a>
-                </u></b><label>&nbsp;(it provides bookmarking of web pages)</label><br><br>
+                </u></b><label>&nbsp;to allow bookmarking of web pages</label><br><br>
         </div>
 
+        
+        <!-- ================================================= -->
         <hr/>
-
-        <h3>Search</h3>
+        <h3>Filter</h3>
         <div>
-            <div class="header"><label for="defaultSearch">Heurist search string to execute when loading the search page</label></div>
+            <div class="header"><label for="defaultSearch">Filter string to apply when loading main page</label></div>
             <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"/>
         </div>
+        
         <div>
-            <div class="header"><label for="searchQueryInBrowser">Show current search query in browser address field</label></div>
+            <div class="header"><label for="searchQueryInBrowser">Include current filter in URL for page</label></div>
             <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all h3pref"/>
         </div>
+
         <div>
             <div class="header">
                 <label for="smarty-output-limit">
-                    Limit number of lines in interactive report output<br/>(only applies to web interface, not external calls)
+                    Limit lines in interactive custom report output<br/><i>only in web interface, not external calls</i>
                 </label>
             </div>
-            <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"
+            <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all h3pref" style="min-width:50px"
                 title="This limit does not apply to external calls or periodic report generation to file">
                 <option value="50">50</option>
                 <option value="200">200</option>
@@ -117,11 +122,12 @@
                 <option value="20000">20,000 (not recommended)</option>
             </select>
         </div>
+
         <div>
             <div class="header"><label for="search_detail_limit">
-                    Limit number of objects on map/timeline in search interface<br/>(only applies to web interface, not external calls)
+                    Limit objects on interactive map/timeline<br/><i>only in web interface, not external calls</i>
                 </label></div>
-            <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:300px"
+            <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
                 title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
                 <option value="500">500</option>
                 <option value="1000">1,000</option>
@@ -135,47 +141,70 @@
         </div>
 
 
+        <!-- ================================================= -->
         <hr />
         <h3>Edit</h3>
         <div>
-            <div class="header"><label for="tagging-popup">When saving record, prompt for tags if no tags have been set</label></div>
+            <div class="header"><label for="tagging-popup">Prompt for tags when saving records<br /><i>if no tags have been set</i></label></div>
             <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all h3pref"/>
         </div>
+        
         <div>
-            <div class="header"><label for="defaultRecentPointerSearch">When entering a pointer field in record edit, default to recent records search (otherwise All Records)</label></div>
+            <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br />pointer fields <i>(otherwise All Records)</i></label></div>
             <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all h3pref"/>
         </div>
+        
         <div>
-            <div class="header"><label for="findFuzzyMatches">Check for similar records on creation (can slow down new record save significantly)</label></div>
+            <div class="header"><label for="findFuzzyMatches">Check for similar records on creation<br /><i>can slow new-record save</i></label></div>
             <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all h3pref"/>
         </div>
+        
         <div>
-            <div class="header"><label for="record-edit-advancedmode">Advanced edit mode</label></div>
+            <div class="header"><label for="record-edit-advancedmode">Use full edit mode - shows extra functionality<br /><i>otherwise shows data fields tab only</i></label></div>
             <input type="checkbox" name="record-edit-advancedmode" id="record-edit-advancedmode" class="text ui-widget-content ui-corner-all h3pref"/>
         </div>
 
 
+        <!-- ================================================= -->
         <hr />
         <h3>Appearance</h3>
+        
+        <div>
+            <div class="header"><label for="userCompetencyLevel">
+                    User interface style / level of user
+                </label></div>
+            <select name="userCompetencyLevel" id="userCompetencyLevel" class="text ui-widget-content ui-corner-all" style="min-width:300px"
+                title="Determines some aspects of the user interface, from simplified and maximum help for Beginner throguh to leaner, with additional 'raw' functions, for Advanced">
+                <option value="beginner">Beginner (extra help)</option>
+                <option value="intermediate">Intermediate (normal level)</option>
+                <option value="advanced">Advanced (obscure functions, command strings)</option>
+            </select>
+        </div>
+
+        <!-- Allowing this is dangerous b/c you can end up in a style which doesn't allow editing or logout, and is remembered in session -->
         <div style="display: none;">
-            <div class="header"><label for="layout_id">Layout</label></div>
+            <div class="header"><label for="layout_id">Layout (normally specified by parameter)</label></div>
             <select name="layout_id" id="layout_id" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
         </div>
+        
         <div>
-            <div class="header"><label for="layout_language">Language</label></div>
+            <div class="header"><label for="layout_language">Interface language (localisation)</label></div>
             <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
         </div>
+        
         <div>
-            <div class="header"><label>Theme</label></div>
+            <div class="header"><label>Theme (colours & styles)</label></div>
             <div id="layout_theme" style="min-width: 300px;"></div>
             <!-- <select name="layout_theme" id="layout_theme" class="text ui-widget-content ui-corner-all"></select> -->
         </div>
+        
         <div>
-            <div class="header"><label for="help_on">Show help</label></div>
+            <div class="header"><label for="help_on">Show help texts for fields in data entry</label></div>
             <input type="checkbox" name="help_on" id="help_on" class="text ui-widget-content ui-corner-all"/>
         </div>
+        
         <div>
-            <div class="header"><label for="bookmarks_on">Show boomarks search</label></div>
+            <div class="header"><label for="bookmarks_on">Show My Bookmarks in navigation panel</label></div>
             <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
         </div>
 
