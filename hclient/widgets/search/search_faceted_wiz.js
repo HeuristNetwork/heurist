@@ -663,7 +663,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 //load definitions for given rectypes
                 window.HAPI4.SystemMgr.get_defs({rectypes: rectype,
                     mode:4, //special node - returns data for treeview
-                    fieldtypes:['enum','freetext',"year","date","integer","float"]},  //ART20150810 this.options.params.fieldtypes.join() },
+                    fieldtypes:['enum','freetext',"year","date","integer","float","resource","relmarker"]},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
