@@ -420,8 +420,17 @@ $.widget( "heurist.svs_list", {
                     }
                     //save
                     top.HAPI4.save_pref('svs_list_status', JSON.stringify(keep_status));
+                    
+                    //replace all ui-icon-triangle-1-s to se
+                    cdivs.find('.ui-icon-triangle-1-e').removeClass('ui-icon-triangle-1-se');
+                    cdivs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-se');
+                    
                 }
             });
+            //replace all ui-icon-triangle-1-s to se
+            cdivs.find('.ui-accordion-header-icon').css('font-size','inherit');
+            cdivs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-se');
+
         });
 
 
@@ -482,8 +491,18 @@ $.widget( "heurist.svs_list", {
     },
 
     _defineHeader: function(name, domain){
+        
+        if(domain=='all' || domain=='bookmark'){
+            sIcon = 'user';
+        }else if(domain=='dbs'){
+            sIcon = 'database';
+        }else {
+            sIcon = 'group';
+        }
 
-        var $header = $('<h3 grpid="'+domain+'">'+name+'</h3>').addClass('tree-accordeon-header');
+        var $header = $('<h3 grpid="'+domain+'"><span class="ui-icon ui-icon-'+sIcon+'" '
+        + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
+        + name+'</span></h3>').addClass('tree-accordeon-header');
 
         if('dbs'!=domain){
             var context_opts = this._getAddContextMenu(domain);
