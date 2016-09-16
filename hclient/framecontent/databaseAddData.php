@@ -80,20 +80,20 @@ require_once(dirname(__FILE__)."/initPage.php");
                     </li>
 
                     <li style="padding-left:5px;">
-                        <a href="import/biblio/syncZotero.php" name="auto-popup"  class="fixed h3link"
+                        <a href="import/biblio/syncZotero.php" name="auto-popup"  class="fixed h3link embed"
                             onClick="{return false;}"
                             title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
                             Zotero synchronisation</a>
                     </li>
 
                     <li class="admin-only" style="padding-left:5px;">
-                        <a href="import/fieldhelper/synchroniseWithFieldHelper.php" name="auto-popup" class="fixed h3link"
+                        <a href="import/fieldhelper/synchroniseWithFieldHelper.php" name="auto-popup" class="fixed h3link embed"
                             onClick="{return false;}" target="_blank"
                             title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
                             Index multimedia</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="import/email/emailProcessingSetup.php" name="auto-popup" class="fixed h3link"
+                    <li style="padding-left:5px;"><a href="import/email/emailProcessingSetup.php" name="auto-popup" class="fixed h3link embed"
                         onClick="{return false;}"
                         title="Harvest email from a designated IMAP email server (set in database administrtion > Databsae > Advanced Properties)">
                         Harvest emails</a>
@@ -105,7 +105,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                         Import hyperlinks</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="import/importerFramework.php?format=GEO" name="auto-popup" class="fixed h3link"
+                    <li style="padding-left:5px;"><a href="import/importerFramework.php?format=GEO" name="auto-popup" class="fixed h3link embed"
                         onClick="{return false;}"
                         title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
                         Import KML</a>
@@ -121,13 +121,14 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div>
                 <ul>
 
-                    <li class="admin-only" style="padding-left:5px;"><a href="import/utilities/manageFilesUpload.php" name="auto-popup" class="large h3link"
+                    <li class="admin-only" style="padding-left:5px;"><a href="import/utilities/manageFilesUpload.php" name="auto-popup" 
+                    class="large h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
                         Multi-file upload</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="import/utilities/convertTagsToCSV.php" name="auto-popup" class="fixed h3link"
+                    <li style="padding-left:5px;"><a href="import/utilities/convertTagsToCSV.php" name="auto-popup" class="fixed h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="Convert file with tag + value per line (space separated), to a CSV file with pipe-separated repeat values">
                         Tag-value to CSV</a>
