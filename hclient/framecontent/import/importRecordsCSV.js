@@ -437,47 +437,61 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             //apply selection of primary and dependent reccord types
             buttons[top.HR('OK')]  = function() {
                     
-                    $dlg.dialog( "close" );
+                $dlg.dialog( "close" );
+
+                //prepare sequence object - based on selected rectypes and field names
+                //find marked rectype checkboxes 
+                var treeElement = $('#dependencies_preview');
+                var recTypeID, field_key;
+                var rectypes = treeElement.find('.rt_select:checked');
+                rectypes.sort(function(a,b){ return $(a).attr('data-lvl') - $(b).attr('data-lvl')});
+
+                var i,j,k, sequence = [];
+                for(i=0;i<rectypes.length;i++){
+                    recTypeID = $(rectypes[i]).attr('data-rectype');
+                    field_key = $(rectypes[i]).attr('data-rt');
+
+                    //find names of identification fields
+                    var ele = treeElement.find('.id_fieldname[data-res-rt="'+field_key+'"]');
+                    for(j=0;j<ele.length;j++){
+                        var isfound = false;
+                        for(k=0;k<sequence.length;k++){
+                            if(sequence[k].field == $(ele[j]).text()){
+                                isfound = true;
+                                break;
+                            }
+                        }
+                        if(!isfound){
+                            sequence.push({field:$(ele[j]).text(), rectype:recTypeID, 
+                                hierarchy:$(rectypes[i]).attr('data-tree') });    
+                        }
+                    }
+                }
+                if(sequence.length==0){ //no dependencies - add main rectype only
+                    recTypeID = imp_session['primary_rectype'];
+                    var fname = _getColumnNameForPresetIndex(recTypeID);
+                    sequence.push({field:fname, rectype:recTypeID});    
+                }
+                         
+                //comapre  current and new sequences
+                var isSomethingChanged = ($('#sa_primary_rectype').val()!=imp_session['primary_rectype'])
+                            || (!imp_session['sequence'] || imp_session['sequence'].length!=sequence.length);
+                
+                if(!isSomethingChanged){
+                     var i;
+                     for(i=0;i<sequence.length;i++){
+                         
+                        isSomethingChanged = (imp_session['sequence'][i].field != sequence[i].field ||  
+                                              imp_session['sequence'][i].rectype != sequence[i].rectype); 
+                        if(isSomethingChanged) break;
+                     }
+                }
                     
-                    if($('#sa_primary_rectype').val()!=imp_session['primary_rectype']){
+                if (isSomethingChanged) {
 
                         imp_session['primary_rectype'] = $('#sa_primary_rectype').val();    
-                        //prepare sequence object - based on selected rectypes and field names
                         
-                         //find marked rectype checkboxes 
-                         var treeElement = $('#dependencies_preview');
-                         var recTypeID, field_key;
-                         var rectypes = treeElement.find('.rt_select:checked');
-                         rectypes.sort(function(a,b){ return $(a).attr('data-lvl') - $(b).attr('data-lvl')});
-                         
-                         var i,j,k, sequence = [];
-                         for(i=0;i<rectypes.length;i++){
-                            recTypeID = $(rectypes[i]).attr('data-rectype');
-                            field_key = $(rectypes[i]).attr('data-rt');
-                            
-                            //find names of identification fields
-                            var ele = treeElement.find('.id_fieldname[data-res-rt="'+field_key+'"]');
-                            for(j=0;j<ele.length;j++){
-                                var isfound = false;
-                                for(k=0;k<sequence.length;k++){
-                                    if(sequence[k].field == $(ele[j]).text()){
-                                        isfound = true;
-                                        break;
-                                    }
-                                }
-                                if(!isfound){
-                                    sequence.push({field:$(ele[j]).text(), rectype:recTypeID, 
-                                                   hierarchy:$(rectypes[i]).attr('data-tree') });    
-                                }
-                            }
-                         }
-                         if(sequence.length==0){ //no dependencies - add main rectype only
-                             recTypeID = imp_session['primary_rectype'];
-                             var fname = _getColumnNameForPresetIndex(recTypeID);
-                             sequence.push({field:fname, rectype:recTypeID});    
-                         }
-                        
-                         imp_session['sequence'] = sequence;
+                        imp_session['sequence'] = sequence;
                         
                         //save session - new primary rectype and sequence
                         var request = { action: 'set_primary_rectype',
@@ -689,8 +703,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     var f_key = field['depend'][j];
                     var ft_id = _getFt_ID(f_key);
                     if(recStruc[ft_id][idx_reqtype]=='required' 
-                        && levels[selected_fields[i]]<levels[f_key]
-                        && ft_ids.indexOf(ft_id)<0){
+                        && levels[selected_fields[i]]<levels[f_key]) {
+                        //&& ft_ids.indexOf(ft_id)<0){
                         
                         result_depend.push(f_key);
                         new_selected.push(f_key);   
@@ -964,8 +978,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         var cb = treeElement.find('.rt_select[data-rt="'+fields_affected[i]+'"]');
                         cb.prop('checked',true);
                         if(keep_field_key!=fields_affected[i]){ //do not disable itself
-                            //top.HEURIST4.util.setDisabled(cb, true);
-                            //cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
+                            top.HEURIST4.util.setDisabled(cb, true);
+                            cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                         }
                     }
                     

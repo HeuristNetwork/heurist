@@ -253,9 +253,24 @@ If you have missing data for Required fields, you may find it convenient to set 
                     <div class="header" style="min-width: 50px;"><label>Field separator:</label></div>
                     <div class="input-cell">  
                         <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;">
-                                <option value="," selected>comma</option>
+                                <option value="," selected>comma ,</option>
                                 <option value="tab">tab</option>
-                                <option value=";">semicolon</option>
+                                <option value=";">semicolon ;</option>
+                                <option value="|">pipe |</option>
+                                <option value=":">colon :</option>
+                                <option value="-">hyphen -</option>
+                                <option value="=">equal sign =</option>
+                                <option value="#">hash #</option>
+                                <option value="$">dollar sign $</option>
+                                <option value="@">at sign @</option>
+                                <option value="&">ampersand &amp;</option>
+                                <option value="*">asterisk *</option>
+                                <option value="(">left parentheses (</option>
+                                <option value=")">right parentheses )</option>
+                                <option value="[">left bracket [</option>
+                                <option value="]">right bracket ]</option>
+                                <option value="/">slash /</option>
+                                <option value="\">backslash \</option>
                         </select>                          
                     </div>
                 </div>
@@ -283,12 +298,25 @@ If you have missing data for Required fields, you may find it convenient to set 
                     <div class="header" style="min-width: 50px;"><label>Multivalue separator:</label></div>
                     <div class="input-cell">        
                         <select id="csv_mvsep" class="text ui-widget-content ui-corner-all" style="width:120px;">
-                            <option value="|" selected>|</option>
-                            <option value=";">;</option>
-                            <option value=":">:</option>
-                            <option value="/">/</option>
-                            <option value="none">no separator</option>
-                            <!-- option value=",">,</option -->
+                                <option value="|" selected>pipe |</option>
+                                <option value=",">comma ,</option>
+                                <option value="tab">tab</option>
+                                <option value=";">semicolon ;</option>
+                                <option value=":">colon :</option>
+                                <option value="-">hyphen -</option>
+                                <option value="=">equal sign =</option>
+                                <option value="#">hash #</option>
+                                <option value="$">dollar sign $</option>
+                                <option value="@">at sign @</option>
+                                <option value="&">ampersand &amp;</option>
+                                <option value="*">asterisk *</option>
+                                <option value="(">left parentheses (</option>
+                                <option value=")">right parentheses )</option>
+                                <option value="[">left bracket [</option>
+                                <option value="]">right bracket ]</option>
+                                <option value="/">slash /</option>
+                                <option value="\">backslash \</option>
+                                <option value="none">no separator</option>
                         </select>
                     </div>
                 </div>
