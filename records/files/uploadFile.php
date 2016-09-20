@@ -1,7 +1,7 @@
 <?php
 
     /*
-    * Copyright (C) 2005-2013 University of Sydney
+    * Copyright (C) 2005-2016 University of Sydney
     *
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
     * in compliance with the License. You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 
     /**
     set of functions
-    *     upload_file - copies temp file to HEURIST_FILESTORE_DIR and register in recUploadedFiles
+    *     upload_file - copies temp file to HEURIST_FILES_DIR and register in recUploadedFiles
     *     register_file - registger the existing file on the server in recUploadedFiles (used in import)
     *     get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
     *     getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
@@ -24,10 +24,10 @@
     *
     * @author      Tom Murtagh
     * @author      Kim Jackson
-    * @author      Stephen White   <stephen.white@sydney.edu.au>
+    * @author      Stephen White
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @copyright   (C) 2005-2013 University of Sydney
-    * @link        http://Sydney.edu.au/Heurist
+    * @copyright   (C) 2005-2016 University of Sydney
+    * @link        http://HeuristNetwork.org
     * @version     3.1.0
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @package     Heurist academic knowledge management system
@@ -42,7 +42,7 @@
     /**
     * Invoked from HAPI.saveFile.php
     *
-    * Copies temp file to HEURIST_FILESTORE_DIR and registger in recUploadedFiles
+    * Copies temp file to HEURIST_FILES_DIR and registger in recUploadedFiles
     *
     * Check that the uploaded file has a sane name / size / no errors etc,
     * enter an appropriate record in the recUploadedFiles table,
@@ -63,7 +63,6 @@
         if (! is_logged_in()) return "Not logged in";
 
         if ($size <= 0  ||  $error) {
-            error_log("size is $size, error is $error");
             return "File size recognized as 0. Either file size more than php upload_max_filesize or file is corrupted. Error: $error";
         }
 
@@ -108,13 +107,16 @@
             'ulf_MimeExt ' => $mimetypeExt,
             'ulf_FileSizeKB' => $file_size,
             'ulf_Description' => $description? $description : NULL,
-            'ulf_FilePath' => '', //was HEURIST_FILESTORE_DIR
+            'ulf_FilePath' => 'file_uploads/', //relative path to HEURIST_FILESTORE_DIR - db root
             'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt))
         );
-
+                                             
         if (! $res) {
-            error_log("error inserting file upload info: " . mysql_error());
-            $uploadFileError = "Error inserting file upload info into database";
+            
+            $uploadFileError = "Error inserting file metadata or unable to recognise uploaded file format. '.
+                'This generally means that the mime type for this file has not been defined for this database (common mime types are defined by default). '.
+                'Please add mime type from Database > Administration > Structure > Define mime types. '.
+                'Otherwise please contact your system administrator or the Heurist developers.";
             return $uploadFileError;
         }
 
@@ -123,20 +125,36 @@
         mysql_query('update recUploadedFiles set ulf_FileName = "'.$filename.
             '", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
         /* nonce is a random value used to download the file */
-        /*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".$filename);
-        $pos = strpos($tmp_name, HEURIST_FILESTORE_DIR);   
-        if( is_numeric($pos) && $pos==0 && copy($tmp_name, HEURIST_FILESTORE_DIR . "/" . $filename) )  //file is already in upload folder
+
+        if(!file_exists($tmp_name)){
+error_log("NOT FOUND ".$tmp_name);
+        }
+
+        $pos = strpos($tmp_name, HEURIST_FILES_DIR);
+        if( copy($tmp_name, HEURIST_FILES_DIR .  $filename) )  //file is already in upload folder
         {
+            //rename file
             unlink($tmp_name);
             return $file_id;
 
-        } else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_FILESTORE_DIR . "/" . $filename)) {  //move file into upload folder
+        }
+        /*else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_FILES_DIR . $filename)) {  //move file into upload folder
 
             return $file_id;
-        } else {
+        }*/
+        /*
+
+        $isError = move_uploaded_file($tmp_name, HEURIST_FILES_DIR . $filename);
+error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$isError);
+        if($isError==true){
+            return $file_id;
+        }else*/
+
+        if(true){
+
             /* something messed up ... make a note of it and move on */
             $uploadFileError = "upload file: $name couldn't be saved to upload path definied for db = "
-            . HEURIST_DBNAME." (".HEURIST_FILESTORE_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory";
+            . HEURIST_DBNAME." (".HEURIST_FILES_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory";
             error_log($uploadFileError);
             mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
             return $uploadFileError;
@@ -176,7 +194,7 @@
 
         //get folder, extension and filename
         $path_parts = pathinfo($fullname);
-        $dirname = $path_parts['dirname']."/";
+        $dirname = $path_parts['dirname'].'/';
         $mimetypeExt = strtolower($path_parts['extension']);
         //$filename = $path_parts['filename'];
         $filename = $path_parts['basename'];
@@ -193,14 +211,14 @@
         }else{
             $file_size = round($size / 1024);
         }
-        
-        // get relative path
+
+        // get relative path to db root folder
         $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);
 
         //check if such file is already registered
         $res = mysql_query('select ulf_ID from recUploadedFiles '
-            .'where ulf_FileName = "'.addslashes($filename).'" and '
-            .' (ulf_FilePath = "'.addslashes(HEURIST_FILESTORE_DIR).'" or ulf_FilePath = "'.addslashes($relative_path).'")');
+            .'where ulf_FileName = "'.mysql_real_escape_string($filename).'" and '
+            .' (ulf_FilePath = "file_uploads/" or ulf_FilePath = "'.mysql_real_escape_string($relative_path).'")');
 
         if (mysql_num_rows($res) == 1) {
             $row = mysql_fetch_assoc($res);
@@ -219,7 +237,6 @@
                 'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt));
 
 
-            /*****DEBUG****///error_log(">>>>>".print_r($toins,true));
 
             $res = mysql__insert('recUploadedFiles', $toins);
 
@@ -299,14 +316,16 @@
                     $filename = HEURIST_FILESTORE_DIR ."/". $filedata['id']; // pre 18/11/11 - bare numbers as names, just use file ID
                 }
 
-                $filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
+                //$filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
                 $filename = str_replace('//', '/', $filename);
+                $filename = str_replace('\\', '/', $filename);
 
                 //do not delete files that are not in root folder, they may be indexed/imported by "filez in situ" utility
                 $path_parts = pathinfo($filename);
                 $dirname = $path_parts['dirname']."/";
 
-                if( $dirname == HEURIST_FILESTORE_DIR ){
+                if( $dirname == HEURIST_FILESTORE_DIR || $dirname == HEURIST_FILES_DIR ){
+                    //remove physically from file_uploads or db root only
                     if(file_exists($filename)){
                         unlink($filename);
                     }
@@ -469,10 +488,6 @@
         }
         $filedata = json_decode($filejson, true);
 
-        //DEBUG
-        /*****DEBUG****///error_log("1.>>>>>".$filedata);
-        /*****DEBUG****///error_log("is_array".is_array($filedata)." 2.>>>>>".print_r($filedata, true));
-
 
         if(!is_array($filedata)){ //can't parse - assume this is URL - old way
 
@@ -500,7 +515,6 @@
         if(@$filedata['ext']==null && $filedata['mediaType']=="xml"){
             $filedata['ext'] = "xml";
         }
-        //*****DEBUG****/// error_log("reg remote file data ".print_r($filedata,true));
         $fileparameters = @$filedata['params'] ? $filedata['params'] : "mediatype=".$filedata['mediaType'];
         if(@$filedata['remoteSource'] && $filedata['remoteSource']!='heurist'){ // && $filedata['remoteSource']!='generic'){
             $fileparameters	= $fileparameters."|source=".$filedata['remoteSource'];
@@ -563,7 +577,6 @@
             );
 
             if (!$res) {
-                /*****DEBUG****///error_log("ERROR Insert record: ".mysql_error());
                 return null; //"Error registration remote source  $url into database";
             }
 
@@ -648,6 +661,46 @@
     }
 
     /**
+    *
+    *
+    *
+    * @param mixed $path
+    */
+    function resolveFilePath($path){
+
+            if( $path && !file_exists($path) ){
+                chdir(HEURIST_FILESTORE_DIR);  // relatively db root
+                $fpath = realpath($path);
+                if(file_exists($fpath)){
+                    return $fpath;
+                }else{
+                    chdir(HEURIST_FILES_DIR);          // relatively file_uploads 
+                    $fpath = realpath($path);
+                    if(file_exists($fpath)){
+                        return $fpath;
+                    }else{
+                        //realpath gives real path on remote file server
+                        if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
+                            $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
+                            if(file_exists($fpath)){
+                                return $fpath;
+                            }
+                        }else
+                        if(strpos($path, '/misc/heur-filestore/')===0){
+                            $fpath = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $path);
+                            if(file_exists($fpath)){
+                                return $fpath;
+                            }
+                        }
+                        
+                    }
+                }
+            }
+
+            return $path;
+    }
+
+    /**
     * put your comment there...
     *
     * @param mixed $fileID
@@ -674,7 +727,7 @@
             ulf_MimeExt as ext,
             ulf_ExternalFileReference as remoteURL,
             ulf_Parameters as parameters,
-            concat(ulf_FilePath,ulf_FileName) as fullpath,
+            ulf_FilePath, ulf_FileName,
             ulf_PreferredSource as prefsource
 
             from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
@@ -706,17 +759,12 @@
             }else{
                 $res["URL"] = $downloadURL;
             }
-            
-            //add database media storage folder for relative paths
-            $path = @$res['fullpath'];
-            if( $path && !file_exists($path) ){
-                chdir(HEURIST_FILESTORE_DIR);
-                $path = realpath($path);
-                if(file_exists($path)){
-                    $res['fullpath'] = $path;
-                }
+
+            if(@$res['ulf_FilePath'] || @$res['ulf_FileName']){
+                $res['fullpath'] = @$res['ulf_FilePath'].@$res['ulf_FileName'];
             }
-            
+            //add database media storage folder for relative paths
+            $res['fullpath'] = resolveFilePath(@$res['fullpath']);
 
             $params = parseParameters($res["parameters"]);
             $res["mediaType"] =	(array_key_exists('mediatype', $params))?$params['mediatype']:null;
@@ -757,8 +805,10 @@
         if($params){
             $pairs = explode('|', $params);
             foreach ($pairs as $pair) {
-                list($k, $v) = explode("=", $pair); //array_map("urldecode", explode("=", $pair));
-                $op[$k] = $v;
+                if(strpos($pair,'=')>0){
+                    list($k, $v) = explode("=", $pair); //array_map("urldecode", explode("=", $pair));
+                    $op[$k] = $v;
+                }
             }
         }
         return $op;
@@ -790,7 +840,6 @@
         $res = mysql_query($squery);
         $row = mysql_fetch_assoc($res);
         $rtyID = $row["rec_RecTypeID"];
-        //error_log("rectype is ".print_r($rtyID,true));
         $thumb_url = "";
         // 223  Thumbnail
         // 222  Logo image
@@ -810,7 +859,6 @@
             ($imgDT?		" dtl_DetailTypeID = $imgDT desc,"		:"").
             " dtl_DetailTypeID".	// no preference on associated or other files just select the first
             " limit 1";
-            /*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>>>>>>".$squery);
             $res = mysql_query($squery);
 
             if ($res && mysql_num_rows($res) == 1) {
@@ -824,7 +872,6 @@
                 }
             }
         }
-        /*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>>>>>>thumb url ".$thumb_url);
         //check freetext (url) type details for a something to represent this record as an icon
         if( $thumb_url == "" && ($thumbUrlDT || $fullUrlDT || $webIconDT)) {
             $squery = "select dtl_Value".
@@ -837,7 +884,6 @@
             " dtl_DetailTypeID".	// anythingelse is last
             " limit 1";
 
-            /*****DEBUG****///error_log("2.>>>>>>>>>>>>>>>>>>>>>>>".$squery);
             $res = mysql_query($squery);
 
             if ($res && mysql_num_rows($res) == 1) {
@@ -876,7 +922,7 @@
         }
     }*/
 
-    
+
     /**
      * Returns the target path as relative reference from the base path.
      *
@@ -899,6 +945,12 @@
      */
     function getRelativePath($basePath, $targetPath)
     {
+        
+        $targetPath = str_replace("\0", '', $targetPath);
+        $targetPath = str_replace('\\', '/', $targetPath);
+        
+        if( substr($targetPath, -1, 1) != '/' )  $targetPath = $targetPath.'/';
+        
         if ($basePath === $targetPath) {
             return '';
         }
@@ -928,7 +980,7 @@
         // (see http://tools.ietf.org/html/rfc3986#section-4.2).
         return '' === $path || '/' === $path[0]
             || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
-            ? "./$path" : $path;
-    }    
+            ? './'.$path : $path;
+    }
 
 ?>

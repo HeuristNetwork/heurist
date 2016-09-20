@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -15,19 +15,19 @@
 */
 
 /**
-* service to add a record, will load editor for temporary record 
+* service to add a record, will load editor for temporary record
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Add 
+* @subpackage  Records/Add
 */
 
 
@@ -40,8 +40,7 @@ if (@$_REQUEST['k']) $_REQUEST['tag'] = $_REQUEST['k'];
 // $_REQUEST['bkmrk_bkmk_description'] = mb_convert_encoding($_REQUEST['bkmrk_bkmk_description'], 'utf-8');
 
 if (! @$_REQUEST['bkmrk_bkmk_title']) $_REQUEST['bkmrk_bkmk_title'] = '';
-
-/*****DEBUG****///error_log("in add record request - ".print_r($_REQUEST,true));
+if (! @$_REQUEST['bkmrk_bkmk_description']) $_REQUEST['bkmrk_bkmk_description'] = '';
 
 
 define('LATEST_BOOKMARKLET_VERSION', '20060713');	//note! this must be in synch with import/bookmarklet/bookmarkletPopup.php
@@ -66,34 +65,23 @@ if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['rec_rectype'])
 	$_REQUEST['rec_rectype'] = (defined('RT_INTERNET_BOOKMARK')?RT_INTERNET_BOOKMARK:0);
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
-require_once(dirname(__FILE__)."/../../records/files/saveURLasFile.php");
+require_once(dirname(__FILE__)."/../files/saveURLasFile.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__).'/../disambig/testSimilarURLs.php');
 require_once(dirname(__FILE__).'/../woot/woot.php');
 
 if (!is_logged_in()) {
-	if (! (@$_REQUEST['bkmrk_bkmk_url'] or @$_REQUEST['bkmrk_bkmk_title'] or @$_REQUEST['bkmrk_bkmk_description']))
+	if (! (@$_REQUEST['bkmrk_bkmk_url'] || @$_REQUEST['bkmrk_bkmk_title'] || @$_REQUEST['bkmrk_bkmk_description']))
 		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	else
-		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&bkmrk_bkmk_title='.urlencode($_REQUEST['bkmrk_bkmk_title']).'&bkmrk_bkmk_url='.urlencode($_REQUEST['bkmrk_bkmk_url']).'&bkmrk_bkmk_description='.urlencode($_REQUEST['bkmrk_bkmk_description']));
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&bkmrk_bkmk_title='.urlencode(@$_REQUEST['bkmrk_bkmk_title']).'&bkmrk_bkmk_url='.urlencode(@$_REQUEST['bkmrk_bkmk_url']).'&bkmrk_bkmk_description='.urlencode(@$_REQUEST['bkmrk_bkmk_description']));
 	return;
 }
 $usrID = get_user_id();
 mysql_connection_overwrite(DATABASE);
 mysql_query("set @logged_in_user_id = $usrID");	//saw TODO: check where else this needs to be used
 
-$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
-if ($addRecDefaults){
-	if ($addRecDefaults[0]){
-		$userDefaultRectype = intval($addRecDefaults[0]);
-	}
-	if ($addRecDefaults[1]){
-		$userDefaultOwnerGroupID = intval($addRecDefaults[1]);
-	}
-	if ($addRecDefaults[2]){
-		$userDefaultVisibility = $addRecDefaults[2];
-	}
-}
+list($userDefaultRectype, $userDefaultOwnerGroupID, $userDefaultVisibility) = getDefaultOwnerAndibility($_REQUEST);
 
 /* preprocess any description */
 if (@$_REQUEST['bkmrk_bkmk_description']) {
@@ -153,7 +141,6 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 		$bkmk = mysql_fetch_assoc($res);
 		$bkm_ID = $bkmk['bkm_ID'];
         $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate;
-//DEBUG error_log("Rediect 1 ".$url);        
 		header('Location: ' . $url);
 		return;
 	}
@@ -228,6 +215,9 @@ $relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
 $relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
 $relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
+
+
+
 /* arrive with a new (un-bookmarked) URL to process */
 if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
@@ -275,10 +265,10 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 	}
 //if no similar url's and recID was -1 then force a new record of rec_rectype supplied
 
-
 	if (!isset($rec_id)  ||  (@$force_new && $force_new)) {
 		$isNewRecID = true;
 		$rt = intval($_REQUEST['rec_rectype']);
+        
 		if (! $rt) {
 			if ( isset($userDefaultRectype) && check_rectype_exist($userDefaultRectype)) {
 				 $_REQUEST['rec_rectype']= $rt = $userDefaultRectype;
@@ -296,11 +286,12 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 								. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 			return;
 		}
-       
+        
+        $is_AddToExtendedDescription = checkAddToDescription($rt);
 
 		mysql__insert('Records', array('rec_URL' => $url,
 										'rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
-										'rec_ScratchPad' => $description,
+										'rec_ScratchPad' => ($is_AddToExtendedDescription?'':$description),
 										'rec_Added' => date('Y-m-d H:i:s'),
 										'rec_Modified' => date('Y-m-d H:i:s'),
 										'rec_AddedByUGrpID' => intval($usrID),
@@ -311,19 +302,46 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
 										'rec_FlagTemporary' => ($url  ||  @$_REQUEST['bkmrk_bkmk_title'])?0:1 ));
 
-        if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
+        // TODO: why isn't there some action if ther's a MySQL error other than writing to the error log?
+
 
         $rec_id = mysql_insert_id();
-        
+
 		// there are sometimes cases where there is no title set (e.g. webpage with no TITLE tag)
 		if (@$_REQUEST['bkmrk_bkmk_title']) {
-			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id
+                    .','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
 		}
+        if($is_AddToExtendedDescription){
+            mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id
+                    .','.DT_EXTENDED_DESCRIPTION.',"'.mysql_real_escape_string($description).'")');
+        }
 		$inserts = array();
 		foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . mysql_real_escape_string($doi) . "')");
 		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($_REQUEST["f"]) . "')");
 		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . mysql_real_escape_string($isbn) . "')");
 		foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . mysql_real_escape_string($issn) . "')");
+        
+
+        //insert arbitrary detail types based on URL parameter defval
+        if(@$_REQUEST["defval"]){
+            $default_value = json_decode($_REQUEST["defval"],true);
+            foreach($default_value as $defval){
+                $dtyID = array_keys($defval);
+                if(is_array($dtyID)){
+                    $dtyID = @$dtyID[0];
+                }
+                if(intval($dtyID)>0){
+                    $res = mysql_query("select dty_ID from defDetailTypes where dty_ID=$dtyID");
+                    if ($res && $row = mysql_fetch_row($res)) {
+                        if(intval($row[0])>0 && @$defval[$dtyID]){
+                            array_push($inserts, "($rec_id, $dtyID, '" . mysql_real_escape_string($defval[$dtyID]) . "')");
+                        }
+                    }
+                }
+            }
+        }
+        
 		if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 		if ($description) insert_woot_content($rec_id, $description);
@@ -338,7 +356,6 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 // no recID or url passed in so create a new record
 if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	/* create a new public note */
-/*****DEBUG****///error_log("in add making new records new reco ownid = ". HEURIST_NEWREC_OWNER_ID);
 	$isNewRecID = true;
 	$rt = intval($_REQUEST['rec_rectype']);
 	if (!check_rectype_exist($rt)) {
@@ -350,9 +367,11 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 							. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 		return;
 	}
+    
+    $is_AddToExtendedDescription = checkAddToDescription($rt);
 
 	mysql__insert('Records', array('rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
-									'rec_ScratchPad' => $description,
+									'rec_ScratchPad' => ($is_AddToExtendedDescription?'':$description),
 									'rec_Added' => date('Y-m-d H:i:s'),
 									'rec_Modified' => date('Y-m-d H:i:s'),
 									'rec_AddedByUGrpID' => intval($usrID),
@@ -362,21 +381,48 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 															(@$userDefaultVisibility ? $userDefaultVisibility :
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
                                     'rec_FlagTemporary' => (@$_REQUEST['bkmrk_bkmk_title'])?0:1 ));
-                                    
 
-        if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
-                                    
-/*****DEBUG****///error_log( " after insert error = ". mysql_error());
+
+
 	$rec_id = mysql_insert_id();
 	if (@$_REQUEST['bkmrk_bkmk_title']) {
 		mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.
 						$rec_id.','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
 	}
+    if($is_AddToExtendedDescription){
+            mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id
+                    .','.DT_EXTENDED_DESCRIPTION.',"'.mysql_real_escape_string($description).'")');
+    }
+    
 	$inserts = array();
 	foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . mysql_real_escape_string($doi) . "')");
 	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($_REQUEST["f"]) . "')");
 	foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . mysql_real_escape_string($isbn) . "')");
 	foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . mysql_real_escape_string($issn) . "')");
+    
+    //insert arbitrary detail types based on URL parameter defval
+    if(@$_REQUEST["defval"]){
+        $default_value = json_decode($_REQUEST["defval"],true);
+        foreach($default_value as $defval){
+            $dtyID = array_keys($defval);
+            if(is_array($dtyID)){
+                    $dtyID = @$dtyID[0];
+            }
+            if(intval($dtyID)>0){
+                $res = mysql_query("select dty_ID from defDetailTypes where dty_ID=$dtyID");
+                if ($res && $row = mysql_fetch_row($res)) {
+                    if(intval($row[0])>0 && @$defval[$dtyID]){
+                        $s = "($rec_id, $dtyID, '" . mysql_real_escape_string($defval[$dtyID]) . "')";
+//DEBUG error_log('ins: '.$s);                
+                        array_push($inserts, $s);
+                    }
+                }
+            }
+        }
+    }
+    
+    
+    
 	if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 	if ($description) insert_woot_content($rec_id, $description);
@@ -414,7 +460,6 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
         $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
-//DEBUG error_log("Rediect 2 ".$url);        
 		header('Location: ' . $url );
 		return;
 	}
@@ -506,11 +551,9 @@ if ($rec_id) {
 	if ($bkm_ID) {
 		if ($isNewRecID) {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bib' . $outdate . $wg;
-//DEBUG error_log("Rediect 3 ".$url);        
 			header('Location: ' . $url);
 		} else {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bkmk' . $outdate . $wg;
-//DEBUG error_log("Rediect 4 ".$url);        
 			header('Location: ' . $url);
 		}
 		return;
@@ -545,7 +588,6 @@ function insert_woot_content($rec_id, $content) {
 	array_push($woot["chunks"], $new_chunk);
 
 	$result = saveWoot($woot);
-	if (! $result["success"]) error_log("Save woot: ".$result["errorType"]);
 }
 
 function check_rectype_exist($rt) {
@@ -570,4 +612,17 @@ function insert_thumbnail_content($recid, $url){
 		}
 	}
 }
+        
+//check that DT_EXTENDED_DESCRIPTION is defined for given record type
+function checkAddToDescription($rt) {
+    if(defined('DT_EXTENDED_DESCRIPTION') ){
+        $query = 'select rst_ID from defRecStructure where rst_RecTypeID = '.($rt? $rt : RT_INTERNET_BOOKMARK).' and rst_DetailTypeID='.DT_EXTENDED_DESCRIPTION;
+        $res = mysql_query($query);
+        if (mysql_num_rows($res)>0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 ?>

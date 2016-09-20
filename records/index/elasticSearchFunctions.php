@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -58,7 +58,6 @@
             $error = curl_error($ch);
             if ($error) {
                 $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-                error_log("testElasticSearchOK: Failed to contact ElasticSearch server: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return($code);
             }
@@ -100,9 +99,6 @@
             global $indexServerAddress, $indexServerPort;
 
             $jsonData = "{";
-
-            //print "$recID ";
-            error_log("updateRecordIndexEntry: about to index recID = $recID");
 
             // Add the record level data:
             // DO NOT CHANGE ORDER unless changing JSON construction below
@@ -165,13 +161,12 @@
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
             curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
             curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-            
+
             $data = curl_exec($ch);
             $error = curl_error($ch);
             if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
+                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
                 //print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code) & url = $url & data = $jsonData";
-                error_log("updateRecordIndexEntry indexing: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return $code;
             } else {
@@ -203,9 +198,6 @@
         if($elasticSearch) {
             global $indexServerAddress, $indexServerPort;
 
-            //print "deleteRecordIndexEntry : deleting index entry for record $recID for type $recTypeID for $dbName<br />";
-            error_log("deleteRecordIndexEntry : deleting index entry for record $recID for type $recTypeID for $dbName");//DEBUG
-
             $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID/$recID";
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -215,7 +207,6 @@
             if ($error) {
                 $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
                 //print "<br />ERROR: deleteRecordIndexEntry: $error ($code)" . " url = ". $url;
-                error_log("deleteRecordIndexEntry: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return $code;
             } else {
@@ -238,9 +229,6 @@
             // TODO: check that this is correct spec for deletion of the index for a record type
             global $indexServerAddress, $indexServerPort;
 
-            //print "deleting index for record type $recTypeID for $dbName<br />";
-            error_log("deleting index for record type $recTypeID for $dbName");//DEBUG
-
             $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID";
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -250,7 +238,6 @@
             if ($error) {
                 $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
                 //print "<br />ERROR: deleteIndexForRectype: $error ($code)" . " url = ". $url;
-                error_log("deleteIndexForRectype: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return $code;
             } else {
@@ -271,20 +258,18 @@
         if($elasticSearch) {
             // TODO: check that this is correct spec for deletion of the index for a database
             global $indexServerAddress, $indexServerPort;
-      
+
             $url="$indexServerAddress:$indexServerPort/$dbName";
             print "Deleting all Elasticsearch indices for $dbName at $url<br />";
-            error_log("Deleting all Elasticsearch indexes for $dbName at $url");
-            
+
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $data = curl_exec($ch);
             $error = curl_error($ch);
             if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
+                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
                 //print "<br />ERROR: deleteIndexForDatabase: $error ($code)" . " url = ". $url;
-                error_log("deleteIndexForDatabase: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return($code);
             } else {
@@ -306,8 +291,6 @@
         global $elasticSearch;
         if($elasticSearch) {
             //print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
-            error_log("buildIndexForRectype: indexing record type $recTypeID for $dbName");//DEBUG
-
             deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
 
             $query="Select rec_ID from Records where rec_RecTypeID = $recTypeID";
@@ -337,7 +320,6 @@
         global $elasticSearch;
         if($elasticSearch) {
             print "Building all Elasticsearch indices for: $dbName<br />";
-            error_log("Building all Elasticsearch indices for: $dbName");//DEBUG
 
             $query="Select MAX(rec_RecTypeID) from Records where 1";
             $res = mysql_query($query);

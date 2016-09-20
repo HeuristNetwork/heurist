@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,23 +20,23 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-    $TL = array();
-    $RTN = array();    
-    
+$TL = array();
+$RTN = array();
+
 function getInvalidFieldTypes($rectype_id){
-      
+
     global $TL, $RTN;
 
     mysql_connection_select(DATABASE);
@@ -63,10 +63,10 @@ function getInvalidFieldTypes($rectype_id){
     "dty_TermIDTreeNonSelectableIDs,".
     "dty_PtrTargetRectypeIDs".
     " FROM defDetailTypes";
-    
+
     if(null!=$rectype_id){ //detail types for given recordtype
         $query = $query.", defRecStructure WHERE rst_RecTypeID=".$rectype_id." and rst_DetailTypeID=dty_ID and ";
-        
+
     }else{
         $query = $query." WHERE ";
     }
@@ -74,9 +74,10 @@ function getInvalidFieldTypes($rectype_id){
     "(dty_Type in ('enum','relationtype','relmarker','resource')".
     " and (dty_JsonTermIDTree is not null or dty_TermIDTreeNonSelectableIDs is not null)) ".
     "or (dty_Type in ('relmarker','resource') and dty_PtrTargetRectypeIDs is not null)";
-    
-    
+
+
     $res = mysql_query($query);
+    if($res)
     while ($row = mysql_fetch_assoc($res)) {
         $DTT[$row['dty_ID']] = $row;
     }
@@ -97,17 +98,16 @@ function getInvalidFieldTypes($rectype_id){
         }
         if ($dty['dty_TermIDTreeNonSelectableIDs'])
         {
-            
+
             $res = getInvalidTerms($dty['dty_TermIDTreeNonSelectableIDs'], false);
             $invalidNonSelectableTerms = $res[0];
-            $validNonSelTermsString = $res[1]; 
+            $validNonSelTermsString = $res[1];
             if (count($invalidNonSelectableTerms)){
                 $dtysWithInvalidNonSelectableTerms[$dtyID] = $dty;
                 $dtysWithInvalidNonSelectableTerms[$dtyID]['invalidNonSelectableTermIDs'] = $invalidNonSelectableTerms;
                 $dtysWithInvalidNonSelectableTerms[$dtyID]['validNonSelTermsString'] = $validNonSelTermsString;
             }
         }
-        /*****DEBUG****///error_log("selectable - ".print_r($dtysWithInvalidNonSelectableTerms,true));
         if ($dty['dty_PtrTargetRectypeIDs']){
             $res = getInvalidRectypes($dty['dty_PtrTargetRectypeIDs']);
             $invalidRectypes = $res[0];
@@ -119,7 +119,7 @@ function getInvalidFieldTypes($rectype_id){
             }
         }
     }//for
-  
+
     return array("terms"=>$dtysWithInvalidTerms, "terms_nonselectable"=>$dtysWithInvalidNonSelectableTerms, "rt_contraints"=>$dtysWithInvalidRectypeConstraint);
 }
 
@@ -130,13 +130,12 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
         return array($invalidTermIDs, "");
     }
-    
+
     $isvocabulary = false;
     $pos = strpos($formattedStringOfTermIDs,"{");
-    
+
     if ($pos!==false){ //}is_numeric($pos) && $pos>=0) {
 
-        /*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
         $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
         if (strrpos($temp,":") == strlen($temp)-1) {
             $temp = substr($temp,0, strlen($temp)-1);
@@ -145,19 +144,18 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     } else if ($is_tree){ //vocabulary
 
         $isvocabulary = true;
-        $termIDs = array($formattedStringOfTermIDs); 
+        $termIDs = array($formattedStringOfTermIDs);
     } else {
-        /*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
         $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
         $termIDs = explode(",",$temp);
     }
     // Validate termIDs
-    
+
     foreach ($termIDs as $trmID) {
         // check that the term valid
         if (!$trmID ){ // invalid trm ID null or 0 is not allowed
             if(count($termIDs)>1){
-                array_push($invalidTermIDs, "blank");    
+                array_push($invalidTermIDs, "blank");
             }
         }else if ( !@$TL[$trmID]){ // invalid trm ID
             array_push($invalidTermIDs,$trmID);
@@ -165,7 +163,7 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     }
 
     $validStringOfTerms = "";
-    //create valid set of terms    
+    //create valid set of terms
     if(count($invalidTermIDs)>0){
 
         if($isvocabulary ){ //vocabulary
@@ -185,7 +183,7 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
             }
         }
     }
-    
+
     return array($invalidTermIDs, $validStringOfTerms);
 }
 
@@ -193,14 +191,12 @@ function createValidTermTree($termTree, $invalidTermIDs){
     $validStringOfTerms = "";
     $res = "";
     foreach ($termTree as $termid=>$child_terms){
-        
+
         $key = array_search($termid, $invalidTermIDs);
-//error_log($termid."=".$key);
         if($key===false){
             $res = $res.'"'.$termid.'":{'.createValidTermTree($child_terms, $invalidTermIDs).'},';
-//error_log($res);            
         }else{ //invalid
-            //return "";            
+            //return "";
         }
     }
     return ($res=="")?"": substr($res,0,-1);
@@ -210,7 +206,7 @@ function createValidTermTree($termTree, $invalidTermIDs){
 function getInvalidRectypes($formattedStringOfRectypeIDs) {
     global $RTN;
     $invalidRectypeIDs = array();
-    
+
     if (!$formattedStringOfRectypeIDs || $formattedStringOfRectypeIDs == "") {
         return array($invalidRectypeIDs, "");
     }
@@ -226,7 +222,7 @@ function getInvalidRectypes($formattedStringOfRectypeIDs) {
             array_push($validRectypeIDs, $rtID);
         }
     }
-    
+
     return array($invalidRectypeIDs, implode(",", $validRectypeIDs) );
 }
 

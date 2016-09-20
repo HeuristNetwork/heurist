@@ -6,11 +6,11 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Tom Murtagh
     * @author      Kim Jackson
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Stephen White   <stephen.white@sydney.edu.au>
+    * @author      Stephen White   
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     3.1.0   
@@ -180,7 +180,7 @@
                     
                     $i = 0;
                     foreach ($updates as $rec_id => $new_title) {
-                        mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
+                        mysql_query('update Records set rec_Modified=rec_Modified, rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
                         ++$i;
                         if ($rec_id % $step_uiupdate == 0) {
                             print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
@@ -206,11 +206,11 @@
 
                     print '<hr>';
 
-                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.
+                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
                     '&w=all&q=ids:'.join(',', array_keys($updates)).'">Click to view updated records</a><br/>&nbsp;<br/>';
                 }
                 if(count($blanks)>0){
-                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.
+                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
                         '&w=all&q=ids:'.join(',', $blanks).
                     '">Click to view records for which the data would create a blank title</a>'.
                     '<br/>This is generally due to faulty title mask (verify with Check Title Masks)<br/>'.

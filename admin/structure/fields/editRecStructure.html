@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -22,9 +22,9 @@
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @author      Stephen White   
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -120,6 +120,15 @@
             background-color: #000;
             color: #FFF;
             }
+            .yui-dt-expanded .yui-dt-expandablerow-trigger{
+                background:none;
+            }
+            .yui-dt-expandablerow-trigger, .yui-dt-collapsed .yui-dt-expandablerow-trigger{
+                background:none;
+            }
+            .yui-dt-expanded .yui-dt-expandablerow-trigger.spinner{
+                background:none;
+            }            
             .tooltip {
                     position:absolute;
                     z-index:999;
@@ -181,12 +190,45 @@
             .yui-skin-sam .yui-dt-selected, .yui-skin-sam tr.yui-dt-selected td{
                 background-color: #aaaaaa;
             }
+            
+            .dragrow{
+                padding-left:30px;
+                padding-top:6px;
+                font-size:1.2em;
+            }
+            .dragrow-class{
+            }
+            #ygddfdiv {
+                border:none;
+                background:none;
+                opacity:0.1;
+                box-shadow: none;
+                width:100px;
+                /*background-color:#FFE;
+                box-shadow:0 2px 3px RGBA(0,0,0,0.5);
+                border:2px solid #62A7F8 !important;
+                */
+            }
+            .yui-dt th{
+                vertical-align: baseline !important;
+            }
         </style>
     </head>
 
     <body class="popup yui-skin-sam" style="overflow: auto;">
         <h2 id="recordTitle" style="margin:10px 0"></h2>
-        <div id="page-inner" style="top:50px; bottom:60px;">
+        
+        <div  id="divTitleMask">
+            <div style="display:inline-block;vertical-align:top;font-weight:bold">
+                 <label for="rty_TitleMask">Constructed title mask</label><br/>
+                 <!-- <span><button onClick="editStructure.doEditTitleMask(false)">Edit mask</button></span> -->
+            </div>
+            <textarea readonly cols="400" id="rty_TitleMask" rows="1" 
+                style="width:600px;height:20px;display:inline-block; background-color: lightgray;"></textarea>
+        </div>
+        
+        <div id="page-inner" style="top:80px; bottom:60px;">
+        
             <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
             <script src="../../../common/php/displayPreferences.php"></script>
             <script src="../../../common/php/getMagicNumbers.php"></script>
@@ -206,30 +248,30 @@
 
         <div style="bottom:10px;left:10px; right:10px;text-align:left; position:absolute;" id="recStrcuture_bottom">
             <span style="float:left">
-                  <i>Click row to edit field specifications. Drag arrows at left to change the order in the form.</i>
+                  <i>Click row to edit field specifications. Drag arrows at left to change the order in the form. Click + icon to insert headings/fields.</i>
                   <br/>
                   To see the effects of record structure changes on the data entry form, keep a record open in the record edit form<br/>
-                  and simply hit Reload to view the revised form - changes here take effect immediately, there is no need to hit [Done]
+                  and simply hit Reload to view the revised form - changes here take effect immediately, there is no need to hit [Save]
             </span>
 
             <span style="float:right; text-align:right">
                 <!--<input type="button" value="Back to list of record types" onClick="{window.history.back();}"/>-->
                 <!-- input type="button" value="Preview" onClick="editStructure.initPreview()"/ -->
-                <input type="button" value="Done" onClick="editStructure.closeWin();"/>
+                <input type="button" value="Save/Close" onClick="editStructure.closeWin();"/>
             </span>
         </div>
 
-        <div style="display: none;text-align:center; padding:5px; width:90%" id="dlgWrongTitleMask">
+        <div style="display: none;text-align:left; padding:5px; width:90%" id="dlgWrongTitleMask">
             The current title mask appears to be invalid.
             This generally means that fields used in the mask have been removed from the record structure.
             A valid title mask is essential for display of the record in search results.
-            <div style="padding-top: 10px;">
-                <input style="margin-right: 10px;" type="button" value="Fix title mask"
-                    onClick="{top.HEURIST.util.popups.list[top.HEURIST.util.popups.list.length-1].opener.editStructure.doEditTitleMask();}"/>
+            <div style="padding-top: 10px;text-align:center;">
+                <input style="margin-right: 10px;" type="button" value="Fix title mask" id="dlgWrongTitleMask_closeBtn"/>
             </div>
         </div>
 
         <script  type="text/javascript">
+
             //
             //  starts initialization on load completion of this window
             //

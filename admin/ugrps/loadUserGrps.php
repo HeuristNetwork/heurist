@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -41,9 +41,6 @@ header('Content-type: text/javascript');
 
 mysql_connection_select(DATABASE);
 
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> ".$_SERVER['QUERY_STRING']);
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_REQUEST['userEmail']));
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));
 	$metod = @$_REQUEST['method'];
 
 if (is_logged_in() || $metod=="getuser") {
@@ -54,8 +51,6 @@ if (is_logged_in() || $metod=="getuser") {
 		$f_role  = @$_REQUEST['grpRole'];
 		$f_name  = urldecode(@$_REQUEST['name']);
 		$f_disab = @$_REQUEST['disabled'];
-
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$f_group."        ".$f_role);
 
 		$query = "select 0 as selection, usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname, usr.ugr_eMail, usr.ugr_Enabled, usr.ugr_Organisation,";
 
@@ -87,8 +82,6 @@ if (is_logged_in() || $metod=="getuser") {
 
 		$userGrp = array();
 		$userGrp['userslist'] = array();
-
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_row($res)) {
@@ -124,8 +117,6 @@ if (is_logged_in() || $metod=="getuser") {
 			}
 		}
 
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$f_group."        ".$f_role);
-
 		$workgroups = array();
 		$workgroupIDs = array();
 		$workgroupsLength = 0;
@@ -139,8 +130,6 @@ if (is_logged_in() || $metod=="getuser") {
 						 where grp.ugr_Type != 'user'
 						   and b.ugr_Enabled  = 'y' $filter2
 					  group by grp.ugr_ID order by grp.ugr_Name";
-
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>".$query);
 
 		$res = mysql_query($query);
 
@@ -190,6 +179,7 @@ if (is_logged_in() || $metod=="getuser") {
 		$userGrp['workgroupIDs'] = $workgroupIDs;
 
 		print json_format($userGrp);
+        // TODO: why are these commented out 24/7/15
 		//print "top.HEURIST.workgroups = " . json_format($workgroups) . ";\n";
 		//print "top.HEURIST.workgroupIDs = " . json_format($workgroupIDs) . ";\n";
 		//print "\n";
@@ -221,7 +211,6 @@ if (is_logged_in() || $metod=="getuser") {
 			$sAdminOnly = null;
 		}
 
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		if($query){
 			$res = mysql_query($query);
 			while ($row = mysql_fetch_row($res)) {
@@ -247,7 +236,8 @@ if (is_logged_in() || $metod=="getuser") {
 							array_push($admins, $row2["ugl_UserID"]);
 						}
 						$members[$row2["ugl_UserID"]] = $row2["ugr_FirstName"]." ".$row2["ugr_LastName"];
-						//array_push($members, array($row2["ugl_UserID"]=>($row2["ugr_FirstName"]." ".$row2["ugr_LastName"]) ));  //array
+						// TODO: why is this commented out?
+                        // array_push($members, array($row2["ugl_UserID"]=>($row2["ugr_FirstName"]." ".$row2["ugr_LastName"]) ));  //array
 					}
 				}
 				$userGrp['groups'][$row[0]]["admins"] = $admins;
@@ -284,6 +274,7 @@ if (is_logged_in() || $metod=="getuser") {
 		$userGrp['users'] = array('fieldNames' => $colNames);
 
 		$query = "select ".join(",", $colNames)." from ".USERS_DATABASE.".sysUGrps where ";
+        // TODO: why is this commented out
 		/*if($userEmail){
 			$query = $query."ugr_eMail='".$userEmail."'";
 		} else*/
@@ -298,7 +289,6 @@ if (is_logged_in() || $metod=="getuser") {
 			$query = null;
 		}
 
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		if($query){
 			$res = mysql_query($query);
 			while ($row = mysql_fetch_row($res)) {
@@ -315,9 +305,10 @@ if (is_logged_in() || $metod=="getuser") {
 			$userGrp['adminMail'] = $eMail;
 		}
 
-// using ob_gzhandler makes this stuff up on IE6-
-//ini_set("zlib.output_compression_level", 5);
-//ob_start('ob_gzhandler');
+        // TODO: why not re-enable now IE6 is legacy
+        // using ob_gzhandler makes this stuff up on IE6-
+        // ini_set("zlib.output_compression_level", 5);
+        // ob_start('ob_gzhandler');
 
 
 	print "top.HEURIST.userGrp = " . json_format($userGrp) . ";\n";

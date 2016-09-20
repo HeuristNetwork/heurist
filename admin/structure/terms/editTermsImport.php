@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -33,8 +33,8 @@
     $parent_id = intval($_REQUEST['parent']);
     $domain = $_REQUEST['domain'];
 
-    $has_codes = (@$_REQUEST['has_codes']=="1");
-    $has_descr = (@$_REQUEST['has_descr']=="1");
+    $has_codes = true; //(@$_REQUEST['has_codes']=="1");
+    $has_descr = true; //(@$_REQUEST['has_descr']=="1");
 
     if (!$parent_id) return;
 
@@ -58,9 +58,9 @@
     <head>
         <title>Import list of terms into current branch</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/admin.css">
 
         <style type="text/css">
             .success { font-weight: bold; color: green; margin-left: 3px; }
@@ -73,14 +73,14 @@
 
         <script type="text/javascript">
             var result = null;
-            <?php 
+            <?php
                     if ($res_array) {
                         print 'result = '.$res_array.';';
                     }
             ?>
         </script>
 
-        <?php   
+        <?php
                 if ($success_msg) {
                     ?>
                     <div style='width:90%;text-align:center;padding-top:30px'>
@@ -109,12 +109,16 @@
             </div>
 
             <div class="input-row">
+                Terms may be followed on each line by a code and a label, separated by commas 
+                with optional quote marks eg. English,En,"English language (UK)"
+                <!--
                 <div class="input-header-cell">Terms are followed on each line,  in this order, by comma-separated:
                 </div>
                 <div class="input-cell">
                     <input type="checkbox" name="has_codes" value="1" style="display:inline-block;">codes&nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="checkbox" name="has_descr" value="1" style="display:inline-block;">extended labels
                 </div>
+                -->
             </div>
 
             <div class="actionButtons" style="padding-right:80px">
@@ -145,30 +149,23 @@
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 $num = count($data);
                 if($num>0){
-                    if($has_codes){
-                        $code = substr(trim($data[0]), 0, 99);
-                        $ind = 1;
-                    }else{
-                        $code = '';
-                        $ind = 0;
-                    }
-
-                    if($num>$ind){
-
-                        $label = substr(trim($data[$ind]), 0, 399);
-                        $len = strlen($label);
-                        if($len>0 && $len<400){
-                            $desc = "";
-                            if($has_descr){
-                                $ind++;
-                                for ($c=$ind; $c < $num; $c++) {
-                                    if($c>1) $desc = $desc.",";
-                                    $desc = $desc.$data[$c];
-                                }
-                            }
-                            array_push($parsed, array($code, $label,substr($desc, 0, 999),$domain,$parent_id,1));
-                            $row++;
+                    
+                    $desc = '';
+                    $code = '';
+                    $label = substr(trim($data[0]), 0, 499);
+                    if(count($data)>1){
+                        $code = substr(trim($data[1]), 0, 99);
+                        if(count($data)>2){
+                            $desc = implode(',', array_slice($data,2) );
+                            $desc = substr($desc, 0, 999);
                         }
+                    }
+                    if($label==''){
+                        $label = $code;
+                    }
+                    if($label!=''){
+                        array_push($parsed, array($code, $label, $desc, $domain, $parent_id, 1));
+                        $row++;
                     }
                 }
             }

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -53,7 +53,7 @@
     ALTER TABLE Records
         CHANGE rec_NonOwnerVisibility rec_NonOwnerVisibility
         ENUM(  'viewable',  'hidden',  'public', 'pending' ) NOT NULL DEFAULT  'viewable'
-        COMMENT  'Defines if record visible outside owning user group(s)';
+        COMMENT  'Defines if record visible outside owning Workgroup(s)';
 
     ALTER TABLE  sysIdentification
         ADD  sys_IncomingEmailAddresses VARCHAR( 4000 ) NULL
@@ -115,7 +115,7 @@
   ALTER TABLE Records
         CHANGE rec_NonOwnerVisibility rec_NonOwnerVisibility
         ENUM('viewable','hidden','public','pending') NOT NULL DEFAULT 'viewable'
-        COMMENT 'Defines if record visible outside owning user group(s) or to anyone';
+        COMMENT 'Defines if record visible outside owning Workgroup(s) or to anyone';
 
   ALTER TABLE  `sysIdentification`
         CHANGE  `sys_NewRecAccess`  `sys_NewRecAccess`

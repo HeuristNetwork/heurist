@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -91,7 +91,7 @@ function MimetypeManager() {
 			_initTable(arr);
 		};
 
-		var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
+		var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/mimetypes/srvMimetypes.php";
 		var params = "method=search&db=" + _db;
 		top.HEURIST.util.getJsonData(baseurl, __updateList, params);
 	};
@@ -257,7 +257,7 @@ function MimetypeManager() {
 							}
 						}
 
-						var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
+						var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/mimetypes/srvMimetypes.php";
 						var callback = _updateAfterDelete;
 						var params = "method=delete&db=" + _db + "&recID=" + recID;
 						top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -298,7 +298,7 @@ function MimetypeManager() {
 	// call new popup - to edit entity
 	//
 	function _editMimetype(id) {
-		var URL = top.HEURIST.basePath + "admin/structure/mimetypes/editMimetype.html?db=" + _db;
+		var URL = top.HEURIST.baseURL_V3 + "admin/structure/mimetypes/editMimetype.html?db=" + _db;
 
 		if(Number(id)<0) {
 

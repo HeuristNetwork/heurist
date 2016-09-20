@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,14 +18,24 @@
 * encode polyline 
 *
 * @author      Kim Jackson
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+// where numLevels and zoomFactor indicate how many
+// different levels of magnification the polyline has
+// and the change in magnification between those levels,
+// verySmall indicates the length of a barely visible
+// object at the highest zoom level, forceEndpoints
+// indicates whether or not the endpoints should be
+// visible at all zoom levels. forceEndpoints is
+// optional with a default value of true. Probably
+// should stay true regardless.
+ 
 
 $numLevels = 21;
 $zoomFactor = 3;
@@ -34,7 +44,7 @@ $forceEndpoints = true;
 
 for($i = 0; $i < $numLevels; $i++)
 {
-	$zoomLevelBreaks[$i] = $verySmall*pow($zoomFactor, $numLevels-$i-1);
+	$zoomLevelBreaks[$i] = $verySmall * pow($zoomFactor, $numLevels-$i-1);
 }
 
 function computeLevel($dd)
@@ -69,21 +79,21 @@ function dpEncode($points)
 	    for($i = $current[0]+1; $i < $current[1]; $i++)
 	    {
 	    	$temp = distance($points[$i], $points[$current[0]], $points[$current[1]]);
-		if($temp > $maxDist)
-		{
-		    $maxDist = $temp;
-		    $maxLoc = $i;
-		    if($maxDist > $absMaxDist)
+		    if($temp > $maxDist)
 		    {
-		        $absMaxDist = $maxDist;
+		        $maxDist = $temp;
+		        $maxLoc = $i;
+		        if($maxDist > $absMaxDist)
+		        {
+		            $absMaxDist = $maxDist;
+		        }
 		    }
-		}
 	    }
 	    if($maxDist > $verySmall)
 	    {
 	    	$dists[$maxLoc] = $maxDist;
-		array_push($stack, array($current[0], $maxLoc));
-		array_push($stack, array($maxLoc, $current[1]));
+		    array_push($stack, array($current[0], $maxLoc));
+		    array_push($stack, array($maxLoc, $current[1]));
 	    }
 	}
     }

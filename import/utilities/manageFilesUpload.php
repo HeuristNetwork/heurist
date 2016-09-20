@@ -9,7 +9,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -92,11 +92,11 @@
             }
 
             print "<h2>FILE MANAGEMENT</h2>";
-            print "<p>This function allows members of the database managers group to upload ".
-                "multiple files and/or large files to the database scratch space<br>";
-            print "and delete files from that space. Most commonly files will be uploaded prior ".
-                "to importing data from them or running the in situ import of images.<br>";
-            print "The function is restricted to database owners/managers to reduce the risk of ".
+            print "<p>Members of the database managers group can upload ".
+                "multiple files and/or large files to the database scratch space. <br>";
+            print "Most commonly, files will be uploaded prior ".
+                "to importing data from them or running the in situ multimedia import.<br>";
+            print "The function is restricted to database managers to reduce the risk of ".
                 "other users filling the database with unwanted material.<br>";
             print "</p>";
 
@@ -113,16 +113,19 @@
                     die ("<p><b>Sorry, unable to read the sysIdentification table from the current database. ".
                         "Possibly wrong database format, please consult Heurist team</b></p>");
                 }
-                
+
                 $system_folders = array(HEURIST_THUMB_DIR,
-                        HEURIST_FILESTORE_DIR."/generated-reports/",
+                        HEURIST_FILESTORE_DIR."generated-reports/",
                         HEURIST_ICON_DIR,
-                        HEURIST_FILESTORE_DIR."/settings/",
+                        HEURIST_FILESTORE_DIR."settings/",
+                        HEURIST_FILESTORE_DIR.'documentation_and_templates/',
+                        HEURIST_FILESTORE_DIR.'backup/',
+                        HEURIST_FILESTORE_DIR.'entity/',
                         HEURIST_SMARTY_TEMPLATES_DIR,
                         HEURIST_XSL_TEMPLATES_DIR);
                 if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
                 if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
-                
+
 
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
                 // These are the most likely location for bulk upload (of images) and restricting to these directories
@@ -136,7 +139,7 @@
                         if(substr($dir, -1) != '/'){
                             $dir .= "/";
                         }
-                    
+
                         if(!file_exists($dir) ){ //probable this is relative
                             $orig = $dir;
                             chdir(HEURIST_FILESTORE_DIR);
@@ -147,11 +150,12 @@
                         }
                     }
                 }
-                $dirs = $dirs2;                
-                
-                
+                $dirs = $dirs2;
+
+
                 // add the scratch directory, which will be the default for upload of material for import
-                array_push($dirs, HEURIST_UPLOAD_ROOT.'scratch');
+                array_push($dirs, HEURIST_FILESTORE_DIR.'scratch/');
+                array_push($dirs, HEURIST_FILES_DIR);
 
                 // The defined list of file extensions for FieldHelper indexing.
                 // For the moment keep this in as a restriction on file types which can be uploaded
@@ -163,14 +167,13 @@
                 // TODO: we should eliminate any duplicate extensions which might have been added by the user
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
-                    print ("<p><b>If you wish to upload files to a directory other than the scratch space, define the folders in <br />".
-                        "Designer View > Database > Advanced Properties > Additional Folders for indexing.<br />".
-                        "You may also add additional file extensions.</b></p>");
+                    print ("<p>If you wish to upload files to a directory other than the scratch space, define the folders on the database administration page <br />".
+                        "(in Database > Advanced Properties > Additional Folders for indexing), where you can also add additional file extensions.</p>");
                 }else{
                     print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";
                 }
-
-                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1' "
+                
+                print  "<br/><p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=3' "
                     ." title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>"
                     ."Click here to set media/upload folders</a></p>";
 
@@ -203,10 +206,12 @@
                         <span>Add files...</span>
                         <input type="file" name="files[]" multiple>
                     </span>
-                    <button type="submit" class="start">Start upload</button>
-                    <button type="reset" class="cancel">Cancel upload</button>
-                    <button type="button" class="delete">Delete</button>
+                    <button type="submit" class="start">Start uploads</button>
+                    <button type="reset" class="cancel">Cancel uploads</button>
+                    <!-- Ian 17/6/16 It's quite confusing what these are for
+                    <button type="button" class="delete">Delete selected</button>
                     <input type="checkbox" class="toggle">
+                    -->
                     <!-- The global file processing state -->
                     <span class="fileupload-process"></span>
                 </div>
@@ -246,7 +251,7 @@
                 </td>
                 <td>
                 {% if (!i && !o.options.autoUpload) { %}
-                <button class="start" disabled>Start</button>
+                <button class="start" disabled>Upload</button>
                 {% } %}
             {% if (!i) { %}
                 <button class="cancel">Cancel</button>
@@ -273,7 +278,7 @@
             <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
             </p>
             {% if (file.error) { %}
-                <div><span class="error">Error</span> {%=file.error%}</div>
+                <div><span class="error">Upload error</span> {%=file.error%}</div>
                 {% } %}
                 </td>
                 <td>
@@ -282,8 +287,10 @@
                 <td>
                 <button class="delete" data-type="{%=file.deleteType%}"
                 data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %}
-                data-xhr-fields='{"withCredentials":true}'{% } %}>Delete</button>
+                data-xhr-fields='{"withCredentials":true}'{% } %}>Remove</button>
+                <!-- another confuising control - presumably meant to be a selection checkbox for multiple removals
                 <input type="checkbox" name="delete" value="1" class="toggle">
+                -->
                 </td>
                 </tr>
                 {% } %}

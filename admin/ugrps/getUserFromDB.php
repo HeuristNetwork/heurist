@@ -5,11 +5,11 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.0   
+    * @version     3.1.0
     */
 
     /*
@@ -130,9 +130,9 @@
                     } else {
                         /* IJ: 19-Sep-12 Don't make imported users members of the Database Managers group - too risky.
                         $newUserID =  mysql_insert_id();
-                        $query1="INSERT INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID) VALUES ($newUserID,'1')"; 
+                        $query1="INSERT INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID) VALUES ($newUserID,'1')";
                         // adds to 1 = 'Database Managers' as 'member'
-                        // todo: should really offer choice of existing user groups to add the user to, as well as their role
+                        // todo: should really offer choice of existing Workgroups to add the user to, as well as their role
                         $res1 = mysql_query($query1);
                         $err=mysql_error();
                         if (!$res1) {

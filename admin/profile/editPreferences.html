@@ -2,15 +2,16 @@
 
 /**
 * editPreferences.html: edits user's preferences for behaviour of program, plus sets bookmarklet
+* TODO: DELETE after adding additional preferences not yet set in h4 : DEPRECATED in h4, replaced by profile_preferences.html 
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     3.0
 */
@@ -52,6 +53,8 @@
 
             // Note: "Preferences are defined in /common/php/displayPreferences
             function showPreferences() {
+                document.getElementById("userCompetencyLevel").value
+                = top.HEURIST.util.getDisplayPreference("userCompetencyLevel");
                 document.getElementById("results-per-page").value
                 = top.HEURIST.util.getDisplayPreference("results-per-page");
                 document.getElementById("defaultSearch").value
@@ -74,6 +77,8 @@
                 = (bkm==='true');
                 mybkm = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
                 document.getElementById("showMyBookmarks").checked = (mybkm!=='false');
+                
+                // deprecated with version 4
                 var asr = top.HEURIST.util.getDisplayPreference("autoSelectRelated"); // auto select related records (one level for now)
                 document.getElementById("autoSelectRelated").checked
                 = (asr!=='false');
@@ -81,6 +86,7 @@
                 document.getElementById("autoDeselectOtherLevels").checked
                 = (adl!=='false');
 
+                
                 var ptd = top.HEURIST.util.getDisplayPreference("tagging-popup");
                 document.getElementById("promptTagOnDataAddition").checked = (ptd!=='false');
 
@@ -93,9 +99,9 @@
                 favsrch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
                 document.getElementById("showFavouritesSearch").checked = (favsrch!=='false');
 
-                var mol = top.HEURIST.util.getDisplayPreference("report-output-limit");
+                var mol = top.HEURIST.util.getDisplayPreference("smarty-output-limit");
                 if(isNaN(mol) || parseInt(mol)<1) mol = 1000;
-                document.getElementById("report-output-limit").value = mol;
+                document.getElementById("smarty-output-limit").value = mol;
 
                 var showquery = top.HEURIST.util.getDisplayPreference("searchQueryInBrowser");
                 document.getElementById("showSearchQueryInBrowser").checked = (showquery!=='false');
@@ -108,6 +114,7 @@
                 var reload_nav = false;
                 var reload_menu = false;
 
+                var ucl = document.getElementById("userCompetencyLevel").value;
                 var rpp = parseInt(document.getElementById("results-per-page").value);
                 var def = document.getElementById("defaultSearch").value;
                 var fav = document.getElementById("favourites").value;
@@ -126,7 +133,7 @@
                     return;
                 }
 
-                var mol = parseInt(document.getElementById("report-output-limit").value);
+                var mol = parseInt(document.getElementById("smarty-output-limit").value);
                 if(favsrch != new_val){
                     reload_nav = true;
                     favsrch = new_val;
@@ -159,7 +166,9 @@
                     favsrch = new_val;
                 }
 
-                top.HEURIST.util.setDisplayPreference(["results-per-page",
+                top.HEURIST.util.setDisplayPreference([
+                    "userCompetencyLevel",
+                    "results-per-page",
                     "defaultSearch",
                     "favourites",
                     "loadRelatedOnSearch",
@@ -173,7 +182,7 @@
                     "showAggregations",
                     "showNavMenuAlways",
                     "showFavouritesSearch",
-                    "report-output-limit",
+                    "smarty-output-limit",
                     "searchQueryInBrowser",
                     "record-edit-advancedmode"],
                     [rpp,def,fav,rel,rec,rec2,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery,edadv]);
@@ -201,7 +210,7 @@
         <br /><i>Drag this link </i> &nbsp;&nbsp;<b><u>
         
         <script>
-            var hBase = (top.HEURIST && top.HEURIST.baseURL)? top.HEURIST.baseURL
+            var hBase = (top.HEURIST && top.HEURIST.baseURL_V3)? top.HEURIST.baseURL_V3
             : document.location.href.replace(/admin\/.*/,"");
             var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
 
@@ -237,7 +246,7 @@
         <div class="input-row">
             <div class="input-header-cell">Limit number of lines in report output (no warning if limit exceeded)
             </div>
-            <div  class="input-cell"><input id="report-output-limit">
+            <div  class="input-cell"><input id="smarty-output-limit">
             </div>
         </div>
 

@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -27,7 +27,7 @@
 * 4) Init values for mapping form (checkboxes and selected field in dropdowns)
 */
 
-$( init );
+$(document).ready( init );
 
 function init() {
 
@@ -40,12 +40,21 @@ function init() {
 
     var allowed = Object.keys(top.HEURIST.detailTypes.lookups);
     allowed.splice(allowed.indexOf("separator"),1);
-    allowed.splice(allowed.indexOf("relmarker"),1);
+    //allowed.splice(allowed.indexOf("relmarker"),1);
     allowed.splice(allowed.indexOf("file"),1);
     allowed.splice(allowed.indexOf("geo"),1);
     //
     document.title = "Import Records from "+currentSessionName;
 
+    //change title in parent dialog
+    if(window.frameElement){
+    var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
+    if( reference_to_parent_dialog ){
+        var ele = parent.document.getElementById(reference_to_parent_dialog);
+        $(ele.parentElement).find('.ui-dialog-title').text( 'Import Records from '+currentSessionName );
+        //dialog( "option", "title", 'Import Records from '+currentSessionName );
+    }
+    }
 
     select_rectype.change(function (event){
 
@@ -95,12 +104,17 @@ function init() {
             $(this).parent().hide();
         });
 
-        $('#btnStartMatch').hide();
+        //$('#btnStartMatch').hide();
+        $('#btnStartMatch').attr("disabled", "disabled");
+        $('#btnStartMatch').css('color','#CCC');
         $('#btnStartImport').attr("disabled", "disabled");// .hide();
         $('#btnStartImport').css('color','#CCC');
 
         //id field
         if(rectype){
+            $('#btnSkipMatch').removeAttr("disabled");
+            $('#btnSkipMatch').css('color','#666');
+
             $("#div_idfield").show();
             $('input[id^="cbsa_dt_"]').parent().show();
             $('input[id^="cbsa_keyfield_"]').parent().show();
@@ -168,6 +182,8 @@ function init() {
 
         }else{
             $("#div_idfield").hide();
+            $('#btnSkipMatch').attr("disabled", "disabled");
+            $('#btnSkipMatch').css('color','#CCC');
         }
         $(".analized2").hide();  //hide after rectype change
         if ($("#divPreviousBtn").is(":visible")) $(".analized3").show();
@@ -275,6 +291,7 @@ function init() {
     $( "#tabs_actions" ).tabs({active: form_vals.sa_mode, activate: function(event, ui){
         showUpdMode(ui.newTab.index());
     } });
+    $( "#tabs_actions ul.ui-tabs-nav" ).hide();
 
 
     if(form_vals.auto_switch_to_import==1){
@@ -296,6 +313,7 @@ function init() {
             $("#btnMatchProceed").click(function(){
                 $("#ignore_insert").val(1);
                 $("#input_step").val(2);
+                hideThisFrame();
                 document.forms[0].submit();
                 if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
                 _dialogbox = null;
@@ -314,7 +332,7 @@ function init() {
                 divUnmatchedBtns.hide();
 
                 $.ajax({
-                    url: top.HEURIST.basePath+'import/delimited/importCSV.php',
+                    url: top.HEURIST.baseURL_V3+'import/delimited/importCSV.php',
                     type: "POST",
                     data: {deleteunmatched: $('#import_id').val(), idfield:$("#recid_field").val(), db:currentDb},
                     dataType: "text",
@@ -356,6 +374,16 @@ function update_counts(processed, added, updated, total){
     $("#div-progress2").html("Added: "+added+" Updated:"+updated+". Processed "+processed+" records for "+total+" input rows");
 }
 
+function doMatchingAfterDisambig(){
+
+    if(currDialog!=null){
+        currDialog.dialog('close');
+        currDialog = null;
+    }
+    
+    doMatching();
+}
+
 //
 // Start search/matching
 //
@@ -384,12 +412,14 @@ function doMatching(){
 
         var r = true;
         if(cb_keyfields2.length>0){
+            r = true;
+            /* 2016-02-01 hide this warning since all id fields are considered as mutlivalue
             r = confirm('You have a multi-value column ('+cb_keyfields2.attr('column')+
                 ') in your key columns. The record identifier column created by this matching process will have multiple values '+
                 'corresponding with the number of values in this column for each record.\r\n\r\n'+
                 'When used as the key field in the insert/update step, a record will be created for each value. '+
                 'When used as a data field, the data field will have repeated values in the record.');
-
+            */    
             if(r){
                 $("#mvm").val(1);
                 $("#multifield").val(cb_keyfields2.val());
@@ -430,6 +460,7 @@ function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
     }
     if(r){
         $("#input_step").val(3); //start real import
+        hideThisFrame();
         document.forms[0].submit();
     }
 }
@@ -531,11 +562,20 @@ function onFtSelect2(ind){
             isok  = isok && ($('select[id="'+this.id.substr(2)+'"]').val()!="");
         });
     }
+
+    if(isok){
+        $('#btnStartMatch').removeAttr("disabled"); //.show();
+        $('#btnStartMatch').css('color','#666');
+    }else{
+        $('#btnStartMatch').attr("disabled", "disabled");
+        $('#btnStartMatch').css('color','#CCC');
+    }
+    /*
     if(isok){
         $('#btnStartMatch').show();
     }else{
         $('#btnStartMatch').hide();
-    }
+    }*/
 
     /*
     if($('select[id^="sa_keyfield_"][value!=""]').length>0){
@@ -630,16 +670,55 @@ function onUpdateModeSet(event){
     }
 }
 
+var currDialog = null;
+
 //
 // Show error, matched or new records
 //
 function showRecords(divname){
 
-    $('div[id^="main_"]').hide();
-    $('div[id="main_'+divname+'"]').show();
+    if (divname=='mapping'){
+        if(currDialog!=null){
+            currDialog.dialog('close');
+        }
+    }else{
+
+        var $dlg = $('div[id="main_'+divname+'"]');
+        //keep            
+        var element = $dlg[0];
+        var originalParentNode = element.parentNode;
+        //element.parentNode.removeChild(element);
+
+        var options = {
+                    autoOpen: true,
+                    height: 550,
+                    width: 800,
+                    modal: true,
+                    resizable: false,
+                    draggable: false,
+                    title: 'Import delimited',
+                    close: function(event, ui){
+
+                        //var element = popup.element.parentNode.removeChild(popup.element);
+                        element.style.display = "none";
+                        originalParentNode.appendChild(element);
+
+                        currDialog = null; //$dlg.remove();
+                    }
+        };
+                    
+
+        $dlg.dialog(options);
+        //$dlg.dialog('open');
+        currDialog = $dlg;
+    
+    }
+
+    //$('div[id^="main_"]').hide();
+    //$('div[id="main_'+divname+'"]').show();
 
     if(divname=='error'){
-        if($( "#tabs_records" ).length>0){
+            if($( "#tabs_records" ).length>0){
             $( "#tabs_records" ).tabs();
         }
     }
@@ -666,7 +745,7 @@ function getValues(dest){
         }
 
         $.ajax({
-            url: top.HEURIST.basePath+'import/delimited/importCSV.php',
+            url: top.HEURIST.baseURL_V3+'import/delimited/importCSV.php',
             type: "POST",
             data: {recid: currentId, table:currentTable, db:currentDb},
             dataType: "json",
@@ -714,6 +793,8 @@ function getValues(dest){
 //
 function verifySubmit()
 {
+    
+    var res = false;    
     var rectype = $("#sa_rectype").val();
     if(rectype>0){
 
@@ -734,11 +815,11 @@ function verifySubmit()
                     alert("If you wish to redo the matching, select column for ID field");
 
                 }else {
-                    return true;
+                    res = true;
                 }
 
             }else{
-                alert("To search/match records you have to select at least one key field in import data");
+                alert("To search/match records you must select at least one key field in import data");
             }
 
 
@@ -747,9 +828,9 @@ function verifySubmit()
 
             var select_fieldtype = $('select[id^="sa_dt_"][value!=""]');
             if(select_fieldtype.length>0){
-                return true;
+                res = true;
             }else{
-                alert("You have to map import data to record's fields. Select at least one field type!");
+                alert("You need to map import data to record's fields. Please select at least one field type.");
             }
         }
 
@@ -757,7 +838,11 @@ function verifySubmit()
         alert("Select record type!");
     }
 
-    return false;
+    if(res){
+        hideThisFrame();
+    }
+    
+    return res;
 }
 //
 // create SELECT element (see h4/utils)
@@ -853,6 +938,7 @@ function createRectypeSelect(selObj, rectypeList, topOptions) {
 
     return selObj;
 }
+
 
 //
 // create detailtype SELECT element (see h4/utils)
@@ -983,3 +1069,4 @@ function showTermListPreview(dty_ID){
         parentdiv.appendChild(el_sel);
     }
 }
+

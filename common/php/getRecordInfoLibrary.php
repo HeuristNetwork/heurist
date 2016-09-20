@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -91,14 +91,14 @@
 */
 require_once (dirname(__FILE__) . '/imageLibrary.php');
 require_once (dirname(__FILE__) . '/../../records/files/uploadFile.php');
-require_once('utilsTitleMask.php');
+require_once(dirname(__FILE__).'/utilsTitleMask.php');
 
 $lastModified = null;
 $dbID = intval(HEURIST_DBID);
 /**
- * description
- * @global    int $lastModified represents the last modified datetime
- */
+* description
+* @global    int $lastModified represents the last modified datetime
+*/
 function setLastModified() {
     global $lastModified;
 
@@ -107,13 +107,13 @@ function setLastModified() {
     $lastModified = strtotime($lastModified[0]);
 }
 /**
- * get cached object
- * @global    object $memcache
- * @global    int $lastModified represents the last modified date
- * @param     string [$key] key for data to retrieve
- * @return    cached data for $key or null if not in cache
- * @uses      MEMCACHED_PORT
- */
+* get cached object
+* @global    object $memcache
+* @global    int $lastModified represents the last modified date
+* @param     string [$key] key for data to retrieve
+* @return    cached data for $key or null if not in cache
+* @uses      MEMCACHED_PORT
+*/
 function getCachedData($key) {
     global $memcache, $lastModified;
 
@@ -127,31 +127,34 @@ function getCachedData($key) {
     return $memcache->get($key);
 }
 /**
- * store object in cache
- * @global    object $memcache
- * @global    int $lastModified represents the last modified date
- * @param     string [$key] key for data to store
- * @param     mixed [$var] variable with data to store
- * @return    boolean true if success, false otherwise
- * @uses      MEMCACHED_PORT
- */
+* store object in cache
+* @global    object $memcache
+* @global    int $lastModified represents the last modified date
+* @param     string [$key] key for data to store
+* @param     mixed [$var] variable with data to store
+* @return    boolean true if success, false otherwise
+* @uses      MEMCACHED_PORT
+*/
 function setCachedData($key, $var) {
     global $memcache, $lastModified;
 
     setLastModified();
 
-    $memcache->set('lastUpdate:' . $key, $lastModified);
-    return $memcache->set($key, $var);
+    try{
+        @$memcache->set('lastUpdate:' . $key, $lastModified);
+        return $memcache->set($key, $var);
+    }catch(Exception $e){
+    }
 }
 /**
- * resolves a recID to any forwarded value and returns resolved recID with any bmkID for user and indicates
- * that it had to resolve. If currect recID it returns with any user bkmID. If bkmID it returns with the
- * cooresponding recID.
- * @param     int $recID record ID
- * @param     int $bmkID bookmark ID
- * @return    array list of recID,bkmID,isReplaced
- *  @uses     get_user_id() in the lookup query for bookmarks
- */
+* resolves a recID to any forwarded value and returns resolved recID with any bmkID for user and indicates
+* that it had to resolve. If currect recID it returns with any user bkmID. If bkmID it returns with the
+* corresponding recID.
+* @param     int $recID record ID
+* @param     int $bmkID bookmark ID
+* @return    array list of recID,bkmID,isReplaced
+*  @uses     get_user_id() in the lookup query for bookmarks
+*/
 function getResolvedIDs($recID, $bmkID) {
     // Look at the request parameters rec_ID and bkm_ID,
     // return the actual rec_ID and bkm_ID as the user has access to them
@@ -175,23 +178,20 @@ function getResolvedIDs($recID, $bmkID) {
             $recID = $resolvedRecID;
         }
     }
-    /*****DEBUG****///error_log("no forwarding".print_r($recID,true));
     $rec_id = 0;
     $bkm_ID = 0;
     if (intval(@$recID)) {
         $rec_id = intval($recID);
         $res = mysql_query('select rec_ID, bkm_ID from Records'.
-                             ' left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID=' . get_user_id() . ' where rec_ID=' . $rec_id);
+            ' left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID=' . get_user_id() . ' where rec_ID=' . $rec_id);
         $row = mysql_fetch_assoc($res);
-        /*****DEBUG****///error_log("row ".print_r($row,true));
         $rec_id = intval($row['rec_ID']);
         $bkm_ID = intval($row['bkm_ID']);
     }
-    /*****DEBUG****///error_log("after recID bmk lookup ".print_r($rec_id,true));
     if (!$rec_id && intval(@$bmkID)) {
         $bkm_ID = intval($bmkID);
         $res = mysql_query('select bkm_ID, rec_ID from usrBookmarks'.
-        					' left join Records on bkm_recID=rec_ID where bkm_ID=' . $bkm_ID . ' and bkm_UGrpID=' . get_user_id());
+            ' left join Records on bkm_recID=rec_ID where bkm_ID=' . $bkm_ID . ' and bkm_UGrpID=' . get_user_id());
         $row = mysql_fetch_assoc($res);
         $bkm_ID = intval($row['bkm_ID']);
         $rec_id = intval($row['rec_ID']);
@@ -199,15 +199,15 @@ function getResolvedIDs($recID, $bmkID) {
     return array($rec_id, $bkm_ID, $replaced);
 }
 /**
- * Return an array of the basic scalar properties for this record / bookmark
- *
- * @param     int $recID record ID
- * @param     int $bmkID bookmark ID
- * @return    object base properties of the record-bookmark pair
- * @link      URL
- * @see       name of another element (function or object) used in this function
- * @todo      add code to get personal woots
- */
+* Return an array of the basic scalar properties for this record / bookmark
+*
+* @param     int $recID record ID
+* @param     int $bmkID bookmark ID
+* @return    object base properties of the record-bookmark pair
+* @link      URL
+* @see       name of another element (function or object) used in this function
+* @todo      add code to get personal woots
+*/
 function getBaseProperties($recID, $bkmID) {
     if (!$recID && !$bkmID) {
         return array("error" => "invalid parameters passed to getBaseProperties");
@@ -215,25 +215,25 @@ function getBaseProperties($recID, $bkmID) {
 
     if ($bkmID) {
         $res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype,
-									rty_ID as rectypeID, rec_URL as url, grp.ugr_ID as workgroupID,
-									concat(grp.ugr_FirstName,\' \',grp.ugr_LastName) as name,
-									grp.ugr_Name as workgroup, rec_ScratchPad as notes,
-									rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder,
-									bkm_Rating as rating, rec_Modified, rec_FlagTemporary
-								from usrBookmarks left join Records on bkm_recID=rec_ID and bkm_UGrpID=' . get_user_id() . '
-												left join defRecTypes on rty_ID = rec_RecTypeID
-												left join ' . USERS_DATABASE . '.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID
-								where bkm_ID=' . $bkmID);
+            rty_ID as rectypeID, rec_URL as url, grp.ugr_ID as workgroupID,
+            concat(grp.ugr_FirstName,\' \',grp.ugr_LastName) as name,
+            grp.ugr_Name as workgroup, rec_ScratchPad as notes,
+            rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder,
+            bkm_Rating as rating, rec_Added, rec_Modified, rec_FlagTemporary
+            from usrBookmarks left join Records on bkm_recID=rec_ID and bkm_UGrpID=' . get_user_id() . '
+            left join defRecTypes on rty_ID = rec_RecTypeID
+            left join ' . USERS_DATABASE . '.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID
+            where bkm_ID=' . $bkmID);
     } else if ($recID) {
         $res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype, rty_ID as rectypeID,
-									rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup,
-									concat(grp.ugr_FirstName,\' \',grp.ugr_LastName) as name,
-									rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Modified,
-									rec_FlagTemporary
-								from Records left join usrBookmarks on bkm_recID=rec_ID
-											left join defRecTypes on rty_ID = rec_RecTypeID
-											left join ' . USERS_DATABASE . '.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID
-								where rec_ID=' . $recID);
+            rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup,
+            concat(grp.ugr_FirstName,\' \',grp.ugr_LastName) as name,
+            rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Added, rec_Modified,
+            rec_FlagTemporary
+            from Records left join usrBookmarks on bkm_recID=rec_ID
+            left join defRecTypes on rty_ID = rec_RecTypeID
+            left join ' . USERS_DATABASE . '.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID
+            where rec_ID=' . $recID);
     }
     $row = mysql_fetch_assoc($res);
     $recID = $row["rec_ID"];
@@ -245,6 +245,7 @@ function getBaseProperties($recID, $bkmID) {
     $props["rectype"] = $row["rectype"];
     $props["rectypeID"] = $row["rectypeID"];
     $props["url"] = $row["url"];
+    $props["adddate"] = $row["rec_Added"];
     $props["moddate"] = $row["rec_Modified"];
     $props["isTemporary"] = $row["rec_FlagTemporary"] ? true : false;
     if (@$row["passwordReminder"]) {
@@ -268,30 +269,30 @@ function getBaseProperties($recID, $bkmID) {
     return $props;
 }
 /**
- * description
- * Get all recDetails entries for this record,
- * as an array.
- * File entries have file data associated,
- * geo entries have geo data associated,
- * record references have title data associated.
- * here we want  list of detail values for this record grouped by detail Type
- * recordType can contain pseudoDetailTypes that are structural only information (relmarker, separator and fieldsetmarker)
- * since these will never be instantiated to a detail (data value) we don't need to worry about them here. Any detail will
- * will be of valid type and might not be in the definition of the rec type (Heurist separates data storage for type definition).
- *
- * @param     int $recID record ID
- * @return    object array of details index by local detailID
- * @uses      get_uploaded_file_info() to get the file info
- */
+* description
+* Get all recDetails entries for this record,
+* as an array.
+* File entries have file data associated,
+* geo entries have geo data associated,
+* record references have title data associated.
+* here we want  list of detail values for this record grouped by detail Type
+* recordType can contain pseudoDetailTypes that are structural only information (relmarker, separator and fieldsetmarker)
+* since these will never be instantiated to a detail (data value) we don't need to worry about them here. Any detail will
+* will be of valid type and might not be in the definition of the rec type (Heurist separates data storage for type definition).
+*
+* @param     int $recID record ID
+* @return    object array of details index by local detailID
+* @uses      get_uploaded_file_info() to get the file info
+*/
 function getAllRecordDetails($recID) {
     $res = mysql_query("select dtl_ID, dtl_DetailTypeID, dtl_Value, rec_Title, dtl_UploadedFileID, trm_Label,
-	                           if(dtl_Geo is not null, astext(envelope(dtl_Geo)), null) as envelope,
-	                           if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo
-	                      from recDetails
-	                 left join defDetailTypes on dty_ID=dtl_DetailTypeID
-	                 left join Records on rec_ID=dtl_Value and dty_Type='resource'
-	                 left join defTerms on trm_ID = dtl_Value
-	                     where dtl_RecID = $recID order by dtl_DetailTypeID, dtl_ID");
+        if(dtl_Geo is not null, AsWKT(envelope(dtl_Geo)), null) as envelope,
+        if(dtl_Geo is not null, AsWKT(dtl_Geo), null) as dtl_Geo
+        from recDetails
+        left join defDetailTypes on dty_ID=dtl_DetailTypeID
+        left join Records on rec_ID=dtl_Value and dty_Type='resource'
+        left join defTerms on trm_ID = dtl_Value
+        where dtl_RecID = $recID order by dtl_DetailTypeID, dtl_ID");
     $recDetails = array();
     while ($row = mysql_fetch_assoc($res)) {
         $detail = array();
@@ -306,7 +307,6 @@ function getAllRecordDetails($recID) {
             }
         } else if ($row["envelope"] && preg_match("/^POLYGON[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $row["envelope"], $poly)) {
             list($match, $minX, $minY, $maxX, $maxY) = $poly;
-            /*****DEBUG****///error_log($match);
             $x = 0.5 * ($minX + $maxX);
             $y = 0.5 * ($minY + $maxY);
             // This is a bit ugly ... but it is useful.
@@ -317,19 +317,19 @@ function getAllRecordDetails($recID) {
             switch ($row["dtl_Value"]) {
                 case "p":
                     $type = "point";
-                break;
+                    break;
                 case "pl":
                     $type = "polygon";
-                break;
+                    break;
                 case "c":
                     $type = "circle";
-                break;
+                    break;
                 case "r":
                     $type = "rectangle";
-                break;
+                    break;
                 case "l":
                     $type = "path";
-                break;
+                    break;
                 default:
                     $type = "unknown";
             }
@@ -342,11 +342,11 @@ function getAllRecordDetails($recID) {
     return $recDetails;
 }
 /**
- * Get any reminders as an array
- *
- * @param     int [$recID] record ID
- * @return    array of reminder structures
- */
+* Get any reminders as an array
+*
+* @param     int [$recID] record ID
+* @return    array of reminder structures
+*/
 function getAllReminders($recID) {
     // Get any reminders as an array
     if (!$recID) return array();
@@ -356,22 +356,22 @@ function getAllReminders($recID) {
     if (mysql_num_rows($res) > 0) {
         while ($rem = mysql_fetch_assoc($res)) {
             array_push($reminders, array("id" => $rem["rem_ID"],
-                                        "user" => $rem["rem_ToUserID"],
-                                        "group" => $rem["rem_ToWorkGroupID"],
-                                        "email" => $rem["rem_ToEmail"],
-                                        "message" => $rem["rem_Message"],
-                                        "when" => $rem["rem_StartDate"],
-                                        "frequency" => $rem["rem_Freq"]));
+                "user" => $rem["rem_ToUserID"],
+                "group" => $rem["rem_ToWorkgroupID"],
+                "email" => $rem["rem_ToEmail"],
+                "message" => $rem["rem_Message"],
+                "when" => $rem["rem_StartDate"],
+                "frequency" => $rem["rem_Freq"]));
         }
     }
     return $reminders;
 }
 /**
- * Get any comments as an array
- *
- * @param     int [$recID] record ID
- * @return    array of comment structures index by comment ID
- */
+* Get any comments as an array
+*
+* @param     int [$recID] record ID
+* @return    array of comment structures index by comment ID
+*/
 function getAllComments($recID) {
     $res = mysql_query("select cmt_ID, cmt_Deleted, cmt_Text, cmt_ParentCmtID, cmt_Added, cmt_Modified, cmt_OwnerUGrpID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from recThreadedComments left join " . USERS_DATABASE . ".sysUGrps usr on cmt_OwnerUGrpID=usr.ugr_ID where cmt_RecID = $recID order by cmt_Added");
     $comments = array();
@@ -379,28 +379,28 @@ function getAllComments($recID) {
         if ($cmt["cmt_Deleted"]) {
             /* indicate that the comments exists but has been deleted */
             $comments[$cmt["cmt_ID"]] = array("id" => $cmt["cmt_ID"],
-                                              "owner" => $cmt["cmt_ParentCmtID"],
-                                              "deleted" => true);
+                "owner" => $cmt["cmt_ParentCmtID"],
+                "deleted" => true);
             continue;
         }
         $comments[$cmt["cmt_ID"]] = array("id" => $cmt["cmt_ID"],
-                                          "text" => $cmt["cmt_Text"],
-                                          "owner" => $cmt["cmt_ParentCmtID"], /* comments that owns this one (i.e. parent, just like in Dickensian times) */
-                                          "added" => $cmt["cmt_Added"],
-                                          "modified" => $cmt["cmt_Modified"],
-                                          "user" => $cmt["Realname"],
-                                          "userID" => $cmt["cmt_OwnerUGrpID"],
-                                          "deleted" => false);
+            "text" => $cmt["cmt_Text"],
+            "owner" => $cmt["cmt_ParentCmtID"], /* comments that owns this one (i.e. parent, just like in Dickensian times) */
+            "added" => $cmt["cmt_Added"],
+            "modified" => $cmt["cmt_Modified"],
+            "user" => $cmt["Realname"],
+            "userID" => $cmt["cmt_OwnerUGrpID"],
+            "deleted" => false);
     }
     return $comments;
 }
 /**
- * Get all workgroup tagODs for this record as an array
- *
- * @param     int [$recID] record ID
- * @return    array of comment structures index by comment ID
- * @todo      should limit this just to workgroups that the user is in? keeps from viewing others tags
- */
+* Get all workgroup tagODs for this record as an array
+*
+* @param     int [$recID] record ID
+* @return    array of comment structures index by comment ID
+* @todo      should limit this just to workgroups that the user is in? keeps from viewing others tags
+*/
 function getAllworkgroupTags($recID) {
     $res = mysql_query("select tag_ID from usrRecTagLinks, usrTags where rtl_TagID=tag_ID and rtl_RecID=$recID");
     $wgTagIDs = array();
@@ -410,50 +410,45 @@ function getAllworkgroupTags($recID) {
     return $wgTagIDs;
 }
 /**
- * attaches a child branch to a parent, recursively calling itself to build the childs subtree
- * @param     int $parentIndex id of parent term to attach child branch to
- * @param     int $childIndex id of child branch in current array
- * @param     mixed $terms the array of branches to build the tree
- * @return    object $terms
- */
+* attaches a child branch to a parent, recursively calling itself to build the childs subtree
+* @param     int $parentIndex id of parent term to attach child branch to
+* @param     int $childIndex id of child branch in current array
+* @param     mixed $terms the array of branches to build the tree
+* @return    object $terms
+*/
 function attachChild($parentIndex, $childIndex, $terms) {
     if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
         return $terms;
     }
-    /*****DEBUG****///error_log(" enter attach $contIndex, $childIndex, ".print_r($terms,true));
     if (array_key_exists($childIndex, $terms)) {//check for
         if (count($terms[$childIndex])) {
             foreach ($terms[$childIndex] as $gChildID => $n) {
                 if ($gChildID != null) {
                     $terms = attachChild($childIndex, $gChildID, $terms);//depth first recursion
-                    /*****DEBUG****/// error_log(" after recurse $childIndex, $gChildID, ".print_r($terms,true));
                 }
             }
         }
-        /*****DEBUG****///error_log(" attaching ".print_r($terms[$childIndex],true));
-        /*****DEBUG****///error_log(" to ".print_r($terms[$parentIndex],true));
         $terms[$parentIndex][$childIndex] = $terms[$childIndex];
         unset($terms[$childIndex]);
     }
-    /*****DEBUG****/// error_log(" exit attach $contIndex, $childIndex, ".print_r($terms,true));
     return $terms;
 }
 /**
- * build a tree of term ids for a given domain name or names (prefix or postfix subdomain naming)
- * @global    type description of global variable usage in a function
- * @staticvar type [$varname] description of static variable usage in function
- * @param     string $termDomain the term domain to build
- * @param     string $matching indicates whether the domain name is complete or portion of the domain
- * @return    mixed
- * @uses      attachChild()
- */
- function getTermTree($termDomain, $matching = 'exact') { // termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in the trm_Domain enum
+* build a tree of term ids for a given domain name or names (prefix or postfix subdomain naming)
+* @global    type description of global variable usage in a function
+* @staticvar type [$varname] description of static variable usage in function
+* @param     string $termDomain the term domain to build
+* @param     string $matching indicates whether the domain name is complete or portion of the domain
+* @return    mixed
+* @uses      attachChild()
+*/
+function getTermTree($termDomain, $matching = 'exact') { // termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in the trm_Domain enum
     $whereClause = "a.trm_Domain " . ($matching == 'prefix' ? " like '" . $termDomain . "%' " : ($matching == 'postfix' ? " like '%" . $termDomain . "' " : "='" . $termDomain . "'"));
     $query = "select a.trm_ID as pID, b.trm_ID as cID
-				from defTerms a
-					left join defTerms b on a.trm_ID = b.trm_ParentTermID
-				where $whereClause
-				order by a.trm_Label, b.trm_Label";
+    from defTerms a
+    left join defTerms b on a.trm_ID = b.trm_ParentTermID
+    where $whereClause
+    order by a.trm_Label, b.trm_Label";
     $res = mysql_query($query);
     $terms = array();
     // create array of parent => child arrays
@@ -480,8 +475,8 @@ function attachChild($parentIndex, $childIndex, $terms) {
     return $terms;
 }
 /**
- * calculate depth and child count for each term
- */
+* calculate depth and child count for each term
+*/
 function updateTermData() {
     //mysql_query("start transaction");
     // set al child counts to zero
@@ -507,19 +502,15 @@ function updateTermData() {
         return $children;
     }
     function setChildDepth($parentID, $parentDepth) {
-        /*****DEBUG****///error_log(" parentID = $parentID and parentDepth = $parentDepth");
         $children = getChildTerms($parentID);
-        /*****DEBUG****///error_log(" $parentID - children = ". print_r($children,true));
         if (!$children) {// if no children nothing to do so return
             return;
         }
         $childIDList = join(",", array_keys($children));
-        /*****DEBUG****///error_log(" childID list = $childIDList");
         $depth = $parentDepth + 1;
         // set every childs depth
         $query = "update defTerms set trm_Depth = " . $depth . " where trm_ID in(" . $childIDList . ")";
         mysql_query($query);
-        /*****DEBUG****///error_log("query = $query and errors ".mysql_error());
         foreach ($children as $childID => $childCount) {
             if ($childCount) {
                 setChildDepth($childID, $depth);
@@ -538,22 +529,23 @@ function updateTermData() {
 
 }
 /**
- * return array of term table column names
- */
+* return array of term table column names
+*/
 function getTermColNames() {
     return array("trm_ID", "trm_Label", "trm_InverseTermID", "trm_Description", "trm_Status", "trm_OriginatingDBID",
-    //					"trm_NameInOriginatingDB",
-    "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", "trm_ConceptID");
+        //					"trm_NameInOriginatingDB",
+        "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", "trm_ParentTermID", "trm_Depth", 
+        "trm_Modified", "trm_LocallyModified", "trm_Code", "trm_ConceptID");
 }
 /**
- * get term structure with trees from relation and enum domains
- * @param     boolean $useCachedData whether to use cached data (default = false)
- * @return    object terms structure that contains domainLookups and domain term trees
- * @uses      getTermColNames()
- * @uses      getTermTree()
- * @uses      getCachedData()
- * @uses      setCachedData()
- */
+* get term structure with trees from relation and enum domains
+* @param     boolean $useCachedData whether to use cached data (default = false)
+* @return    object terms structure that contains domainLookups and domain term trees
+* @uses      getTermColNames()
+* @uses      getTermTree()
+* @uses      getCachedData()
+* @uses      setCachedData()
+*/
 function getTerms($useCachedData = false) {
     global $dbID;
     $cacheKey = DATABASE . ":getTerms";
@@ -572,33 +564,37 @@ function getTerms($useCachedData = false) {
     }
     $query.= " from defTerms order by trm_Domain, trm_Label";
     $res = mysql_query($query);
-    $terms = array('termsByDomainLookup' => array('relation' => array(), 'enum' => array()), 'commonFieldNames' => array_slice(getTermColNames(), 1), 'fieldNamesToIndex' => getColumnNameToIndex(array_slice(getTermColNames(), 1)));
+    $terms = array('termsByDomainLookup' => array('relation' => array(), 'enum' => array()), 
+        'commonFieldNames' => array_slice(getTermColNames(), 1), 
+        'fieldNamesToIndex' => getColumnNameToIndex(array_slice(getTermColNames(), 1)));
+    $terms['fieldNamesToIndex']['trm_Image'] = count($terms['commonFieldNames']);
+    array_push($terms['commonFieldNames'],'trm_Image');
+        
     while ($row = mysql_fetch_row($res)) {
         $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
+        $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$row[0].'.png';
+        array_push($terms['termsByDomainLookup'][$row[9]][$row[0]], file_exists($filename));
     }
     $terms['treesByDomain'] = array('relation' => getTermTree("relation", "prefix"), 'enum' => getTermTree("enum", "prefix"));
     setCachedData($cacheKey, $terms);
     return $terms;
 }
 /**
- * translate a local id for a given table to it's concept ID
- * @param     string $lclID local id of row in $tableName table
- * @param     string $tableName name of table
- * @param     string $fieldNamePrefix column name prefix used in $tableName table
- * @return    string concept id (dbID-origID) or null if no HEURIST DBID
- * @uses      HEURIST_DBID
- */
- function getConceptID($lclID, $tableName, $fieldNamePrefix) {
+* translate a local id for a given table to it's concept ID
+* @param     string $lclID local id of row in $tableName table
+* @param     string $tableName name of table
+* @param     string $fieldNamePrefix column name prefix used in $tableName table
+* @return    string concept id (dbID-origID) or null if no HEURIST DBID
+* @uses      HEURIST_DBID
+*/
+function getConceptID($lclID, $tableName, $fieldNamePrefix) {
     $query = "select " . $fieldNamePrefix . "OriginatingDBID," . $fieldNamePrefix . "IDInOriginatingDB from $tableName where " . $fieldNamePrefix . "ID = $lclID";
-    /*****DEBUG****///error_log("SQL=".$query);
     $res = mysql_query($query);
     if($res){
         $ids = mysql_fetch_array($res);
     }else{
         $ids = null;
     }
-    /*****DEBUG****///error_log(print_r($ids, true));
-    /*****DEBUG****///error_log("RES=".count($ids)."    ".$ids[0]."    ".$ids[1]);
     //return "".$ids[0]."-".$ids[1];
     if ($ids && count($ids) == 4 && is_numeric($ids[0]) && is_numeric($ids[1])) {
         return "" . $ids[0] . "-" . $ids[1];
@@ -609,51 +605,51 @@ function getTerms($useCachedData = false) {
     }
 }
 /**
- * return a terms concpet ID
- * @param     int $lclTermID local Term ID
- * @return    mixed from getConceptID()
- * @uses      getConceptID()
- */
+* return a terms concpet ID
+* @param     int $lclTermID local Term ID
+* @return    mixed from getConceptID()
+* @uses      getConceptID()
+*/
 function getTermConceptID($lclTermID) {
     return getConceptID($lclTermID, "defTerms", "trm_");
 }
 /**
- * return a detailTypes concpet ID
- * @param     int $lclDtyID local detailType ID
- * @return    mixed from getConceptID()
- * @uses      getConceptID()
- */
+* return a detailTypes concpet ID
+* @param     int $lclDtyID local detailType ID
+* @return    mixed from getConceptID()
+* @uses      getConceptID()
+*/
 function getDetailTypeConceptID($lclDtyID) {
     return getConceptID($lclDtyID, "defDetailTypes", "dty_");
 }
 /**
- * return a recTypes concpet ID
- * @param     int $lclRecTypeID local recType ID
- * @return    mixed from getConceptID()
- * @uses      getConceptID()
- */
+* return a recTypes concpet ID
+* @param     int $lclRecTypeID local recType ID
+* @return    mixed from getConceptID()
+* @uses      getConceptID()
+*/
 function getRecTypeConceptID($lclRecTypeID) {
     return getConceptID($lclRecTypeID, "defRecTypes", "rty_");
 }
 /**
- * return a ontologies concpet ID
- * @param     int $lclOntID local ontology ID
- * @return    mixed from getConceptID()
- * @uses      getConceptID()
- */
+* return a ontologies concpet ID
+* @param     int $lclOntID local ontology ID
+* @return    mixed from getConceptID()
+* @uses      getConceptID()
+*/
 function getOntologyConceptID($lclOntID) {
     return getConceptID($lclOntID, "defOntologies", "ont_");
 }
 /**
- * get local id for concept id of a given table row
- * @global    type description of global variable usage in a function
- * @staticvar type [$varname] description of static variable usage in function
- * @param     string $conceptID concept id of row in $tableName table
- * @param     string $tableName name of table
- * @param     string $fieldNamePrefix column name prefix used in $tableName table
- * @return    int id or null if not found
- * @uses      HEURIST_DBID
- */
+* get local id for concept id of a given table row
+* @global    type description of global variable usage in a function
+* @staticvar type [$varname] description of static variable usage in function
+* @param     string $conceptID concept id of row in $tableName table
+* @param     string $tableName name of table
+* @param     string $fieldNamePrefix column name prefix used in $tableName table
+* @return    int id or null if not found
+* @uses      HEURIST_DBID
+*/
 function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
     $ids = explode("-", $conceptID);
     $res_id = null;
@@ -681,62 +677,62 @@ function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
     return $res_id;
 }
 /**
- * return local term id for a terms concept ID
- * @param     int $trmConceptID Term concept ID
- * @return    mixed from getLocalID()
- * @uses      getLocalID()
- */
+* return local term id for a terms concept ID
+* @param     int $trmConceptID Term concept ID
+* @return    mixed from getLocalID()
+* @uses      getLocalID()
+*/
 function getTermLocalID($trmConceptID) {
     return getLocalID($trmConceptID, "defTerms", "trm_");
 }
 /**
- * return local detailType id for a detailTypes concept ID
- * @param     int $dtyConceptID detailType concept ID
- * @return    mixed from getLocalID()
- * @uses      getLocalID()
- */
+* return local detailType id for a detailTypes concept ID
+* @param     int $dtyConceptID detailType concept ID
+* @return    mixed from getLocalID()
+* @uses      getLocalID()
+*/
 function getDetailTypeLocalID($dtyConceptID) {
     return getLocalID($dtyConceptID, "defDetailTypes", "dty_");
 }
 /**
- * return local recType id for a recTypes concept ID
- * @param     int $rtyConceptID recType concept ID
- * @return    mixed from getLocalID()
- * @uses      getLocalID()
- */
+* return local recType id for a recTypes concept ID
+* @param     int $rtyConceptID recType concept ID
+* @return    mixed from getLocalID()
+* @uses      getLocalID()
+*/
 function getRecTypeLocalID($rtyConceptID) {
     return getLocalID($rtyConceptID, "defRecTypes", "rty_");
 }
 /**
- * return local ontology id for a ontologys concept ID
- * @param     int $ontConceptID ontology concept ID
- * @return    mixed from getLocalID()
- * @uses      getLocalID()
- */
+* return local ontology id for a ontologys concept ID
+* @param     int $ontConceptID ontology concept ID
+* @return    mixed from getLocalID()
+* @uses      getLocalID()
+*/
 function getOntologyLocalID($ontConceptID) {
     return getLocalID($ontConceptID, "defOntologies", "ont_");
 }
 /**
- * get array of constraints for a recType using the recType in the source record role
- * @param     int $rectypeID constraint source recType ID
- * @return    array constraint array indexed by srcID then trgID then by trmID with max values
- */
+* get array of constraints for a recType using the recType in the source record role
+* @param     int $rectypeID constraint source recType ID
+* @return    array constraint array indexed by srcID then trgID then by trmID with max values
+*/
 function getRectypeConstraints($rectypeID) {
     $query = "select rcs_SourceRectypeID as srcID,
-					rcs_TermID as trmID,
-					rcs_TargetRectypeID as trgID,
-					rcs_TermLimit as max,
-					trm_Depth as level
-				from defRelationshipConstraints
-					left join defTerms on rcs_TermID = trm_ID
-				" . (@$rectypeID ? " where rcs_SourceRectypeID = $rectypeID or rcs_SourceRectypeID is null" : "") . "
-				order by rcs_SourceRectypeID is null,
-					rcs_SourceRectypeID,
-					trm_Depth,
-					rcs_TermID is null,
-					rcs_TermID,
-					rcs_TargetRectypeID is null,
-					rcs_TargetRectypeID";
+    rcs_TermID as trmID,
+    rcs_TargetRectypeID as trgID,
+    rcs_TermLimit as max,
+    trm_Depth as level
+    from defRelationshipConstraints
+    left join defTerms on rcs_TermID = trm_ID
+    " . (@$rectypeID ? " where rcs_SourceRectypeID = $rectypeID or rcs_SourceRectypeID is null" : "") . "
+    order by rcs_SourceRectypeID is null,
+    rcs_SourceRectypeID,
+    trm_Depth,
+    rcs_TermID is null,
+    rcs_TermID,
+    rcs_TargetRectypeID is null,
+    rcs_TargetRectypeID";
     $res = mysql_query($query);
     $cnstrnts = array();
     while ($row = mysql_fetch_assoc($res)) {
@@ -756,41 +752,41 @@ function getRectypeConstraints($rectypeID) {
     return $cnstrnts;
 }
 /**
- * get rectype constraint structure with lookups by target and term id index by srcID
- * constraints = array( [recID | any] => array(
- *                          byTerm => array(
- *                              [trmID|any] => array([trgID|any] => array(
- *                                                          limit => $max
- *                                                          [,addsTo => parentTrmID]))
- *                              [,offspring =>array(trmID[,trmID])),
- *                          byTarget => array(
- *                              [trgID|any] => array([trmID|any] => array(
- *                                                          limit => $max,
- *                                                          notes => $notes
- *                                                          [,addsTo => parentTrmID])))))
- * where $max can be "unlimited" or any positive integer with 0 meaning not allowed
- * addsTo atttemps to handle child terms with out specific constraints, they effectively
- * inherit the parents limit.
- * @return    object constraint structure
- * @uses      getTermOffspringList()
- */
+* get rectype constraint structure with lookups by target and term id index by srcID
+* constraints = array( [recID | any] => array(
+*                          byTerm => array(
+*                              [trmID|any] => array([trgID|any] => array(
+*                                                          limit => $max
+*                                                          [,addsTo => parentTrmID]))
+*                              [,offspring =>array(trmID[,trmID])),
+*                          byTarget => array(
+*                              [trgID|any] => array([trmID|any] => array(
+*                                                          limit => $max,
+*                                                          notes => $notes
+*                                                          [,addsTo => parentTrmID])))))
+* where $max can be "unlimited" or any positive integer with 0 meaning not allowed
+* addsTo atttemps to handle child terms with out specific constraints, they effectively
+* inherit the parents limit.
+* @return    object constraint structure
+* @uses      getTermOffspringList()
+*/
 function getAllRectypeConstraint() {
     $query = "select rcs_SourceRectypeID as srcID,
-					rcs_TermID as trmID,
-					rcs_TargetRectypeID as trgID,
-					rcs_TermLimit as max,
-					rcs_Description as notes,
-					trm_Depth as level,
-					if(trm_ChildCount > 0, true, false) as hasChildren
-				from defRelationshipConstraints
-					left join defTerms on rcs_TermID = trm_ID
-				order by rcs_SourceRectypeID is null,
-					rcs_SourceRectypeID,
-					trm_Depth,
-					rcs_TermID is null,
-					rcs_TermID,
-					rcs_TargetRectypeID is null,
-					rcs_TargetRectypeID";
+    rcs_TermID as trmID,
+    rcs_TargetRectypeID as trgID,
+    rcs_TermLimit as max,
+    rcs_Description as notes,
+    trm_Depth as level,
+    if(trm_ChildCount > 0, true, false) as hasChildren
+    from defRelationshipConstraints
+    left join defTerms on rcs_TermID = trm_ID
+    order by rcs_SourceRectypeID is null,
+    rcs_SourceRectypeID,
+    trm_Depth,
+    rcs_TermID is null,
+    rcs_TermID,
+    rcs_TargetRectypeID is null,
+    rcs_TargetRectypeID";
     $res = mysql_query($query);
     $cnstrnts = array();
     while ($row = mysql_fetch_assoc($res)) {
@@ -825,7 +821,6 @@ function getAllRectypeConstraint() {
             $cnstrnts[$srcID]['byTarget'][$trgID][$trmID]['limit'] = $max;
         }
         $offspring = $trmID && $trmID !== "any" && $hasChildren ? getTermOffspringList($trmID) : null;
-        /*****DEBUG****///error_log("offspring for $trmID = ".print_r($offspring,true));
         if ($offspring) {
             $cnstrnts[$srcID]['byTerm'][$trmID]['offspring'] = $offspring;
             foreach ($offspring as $childTermID) { // point all offspring to inherit from term
@@ -837,15 +832,15 @@ function getAllRectypeConstraint() {
     return $cnstrnts;
 }
 /**
- * returns array list of all terms under a given term
- * @param     int $termID
- * @param     boolean $getAllDescentTerms determines whether to recurse and retrieve children of children (default = true)
- * @return    array  of term IDs
- */
+* returns array list of all terms under a given term
+* @param     int $termID
+* @param     boolean $getAllDescentTerms determines whether to recurse and retrieve children of children (default = true)
+* @return    array  of term IDs
+*/
 function getTermOffspringList($termID, $getAllDescentTerms = true) {
     $offspring = array();
     if ($termID) {
-        $res = mysql_query("select * from defTerms where trm_ParentTermID = $termID");
+        $res = mysql_query("select * from defTerms where trm_ParentTermID=$termID");
         if ($res && mysql_num_rows($res)) { //child nodes exist
             while ($row = mysql_fetch_assoc($res)) { // for each child node
                 $subTermID = $row['trm_ID'];
@@ -858,6 +853,23 @@ function getTermOffspringList($termID, $getAllDescentTerms = true) {
     }
     return $offspring;
 }
+function getTermListAll($termDomain) {
+        $terms = array();
+        $res = mysql_query('SELECT * FROM defTerms
+            where (trm_Domain="'.$termDomain.'") and (trm_ParentTermId=0 or trm_ParentTermId is NULL)');
+
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_assoc($res)) { // for each child node
+                array_push($terms, $row['trm_ID']);
+                if (true){ //ARTEM: trm_ChildCount is not reliable   }$row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
+                    $terms = array_merge($terms, getTermOffspringList( $row['trm_ID'] ));
+                }
+            }
+        }else{
+        }
+        return $terms;
+}
+
 function getTermLabels($termIDs) {
     $labels = array();
     if ($termIDs) {
@@ -884,21 +896,47 @@ function getTermByLabel($label){
     return false;
 }
 
+
+function getFullTermLabel($dtTerms, $term, $domain, $withVocab=false){
+
+    $fi = $dtTerms['fieldNamesToIndex'];
+    $parent_id = $term[ $fi['trm_ParentTermID'] ];
+
+    $parent_label = '';
+
+    if($parent_id!=null && $parent_id>0){
+        $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
+        if($term_parent){
+            if(!$withVocab){
+                $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
+                if(!($parent_id>0)){
+                    return $term[ $fi['trm_Label']];
+                }
+            }
+            
+            $parent_label = getFullTermLabel($dtTerms, $term_parent, $domain, $withVocab);    
+            if($parent_label) $parent_label = $parent_label.'.';
+        }    
+    }
+    return $parent_label.$term[ $fi['trm_Label']];
+}
+
 /**
- * return array of recType table column names
- */
+* return array of recType table column names
+*/
 function getRectypeColNames() {
     return array("rty_Name", "rty_OrderInGroup", "rty_Description", "rty_TitleMask", "rty_CanonicalTitleMask", "rty_Plural",
-                "rty_Status", "rty_OriginatingDBID", "rty_NameInOriginatingDB", "rty_IDInOriginatingDB", "rty_NonOwnerVisibility",
-                "rty_ShowInLists", "rty_RecTypeGroupID", "rty_RecTypeModelIDs", "rty_FlagAsFieldset",
-                "rty_ReferenceURL", "rty_AlternativeRecEditor", "rty_Type", "rty_ShowURLOnEditForm", "rty_ShowDescriptionOnEditForm",
-                "rty_Modified", "rty_LocallyModified", "rty_ConceptID");
+        "rty_Status", "rty_OriginatingDBID", "rty_NameInOriginatingDB", "rty_IDInOriginatingDB", "rty_NonOwnerVisibility",
+        "rty_ShowInLists", "rty_RecTypeGroupID", "rty_RecTypeModelIDs", "rty_FlagAsFieldset",
+        "rty_ReferenceURL", "rty_AlternativeRecEditor", "rty_Type", "rty_ShowURLOnEditForm", "rty_ShowDescriptionOnEditForm",
+        "rty_Modified", "rty_LocallyModified", "rty_ConceptID");
 }
+
 /**
- * get name to index map for columns
- * @param     array $columns array of strings
- * @return    object string => index lookup
- */
+* get name to index map for columns
+* @param     array $columns array of strings
+* @return    object string => index lookup
+*/
 function getColumnNameToIndex($columns) {
     $columnsNameIndexMap = array();
     $index = 0;
@@ -908,19 +946,19 @@ function getColumnNameToIndex($columns) {
     return $columnsNameIndexMap;
 }
 /**
- * get recType info ordered by the recTypeGroup order, then by recTypeGroup name,
- * then by recType order in group and finally by recType name
- * @param     int [$rtID] recType ID
- * @return    array of values for columns defined in getRectypeColNames()
- * @uses      getRectypeColNames()
- */
+* get recType info ordered by the recTypeGroup order, then by recTypeGroup name,
+* then by recType order in group and finally by recType name
+* @param     int [$rtID] recType ID
+* @return    array of values for columns defined in getRectypeColNames()
+* @uses      getRectypeColNames()
+*/
 function getRectypeDef($rtID) {
     global $dbID;
-    
+
     $rtDef = array();
     //
     $query = "select " . join(",", getRectypeColNames());
-                        
+
     $query = preg_replace("/rty_ConceptID/", "", $query);
     if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
         $query.= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID";
@@ -929,12 +967,12 @@ function getRectypeDef($rtID) {
     }
 
     $query = $query . " from defRecTypes".
-                        " left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID".
-                        " where rty_ID=$rtID".
-                        " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
+    " left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID".
+    " where rty_ID=$rtID".
+    " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
 
-                        
-    $res = mysql_query($query);                    
+
+    $res = mysql_query($query);
     if($res){
         $rtDef = mysql_fetch_row($res);
 
@@ -942,54 +980,53 @@ function getRectypeDef($rtID) {
         //it stores as cocept codes - need to convert it to human readable string
         $rtDef = makeTitleMaskHumanReadable($rtDef, $rtID);
     }else{
-        error_log('getRectypeDef: record type not found '.$rtID.'  '.mysql_error());
     }
 
     return $rtDef;
 }
 /**
- * return array of defRecStructure (fields) table column names
- */
+* return array of defRecStructure (fields) table column names
+*/
 function getRectypeStructureFieldColNames() {
     return array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DisplayOrder", "rst_DisplayWidth",
-                 "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType", "rst_NonOwnerVisibility",
-                 "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues", "rst_DisplayDetailTypeGroupID",
-                 "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
-                 "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID", "dty_Type");
+        "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType", "rst_NonOwnerVisibility",
+        "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues", "rst_DisplayDetailTypeGroupID",
+        "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
+        "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID", "dty_Type");
 }
 /**
- * get field definitions for a given rectype
- * @param     int [$rtID] recType ID
- * @return    object index by detatilType array of field definitions ordered the same as getRectypeStructureFieldColNames()
- */
+* get field definitions for a given rectype
+* @param     int [$rtID] recType ID
+* @return    object index by detatilType array of field definitions ordered the same as getRectypeStructureFieldColNames()
+*/
 function getRectypeFields($rtID) {
     $rtFieldDefs = array();
     // NOTE: these are ordered to match the order of getRectypeStructureFieldColNames from DisplayName on
     $colNames = array("rst_DetailTypeID",
-                      //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
-                      "if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
-                      //here we check for an override in the recTypeStrucutre for HelpText which is a rectype specific HelpText, use detailType HelpText as default
-                      "if(rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0,rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
-                      //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
-                      "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
-                      "rst_DisplayOrder", "rst_DisplayWidth", "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType",
-                      "rst_NonOwnerVisibility", "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
-                      //here we check for an override in the recTypeStrucutre for displayGroup
-                      "if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
-                      //here we check for an override in the recTypeStrucutre for TermIDTree which is a subset of the detailType dty_JsonTermIDTree
-                      //ARTEM we never use rst_FilteredJsonTermIDTree "if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
-                      "dty_JsonTermIDTree as rst_FilteredJsonTermIDTree",
-                      //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
-                      //ARTEM we never use rst_PtrFilteredIDs "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
-                      "dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs",
-                      "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs",
-                      "dty_FieldSetRectypeID", "dty_Type");
+        //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
+        "if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
+        //here we check for an override in the recTypeStrucutre for HelpText which is a rectype specific HelpText, use detailType HelpText as default
+        "if(dty_Type='separator' OR (rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
+        //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
+        "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
+        "rst_DisplayOrder", "rst_DisplayWidth", "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType",
+        "rst_NonOwnerVisibility", "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
+        //here we check for an override in the recTypeStrucutre for displayGroup
+        "if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
+        //here we check for an override in the recTypeStrucutre for TermIDTree which is a subset of the detailType dty_JsonTermIDTree
+        //ARTEM we never use rst_FilteredJsonTermIDTree "if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
+        "dty_JsonTermIDTree as rst_FilteredJsonTermIDTree",
+        //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
+        //ARTEM we never use rst_PtrFilteredIDs "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
+        "dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs",
+        "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs",
+        "dty_FieldSetRectypeID", "dty_Type");
     // get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
     $res = mysql_query("select " . join(",", $colNames) . " from defRecStructure
-															left join defDetailTypes on rst_DetailTypeID = dty_ID
-															left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
-														where rst_RecTypeID=" . $rtID . "
-														order by rst_DisplayOrder, rst_ID");
+        left join defDetailTypes on rst_DetailTypeID = dty_ID
+        left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
+        where rst_RecTypeID=" . $rtID . "
+    order by rst_DisplayOrder, rst_ID");
     while ($row = mysql_fetch_row($res)) {
         //use first element as index
         $rtFieldDefs[$row[0]] = array_slice($row, 1);
@@ -997,12 +1034,12 @@ function getRectypeFields($rtID) {
     return $rtFieldDefs;
 }
 /**
- * get a recType structure consisting of recType commonFields and recType fields
- * @param     int [$rtID] recType ID
- * @return    object containing recType commonFields and dtFields (fields index by detailType)
- * @uses      getRectypeDef()
- * @uses      getRectypeFields()
- */
+* get a recType structure consisting of recType commonFields and recType fields
+* @param     int [$rtID] recType ID
+* @return    object containing recType commonFields and dtFields (fields index by detailType)
+* @uses      getRectypeDef()
+* @uses      getRectypeFields()
+*/
 function getRectypeStructure($rtID) {
     $rectypesStructure = array();
     $rectypesStructure['commonFields'] = getRectypeDef($rtID);
@@ -1010,56 +1047,56 @@ function getRectypeStructure($rtID) {
     return $rectypesStructure;
 }
 /**
- * returns an array of RecType Structures for array of ids passed in
- * @param     array [$rtIDs] of recType IDs
- * @return    object containing recType structures indexed by recTypeID and column names with index lookups.
- * @uses      getRectypeColNames()
- * @uses      getColumnNameToIndex()
- * @uses      getRectypeStructureFieldColNames()
- * @uses      getRectypeStructure()
- */
+* returns an array of RecType Structures for array of ids passed in
+* @param     array [$rtIDs] of recType IDs
+* @return    object containing recType structures indexed by recTypeID and column names with index lookups.
+* @uses      getRectypeColNames()
+* @uses      getColumnNameToIndex()
+* @uses      getRectypeStructureFieldColNames()
+* @uses      getRectypeStructure()
+*/
 function getRectypeStructures($rtIDs) {
     $rtStructs = array('commonFieldNames' => getRectypeColNames(),
-                        'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
-                        'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
-                        'dtFieldNames' => getRectypeStructureFieldColNames());
+        'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
+        'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
+        'dtFieldNames' => getRectypeStructureFieldColNames());
     foreach ($rtIDs as $rt_id) {
         $rtStructs[$rt_id] = getRectypeStructure($rt_id);
     }
     return $rtStructs;
 }
 /**
- * returns an array of RecType Structures for all RecTypes
- * rectypes = {{"groups":{"groupIDToIndex":{recTypeGroupID:index},
- *                         recTypeGroupID:{propName:val,...},...}},
- *             "names":{rtyID:name,...},
- *             "pluralNames":{rtyID:pluralName,...},
- *             "usageCount":{rtyID:nonzero-count,...},
- *             "dtDisplayOrder":{rtyID:[ordered dtyIDs], ...},
- *             "typedefs":{"commonFieldNames":[defRecType Column names],
- *                         "commonNamesToIndex":{"defRecTypes columnName":index,...},
- *                         "dtFieldNamesToIndex":{"defRecStructure columnName":index,...},
- *                         "dtFieldNames":[defRecStructure Column names],
- *                         rtyID:{"dtFields":{dtyID:[val,...]},
- *                                 "commonFields":[val,....]},
- *                         ...},
- *             "constraints":[]}};
- *
- * @global    int $dbID databse ID
- * @param     boolean $useCachedData if true does a lookup for the rectypes structure in cache
- * @return    object iformation describing all the rectypes defined in the database
- * @uses      getRectypeColNames()
- * @uses      getColumnNameToIndex()
- * @uses      getRectypeStructureFieldColNames()
- * @uses      DATABASE
- * @uses      getCachedData()
- * @uses      setCachedData()
- * @uses      getRectypeGroups()
- * @uses      getRecTypeUsageCount()
- */
+* returns an array of RecType Structures for all RecTypes
+* rectypes = {{"groups":{"groupIDToIndex":{recTypeGroupID:index},
+*                         recTypeGroupID:{propName:val,...},...}},
+*             "names":{rtyID:name,...},
+*             "pluralNames":{rtyID:pluralName,...},
+*             "usageCount":{rtyID:nonzero-count,...},
+*             "dtDisplayOrder":{rtyID:[ordered dtyIDs], ...},
+*             "typedefs":{"commonFieldNames":[defRecType Column names],
+*                         "commonNamesToIndex":{"defRecTypes columnName":index,...},
+*                         "dtFieldNamesToIndex":{"defRecStructure columnName":index,...},
+*                         "dtFieldNames":[defRecStructure Column names],
+*                         rtyID:{"dtFields":{dtyID:[val,...]},
+*                                 "commonFields":[val,....]},
+*                         ...},
+*             "constraints":[]}};
+*
+* @global    int $dbID databse ID
+* @param     boolean $useCachedData if true does a lookup for the rectypes structure in cache
+* @return    object iformation describing all the rectypes defined in the database
+* @uses      getRectypeColNames()
+* @uses      getColumnNameToIndex()
+* @uses      getRectypeStructureFieldColNames()
+* @uses      DATABASE
+* @uses      getCachedData()
+* @uses      setCachedData()
+* @uses      getRectypeGroups()
+* @uses      getRecTypeUsageCount()
+*/
 function getAllRectypeStructures($useCachedData = false) {
     global $dbID;
-    
+
     $cacheKey = DATABASE . ":AllRecTypeInfo";
     if ($useCachedData) {
         $rtStructs = getCachedData($cacheKey);
@@ -1067,42 +1104,43 @@ function getAllRectypeStructures($useCachedData = false) {
             return $rtStructs;
         }
     }
-    
+
     // NOTE: these are ordered to match the order of getRectypeStructureFieldColNames from DisplayName on
     $colNames = array("rst_RecTypeID", "rst_DetailTypeID",
-                      //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
-                      "if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
-                      //here we check for an override in the recTypeStrucutre for HelpText which is a rectype specific HelpText, use detailType HelpText as default
-                      "if(rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0,rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
-                      //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
-                      "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
-                      "rst_DisplayOrder", "rst_DisplayWidth", "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType",
-                      "rst_NonOwnerVisibility", "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
-                      //here we check for an override in the recTypeStrucutre for displayGroup
-                      "if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
-                      //here we check for an override in the recTypeStrucutre for TermIDTree which is a subset of the detailType dty_JsonTermIDTree
-                      //ARTEM WE NEVER USE rst_FilteredJsonTermIDTree "if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
-                      "dty_JsonTermIDTree as rst_FilteredJsonTermIDTree",
-                      //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
-                      //ARTEM WE NEVER USE "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
-                      "dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs",
-                      "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs",
-                      "dty_FieldSetRectypeID", "dty_Type");
+        //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
+        "if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
+        //here we check for an override in the recTypeStrucutre for HelpText which is a rectype specific HelpText, use detailType HelpText as default
+        "if(dty_Type='separator' OR (rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
+        //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
+        "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
+        "rst_DisplayOrder", "rst_DisplayWidth", "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType",
+        "rst_NonOwnerVisibility", "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
+        //here we check for an override in the recTypeStrucutre for displayGroup
+        "if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
+        //here we check for an override in the recTypeStrucutre for TermIDTree which is a subset of the detailType dty_JsonTermIDTree
+        //ARTEM WE NEVER USE rst_FilteredJsonTermIDTree "if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
+        "dty_JsonTermIDTree as rst_FilteredJsonTermIDTree",
+        //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
+        //ARTEM WE NEVER USE "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
+        "dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs",
+        "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs",
+        "dty_FieldSetRectypeID", "dty_Type");
     $query = "select " . join(",", $colNames) .
-             " from defRecStructure".
-             " left join defDetailTypes on rst_DetailTypeID = dty_ID".
-             " left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)".
-             " order by rst_RecTypeID, rst_DisplayOrder, rst_ID";
+    " from defRecStructure".
+    " left join defDetailTypes on rst_DetailTypeID = dty_ID".
+    " left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)".
+    " order by rst_RecTypeID, rst_DisplayOrder, rst_ID";
+    
     $res = mysql_query($query);
     $rtStructs = array('groups' => getRectypeGroups(),
-                        'names' => array(),
-                        'pluralNames' => array(),
-                        'usageCount' => getRecTypeUsageCount(),
-                        'dtDisplayOrder' => array());
+        'names' => array(),
+        'pluralNames' => array(),
+        'usageCount' => getRecTypeUsageCount(),
+        'dtDisplayOrder' => array());
     $rtStructs['typedefs'] = array('commonFieldNames' => getRectypeColNames(),
-                                    'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
-                                    'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
-                                    'dtFieldNames' => getRectypeStructureFieldColNames());
+        'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
+        'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
+        'dtFieldNames' => getRectypeStructureFieldColNames());
     while ($row = mysql_fetch_row($res)) {
         if (!array_key_exists($row[0], $rtStructs['typedefs'])) {
             $rtStructs['typedefs'][$row[0]] = array('dtFields' => array($row[1] => array_slice($row, 2)));
@@ -1112,10 +1150,10 @@ function getAllRectypeStructures($useCachedData = false) {
         }
         array_push($rtStructs['dtDisplayOrder'][$row[0]], $row[1]);
     }
-    
+
     $rtnames = getRectypeColNames();
     $rt_groupid_idx = array_search("rty_RecTypeGroupID", $rtnames) + 3;
-    
+
     // get rectypes ordered by the RecType Group order, then by Group Name, then by rectype order in group and then by rectype name
     $query = "select rty_ID, rtg_ID, rtg_Name, " . join(",", getRectypeColNames());
     $query = preg_replace("/rty_ConceptID/", "", $query);
@@ -1129,14 +1167,13 @@ function getAllRectypeStructures($useCachedData = false) {
     $res = mysql_query($query);
     while ($row = mysql_fetch_row($res)) {
         $rtID = $row[0];
-            
+
         $gidx = @$rtStructs['groups']['groupIDToIndex'][$row[1]];
         if( $row[1]==null || !@$rtStructs['groups'][$gidx]){
             $gidx = 0;
-            //error_log("GROUP DOES NOT EXISTS ".$row[1]."  rectype ".$rtID);
             $row[$rt_groupid_idx] = $rtStructs['groups'][$gidx]['id'];
         }
-        
+
         array_push($rtStructs['groups'][$gidx]['allTypes'], $rtID);
         if ($row[14]) { //rty_ShowInList
             array_push($rtStructs['groups'][$gidx]['showTypes'], $rtID);
@@ -1149,9 +1186,7 @@ function getAllRectypeStructures($useCachedData = false) {
         $rtStructs['names'][$row[0]] = $row[3];
         $rtStructs['pluralNames'][$row[0]] = $row[8];
     }
-    
-//DEBUG error_log( print_r($rtStructs['typedefs'][3]['dtFields'], true) );
-    
+
     $rtStructs['constraints'] = getAllRectypeConstraint();
     setCachedData($cacheKey, $rtStructs);
     return $rtStructs;
@@ -1159,7 +1194,7 @@ function getAllRectypeStructures($useCachedData = false) {
 
 /*
 * special behaviour for rty_TitleMask
-* it stores as cocept codes - need to convert it to human readable string
+* it is stored as concept codes - need to convert it to human readable string
 */
 function makeTitleMaskHumanReadable($fields, $rtID)
 {
@@ -1167,16 +1202,10 @@ function makeTitleMaskHumanReadable($fields, $rtID)
     $ind1 = array_search('rty_TitleMask', $cols);
     $ind2 = array_search('rty_CanonicalTitleMask', $cols);
     //$ind2 = array_search('rty_Type', $cols);
-/*if($rtID==26){
-error_log(">>>> ".$ind1."  ".$fields[$ind1]."  ".$rtID);//$ind2."  ".$fields[$ind2].print_r($fields, true));
-error_log(">>>> ".$fields[$ind1]);
-}*/
     if($ind2){
         $fields[$ind2] = $fields[$ind1]; //keep canonical
     }
-//error_log("BEFORE>>>>".$fields[$ind1]);    
     $fields[$ind1] = titlemask_make($fields[$ind1], $rtID, 2, null, _ERR_REP_SILENT);
-//error_log("AFTER>>>>".$fields[$ind1]);    
     return $fields;
 }
 
@@ -1184,14 +1213,14 @@ error_log(">>>> ".$fields[$ind1]);
 // After addition of new record - update this value
 //
 /**
- * get rectype usageCount and update cache value if exist
- * usageCount = {rtyID:nonzero-count,...}
- * @return    object non-zero usage counts indexed by rtyID
- * @uses      DATABASE
- * @uses      getCachedData()
- * @uses      setCachedData()
- * @uses      getAllRectypeStructures()
- */
+* get rectype usageCount and update cache value if exist
+* usageCount = {rtyID:nonzero-count,...}
+* @return    object non-zero usage counts indexed by rtyID
+* @uses      DATABASE
+* @uses      getCachedData()
+* @uses      setCachedData()
+* @uses      getAllRectypeStructures()
+*/
 function updateRecTypeUsageCount() {
     $cacheKey = DATABASE . ":AllRecTypeInfo";
     $rtStructs = getCachedData($cacheKey);
@@ -1207,11 +1236,11 @@ function updateRecTypeUsageCount() {
     }
 }
 /**
- * get recType Group definitions
- * groups = {"groupIDToIndex":{recTypeGroupID:index},
- *           index:{propName:val,...},...}
- * @return    array recTypeGroup definitions as array of prop:val pairs
- */
+* get recType Group definitions
+* groups = {"groupIDToIndex":{recTypeGroupID:index},
+*           index:{propName:val,...},...}
+* @return    array recTypeGroup definitions as array of prop:val pairs
+*/
 function getRectypeGroups() {
     $rtGroups = array('groupIDToIndex' => array());
     $index = 0;
@@ -1223,16 +1252,16 @@ function getRectypeGroups() {
     return $rtGroups;
 }
 /**
- * get recTypeIDs by recTypeGroupID
- *  types => { rtgID => {rtyIF => bShowInList,...}, ...}
- * @return    object rtyIDs by rtgID lookup
- */
+* get recTypeIDs by recTypeGroupID
+*  types => { rtgID => {rtyIF => bShowInList,...}, ...}
+* @return    object rtyIDs by rtgID lookup
+*/
 function getRecTypesByGroup() {
     $rectypesByGroup = array();
     // query assumes rty_RecTypeGroupID is ordered single functional group ID followed by zero or more model group ids
     $res = mysql_query("select rtg_ID,rtg_Name,rty_ID, rty_ShowInLists
-							from defRecTypes left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID
-							where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
+        from defRecTypes left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID
+    where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
     while ($row = mysql_fetch_assoc($res)) {
         if (!array_key_exists($row['rtg_ID'], $rectypesByGroup)) {
             $rectypesByGroup[$row['rtg_ID']] = array('name' => $row["rtg_Name"], 'types' => array());
@@ -1242,14 +1271,14 @@ function getRecTypesByGroup() {
     return $rectypesByGroup;
 }
 /**
- * get rectype usage by detailTypeID
- * rectypesByDetailType = { dtyID => [rtyID,...], ...}
- * @return    object rtyIDs (array) using detailType indexed by dtyID
- */
+* get rectype usage by detailTypeID
+* rectypesByDetailType = { dtyID => [rtyID,...], ...}
+* @return    object rtyIDs (array) using detailType indexed by dtyID
+*/
 function getDetailTypeDefUsage() {
     $rectypesByDetailType = array();
     $res = mysql_query("select rst_DetailTypeID as dtID, rst_RecTypeID as rtID
-						from defRecStructure order by dtID, rtID");
+    from defRecStructure order by dtID, rtID");
     while ($row = mysql_fetch_assoc($res)) {
         if (!array_key_exists($row['dtID'], $rectypesByDetailType)) {
             $rectypesByDetailType[$row['dtID']] = array();
@@ -1259,31 +1288,31 @@ function getDetailTypeDefUsage() {
     return $rectypesByDetailType;
 }
 /**
- * get usage counts of rectypes from the record table
- * usageCount = {rtyID:nonzero-count,...}
- * @return    object non-zero usage counts indexed by rtyID
- */
+* get usage counts of rectypes from the record table
+* usageCount = {rtyID:nonzero-count,...}
+* @return    object non-zero usage counts indexed by rtyID
+*/
 function getRecTypeUsageCount() {
     $recCountByRecType = array();
     $res = mysql_query("select rty_ID as rtID, count(rec_ID) as usageCnt
-						from Records left join defRecTypes on rty_ID = rec_RecTypeID
-						group by rec_RecTypeID");
+        from Records left join defRecTypes on rty_ID = rec_RecTypeID
+    group by rec_RecTypeID");
     while ($row = mysql_fetch_assoc($res)) {
         $recCountByRecType[$row['rtID']] = $row["usageCnt"];
     }
     return $recCountByRecType;
 }
 /**
- * get object of defined transforms grouped by owner group (user or workgroup)
- * transforms = {"groupOrder" => [groupName],
- *               "groups" => {groupName => [transRecID,...], ...},
- *               "nameLookup" => {transformName => [transRecID,...], ...},
- *               "byID" => {transRecID => {property => val,...},...}}
- * @return    object transform information structured for interface use
- * @uses      HEURIST_BASE_URL
- * @uses      HEURIST_DBNAME
- * @uses      get_user_id()
- */
+* get object of defined transforms grouped by owner group (user or workgroup)
+* transforms = {"groupOrder" => [groupName],
+*               "groups" => {groupName => [transRecID,...], ...},
+*               "nameLookup" => {transformName => [transRecID,...], ...},
+*               "byID" => {transRecID => {property => val,...},...}}
+* @return    object transform information structured for interface use
+* @uses      HEURIST_BASE_URL
+* @uses      HEURIST_DBNAME
+* @uses      get_user_id()
+*/
 function getTransformsByOwnerGroup() {
     $transRT = (defined('RT_TRANSFORM') ? RT_TRANSFORM : 0);
     $transNameDT = (defined('DT_NAME') ? DT_NAME : 0);
@@ -1306,28 +1335,26 @@ function getTransformsByOwnerGroup() {
     }
     $transforms = array("groupOrder" => array(), "groups" => array(), "nameLookup" => array(), "byID" => array());
     $query = 'select rec_ID,' .
-                    ' if(ugr_Type="workgroup", ugr_Name,if(ugr_id = ' . get_user_id() . ',"personal",concat(ugr_FirstName," ",ugr_LastName))) as grpName,' .
-                    ' if(ugr_id = ' . get_user_id() . ',0, if(ugr_id = 0,1,2)) as dispOrder,' .
-                    ' dtname.dtl_Value as lbl, ulf_ExternalFileReference as uri, ulf_ObfuscatedFileID as fileID,' .
-                    ' trm_Label as typ, dttrans.dtl_Value as trans' .
-             ' from Records' .
-                ' left join recDetails dtname on rec_ID=dtname.dtl_RecID and dtname.dtl_DetailTypeID=' . $transNameDT .
-                ' left join recDetails dtfile on rec_ID=dtfile.dtl_RecID and dtfile.dtl_DetailTypeID=' . $transFileDT .
-                ' left join recUploadedFiles on dtfile.dtl_UploadedFileID = ulf_ID' .
-                ' left join recDetails dttrantyp on rec_ID=dttrantyp.dtl_RecID and dttrantyp.dtl_DetailTypeID=' . $transTypeDT .
-                ' left join defTerms on dttrantyp.dtl_Value = trm_ID' .
-                ' left join recDetails dttrans on rec_ID=dttrans.dtl_RecID and dttrans.dtl_DetailTypeID=' . $transDT .
-                ' left join sysUGrps on ugr_ID=rec_OwnerUGrpID' .
-             ' where rec_RecTypeID=' . $transRT;
-             if($ACCESSABLE_OWNER_IDS && count($ACCESSABLE_OWNER_IDS)>0){
-                $query = $query.' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' . 'NOT rec_NonOwnerVisibility = "hidden")';
-             }else{
-                $query = $query.' and (NOT rec_NonOwnerVisibility = "hidden")';
-             }
-             $query = $query.' order by dispOrder, grpName, lbl';
+    ' if(ugr_Type="workgroup", ugr_Name,if(ugr_id = ' . get_user_id() . ',"personal",concat(ugr_FirstName," ",ugr_LastName))) as grpName,' .
+    ' if(ugr_id = ' . get_user_id() . ',0, if(ugr_id = 0,1,2)) as dispOrder,' .
+    ' dtname.dtl_Value as lbl, ulf_ExternalFileReference as uri, ulf_ObfuscatedFileID as fileID,' .
+    ' trm_Label as typ, dttrans.dtl_Value as trans' .
+    ' from Records' .
+    ' left join recDetails dtname on rec_ID=dtname.dtl_RecID and dtname.dtl_DetailTypeID=' . $transNameDT .
+    ' left join recDetails dtfile on rec_ID=dtfile.dtl_RecID and dtfile.dtl_DetailTypeID=' . $transFileDT .
+    ' left join recUploadedFiles on dtfile.dtl_UploadedFileID = ulf_ID' .
+    ' left join recDetails dttrantyp on rec_ID=dttrantyp.dtl_RecID and dttrantyp.dtl_DetailTypeID=' . $transTypeDT .
+    ' left join defTerms on dttrantyp.dtl_Value = trm_ID' .
+    ' left join recDetails dttrans on rec_ID=dttrans.dtl_RecID and dttrans.dtl_DetailTypeID=' . $transDT .
+    ' left join sysUGrps on ugr_ID=rec_OwnerUGrpID' .
+    ' where rec_RecTypeID=' . $transRT;
+    if($ACCESSABLE_OWNER_IDS && count($ACCESSABLE_OWNER_IDS)>0){
+        $query = $query.' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' . 'NOT rec_NonOwnerVisibility = "hidden")';
+    }else{
+        $query = $query.' and (NOT rec_NonOwnerVisibility = "hidden")';
+    }
+    $query = $query.' order by dispOrder, grpName, lbl';
     $res = mysql_query($query);
-    /*****DEBUG****///error_log("query ".print_r($query,true));
-    /*****DEBUG****///error_log("error ".print_r(mysql_error(),true));
     while ($row = mysql_fetch_assoc($res)) {
         $transRecID = $row['rec_ID'];
         $uri = (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? HEURIST_BASE_URL . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID'] : null));
@@ -1340,21 +1367,20 @@ function getTransformsByOwnerGroup() {
         } else {
             array_push($transforms["groups"][$row['grpName']], $transRecID);
         }
-        /*****DEBUG****///error_log("row ".print_r($row,true));
         $transforms["nameLookup"][$row['lbl']] = $transRecID;
         $transforms["byID"][$transRecID] = array("label" => $row['lbl'], "uri" => $uri, "type" => $row['typ'], "trans" => (@$row['trans'] ? $row['trans'] : null));
     }
     return $transforms;
 }
 /**
- * get object of tools with lookup by toolRecID and by transformRecID
- * tools = {"byTransform" => {transRecID => [toolRecID,...], ...},
- *          "byID" => {toolRecID => {property => val,...},...}}
- * @return    object tool information lookup by toolRecID and transRecID
- * @uses      HEURIST_BASE_URL
- * @uses      HEURIST_DBNAME
- * @uses      get_user_id()
- */
+* get object of tools with lookup by toolRecID and by transformRecID
+* tools = {"byTransform" => {transRecID => [toolRecID,...], ...},
+*          "byID" => {toolRecID => {property => val,...},...}}
+* @return    object tool information lookup by toolRecID and transRecID
+* @uses      HEURIST_BASE_URL
+* @uses      HEURIST_DBNAME
+* @uses      get_user_id()
+*/
 function getToolsByTransform() {
     $toolRT = (defined('RT_TOOL') ? RT_TOOL : 0);
     $toolNameDT = (defined('DT_NAME') ? DT_NAME : 0);
@@ -1374,41 +1400,39 @@ function getToolsByTransform() {
     }
     $tools = array("byTransform" => array(), "byId" => array());
     $query = 'select rec_ID, dtname.dtl_Value as name, ulf_ExternalFileReference as uri, ulf_ObfuscatedFileID as fileID,' .
-                    ' clrTrm.trm_Label as colour, dttype.dtl_Value as dt, rttype.dtl_Value as rt, dtv.trm_Label as value,' .
-                    ' cmd.dtl_Value as command' .
-              ' from Records' .
-                ' left join recDetails dtname on rec_ID=dtname.dtl_RecID and dtname.dtl_DetailTypeID=' . $toolNameDT .
-                ' left join recDetails dtIcon on rec_ID=dtIcon.dtl_RecID and dtIcon.dtl_DetailTypeID=' . $toolIconDT .
-                ' left join recUploadedFiles on dtIcon.dtl_UploadedFileID = ulf_ID' .
-                ' left join recDetails clr on rec_ID=clr.dtl_RecID and clr.dtl_DetailTypeID=' . $colourDT .
-                ' left join defTerms clrTrm on clr.dtl_Value = clrTrm.trm_ID' .
-                ' left join recDetails rttype on rec_ID=rttype.dtl_RecID and rttype.dtl_DetailTypeID=' . $rectypeDT .
-                ' left join recDetails dttype on rec_ID=dttype.dtl_RecID and dttype.dtl_DetailTypeID=' . $detailTypeDT .
-                ' left join recDetails dtValue on rec_ID=dtValue.dtl_RecID and dtValue.dtl_DetailTypeID=' . $toolDtValueDT .
-                ' left join defTerms dtv on dtValue.dtl_Value = dtv.trm_ID' .
-                ' left join recDetails cmd on rec_ID=cmd.dtl_RecID and cmd.dtl_DetailTypeID=' . $commandDT .
-              ' where rec_RecTypeID=' . $toolRT;
+    ' clrTrm.trm_Label as colour, dttype.dtl_Value as dt, rttype.dtl_Value as rt, dtv.trm_Label as value,' .
+    ' cmd.dtl_Value as command' .
+    ' from Records' .
+    ' left join recDetails dtname on rec_ID=dtname.dtl_RecID and dtname.dtl_DetailTypeID=' . $toolNameDT .
+    ' left join recDetails dtIcon on rec_ID=dtIcon.dtl_RecID and dtIcon.dtl_DetailTypeID=' . $toolIconDT .
+    ' left join recUploadedFiles on dtIcon.dtl_UploadedFileID = ulf_ID' .
+    ' left join recDetails clr on rec_ID=clr.dtl_RecID and clr.dtl_DetailTypeID=' . $colourDT .
+    ' left join defTerms clrTrm on clr.dtl_Value = clrTrm.trm_ID' .
+    ' left join recDetails rttype on rec_ID=rttype.dtl_RecID and rttype.dtl_DetailTypeID=' . $rectypeDT .
+    ' left join recDetails dttype on rec_ID=dttype.dtl_RecID and dttype.dtl_DetailTypeID=' . $detailTypeDT .
+    ' left join recDetails dtValue on rec_ID=dtValue.dtl_RecID and dtValue.dtl_DetailTypeID=' . $toolDtValueDT .
+    ' left join defTerms dtv on dtValue.dtl_Value = dtv.trm_ID' .
+    ' left join recDetails cmd on rec_ID=cmd.dtl_RecID and cmd.dtl_DetailTypeID=' . $commandDT .
+    ' where rec_RecTypeID=' . $toolRT;
 
-             if($ACCESSABLE_OWNER_IDS && count($ACCESSABLE_OWNER_IDS)>0){
-                $query = $query.' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' . 'NOT rec_NonOwnerVisibility = "hidden")';
-             }else{
-                $query = $query.' and (NOT rec_NonOwnerVisibility = "hidden")';
-             }
-             $query = $query.' order by name';
+    if($ACCESSABLE_OWNER_IDS && count($ACCESSABLE_OWNER_IDS)>0){
+        $query = $query.' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' . 'NOT rec_NonOwnerVisibility = "hidden")';
+    }else{
+        $query = $query.' and (NOT rec_NonOwnerVisibility = "hidden")';
+    }
+    $query = $query.' order by name';
     $res = mysql_query($query);
-    /*****DEBUG****///error_log("query ".print_r($query,true));
-    /*****DEBUG****///error_log("error ".print_r(mysql_error(),true));
     while ($row = mysql_fetch_assoc($res)) {
         $toolRecID = $row['rec_ID'];
         $tools["byId"][$toolRecID] = array("name" => $row['name'],
-                                        "recID" => $row['rec_ID'],
-                                        "img" => (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? (HEURIST_BASE_URL . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID']) : null)),
-                                        "colour" => $row['colour'],
-                                        "dt" => $row['dt'],
-                                        "rt" => $row['rt'],
-                                        "value" => $row['value'],
-                                        "command" => $row['command'],
-                                        "trans" => mysql__select_array("recDetails", "dtl_Value", ("dtl_RecID=" . $row['rec_ID'] . " and dtl_DetailTypeID=" . $toolTransDT)));
+            "recID" => $row['rec_ID'],
+            "img" => (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? (HEURIST_BASE_URL . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID']) : null)),
+            "colour" => $row['colour'],
+            "dt" => $row['dt'],
+            "rt" => $row['rt'],
+            "value" => $row['value'],
+            "command" => $row['command'],
+            "trans" => mysql__select_array("recDetails", "dtl_Value", ("dtl_RecID=" . $row['rec_ID'] . " and dtl_DetailTypeID=" . $toolTransDT)));
         foreach ($tools["byId"][$toolRecID]["trans"] as $transRecID) {
             if (!array_key_exists($transRecID, $tools["byTransform"])) {
                 $tools["byTransform"][$transRecID] = array($toolRecID);
@@ -1420,81 +1444,81 @@ function getToolsByTransform() {
     return $tools;
 }
 /**
- * get detailType usage counts
- * @return    array usage counts index by detailTypeID
- * @link      URL
- */
+* get detailType usage counts
+* @return    array usage counts index by detailTypeID
+* @link      URL
+*/
 function getDetailTypeUsageCount() {
     $useCntByDetailTypeID = array();
     $res = mysql_query("select dty_ID as dtID, count(dtl_ID) as usageCnt ".
-                        " from recDetails left join defDetailTypes on dty_ID = dtl_DetailTypeID".
-                        " group by dtl_DetailTypeID");
+        " from recDetails left join defDetailTypes on dty_ID = dtl_DetailTypeID".
+        " group by dtl_DetailTypeID");
     while ($row = mysql_fetch_assoc($res)) {
         $useCntByDetailTypeID[$row['dtID']] = $row["usageCnt"];
     }
     return $useCntByDetailTypeID;
 }
 /**
- * return array of defDetailType table column names
- */
+* return array of defDetailType table column names
+*/
 function getDetailTypeColNames() {
     return array("dty_ID", "dty_Name", "dty_Documentation", "dty_Type", "dty_HelpText", "dty_ExtendedDescription", "dty_Status",
-                 "dty_OriginatingDBID", "dty_IDInOriginatingDB", "dty_DetailTypeGroupID", "dty_OrderInGroup", "dty_JsonTermIDTree",
-                 "dty_TermIDTreeNonSelectableIDs", "dty_PtrTargetRectypeIDs", "dty_FieldSetRectypeID", "dty_ShowInLists",
-                 "dty_NonOwnerVisibility", "dty_Modified", "dty_LocallyModified", "dty_EntryMask", "dty_ConceptID");
+        "dty_OriginatingDBID", "dty_IDInOriginatingDB", "dty_DetailTypeGroupID", "dty_OrderInGroup", "dty_JsonTermIDTree",
+        "dty_TermIDTreeNonSelectableIDs", "dty_PtrTargetRectypeIDs", "dty_FieldSetRectypeID", "dty_ShowInLists",
+        "dty_NonOwnerVisibility", "dty_Modified", "dty_LocallyModified", "dty_EntryMask", "dty_ConceptID");
 }
 /**
- * get map for internal storage base datatype names to Human readable interface names.
- * note this must match defDetailTypes table's enumeration for the dty_Type column
- * @return    object lookup from basetype to Display name
- * @todo      compare this against table for complete list logging error if mismatch
- */
+* get map for internal storage base datatype names to Human readable interface names.
+* note this must match defDetailTypes table's enumeration for the dty_Type column
+* @return    object lookup from basetype to Display name
+* @todo      compare this against table for complete list logging error if mismatch
+*/
 function getDtLookups() {
     return array("enum" => "Terms list",
-                 "float" => "Numeric",
-                 "date" => "Date / temporal",
-                 "file" => "File",
-                 "geo" => "Geospatial",
-                 "freetext" => "Text (single line)",
-                 "blocktext" => "Memo (multi-line)",
-                 "resource" => "Record pointer",
-                 "relmarker" => "Relationship marker",
-                 "separator" => "Heading (no data)",
-                 "calculated" => "Calculated (not yet impl.)",
-                 // Note=> the following types are no longer deinable but may be required for backward compatibility
-                 "relationtype" => "Relationship type",
-                 //"fieldsetmarker" => "Field set marker",
-                 "integer" => "Numeric - integer",
-                 "year" => "Year (no mm-dd)",
-                 //"urlinclude" => "File/URL of include content",
-                 "boolean" => "Boolean (T/F)");
+        "float" => "Numeric",
+        "date" => "Date / temporal",
+        "file" => "File",
+        "geo" => "Geospatial",
+        "freetext" => "Text (single line)",
+        "blocktext" => "Memo (multi-line)",
+        "resource" => "Record pointer",
+        "relmarker" => "Relationship marker",
+        "separator" => "Heading (no data)",
+        "calculated" => "Calculated (not yet impl.)",
+        // Note=> the following types are no longer deinable but may be required for backward compatibility
+        "relationtype" => "Relationship type",
+        //"fieldsetmarker" => "Field set marker",
+        "integer" => "Numeric - integer",
+        "year" => "Year (no mm-dd)",
+        //"urlinclude" => "File/URL of include content",
+        "boolean" => "Boolean (T/F)");
 }
 /**
- * returns an array of detailType structured information for all detailTypes
- *     detailTypes = {"groups" => {"groupIDToIndex":{detailTypeGroupID:index},
- *                                       index:{propName:val,...},...},
- *                    "names":{dtyID:name,...},
- *                    "rectypeUsage" => { dtyID => [rtyID,...], ...},
- *                    'usageCount' => {dtyID:nonzero-count,...},
- *                    "typedefs":{"commonFieldNames":[defDetailTypes Column names],
- *                                "commonNamesToIndex":{"defDetailTypes columnName":index,...},
- *                                dtyID:{"commonFields":[val,....]},
- *                                ...},
- *                    'lookups' => {basetype=>displayName);
- *
- * @global    int $dbID databse ID
- * @param     boolean $useCachedData if true does a lookup for the detailtypes structure in cache
- * @return    object information describing all the detailtypes defined in the database
- * @uses      getDetailTypeColNames()
- * @uses      getColumnNameToIndex()
- * @uses      getRectypeStructureFieldColNames()
- * @uses      getDetailTypeGroups()
- * @uses      getDetailTypeUsageCount()
- * @uses      getDetailTypeDefUsage()
- * @uses      getDtLookups()
- * @uses      getCachedData()
- * @uses      setCachedData()
- */
+* returns an array of detailType structured information for all detailTypes
+*     detailTypes = {"groups" => {"groupIDToIndex":{detailTypeGroupID:index},
+*                                       index:{propName:val,...},...},
+*                    "names":{dtyID:name,...},
+*                    "rectypeUsage" => { dtyID => [rtyID,...], ...},
+*                    'usageCount' => {dtyID:nonzero-count,...},
+*                    "typedefs":{"commonFieldNames":[defDetailTypes Column names],
+*                                "commonNamesToIndex":{"defDetailTypes columnName":index,...},
+*                                dtyID:{"commonFields":[val,....]},
+*                                ...},
+*                    'lookups' => {basetype=>displayName);
+*
+* @global    int $dbID databse ID
+* @param     boolean $useCachedData if true does a lookup for the detailtypes structure in cache
+* @return    object information describing all the detailtypes defined in the database
+* @uses      getDetailTypeColNames()
+* @uses      getColumnNameToIndex()
+* @uses      getRectypeStructureFieldColNames()
+* @uses      getDetailTypeGroups()
+* @uses      getDetailTypeUsageCount()
+* @uses      getDetailTypeDefUsage()
+* @uses      getDtLookups()
+* @uses      getCachedData()
+* @uses      setCachedData()
+*/
 function getAllDetailTypeStructures($useCachedData = false) {
     global $dbID;
     $cacheKey = DATABASE . ":AllDetailTypeInfo";
@@ -1505,14 +1529,13 @@ function getAllDetailTypeStructures($useCachedData = false) {
         }
     }
     $dtG = getDetailTypeGroups();
-    /*****DEBUG****///error_log(print_r($dtG,true));
     $dtStructs = array('groups' => $dtG,
-                        'names' => array(),
-                        'rectypeUsage' => getDetailTypeDefUsage(),
-                        'usageCount' => getDetailTypeUsageCount(),
-                        'typedefs' => array('commonFieldNames' => getDetailTypeColNames(),
-                                            'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())),
-                        'lookups' => getDtLookups());
+        'names' => array(),
+        'rectypeUsage' => getDetailTypeDefUsage(),
+        'usageCount' => getDetailTypeUsageCount(),
+        'typedefs' => array('commonFieldNames' => getDetailTypeColNames(),
+            'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())),
+        'lookups' => getDtLookups());
     $query = "select dtg_ID, dtg_Name, " . join(",", getDetailTypeColNames());
     $query = preg_replace("/dty_ConceptID/", "", $query);
     if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
@@ -1532,15 +1555,14 @@ function getAllDetailTypeStructures($useCachedData = false) {
         $dtStructs['names'][$row[2]] = $row[3];
     }
     setCachedData($cacheKey, $dtStructs);
-    /*****DEBUG****///error_log(print_r($dtStructs['typedefs'],true));
     return $dtStructs;
 }
 /**
- * get detailType Group definitions
- * groups = {"groupIDToIndex":{detailTypeGroupID:index},
- *           index:{propName:val,...},...}
- * @return    object detailTypeGroup definitions as array of prop:val pairs indexed by dtgID
- */
+* get detailType Group definitions
+* groups = {"groupIDToIndex":{detailTypeGroupID:index},
+*           index:{propName:val,...},...}
+* @return    object detailTypeGroup definitions as array of prop:val pairs indexed by dtgID
+*/
 function getDetailTypeGroups() {
     $dtGroups = array('groupIDToIndex' => array());
     $index = 0;
@@ -1552,12 +1574,12 @@ function getDetailTypeGroups() {
     return $dtGroups;
 }
 /**
- * determine the inverse of a relationship term
- * @global    array llokup of term inverses by trmID to inverseTrmID
- * @param     int $relTermID reltionship trmID
- * @return    int inverse trmID
- * @todo      modify to retrun -1 in case not inverse defined
- */
+* determine the inverse of a relationship term
+* @global    array llokup of term inverses by trmID to inverseTrmID
+* @param     int $relTermID reltionship trmID
+* @return    int inverse trmID
+* @todo      modify to retrun -1 in case not inverse defined
+*/
 function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id instead of a string
     global $inverses;
     if (!$relTermID) return;
@@ -1579,31 +1601,31 @@ $startDT = (defined('DT_START_DATE') ? DT_START_DATE : 0);
 $endDT = (defined('DT_END_DATE') ? DT_END_DATE : 0);
 $titleDT = (defined('DT_NAME') ? DT_NAME : 0);
 /**
- * get related record structure for a give relationship record
- * related = { "recID" => recID,
- *             "RelTermID" => relationTrmID,
- *             "RelTerm" => trmLabel,
- *             "ParentTermID" => parentTrmID,
- *             "RelatedRecID" => linkedRecID,
- *             "InterpRecID" => interpretationRecID,
- *             "Notes" => relationshipNotes,
- *             "Title" => relationshipTitle,
- *             "StartData" => relationshipStartDate,
- *             "EndDate" => relationshipEndDate}
- *
- * @global    int $relTypDT local id of relationtype detailType (magic number)
- * @global    int $relSrcDT local id of source record pointer detailType (magic number)
- * @global    int $relTrgDT local id of target record pointer detailType (magic number)
- * @global    int $intrpDT local id of interpretation record pointer detailType (magic number)
- * @global    int $notesDT local id of notes detailType (magic number)
- * @global    int $startDT local id of start time detailType (magic number)
- * @global    int $endDT local id of end time detailType (magic number)
- * @global    int $titleDT local id of title detailType (magic number)
- * @param     int $recID relationshipRecID to use for related
- * @param     boolean $i_am_primary true if context is "from" record of relationship link
- * @return    object related record structure
- * @todo      change $i_am_primary to useInverseRelation
- */
+* get related record structure for a give relationship record
+* related = { "recID" => recID,
+*             "RelTermID" => relationTrmID,
+*             "RelTerm" => trmLabel,
+*             "ParentTermID" => parentTrmID,
+*             "RelatedRecID" => linkedRecID,
+*             "InterpRecID" => interpretationRecID,
+*             "Notes" => relationshipNotes,
+*             "Title" => relationshipTitle,
+*             "StartData" => relationshipStartDate,
+*             "EndDate" => relationshipEndDate}
+*
+* @global    int $relTypDT local id of relationtype detailType (magic number)
+* @global    int $relSrcDT local id of source record pointer detailType (magic number)
+* @global    int $relTrgDT local id of target record pointer detailType (magic number)
+* @global    int $intrpDT local id of interpretation record pointer detailType (magic number)
+* @global    int $notesDT local id of notes detailType (magic number)
+* @global    int $startDT local id of start time detailType (magic number)
+* @global    int $endDT local id of end time detailType (magic number)
+* @global    int $titleDT local id of title detailType (magic number)
+* @param     int $recID relationshipRecID to use for related
+* @param     boolean $i_am_primary true if context is "from" record of relationship link
+* @return    object related record structure
+* @todo      change $i_am_primary to useInverseRelation
+*/
 function fetch_relation_details($recID, $i_am_primary) {
     global $relTypDT, $relSrcDT, $relTrgDT, $intrpDT, $notesDT, $startDT, $endDT, $titleDT;
     /* get recDetails for the given linked resource and extract all the necessary values */
@@ -1616,29 +1638,29 @@ function fetch_relation_details($recID, $i_am_primary) {
                     $bd['RelTermID'] = $row['dtl_Value'];
                 } else {
                     $bd['RelTermID'] = reltype_inverse($row['dtl_Value']); // BUG: assumes reltype_inverse returns ID
-//TODO: saw this should have a -1 which is different than self inverse and the RelTerm should be "inverse of ". term label requires checking smarty/showReps
+                    //TODO: saw this should have a -1 which is different than self inverse and the RelTerm should be "inverse of ". term label requires checking smarty/showReps
                 }
                 $relval = mysql_fetch_assoc(mysql_query('select trm_Label, trm_ParentTermID from defTerms where trm_ID = ' . intval($bd['RelTermID'])));
                 $bd['RelTerm'] = $relval['trm_Label'];
                 if ($relval['trm_ParentTermID']) {
                     $bd['ParentTermID'] = $relval['trm_ParentTermID'];
                 }
-            break;
+                break;
             case $relTrgDT: // linked resource
                 if (!$i_am_primary) break;
                 $r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
-                                 ' from Records where rec_ID = ' . intval($row['dtl_Value']));
+                    ' from Records where rec_ID = ' . intval($row['dtl_Value']));
                 $bd['RelatedRecID'] = mysql_fetch_assoc($r);
                 break;
             case $relSrcDT:
                 if ($i_am_primary) break;
                 $r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
-                                 ' from Records where rec_ID = ' . intval($row['dtl_Value']));
+                    ' from Records where rec_ID = ' . intval($row['dtl_Value']));
                 $bd['RelatedRecID'] = mysql_fetch_assoc($r);
                 break;
             case $intrpDT:
                 $r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
-                                 ' from Records where rec_ID = ' . intval($row['dtl_Value']));
+                    ' from Records where rec_ID = ' . intval($row['dtl_Value']));
                 $bd['InterpRecID'] = mysql_fetch_assoc($r);
                 break;
             case $notesDT:
@@ -1653,85 +1675,87 @@ function fetch_relation_details($recID, $i_am_primary) {
             case $endDT:
                 $bd['EndDate'] = $row['dtl_Value'];
                 break;
-            }
         }
-        return $bd;
+    }
+    return $bd;
 }
 /**
- * get related records structure
- *  relations = {"byRectype" => { rtyID =>{trmID =>[recID,...]},...},
- *               "byTerm" => { trmID => { rtyID =>[recID,...]},...},
- *               "relationshipRecs" => { relnRecID => { "recID" => val,
- *                                                      "relInvTerm" => val,
- *                                                      "relInvTermID" => val,
- *                                                      "relTerm" => val,
- *                                                      "relTermID" => val,
- *                                                      "relatedRec" => { "title" => val,
- *                                                                        "recID" => val,
- *                                                                        "rectype" => val,
- *                                                                        "URL" => val,
- *                                                                      }
- *                                                      "relnID" => val,
- *                                                      "role" => val,
- *                                                      "title" => val},...}}
- *
- * @global    int $relTypDT local id of relationtype detailType (magic number)
- * @global    int $relSrcDT local id of source record pointer detailType (magic number)
- * @global    int $relTrgDT local id of target record pointer detailType (magic number)
- * @global    int $intrpDT local id of interpretation record pointer detailType (magic number)
- * @global    int $notesDT local id of notes detailType (magic number)
- * @global    int $startDT local id of start time detailType (magic number)
- * @global    int $endDT local id of end time detailType (magic number)
- * @global    int $titleDT local id of title detailType (magic number)
- * @staticvar type [$varname] description of static variable usage in function
- * @param     int $recID context record recID for which to find related records
- * @param     int $relnRecID relationshipRecID used to get a specific related record default=0 for find all related
- * @return    object related records structure
- */
+* get related records structure
+*  relations = {"byRectype" => { rtyID =>{trmID =>[recID,...]},...},
+*               "byTerm" => { trmID => { rtyID =>[recID,...]},...},
+*               "relationshipRecs" => { relnRecID => { "recID" => val,
+*                                                      "relInvTerm" => val,
+*                                                      "relInvTermID" => val,
+*                                                      "relTerm" => val,
+*                                                      "relTermID" => val,
+*                                                      "relatedRec" => { "title" => val,
+*                                                                        "recID" => val,
+*                                                                        "rectype" => val,
+*                                                                        "URL" => val,
+*                                                                      }
+*                                                      "relnID" => val,
+*                                                      "role" => val,
+*                                                      "title" => val},...}}
+*
+* @global    int $relTypDT local id of relationtype detailType (magic number)
+* @global    int $relSrcDT local id of source record pointer detailType (magic number)
+* @global    int $relTrgDT local id of target record pointer detailType (magic number)
+* @global    int $intrpDT local id of interpretation record pointer detailType (magic number)
+* @global    int $notesDT local id of notes detailType (magic number)
+* @global    int $startDT local id of start time detailType (magic number)
+* @global    int $endDT local id of end time detailType (magic number)
+* @global    int $titleDT local id of title detailType (magic number)
+* @staticvar type [$varname] description of static variable usage in function
+* @param     int $recID context record recID for which to find related records
+* @param     int $relnRecID relationshipRecID used to get a specific related record default=0 for find all related
+* @return    object related records structure
+*/
 function getAllRelatedRecords($recID, $relnRecID = 0) {
     global $relRT, $relTypDT, $relSrcDT, $relTrgDT, $intrpDT, $notesDT, $startDT, $endDT, $titleDT;
     if (!$recID) return null;
     $query = "select relnID, src.dtl_Value as src, srcRec.rec_RecTypeID as srcRT, srcRec.rec_Title as srcTitle, srcRec.rec_URL as srcURL, trg.dtl_Value as trg," .
-                    " if(srcRec.rec_ID = $recID, 'Primary', 'Non-Primary') as role, trgRec.rec_RecTypeID as trgRT, trgRec.rec_Title as trgTitle," .
-                    " trgRec.rec_URL as trgURL, trm.dtl_Value as trmID, term.trm_Label as term, inv.trm_ID as invTrmID," .
-                    " if(inv.trm_ID>0, inv.trm_Label, term.trm_Label) as invTrm, rlnTtl.dtl_Value as title," .    //concat('inverse of ', term.trm_Label)
-                    " rlnNote.dtl_Value as note, strDate.dtl_Value as strDate, endDate.dtl_Value as endDate, intrpRec.rec_ID as intrp," .
-                    " intrpRec.rec_RecTypeID as intrpRT, intrpRec.rec_Title as intrpTitle, intrpRec.rec_URL as intrpURL" .
-              " from (select rrc_RecID as relnID from recRelationshipsCache) rels" .
-                " left join recDetails src on src.dtl_RecID = rels.relnID and src.dtl_DetailTypeID = $relSrcDT" .
-                " left join Records srcRec on src.dtl_Value = srcRec.rec_ID" .
-                " left join recDetails trg on trg.dtl_RecID = rels.relnID and trg.dtl_DetailTypeID = $relTrgDT" .
-                " left join Records trgRec on trg.dtl_Value = trgRec.rec_ID" .
-                " left join recDetails trm on trm.dtl_RecID = rels.relnID and trm.dtl_DetailTypeID = $relTypDT" .
-                " left join defTerms term on term.trm_ID = trm.dtl_Value" .
-                " left join defTerms inv on inv.trm_ID = term.trm_InverseTermID" .
-                " left join recDetails intrp on intrp.dtl_RecID = rels.relnID and intrp.dtl_DetailTypeID = $intrpDT" .
-                " left join Records intrpRec on intrp.dtl_Value = intrpRec.rec_ID" .
-                " left join recDetails rlnTtl on rlnTtl.dtl_RecID = rels.relnID and rlnTtl.dtl_DetailTypeID = $titleDT" .
-                " left join recDetails rlnNote on rlnNote.dtl_RecID = rels.relnID and rlnNote.dtl_DetailTypeID = $notesDT" .
-                " left join recDetails strDate on strDate.dtl_RecID = rels.relnID and strDate.dtl_DetailTypeID = $startDT" .
-                " left join recDetails endDate on endDate.dtl_RecID = rels.relnID and endDate.dtl_DetailTypeID = $endDT" .
-              " where (srcRec.rec_ID = $recID or trgRec.rec_ID = $recID)";
+    " if(srcRec.rec_ID = $recID, 'Primary', 'Non-Primary') as role, trgRec.rec_RecTypeID as trgRT, trgRec.rec_Title as trgTitle," .
+    " trgRec.rec_URL as trgURL, trm.dtl_Value as trmID, term.trm_Label as term, inv.trm_ID as invTrmID," .
+    " if(inv.trm_ID>0, inv.trm_Label, term.trm_Label) as invTrm, rlnTtl.dtl_Value as title," .    //concat('inverse of ', term.trm_Label)
+    " rlnNote.dtl_Value as note, strDate.dtl_Value as strDate, endDate.dtl_Value as endDate, intrpRec.rec_ID as intrp," .
+    " intrpRec.rec_RecTypeID as intrpRT, intrpRec.rec_Title as intrpTitle, intrpRec.rec_URL as intrpURL" .
+    " from (select rrc_RecID as relnID from recRelationshipsCache) rels" .
+    " left join recDetails src on src.dtl_RecID = rels.relnID and src.dtl_DetailTypeID = $relSrcDT" .
+    " left join Records srcRec on src.dtl_Value = srcRec.rec_ID" .
+    " left join recDetails trg on trg.dtl_RecID = rels.relnID and trg.dtl_DetailTypeID = $relTrgDT" .
+    " left join Records trgRec on trg.dtl_Value = trgRec.rec_ID" .
+    " left join recDetails trm on trm.dtl_RecID = rels.relnID and trm.dtl_DetailTypeID = $relTypDT" .
+    " left join defTerms term on term.trm_ID = trm.dtl_Value" .
+    " left join defTerms inv on inv.trm_ID = term.trm_InverseTermID" .
+    " left join recDetails intrp on intrp.dtl_RecID = rels.relnID and intrp.dtl_DetailTypeID = $intrpDT" .
+    " left join Records intrpRec on intrp.dtl_Value = intrpRec.rec_ID" .
+    " left join recDetails rlnTtl on rlnTtl.dtl_RecID = rels.relnID and rlnTtl.dtl_DetailTypeID = $titleDT" .
+    " left join recDetails rlnNote on rlnNote.dtl_RecID = rels.relnID and rlnNote.dtl_DetailTypeID = $notesDT" .
+    " left join recDetails strDate on strDate.dtl_RecID = rels.relnID and strDate.dtl_DetailTypeID = $startDT" .
+    " left join recDetails endDate on endDate.dtl_RecID = rels.relnID and endDate.dtl_DetailTypeID = $endDT" .
+    " where (srcRec.rec_ID = $recID or trgRec.rec_ID = $recID)";
     if ($relnRecID) $query.= " and rels.relnID = $relnRecID";
-    /*****DEBUG****/// error_log($query);
+    
+//error_log($query);    
     $res = mysql_query($query);
-    if (!mysql_num_rows(@$res)) {
+    if (!$res || !mysql_num_rows($res)) {
         return array();
     }
     //if (@$res && mysql_error(@$res)) {
     if (mysql_error()) {
         return array("error" => mysql_error());
     }
+    
     $relations = array('relationshipRecs' => array());
     while ($row = mysql_fetch_assoc($res)) {
         $relnRecID = $row["relnID"];
         $relations['relationshipRecs'][$relnRecID] = array("relnID" => $relnRecID,
-                                                            "title" => $row['title'],
-                                                            "recID" => $recID,
-                                                            "role" => $row['role'],
-                                                            "relTermID" => $row['trmID'],
-                                                            "relTerm" => $row['term'],
-                                                            "relInvTerm" => $row['invTrm']);
+            "title" => $row['title'],
+            "recID" => $recID,
+            "role" => $row['role'],
+            "relTermID" => $row['trmID'],
+            "relTerm" => $row['term'],
+            "relInvTerm" => $row['invTrm']);
         if (@$row['invTrmID']) {
             $relations['relationshipRecs'][$relnRecID]["relInvTermID"] = $row['invTrmID'];
         }
@@ -1746,22 +1770,23 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
         }
         if (@$row['intrp']) {
             $relations['relationshipRecs'][$relnRecID]["interpRec"] = array("title" => $row["intrpTitle"],
-                                                                            "rectype" => $row["intrpRT"],
-                                                                            "URL" => $row["intrpURL"],
-                                                                            "recID" => $row["intrp"]);
+                "rectype" => $row["intrpRT"],
+                "URL" => $row["intrpURL"],
+                "recID" => $row["intrp"]);
         }
         if ($row['src'] == $recID) {
             $relations['relationshipRecs'][$relnRecID]["relatedRec"] = array("title" => $row["trgTitle"],
-                                                                             "rectype" => $row["trgRT"],
-                                                                             "URL" => $row["trgURL"],
-                                                                             "recID" => $row["trg"]);
+                "rectype" => $row["trgRT"],
+                "URL" => $row["trgURL"],
+                "recID" => $row["trg"]);
         } else {
             $relations['relationshipRecs'][$relnRecID]["relatedRec"] = array("title" => $row["srcTitle"],
-                                                                             "rectype" => $row["srcRT"],
-                                                                             "URL" => $row["srcURL"],
-                                                                             "recID" => $row["src"]);
+                "rectype" => $row["srcRT"],
+                "URL" => $row["srcURL"],
+                "recID" => $row["src"]);
         }
     }
+
     foreach ($relations['relationshipRecs'] as $relnRecID => $reln) {
         $relRT = $reln['relatedRec']['rectype'];
         $relRecID = $reln['relatedRec']['recID'];

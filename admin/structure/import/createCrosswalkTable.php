@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Stephen White
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
@@ -36,7 +36,11 @@
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
 
-    //ART - It breaks everything! require_once(dirname(__FILE__).'/../../../viewers/smarty/templateOperations.php'); // for listing and converting smarty templates
+    // Artem - It breaks everything! Ian - all well and good, but why?
+    // TODO: investigate why smarty template operation file breaks something in crosswalks
+    // TODO: I think it had one level of relative path too few - have added a ../
+    // require_once(dirname(__FILE__).'/../../../../viewers/smarty/templateOperations.php');
+    // for listing and converting smarty templates
 
     mysql_connection_insert($tempDBName); // Use temp database
 
@@ -112,6 +116,12 @@
                 while($rectype = mysql_fetch_assoc($rectypes)) {
                     $OriginatingDBID = $rectype["rty_OriginatingDBID"];
                     $IDInOriginatingDB = $rectype["rty_IDInOriginatingDB"];
+
+                    if(!($OriginatingDBID>0 && $IDInOriginatingDB>0)){
+                        $OriginatingDBID = $source_db_id;
+                        $IDInOriginatingDB = $rectype["rty_ID"];
+                    }
+                    
                     $nameInTempDB = mysql_real_escape_string($rectype["rty_Name"]);
 
                     // Find recordtypes that are already in the local DB (comparing OriginatingDBID and IDInOriginatingDB
@@ -123,8 +133,10 @@
                         // These rectypes are not in the importing database
                         $cnt_identical = mysql_num_rows($identicalMatches);
                     }
+                    
+                    
 
-                    if(!$cnt_identical) {
+                    if(!($cnt_identical>0)) {
                         $approxMatchesRes = mysql_query("select rty_Name, rty_Description from "
                             . DATABASE . ".defRecTypes where (rty_Name like '%$nameInTempDB%')");
                         // TODO: if rectype is more than one word, check for both words
@@ -242,6 +254,8 @@
                     var myColumnDefs = [
                         { key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
                         { key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
+                        { key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>",
+                            sortable:true, resizeable:true, width:150 },
                         { key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:true, hidden:false, formatter:function(elLiner, oRecord, oColumn, oData) {
                             var grpid = oRecord.getData("rtyRecTypeGroupID");
                             elLiner.innerHTML = "group #"+grpid+" not found";
@@ -255,8 +269,6 @@
                             }
                         },
                         { key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
-                        { key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>",
-                            sortable:true, resizeable:true, width:150 },
                         { key:"matches", label:"<span title='Shows the number of record types in the current database with simliar names'>"
                             +"<u>Potential dupes in this DB</u></span>",
                             sortable:true, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
@@ -265,9 +277,9 @@
                                 if(dup<0){
                                     elLiner.innerHTML = 'Same origin (x '+Math.abs(dup)+')';
                                 }else if (isNaN(Number(dup))){
-                                    elLiner.innerHTML = dup+' has same origin';
+                                    elLiner.innerHTML = '<b>'+dup+'</b> (this database) came from same source (same original database + code)';
                                 }else if (dup>0){
-                                    elLiner.innerHTML = 'Duplicate name (x '+dup+')';
+                                    elLiner.innerHTML = 'Partial name matches (x '+dup+')';
                                 }else{
                                     elLiner.innerHTML = '';
                                 }
@@ -289,7 +301,7 @@
 
                             if (req) {
 
-                                var fvals = req.split("|");
+                                var fvals = req.split("|");   //filter values
 
                                 var sByGroup  = fvals[0];
                                 var showIdentical = (fvals[1]==="1");
@@ -544,13 +556,13 @@
 
     <body class="popup yui-skin-sam" onbeforeunload="dropTempDB(false)">
         <div id=popup-saved style="display: none">
-            <b>Import succesful</b>
+            <b>Import successful</b>
         </div>
 
         <div class="banner">
             <h2>Import record types from <?= "\"".($source_db_id ?$source_db_id." : " : "").$source_db_name."\""?> </h2>
         </div>
-        
+
         <script src="../../../common/js/utilsLoad.js"></script>
         <script src="../../../common/js/utilsUI.js"></script>
 
@@ -560,12 +572,12 @@
             -->
 
             <?php ?>
-            <!-- Smarty templates 
+            <!-- Smarty templates
                  TODO:  functions are in templateOperations.php
                      selection list of TPL files - use getList();
                      call smartyLocalIDsToConceptIDs
                      serve up to the calling database
-                
+
             <div id="smarty" style="width:100%; margin:auto;">
                 <h3>Smarty report templates</h3>
                 <p>
@@ -584,7 +596,12 @@
                         <label for="inputFilterByGroup">Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1"
                             style="width:138px;height:16px"><option value="all">all groups</option></select>
                     </div>
-                    <div style="display:inline-block;">
+                    
+                    <div style="display:none;"> <!--  Ian Johnson: 2016-05-26  
+    hide the checkboxes, set the checked choices as defaults (we allowed these incomplete imports because 
+    we used to have a lot of trouble importing structures, but now those problems are mostly indicative 
+    of faulty structures which shouldn't be imported). Importing incomplete or faulty structures will only 
+    cause further problems down the track. -->
                         <input id="inputFilterByExist" type="checkbox"/>
                         <label for="inputFilterByExist">&nbsp;&nbsp;Show record types with same original source</label><br />
                         <input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of record types."
@@ -592,12 +609,13 @@
                         <label for="noRecursion">&nbsp;&nbsp;Direct record types import only (w/out all related types - constrained pointers)
                         </label><br />
                         <input type="checkbox" id="strict" title="Check this for strict import of types!" checked>
-                        <label for="strict">&nbsp;&nbsp;Strict import - only import if structure is entirely correct</label>
+                        <label for="strict">&nbsp;&nbsp;Strict import - only import if structure is entirely correct
+                        </label><br />
                         <input type="checkbox" id="importVocabs" checked>
                         <label for="importVocabs">&nbsp;&nbsp;Import complete vocabulary even if a limited set of terms is specified</label>
                     </div>
                 </div>
-                
+
                 <div id="topPagination"></div>
                 <div id="crosswalkTable"></div>
                 <div id="bottomPagination"></div>
@@ -607,7 +625,7 @@
                definitions in the selected database which are not already in the current database.</i>
 
             <p>
-                <i>In version 3.0 this may also mean that the database is in a 
+                <i>In version 3.0 this may also mean that the database is in a
                 different format version which is not being read correctly</i>
             </p>
 
@@ -621,10 +639,10 @@
                 <p>Logs give a more detailed history of the actions taken to import structure.
                 Click the links below to see the short version and long version respectively.</p>
             </div>
-            
+
             <a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
             <a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
-            
+
             <div id="log"></div><br />
             <div id="log"></div>
 
@@ -638,6 +656,31 @@
                 var strictImport = false;
                 var noRecursion = false;
                 var importVocabs = true;
+
+                if (!Array.prototype.indexOf)
+                    {
+                    Array.prototype.indexOf = function(elt /*, from*/)
+                    {
+                        var len = this.length;
+
+                        var from = Number(arguments[1]) || 0;
+                        from = (from < 0)
+                        ? Math.ceil(from)
+                        : Math.floor(from);
+                        if (from < 0)
+                            from += len;
+
+                        for (; from < len; from++)
+                        {
+                            if (from in this &&
+                                this[from] === elt)
+                                return from;
+                        }
+                        return -1;
+                    };
+                }
+
+
                 // Start an asynchronous call, sending the recordtypeID and action
                 function processAction(rtyID, action, rectypeName) {
                     // Lock import, and set import icon to loading icon
@@ -664,6 +707,8 @@
                     else { // code for IE6, IE5
                         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
                     }
+
+                    //Juan made stupid response as string!!! @todo - change to JSON
                     xmlhttp.onreadystatechange=function() {
                         // executed on change of ready state:
                         // 0=not init, 1=server connection, 2=request received, 3=processing request, 4= done
@@ -699,6 +744,15 @@
                             } else {
                                 document.getElementById("importIcon"+rtyID).src = "../../../common/images/import_icon.png";
 
+
+                                var k = response.indexOf('IMPORTED:');
+                                var rt_ids = [];
+                                if(k>0){
+                                    rt_ids = response.substr(k+9).split(',');
+                                    response = response.substr(0,k);
+                                }
+
+
                                 detailedImportLog = '<p style="color:green">'+ logHeader+response+"</p>" + detailedImportLog;
                                 result += logHeader;
                                 response = response.split("<br />");
@@ -727,7 +781,20 @@
                                     document.getElementById("log").innerHTML = shortImportLog;
                                 }
 
-                                myDataTable.deleteRow(importedRowID, -1);
+                                //myDataTable.deleteRow(importedRowID, -1); //wrong way - need to refresh filter
+                                var oRecord = myDataTable.getRecord(importedRowID);
+                                //matches
+                                var rt_id = oRecord.getData("rtyID");
+                                //find
+                                var k, cnt = 0;
+                                for (k=0;k<tableData.length;k++){
+                                    if(tableData[k][1]==rt_id || rt_ids.indexOf(tableData[k][1])>=0){
+                                        tableData[k][3] = -1;
+                                        cnt++;
+                                        if(cnt==rt_ids.length) break;
+                                    }
+                                }
+                                _updateFilter();
                             }
                         }
                     } // end readystate callback
@@ -735,6 +802,7 @@
                     xmlhttp.open("GET","processAction.php?"+
                         "db=<?=HEURIST_DBNAME?>"+
                         "&action="+action+
+                        //"&DBGSESSID=424548064757500001;d=1,p=0,c=0"+
                         "&tempDBName="+tempDBName+
                         "&sourceDBName="+sourceDBName+
                         "&sourceDBID="+ (sourceDBID ? sourceDBID : "0")+
@@ -809,26 +877,27 @@
                     if(!dropped) {
                         dropped = true;
 
-                        top.HEURIST.util.popupURL(top,
-                            "../admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
-                                "close-on-blur": true,
-                                "no-resize": true,
-                                //"no-close": true,
-                                height: 100,
-                                width: 300,
-                                x: 10000,
-                                y: 10000,
-                                callback: function(context) {
-
-                                    if(redirect) {
-                                        window.location = "<?=HEURIST_BASE_URL?>/admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
-                                    }
-                                }
-                        });
-
-
-                        //  processAction(0, "drop");
-                        //  alert("Dropping temporal database");
+                        var baseurl = "<?=HEURIST_BASE_URL?>admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>";
+                        
+           $.ajax({
+                url: baseurl,
+                type: "GET",
+                data: {},
+                dataType: "text",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                },
+                success: function( response, textStatus, jqXHR ){
+                    if(response == "OK"){
+                    }else{
+                        alert(response);
+                    }
+                    if(redirect) {
+                        window.location = "<?=HEURIST_BASE_URL?>admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
+                    }
+                }
+            });                
+                     
                     }
                 }
             </script>

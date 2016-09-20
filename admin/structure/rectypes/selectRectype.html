@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -112,7 +112,7 @@
 	</head>
 
 
-	<body class="popup yui-skin-sam" style="overflow: scroll;">
+	<body class="popup yui-skin-sam" style="overflow-y: scroll;overflow-x:hidden">
 
 		<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
@@ -121,52 +121,54 @@
 
 		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
-		<div style="width:400;margin:auto;">
+		<div style="margin:auto;">
             <div id="filtertoolbar">
                 <div class="input-row">
-                    <div class="input-header-cell">
-                        Filter by group
-                    </div>
-                    <div class="input-cell">
+                    <div class="input-cell" style="display:inline-block;">
+                        <label>Filter by group</label>
                         <select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;">
                                 <option value="all">all groups</option>
                         </select>
                     </div>
+                    
+                    <div style="border:1px lightgray solid;float:right">
+                        <label>Show</label>
+                        <label style="text-align:left">
+                            <input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" 
+                                    value="all" checked="checked" style="vertical-align: -3px;"/>All</label>
+                        <label style="text-align:left">
+                            <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" 
+                                    value="selonly" style="vertical-align: -3px;"/>Selected</label>
+                    </div>
+                    
                 </div>
                 
                 <div class="input-row">
-                    <div class="input-header-cell">
-                        Filter by name
-                    </div>
                     <div class="input-cell">
+                        <label>Filter by name</label>
                         <input type="text" id="inputFilterByName" name="inputFilterByName" style="width:40px;" value=""/>
                     </div>
                 </div>
                 
-	            <div class="input-row">
-		            <div style="display:inline-block;" class="input-header-cell" id="divFilterBySelectionLbl">
-			            Show
-		            </div>
-		            <div style="display:inline-block;" id="divFilterBySelection">
-			            <input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
-			            <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2" style="text-align:left">Selected</label>
+	            <div>
+                    <div style="font-weight:bold;padding-bottom:0.4em">Not finding the record type you require?</div>
+                    <div id="divDefineNew" style="float:left;text-align:left;">
+                        <input type="button" style="min-width:11ex;" value="Define New Record Type" 
+                            onClick="{selectRecordType.onDefineNewType();}" 
+                            title="Create a completely new record type - it is preferable to use an existing type (choose below and Insert Selected) before creating a new record type." />
+                    </div>
+                  
+		            <div style="float:right">
+                        <label id="lblSelect1"></label>
 			            <a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear selection">clear</a>
                         <a href="#" id="btnAllSelection" style="min-width:7ex;display: none;" title="select all">all</a>
+                        <input type="button" tabindex="11" id="btnApply1" value="Insert Selected" onclick="selectRecordType.returnSelection();" />
                     </div>
-                    
-	              <div id="divDefineNew" style="float:right;text-align:right;">
-	                <input type="button" style="min-width:11ex;" value="Define New" onClick="{selectRecordType.onDefineNewType();}" title="Create a completely new record type - it is preferable to use an existing type (choose below and Insert Selected) before creating a new record type." />
-	              </div>
 	            </div>
             </div>		
 
 		    <div id="tb_top" style="height:30">
 			    <div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
-			    <div style="float:right; text-align:right;padding-top:5px;">
-				    <label id="lblSelect1"></label>
-				    <!-- input type="button" tabindex="12" value="Cancel" onclick="selectRecordType.cancel();" / -->
-				    <input type="button" tabindex="11" id="btnApply1" value="Insert Selected" onclick="selectRecordType.returnSelection();" />
-			    </div>
 		    </div>
 
 		    <div id="tabContainer">

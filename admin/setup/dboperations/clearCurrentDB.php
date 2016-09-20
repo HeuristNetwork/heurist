@@ -6,10 +6,10 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.0   
+    * @version     3.0
     */
 
     /*
@@ -23,50 +23,50 @@
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
-    
-    if(isForAdminOnly("to clear a database")){
+
+    if(isForOwnerOnly("to clear a database")){
         return;
     }
-?>    
-<html> 
-<head> 
+?>
+<html>
+<head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Clear Records from Current Heurist Database</title> 
-    <link rel='stylesheet' type='text/css' href='../../../common/css/global.css'> 
-    <link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'> 
-    <link rel='stylesheet' type='text/css' href='../../../common/css/admin.css'> 
-</head> 
-<body class='popup'> 
-    <div class='banner'><h2>Clear Records from Current Heurist database</h2></div> 
-    <div id='page-inner' style='overflow:auto'> 
+    <title>Clear Records from Current Heurist Database</title>
+    <link rel='stylesheet' type='text/css' href='../../../common/css/global.css'>
+    <link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'>
+    <link rel='stylesheet' type='text/css' href='../../../common/css/admin.css'>
+</head>
+<body class='popup'>
+    <div class='banner'><h2>Clear Records from Current Heurist database</h2></div>
+    <div id='page-inner' style='overflow:auto'>
 <?php
     $dbname = $_REQUEST['db'];
 
     if(!@$_REQUEST['mode']) {
-?>        
+?>
 
     <h4 style='display:inline-block; margin:0 5px 0 0'>
         <span><img src='../../../common/images/url_error.png' /> DANGER <img src='../../../common/images/url_error.png' /></span>
     </h4>
-    
-    <h1 style='display:inline-block'>CLEAR ALL RECORDS FROM CURRENT DATABASE</h1><br> 
-    
-    <h3>This will clear (delete) all records and reset counter to 1 for the current database: </h3> 
+
+    <h1 style='display:inline-block'>CLEAR ALL RECORDS FROM CURRENT DATABASE</h1><br>
+
+    <h3>This will clear (delete) all records and reset counter to 1 for the current database: </h3>
     <h2>Clear database: <?=$dbname?></h2>
-    <form name='deletion' action='clearCurrentDB.php' method='get'> 
-        <p>Database definitions - record types, fields, terms, tags, users etc. - are not affected.  
-        Uploaded files are not deleted. Bookmarks and tags on specific records are deleted.<p> 
-        This operation may take some minutes on a large database<br> 
+    <form name='deletion' action='clearCurrentDB.php' method='get'>
+        <p>Database definitions - record types, fields, terms, tags, users etc. - are not affected.
+        Uploaded files are not deleted. Bookmarks and tags on specific records are deleted.<p>
+        This operation may take some minutes on a large database<br>
         <p>Enter the words CLEAR ALL RECORDS in ALL-CAPITALS to confirm that you want to clear all records from the current database
         <p>Type the words above to confirm deletion of records: <input type='input' maxlength='20' size='20' name='del' id='del'>
         &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' style='font-weight: bold;' >
         <input name='mode' value='2' type='hidden'>
-        <input name='db' value='<?=$dbname?>' type='hidden'> 
+        <input name='db' value='<?=$dbname?>' type='hidden'>
     </form>
-<?php        
-        
+<?php
+
     }else if(@$_REQUEST['mode']=='2') {
-        
+
         if (@$_REQUEST['del']=='CLEAR ALL RECORDS') {
             print "<br/><hr>";
             if ($dbname=='') {
@@ -74,9 +74,9 @@
             } else {
 
                 $fulldbname = HEURIST_DB_PREFIX.$dbname;
-                
+
                 $res = db_clean($fulldbname);
-/*                
+/*
                 // This is a bit inelegant but it does the job effectively. Delete all the related records first because
                 // otherwise referential integrity will stop you deleting the records and/or bookmarks
                 $res2=0;
@@ -236,8 +236,8 @@
                         echo($output2);
                     }
                 }
- */               
-                
+ */
+
                 if (!$res) {
                     echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                     print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a></p>";
@@ -245,7 +245,7 @@
                     // Remove from Elasticsearch
                     print "<br/><br/>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";
                     deleteIndexForDatabase($dbname);
-                    
+
                     print "<br/><br/>Record data, bookmarks and tags have been deleted from <b>$dbname</b><br/>";
                     print "Database structure (record types, fields, terms, constraints etc.) and users have not been affected.";
                     //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a></p>";

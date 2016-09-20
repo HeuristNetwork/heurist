@@ -5,13 +5,13 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1.0   
+* @version     3.1.0
 */
 
 /*
@@ -52,12 +52,12 @@
         <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
     </head>
-    
+
     <body class="popup">
         <div class="banner"><h2>Modify group / admin status for session</h2></div>
         <div id="page-inner">
-            <p>This page is designed for testing purposes. It allows you to exit a group, or relinquish administrator status for a group, 
-                for the rest of your session, in order to test the behaviour of a database as viewed by another class of user. 
+            <p>This page is designed for testing purposes. It allows you to exit a group, or relinquish administrator status for a group,
+                for the rest of your session, in order to test the behaviour of a database as viewed by another class of user.
                 Changes will not be saved to the database. Log out and log back in to restore your normal permissions.</p>
 
             <table>

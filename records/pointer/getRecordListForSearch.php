@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -31,10 +31,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -42,7 +42,7 @@
 */
 
 
-define("RESULT_LIMIT", 100);
+define("RESULT_LIMIT", 500);
 define('ISSERVICE',1);
 define("SAVE_URI", "disabled");
 
@@ -72,11 +72,15 @@ if (@$_REQUEST["searchID"]) $searchID = $_REQUEST["searchID"];
 
 $colNames = array("rec_ID", "rec_Title", "rec_URL", "rec_RecTypeID");
 $query = REQUEST_to_query("select " . join(", ", $colNames) . " ", BOTH);
-/*****DEBUG****///error_log("Rec List query = ".$query);
+
 if (@$_REQUEST["r"] == "recent") {
-	$query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_ID in (select distinct rre_RecID from usrRecentRecords where rre_UGrpID = " . get_user_id() . ")) and ", $query);
+	$query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_RecTypeID!=1) AND "
+    ."(TOPBIBLIO.rec_ID in (select distinct rre_RecID from usrRecentRecords where rre_UGrpID = " 
+    . get_user_id() . ")) and ", $query);
 	// saw CHECK ME: this code assumes order by is last clause of query
 	$query = preg_replace("/(.*)\\sorder by.*/", "$1 order by TOPBIBLIO.rec_Modified desc", $query);
+}else{
+    $query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_RecTypeID!=1) AND ", $query);
 }
 
 $query .= " limit $limit";

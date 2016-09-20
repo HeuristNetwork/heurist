@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -13,15 +13,15 @@
 */
 
 /**
-* UpgradeDB_3.0_3.1.sql: SQL file to update Heurist database between indicated versions 
+* UpgradeDB_3.0_3.1.sql: SQL file to update Heurist database between indicated versions
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -33,11 +33,11 @@
 
 -- VERSION  3.0  (6 April 2011) ---->  Version 3.1  (July 2011?)
 
--- Source version: 1.0.0 
+-- Source version: 1.0.0
 -- Target version: 1.1.0
 -- Safety rating: SAFE
 
--- Description: Early set of upgrades in mid 2011, has been applied to all known active databases (possibly excluding 
+-- Description: Early set of upgrades in mid 2011, has been applied to all known active databases (possibly excluding
 -- a small number of inactive legacy databases corrupted by Steve's unmanaged change of internal IDs in approx. June 2011)
 -- This file is maintained for historic information only, formerly named UpgradeDB_to_1.0.0.sql
 
@@ -53,7 +53,7 @@
     ALTER TABLE Records
         CHANGE rec_NonOwnerVisibility rec_NonOwnerVisibility
         ENUM(  'viewable',  'hidden',  'public', 'pending' ) NOT NULL DEFAULT  'viewable'
-        COMMENT  'Defines if record visible outside owning user group(s)';
+        COMMENT  'Defines if record visible outside owning Workgroup(s)';
 
     ALTER TABLE  sysIdentification
         ADD  sys_IncomingEmailAddresses VARCHAR( 4000 ) NULL
@@ -110,12 +110,12 @@
 
 
 -- Add PENDING status to existing non owner visibilites -
--- 12/9/11: these have been applied to H3CoreDefinitions and to sandpit5
+-- 12/9/11: these have been applied to HeuristCoreDefinitions
 
   ALTER TABLE Records
         CHANGE rec_NonOwnerVisibility rec_NonOwnerVisibility
         ENUM('viewable','hidden','public','pending') NOT NULL DEFAULT 'viewable'
-        COMMENT 'Defines if record visible outside owning user group(s) or to anyone';
+        COMMENT 'Defines if record visible outside owning Workgroup(s) or to anyone';
 
   ALTER TABLE  `sysIdentification`
         CHANGE  `sys_NewRecAccess`  `sys_NewRecAccess`

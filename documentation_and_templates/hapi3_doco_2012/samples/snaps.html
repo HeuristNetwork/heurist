@@ -1,0 +1,390 @@
+<html>
+ <head>
+  <title>HAPI snaps</title>
+
+  <script src=http://hapi.Heurist.sydney.edu.au/load?v=02&key=ce1c992c139cfd5a6fdc77c5c71444925f229942></script>
+
+  <style>
+   * { font-family: sans-serif,arial; }
+   input, textarea { border: 1px solid black; }
+
+   #search-div { float: right; text-align: right; }
+   #search-div label { font-size: 80%; }
+
+   td.title img.fave { float: right; cursor: pointer; }
+
+   table.photo {
+	width: 180px;
+	max-width: 180px;
+	margin: 5px;
+	float: left;
+	margin-bottom: 40px;
+   }
+   table.photo tbody {
+	background-color: #e0e0e0;
+   }
+   table.photo tr:first-child td { 
+	height: 120px;
+   }
+   table.photo td {
+	vertical-align: center;
+	text-align: center;
+   }
+
+   img.thumbnail {
+	cursor: pointer;
+   }
+
+   table.photo td.title {
+	vertical-align: bottom;
+	text-align: left;
+	font-size: 80%;
+	padding: 5px;
+   }
+   .fave { margin: 4px; }
+
+   #upload-div {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	padding: 3px;
+	width: 100%;
+	border-top: 1px solid #c0c0c0;
+	background-color: white;
+	text-align: right;
+   }
+
+   .title-edit {
+	width: 140px;
+	height: 60px;
+	font-size: 85%;
+   }
+
+   div.dusk {
+	background-color: #f0f0f0;
+	opacity: 0.8;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	position: absolute;
+	z-index: 999;
+   }
+
+   div.popup {
+	vertical-align: center;
+	text-align: center;
+
+	top: 100px;
+	background-color: #f0f0f0;
+	border: 1px solid #c0c0c0;
+	padding: 5px;
+
+	position: absolute;
+	z-index: 1000;
+   }
+  </style>
+
+  <script>
+
+function loadImages() {
+	document.getElementById("photos-div").innerHTML = "<h3>Loading ...</h3>";
+
+	var searchTerm = document.getElementById("q").value;
+	searchTerm = searchTerm? (searchTerm + " AND type:74 sortby:m") : "type:74 sortby:m";
+
+	var searchOpts = {};
+	if (document.getElementById("faves-only").checked) { searchOpts["personalised-only"] = true; }
+
+	var searchObject = new HSearch(searchTerm, searchOpts);
+
+	HeuristScholarDB.loadRecords(searchObject, searchLoader);
+}
+
+
+function searchLoadError() {
+	document.getElementById("photos-div").innerHTML = "<h3>There was a problem contacting the Heurist server</h3><p>Try again in a moment</p>";
+}
+
+function searchLoad(search, results) {
+	var photosDiv = document.getElementById("photos-div");
+
+	if (results.length === 0) {
+		photosDiv.innerHTML = "<p>No photos were found matching your search</p>";
+		return;
+	}
+	else if (results.length === 1) {
+		photosDiv.innerHTML = "<p>One photo matches your search</p>";
+	}
+	else {
+		photosDiv.innerHTML = "<p>" + results.length + " photos match your search</p>";
+	}
+
+	for (var i=0; i < results.length; ++i) {
+		photosDiv.appendChild(makePhotoThumbnail(results[i]));
+	}
+}
+
+var searchLoader = new HLoader(searchLoad, searchLoadError);
+
+
+var MediaRecordType = HRecordTypeManager.getRecordTypeById(74);
+
+var MediaFileType = HDetailManager.getDetailTypeById(221);
+var MimeType = HDetailManager.getDetailTypeById(289);
+var TitleType = HDetailManager.getDetailTypeById(160);
+var CreatorType = HDetailManager.getDetailTypeById(158);
+function makePhotoThumbnail(record) {
+	var file = record.getDetail(MediaFileType);
+	var title = record.getDetail(TitleType);
+
+	var table = document.createElement("table");
+	table.cellSpacing = 0;
+	table.cellPadding = 0;
+
+	table.className = "photo";
+	table.innerHTML = "<tbody><tr><td><img></td></tr><tr><td class=title><img></td></tr></tbody>";
+
+	var thumbnailImg = table.childNodes[0].childNodes[0].childNodes[0].childNodes[0];
+	var titleCell = table.childNodes[0].childNodes[1].childNodes[0];
+	var faveImg = titleCell.childNodes[0];
+
+	if (file) {
+		thumbnailImg.src = file.getThumbnailURL();
+		thumbnailImg.className = "thumbnail";
+		thumbnailImg.onclick = function() { popupImage(record, file); };
+	}
+	else {
+		thumbnailImg.parentNode.innerHTML = "(broken image)";
+	}
+
+	var creator = record.getDetails(CreatorType);
+	if (creator && creator.length > 0 && creator[0].getTitle()) {
+		thumbnailImg.title = "Uploaded " + record.getCreationDate() + " by " + creator[0].getTitle()
+	}
+	else {
+		thumbnailImg.title = "Uploaded " + record.getCreationDate();
+	}
+
+	var titleSpan = titleCell.appendChild(document.createElement("span"));
+	titleSpan.appendChild(document.createTextNode(title  ||  "(untitled image)"));
+	titleSpan.onclick = function() { editTitle(record, titleSpan); };
+
+	faveImg.className = "fave";
+	faveImg.src = "http://Heurist.sydney.edu.au/heurist/img/" + (record.isPersonalised()? "star-yellow.gif" : "star-white.gif");
+	faveImg.onclick = function() { toggleFavourite(record, faveImg); };
+
+	return table;
+}
+
+
+function makeUploadingIndicator(fileName) {
+	var table = document.createElement("table");
+	table.className = "photo";
+	table.cellSpacing = 0;
+	table.cellPadding = 0;
+
+	table.innerHTML = "<tbody><tr><td><img src=loading-animation.gif><br>Uploading&nbsp;...</td></tr><tr><td></td></tr></tbody>";
+	table.childNodes[0].childNodes[1].childNodes[0].appendChild(document.createTextNode(fileName));
+
+	return table;
+}
+
+
+function makeFailureIndicator(fileName, error) {
+	var table = document.createElement("table");
+	table.className = "photo";
+	table.cellSpacing = 0;
+	table.cellPadding = 0;
+
+	table.innerHTML = "<tbody><tr><td><b>Upload&nbsp;error</b></td></tr><tr><td></td></tr></tbody>";
+	if (error) {
+		table.childNodes[0].childNodes[0].childNodes[0].appendChild(document.createElement("br"));
+		table.childNodes[0].childNodes[0].childNodes[0].appendChild(document.createTextNode(error));
+	}
+	table.childNodes[0].childNodes[1].childNodes[0].appendChild(document.createTextNode(fileName));
+
+	return table;
+}
+
+
+function saveImage(fileInput) {
+	if (! fileInput.value) { return; }
+
+	// swap out the old file input, put in a new one ready to go again ...
+	var newFileInput = fileInput.cloneNode(false);
+	newFileInput.onchange = newFileInput.onmouseout = function() { saveImage(newFileInput); };
+	newFileInput.type = "text";
+	newFileInput.value = "";
+	newFileInput.type = "file";
+
+	fileInput.onmouseout = null;
+
+	fileInput.parentNode.replaceChild(newFileInput, fileInput);
+
+
+	// create a new uploading indicator ...
+	var photosDiv = document.getElementById("photos-div");
+	var uploadIndicator = makeUploadingIndicator(fileInput.value);
+	photosDiv.appendChild(uploadIndicator);
+
+
+	// prepare the file saver, and the record saver
+	var fileCallback = function(fInput, hFile) {
+		var record = new HRecord();
+		record.setRecordType(MediaRecordType);
+
+		record.addDetail(MediaFileType, hFile);
+		record.addDetail(MimeType, hFile.getType());
+		record.addDetail(TitleType, hFile.getOriginalName());
+		record.addDetail(CreatorType, currentUserAsRecord);
+
+		HeuristScholarDB.saveRecord( record, new HSaver(recordCallback, fileUploadErrorCallback));
+	};
+
+	var recordCallback = function(record) {
+		var newThumbnail = makePhotoThumbnail(record);
+		uploadIndicator.parentNode.replaceChild(newThumbnail, uploadIndicator);
+	};
+
+	var fileUploadErrorCallback = function(record, error) {
+		var failureIndicator = makeFailureIndicator(fileInput.value, error);
+		uploadIndicator.parentNode.replaceChild(failureIndicator, uploadIndicator);
+	};
+
+	HeuristScholarDB.saveFile(fileInput, new HSaver(fileCallback, fileUploadErrorCallback));
+}
+
+
+var currentUserAsRecord;
+
+function init() {
+	if (! HCurrentUser.isLoggedIn()) {
+		alert("You are not currently logged in to Heurist");
+		location.replace("http://Heurist.sydney.edu.au/heurist/php/login.php");
+		return;
+	}
+
+	var fileInput = document.getElementById("upload-file");
+	fileInput.onchange = fileInput.onmouseout = function() { saveImage(fileInput); };
+
+	HeuristScholarDB.loadRecords(new HSearch("ids:52060"), new HLoader(function(search, records) { if (records) { currentUserAsRecord = records[0]; } }));
+
+	if (document.getElementById("q").value) { loadImages(); }
+}
+
+
+function editTitle(record, titleSpan) {
+	var titleInput = document.createElement("textarea");
+	titleInput.className = "title-edit";
+	titleInput.wrap = "soft";
+	titleInput.rows = 3;
+	titleInput.value = record.getTitle();
+
+	titleInput.onkeypress = function(e) {
+		if (! e) { e = event; }
+		if ((e.which || e.keyCode) === 13) { saveTitle(record, titleInput, titleSpan); } 
+	};
+	titleInput.onblur = function() {
+		titleInput.parentNode.replaceChild(titleSpan, titleInput);
+		titleInput.onkeypress = titleInput.onblur = null;
+	};
+
+	titleSpan.parentNode.replaceChild(titleInput, titleSpan);
+	titleInput.focus();
+}
+
+function saveTitle(record, titleInput, titleSpan) {
+	if (! titleInput.value) {
+		saveTitleErrorCallback.call(this, record);
+		return;
+	}
+	record.setDetails(TitleType, [ titleInput.value ]);
+
+	titleInput.style.cursor = "wait";
+
+	var saver = new HSaver(saveTitleCallback, saveTitleErrorCallback);
+	saver.titleInput = titleInput;
+	saver.titleSpan = titleSpan;
+
+	HeuristScholarDB.saveRecord(record, saver);
+}
+
+
+function saveTitleErrorCallback(record, error) {
+	titleInput.parentNode.replaceChild(titleSpan, titleInput);
+	titleInput.onkeypress = titleInput.onblur = null;
+
+	if (error) {
+		alert("Problem contacting server: " + error);
+	}
+}
+
+
+function saveTitleCallback(record) {
+	var titleInput = this.titleInput;
+	var titleSpan = this.titleSpan;
+
+	titleSpan.innerHTML = "";
+	titleSpan.appendChild(document.createTextNode(record.getTitle()));
+
+	titleInput.parentNode.replaceChild(titleSpan, titleInput);
+	titleInput.onkeypress = titleInput.onblur = null;
+}
+
+
+function toggleFavourite(record, faveImg) {
+	if (record.isPersonalised()) { record.removeFromPersonalised(); }
+	else { record.addToPersonalised(); }
+
+	var saveCallback = function() {
+		faveImg.src = "http://Heurist.sydney.edu.au/heurist-test/img/" + (record.isPersonalised()? "star-yellow.gif" : "star-white.gif");
+	};
+	HeuristScholarDB.saveRecord(record, new HSaver(saveCallback));
+}
+
+
+function popupImage(record, file) {
+	var dusk = document.createElement("div");
+	dusk.className = "dusk";
+	document.body.appendChild(dusk);
+
+	var innerHeight = Math.min(window.innerHeight - 150, window.innerWidth);
+	var innerWidth = window.innerWidth;
+
+	var popupDiv = document.createElement("div");
+	popupDiv.className = "popup";
+	popupDiv.style.width = innerHeight + "px";
+	popupDiv.style.height = innerHeight + "px";
+	popupDiv.style.left = (innerWidth - innerHeight) / 2;
+
+	popupDiv.appendChild(document.createElement("h3")).appendChild(document.createTextNode(record.getTitle()));
+
+	var image = popupDiv.appendChild(document.createElement("img"));
+	image.src = file.getThumbnailURL() + "&w=" + (innerHeight-20) + "&h=" + (innerHeight-20);
+
+	popupDiv.onclick = function() { popupDiv.parentNode.removeChild(popupDiv); dusk.parentNode.removeChild(dusk); };
+
+	document.body.appendChild(popupDiv);
+}
+
+  </script>
+ </head>
+
+ <body onload="init();">
+
+  <div id=search-div>
+   <b>Search</b> <input id=q onkeypress="if (event && (event.which || event.keyCode) === 13) { loadImages(); }">
+   <br>
+   <label for=faves-only><input type=checkbox id=faves-only onclick="loadImages();"> Show only my favourites</label>
+  </div>
+
+  <h2>HAPI snaps</h2>
+
+  <div id=photos-div></div>
+
+  <div id=upload-div>
+   <b>Upload new image: </b> <input type=file id=upload-file>
+  </div>
+ </body>
+</html>

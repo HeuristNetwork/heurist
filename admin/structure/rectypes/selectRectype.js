@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -122,16 +122,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										_arr_selection = [];
 									}
 
-									if(datatype==="fieldsetmarker"){
-										var el = Dom.get('divFilterBySelection');
-										el.style.display = "none";
-										el = Dom.get('divFilterBySelectionLbl');
-										el.style.display = "none";
-										el = Dom.get('btnApply1');
-										el.style.display = "none";
-										el = Dom.get('btnApply2');
-										el.style.display = "none";
-									}else if (datatype==="select"){
+									if (datatype==="select"){
                                         Dom.get('btnApply1').value = "Select";
                                         Dom.get('btnApply2').value = "Select";
                                         //Dom.get('btnAllSelection').style.display = "block";
@@ -142,7 +133,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 				_dtyID = dtyID;
 				_reinit_table();
-
+                Dom.get('inputFilterByName').focus();
 	}
 
 	function _reinit_table()
@@ -161,7 +152,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 
 					if(Hul.isnull(_dtyID)){
-						lblSelect1.innerHTML = "ERROR: Detailtype was not found";
+						lblSelect1.innerHTML = "ERROR: Detail type was not found";
 						return;
 					}else{
 						lblSelect1.innerHTML = "";
@@ -275,7 +266,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var id = oRecord.getData("id");
 
-					var str1 = top.HEURIST.iconBaseURL + id + ".png";
+					var str1 = top.HEURIST.iconBaseURL + id;
 					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png";
 					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
 					elLiner.innerHTML = icon;
@@ -498,7 +489,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 	}
 
 	function _showSelectCount(){
-				lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> record type"+((_arr_selection.length>1)?"s":"");
+				lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> selected";
 				if(!Hul.isnull(lblSelect2)) {
 					lblSelect2.innerHTML = lblSelect1.innerHTML;
 				}
@@ -584,14 +575,15 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var url = top.HEURIST.basePath + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
+			var url = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
 
+            var dim = Hul.innerDimensions(top);                    
+            
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,
 				"no-resize": false,
-			height: 700,
-
-			width: 700,
+                height: dim.h*0.9,
+                width: 800,
 				callback: function(context) {
 
 					if(!Hul.isnull(context)){

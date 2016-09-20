@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -15,23 +15,23 @@
 */
 
 /**
-* T1000 tag viewer 
+* T1000 tag viewer
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Util 
+* @subpackage  Records/Util
 */
 
 
-define('T1000_DEBUG',1);
+// Enable to log T1000 SQL select statements to php_errors.log define('',1);
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
@@ -40,7 +40,6 @@ if (!is_logged_in()) {
 	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php');
 	return;
 }
-/*****DEBUG****///error_log(print_r($LOOKUPS, 1));
 
 mysql_connection_overwrite(DATABASE);
 $template = file_get_contents('viewRecordTags.html');
@@ -64,9 +63,6 @@ if (@$_REQUEST['bkmk_id']) {
 	$bib = mysql_fetch_assoc($res);
 	$_REQUEST['bkmk_id'] = $bkmk['bkm_ID'];
 }
-/*****DEBUG****///error_log("bookmark is ".print_r($bkmk,true));
-/*****DEBUG****///error_log("record is ".print_r($bib,true));
-
 $_REQUEST['bkm_ID'] = $_REQUEST['bkmk_id'];
 
 $lexer = new Lexer($template);
@@ -87,33 +83,12 @@ $tags = mysql__select_assoc('usrRecTagLinks left join usrTags on rtl_TagID=tag_I
 								' group by tag_Text'.
 								' order by kcount desc, tag_Text');
 
-/*
-$res = mysql_query('select concat(ugr_FirstName," ",ugr_LastName) as bkmk_user, tag_Text
-					from usrBookmarks
-					left join usrRecTagLinks on bkm_RecID=rtl_RecID
-					left join usrTags on rtl_TagID=tag_ID
-					left join '.USERS_DATABASE.'.sysUGrps usr on bkm_UGrpID=usr.ugr_ID
-					where bkm_recID='.$bib['rec_ID'].' and rtl_ID is not null order by bkmk_user, tag_Text');
-
-$user_tags = array();
-while ($row = mysql_fetch_assoc($res)) {
-	$bkmk_user = $row['bkmk_user'];
-	$kwd_name = $row['tag_Text'];
-
-	if ($user_tags[$bkmk_user])
-		array_push($user_tags[$bkmk_user], $kwd_name);
-	else
-		$user_tags[$bkmk_user] = array($kwd_name);
-}
-*/
-/*****DEBUG****///error_log("tags are ".print_r($tags,true));
-/*****DEBUG****///error_log("kwds are ".print_r($my_kwds,true));
 
 if ($tags) {
 	$kwd_list = '';
 	foreach ($tags as $tag => $count) {
 		$kwd_list .= ' <tr>';
-		$kwd_list .= '  <td style="vertical-align: top;white-space:nowrap;"><a target=_top href="'.HEURIST_SITE_PATH.'search/search.html?w=all&q=tag:%22'.urlencode($tag).'%22&db='.HEURIST_DBNAME.'" onclick="opener.location.href = this.href; window.close();" title="Search for references with the tag \''.$tag.'\'">'
+		$kwd_list .= '  <td style="vertical-align: top;white-space:nowrap;"><a target=_top href="'.HEURIST_BASE_URL.'?w=all&q=tag:%22'.urlencode($tag).'%22&db='.HEURIST_DBNAME.'" onclick="opener.location.href = this.href; window.close();" title="Search for references with the tag \''.$tag.'\'">'
 											. (in_array($tag, $my_kwds) ? '<b>'.htmlspecialchars($tag).'</b>' : htmlspecialchars($tag))
 											. "</a>&nbsp;</td>\n";
 
@@ -133,7 +108,7 @@ if ($tags) {
 			if ($i++ == 3) {
 				$kwd_list .= '   <span class="collapsed"><span class="hide_on_collapse">'."\n";
 			}
-			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].
+			$kwd_list .= '   <a href="'.HEURIST_BASE_URL.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].
 									'" style="white-space:nowrap;" title="View user profile for '.
 									$row['bkmk_user'].'">'.$row['bkmk_user']."</a>&nbsp;\n";
 		}
@@ -148,7 +123,6 @@ if ($tags) {
 } else {
 	$kwd_list = '<tr><td>(no matching tags)</td></tr>';
 }
-/*****DEBUG****///error_log("kwdlist is ".print_r($kwd_list,true));
 
 $body->global_vars['tag-list'] = $kwd_list;
 
@@ -174,7 +148,7 @@ if (mysql_num_rows($res)) {
 		if ($i++ == 3) {
 			$body->global_vars['other-users'] .= ' <span class="collapsed"><span class="hide_on_collapse">'."\n";
 		}
-		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'" style="white-space:nowrap;">'.$row['bkmk_user']."</a>&nbsp;\n";
+		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_BASE_URL.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'" style="white-space:nowrap;">'.$row['bkmk_user']."</a>&nbsp;\n";
 	}
 	if ($i > 3) {
 		$body->global_vars['other-users'] .= ' </span>'."\n";

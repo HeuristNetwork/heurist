@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -43,7 +43,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 	    <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-        
+
          <style>
               #form { width: 500px; margin:5px }
               #form input[type=text], #form textarea { width: 100% }
@@ -65,17 +65,17 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	        });
          </script>
      </head>
-     
+
     <body class="popup">
         <div class="banner"><h2>Record rollback</h2></div>
         <div id="page-inner" style="overflow:auto">
             <div id=errorMsg><span>This function has not yet been converted from Vsn 2</span></div>
             <div>Please advise Heurist developers if rollback is critical to your use of Heurist</div>
-            
+
             <?php
             require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
             require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
-            require_once("rollbackRecordsFuncs.php");
+            require_once(dirname(__FILE__)."/rollbackRecordsFuncs.php");
 
             $ids = @$_REQUEST["ids"];
             $date = @$_REQUEST["date"];
@@ -91,7 +91,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	            $s = $n != 1 ? "s" : "";
 	            $state = $date ? "state as of $date" : "previous version";
 	            print "<p>$n record$s rolled back to $state</p>";
-	            print '<p><a href="'.HEURIST_BASE_URL.'search/search.html?q=ids:' . $ids . '">View updated records</a></p>';
+	            print '<p><a href="'.HEURIST_BASE_URL.'?q=ids:' . $ids . '">View updated records</a></p>';
             } else {
 	            $rollbacks = getRecordRollbacks(split(",", $ids), $date);
 	            showRollbacks($rollbacks);
@@ -109,7 +109,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
                             If no record IDs are given, ALL records changed since the given date will be rolled
                             back to their state as at the given date.
                        </p>
-                       
+
                        <div>Record IDs (comma-separated):</div>
                        <textarea name="ids" class='in'></textarea>
                        <div>Date (YYYY-MM-DD hh:mm:ss):</div>
@@ -224,7 +224,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 		            return $val;
 	            }
             }
-    
+
             function getDetailUpdateString ($ard_row) {
 	            $s = '';
 	            if ($ard_row["ard_Value"]) {

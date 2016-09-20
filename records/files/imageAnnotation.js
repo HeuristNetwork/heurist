@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -80,13 +80,26 @@ function ImageAnnotation(imageviewer, _recID) {
 		_selAnnotations.onchange = _hightlighSelection;
 		//_hightlighSelection(null);
 
+        /*
 		edittoolbar.appendChild(_selRectypes);
 		edittoolbar.appendChild(document.createTextNode(' Add: '));
 		edittoolbar.appendChild(btnAnnotation);
 		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnRectangle);
-		edittoolbar.appendChild(document.createTextNode(' Select: '));
-		edittoolbar.appendChild(_selAnnotations);
+        edittoolbar.appendChild(document.createTextNode(' Select: '));
+        edittoolbar.appendChild(_selAnnotations);
+        */
+        
+        var $seldiv = $('<div>').css({'display':'inline-block'}).appendTo($(edittoolbar));
+        $(_selRectypes).appendTo($seldiv);
+        $('<label>').css({'padding-left':'4px'}).text('Add: ').appendTo($seldiv);
+        $(btnAnnotation).appendTo($seldiv);
+        $(btnRectangle).appendTo($seldiv);
+        
+        $seldiv = $('<div>').css({'padding-left':'4px','display':'inline-block'}).appendTo($(edittoolbar));
+        $('<label>').text('Select: ').appendTo($seldiv);
+        $(_selAnnotations).appendTo($seldiv);
+        
 		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnEdit);
 		edittoolbar.appendChild(document.createTextNode(' '));
@@ -129,7 +142,7 @@ function ImageAnnotation(imageviewer, _recID) {
 			lblInfo = document.createElement('label');
 			lblInfo.id = 'lblInfoCoords';
 			lblInfo.style.color = '#ff0000';
-			lblInfo.innerHTML = "To enable image annotation, use Database>Import Structure to obtain Annotation record type (2-15) from H3ToolSupport database";
+			lblInfo.innerHTML = "To enable image annotation, use Database &gt; Structure &gt; Acquire from Databases to obtain Annotation record type (2-15) from HeuristReferenceSet or HeuristToolSupport database";
 			edittoolbar.appendChild(lblInfo);
 			image_digitizer_container.appendChild(edittoolbar);
 
@@ -206,7 +219,7 @@ function ImageAnnotation(imageviewer, _recID) {
 
 					if(url.indexOf('http')!=0){
 						if(_markers[k][6]>0){
-							url = "../../search/search.html?q=ids:"+_markers[k][6]+"&db="+_db;
+							url = top.HEURIST.baseURL_V4+"?q=ids:"+_markers[k][6]+"&db="+_db;
 						}else{
 							return;
 						}
@@ -304,7 +317,7 @@ function ImageAnnotation(imageviewer, _recID) {
 			}
 		}//end callback
 
-		var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
+		var baseurl = top.HEURIST.baseURL_V3 + "records/files/imageAnnotation.php";
 		var callback = _updateList;
 		var params = "recid="+_recordID+"&db="+_db;
 		top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -342,7 +355,7 @@ function ImageAnnotation(imageviewer, _recID) {
 				}
 			}
 
-			var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "records/files/imageAnnotation.php";
 			var callback = _updateAnnList;
 			var params = "listrt=1&db="+_db;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -379,7 +392,7 @@ function ImageAnnotation(imageviewer, _recID) {
 				div.style.borderWidth = "0px";
 				div.style.borderStyle = "none";
 				div.style.borderRadius = 0;
-				div.style.backgroundImage = "url("+top.HEURIST.basePath+"common/images/cross-red.png)";
+				div.style.backgroundImage = "url("+top.HEURIST.baseURL_V3+"common/images/cross-red.png)";
 				div.style.backgroundRepeat = "no-repeat";
 				div.style.backgroundPosition = "center left";
 			}
@@ -475,7 +488,7 @@ function ImageAnnotation(imageviewer, _recID) {
 				//delete annotation record as well
 
 
-				var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
+				var baseurl = top.HEURIST.baseURL_V3 + "records/files/imageAnnotation.php";
 				var callback = _afterDelete;
 				var params = "delete=1&recid="+recid+"&db="+_db;
 				top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -509,12 +522,13 @@ function ImageAnnotation(imageviewer, _recID) {
 		var recImageTitle = 'todo: name of file';
 
 			if(Number(marker[6])>0){
-					window.open(top.HEURIST.basePath+"/records/edit/editRecord.html?recID="+marker[6]+"&db="+_db,"_blank");
+					window.open(top.HEURIST.baseURL_V3+"/records/edit/editRecord.html?recID="+marker[6]+"&db="+_db,"_blank");
 			}else if(_recordID>0){
 
-				var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(rectype);
+                //was  getRectypeIconAndName
+				var title = "Add new record "+top.HEURIST.util.getRectypeName(rectype);
 
-				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
+				top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?fromadd=new_bib&rectype='+
 							rectype+ //top.HEURIST.magicNumbers['RT_ANNOTATION_IMAGE']+
 										'&addr='+marker[0]+":"+marker[1]+":"+marker[2]+":"+marker[3]+
 										'&trgRecID='+_recordID +

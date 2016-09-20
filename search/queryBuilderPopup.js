@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -35,6 +35,13 @@
         allowUpdate = false;
 
     function update(elt) {
+        
+        if(!top.HEURIST.detailTypes && top.HEURIST4){
+            top.HEURIST.detailTypes = top.HEURIST4.util.cloneJSON(top.HEURIST4.detailtypes);
+            top.HEURIST.rectypes = top.HEURIST4.util.cloneJSON(top.HEURIST4.rectypes);
+            top.HEURIST.terms = top.HEURIST4.util.cloneJSON(top.HEURIST4.terms);
+        }
+        
 
         if(!allowUpdate){
             return;
@@ -186,10 +193,16 @@
         var params = top.HEURIST.parseParams(location.search);
 
         var q_str = decodeURIComponent(params["q"]);
-        document.getElementById('q').value = q_str;
+        var q_bits = null;
+        
+        if(top.HEURIST.util.isempty(q_str)){
+            document.getElementById('q').value = '';
+        }else{
+            document.getElementById('q').value = q_str;
+            q_bits = HQuery.parseQuery(q_str);
+        }
 
-        var q_bits = HQuery.parseQuery(q_str);
-        if (q_bits) {
+        if (!top.HEURIST.util.isnull(q_bits)) {
             for (q_key in q_bits) {
                 if (document.getElementById(q_key)) {
                     var val = '';

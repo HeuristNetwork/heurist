@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -65,16 +65,16 @@
 * @uses     READONLY_DBUSERPSWD defined in initialise.php as the user password
 */
 function mysql_connection_select($database = '', $server = HEURIST_DBSERVER_NAME) {
-	/* User name and password for Select access */
-	if (!READONLY_DBUSERNAME && !READONLY_DBUSERPSWD) {
-		print "PLEASE SET USERNAME/PASSWORD for SELECT in configIni.php\n";
-		exit(2);
-	}
-	$db = mysql_connect($server, READONLY_DBUSERNAME, READONLY_DBUSERPSWD) or die(mysql_error());
-	if ($database != '') mysql_query("use $database") or die(mysql_error());
-	mysql_query('set character set "utf8"');
-	mysql_query('set names "utf8"');
-	return $db;
+    /* User name and password for Select access */
+    if (!READONLY_DBUSERNAME && !READONLY_DBUSERPSWD) {
+        print "PLEASE SET USERNAME/PASSWORD for SELECT in configIni.php\n";
+        exit(2);
+    }
+    $db = mysql_connect($server, READONLY_DBUSERNAME, READONLY_DBUSERPSWD) or die(mysql_error());
+    if ($database != '') mysql_query("use $database") or die(mysql_error());
+    mysql_query('set character set "utf8"');
+    mysql_query('set names "utf8"');
+    return $db;
 }
 /**
 * creates a read/write connection to the configured database server and use the database name if supplied.
@@ -88,18 +88,18 @@ function mysql_connection_select($database = '', $server = HEURIST_DBSERVER_NAME
 * @uses     ADMIN_DBUSERPSWD defined in initialise.php as the read/write user password
 */
 function mysql_connection_insert($database = '', $server = HEURIST_DBSERVER_NAME) {
-	/* User name and password for insert access - must allow writing to database */
-	if (!ADMIN_DBUSERNAME && !ADMIN_DBUSERPSWD) {
-		print "PLEASE SET USERNAME/PASSWORD for INSERT in configIni.php\n";
-		exit(2);
-	}
-	//	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
-	$db = mysql_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD) or die(mysql_error());
-	if ($database != '') mysql_query("use $database") or die(mysql_error());
-	mysql_query('set character set "utf8"');
-	mysql_query('set names "utf8"');
-	if (function_exists('get_user_id')) mysql_query('set @logged_in_user_id = ' . get_user_id());
-	return $db;
+    /* User name and password for insert access - must allow writing to database */
+    if (!ADMIN_DBUSERNAME && !ADMIN_DBUSERPSWD) {
+        print "PLEASE SET USERNAME/PASSWORD for INSERT in configIni.php\n";
+        exit(2);
+    }
+    //	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
+    $db = mysql_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD) or die(mysql_error());
+    if ($database != '') mysql_query("use $database") or die(mysql_error());
+    mysql_query('set character set "utf8"');
+    mysql_query('set names "utf8"');
+    if (function_exists('get_user_id')) mysql_query('set @logged_in_user_id = ' . get_user_id());
+    return $db;
 }
 /**
 * creates a read/write connection to the configured database server and use the database name if supplied.
@@ -113,27 +113,27 @@ function mysql_connection_insert($database = '', $server = HEURIST_DBSERVER_NAME
 * @uses     ADMIN_DBUSERPSWD defined in initialise.php as the read/write user password
 */
 function mysql_connection_overwrite($database = '', $server = HEURIST_DBSERVER_NAME) {
-	/* User name and password for overwrite access - must allow writing to database */
-	if (!ADMIN_DBUSERNAME && !ADMIN_DBUSERPSWD) {
-		print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in configIni.php\n";
-		exit(2);
-	}
-	//	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
-	$db = mysql_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+    /* User name and password for overwrite access - must allow writing to database */
+    if (!ADMIN_DBUSERNAME && !ADMIN_DBUSERPSWD) {
+        print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in configIni.php\n";
+        exit(2);
+    }
+    //	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
+    $db = mysql_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
     if(!$db){
         printf("An error occurred trying to contact the sql database: %s\n", mysql_error());
         die(mysql_error());
     }
-	if ($database != ''){
-      if(!mysql_query("use $database")){
-        printf("Can not connect to sql database $database: %s\n", mysql_error());
-        die(mysql_error());    
-      } 
-    } 
-	mysql_query('set character set "utf8"');
-	mysql_query('set names "utf8"');
-	if (function_exists('get_user_id')) mysql_query('set @logged_in_user_id = ' . get_user_id());
-	return $db;
+    if ($database != ''){
+        if(!mysql_query("use $database")){
+            printf("Cannot connect to sql database $database: %s\n", mysql_error());
+            die(mysql_error());
+        }
+    }
+    mysql_query('set character set "utf8"');
+    mysql_query('set names "utf8"');
+    if (function_exists('get_user_id')) mysql_query('set @logged_in_user_id = ' . get_user_id());
+    return $db;
 }
 /**
 * creates a read/write mysqli connection object connected to the configured database server and use the database name if supplied.
@@ -147,20 +147,33 @@ function mysql_connection_overwrite($database = '', $server = HEURIST_DBSERVER_N
 * @uses     ADMIN_DBUSERPSWD defined in initialise.php as the read/write user password
 */
 function mysqli_connection_overwrite($database = '', $server = HEURIST_DBSERVER_NAME) {
-	if (!ADMIN_DBUSERNAME && !ADMIN_DBUSERPSWD) {
-		print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in configIni.php\n";
-		exit(2);
-	}
-	$mysqli = new mysqli($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database);
-	/* check connection */
-	if (mysqli_connect_errno()) {
-		printf("An error occurred trying to contact the database: %s\n", mysqli_connect_error());
-		die(mysqli_connect_error());
-	}
-	$mysqli->query('set character set "utf8"');
-	$mysqli->query('set names "utf8"');
-	if (function_exists('get_user_id')) $mysqli->query('set @logged_in_user_id = ' . get_user_id());
-	return $mysqli;
+    if (!ADMIN_DBUSERNAME && !ADMIN_DBUSERPSWD) {
+        print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in configIni.php\n";
+        exit(2);
+    }
+    
+    /*
+    $mysqli = mysqli::init();
+    mysqli::options(MYSQLI_OPT_LOCAL_INFILE, true);
+    mysqli::real_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database);*/
+        
+    $mysqli = mysqli_init();
+    mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, 1);
+    if(!mysqli_real_connect($mysqli, $server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database)){
+        printf("An error occurred trying to contact the database: %s\n", mysqli_connect_error());
+        die(mysqli_connect_error());
+    }
+    
+    //$mysqli = new mysqli($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database);
+    /* check connection */
+    if (mysqli_connect_errno()) {
+        printf("An error occurred trying to contact the database: %s\n", mysqli_connect_error());
+        die(mysqli_connect_error());
+    }
+    $mysqli->query('set character set "utf8"');
+    $mysqli->query('set names "utf8"');
+    if (function_exists('get_user_id')) $mysqli->query('set @logged_in_user_id = ' . get_user_id());
+    return $mysqli;
 }
 /**
 * format input string into sql query usable string
@@ -168,11 +181,11 @@ function mysqli_connection_overwrite($database = '', $server = HEURIST_DBSERVER_
 * @return   string formatted for use in am SQL query.
 */
 function sql_niceify($val) {
-	if (isset($val) and !is_null($val)) {
-		return '"' . mysql_real_escape_string(preg_replace('/\r\n?/', "\n", $val)) . '"';
-	} else {
-		return 'NULL';
-	}
+    if (isset($val) and !is_null($val)) {
+        return '"' . mysql_real_escape_string(preg_replace('/\r\n?/', "\n", $val)) . '"';
+    } else {
+        return 'NULL';
+    }
 }
 /**
 * Inserts a new row into the named $table,
@@ -186,25 +199,25 @@ function sql_niceify($val) {
 * @see      mysql__update()
 */
 function mysql__insert($table, $pairs_assoc, $ignoreDupes = false) {
-	// Prepare statement
-	$keys = array_keys($pairs_assoc);
-	$ignore = $ignoreDupes ? " ignore " : "";
-	if (count($keys) == 0) {
-		return 1;
-	} else {
-		$stmt = "INSERT $ignore INTO " . $table . ' (' . join(',', $keys) . ') VALUES (';
-		for ($i = 0;$i < count($keys);$i++) {
-			if ($i > 0) $stmt.= ",";
-			if (!is_array($pairs_assoc[$keys[$i]])) {
-				$stmt.= sql_niceify($pairs_assoc[$keys[$i]]);
-			} else if (preg_match('/^[a-zA-Z0-9_]+[(](?:"[^\\"]+")?[)]$/', $pairs_assoc[$keys[$i]][0])) {
-				$stmt.= $pairs_assoc[$keys[$i]][0];
-			}
-		}
-		$stmt.= ')';
-	}
-	if (defined("T1000_DEBUG")) error_log("T1000 debug: ".$stmt);
-	return mysql_query($stmt); // Maybe something bad, maybe something good!
+    // Prepare statement
+    $keys = array_keys($pairs_assoc);
+    $ignore = $ignoreDupes ? " ignore " : "";
+    if (count($keys) == 0) {
+        return 1;
+    } else {
+        $stmt = "INSERT $ignore INTO " . $table . ' (' . join(',', $keys) . ') VALUES (';
+        for ($i = 0;$i < count($keys);$i++) {
+            if ($i > 0) $stmt.= ",";
+            if (!is_array($pairs_assoc[$keys[$i]])) {
+                $stmt.= sql_niceify($pairs_assoc[$keys[$i]]);
+            } else if (preg_match('/^[a-zA-Z0-9_]+[(](?:"[^\\"]+")?[)]$/', $pairs_assoc[$keys[$i]][0])) {
+                $stmt.= $pairs_assoc[$keys[$i]][0];
+            }
+        }
+        $stmt.= ')';
+    }
+    if (defined("T1000_DEBUG")) error_log("T1000 debug: ".$stmt);
+    return mysql_query($stmt); // Maybe something bad, maybe something good!
 
 }
 /**
@@ -229,25 +242,23 @@ function mysql__insert($table, $pairs_assoc, $ignoreDupes = false) {
 * @return   mixed returns 1 if no pairs are given or the result from mysql_query {@link http://php.net/manual/en/function.mysql-query.php}
 */
 function mysql__update($table, $condition, $pairs_assoc) {
-	// Prepare statement
-	if (count($pairs_assoc) == 0) return 1; // nothing to do
-	else {
-		$stmt = "UPDATE $table SET ";
-		$first = true;
-		foreach ($pairs_assoc as $key => $val) {
-			if (!$first) $stmt.= ",";
-			if (!is_array($val)) {
-				$stmt.= $key . ' = ' . sql_niceify($val);
-			} else if (preg_match('/^[a-zA-Z0-9_]+(?:[(](?:"[^\\"]+")?[)])?$/', $val[0])) {
-				$stmt.= $key . ' = ' . $val[0];
-			} else continue;
-			$first = false;
-		}
-		$stmt.= " WHERE $condition";
-	}
-	//if (defined('T1000_DEBUG')) 
-    //error_log("T1000: ".$stmt);
-	return mysql_query($stmt); // Up to the user to check for error.
+    // Prepare statement
+    if (count($pairs_assoc) == 0) return 1; // nothing to do
+    else {
+        $stmt = "UPDATE $table SET ";
+        $first = true;
+        foreach ($pairs_assoc as $key => $val) {
+            if (!$first) $stmt.= ",";
+            if (!is_array($val)) {
+                $stmt.= $key . ' = ' . sql_niceify($val);
+            } else if (preg_match('/^[a-zA-Z0-9_]+(?:[(](?:"[^\\"]+")?[)])?$/', $val[0])) {
+                $stmt.= $key . ' = ' . $val[0];
+            } else continue;
+            $first = false;
+        }
+        $stmt.= " WHERE $condition";
+    }
+    return mysql_query($stmt); // Up to the user to check for error.
 
 }
 /**
@@ -260,12 +271,13 @@ function mysql__update($table, $condition, $pairs_assoc) {
 * @return   array of results from the $column column of $table or NULL on failure
 */
 function mysql__select_array($table, $column, $condition) {
-	if (defined('T1000_DEBUG')) error_log("T1000 select: SELECT $column FROM $table WHERE $condition");
-	$res = mysql_query("SELECT $column FROM $table WHERE $condition");
-	if (!$res) return NULL;
-	$matches = array();
-	while (($row = mysql_fetch_array($res))) array_push($matches, $row[0]);
-	return $matches;
+    if (defined('T1000_DEBUG')) error_log("T1000 select: SELECT $column FROM $table WHERE $condition");
+    $query = "SELECT $column FROM $table WHERE $condition";
+    $res = mysql_query($query);
+    if (!$res) return NULL;
+    $matches = array();
+    while (($row = mysql_fetch_array($res))) array_push($matches, $row[0]);
+    return $matches;
 }
 /**
 * Return an associative array containing all matching rows,
@@ -279,12 +291,12 @@ function mysql__select_array($table, $column, $condition) {
 * @return   array of key-value pairs from the $key_column and $val_column columns of $table or NULL on failure
 */
 function mysql__select_assoc($table, $key_column, $val_column, $condition) {
-	//if (defined('T1000_DEBUG')) error_log("SELECT $key_column, $val_column FROM $table WHERE $condition");
-	$res = mysql_query("SELECT $key_column, $val_column FROM $table WHERE $condition");
-	if (!$res) return NULL;
-	$matches = array();
-	while (($row = mysql_fetch_array($res))) $matches[$row[0]] = $row[1];
-	return $matches;
+    $query = "SELECT $key_column, $val_column FROM $table WHERE $condition";
+    $res = mysql_query($query);
+    if (!$res) return NULL;
+    $matches = array();
+    while (($row = mysql_fetch_array($res))) $matches[$row[0]] = $row[1];
+    return $matches;
 }
 /**
 * Run this query, reporting errors;
@@ -295,18 +307,17 @@ function mysql__select_assoc($table, $key_column, $val_column, $condition) {
 * @return   mixed returns an associative array (lookup) on success or NULL on failure.
 */
 function mysql__lookup($query) {
-	/*	*/
-	$res = mysql_query($query);
-	if (!$res) {
-		error_log('mysql__lookup: ' . mysql_error());
-		return NULL;
-	}
-	$lookup = array();
-	while (($row = mysql_fetch_assoc($res))) {
-		$pri = array_shift($row);
-		$lookup[$pri] = $row;
-	}
-	return $lookup;
+    /*	*/
+    $res = mysql_query($query);
+    if (!$res) {
+        return NULL;
+    }
+    $lookup = array();
+    while (($row = mysql_fetch_assoc($res))) {
+        $pri = array_shift($row);
+        $lookup[$pri] = $row;
+    }
+    return $lookup;
 }
 /**
 * enhancement to mysql_real_escape_string that standardises the return character.
@@ -314,7 +325,7 @@ function mysql__lookup($query) {
 * @return   string slashed string with \n for return
 */
 function slash($str) {
-	return preg_replace("/\r\n|\r|\n/", "\\n", mysql_real_escape_string($str));
+    return preg_replace("/\r\n|\r|\n/", "\\n", mysql_real_escape_string($str));
 }
 /**
 * simple test to see if this is a zero based ordered array
@@ -322,17 +333,17 @@ function slash($str) {
 * @return   boolean true if ordered array
 */
 function isZeroBasedOrderedArray($obj) {
-	if (is_object($obj)) {
-		return false;
-	}
-	$keys = array_keys($obj);
-	$cnt = count($keys);
-	for ($i = 0;$i < $cnt;$i++) {
-		if ($i !== $keys[$i]) {
-			return false;
-		}
-	}
-	return true;
+    if (is_object($obj)) {
+        return false;
+    }
+    $keys = array_keys($obj);
+    $cnt = count($keys);
+    for ($i = 0;$i < $cnt;$i++) {
+        if ($i !== $keys[$i]) {
+            return false;
+        }
+    }
+    return true;
 }
 /**
 * change php object in to it's json description as a string
@@ -341,46 +352,46 @@ function isZeroBasedOrderedArray($obj) {
 * @return   string JSON formatted description of the supplied variable/object
 */
 function json_format($obj, $purdy = false) {
-	// Return the data from $obj as a JSON format string
-	if (!is_array($obj) && !is_object($obj)) {
-		// Primitive scalar types
-		if ($obj === null) return "null";
-		else if (is_bool($obj)) return $obj ? "true" : "false";
-		else if (is_integer($obj)) return $obj;
-		else if (is_float($obj)) return $obj;
-		//else if (preg_match('/^-?[1-9]\d*$/', $obj)) return intval($obj);
-		else return '"' . slash($obj) . '"';
-	}
-	// is it an array or an object?
-	if (count($obj) == 0) {
-		return "[]";
-	} else if (isZeroBasedOrderedArray($obj)) {
-		// Has a "0" element ... we'll call it an array
-		$json = "";
-		foreach ($obj as $val) {
-			if ($json) {
-				$json.= ",";
-				if ($purdy) $json.= "\n";
-			}
-			$json.= json_format($val);
-		}
-		return "[" . $json . "]";
-	} else {
-		// Do object output
-		$json = "";
-		foreach ($obj as $key => $val) {
-			if ($json) {
-				$json.= ",";
-				if ($purdy) $json.= "\n";
-			}
-			if (preg_match('/^\d+$/', $key)) {
-				$json.= "\"" . $key . "\"" . ":" . json_format($val);
-			} else {
-				$json.= "\"" . slash($key) . "\":" . json_format($val);
-			}
-		}
-		return "{" . $json . "}";
-	}
+    // Return the data from $obj as a JSON format string
+    if (!is_array($obj) && !is_object($obj)) {
+        // Primitive scalar types
+        if ($obj === null) return "null";
+        else if (is_bool($obj)) return $obj ? "true" : "false";
+            else if (is_integer($obj)) return $obj;
+                else if (is_float($obj)) return $obj;
+                    //else if (preg_match('/^-?[1-9]\d*$/', $obj)) return intval($obj);
+                    else return '"' . slash($obj) . '"';
+    }
+    // is it an array or an object?
+    if (count($obj) == 0) {
+        return "[]";
+    } else if (isZeroBasedOrderedArray($obj)) {
+        // Has a "0" element ... we'll call it an array
+        $json = "";
+        foreach ($obj as $val) {
+            if ($json) {
+                $json.= ",";
+                if ($purdy) $json.= "\n";
+            }
+            $json.= json_format($val);
+        }
+        return "[" . $json . "]";
+    } else {
+        // Do object output
+        $json = "";
+        foreach ($obj as $key => $val) {
+            if ($json) {
+                $json.= ",";
+                if ($purdy) $json.= "\n";
+            }
+            if (preg_match('/^\d+$/', $key)) {
+                $json.= "\"" . $key . "\"" . ":" . json_format($val);
+            } else {
+                $json.= "\"" . slash($key) . "\":" . json_format($val);
+            }
+        }
+        return "{" . $json . "}";
+    }
 }
 /**
 * returns list of databases as array
@@ -389,42 +400,42 @@ function json_format($obj, $purdy = false) {
 * @param    mixed $role - admin - returns database where current user is admin, user - where current user exists
 */
 function mysql__getdatabases($with_prefix = false, $email = null, $role = null, $prefix=HEURIST_DB_PREFIX) {
-	$query = "show databases";
-	$res = mysql_query($query);
-	$result = array();
-	$isFilter = ($email != null && $role != null);
-	while ($row = mysql_fetch_array($res)) {
-		$test = strpos($row[0], $prefix);
-		if (is_numeric($test) && ($test == 0)) {
-			if ($isFilter) {
-				if ($role == 'user') {
-					$query = "select ugr_ID from " . $row[0] . ".sysUGrps where ugr_eMail='" . $email . "'";
-				} else if ($role == 'admin') {
-					$query = "select ugr_ID from " . $row[0] . ".sysUGrps, " . $row[0] .".sysUsrGrpLinks".
-							" left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
-							" where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $email . "'";
-				}
-				if ($query) {
-					$res2 = mysql_query($query);
-					if (!$res2 || mysql_num_rows($res2) < 1) {
-						continue;
-					}
-				} else {
-					continue;
-				}
-			}
-			if ($with_prefix) {
-				array_push($result, $row[0]);
-			} else {
-				// delete the prefix
-				array_push($result, substr($row[0], strlen($prefix)));
-			}
-		}
-	}
+    $query = "show databases";
+    $res = mysql_query($query);
+    $result = array();
+    $isFilter = ($email != null && $role != null);
+    while ($row = mysql_fetch_array($res)) {
+        $test = strpos($row[0], $prefix);
+        if (is_numeric($test) && ($test == 0)) {
+            if ($isFilter) {
+                if ($role == 'user') {
+                    $query = "select ugr_ID from " . $row[0] . ".sysUGrps where ugr_eMail='" . $email . "'";
+                } else if ($role == 'admin') {
+                    $query = "select ugr_ID from " . $row[0] . ".sysUGrps, " . $row[0] .".sysUsrGrpLinks".
+                    " left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
+                    " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $email . "'";
+                }
+                if ($query) {
+                    $res2 = mysql_query($query);
+                    if (!$res2 || mysql_num_rows($res2) < 1) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+            }
+            if ($with_prefix) {
+                array_push($result, $row[0]);
+            } else {
+                // delete the prefix
+                array_push($result, substr($row[0], strlen($prefix)));
+            }
+        }
+    }
 
-	natcasesort($result); //AO: Ian wants case insensetive order
+    natcasesort($result); //AO: Ian wants case insensetive order
 
-	return $result;
+    return $result;
 }
 
 /**
@@ -433,14 +444,13 @@ function mysql__getdatabases($with_prefix = false, $email = null, $role = null, 
 */
 function get_dbowner_email()
 {
-        $query = "select ugr_eMail from ".DATABASE.".sysUGrps where ugr_ID=2";
-        $res = mysql_query($query);
-        $row = mysql_fetch_array($res);
-        if($row){
-               return $row[0];
-        }
-        error_log("email for dbowner is not found");
-        return null;
+    $query = "select ugr_eMail from ".DATABASE.".sysUGrps where ugr_ID=2";
+    $res = mysql_query($query);
+    $row = mysql_fetch_array($res);
+    if($row){
+        return $row[0];
+    }
+    return null;
 }
 
 //ARTEM uses mysqli in saveStructure, saveUsergrps, srvMimetypes and loadReports
@@ -452,49 +462,47 @@ function get_dbowner_email()
 * @param    boolean [$retCnt] true to return row count false to return an array with the values;
 */
 function execSQL($mysqli, $sql, $params, $retCnt=true) {
-	$result;
-	if ($params == null || count($params) < 1) {// not parameterised
-		if ($result = $mysqli->query($sql)) {
-			if ($retCnt) {
-				$result = $mysqli->affected_rows;
-			}
-		} else {
-			$result = $mysqli->error;
-			if ($result == "") {
-				$result = $mysqli->affected_rows;
-			} else {
-				error_log(">>> MySQL Error code " . $mysqli->error);
-			}
-		}
-	} else { //prepared query
-		$stmt = $mysqli->prepare($sql) or die("Failed to prepare the SQL statement: ".$sql);
-//DEBUG error_log('>>');error_log('Preparing SQL stmt: '.$sql.' with parameters: '.$params); //TODO: DEBUG to remove
-		call_user_func_array(array($stmt, 'bind_param'), refValues($params));
-		$stmt->execute();
-		if ($retCnt) {
-			$result = $mysqli->error;
-			if ($result == "") {
-				$result = $mysqli->affected_rows;
-			} else {
-			}
-		} else {
-			$meta = $stmt->result_metadata();
-			while ($field = $meta->fetch_field()) {
-				$parameters[] = & $row[$field->name];
-			}
-			call_user_func_array(array($stmt, 'bind_result'), refValues($parameters));
-			while ($stmt->fetch()) {
-				$x = array();
-				foreach ($row as $key => $val) {
-					$x[$key] = $val;
-				}
-				$results[] = $x;
-			}
-			$result = $results;
-		}
-		$stmt->close();
-	}
-	return $result;
+    $result;
+    if ($params == null || count($params) < 1) {// not parameterised
+        if ($result = $mysqli->query($sql)) {
+            if ($retCnt) {
+                $result = $mysqli->affected_rows;
+            }
+        } else {
+            $result = $mysqli->error;
+            if ($result == "") {
+                $result = $mysqli->affected_rows;
+            } else {
+            }
+        }
+    } else { //prepared query
+        $stmt = $mysqli->prepare($sql) or die("Failed to prepare the SQL statement: ".$sql);
+        call_user_func_array(array($stmt, 'bind_param'), refValues($params));
+        $stmt->execute();
+        if ($retCnt) {
+            $result = $mysqli->error;
+            if ($result == "") {
+                $result = $mysqli->affected_rows;
+            } else {
+            }
+        } else {
+            $meta = $stmt->result_metadata();
+            while ($field = $meta->fetch_field()) {
+                $parameters[] = & $row[$field->name];
+            }
+            call_user_func_array(array($stmt, 'bind_result'), refValues($parameters));
+            while ($stmt->fetch()) {
+                $x = array();
+                foreach ($row as $key => $val) {
+                    $x[$key] = $val;
+                }
+                $results[] = $x;
+            }
+            $result = $results;
+        }
+        $stmt->close();
+    }
+    return $result;
 }
 /**
 * converts array of values to array of value references for PHP 5.3+
@@ -503,13 +511,67 @@ function execSQL($mysqli, $sql, $params, $retCnt=true) {
 * @return   array of values or references to values
 */
 function refValues($arr) {
-	if (strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
-	{
-		$refs = array();
-		foreach ($arr as $key => $value) $refs[$key] = & $arr[$key];
-		return $refs;
-	}
-	return $arr;
+    if (strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
+    {
+        $refs = array();
+        foreach ($arr as $key => $value) $refs[$key] = & $arr[$key];
+        return $refs;
+    }
+    return $arr;
 }
 
+//
+// works with temporary table tmpUsrSession that allows trace long server side process like smarty report or csv import
+//
+function updateProgress($mysqli, $session_id, $is_init, $value){
+    
+    //mysql_connection_overwrite(DATABASE);
+    $need_close = false;
+    if($mysqli===null){
+        $need_close = true;
+        $mysqli = mysqli_connection_overwrite(DATABASE);
+    }
+    
+    if($is_init){
+        //check that session table exists
+        $from_res = $mysqli->query("show tables like 'tmpUsrSession'");
+        if ($from_res && $from_res->num_rows > 0) {
+            //remove old data
+            //mysql_query('DELETE FtmpUsrSession where field_id<'.);
+        }else{
+            //recreate
+            $mysqli->query('CREATE TABLE tmpUsrSession(field_id varchar(32) NOT NULL, field_data varchar(32), PRIMARY KEY (field_id))');
+        }
+    }
+    
+    if($value==null){
+
+      
+        $query = "select field_data from tmpUsrSession where field_id=".$session_id;
+        $from_res = $mysqli->query($query);
+        if ($from_res) { // && $from_res->num_rows > 0
+            $res = $from_res->fetch_row();
+            if($need_close)  $mysqli->close();                     
+            return $res[0];
+        }else{
+//error_log('>>>>NOT FOUND '.$query);   
+        }
+
+    }else if($value=='REMOVE'){
+        $mysqli->query("DELETE FROM tmpUsrSession where field_id=".$session_id);
+//error_log('DELTE '.$mysqli->error.'   '.$mysqli->affected_rows);
+    }else{
+        //write 
+        if($is_init){
+            $query = "insert into tmpUsrSession values (".$session_id.",'".$value."')";
+            $res = $mysqli->query($query);
+        }else{
+            $query = "update tmpUsrSession set field_data='".$value."' where field_id=".$session_id;
+            $res = $mysqli->query($query);
+        }
+        //$mysqli->commit();
+    }
+    if($need_close)  $mysqli->close();
+    return null;
+}
 ?>

@@ -7,7 +7,7 @@
 --        3. import core content (minimal database definitions) from
 --           admin/setup/dbcreate/coreDefinitions.txt
 
--- The next section of this file is a PHPMyAdmin dump of H3 database structure
+-- The next section of this file is a PHPMyAdmin dump of database structure
 -- DO NOT include referential integrity or triggers/procedures. Turn off use of
 -- backquotes, auto increment value and dumping of actual data
 
@@ -34,7 +34,7 @@
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 --
--- Database: 'hdb_H3CoreDefinitions'
+-- Database: 'hdb_HeuristCoreDefinitions'
 --
 
 -- --------------------------------------------------------
@@ -55,8 +55,8 @@ CREATE TABLE Records (
   rec_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Whether added by an import (value 1) or by manual entry (value 0)',
   rec_Popularity int(10) unsigned NOT NULL default '0' COMMENT 'Calculated popularity rating for sorting order, set by cron job',
   rec_FlagTemporary tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a partially created record before fully populated',
-  rec_OwnerUGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'User group which owns this record, 0 = everyone',
-  rec_NonOwnerVisibility enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Defines if record visible outside owning user group(s) or to anyone',
+  rec_OwnerUGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Workgroup which owns this record, 0 = everyone',
+  rec_NonOwnerVisibility enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Defines if record visible outside owning Workgroup(s) or to anyone',
   rec_URLLastVerified datetime default NULL COMMENT 'Last date time when URL was verified as contactable',
   rec_URLErrorMessage varchar(255) default NULL COMMENT 'Error returned by URL checking script for bad/inaccessible URLs',
   rec_URLExtensionForMimeType varchar(10) default NULL COMMENT 'A mime type extension for multimedia files pointed to DIRECTLY by the record URL',
@@ -130,7 +130,7 @@ CREATE TABLE defDetailTypes (
   dty_Type enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude') NOT NULL COMMENT 'The value-type of this detail type, what sort of data is stored',
   dty_HelpText varchar(255) NOT NULL default 'Please provide a short explanation for the user ...' COMMENT 'The default help text displayed to the user under the field',
   dty_ExtendedDescription varchar(5000) default 'Please provide an extended description for display on rollover ...' COMMENT 'Extended text describing this detail type, for display in rollover',
-  dty_EntryMask text COMMENT 'Data entry mask, use to control decimals ion numeric values, content of text fields etc.',
+  dty_EntryMask text COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc.',
   dty_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   dty_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this detail type originated, 0 = locally',
   dty_NameInOriginatingDB varchar(255) default NULL COMMENT 'Name used in database where this detail type originated',
@@ -439,6 +439,27 @@ CREATE TABLE recRelationshipsCache (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table 'recLinks'
+--
+
+CREATE TABLE recLinks (
+  rl_ID   int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key',
+  rl_SourceID int(10) unsigned NOT NULL COMMENT 'Source record ID',
+  rl_TargetID int(10) unsigned NOT NULL COMMENT 'Target record ID',
+  rl_RelationID int(10) unsigned        COMMENT 'Realtionship record ID',
+  rl_RelationTypeID int(10) unsigned    COMMENT 'Realtionship type - defTerms.trm_ID',
+  rl_DetailTypeID int(10) unsigned      COMMENT 'Pointer (Resource) detail type ID',
+  rl_DetailID int(10) unsigned          COMMENT 'Pointer Detail type',
+  PRIMARY KEY  (rl_ID),
+  KEY rl_SourcePtrKey (rl_SourceID),
+  KEY rl_TargetPtrKey (rl_TargetID),
+  KEY rl_RelationKey (rl_RelationID),
+  KEY rl_DetailKey (rl_DetailID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache for records links (pointers and relationships) to speed access';
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table 'recSimilarButNotDupes'
 --
 
@@ -552,7 +573,7 @@ CREATE TABLE sysDocumentation (
 
 CREATE TABLE sysIdentification (
   sys_ID tinyint(1) unsigned NOT NULL default '1' COMMENT 'Only 1 record should exist in this table',
-  sys_dbRegisteredID int(10) unsigned NOT NULL default '0' COMMENT 'Allocated by HeuristScholar.org, 0 indicates not yet registered',
+  sys_dbRegisteredID int(10) unsigned NOT NULL default '0' COMMENT 'Allocated by Heurist master index, 0 indicates not yet registered',
   sys_dbVersion tinyint(3) unsigned NOT NULL default '0' COMMENT 'Major version for the database structure',
   sys_dbSubVersion tinyint(3) unsigned NOT NULL default '0' COMMENT 'Sub version',
   sys_dbSubSubVersion tinyint(3) unsigned NOT NULL default '0' COMMENT 'Sub-sub version',
@@ -564,7 +585,7 @@ CREATE TABLE sysIdentification (
   sys_IncomingEmailAddresses varchar(4000) default NULL COMMENT 'Comma-sep list of incoming email addresses for archiving emails visible to all admins',
   sys_TargetEmailAddresses varchar(255) default NULL COMMENT 'Comma-sep list for selecting target for sending records as data, see also ugr_TargetEmailAddresses',
   sys_UGrpsDatabase varchar(63) default NULL COMMENT 'Full name of SQL database containing user tables, null = use internal users/groups tables',
-  sys_OwnerGroupID smallint(5) unsigned NOT NULL default '1' COMMENT 'User group which owns/administers this database, 1 by default',
+  sys_OwnerGroupID smallint(5) unsigned NOT NULL default '1' COMMENT 'Workgroup which owns/administers this database, 1 by default',
   sys_dbName varchar(63) NOT NULL default 'Please enter a DB name ...' COMMENT 'A short descriptive display name for this database, distinct from the name in the URL',
   sys_dbOwner varchar(250) default NULL COMMENT 'Information on the owner of the database, may be a URL reference',
   sys_dbRights varchar(1000) NOT NULL default 'Please define ownership and rights here ...' COMMENT 'A statement of ownership and copyright for this database and content',
@@ -622,8 +643,8 @@ CREATE TABLE sysUGrps (
   ugr_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'User or group ID, used wherever a user or group is to be identified',
   ugr_Type enum('user','workgroup','ugradclass') NOT NULL default 'user' COMMENT 'User or workgroup, special workgroup types also supported',
   ugr_Name varchar(63) NOT NULL COMMENT 'The unique user/login/group name, user name defaults to email address',
-  ugr_LongName varchar(128) default NULL COMMENT 'An optional longer descriptive name for a user group',
-  ugr_Description varchar(1000) default NULL COMMENT 'Extended description of a user group displayed on homepage',
+  ugr_LongName varchar(128) default NULL COMMENT 'An optional longer descriptive name for a Workgroup',
+  ugr_Description varchar(1000) default NULL COMMENT 'Extended description of a Workgroup displayed on homepage',
   ugr_Password varchar(40) NOT NULL COMMENT 'Encrypted password string',
   ugr_eMail varchar(100) NOT NULL COMMENT 'Contact email address of the user/group',
   ugr_FirstName varchar(40) default NULL COMMENT 'Person''s first name, only for Users, not Workgroups',
@@ -644,6 +665,7 @@ CREATE TABLE sysUGrps (
   ugr_URLs varchar(2000) default NULL COMMENT 'URL(s) of group or personal website(s), comma separated',
   ugr_FlagJT int(1) unsigned NOT NULL default '0' COMMENT 'Flag to enable in Jobtrack/Worktrack application',
   ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
+  ugr_NavigationTree text default NULL COMMENT 'JSON array that describes treeview for filters',
   PRIMARY KEY  (ugr_ID),
   UNIQUE KEY ugr_Name (ugr_Name),
   UNIQUE KEY ugr_eMail (ugr_eMail)
@@ -784,7 +806,7 @@ CREATE TABLE usrReportSchedule (
   rps_FileName varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'The base name of the report being published - wil lbe compelted with file types',
   rps_HQuery text collate utf8_unicode_ci NOT NULL COMMENT 'The Heurist query to be used in generating this report',
   rps_Template varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'The name of the template file to be used in generating this report',
-  rps_IntervalMinutes tinyint(4) default NULL COMMENT 'The interval in minutes between regenerations of the report output, null = never',
+  rps_IntervalMinutes int(11) default NULL COMMENT 'The interval in minutes between regenerations of the report output, null = never',
   rps_Added timestamp NULL default NULL COMMENT 'The date when this specification was added',
   rps_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date this specification was last updated',
   PRIMARY KEY  (rps_ID),
@@ -826,7 +848,7 @@ CREATE TABLE usrTags (
   UNIQUE KEY tag_composite_key (tag_Text,tag_UGrpID),
   KEY tag_UGrpID (tag_UGrpID),
   KEY tag_Text (tag_Text)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Personal and user group tags (formerly keywords)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Personal and Workgroup tags (formerly keywords)';
 
 -- --------------------------------------------------------
 
@@ -837,7 +859,7 @@ CREATE TABLE usrTags (
 CREATE TABLE woot_ChunkPermissions (
   wprm_ChunkID int(11) NOT NULL COMMENT 'ID of chunk for which permission is specified, may be repeated',
   wprm_UGrpID smallint(6) NOT NULL COMMENT 'User with specified right to this chunk',
-  wprm_GroupID smallint(6) NOT NULL COMMENT 'User groups with specified right to this chunk',
+  wprm_GroupID smallint(6) NOT NULL COMMENT 'Workgroups with specified right to this chunk',
   wprm_Type enum('RW','RO') NOT NULL COMMENT 'Read-write or read-only permission for this chunk/user/wg',
   wprm_CreatorID smallint(6) NOT NULL COMMENT 'Creator of the permission (= user ID ???? <check>)',
   wprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
@@ -876,7 +898,7 @@ CREATE TABLE woot_Chunks (
 CREATE TABLE woot_RecPermissions (
   wrprm_WootID int(11) NOT NULL COMMENT 'ID of the woot entry to which this permission applies, may be repeated',
   wrprm_UGrpID int(11) NOT NULL COMMENT 'User ID to which this permission is being granted',
-  wrprm_GroupID int(11) NOT NULL COMMENT 'User group ID to which this permission is being granted',
+  wrprm_GroupID int(11) NOT NULL COMMENT 'Workgroup ID to which this permission is being granted',
   wrprm_Type enum('RW','RO') NOT NULL COMMENT 'Type of permission being granted - read only or read-write',
   wrprm_CreatorID int(11) NOT NULL COMMENT 'Creator of the permission',
   wrprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
@@ -900,8 +922,6 @@ CREATE TABLE woots (
   UNIQUE KEY woot_title_key (woot_Title(200))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
 
-
-
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
@@ -918,10 +938,10 @@ CREATE TABLE woots (
  INSERT INTO sysIdentification(sys_ID,sys_dbRegisteredID,sys_dbVersion,sys_dbSubVersion,
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
-  sys_UGrpsdatabase,sys_OwnerGroupID)
-  VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
+  sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior)
+  VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype');
+
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
-  --       This reflects the actual state of the database structure in H3CORECLONE which was pasted in here
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
 -- These are critical to the working of the definitions caching system, without these

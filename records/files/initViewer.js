@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -32,7 +32,7 @@
 /* this file requires
  * ../../common/js/utilsUI.js
  * ../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js
- * ../../records/files/imageAnnotation.js
+ * imageAnnotation.js
  */
 var viewerObject,
 	Hul = top.HEURIST.util;
@@ -268,7 +268,7 @@ function clearViewer(container){
 //
 // If _recordID is defined it loads related annotations (see imageAnnotation.js)
 //
-function showViewer(container, url_and_cfg, _recordID){
+function showViewer(container, url_and_cfg, _recordID, sTypeDef){
 
 	   var acfg;
 
@@ -292,6 +292,7 @@ function showViewer(container, url_and_cfg, _recordID){
 	   		sType = oType.type;
 	   		sSource = oType.source;
 	   		extension = oType.extension;
+            if(sType=='unknown') sType = sTypeDef;
 	   }else{
 	   		sSource = acfg[1];
 	   		sType = acfg[2];
@@ -304,7 +305,7 @@ function showViewer(container, url_and_cfg, _recordID){
  			container.style.bottom = 22;
 
  			viewerObject = null;
-			viewer.toolbarImages = top.HEURIST.baseURL+"external/js/simple_js_viewer/images/toolbar";
+			viewer.toolbarImages = top.HEURIST.baseURL_V3+"external/js/simple_js_viewer/images/toolbar";
 			viewer.onload =  viewer.toolbar;
 			image_digitizer_container = document.getElementById('image_digitizer_container');
 			if(image_digitizer_container){

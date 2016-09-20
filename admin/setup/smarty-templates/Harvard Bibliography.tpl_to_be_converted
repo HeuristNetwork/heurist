@@ -1,5 +1,6 @@
 {$notrec = 0}
 {foreach $results as $r}
+{$r = $heurist->getRecord($r)}
 
 {$recognized = true}
 
@@ -14,11 +15,13 @@
 {$editors = $r.Author_Editor_s_s}
 {$cnt = count($editors )}
 {foreach $editors as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}{if $cnt gt 1 && $auth.recOrder eq $cnt-1}. {/if}{/foreach}  {$r.date}. {*Year*}
 <i>{$r.name}</i>. {*Title of book*} 
 
 {foreach $r.Publisher_seriess as $Publisher}
+    {$Publisher = $heurist->getRecord($Publisher)}
 	{$Publisher.recTitle} {*Title*} 
 {/foreach}
 
@@ -30,6 +33,7 @@
 
 {$cnt = count($r.Author_s_s)}
 {foreach $r.Author_s_s as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}{if $cnt gt 1 && $auth.recOrder eq $cnt-1}. {/if}{/foreach} {$r.Book.date}. {*Year*} 
 
@@ -39,6 +43,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 {$cnt = count($editors)}
 {if $cnt gt 0}
 {foreach $editors as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}{/foreach}
 {if $cnt gt 1} (eds),{else} (ed.),{/if}
@@ -48,6 +53,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 <i>&nbsp;{$r.Book.name}</i>.{*Title of book*} 
 
 {foreach $r.Book.Publisher_seriess as $Publisher}
+    {$Publisher = $heurist->getRecord($Publisher)}
     {$Publisher.recTitle}. {*Title*}
 {/foreach}
 {$r.start_page}-{$r.end_page}.
@@ -57,6 +63,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 <div>
 {$cnt = count($r.Author_s_s)}
 {foreach $r.Author_s_s as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}
 {if $cnt gt 1 && $auth.recOrder eq $cnt-1}. {/if}{/foreach} {$r.Journal_volumes[0].date}. {*Year*} 
@@ -64,6 +71,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 {$r.name}. {*Title of Article*} 
 
 {foreach $r.Journal_volumes as $Journal_volume}
+    {$Journal_volume = $heurist->getRecord($Journal_volume)}
 <i>{$Journal_volume.recTitle}</i>
 {if ($Journal_volume.volume)}&nbsp;{$Journal_volume.volume}{/if}
 {if (isset($Journal_volume.part_issue))}({$Journal_volume.part_issue}){/if}
@@ -79,6 +87,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 <div>
 {$cnt = count($r.Author_s_s)}
 {foreach $r.Author_s_s as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}
 {if $cnt gt 1 && $auth.recOrder eq $cnt-1}. {/if}{/foreach} {$r.Magazine_detailss[0].date}. {*Year*} 
@@ -87,6 +96,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 
 
 {foreach $r.Magazine_detailss as $Magazine_details}
+    {$Magazine_details = $heurist->getRecord($Magazine_details)}
 <i>{$Magazine_details.recTitle}</i>
 {if ($Magazine_details.volume)}&nbsp;{$Magazine_details.volume}{/if}
 {if (isset($Magazine_details.part_issue))}({$Magazine_details.part_issue}){/if}
@@ -100,6 +110,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 <div>
 {$cnt = count($r.Author_s_s)}
 {foreach $r.Author_s_s as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}
 {if $cnt gt 1 && $auth.recOrder eq $cnt-1}. {/if}{/foreach} {$r.Newspaper_detailss[0].date}. {*Year*} 
@@ -108,6 +119,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 
 
 {foreach $r.Newspaper_detailss as $Newspaper_details}
+    {$Newspaper_details = $heurist->getRecord($Newspaper_details)}
 <i>{$Newspaper_details.recTitle}</i>
 {if ($Newspaper_details.volume)}&nbsp;{$Newspaper_details.volume}{/if}
 {if (isset($Newspaper_details.part_issue))}({$Newspaper_details.part_issue}){/if}
@@ -120,6 +132,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 <div>
 {$cnt = count($r.Author_s_s)}
 {foreach $r.Author_s_s as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}
 {if $cnt gt 1 && $auth.recOrder eq $cnt-1}. {/if}{/foreach} {$r.date} {*Date*} 
@@ -129,7 +142,9 @@ In {$editors = $r.Book.Author_Editor_s_s}
 
 
 {foreach $r.Commissioning_organisation_publishers as $Commissioning_organisation_publisher}
+    {$Commissioning_organisation_publisher = $heurist->getRecord($Commissioning_organisation_publisher)}
 {foreach $Commissioning_organisation_publisher.Publishers as $Publisher}
+    {$Publisher = $heurist->getRecord($Publisher)}
 , {$Publisher.recTitle} 
 {/foreach}
 {$Commissioning_organisation_publisher.place_name} {*Place(s) of publication*} 
@@ -140,6 +155,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 <div>
 {$cnt = count($r.Author_s_s)}
 {foreach $r.Author_s_s as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}
 {if $cnt gt 1 && $auth.recOrder eq $cnt-1}. {/if}{/foreach} {$r.start_date} {*Date*} 
@@ -147,7 +163,9 @@ In {$editors = $r.Book.Author_Editor_s_s}
 {$r.name}
 
 {foreach $r.Record_series_detailss as $Record_series_details}
+    {$Record_series_details = $heurist->getRecord($Record_series_details)}
 {foreach $Record_series_details.Archives_institutions as $Archives_institution}
+    {$Archives_institution = $heurist->getRecord($Archives_institution)}
 , {$Archives_institution.recTitle} {*Title*} 	
 {/foreach}
 {/foreach}
@@ -158,6 +176,7 @@ In {$editors = $r.Book.Author_Editor_s_s}
 <div>
 {$cnt = count($r.Author_s_s)}
 {foreach $r.Author_s_s as $auth}
+    {$auth = $heurist->getRecord($auth)}
 {if $cnt gt 1}{if $cnt==$auth.recOrder+1} and {elseif $auth.recOrder gt 0}, {/if}{/if}
 {if $auth.recOrder eq 0}{$auth.name} {/if}{$auth.given_names|regex_replace:"/([A-Z])\S+/":"$1."|strip:""}{if $auth.recOrder gt 0} {$auth.name}{/if}
 {if $cnt gt 1 && $auth.recOrder eq $cnt-1}. {/if}{/foreach} {$r.date} {*Year*} 

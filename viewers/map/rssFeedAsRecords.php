@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 * This class is used to perform search action on the heurist
 *
 * @author      Hanna Chamoun
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -28,8 +28,7 @@
 */
 
 
-require_once('rssItemAsRecord.php');
-//require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/rssItemAsRecord.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 class RssSearch{
@@ -107,7 +106,6 @@ class RssSearch{
 	}
 	$this->fetchIndex = 0;
 	$this->itemCnt = count($this->items);
-/*****DEBUG****///	error_log("in readFeed with title = ".$this->title." and item count of ".$this->itemCnt);
   }
 
   /**

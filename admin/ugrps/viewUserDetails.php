@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -82,7 +82,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	if ($i == 50)
 		$tags .= "</span>\n".'<span id="top100" style="display: none;">'."\n";
 	$i++;
-	$tags .= '<a target="_top" href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'" style="white-space:nowrap;">'.$row['tag_Text'].' ('.$row['bkmks'].")</a>&nbsp&nbsp\n";
+	$tags .= '<a target="_top" href="'.HEURIST_BASE_URL.'?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'" style="white-space:nowrap;">'.$row['tag_Text'].' ('.$row['bkmks'].")</a>&nbsp&nbsp\n";
 }
 $tags .= "</span>\n";
 ?>
@@ -113,7 +113,7 @@ $tags .= "</span>\n";
             <tr>
                 <td><b><?=$ugr_FullName?></b></td>
             </tr>
-            
+
              <?php
              if ($ugr_Department){
   	            print "<tr><td>".$ugr_Department."</td></tr>";
@@ -175,7 +175,7 @@ $tags .= "</span>\n";
             }
             -->
         </script>
-        
+
         sort:
         <a href="viewUserDetails.php?Id=<?=$ugr_ID?>&amp;sort=freq&amp;db=<?=HEURIST_DBNAME?>" style="font-weight:<?=$sortby=='freq'?'bold':'normal'?>;">freq</a>
         <a href="viewUserDetails.php?Id=<?=$ugr_ID?>&amp;sort=alpha&amp;db=<?=HEURIST_DBNAME?>" style="font-weight: <?=$sortby=='alpha'?'bold':'normal'?>;">alpha</a>

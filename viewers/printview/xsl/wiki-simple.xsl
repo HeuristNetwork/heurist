@@ -39,7 +39,7 @@
 					</b>
 					<br></br>
 					
-					<a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new" href="wiki/{id}">[view details]</a>&#160;<a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new" href="http://heuristscholar.org/heurist/edit?bib_id={id}">[edit]</a>
+					<a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new" href="wiki/{id}">[view details]</a>&#160;<a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new" href="http://HeuristNetwork.org/heurist/edit?bib_id={id}">[edit]</a>
 				</xsl:if>
 		</div>
 	</xsl:template>

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -45,8 +45,8 @@ if (! is_logged_in()) {
         <title>Find similar users</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+        <link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
 
         <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
     </head>
@@ -139,7 +139,7 @@ if (! is_logged_in()) {
                 }
                 -->
             </script>
-        
+
             Users with similar interests to you: (show)
             <span id="show10" style="cursor: pointer; text-decoration: underline; font-weight: bold;" onclick="show_rows(10);">10</span>
             <span id="show20" style="cursor: pointer; text-decoration: underline;" onclick="show_rows(20);">20</span>
@@ -152,8 +152,8 @@ if (! is_logged_in()) {
 
 	                $i = 0;
 	                while ($row = mysql_fetch_assoc($res)) {
-		                echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?db='.HEURIST_DBNAME.'&Id='.$row['bkm_UGrpID'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
-		                echo '     <td><a target="_top" href="'.HEURIST_SITE_PATH.'search/search.html?db='.HEURIST_DBNAME.'&w=bookmark&q=user:%22'.$row['name'].'%22" title="Search for records that you and '.$row['name'].' share"><b>'.$row['freq']."</b> records in common</a></td></tr>\n";
+		                echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_BASE_URL.'admin/ugrps/viewUserDetails.php?db='.HEURIST_DBNAME.'&Id='.$row['bkm_UGrpID'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
+		                echo '     <td><a target="_top" href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&w=bookmark&q=user:%22'.$row['name'].'%22" title="Search for records that you and '.$row['name'].' share"><b>'.$row['freq']."</b> records in common</a></td></tr>\n";
 	                }
                 }
 

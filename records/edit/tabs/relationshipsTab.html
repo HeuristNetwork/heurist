@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -37,31 +37,38 @@
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css">
 	<link rel=stylesheet href="../../../common/css/global.css">
 	<link rel=stylesheet href="../../../common/css/edit.css">
-	<link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
-	<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
-	<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
-
+    
+    <link rel="stylesheet" type="text/css" href="../../../external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
 </head>
-<body class="editTab">
+<body class="editTab ui-heurist-bg-light">
 		<script src="../../../common/js/utilsLoad.js"></script>
 		<script src="../relationshipsObjectLibrary.js"></script>
 		<script src="../../../common/php/displayPreferences.php"></script>
-
+<!-- replaced to jquery.calendar
 		<script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
 		<script type="text/javascript" src="../../../common/js/calendar.js"></script>
-
+-->
 		<script>
 
 			function onshow() {
-				top.HEURIST.edit.calendarViewer = calendarViewer;
+                
+                var relatedRecords = top.HEURIST.edit.record.relatedRecords;
+                var relationsBody = document.getElementById("relations-tbody");
+                $(relationsBody).empty();
+                var relManager = new top.RelationManager(relationsBody,top.HEURIST.edit.record, 
+                												relatedRecords,0,changeNotification,false,true);
+                
+				//repalce to jquery top.HEURIST.edit.calendarViewer = calendarViewer;
 				var elt = document.getElementById("relationship-type");
 				setTimeout(function() {
 					try {
 						if (elt) elt.focus()
 					} catch (e) {}
 				}, 0);
+                
 			}
 		</script>
 
@@ -75,7 +82,7 @@
 		<div id=relations-tbody style="width:100%"></div>
 
 		<script>
-			document.write('<form id=relations-form jsonAction="'+top.HEURIST.basePath+'records/relationships/saveRelationships.php"></form>');
+			document.write('<form id=relations-form jsonAction="'+top.HEURIST.baseURL_V3+'records/relationships/saveRelationships.php"></form>');
 		</script>
 		<script>
 

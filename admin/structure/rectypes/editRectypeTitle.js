@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -75,7 +75,7 @@ function EditRectypeTitle() {
                 (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
             //find variables for given rectypeID and create variable tree
-            var baseurl = top.HEURIST.basePath + "common/php/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
+            var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
             "&ver=1&w=all&stype=&db="+_db  + "&q=type:" + _rectypeID; //"&q=id:146433";
             top.HEURIST.util.getJsonData(baseurl, _onGenerateVars, "");
         }
@@ -190,7 +190,8 @@ function EditRectypeTitle() {
                 function() { // On click, select the term, and add it to the selected terms tree
 
                     var _node = arguments[0].node;
-                    if(_node.children.length<1){
+                    
+                    if(_node.children.length<1 && _node.data.this_id!='remark'){
                         this.onEventToggleHighlight.apply(this,arguments);
                     }
 
@@ -206,6 +207,14 @@ function EditRectypeTitle() {
         }
         //fill treeview with content
         _fillTreeView(_varsTree, _variables);
+        
+        /* it does not work since yui tree is formed dynamically
+        $('#varsTree').find('.nocheckbox').each(function(idx, item){
+                $(item).parents('td.ygtvcell').css('background','none');
+        });
+        */
+        
+        
     }
 
     /**
@@ -250,24 +259,29 @@ function EditRectypeTitle() {
                     // unconstained pointers fNNN:array(rt_name
                     // multi-contrained pointers fNNN:array(array(rt_id  - need another recursive loop
 
+                    child = rectypeTree[id];
+                    var is_record = ((typeof(child) == "object") &&
+                                    Object.keys(child).length > 0);
+                                    
+                    
                     term = {};//new Object();
                     term.id = parent_full+"."+id; //fullid;
                     term.parent_id = parent_id;
                     term.this_id = id;
-                    term.label = '<div style="padding-left:10px;">';
+                    term.label = '<div style="padding-left:10px;"'+(is_record||id=='remark'?' class="nocheckbox"':'')+'>';
                     
                     
-                    child = rectypeTree[id];
-
-                    var is_record = ((typeof(child) == "object") &&
-                                    Object.keys(child).length > 0);
-                                    
                     var is_multicontstrained = false; 
                                    
                     if(!is_record){ //simple
                     
                         label = child;   
-                        term.label = term.label + label + '</div>';
+                        if(id=='remark'){
+                            term.label = term.label + '<i>' + label + '</i></div>';
+                        }else{
+                            term.label = term.label + label + '</div>';    
+                        }
+                        
                         
                     }else{
                          
@@ -464,7 +478,7 @@ function EditRectypeTitle() {
         var rec_type = top.HEURIST.parameters.rectypeID;
 
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -497,7 +511,7 @@ function EditRectypeTitle() {
         var mask = document.getElementById('rty_TitleMask').value;
         //var rec_type = top.HEURIST.parameters.rectypeID;
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+_rectypeID+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -528,7 +542,7 @@ function EditRectypeTitle() {
                             defs:_defs}}; //{_rectypeID:[{common:[newvalue],dtFields:[]}]}
                 var str = JSON.stringify(oRectype);
                 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                 var callback = _updateTitleMask;// updateResult;
                 var params = "method=saveRT&db="+_db+"&data=" + encodeURIComponent(str);
                 Hul.sendRequest(baseurl, function(xhr) {
@@ -549,7 +563,7 @@ function EditRectypeTitle() {
     * Third step - update records - change title
     */
     function _updateTitleMask(){
-        var URL = top.HEURIST.basePath + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+_db+"&recTypeIDs="+_rectypeID;
+        var URL = top.HEURIST.baseURL_V3 + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+_db+"&recTypeIDs="+_rectypeID;
 
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
@@ -578,7 +592,7 @@ function EditRectypeTitle() {
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check="+mode;
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {

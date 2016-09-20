@@ -1,0 +1,63 @@
+{
+        "entityName": "sysImportSessions",
+
+        "tableName": "sysImportSessions",
+        "tablePrefix": "imp",
+        
+        "helpContent": "sysImportSessions.html",
+        
+        "searchFormContent": "",
+        
+        "entityTitle": "Import Session",
+        "entityTitlePlural": "Import Session",
+        "empty_remark": "Please use the search field above to locate relevant session (partial string match on title)",
+
+        "sel_actions": [{"key":"edit", "title":"Edit"},
+                        {"key":"delete", "title":"Delete"}],
+        "btn_actions": [{"key":"add", "title":"Add New Session!"}],
+
+        "reference_query": {},
+        
+        "fields": [
+                {
+                    "dtID": "imp_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "ugr_ID",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_DisplayName":"User:",
+                        "rst_DisplayHelpText": "", 
+                        "rst_DisplayWidth":20
+                    }
+                },
+                {
+                    "dtID": "imp_table",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"title",
+                        "dty_Size":63,
+                        "rst_DisplayName": "File name:",
+                        "rst_DisplayHelpText": "Lorem ipsum....", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "imp_session",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":255,
+                        "rst_DisplayName":"Session:",
+                        "rst_DisplayHelpText": "" 
+                    }
+                }
+                ]
+}

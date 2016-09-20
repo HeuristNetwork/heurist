@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -20,22 +20,15 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    //define('_PREF', 'c:/xampp/');
-    define('_PREF', '/var/www/');
-
-    //define('SMARTY_DIR', _PREF.'html/smarty/Smarty-3.0.7/libs/');
 
     define('SMARTY_DIR', dirname(__FILE__).'/../../external/Smarty-3.0.7/libs/');
-
 
     require_once(SMARTY_DIR.'Smarty.class.php');
     require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
-    /*****DEBUG****///error_log(">>>>".HEURIST_SERVER_ROOT_DIR.HEURIST_SITE_PATH.'viewers/smarty/templates/');
-
     $smarty = new Smarty();
 
-    //check folder existance and create new folders if they missed
+    //check folder existance and create new folders if they are missing
     if(!file_exists(HEURIST_SMARTY_TEMPLATES_DIR)){
         if (!mkdir(HEURIST_SMARTY_TEMPLATES_DIR, 0777, true)) {
             die('Failed to create folder for smarty templates');
@@ -62,7 +55,6 @@
     $smarty->compile_dir  = HEURIST_SMARTY_TEMPLATES_DIR.'templates_c/';
     $smarty->cache_dir    = HEURIST_SMARTY_TEMPLATES_DIR.'cache/';
 
-    /*****DEBUG****///error_log(">>>>>".HEURIST_SMARTY_TEMPLATES_DIR);
 
     $smarty->registerResource("string", array("str_get_template",
         "str_get_timestamp",

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -69,16 +69,21 @@ function SelectTermParent() {
 				_childTerm = top.HEURIST.parameters.child;
 				_currentDomain = top.HEURIST.parameters.domain;
                 _target_parent_id = top.HEURIST.parameters.parent;
+                
+                var childTermName = '';
+                if(_childTerm){
+                    childTermName = top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm]
+                                                [top.HEURIST.terms.fieldNamesToIndex.trm_Label];
+                }
 
                 if(top.HEURIST.parameters.mode==1){
-                    Dom.get('header1').innerHTML = 'Select the term you want to be merged';
+                    Dom.get('header1').innerHTML = 'Select term you wish to merge into term '+ childTermName;
                     Dom.get('btnSet').innerHTML = 'SELECT';
-                    Dom.get('divParentIsRoot').style.display = 'none';
+                    //Dom.get('divParentIsRoot').style.display = 'none';
                     Dom.get("childTermName").innerHTML = "";
                 }else
 				if(_childTerm){
-						Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+
-									top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm][top.HEURIST.terms.fieldNamesToIndex.trm_Label]+"</h2>";
+						Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+childTermName+"</h2>";
 				}else{
 						Dom.get("childTermName").innerHTML = "";
 				}

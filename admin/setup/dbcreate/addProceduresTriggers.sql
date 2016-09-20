@@ -3,16 +3,14 @@
 -- 2013-05-13 Arjen Lentz - added replacement functions for levenshtein.c and liposuction.c UDFs
 
 
--- This file contains the stored procedures and triggers for h3 databases
+-- This file contains the stored procedures and triggers for Heurist databases
 
--- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/html/h3-xx WITH:
+-- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/html/h4-xx WITH:
 --   mysql -u root -ppassword hdb_databasename < admin/setup/dbcreate/addProceduresTriggers.sql
 -- Note: this file cannot be run in PHPMySQL because it doesn't recognise the delimiter changes
 
 -- MAY NOT REPORT ERRORS, POSSIBLE NEED TO SET STDOUT FIRST AND/OR USE TEE TO WRITE TO OUTPUT FILE
 -- AND INSPECT
-
--- Updated to new H3 magic numbers for relationshiop records (type 1, with details 4, 5 and 7)
 
 -- Stored Procedures
 -- ------------------------------------------------------------------------------
@@ -40,7 +38,7 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `hhash`(recID int) RETURNS varchar(40
 
 		select group_concat(NEW_LIPOSUCTION(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
 			into non_resource_fields
-			from Details, Records, defDetailTypes, defRecStructure
+			from recDetails, Records, defDetailTypes, defRecStructure
 			where dtl_RecID=rec_ID and
 					dtl_DetailTypeID=dty_ID and
 					rec_RecTypeID=rst_RecTypeID and
@@ -49,9 +47,9 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `hhash`(recID int) RETURNS varchar(40
 					dty_Type != "resource" and
 					rec_ID = recID;
 
-		select group_concat(DST.rec_Hhash order by dty_ID, dty_ID, DST.rec_Hhash separator '$^')
+		select group_concat(DST.rec_Hash order by dty_ID, dty_ID, DST.rec_Hhash separator '$^')
 			into resource_fields
-			from Details, Records SRC, defDetailTypes, defRecStructure, Records DST
+			from recDetails, Records SRC, defDetailTypes, defRecStructure, Records DST
 			where dtl_RecID=SRC.rec_ID and
 					dtl_DetailTypeID=dty_ID and
 					SRC.rec_RecTypeID=rst_RecTypeID and
@@ -87,7 +85,7 @@ DROP function IF EXISTS `simple_hash`$$
 		select rec_RecTypeID into rectype from Records where rec_ID = recID;
 		select group_concat(NEW_LIPOSUCTION(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
 			into non_resource_fields
-			from Details, Records, defDetailTypes, defRecStructure
+			from recDetails, Records, defDetailTypes, defRecStructure
 			where dtl_RecID=rec_ID and
 					dtl_DetailTypeID=dty_ID and
 					rec_RecTypeID=rst_RecTypeID and
@@ -117,20 +115,20 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `set_all_hhash`()
 			truncate t;
 			insert into t select rec_ID
 							from Records A
-							where A.rec_Hhash is null
+							where A.rec_Hash is null
 								and not exists (select *
-												from Details, defDetailTypes, defRecStructure, Records B
+												from recDetails, defDetailTypes, defRecStructure, Records B
 												where dtl_RecID=A.rec_ID and
 														dtl_DetailTypeID=dty_ID and
 														dty_Type="resource" and
 														B.rec_ID=dtl_Value and
-														B.rec_Hhash is null and
+														B.rec_Hash is null and
 														rst_RecTypeID=A.rec_RecTypeID and
 														rst_DetailTypeID=dty_ID and
 														rst_RequirementType="Required");
 			set @tcount := row_count();
 			update Records
-				set rec_Hhash = hhash(rec_ID)
+				set rec_Hash = hhash(rec_ID)
 				where rec_ID in (select * from t);
 			end;
 			until @tcount = 0
@@ -296,108 +294,108 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `getTemporalDateString`(strDate varch
 		end if;
 		set @temporalType = SUBSTRING(strDate,@iBegin,1);
 		CASE @temporalType
-			WHEN 's' THEN 
+			WHEN 's' THEN
 -- Simple Date
 				begin
 					set @iBegin := INSTR(strDate,'DAT=');
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN 
+					if @iEnd = 0 THEN
 -- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	
+					else
 -- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'f' THEN 
+			WHEN 'f' THEN
 -- Fuzzy Date
 				begin
 					set @iBegin := INSTR(strDate,'DAT=');
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN 
+					if @iEnd = 0 THEN
 -- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	
+					else
 -- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'c' THEN 
+			WHEN 'c' THEN
 -- Carbon14 Date
 				begin
 					set @iBegin := INSTR(strDate,'BPD=');
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						set @iBegin := INSTR(strDate,'BCE=');
 					end if;
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN 
+					if @iEnd = 0 THEN
 -- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	
+					else
 -- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'p' THEN 
+			WHEN 'p' THEN
 -- Probable Date
 				begin
 					set @iBegin := INSTR(strDate,'TPQ=');
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no TPQ field try PDB
 						set @iBegin := INSTR(strDate,'PDB=');
 					end if;
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no PDB field try PDE
 						set @iBegin := INSTR(strDate,'PDE=');
 					end if;
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no PDE field try TAQ
 						set @iBegin := INSTR(strDate,'TAQ=');
 					end if;
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN 
+					if @iEnd = 0 THEN
 -- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	
+					else
 -- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
@@ -434,43 +432,67 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
-	DROP TRIGGER IF EXISTS insert_Details_trigger$$
+    DROP TRIGGER IF EXISTS insert_Details_trigger$$
 
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `insert_Details_trigger`
-	AFTER INSERT ON `recDetails`
-	FOR EACH ROW
-	begin
---		declare relSrcDT integer;
---		declare relTrgDT integer;
---		select dty_ID into relSrcDT
---			from defDetailTypes
---			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
---			order by dty_ID desc limit 1;
---		select dty_ID into relTrgDT
---			from defDetailTypes
---			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
---			order by dty_ID desc limit 1;
---		if NEW.dtl_DetailTypeID=relTrgDT then
-		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
-			update recRelationshipsCache
+    CREATE
+    DEFINER=`root`@`localhost`
+    TRIGGER `insert_Details_trigger`
+    AFTER INSERT ON `recDetails`
+    FOR EACH ROW
+    begin
+        declare dtType varchar(20);
+        select dty_Type into dtType
+            from defDetailTypes
+            where dty_ID=NEW.dtl_DetailTypeID
+            limit 1;
+    
+--        declare relSrcDT integer;
+--        declare relTrgDT integer;
+--        select dty_ID into relSrcDT
+--            from defDetailTypes
+--            where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
+--            order by dty_ID desc limit 1;
+--        select dty_ID into relTrgDT
+--            from defDetailTypes
+--            where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
+--            order by dty_ID desc limit 1;
+--        if NEW.dtl_DetailTypeID=relTrgDT then
+        if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
+        begin
+            update recRelationshipsCache
 -- need to also save the RecTypeID for the record to help with constraint checking
-				set rrc_TargetRecID = NEW.dtl_Value
-				where rrc_RecID=NEW.dtl_RecID;
---		elseif NEW.dtl_DetailTypeID=relSrcDT then
-		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
-			update recRelationshipsCache
+                set rrc_TargetRecID = NEW.dtl_Value
+                where rrc_RecID=NEW.dtl_RecID;
+                
+            update recLinks
+                set rl_TargetID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+        end;        
+--        elseif NEW.dtl_DetailTypeID=relSrcDT then
+        elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
+        begin
+            update recRelationshipsCache
 -- need to also save the RecTypeID for the record to help with constraint checking
-				set rrc_SourceRecID = NEW.dtl_Value
-				where rrc_RecID=NEW.dtl_RecID;
-		end if;
+                set rrc_SourceRecID = NEW.dtl_Value
+                where rrc_RecID=NEW.dtl_RecID;
+
+            update recLinks
+                set rl_SourceID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+        end;
+        elseif NEW.dtl_DetailTypeID=6 then -- relationship type
+            update recLinks
+                set rl_RelationTypeID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+                
+        elseif dtType='resource' then
+            insert into recLinks (rl_SourceID, rl_TargetID, rl_DetailTypeID, rl_DetailID)
+            values (NEW.dtl_RecID, NEW.dtl_Value, NEW.dtl_DetailTypeID, NEW.dtl_ID);
+        end if;
 -- legacy databases: need to add update for 200 to save the termID to help with constraint checking
 -- new databases: need to add update for detail 200, now 5, to save the termID
-	end$$
-
-DELIMITER ;
-DELIMITER $$
+    end$$
+    
 
 	DROP TRIGGER IF EXISTS pre_update_Details_trigger$$
 
@@ -497,6 +519,13 @@ DELIMITER $$
 	AFTER UPDATE ON `recDetails`
 	FOR EACH ROW
 	begin
+        declare dtType varchar(20);
+        select dty_Type into dtType
+            from defDetailTypes
+            where dty_ID=NEW.dtl_DetailTypeID
+            limit 1;
+    
+    
 --		declare relSrcDT integer;
 --		declare relTrgDT integer;
 --		select dty_ID into relSrcDT
@@ -509,20 +538,51 @@ DELIMITER $$
 --			order by dty_ID desc limit 1;
 --		if NEW.dtl_DetailTypeID=relTrgDT then
 		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
-			update recRelationshipsCache
-			-- need to also save teh RecTypeID for the record
-				set rrc_TargetRecID = NEW.dtl_Value
-				where rrc_RecID=NEW.dtl_RecID;
+        begin
+            update recRelationshipsCache
+            -- need to also save teh RecTypeID for the record
+                set rrc_TargetRecID = NEW.dtl_Value
+                where rrc_RecID=NEW.dtl_RecID;
+                
+            update recLinks
+                set rl_TargetID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+        end;
 --		elseif NEW.dtl_DetailTypeID=relSrcDT then
 		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
-		update recRelationshipsCache
-				set rrc_SourceRecID = NEW.dtl_Value
+        begin
+            update recRelationshipsCache
+                set rrc_SourceRecID = NEW.dtl_Value
 -- need to also save teh RecTypeID for the record
-				where rrc_RecID=NEW.dtl_RecID;
-		end if;
+                where rrc_RecID=NEW.dtl_RecID;
+            update recLinks
+                set rl_SourceID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+        end;
+        elseif NEW.dtl_DetailTypeID=6 then -- relationship type
+            update recLinks
+                set rl_RelationTypeID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+                
+        elseif dtType='resource' then
+            update recLinks set rl_TargetID=NEW.dtl_Value, rl_DetailTypeID=NEW.dtl_DetailTypeID
+            where rl_DetailID=NEW.dtl_ID;
+        end if;
 -- need to add update for detail 200, now 5, to save the termID
 	end$$
 
+    DROP TRIGGER IF EXISTS delete_detail_trigger$$
+
+    CREATE
+    DEFINER=`root`@`localhost`
+    TRIGGER `delete_detail_trigger`
+    AFTER DELETE ON `recDetails`
+    FOR EACH ROW
+    begin
+        delete ignore from recLinks where rl_DetailID=OLD.dtl_ID;
+    end$$
+    
+    
 DELIMITER ;
 
 -- ------------------------------------------------------------------------------
@@ -549,8 +609,13 @@ DELIMITER $$
 	set @rec_id := last_insert_id(NEW.rec_ID);
 --		if NEW.rec_RecTypeID = relRT then
 		if NEW.rec_RecTypeID = 1 then
+        begin
 --  need to also save relationship records RecTypeID
-			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
+            insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
+            
+            insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID)
+            values (NEW.rec_ID, NEW.rec_ID, NEW.rec_ID);
+        end;    
 		end if;
 	end$$
 
@@ -637,11 +702,17 @@ DELIMITER $$
 				set trgRecID = NEW.rec_ID;
 			end if;
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
-		end if;     
+            
+            insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID)
+            values (srcRecID, trgRecID, NEW.rec_ID);
+		end if;
 -- if change the records type from relation to something else remove cache value
 --		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
 	    if OLD.rec_RecTypeID = 1 AND NOT NEW.rec_RecTypeID = 1 then
-			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
+        begin
+            delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
+            delete ignore from recLinks where rl_RelationID=OLD.rec_ID;
+        end;    
 		end if;
 	end$$
 
@@ -673,6 +744,8 @@ DELIMITER $$
 		if OLD.rec_RecTypeID = 1 then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;
+        
+        delete ignore from recLinks where rl_RelationID=OLD.rec_ID or rl_SourceID=OLD.rec_ID or rl_TargetID=OLD.rec_ID;
 	end$$
 
 DELIMITER ;

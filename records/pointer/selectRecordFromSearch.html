@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @author      Tom Murtagh, Kim Jackson, Stephen White
@@ -45,7 +45,7 @@
         <script src="../../common/js/utilsLoad.js"></script>
         <script>
             if (window == top) { // core HEURIST object definitions (dynamically generated)
-                top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadCommonInfo.php");
+                top.HEURIST.loadScript(top.HEURIST.baseURL_V3 +"common/php/loadCommonInfo.php");
             }
         </script>
 
@@ -63,8 +63,8 @@
                                     onChange="top.HEURIST.util.setDisplayPreference('record-search-string', this.value);"
                                     style="padding: 1px 18px 1px 2px; margin: 6px; width: 100%;"></div>
                                 <div id="help-div" class="help prompt"
-                                    style="width: 300px; margin-left: 20px; font-size: smaller;">
-                                    Select below or search on title here.
+                                    style="padding-left: 10px; font-size: smaller;">
+                                    Select below or search on record title here.
                                     [enter] or <img src="../../common/images/magglass_12x11.gif"
                                         onClick="document.forms[0].submit()" style="vertical-align: middle;"> to search</div>
                             </div>
@@ -79,9 +79,9 @@
                             <input type=submit value=Find style="display: none; font-weight: bold; padding: 0 1ex; margin-right: 1ex;" >
                             -->
                         </td>
-                        <td style="width: 120px;" title="Restrict search to this record type">
+                        <td style="width: 140px;" title="Restrict search to this record type">
                             in <select id="t" name="t" style="width: 90%;"
-                            onChange="document.forms[0].submit('record-search-type')"></select>
+                            onChange="onSelectRecordtype(true)"></select>
                         </td>
                         <td style="width: 80px; padding: 10 5px;">
                             <div class="radio" style="white-space:nowrap;">
@@ -108,10 +108,11 @@
                         <td colspan="5" rowspan="1" style="padding-top: 0px; padding-left: 30px;">
                             <b>or</b> &nbsp;&nbsp;&nbsp;
                             <a href="#" style="border: 3px; border-style: outset; border-color: black;"
+                            id="btn_CreateNewRecord"
                             title="Create and edit a new record, which will become the target of the pointer field"
                             onClick=" return addRecord();">
-                            &nbsp;&nbsp;<img src="../../common/images/add-record-small.png" style="border: 1px;"/>
-                            &nbsp;&nbsp;<b>Create a new record</b></a>
+                            <img src="../../common/images/add-record-small.png" style="border: 1px;"/>
+                            <b>Create a new record</b></a>
                             &nbsp;&nbsp;<i>Record becomes target of current pointer field</i>
                         </td>
                     </tr>
@@ -129,18 +130,22 @@
         <script language="JavaScript">
             // parse the parameter line for input parameters t = constrained type list and q = title of the record pointed to.
             window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
+            
+            var parentOwnership = window.HEURIST.parameters["ownership"];
+            var parentVisibility = window.HEURIST.parameters["visibility"];
 
             // check for type constraints
             var rectype = window.HEURIST.parameters["t"];
             var rtName;
+            var rectypes = [];
+
             if (rectype) {
-                var rectypes = {};
                 var recTypeName = "";
                 if (rectype.search(",") != -1) {//seems like we have multiple type constraint, test that it is well formed
                     var temp = rectype.split(",");
                     for (var i=0; i<temp.length; i++) {
-                        if (temp[i].search(/\D/) == -1) {
-                            rectypes[temp[i]] = 1;// add entry to lookup as 1 for truthy
+                        if (temp[i].search(/\D/) == -1) {   //numeric
+                            rectypes.push(temp[i]);// add entry to lookup as 1 for truthy
                             rtName = top.HEURIST.rectypes.names[temp[i]];
                             if(!top.HEURIST.util.isnull(rtName)){
                                 recTypeName += rtName.toLowerCase() + ",";
@@ -150,7 +155,7 @@
                     recTypeName = recTypeName.slice(0,-1); // remove the last comma
                     delete temp;
                 }else if (rectype.search(/\D/) == -1 && rectype.search(/\d/) != -1) {
-                    rectypes[rectype] = 1;// add entry to lookup as 1 for truthy
+                    rectypes = [rectype];// add entry to lookup as 1 for truthy
                     rtName = top.HEURIST.rectypes.names[rectype];
                     if(!top.HEURIST.util.isnull(rtName)){
                         recTypeName = rtName.toLowerCase();
@@ -159,35 +164,47 @@
                     rectypes = null;
                 }
             }
-
             /* If a rectype has been chosen then set a custom title -- need to do before onload so the popup code will catch it */
             if (recTypeName) {
                 document.title = "Select / create: " + recTypeName;
+            }
+            
+            function onSelectRecordtype(is_submit){
+                if(is_submit) document.forms[0].submit('record-search-type');    
+                var rt_name = top.HEURIST.rectypes.names[document.getElementById('t').value];
+                if(!rt_name) rt_name = 'a new record';
+                document.getElementById('btn_CreateNewRecord').innerHTML = 
+                    '&nbsp;<img src="../../common/images/add-record-small.png" style="border: 1px;"/>'
+                    +'&nbsp;<b>Create new '+rt_name+'</b>';
             }
 
             /*
             *
             */
             function addRecord(){
-
+                
                 var recTypeId = document.getElementById('t').value;
 
-                var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(recTypeId);
-
+                //was  getRectypeIconAndName
+                var title = "Add new record "+top.HEURIST.util.getRectypeName(recTypeId);
+                
+                /*
+                top.HEURIST.util.getRectypeIconAndName(recTypeId);
                 var forrectype = top.HEURIST.util.getRectypeIconAndName(window.HEURIST.parameters["target_recordtype"]);
                 if(forrectype){
                     title = title + " for " + forrectype;
                 }
-
-
+                */
                 var _db = (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
                     (top.HEURIST.parameters.db?top.HEURIST.parameters.db:
                         (top.HEURIST.database.name? top.HEURIST.database.name:'')));
 
-                top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
+                top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?fromadd=new_bib&rectype='+
                     recTypeId+
                     '&title='+document.getElementById('q').value+	// q is a string to match against rectitle so let's start with this in the title field
-                    '&db='+ _db,
+                    '&db='+ _db + 
+                    (parentOwnership? "&ownership="+parentOwnership : "") + 
+                    (parentVisibility? "&visibility="+parentVisibility : ""),
                     {	title: title,
                         callback: function(title, bd, bibID) {
                             if (bibID) {
@@ -221,8 +238,8 @@
                     bibID.className = "id";
 
                     img = recordDiv.appendChild(document.createElement("img"));
-                    img.src = top.HEURIST.basePath + "common/images/16x16.gif";
-                    img.style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + (record[3]? record[3] : "blank") + ".png)";
+                    img.src = top.HEURIST.baseURL_V3 + "common/images/16x16.gif";
+                    img.style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + (record[3]? record[3] : "1") + ")";
 
                     title = recordDiv.appendChild(document.createElement("span"));
                     title.appendChild(document.createTextNode(record[1]));
@@ -319,7 +336,7 @@
                 var resultsDiv = document.getElementById("results");
                 resultsDiv.innerHTML = "<i style='padding: 1ex;'>Searching ...</i>";
 
-                top.HEURIST.util.sendRequest(top.HEURIST.baseURL + "records/pointer/getRecordListForSearch.php", notifyResults, query);
+                top.HEURIST.util.sendRequest(top.HEURIST.baseURL_V3 + "records/pointer/getRecordListForSearch.php", notifyResults, query);
 
                 return false;
             }
@@ -336,8 +353,8 @@
                 var searchScope = top.HEURIST.util.getDisplayPreference("record-search-scope");
                 var lastSelected = top.HEURIST.util.getDisplayPreference("record-search-last");
                 var lastSearchType = window.HEURIST.parameters["deft"]
-                ?window.HEURIST.parameters["deft"]
-                :top.HEURIST.util.getDisplayPreference("record-search-type");
+                            ?window.HEURIST.parameters["deft"]
+                            :top.HEURIST.util.getDisplayPreference("record-search-type");
                 var rectypeIDList = [];
                 //set focus
                 window.setTimeout(function() {
@@ -349,11 +366,8 @@
 
                 //get last selected rectype
                 var initialType = top.HEURIST.util.getDisplayPreference("record-search-type");
-                if (rectypes && !rectypes[initialType]) {//if preferred is not in constrained list choose first rectype
-                    for (var type in rectypes) {	// careful! this only runs once to get and then breaks out.
-                        initialType = type;
-                        break;
-                    }
+                if (!initialType && rectypes.length>0) {//if preferred is not in constrained list choose first rectype
+                    initialType = rectypes[0];
                 }
 
                 //create rectype selector and set intial selection
@@ -399,7 +413,8 @@
                     }
                 }else{ // pointer constrained to rectypes - ignore showTypes
                     var isNotFound = true;
-                    for (var rectypeID in rectypes) {
+                    for (var idx=0; idx<rectypes.length; idx++) {
+                        var rectypeID = rectypes[idx];
                         var name = top.HEURIST.rectypes.names[rectypeID];
                         if(!top.HEURIST.util.isnull(name))
                         {
@@ -425,12 +440,14 @@
                     document.forms[0].elements["q"].value = qVal;
                     document.getElementById("r-all").checked = true;
                 }else{//new record
-                    if(lastSearchType){
+                    if(false && lastSearchType){
                         document.getElementById("t").value = lastSearchType;
                     }
                     document.getElementById(searchScope).checked = true;
                 }
-                document.forms[0].submit();
+                
+                onSelectRecordtype(true);
+                //document.forms[0].submit();
 
                 /*				var intervalID = setInterval(function() {
                 try {

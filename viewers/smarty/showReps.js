@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -50,11 +50,15 @@ function ShowReps() {
     mySimpleDialog,
     needReload = true,
     codeEditor = null,
-    _isAceEditor = false,
     infoMessageBox,
+    _currentRecordset = null,
     _db;
+    
+    var lastQuery = null;
 
     var top_repcontainer = '30px';
+    
+    var progressInterval = null;
 
 
     var handleYes = function() {
@@ -104,7 +108,6 @@ function ShowReps() {
         _setLayout(true, false);
     }
 
-
     /**
     * Inserts template output into container
     */
@@ -114,8 +117,11 @@ function ShowReps() {
 
         //converts Heurist.tmap structure to timemap structure
         //HEURIST.tmap = context;
-        var div_rep = document.getElementById("rep_container");//Dom.get("rep_container");
-        div_rep.innerHTML = context;
+        var iframe = document.getElementById("rep_container_frame");//Dom.get("rep_container");
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(context);
+        iframe.contentWindow.document.close();
+        //div_rep.innerHTML = context;
 
         _needSelection = (context.indexOf("Select records to see template output")>0);
     }
@@ -129,9 +135,17 @@ function ShowReps() {
     function _init() {
         _setLayout(true, false); //aftert load show viewer only
 
-        _sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
-        document.getElementById('cbUseAllRecords2').value = _sQueryMode;
-        document.getElementById('cbUseAllRecords1').value = _sQueryMode;
+        if(top.HEURIST4){
+            _sQueryMode = "all";
+            $('#cbUseAllRecords1').hide();
+            $('#cbUseAllRecords2').hide();
+        }else{
+            _sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+            document.getElementById('cbUseAllRecords2').value = _sQueryMode;
+            document.getElementById('cbUseAllRecords1').value = _sQueryMode;
+        }
+
+        top.HEURIST.insertPattern = _insertPattern;
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -169,7 +183,7 @@ function ShowReps() {
                 visible: false,
                 draggable: false,
                 close: true,
-                header: 'Warning',
+                header: 'Warning!',
                 text: "some text",
                 icon: YAHOO.widget.SimpleDialog.WARNING,
                 buttons: [
@@ -186,9 +200,17 @@ function ShowReps() {
     * loads list of templates
     */
     function _reload_templates(){
-        var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
         var callback = _updateTemplatesList;
         Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
+    }
+
+
+    function _getSelectedTemplate(){
+
+        var sel = document.getElementById('selTemplates');
+        if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
+        return sel.options[sel.selectedIndex].value; // by default first entry
     }
 
     /**
@@ -202,7 +224,7 @@ function ShowReps() {
             if(_sQueryMode=="selected"){
                 _updateReps("<div class='wrap'><div id='errorMsg'><span>No Records Selected</span></div></div>");
             }else{
-                _updateReps("<b><font color='#ff0000'>Perform search to see template output</font></b>");
+                _updateReps("<b><font color='#ff0000'>Select saved search or apply a filter to see report output</font></b>");
             }
 
             return null;
@@ -210,9 +232,7 @@ function ShowReps() {
         }else{
 
             if(Hul.isnull(template_file)){
-                var sel = document.getElementById('selTemplates');
-                if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
-                template_file = sel.options[sel.selectedIndex].value; // by default first entry
+                template_file = _getSelectedTemplate();
             }
 
             if(isencode){
@@ -230,43 +250,192 @@ function ShowReps() {
     */
     function _reload(template_file) {
 
-        _showLimitWarning();
+        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
+        var squery = null;
+        var request_query = {};
+        var session_id = Math.round((new Date()).getTime()/1000);
 
-        var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
-        var squery = _getQueryAndTemplate(template_file, false);
+        if(_currentRecordset!=null){
+
+            //new approach to support h4
+            if(Hul.isnull(template_file)){
+                template_file = _getSelectedTemplate();
+            }
+            if(Hul.isnull(template_file)){
+                return;
+            }
+
+            squery =  'db='+_db+'&template='+template_file;//+&recordset='+JSON.stringify(_currentRecordset);
+            
+            request_query = {db:_db, template:template_file, recordset:_currentRecordset, session:session_id};
+
+        }else{
+            return; //use global recordset only
+            squery = _getQueryAndTemplate(template_file, false);
+        }
 
         if(squery!=null){
-
 
             //infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
             infoMessageBox.show();
 
+            lastQuery = squery;
+            
+            _showProgress( session_id );
+            
+            $.ajax({
+                url: baseurl,
+                type: "POST",
+                data: request_query,
+                dataType: "text",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                    _hideProgress();
+                },
+                success: function( response, textStatus, jqXHR ){
+                    _hideProgress();
+                    _updateReps( response );
+                }
+            });
+            
+            /* 
             Hul.sendRequest(baseurl, function(xhr) {
+                
+                _hideProgress();
+                
                 var obj = xhr.responseText;
-                _updateReps(obj);
-                }, squery);
+                    _updateReps(obj);
+                
+                    var limit = parseInt(Hul.getDisplayPreference("smarty-output-limit"));
+                    if(top.HEURIST.totalQueryResultRecordCount>limit){
+                        
+$('<hr/><p>Output truncated at '+limit+' records (out of '
++top.HEURIST.totalQueryResultRecordCount+'). This limit can be reset in Profiles > Preferences.'
++'Note: calls to this function from websites and other external requests are not truncated'
++ '- the limit applies only to interactive viewing.</p>').appendTo($("#rep_container"));
 
+                    }
+                
+                }, squery);
+            */    
         }
+
         //Hul.getJsonData(baseurl, callback, squery);
     }
 
     //
-    function _isEditorVisible(){
-        //
-        if(!isEditorVisible && !isInited){
-            //MCE works only once????  setupMCE(); //auto setup mce
-            return false;
-        }else{
-            return isEditorVisible;
+    //
+    //
+    function _showProgress( session_id ){
+
+        var progressCounter = 0;        
+        var progress_url = top.HEURIST.baseURL_V3 + "viewers/smarty/reportProgress.php";
+
+        $('#toolbardiv').hide();
+        $('#progressbar_div').show();
+        $('body').css('cursor','progress');
+        
+        $('#progress_stop').button().on({click: function() {
+            $.ajax({
+                url: progress_url,
+                type: "GET",
+                data: {db: _db, terminate:1, t:(new Date()).getMilliseconds(), session:session_id},
+                dataType: "text",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                    _hideProgress();
+                },
+                success: function( response, textStatus, jqXHR ){
+                    _hideProgress();
+                }
+            });
+        
+        } });
+        
+        var pbar = $('#progressbar');
+        var progressLabel = pbar.find('.progress-label').text('');
+        pbar.progressbar({value:0});
+        //pbar.progressbar('value', 0);
+        /*{
+              value: false,
+              change: function() {
+                progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+              },
+              complete: function() {
+                progressLabel.text( "Complete!" );
+              }
+        });*/
+        
+        progressInterval = setInterval(function(){ 
+            
+        $.ajax({
+            url: progress_url,
+            type: "GET",
+            data: {db: _db, t:(new Date()).getMilliseconds(), session:session_id},
+            dataType: "text",
+            cache: false,
+            error: function(jqXHR, textStatus, errorThrown ) {
+                console.log(textStatus+' '+jqXHR.responseText);
+                _hideProgress();
+            },
+            success: function( response, textStatus, jqXHR ){
+
+//console.log('resp '+progressCounter+'  resp='+response+'  '+session_id);
+                
+                var resp = response?response.split(','):[0,0];
+                
+                if(resp && resp[0]){
+                    if(progressCounter>0){
+                        if(resp[1]>0){
+                            var val = resp[0]*100/resp[1];
+                            pbar.progressbar( "value", val );
+                            progressLabel.text(resp[0]+' of '+resp[1]);
+                        }else{
+                            progressLabel.text('wait...');
+                            //progressLabel.text('');
+                        }
+                    }else{
+                        pbar.progressbar( "value", 0 );
+                        progressLabel.text('preparing...');
+                    }
+                }else{
+                    _hideProgress();
+                }
+                
+                
+                progressCounter++;
+                //if(progressCounter>10000){
+                //     _hideProgress();
+                //}
+            }
+        });            
+        
+            }, 1000);                
+        
+    }
+    
+    function _hideProgress(){
+        
+        
+        $('body').css('cursor','auto');
+        
+        if(progressInterval!=null){
+            
+            clearInterval(progressInterval);
+            progressInterval = null;
         }
+        $('#progressbar_div').hide();
+        $('#toolbardiv').show();
+        
     }
 
     function _onbeforeunload() {
         if(_iseditor && _keepTemplateValue && _keepTemplateValue!=codeEditor.getValue()){
-            return "Template was changed. Are you sure you wish to exit and lose all modifications?";
+            return "Template was changed. Are you sure you wish to exit and lose all modifications?!!!";
         }
     }
+
 
 
     /**
@@ -288,11 +457,6 @@ function ShowReps() {
 
             if(isLoadGenerated){
 
-                if(_isEditorVisible()){ //NOT USED
-                    var ed = tinyMCE.get('edTemplateBody');
-                    ed.setContent(context['text']);
-                }else if(true) {
-
                     //ApplyLineBreaks
                     var text = [
 
@@ -311,6 +475,7 @@ function ShowReps() {
                         '',
                         '{*------------------------------------------------------------*}',
                         '{foreach $results as $r} {* Start records loop, do not remove *}',
+                        '{$r = $heurist->getRecord($r)}',
                         '{*------------------------------------------------------------*}',
                         '',
                         '',
@@ -346,12 +511,6 @@ function ShowReps() {
 
                     Dom.get("edTemplateName").innerHTML = name;
                     _initEditor(res);
-                    _keepTemplateValue = codeEditor.getValue();
-                }else{ //NOT USED
-                    Dom.get("edTemplateName").innerHTML = name;
-                    ApplyLineBreaks(Dom.get("edTemplateBody"), context['text']);
-                    _keepTemplateValue = Dom.get("edTemplateBody").value;
-                }
             }
 
             _variables = context;
@@ -387,25 +546,38 @@ function ShowReps() {
 
             _doExecuteFromEditor(); //execute at once
         }
-
-        var squery = _getQuery();
-
-        if(Hul.isnull(squery)){
-            alert('Please select some records in search results');
-        }else{
-            var baseurl = top.HEURIST.basePath + "common/php/recordTypeTree.php";
-            Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
+        
+        function __onRectypeTree(context){
+            if(Hul.isnull(context)){
+                return;
+            }
+            _variables = context;
+            _fillTreeView();
         }
+
+        if(isLoadGenerated){
+            __onGenerateTemplate([]);
+        }
+
+        var ele = $('#rectype_selector');
+        ele.load( top.HEURIST.baseURL_V3 + "common/php/recordTypeSelect.php?db="+_db,
+            function(){
+                ele.find('#rectype_elt').on('change', function(event){
+                    var selel = $(event.target).val();
+                    if(selel>0){
+                        var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
+                        Hul.getJsonData(baseurl, __onRectypeTree, 'db='+_db+'&mode=list&rty_id='+selel);
+                    }
+                });
+
+        } );
+
     }
+
+
 
     function _initEditor(content) {
         if(codeEditor==null){
-            if(_isAceEditor){
-                codeEditor = ace.edit("editor");
-                codeEditor.setTheme("ace/theme/chrome");
-                codeEditor.getSession().setMode("ace/mode/php");
-                codeEditor.setValue(content);
-            }else{
 
                 codeEditor = CodeMirror(Dom.get("templateCode"), {
                     mode           : "smartymixed",
@@ -420,30 +592,31 @@ function ShowReps() {
                         "Enter": function(e){
                             insertAtCursor(null, "");
                         }
-                }});
-            }
-        }else if(!_isAceEditor){
-            $('.CodeMirror').hide();
+                    },
+                    onFocus:function(){},
+                    onBlur:function(){}
+                });
         }
 
         codeEditor.setValue(content);
 
-        if(!_isAceEditor){
-            setTimeout(function(){
+        setTimeout(function(){
                 $('.CodeMirror').show();
-                codeEditor.refresh();
+                    codeEditor.refresh();
+                    _keepTemplateValue = codeEditor.getValue();
                 },2000);
-        }
     }
+
+
 
     function _initEditorMode(template_file, template_body){
 
         Dom.get("edTemplateName").innerHTML = template_file;
         _initEditor(template_body);
-        //Dom.get("edTemplateBody").value = template_body;
-        _keepTemplateValue = template_body; //Dom.get("edTemplateBody").value;
         _setLayout(true, true);
     }
+
+
 
     /**
     * Creates new template from the given query
@@ -454,7 +627,7 @@ function ShowReps() {
             _initEditorMode(template_file, context);
         }
 
-        var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
 
         _originalFileName = template_file;
 
@@ -472,6 +645,7 @@ function ShowReps() {
         _generateTemplate(template_file, null, false);
     }
 
+
     /**
     * Convert template to global
     */
@@ -479,7 +653,7 @@ function ShowReps() {
 
         if(Number(top.HEURIST.database.id)>0){
 
-            var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
 
             var squery = 'db='+_db+'&mode=serve&dir=0&template='+template_file;
 
@@ -495,13 +669,19 @@ function ShowReps() {
             }else{
 
                 //template.gpl
-                window.open(baseurl+'?'+squery, '_blank');
+                if(top.HEURIST4){
+                    top.HEURIST4.util.downloadURL(baseurl+'?'+squery);
+                }else{
+                    window.open(baseurl+'?'+squery, 'Download'); //old way
+                }
+
             }
 
         }else{
             alert('Database must be registered to allow translation of local template to global template');
         }
     }
+
 
 
     /**
@@ -512,7 +692,7 @@ function ShowReps() {
 
         if(mode>0){
 
-            var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php",
+            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php",
             squery = 'db='+_db+'&mode=',
             template_file = null;
 
@@ -600,9 +780,29 @@ function ShowReps() {
                 ];
                 mySimpleDialog.cfg.queueProperty("buttons", myButtons);*/
 
-                mySimpleDialog.setHeader("Warning!");
-                mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?");
-                mySimpleDialog.show();
+                if(top.HEURIST4){
+                    top.HEURIST4.msg.showMsgDlg(
+                        'Template was changed. Are you sure you wish to exit and lose all modifications?',
+                        {'Save': function() {
+                            _operationEditor(2);
+                            var $dlg = top.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog( 'close' );},
+                            'Discard': function() {
+                                _setLayout(true, false);
+                                var $dlg = top.HEURIST4.msg.getMsgDlg();
+                                $dlg.dialog( 'close' );},
+                            'Cancel':function() {
+                                var $dlg = top.HEURIST4.msg.getMsgDlg();
+                                $dlg.dialog( 'close' );
+                            }
+                        },
+                        'Warning');
+
+                }else{
+                    mySimpleDialog.setHeader("Warning!");
+                    mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?!");
+                    mySimpleDialog.show();
+                }
             }else{
                 _setLayout(true, false);
             }
@@ -619,6 +819,8 @@ function ShowReps() {
         }
     }
 
+
+
     /**
     * Executes the template from editor
     *
@@ -631,6 +833,9 @@ function ShowReps() {
             document.getElementById('cbErrorReportLevel').value = 0;
             replevel = 0;
         }
+        var debug_limit = document.getElementById('cbDebugReportLimit').value;
+
+
         /*
         if(document.getElementById('cbDebug').checked){
         replevel = 1;
@@ -638,28 +843,34 @@ function ShowReps() {
         replevel = 2;
         }*/
 
-        var template_body;
-        if(_isEditorVisible()){
-            var ed = tinyMCE.get('edTemplateBody');
-            template_body = ed.getContent();
-        }else if (true){
-            template_body = codeEditor.getValue();
-        }else{
-            template_body = Dom.get("edTemplateBody").value;
-        }
+        var template_body = codeEditor.getValue();
 
         if(template_body && template_body.length>10){
 
-            var squery = _getQuery();
+            var squery;
 
-            var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
+
+            if(_currentRecordset!=null){
+                squery =  'db='+_db+'&recordset='+JSON.stringify(_currentRecordset);
+            }else{
+                squery = _getQuery();;
+            }
+
+            if(debug_limit>0){
+                squery = squery + '&limit='+debug_limit;
+            }
 
             squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
+
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
             infoMessageBox.show();
+            
+            _showProgress();
 
             Hul.sendRequest(baseurl, function(xhr) {
+                _hideProgress();
                 var obj = xhr.responseText;
                 _updateReps(obj);
                 }, squery);
@@ -670,7 +881,8 @@ function ShowReps() {
     }
 
 
-    var layout, _isviewer, _iseditor;
+
+    var layout, _isviewer, _iseditor, _kept_width=-1;
 
     /**
     * change visibility
@@ -735,11 +947,28 @@ function ShowReps() {
             _needListRefresh = false;
             _reload_templates();
         }
+
+        //resize global cardinal layout
+        if(iseditor){
+            _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
+            top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
+            top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
+            _doExecuteFromEditor();
+        }else if(isviewer){
+            if(_kept_width>0)
+                top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width
+            top.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
+            
+            var sel = document.getElementById('selTemplates');
+            if(sel.selectedIndex>=0){
+                var template_file = sel.options[sel.selectedIndex].value;
+                _reload(template_file);
+            }
+        }
     }
 
-    //
-    //
-    //
+
+
     function _selectAllChildren(parentNode) {
         var len = parentNode.children?parentNode.children.length:0;
         if( len > 0) {
@@ -762,6 +991,7 @@ function ShowReps() {
     }
 
 
+
     /**
     * Finds node by term id
     */
@@ -782,6 +1012,8 @@ function ShowReps() {
         }
     }
 
+
+
     //
     //
     //
@@ -791,6 +1023,8 @@ function ShowReps() {
             _selectAllChildren(node);
         }
     }
+
+
 
     //
     //
@@ -805,6 +1039,8 @@ function ShowReps() {
         _varsTree.getNodesBy(__resetSelection);
         _varsTree.render();
     }
+
+
 
     /**
     *	Fills the given treeview with the list of variables
@@ -830,10 +1066,13 @@ function ShowReps() {
         var idx_maxval = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
         var idx_dtype  = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
 
+        var first_node = null;
+
         //internal function
         // parent_single - true if recrod pointer or enum is not repeatable field type
         //
-        function __createChildren(parentNode, rectypeTree, parent_id, parent_full, parent_single) { // Recursively get all children
+        function __createChildren(parentNode, rectypeTree, parent_id, parent_full,
+                         parent_single, grandparent_single) { // Recursively get all children
             //  __createChildren(topLayerNode, _variables[i], "r", prefix_id+".r");
 
             var term,
@@ -866,6 +1105,8 @@ function ShowReps() {
 
                     var is_record = ((typeof(child) == "object") &&
                         Object.keys(child).length > 0);
+                        
+                    var is_remark = (id=='remark');    
 
                     var is_multiconstrained = false;
                     var is_single = true; //non repeatable field
@@ -885,23 +1126,36 @@ function ShowReps() {
                     }
 
 
-                    if(!is_record){ //simple
+                    if(!is_record){ //simple - leaf - field or term id,label,code
 
                         label = child;
-
+                        
+                        if(is_remark){
+                            term.label = term.label + '<i>' + label + '</i></div>';
+                        }else
                         if(parent_single){   //parent_id=="r"){ // || parent_id.indexOf("r")==0){
-                            term.label = term.label + label +
-                            '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
-                            term.id+'\', false, this)">insert</a>)</span>'+
-                            '<span class="insert-intree">'+
-                            '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+
-                            term.id+'\', false, false)">insert</a>'+
-                            '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+
-                            term.id+'\', true, true)">if</a>)</span></div>';
+                        
+                            if(grandparent_single){
+                        
+                                term.label = term.label + label +
+                                '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
+                                term.id+'\', 0, this)">insert</a>)</span>'+
+                                '<span class="insert-intree">'+
+                                '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+
+                                term.id+'\', false, false)">insert</a>'+
+                                '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+
+                                term.id+'\', true, true)">if</a>)</span></div>';
+                            } else {
+                                
+                                term.label = term.label + label +
+                                '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
+                                term.id+'\', 2, this)">insert</a>)</span></div>';
+                                
+                            }
                         }else{
                             term.label = term.label + label +
                             '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
-                            term.id+'\', true, this)">insert</a>)</span>'+
+                            term.id+'\', 1, this)">insert</a>)</span>'+
                             '<span class="insert-intree">'+
                             '&nbsp;(<a href="javascript:void(0)" title="Insert variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+
                             term.id+'\', true, false)">in</a>'+
@@ -941,6 +1195,8 @@ function ShowReps() {
                     childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
                     childNode.enableHighlight = false;
 
+                    if(first_node==null) first_node = childNode;
+
                     if( is_multiconstrained ){
 
                         var k;
@@ -957,10 +1213,10 @@ function ShowReps() {
                             }
 
                             rt_term.label =  '<div style="padding-left:10px;"><b>' + (child[k].rt_name?child[k].rt_name:child[k].rt_id+' name N/A') +
-                            '</b>&nbsp;(<a href="javascript:void(0)" '+
+                            '</b>&nbsp;(<span '+
                             'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
                             'onClick="showReps.insertRectypeIf(\''+term.id+'\',' + child[k].rt_id +
-                            ', \'' + (child[k].rt_name?child[k].rt_name.replace("'", "\\'"):'') + '\')">if</a>)';
+                            ', \'' + (child[k].rt_name?child[k].rt_name.replace("'", "\\'"):'') + '\')">if</span>)';
 
                             //'onClick="showReps.insertRectypeIf(\''+term.this_id+'\', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
 
@@ -970,16 +1226,17 @@ function ShowReps() {
 
                             var rectypeNode = new YAHOO.widget.TextNode(rt_term, childNode, false);
 
-                            __createChildren(rectypeNode, child[k], term.this_id, term.id, is_single);
+                            __createChildren(rectypeNode, child[k], term.this_id, term.id, is_single, parent_single);
                         }
 
                     }else if( is_record ){ //next recursion
-                        __createChildren(childNode, child, term.this_id, term.id, is_single);
+                        __createChildren(childNode, child, term.this_id, term.id, is_single, parent_single);
                     }
                 }
             }//for
         }//__createChildren
         //end internal function
+
 
 
         //fill treeview with content
@@ -1009,11 +1266,13 @@ function ShowReps() {
             term.id = _variables[i].rt_id;  //record type
             term.this_id = 'r';
             term.parent_id = null;
-
-            term.label =  '<div style="padding-left:10px;"><b>' +_variables[i].rt_name +
-            '</b>&nbsp;(<a href="javascript:void(0)" '+
+                                                                 
+            term.label =  '<div style="padding-left:10px;"><b>' + _variables[i].rt_name +
+            '</b>'+
+            '&nbsp;(<span '+
             'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
-            'onClick="showReps.insertRectypeIf(\'r\', ' + _variables[i].rt_id + ', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
+            'onClick="showReps.insertRectypeIf(\'r\', ' + _variables[i].rt_id + ', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</span>)';
+            
             //'onClick="showReps.insertRectypeIf(\'r\', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
 
             term.label =  term.label + '</div>';
@@ -1022,8 +1281,9 @@ function ShowReps() {
 
             var topLayerNode = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
 
-            __createChildren(topLayerNode, _variables[i], 'r', 'r', true);
+            __createChildren(topLayerNode, _variables[i], 'r', 'r', true, false);
 
+            $('#varsTree').find('.ygtvlabel').css('margin-left',0);
         }//for  _variables
 
         //TODO tv.subscribe("labelClick", _onNodeClick);
@@ -1031,9 +1291,14 @@ function ShowReps() {
         //TODO tv.subscribe("clickEvent", tv.onEventToggleHighlight);
 
         tv.render();
-        //first_node.focus();
-        //first_node.toggle();
+        if(first_node){
+            first_node.focus();
+            first_node.toggle();
+        }
+        $('.ygtvlabel').css('margin-left',0); //otherwise ff renders wrong
     }
+
+
 
     function _addIfOperator(nodedata, varname){
         //var varname = nodedata.id; //was prefix+nodedata.this_id
@@ -1046,11 +1311,32 @@ function ShowReps() {
     }
 
     //
+    // add loop opeartor for for multi-value field
+    //
+    function _addMagicLoopOperator(_nodep, varname){
+        
+        var gp_node = _findNodeById(_nodep.parent_full_id);
+        if(gp_node && gp_node.data){
+            
+            var parent_name = _getVariableName(_nodep.parent_full_id);
+            var var_name = (parent_name + '>>' +_getVariableName(_nodep.id)).trim(); //was this_id
+            
+            return '{foreach $'+gp_node.data.parent_id+'.'+_nodep.parent_id+'s as $'+_nodep.parent_id+' name=valueloop}{*  multi-value field loop *}'
+                    //+'\n\t'+_addVariable(_nodep, varname)
+                    +'\n\t{$'+_nodep.parent_id+"."+_nodep.this_id+'} {* '
+                            +var_name+' Note: $'+gp_node.data.parent_id+'.'+_nodep.parent_id+'.'+_nodep.this_id+' outputs first term only *}'
+                    +'\n{/foreach}';
+        }else{
+            return _addVariable(_nodep, varname);
+        }
+
+    }
+    //
     //
     //
     function _addVariable(nodedata, varname){
         var res= "",
-        insertMode = Dom.get("selInsertMode").value;
+        insertMode = $("#selInsertMode").val();
 
         //var varname = nodedata.id; //was prefix+nodedata.this_id
         var parname = _getVariableName(nodedata.parent_full_id);
@@ -1081,31 +1367,42 @@ function ShowReps() {
                 res = res + ' width="300" height="auto"';
             }else{
             }
-            res = res +'}';
+            res = res +'}{*' +  remark + '*}';
         }
 
         return (res+((insertMode==0)?' ':'\n'));
     }
 
 
+
     //
     // root loop
-    // TODO: This function no longer needed as root loop is simply one of the patterns inserted by next fucntion
+    // TODO: This function no longer needed as root loop is simply one of the patterns inserted by next function
     //
     function _insertRootForEach(){
         var textedit = Dom.get("edTemplateBody");
-        var _text = '{foreach $results as $r}\n\n  {if ($r.recOrder==0)}\n    \n  '+
-            '{elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
+        var _text = '{foreach $results as $r}\n{$r = $heurist->getRecord($r)}\n\n  {if ($r.recOrder==0)}\n    \n  '+
+        '{elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
 
         insertAtCursor(textedit, _text, false, -12);
     }
-//
+    //
+
+
 
     /*
     * insertPattern: inserts a pattern/template/example for different actions into the editor text
     *
     */
     function _insertPattern(pattern) {
+
+        if(top.HEURIST4){
+            if(insertPopupID){
+                $(insertPopupID).dialog('close');
+                insertPopupID = null;
+            }
+        }
+
         var _text = '';
         var textedit = Dom.get("edTemplateBody");
 
@@ -1115,75 +1412,86 @@ function ShowReps() {
         switch(pattern) {
 
             case 1: // Heading for record type
-                _text=  "{* Use a saved search sorted by record type (in this example) *} \n" +
-                    "{* Modify the sorting variable and the test according to your needs *} \n" +
-                    "{* Put the following at top of file: {$lastRecordType = 0}  *} \n\n" +
+                _text= "{* Section heading *} \n" +
+                "\n\n {* Make sure your search results are sorted by record type. \n" +
+                "    Move the following line to the top of the file:\n"+
+                "        {$lastRecordType = 0}\n" +
+                "    Modify the sorting variable and the test according to your needs.*} \n\n" +
 
-                    "{* Section heading *} \n" +
-                    "{if $lastRecordType != $r.recTypeID} {$lastRecordType = $r.recTypeID}\n" +
-                    "   <hr> \n<p/> \n"+
-                    "   <h1>{$r.recTypeName}</h1> {* Replace this with whatever you want as a heading *} \n" +
-                    "{/if} {* section heading *} ";
+                "{if $lastRecordType != $r.recTypeID} {$lastRecordType = $r.recTypeID}\n" +
+                "   <hr> \n<p/> \n"+
+                "   <h1>{$r.recTypeName}</h1> {* Replace this with whatever you want as a heading *} \n" +
+                "{/if} {* end of section heading *} " +
+                "\n\n";
                 break;
 
             case 2: // simple table
-                _text='{* Use this as a guideline for creating a simple tabular format *} \n' +
-                '{* Put narrow specified width columns at the start and any long text columns at the end *} \n' +
+                _text='\n\n {* Use this as a guideline for creating a simple tabular format *} \n' +
+                '{* Put narrow specified-width columns at the start and any long text columns at the end *} \n' +
                 '<table> \n' +
                 '   <tr style="padding-top:10px;"> \n' +
                 '      <td style="width:200px"> \n' +
                 '      </td> \n' +
+                '      <td> \n' +
+                '      </td> \n' +
+                '      {* Add more columns as required *}\n' +
                 '   </tr> \n' +
-                '</table>';
+                '</table> ' +
+                '\n\n';
                 break;
 
             case 3: // information on first element of a loop
-                _text='{* The information between {if} ... {/if} will be generated before the first element of a loop is output *} \n' +
-                '{* The information will not be output if the loop is empty - this is often an advantage *} \n' +
-                '{if ?????????} {* Information preceding first element of loop *} \n' +
+                _text='\n\n{* Information before first element of a loop (nothing output if loop is empty). \n' +
+                '     Place this before the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n' +
+                '{if $smarty.foreach.valueloop.first} {* Before loop *} \n' +
                 ' \n' +
+                ' {* Add the information you want output here *}}\n' +
                 ' \n' +
-                ' \n' +
-                ' \n' +
-                '{/if} {* Information before first element of loop*}';
+                '{/if} {* End: Before loop*}' +
+                '\n\n';
                 break;
 
-            case 4: // information on last element of a loop
-                _text='{* The information between {if} ... {/if} will be generated after the last element of a loop is output *} \n' +
-                '{* The information will not be output if the loop is empty - this is often an advantage *} \n' +
-                '{if ?????????} {* Information following last element of loop *} \n' +
+            case 4: // information on first element of a loop
+                _text='\n\n{* Information after last element of a loop (nothing output if loop is empty). \n' +
+                '     Place this after the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n' +
+                '{if $smarty.foreach.valueloop.last} {* After loop *} \n' +
                 ' \n' +
+                ' {* Add the information you want output here *}}\n' +
                 ' \n' +
-                ' \n' +
-                ' \n' +
-                '{/if} {* Information following last element of loop*}';
+                '{/if} {* End: After loop*}' +
+                '\n\n';
                 break;
 
-            case 5: // using a div to control scpacing
-                _text=  '{* You can use style= on divs, spans, table rows and cells etc. to control spacing *} \n' +
+            case 5: // using a div to control spacing
+                _text=  '\n\n{* You can use style= on divs, spans, table rows and cells etc. to control spacing *} \n' +
                 '<div style="padding-top:5px; margin-left:10px;"> \n' +
                 '   {* Put content here *} \n' +
-                '</div>';
+                '</div>' +
+                '\n\n';
                 break;
 
             case 6: //
-                _text='TO DO';
+                _text='\n\n   TO DO   ' +
+                ' content to add here ' +
+                '\n\n';
                 break;
 
 
             case 99: // outer records loop
-                _text=  '{*------------------------------------------------------------*} \n' +
-                    '{foreach $results as $r} {* Start records loop, do not remove *} \n' +
-                    '{*------------------------------------------------------------*} \n' +
-                    ' \n\n' +
-                    '  {* put the data you want output for each record here - insert the *} \n' +
-                    '  {* fields using the tree of record types and fields on the right *} \n' +
-                    ' \n' +
-                    '<br/> {* line break between each record *} \n' +
-                    ' \n' +
-                    '{*------------------------------------------------------------*} \n' +
-                    '{/foreach} {* end records loop, do not remove *} \n' +
-                    '{*------------------------------------------------------------*}';
+                _text=  '\n\n{*------------------------------------------------------------*} \n' +
+                '{foreach $results as $r} {* Start records loop, do not remove *} \n' +
+                '{$r = $heurist->getRecord($r)}\n'+
+                '{*------------------------------------------------------------*} \n' +
+                ' \n\n' +
+                '  {* put the data you want output for each record here - insert the *} \n' +
+                '  {* fields using the tree of record types and fields on the right *} \n' +
+                ' \n' +
+                '<br/> {* line break between each record *} \n' +
+                ' \n' +
+                '{*------------------------------------------------------------*} \n' +
+                '{/foreach} {* end records loop, do not remove *} \n' +
+                '{*------------------------------------------------------------*} ' +
+                '\n\n';
                 break;
 
             default:
@@ -1193,6 +1501,7 @@ function ShowReps() {
         insertAtCursor(null, _text, false, 0); // insert text into text buffer
 
     } // _insertPattern
+
 
 
     //
@@ -1211,16 +1520,19 @@ function ShowReps() {
     }
 
 
+
     var insertPopupID, insert_ID;
+    
+    // 
+    // isloop_level - insert var in loop (trim parents)
+    //  0 - no loop, 1 one level (parent is repeatable), 2 levels (grandparent is repreatable)
+    //
+    function _showInsertPopup( varid, isloop_level, elt ){
 
-    function _showInsertPopup( varid, isloop, elt ){
-
-        top.HEURIST.insertVar = _insertSelectedVars; 
-        top.HEURIST.insertPattern = _insertPattern;
+        top.HEURIST.insertVar = isloop_level==2?_insertSelectedVars_GP_repeatable:_insertSelectedVars;
         top.HEURIST.insertModifier = _insertModifier;
-        
-        
-        if(isloop){
+
+        if(isloop_level>0){
             $(".ins_isloop").show();
         }else{
             $(".ins_isloop").hide();
@@ -1228,9 +1540,9 @@ function ShowReps() {
 
 
         function __shownewpopup(){
-            
+
             var ele = document.getElementById("insert-popup");
-            
+
             var pos = top.HEURIST.getPosition(elt);
             var scroll = document.getElementById("treeContainer").scrollTop;
             insert_ID = varid;
@@ -1240,35 +1552,83 @@ function ShowReps() {
             if(node){
                 title = ucwords(node.data.labelonly);
             }else{
-                title = 'Insert variable';
+                title = 'variable';
             }
+            document.getElementById("insert-popup-header").innerHTML = 'Inserting: <b>'+title+'</b>';
 
-            
-            var topWindowDims = top.HEURIST.util.innerDimensions(window);
-            var xpos = topWindowDims.w - 400;
 
-            var w = top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
-                "no-close": false, y: pos.y-scroll, width: 400, height: isloop?260:200 });
-            //
-            insertPopupID = w.id;
-        }
+            if(top.HEURIST4){
 
-        if(top.HEURIST.util.popups.list.length>0){ //close previous
-            top.HEURIST.util.closePopupAll();
-            //top.HEURIST.util.closePopup(insertPopupID);
-            insertPopupID = null;
-            //setTimeout(__shownewpopup, 2000);
-        }else{
+                //show jquery dialog
+                insertPopupID = $(ele).dialog({
+                    autoOpen: true,
+                    height: 300,
+                    width: 400,
+                    modal: false,
+                    title: 'Insert field, test or pattern',
+                    position: { my: "right top", at: "left bottom", of: $(elt) }
+                });
+
+            }else{
+                var topWindowDims = top.HEURIST.util.innerDimensions(window);
+                var xpos = topWindowDims.w - 400;
+
+                top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
+                    "no-close": false, y: pos.y-scroll, width: 400, height: isloop_level>0?260:200 });
+
+            }
+        }//__shownewpopup
+
+
+        if(top.HEURIST4){
+
+            if(insertPopupID){
+                $(insertPopupID).dialog('close');
+                insertPopupID = null;
+            }
             __shownewpopup();
+
+        }else{
+            if(top.HEURIST.util.popups.list.length>0){ //close previous
+                top.HEURIST.util.closePopupAll();
+                //top.HEURIST.util.closePopup(insertPopupID);
+                insertPopupID = null;
+                //setTimeout(__shownewpopup, 2000);
+            }else{
+                __shownewpopup();
+            }
         }
     }
 
     //
     // inserts selected variables
+    // for special case: parent is not repeatable, grandparent is
+    //
+    function _insertSelectedVars_GP_repeatable(  varid, inloop, isif  ){
+        
+        _insertSelectedVars( varid, inloop?2:0, isif )
+    }
+    //
+    // inloop_level = 0 no loop
+    //              = 1 parent is repeatable
+    //              = 2 grandparent is repeatable
     //
     function _insertSelectedVars( varid, inloop, isif ){
+        
+        var inloop_level=2;
+        if(inloop!=2){
+            inloop_level = (inloop===true)?1:0;
+        }
 
-        top.HEURIST.util.closePopupAll();
+        if(top.HEURIST4){
+            if(insertPopupID){
+                $(insertPopupID).dialog('close');
+                insertPopupID = null;
+            }
+        }else{
+            top.HEURIST.util.closePopupAll();
+        }
+
         if(varid==null){
             //top.HEURIST.util.closePopup(insertPopupID);
             insertPopupID = null;
@@ -1278,34 +1638,78 @@ function ShowReps() {
         var textedit = document.getElementById("edTemplateBody"),
         _text = "",
         _varid = varid,
-        _inloop = inloop;
-        _varname = "";
-
+        _inloop = inloop,
+        _varname = "",
+        _getrec = '';
 
         var _nodep = _findNodeById(varid);
 
         if(_nodep){
 
             _nodep = _nodep.data;
-
-            if(_inloop){
+/*            
+id            : "r.f15.f26.term"
+labelonly     : "Term"
+parent_full_id: "r.f15.f26"
+parent_id     : "f26"
+this_id       : "term"            
+*/
+            if(inloop_level==2){
+                
+                var gp_node = _findNodeById(_nodep.parent_full_id);
+                if(gp_node && gp_node.data){
+                    _varname = gp_node.data.parent_id+'.'+_nodep.parent_id+'.'+_nodep.this_id;
+                }else{
+                    _varname = _nodep.parent_id+"."+_nodep.this_id;
+                }
+                
+            }else if(inloop_level==1){
+                
                 _varname = _nodep.parent_id+"."+_nodep.this_id;
+                
+                //2016-03-22 IJ wants to insert loop instead of var. AO - I am strictly against this inconsistency!
+                if(_nodep.this_id=='term' && !isif){
+                    
+                    _text = _addMagicLoopOperator(_nodep, _varname);
+                    insertAtCursor(textedit, _text, false, 0);
+                    return;
+
+                }else{
+                    _varname = _nodep.parent_id+"."+_nodep.this_id;
+                }
+                
             }else{
+                
+                var gp_node = _findNodeById(_nodep.parent_full_id);
+                if(gp_node && gp_node.data && gp_node.data.dtype=='resource'){
+                    _getrec = '{$'+_nodep.parent_full_id+
+                                    '=$heurist->getRecord($'+_nodep.parent_full_id+')}\n';
+                    //find if above cursor code already has such line             
+                    if(findAboveCursor(_getrec)) {
+                        _getrec = '';
+                    }
+                }
+                
+                if(_nodep.parent_full_id=='r.Relationship'){
+                    insertGetRelatedRecords();
+                }
+
+                
                 _varname = _nodep.id;
             }
 
 
             if(isif){
-                _text = _text + _addIfOperator(_nodep, _varname);
+                _text = _text + _getrec + _addIfOperator(_nodep, _varname);
             }else{
-                _text = _text + _addVariable(_nodep, _varname);
+                _text = _text + _getrec + _addVariable(_nodep, _varname);
             }
 
             // for loop we also add the variable in the loop
-            if(_inloop){
-                _varname = _nodep.parent_id+"."+_nodep.this_id;
-                _text = _text + _addVariable(_nodep, _varname);
-            }
+            /*if(_inloop){
+            _varname = _nodep.parent_id+"."+_nodep.this_id;
+            _text = _text + _addVariable(_nodep, _varname);
+            }*/
 
         }
 
@@ -1313,6 +1717,7 @@ function ShowReps() {
             insertAtCursor(textedit, _text, false, 0);
         }
     }
+
 
 
     //
@@ -1329,8 +1734,15 @@ function ShowReps() {
             var arr_name = (_nodep.data.this_id==="r") ?"results" : _nodep.data.parent_id+'.'+_nodep.data.this_id+'s';
             var item_name = (_nodep.data.this_id==="r") ?"r" : _nodep.data.this_id;
             var remark = "{* "+_getVariableName(_nodep.data.id)+" *}";
+            var loopname = (_nodep.data.dtype=='enum')?'ptrloop':'valueloop';
+            var getrecord = (_nodep.data.dtype=='resource')? ('{$'+item_name+'=$heurist->getRecord($'+item_name+')}') :'';
+            
+            if(_nodep.data.id=='r.Relationship'){
+                insertGetRelatedRecords();
+            }
 
-            _text = "{foreach $"+arr_name+" as $"+item_name+"}"+remark+"\n  \n{/foreach}"+remark+"\n";
+            _text = "{foreach $"+arr_name+" as $"+item_name+" name="+loopname+"}"+remark+"\n  "+getrecord+"\n  "
+            +"\n{/foreach}"+remark+"\n";
         }
 
         if(_text!=="")    {
@@ -1339,11 +1751,15 @@ function ShowReps() {
 
     }
 
+
+
     function ucwords (str) {
         return (str + '').replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, function ($1) {
             return $1.toUpperCase();
         });
     }
+
+
 
     function _getVariableName(id){
         if(!Hul.isempty(id)){
@@ -1366,6 +1782,8 @@ function ShowReps() {
             return "";
         }
     }
+
+
 
     function _getVariableName_old(id){
         if(!Hul.isempty(id)){
@@ -1392,14 +1810,76 @@ function ShowReps() {
     }
 
 
+    //
+    // returns false if token not found in current and lines until first "if" or "for" above
+    //
+    function findAboveCursor(token) {
+        
+        //for codemirror
+        var crs = codeEditor.getCursor();
+        //calculate required indent
+        var l_no = crs.line;
+        var line = "";
+        
+        token = token.trim();
+        
+        while (l_no>0){
+            line = codeEditor.getLine(l_no);
+            l_no--;
+            if(line.trim()=='') continue;
+
+            if(line.indexOf(token)>=0){
+                return true;   
+            }
+        
+            if(line.indexOf("{if")>=0 || line.indexOf("{foreach")>=0){
+                return false;   
+            }
+        }
+        
+        return false;   
+    }
+    
+    //
+    //
+    //
+    function insertGetRelatedRecords(){
+        
+        //find main loop and {$r = $heurist->getRecord($r)}
+        var l_count = codeEditor.lineCount();
+            l_no = 0, k = -1;
+        while (l_no<l_count){
+            line = codeEditor.getLine(l_no);
+            if(line.indexOf('$heurist->getRelatedRecords($r)}')>0){
+                return;//already inserted
+            }
+            l_no++;
+        }
+        
+        l_no = 0;    
+        while (l_no<l_count){
+            line = codeEditor.getLine(l_no);
+            k = line.indexOf('$heurist->getRecord($r)}');
+            if(k>=0){
+                
+                var s = '\n{$r.Relationships = $heurist->getRelatedRecords($r)}\n'+
+                '{$r.Relationship = (count($r.Relationships)>0)?$r.Relationships[0]:array()}\n';
+                
+                codeEditor.replaceRange(s, {line:l_no, ch:k+24}, {line:l_no, ch:k+24});
+                
+                break;
+            }
+            l_no++;
+        }
+    }
+    
+
     /**
     * myField, isApplyBreaks, cursorIndent - not used
     * TODO: What do the parameters do?
     */
     function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
-        if(_isAceEditor){
-            codeEditor.insert(myValue);
-        }else{
+
             //for codemirror
             var crs = codeEditor.getCursor();
             //calculate required indent
@@ -1437,8 +1917,9 @@ function ShowReps() {
 
             codeEditor.setCursor(crs);
             setTimeout(function(){codeEditor.focus();},200);
-        }
+
     }
+
 
 
     //
@@ -1479,6 +1960,9 @@ function ShowReps() {
 
         setTimeout(function() {myField.focus(); }, 500);
     }
+
+
+
     //
     // apply line breaks
     //
@@ -1530,6 +2014,8 @@ function ShowReps() {
         return oTextarea;
     }
 
+
+
     //
     //
     //
@@ -1574,10 +2060,12 @@ function ShowReps() {
         */
     }
 
+
+
     //
     function _getQuery(){
         if(_sQueryMode=="all"){
-            return top.HEURIST.currentQuery_all;
+            return top.HEURIST.currentQuery_all_ ?top.HEURIST.currentQuery_all_ :top.HEURIST.currentQuery_all;
         }else if(_sQueryMode=="selected"){
             return top.HEURIST.currentQuery_sel;
         }else {
@@ -1585,25 +2073,6 @@ function ShowReps() {
         }
     }
 
-    //
-    function _showLimitWarning(){
-
-        var msg = "";
-
-        var limit = parseInt(Hul.getDisplayPreference("report-output-limit"));
-        if (isNaN(limit)) limit = 1000; //def value for dispPreference
-
-        if( (_sQueryMode=="all" && top.HEURIST.currentQuery_all_waslimited) ||
-            (_sQueryMode=="selected" && top.HEURIST.currentQuery_sel_waslimited) ||
-            (_sQueryMode=="main" && limit<top.HEURIST.totalQueryResultRecordCount))
-        {
-            msg = "&nbsp;&nbsp;<font color='red'>(result set limited to "+limit+")</font>";
-        }else if(_sQueryMode=="main"){
-            msg = "&nbsp;&nbsp;total records: "+top.HEURIST.totalQueryResultRecordCount;
-        }
-
-        document.getElementById('recordCount').innerHTML = msg;
-    }
 
     //
     function _onPublish(template_file){
@@ -1612,7 +2081,7 @@ function ShowReps() {
 
         if(q==null) return;
 
-        var url = top.HEURIST.basePath + "export/publish/manageReports.html?"+q+"&db="+_db;
+        var url = top.HEURIST.baseURL_V3 + "export/publish/manageReports.html?"+q+"&db="+_db;
 
         var dim = Hul.innerDimensions(top);
 
@@ -1625,9 +2094,11 @@ function ShowReps() {
         });
     }
 
+
+
     function _onResize(newwidth){
 
-        var newval = newwidth>490?'30px':'60px';
+        var newval = newwidth>605?'30px':'60px';
 
         if(top_repcontainer!=newval){
             top_repcontainer = newval;
@@ -1636,6 +2107,7 @@ function ShowReps() {
             }
         }
     }
+
 
     //public members
     var that = {
@@ -1652,6 +2124,12 @@ function ShowReps() {
 
         processTemplate: function (template_file){
             _reload(template_file);
+        },
+
+
+        // recordset is JSON array   {"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599....."}
+        assignRecordset: function(recordset){
+            _currentRecordset = recordset;
         },
 
         isNeedSelection: function(){
@@ -1723,8 +2201,8 @@ function ShowReps() {
             _insertSelectedVarsAsLoop(varid);
         },
 
-        showInsertPopup:function(varid, isloop, elt){
-            _showInsertPopup(varid, isloop, elt);
+        showInsertPopup:function(varid, isloop_level, elt){
+            _showInsertPopup(varid, isloop_level, elt);
             return false;
         },
 
@@ -1754,7 +2232,7 @@ function ShowReps() {
         },
 
         baseURL:  function (){
-            return top.HEURIST.basePath;
+            return top.HEURIST.baseURL_V3;
         },
 
         originalFileName:  function (val){

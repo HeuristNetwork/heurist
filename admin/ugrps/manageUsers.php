@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -40,7 +40,7 @@
 * @autor: Artem Osmakov
 *
 * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
+* @link: http://HeuristNetwork.org
 * @license http://www.gnu.org/licenses/gpl-3.0.txt
 * @package Heurist academic knowledge management system
 * @todo
@@ -256,7 +256,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 				    <script  type="text/javascript">
 
 				    function backToGroup(){
-					    window.location.href = top.HEURIST.baseURL + "admin/ugrps/manageGroups.php?db=<?=$_REQUEST['db']?>&popup=<?=@$_REQUEST['popup']?>";
+					    window.location.href = top.HEURIST.baseURL_V3 + "admin/ugrps/manageGroups.php?db=<?=$_REQUEST['db']?>&popup=<?=@$_REQUEST['popup']?>";
 					    //window.history.go(-1);
 				    }
 

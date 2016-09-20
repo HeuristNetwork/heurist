@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -33,7 +33,7 @@ if (! window["HAPI"]) {
 	alert(
 		"It seems the Heurist API libraries have failed to load.\n\n" +
 		"This can be caused by network problems, so please try relaoding the page.\n\n" +
-		"If the problem persists, please email info@heuristscholar.org and tell us the URL you are accessing."
+		"If the problem persists, please email info@HeuristNetwork.org and tell us the URL you are accessing."
 	);
 }
 
@@ -44,7 +44,7 @@ HAPI.WootException = HWootException;
 
 HAPI.WOOT = function() {
 	var _xssWebPrefix = (window.HeuristBaseURL ? window.HeuristBaseURL :
-							(window.HEURIST && window.HEURIST.baseURL ? HEURIST.baseURL :
+							(window.HEURIST && window.HEURIST.baseURL_V3 ? HEURIST.baseURL_V3 :
 								(window.HAPI && window.HAPI.XHR.defaultURLPrefix))) + "records/woot/php/wootDispatcher.php?";
 
 	function Woot(id, title, version, creatorId, permissions, chunks) {

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -128,7 +128,7 @@ function getDetailHistory ($ard_id, $up_to_version) {
 	// return deltas from archiveDetails, latest first
 	$deltas = array();
 	$res = mysql_query("
-		select ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, astext(ard_Geo) as ard_Geo
+		select ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, AsWKT(ard_Geo) as ard_Geo
 		from archiveDetails
 		where ard_ID = $ard_id
 		and ard_Ver <= $up_to_version
@@ -193,7 +193,7 @@ function getDetailRollbacks ($rec_id, $version) {
 				where dtl_ID = $ard_id
 				and dtl_Value " . ($ard_val ? "= '" . mysql_real_escape_string($ard_val) . "'" : "is null") . "
 				and dtl_UploadedFileID " . ($ard_file_id ? "= $ard_file_id" : "is null") . "
-				and astext(dtl_Geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
+				and AsWKT(dtl_Geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
 			);
 			if (mysql_num_rows($res) == 0) {
 				array_push($updates, $potential_update);
@@ -232,7 +232,6 @@ function rollRecordBack ($rec_id, $changes) {
 
 	mysql_query("update Records set rec_Modified = now() where rec_ID = $rec_id");
 	if (mysql_error()) {
-		error_log("rollback recmodified: ".mysql_error());
 		mysql_query("rollback");
 		return false;
 	}
@@ -249,7 +248,6 @@ function rollRecordBack ($rec_id, $changes) {
 			and dtl_ID = $rd_id
 		");
 		if (mysql_error()) {
-			error_log("rollback updates: ".mysql_error());
 			mysql_query("rollback");
 			return false;
 		}
@@ -266,7 +264,6 @@ function rollRecordBack ($rec_id, $changes) {
 			values ($rec_id, $rd_type, $rd_val, $rd_file_id, $rd_geo)
 		");
 		if (mysql_error()) {
-			error_log("rollback inserts: ".mysql_error());
 			mysql_query("rollback");
 			return false;
 		}
@@ -275,7 +272,6 @@ function rollRecordBack ($rec_id, $changes) {
 	foreach ($changes["deletes"] as $ard_id) {
 		mysql_query("delete from recDetails where dtl_ID = $ard_id");
 		if (mysql_error()) {
-			error_log("rollback deletes: "mysql_error());
 			mysql_query("rollback");
 			return false;
 		}
@@ -296,7 +292,6 @@ function rollRecordBack ($rec_id, $changes) {
 				mysql_query("set @suppress_update_trigger := 1");
 				mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($title) . "' where rec_ID = $rec_id");
 				if (mysql_error()) {
-					error_log("rollback title update: ".mysql_error());
 					mysql_query("rollback");
 					mysql_query("set @suppress_update_trigger := NULL");
 					return false;

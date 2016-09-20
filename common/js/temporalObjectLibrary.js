@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -15,17 +15,17 @@
 /**
 * temporal.js
 * Temporal Object Library V 1.0
-* 
+*
 * This file contains Objects for dealing with temporals. Temporals are a robust representation
 * of date - time information allowing for uncertainty and imprecision.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -352,7 +352,7 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
     "COM"	:	"Comment",
     "EGP"	:	"Egyptian Date",
     "CLD"   :   "Calendar",
-    "CL2"   :   "Non-gregorian value",  //value in calendar value 
+    "CL2"   :   "Non-gregorian value",  //value in calendar value
 };
 
 Temporal.determination = {	0	:	"Unknown",
@@ -516,7 +516,7 @@ Temporal.checkValidity = function ( temporal ) {
                 temp = temp.replace(map.req[i][j] + "=","");//remove from search
             } else {
                 //req field not found
-                valid = false;  
+                valid = false;
                 if (i < map.req.length-1){
                     break;  //ignore if there are several sets
                 } else {
@@ -525,7 +525,7 @@ Temporal.checkValidity = function ( temporal ) {
                 }
             }
         }
-    
+
         if (valid) {  // remove any optional fields
             for (j=0; j < map.opt.length; j++) {
                 temp = temp.replace(map.opt[j] + "=","");
@@ -543,9 +543,9 @@ Temporal.checkValidity = function ( temporal ) {
         switch ( type ) {
             case 'p':
             if (temporal.getTDate("PDB") && temporal.getTDate("TPQ").compare(temporal.getTDate("PDB")) > 0) {
-                ret[3] = "Probability type temporals require that TPQ is before or the same as PDB.";
+                ret[3] = "Probability type temporals require that TPQ is before or the same as PB.";
             }else if (temporal.getTDate("PDE") && temporal.getTDate("TAQ").compare(temporal.getTDate("PDE")) < 0) {
-                ret[3] = "Probability type temporals require that TAQ is after or the same as PDE.";
+                ret[3] = "Probability type temporals require that TAQ is after or the same as PE.";
             }else{
                 ret[0] = true;
             }
@@ -712,7 +712,7 @@ var TDate = function (strDate) {
         getTimezoneOffset: function () {
             return "" + _tzOffset ;
         },
-        
+
         toString : function (format) {
             var frmPart = function (s,fillLength) {
                 if (!s) {
@@ -721,6 +721,7 @@ var TDate = function (strDate) {
                 var neg = s<0;
                 if (neg) {
                     s = s.replace(/\-/,"");
+                    //if(fillLength==4) fillLength=6; //special case - required 5 digits for visjs timeline
                 }
                 while (s.toString().length < fillLength) {
                     s = "0" + s;
@@ -735,7 +736,7 @@ var TDate = function (strDate) {
                 format = "yyyy-MM-dd HH:mm:ssz";  // set default format to universally searchable format
             }
 
-            return  format.replace(/[\s\-\/]?dd?d?d?|[\s\-\/]?MM?M?M?|yy?y?y?|[\sT]?hh?|[\sT]?HH?|[\s\.,:]?mm?|[\s\.,:]?ss?s?|\s?tt?|\s?zz?z?/g, function (format) {
+            return  format.replace(/[\s\-\/]?dd?d?d?|[\s\-\/]?MM?M?M?|yy?y?y?y?y?|[\sT]?hh?|[\sT]?HH?|[\s\.,:]?mm?|[\s\.,:]?ss?s?|\s?tt?|\s?zz?z?/g, function (format) {
                     switch (format) {
                         case " hh":
                         case "Thh":
@@ -784,6 +785,7 @@ var TDate = function (strDate) {
                             return _milliseconds ? format[0] + _milliseconds : "";
                         case "sss":
                             return _milliseconds ? (_milliSep ? _milliSep : ".") + _milliseconds : "";
+                        case "yyyyyy":
                         case "yyyy":
                         case "yyy":
                         case "yy":
@@ -830,7 +832,7 @@ var TDate = function (strDate) {
                             return (format[0] === " " ? " " : "") + (_tz ? _tz : "Z");
                         case " zz":
                         case "zz":  //output offset
-                            return (format[0] === " " ? " " : "") + (_tzOffset ? "GMT" + _tzOffset : "Z");
+                            return (format[0] === " " ? " " : "") + (_tzOffset ? "GMT" + _tzOffset : '');
                         case " z":
                         case "z":
                             return (format[0] === " " ? " " : "") + (_tzOffset ? _tzOffset : "");
@@ -951,8 +953,8 @@ var TDate = function (strDate) {
         compare: function (tDate2) {
             var ret;
             function comp (a,b) {
-                a = a?a:0;
-                b = b?b:0;
+                a = parseInt(isNaN(a)?0:a);
+                b = parseInt(isNaN(b)?0:b);
                 if (a>b) return 1;
                 if (a<b) return -1;
                 return 0;
@@ -1031,6 +1033,20 @@ TDate.parse = function () {
 
         var date = new Date();
         var d = date.getDate();
+        var m = date.getMonth()+1;
+        var y = date.getFullYear();
+        str = '' + y +'-'+ (m<=9?'0'+m:m) +'-'+ (d<=9?'0'+d:d);
+        //str = (new Date()).toDateString();
+    }else if("tomorrow"===str.toLowerCase()){
+        var date = new Date();
+        var d = date.getDate()+1;  // TODO: will give wrong date at end of month
+        var m = date.getMonth()+1;
+        var y = date.getFullYear();
+        str = '' + y +'-'+ (m<=9?'0'+m:m) +'-'+ (d<=9?'0'+d:d);
+        //str = (new Date()).toDateString();
+    }else if("yesterday"===str.toLowerCase()){
+        var date = new Date();
+        var d = date.getDate()-1; // TODO: will give wrong date at beginning of month
         var m = date.getMonth()+1;
         var y = date.getFullYear();
         str = '' + y +'-'+ (m<=9?'0'+m:m) +'-'+ (d<=9?'0'+d:d);
@@ -1712,8 +1728,9 @@ var TDuration = function (strDuration) {
     //init and binding code
     _init();
     return that;
-}
+}   //end of TDuration
 
+// is given string is in temporal format
 function isTemporal(str) {
 
     var res = false;
@@ -1738,18 +1755,30 @@ function isTemporal(str) {
 }
 
 function formatGregJulian(val, isneed){
-    
+
         if(isneed && val){
 
             var tDate = TDate.parse(val);
             var isbce = (tDate.getYear()<0);
-            return tDate.getDay()+' '+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
+            var day = Number(tDate.getDay());
+            
+            var hrs = Number(tDate.getHours());
+            var min = Number(tDate.getMinutes());
+            var sec = Number(tDate.getSeconds());
+            
+            var res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
+            
+            if(hrs>0||min>0||sec>0){
+               res = res + ' ' +tDate.toString('HH:mm:ss zz');
+            }
+            
+            return  res.trim();
             //toString('d MMM yyyy') - misses space!
             //tDate.getDay()+' '+tDate.getMonth()+' '+tDate.getYear() + (isbce?' BCE':'');;
-            
+
         }else{
             return val;
-        }        
+        }
 }
 
 /**
@@ -1759,22 +1788,24 @@ function temporalToHumanReadableString(inputStr) {
     var str = inputStr;
     var cld = '';
     if (str && str.search(/\|VER/) != -1) {	//we have a temporal
-    
+
         var cldname = 'gregorian';
         if (str.match(/CLD=([^\|]+)/)){
               cldname = str.match(/CLD=([^\|]+)/)[1].toLowerCase();
         }
-    
+
         if (str.match(/CL2=([^\|]+)/) && cldname!='gregorian') {
             cld = str.match(/CL2=([^\|]+)/)[1] + ' '+
                   str.match(/CLD=([^\|]+)/)[1];
+
+            if(cld.indexOf('null')>=0) cld = cld.substr(4); //some dates were saved in wrong format - fix it
         }
-        
+
         var isgj = (cldname=='gregorian' || cldname=='julian');
-    
+
         if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
             str = formatGregJulian(str.match(/SRT=([^\|]+)/)[1], isgj);
-        }else if (str.search(/TYP=s/) != -1 ) {
+        }else if (str.search(/TYP=s/) != -1 ) {  //simple
             if (str.match(/DAT=([^\|]+)/)) {
                 if (str.search(/COM=[^\|]+/) == -1) {
                 }

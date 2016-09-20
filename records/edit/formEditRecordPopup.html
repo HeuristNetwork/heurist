@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -53,7 +53,7 @@
   <script>
 			if (!window.HEURIST) window.HEURIST = {};
 			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-			window.HEURIST.loadScript(top.HEURIST.basePath +'common/php/loadRecordData.php?recID='+window.HEURIST.parameters['recID']+
+			window.HEURIST.loadScript(top.HEURIST.baseURL_V3 +'common/php/loadRecordData.php?recID='+window.HEURIST.parameters['recID']+
 											"&db="+top.HEURIST.database.name, true);
 
 			function showRecordProperties() {
@@ -81,7 +81,7 @@
 
 				var parameters = window.HEURIST.parameters;
 				if (parameters  &&  parameters.recID && parameters.db) {
-					editFrame.src = top.HEURIST.baseURL + "records/edit/tabs/publicInfoTab.html?recID=" + parameters.recID + "&db=" + parameters.db;
+					editFrame.src = top.HEURIST.baseURL_V3 + "records/edit/tabs/publicInfoTab.html?recID=" + parameters.recID + "&db=" + parameters.db;
 
 					editFrame.style.display = "block";
 				}

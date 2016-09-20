@@ -59,7 +59,7 @@
               <b><xsl:value-of select="id"/>: &#160;
                 <img>
                   <xsl:attribute name="align">absbottom</xsl:attribute>
-                  <xsl:attribute name="src">../../common/images/rectype-icons/<xsl:value-of
+                  <xsl:attribute name="src">../../../common/images/rectype-icons/<xsl:value-of
                     select="type/@id"/>.png</xsl:attribute>
                 </img>
 
@@ -257,7 +257,7 @@
     <xsl:param name="id"></xsl:param>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
-        <xsl:attribute name="TARGET">_blank</xsl:attribute>  
+        <xsl:attribute name="TARGET">_blank</xsl:attribute>
         <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/file/url"/></xsl:attribute>
         <xsl:value-of select="file/origName"/>
       </xsl:element>  [<xsl:value-of select="file/size"/>]

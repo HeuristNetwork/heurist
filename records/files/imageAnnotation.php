@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -15,19 +15,19 @@
 */
 
 /**
-* function to search and define image annotations   
+* function to search and define image annotations
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Util 
+* @subpackage  Records/Util
 */
 
 
@@ -35,16 +35,13 @@
 	define("SAVE_URI", "disabled");
 
 	require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
-	require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
+	require_once(dirname(__FILE__).'/../edit/deleteRecordInfo.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-	//require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 	//mysql_connection_select(DATABASE);
 	mysql_connection_overwrite(DATABASE);
 
 	$res = array();
-
-	/*****DEBUG****///error_log(">>>>>".print_r($_REQUEST, true));
 
 	if (array_key_exists('url',$_REQUEST)) {
 		$res = getAnnotationsByUrl($_REQUEST['url']);
@@ -105,7 +102,6 @@
 			$result = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
 
 			if(!array_key_exists('records',$result) ||  $result['resultCount']==0 ){
-				/*****DEBUG****///error_log("EMPTY");
 			}
 		}
 		return $result;
@@ -132,7 +128,6 @@
 	function deleteAnnotationById($rec_id){
 
 		$res = deleteRecord($rec_id);
-		/*****DEBUG****///error_log(">>>>".print_r($res, true));
 		if( array_key_exists("error", $res) ){
 			mysql_query("rollback");
 		}else{

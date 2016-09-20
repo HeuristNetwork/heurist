@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -69,16 +69,14 @@
 		}
 
 		$fresh = !! @$args["f"];
-        
+
         $noCache = (@$args["nocache"]==1);
 
 		$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
-		/*****DEBUG****///error_log("QUERY:".$query);
 
 		$res = mysql_query($query);
 
 		if (mysql_error()) {
-			error_log("queryError in getSearchResults -".mysql_error());
 		}
 		$fres = mysql_query('select found_rows()');
 		$resultCount = mysql_fetch_row($fres); $resultCount = $resultCount[0];
@@ -95,16 +93,15 @@
 			while ($row = mysql_fetch_assoc($res)) {
 
 				if (mysql_error()) {
-					error_log("2.queryError in getSearchResults -".mysql_error());
 				}
 
                 if($noCache){
-                    $record = loadRecord_NoCache($row["rec_ID"], $bare);    
+                    $record = loadRecord_NoCache($row["rec_ID"], $bare);
                 }else{
-                    $record = loadRecord($row["rec_ID"], $fresh, $bare);    
+                    $record = loadRecord($row["rec_ID"], $fresh, $bare);
                 }
-                
-                
+
+
 				if (array_key_exists("error", $record)) {
 					return array("error" => $record["error"]);
 				}
@@ -126,17 +123,13 @@
 		$resrcDT = (defined('DT_RESOURCE')?DT_RESOURCE:0);
 		$expRecIDs = array();
 		foreach ( $recIDs as $recID ){
-			/*****DEBUG****///error_log("recID ".print_r($recID,true));
 			$rectype = mysql__select_array("Records","rec_RecTypeID","rec_ID = $recID");
-			/*****DEBUG****///error_log("rectype ($colRT) ".print_r($rectype,true));
 			$rectype = intval($rectype[0]);
 			if ($rectype == $colRT) { // collection rec so get query string and expand it and list all ptr recIDs
 				$qryStr = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $qStrDT and dtl_RecID = $recID");
-				/*****DEBUG****///error_log("query String ".print_r($qryStr,true));
 				if (count($qryStr) > 0) {
 					// get recIDs only for query. and add them to expanded recs
 					$loadResult = loadSearch(array("q"=>$qryStr[0]),true,true,$publicOnly);
-					/*****DEBUG****///error_log("loadResult ".print_r($loadResult,true));
 					if (array_key_exists("recordCount",$loadResult) && $loadResult["recordCount"] > 0){
 						foreach (explode(",",$loadResult["recIDs"]) as $resRecID) {
 							if (!in_array($resRecID,$expRecIDs)){
@@ -147,7 +140,6 @@
 				}
 				//add any colected record pointers
 				$collRecIDs = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $resrcDT and dtl_RecID = $recID");
-				/*****DEBUG****///error_log("recID list ".print_r($collRecIDs,true));
 				foreach ($collRecIDs as $collRecID) {
 					if (!in_array($collRecID,$expRecIDs)){
 						array_push($expRecIDs,$collRecID);
@@ -170,7 +162,7 @@
 		if (! $fresh) {
 			$record = $memcache->get($key);
 		}
-		if (! $record) {
+		if (true || ! $record) { //ARTEM
 			$record = loadBareRecordFromDB($id);
 			if ($record) {
 				$memcache->set($key, $record);
@@ -183,11 +175,11 @@
 	}
 
     //
-    // do not use memcache - use in export 
+    // do not use memcache - use in export
     // otherwise it fails on export of entire database
     //
     function loadRecord_NoCache($id, $bare = false) {
-        
+
         if (! $id) {
             return array("error" => "must specify record id");
         }
@@ -197,13 +189,13 @@
         }
         return $record;
     }
-    
-    
+
+
 	function updateCachedRecord($id) {
 		global $memcache;
 		$key = DATABASE . ":record:" . $id;
         try{
-		    $record = $memcache->get($key);
+		    $record = @$memcache->get($key);
 		    if ($record) {	// will only update if previously cached
 			    $record = loadBareRecordFromDB($id);
 			    $memcache->set($key, $record);
@@ -250,12 +242,13 @@
 	}
 
 	function loadRecordDetails(&$record) {
+
 		$recID = $record["rec_ID"];
 		$squery =
 		"select dtl_ID,
 		dtl_DetailTypeID,
 		dtl_Value,
-		astext(dtl_Geo) as dtl_Geo,
+		AsWKT(dtl_Geo) as dtl_Geo,
 		dtl_UploadedFileID,
 		dty_Type,
 		rec_ID,
@@ -274,7 +267,6 @@
 			// skip all invalid value
 			if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
 				(($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
-				error_log("found INVALID detail in rec $rd[rec_ID] dtl $rd[dtl_ID] dty $rd[dtl_DetailTypeID] with value = $rd[dtl_Value]");
 				continue;
 			}
 

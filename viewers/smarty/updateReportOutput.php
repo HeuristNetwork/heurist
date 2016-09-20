@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 * parameters
 * 'id' - key field value in usrReportSchedule
 * 'mode' - if publish>0: js or html (default)
-* 'publish' - 0 H3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
+* 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
 *                 3 - redirect the existing report, if it does not exist publish=1
 *
 * If publish=1 then the script displays a web page with a report on the process
@@ -34,10 +34,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -52,6 +52,7 @@ $rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
 
 mysql_connection_select(DATABASE);
 
+//mode of publication  3- to html or js wrapper
 if(array_key_exists('publish',$_REQUEST)){
 	$publish = intval($_REQUEST['publish']);
 }else{
@@ -66,17 +67,18 @@ if($rps_ID==0){
 		doReport($row);
 	}
 
-}else{
+}else if(is_numeric($rps_ID)){
 	//load one
 	$res = mysql_query("select * from usrReportSchedule where rps_ID=".$rps_ID);
 	if(mysql_error()){
-		error_log("ERROR=".mysql_error());
 	}else{
 		$row = mysql_fetch_assoc($res);
 		if($row){
 			doReport($row);
 		}
 	}
+}else{
+    echo "Wrong report ID parameter: ".$rps_ID;
 }
 
 exit();
@@ -104,11 +106,10 @@ function doReport($row){
 
 	$outputfile = $dir.$filename;
 
-	if($publish==3){
+	if($publish==3){  //if published file already exists take it
 
 		$path_parts = pathinfo($outputfile);
 		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;
-/*****DEBUG****///error_log("EXT=".$ext);
 
 		if ($ext == null) {
 
@@ -138,10 +139,11 @@ function doReport($row){
 
 	$hquery = $row['rps_HQuery'];
 	if(strpos($hquery, "&q=")>0){
-		parse_str($hquery, $params);
+		parse_str($hquery, $params); //parse query and put to parameters
 	}else{
 		$params = array("q"=>$hquery);
 	}
+
 	if(!array_key_exists("ver", $params)){
 		$params["ver"] = "1";
 	}

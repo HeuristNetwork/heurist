@@ -6,7 +6,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -55,7 +55,10 @@
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
         <!-- END TREEVIEW DEFS-->
 
-        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
@@ -109,7 +112,7 @@
 
             </div>
 
-            <div id="formContainer" style="float: left; padding-bottom:5px; padding-left: 10px;">
+            <div id="formContainer" style="position:absolute;left:303px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
 
                 <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
@@ -126,8 +129,11 @@
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" style="display:none;width:500px;">
-                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;">Edit selected term / vocabulary</h3>
+                <div id="formEditor" style="display:none;width:600px;">
+                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block">Edit selected term / vocabulary</h3>
+                            <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
+                                <b>term saved</b>
+                            </div>
 
                     <div style="margin-left:10px; border: black; border-style: solid; border-width:thin; padding:10px;">
 
@@ -137,9 +143,6 @@
                             <input id="edParentId" type="hidden"/>
                             &nbsp;&nbsp;&nbsp;
                             <div id="div_ConceptID" style="display: inline-block;">
-                            </div>
-                            <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-                                <b>term saved</b>
                             </div>
                         </div>
 
@@ -157,7 +160,7 @@
                             <div style="float:left;">
                                 <label class="dtyLabel" style="color: red; margin-top:10px;">
                                     Term (label)</label>
-                                <input id="edName" style="width:160px"/>
+                                <input id="edName" style="width:350px" onkeyup="editTerms.isChanged();" />
                                 <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                                     The term or label describing the category. The label is the normal<br/>
                                     way of expressing the term. Dropdowns are ordered alphabetically.<br />
@@ -166,10 +169,11 @@
                             </div>
 
                         </div>
-
+                        
                         <div class="dtyField">
-                            <label class="dtyLabel">Description of term</label>
-                            <input id="edDescription" style="width:350px; margin-top:5px;" title=""/>
+                            <label class="dtyLabel" style="vertical-align: top;">Description of term</label>
+                            <textarea id="edDescription" rows="3"  style="width:350px; margin-top:5px;" title=""
+                                 onkeyup="editTerms.isChanged();"></textarea>
                             <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                                 A concise but comprehensive description of this term or category.
                             </div>
@@ -177,7 +181,7 @@
 
                         <div class="dtyField">
                             <label class="dtyLabel">Standard code</label>
-                            <input id="edCode" style="width:80px; margin-top:5px;"/>
+                            <input id="edCode" style="width:80px; margin-top:5px;" onkeyup="editTerms.isChanged();"/>
                             <div style="padding-left:105;padding-top:3px;  font-size:smaller;">
                                 A domain or international standard code for this term or category.<br/>
                                 May also be used for a local code value to be used in importing data.
@@ -195,11 +199,37 @@
                             <label for="cbInverseTermItself">Term is inverse of another term</label>
                         </div>
                         <div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term</label>
-                            <input id="edInverseTerm" readonly="readonly" style="width:250px"/>
+                            <input id="edInverseTerm" readonly="readonly" style="width:250px;background-color:#DDD;"/>
                             <input id="btnInverseSetClear" type="button" value="clear" style="width:45px"/>
                         </div>
                         <input id="edInverseTermId" type="hidden"/>
 
+                        
+            <div  class="dtyField" id="divImage">
+                <div style="float:left;">
+                    <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">Image (~400x400):</label>
+                </div>
+                <div style="vertical-align: middle;display:inline-block;">
+                    <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
+                    </div>
+                </div>
+                
+                <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top;"
+                        onClick="{editTerms.clearImage(); return false;}">
+                        <img src="../../../common/images/cross-grey.png" style="vertical-align:top;width:12px;height:12px">Clear image</a>
+<!--                            
+                <input id="btnClearImage" type="button" value="Clear"
+                                title="Remove image" 
+                                style="margin-top:10px;vertical-align: top;"
+                                onClick="{editTerms.clearImage()}"/>
+-->                                
+                
+                <div style="padding-left:105;padding-top:3px; font-size:smaller;">
+                    Images can be used to provide a visual description of a term such as an architectural or clothing style, structural position, artefact type or soil texture"
+                </div>
+            </div>                        
+
+                        
 
                         <!--
                         NOTE: button labelling is set in the JS file
@@ -207,21 +237,26 @@
                         <div style="display:inline-block; margin-top:30px;width:90%">
                             <input id="btnImport" type="button" value="Import"
                                 title=""
-                                onClick="{editTerms.doImport(false)}"/>&nbsp;&nbsp;&nbsp;
+                                onClick="{editTerms.doImport(false)}"/>
+                            <input id="btnExport" type="button" value="Export"
+                                title="Print vocabulary as a list"
+                                onClick="{editTerms.doExport(false)}"/>
                             <input id="btnSetParent" type="button" value="Move"
+                                style="margin-left:20px;"
                                 title="Change the parent" onClick="{editTerms.selectParent()}"/>
                             <input id="btnMerge" type="button" value="Merge"
                                 title="Merge this term with another term and update all records to reference the new term"
                                 onClick="{editTerms.mergeTerms()}"/>
-                            &nbsp;&nbsp;&nbsp;
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
-                            <input id="btnSave" type="button" value="Save changes" style="font-style: bold; colour:black;"
+                            <input id="btnSave" type="button" value="Save changes" 
+                                style="margin-left:80px;font-style: bold !important; color:black; display:none"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
-                            &nbsp;&nbsp;&nbsp;
-                            <div id='div_btnAddChild' style="text-align: right; display:inline-block; margin-left:10px; font-style: bold; colour:black;">
+                            
+                            <div id='div_btnAddChild' 
+                                style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
                                 <input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
                             </div>
                         </div>
@@ -249,10 +284,10 @@
 
 
                 <!-- search for and set inverse terms, only for relationship types -->
-                <div id="formInverse" style="display:none;">
+                <div id="formInverse" style="display:none;width:500px;">
 
-                    <h3 style="border-style: none;">Select Inverse Term</h3>
-                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;">
+                    <h3 style="border-style: none;margin-left:10px;">Select Inverse Term</h3>
+                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;margin-left:10px;">
 
                         <div style="display:inline-block;vertical-align: top; width:130px;">
                             <label class="dtyLabel" style="width:30px;">Find:</label>
@@ -269,8 +304,8 @@
 
                 <div id="divApply" style="margin-left:10px; margin-top:15px; text-align:left; display: block;">
                     Warning: if a field uses individually selected terms, new terms must be selected in record structure edit
-                    <br />to appear in data entry dropdown. If field uses a vocabulary, new terms are added automatically.<p>
-                    <input type="button" id="btnApply1" style="float:right;" value="Close window" onclick="editTerms.applyChanges();" />
+                    to appear in data entry dropdown. If field uses a vocabulary, new terms are added automatically.<p>
+                    <input type="button" id="btnApply1" style="float:right;" value="Close window" onclick="editTerms.applyChanges();" /></p>
                 </div>
 
             </div>
@@ -399,12 +434,10 @@
                         </div>
                 </div>
 
-
-
-
+                <input type="file" id="new_term_image" style="display:none">
 
         <script  type="text/javascript">
-
+        
             YAHOO.util.Event.addListener(window, "load", function(){ editTerms = new EditTerms();} );
             //YAHOO.util.Event.onDOMReady(EditTerms.init);
         </script>

@@ -8,7 +8,7 @@
 
 <i><pre>
      Please use this as an example from which to create your own reports, by copying this template.<br/>
-     To do this, choose <b>Edit Template</b> from the pulldown menu at top right, then click the <b>Save As</b> button.<br/>
+     To do this, choose <b>Edit</b> (first button at top right), then click the <b>Save As</b> button.<br/>
      As you edit, hit the <b>Test</b> button repeatedly to see how your changes are working.<br/>
      Ctrl-Z will undo most recent change - can be repeated to backtrack through changes.<br/>
 </pre></i>
@@ -17,6 +17,7 @@
 
 {*------------------------------------------------------------*}
 {foreach $results as $r} {* Start records loop, do not remove *}
+{$r = $heurist->getRecord($r)}
 {*------------------------------------------------------------*}
 
   {* put the data you want output for each record here - insert the *}
@@ -189,25 +190,25 @@
      {* --------------------------------------------------*}
 
 
-       Other: <b>{$r.recID}</b>  {* the unique record ID *}
+       {$r.recTypeName}: <b>{$r.recID}</b>  {* the unique record ID *}
 
        <b>{$r.f1}</b><br/> {*Title*}
 
-			 <br/> Unsupported record type: please edit the template to add support for it
- 
-     
-               
+			 <br/> Unsupported record type: Please edit the template and copy and modify an existing format to add support for this record type, if required.
+
+
+
 {* Close all the IF statements *}
-  
-  {/if}	
-  {/if}	
-  {/if}	
-  {/if}	
-  {/if}	
-  {/if}	
-  {/if}	
-      
-      
+
+  {/if}
+  {/if}
+  {/if}
+  {/if}
+  {/if}
+  {/if}
+  {/if}
+
+
 
 <br/> <hr> <br/> {* line breaks / horizontal rule between each record *}
 

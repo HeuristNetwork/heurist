@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -117,14 +117,32 @@ if (@$_REQUEST['change_names']) {
 }
 
 if (@$_REQUEST['replace_kwd']) {
+    
 	mysql_connection_overwrite(DATABASE);
-	mysql_query('update usrRecTagLinks set rtl_TagID = '.intval(@$_REQUEST['replace_with_kwd_id']).' where rtl_TagID = '.intval($_REQUEST['replace_kwd_id']));
+    
+    $rquery = 'delete r1 FROM usrRecTagLinks AS r1 inner join usrRecTagLinks AS r2 on r1.rtl_RecID=r2.rtl_RecID and r2.rtl_TagID='
+    .intval(@$_REQUEST['replace_with_kwd_id'])
+    .' where r1.rtl_TagID='
+    .intval($_REQUEST['replace_kwd_id']); 
+
+    mysql_query($rquery);
+    
+	$rquery = 'update usrRecTagLinks set rtl_TagID = '
+                    .intval(@$_REQUEST['replace_with_kwd_id'])
+                    .' where rtl_TagID = '
+                    .intval($_REQUEST['replace_kwd_id']);
+    mysql_query($rquery);
 	$tag_message .= '<div class="success">Tag replaced</div>';
 }
 
 if (@$_REQUEST['delete_multiple_kwds']) {
-	$kwd_ids = array_map('intval', array_keys($_REQUEST['delete_kwds']));
-	if (count($kwd_ids)) {
+
+    $isok = false;
+    if(is_array(@$_REQUEST['delete_kwds'])){
+	    $kwd_ids = array_map('intval', array_keys(@$_REQUEST['delete_kwds']));
+        $isok = (count($kwd_ids)>0);
+    }
+	if ($isok) {
 		mysql_connection_overwrite(DATABASE);
 		$res = mysql_query('delete usrTags, usrRecTagLinks from usrTags left join usrRecTagLinks on rtl_TagID = tag_ID where tag_ID in ('. join(', ', $kwd_ids) .') and tag_UGrpID='.get_user_id());
 		$tag_message .= mysql_error() . '<div class="success">Tags deleted</div>';
@@ -174,7 +192,7 @@ if (get_user_id() == 96) {
 	}
 	foreach ($usernames as $id => $name) {
 		$user_hyperlinks_import .=
-'   <option value="'.$id.'">'.htmlspecialchars($name).'</option>';
+'   <option value="'.$id.'">'.escChars($name).'</option>';
 	}
 
 	$user_hyperlinks_import .= '</select></p>';
@@ -223,12 +241,19 @@ $word_limit_options =
 '<option value="5" '.($word_limit==5? 'selected':'').'>at least five words</option>';
 $template = str_replace('{word_limit_options}', $word_limit_options, $template);
 
-$hyperlinks_ignored = '<div>' .
-  join("</div>\n<div>",
-       mysql__select_array('usrHyperlinkFilter', 'hyf_String', 'hyf_UGrpID is null or hyf_UGrpID='.get_user_id())) .
-                      '</div>';
+$atags = mysql__select_array('usrHyperlinkFilter', 'hyf_String', 'hyf_UGrpID is null or hyf_UGrpID='.get_user_id());
+
+if(is_array($atags) && count($atags)>0){
+    $hyperlinks_ignored = '<div>'.implode("</div>\n<div>", $atags).'</div>';
+}else{
+    $hyperlinks_ignored = '<div/>';
+}
+
+$bookmarklet_script = dirname(__FILE__).'/../../import/bookmarklet/bookmarklet.js';
 $template = str_replace('{hyperlinks_ignored}', $hyperlinks_ignored, $template);
-$template = str_replace('{Bookmarklet}', file_get_contents(dirname(__FILE__).'/../../import/bookmarklet/bookmarklet.js'), $template);
+if(file_exists($bookmarklet_script)){
+$template = str_replace('{Bookmarklet}', file_get_contents($file), $template);
+}
 
 $res = mysql_query('select count(rtl_ID) as cnt from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by cnt desc, tag_Text limit 1');
 $row = mysql_fetch_row($res);
@@ -240,30 +265,39 @@ if (@$_REQUEST['order_by_popularity']) {
 	$res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as cnt from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by tag_Text');
 }
 
+$tagsCount = 0;
 $foreach_kwd = $foreach_kwd_js = '';
 while ($row = mysql_fetch_row($res)) {
 	$foreach_kwd .=
-        '<tr>
+        '<tr style="vertical-align:top;">
          <td nowrap>
           <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
-          <img src="'.HEURIST_BASE_URL.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
-          <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.htmlspecialchars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
+          <img src="'.HEURIST_BASE_URL.'common/images/cross.png" onclick="delete_kwd('.$row[0]
+                .',\''.escChars($row[1]).'\','.$row[2].')">
+          <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.escChars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
          </td>
-         <td nowrap>' . $row[2] . '</td>
+         <td nowrap style="padding-top: 4px;">' . $row[2] . '</td>
          <td class="u-cell">
-          <div class="u" title="' . $row[2] . ' records"><div style="width: ' . (intval($row[2]) / $max_cnt * 100) . '%;"></div></div>
+          <div class="u" style="padding-top: 4px;" title="' . $row[2] . ' records"><div style="width: ' 
+                . ($max_cnt>0?(intval($row[2]) / $max_cnt * 100):0) . '%;"></div></div>
          </td>
-         <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=bookmark&db='.HEURIST_DBNAME.'&q=tag:%22'.$row[1].'%22" title="View records with this tag" class="externalLink"></a>': '').'</td>
-         <td class=replace>'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
+         <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_BASE_URL.'?w=bookmark&db='.HEURIST_DBNAME.'&q=tag:%22'.$row[1].'%22" title="View records with this tag" class="externalLink"></a>': '').'</td>
+         <td class=replace style="padding-top: 4px;">'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
         </tr>';
 
-	$foreach_kwd_js .= "kwd['".htmlspecialchars(strtolower($row[1]))."'] = ".$row[0].";\n";
+	$foreach_kwd_js .= "kwd['".escChars(strtolower($row[1]))."'] = ".$row[0].";\n";
+    $tagsCount++;
+}
+if($tagsCount==0){
+    $foreach_kwd = '<h2>You have not defined any tags</h2>';
+}else{
+    $foreach_kwd_js .=  'tagsCount='.$tagsCount."\n";
 }
 
 $kwd_select = "<select id=kwd_select style=\"display: none;\"><option value=\"\" disabled selected>select tag...</option>";
 $res = mysql_query('select tag_ID, tag_Text from usrTags where tag_UGrpID= ' . get_user_id() . ' order by tag_Text');
 while ($row = mysql_fetch_row($res)) {
-	$kwd_select .= "<option value=".$row[0].">".htmlspecialchars($row[1])."</option>";
+	$kwd_select .= "<option value=".$row[0].">".escChars($row[1])."</option>";
 }
 $kwd_select .= "</select>";
 
@@ -274,6 +308,10 @@ $sortby_input = @$_REQUEST['order_by_popularity']
 	? '<input type="hidden" id="sortby_input" name="order_by_popularity" value="1">'
 	: '<input type="hidden" id="sortby_input" name="order_by_popularity" value="">';
 
+if($tag_message!=''){
+    $tag_message = $tag_message.'<script>setTimeout(function(){document.getElementById("div-tag-message").style.display="none";},2000);</script>';
+}    
+    
 
 $template = str_replace('{ForeachTag}', $foreach_kwd, $template);
 $template = str_replace('{ForeachTagJs}', $foreach_kwd_js, $template);
@@ -283,6 +321,14 @@ $template = str_replace('{sortby_button}', $sortby_button, $template);
 $template = str_replace('{sortby_input}', $sortby_input, $template);
 $template = str_replace('{kwd_select}', $kwd_select, $template);
 
+/*
+$template = str_replace('{resize_button}',
+'<button class="button" value="resize" onclick="{if(typeof doDialogResize != 'undefined'    && doDialogResize.call && doDialogResize.apply) doDialogResize(500,700);}" style="float: right;">reize</button>', $template);
+*/
+
 echo($template);
 
+function escChars($val){
+    return htmlspecialchars(str_replace("'",'',$val));   //&#039;
+}
 ?>

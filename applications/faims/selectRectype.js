@@ -1,3 +1,24 @@
+
+/**
+* filename: explanation
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
     var Hul = top.HEURIST.util;
 
     //show list of selected rectypes    
@@ -88,9 +109,9 @@
 
                 // We always require the control tab and start/stop synch as the app hangs inconveniently when synching, so you need to be able to turn it off
                 $("<div>").css('font-weight','bold').append("<input type='checkbox' checked='checked' disabled onclick='onCtCheckBox(event)' id='mainct'>").append("<label for='mainct'>Control tab<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' disabled id='ct1' name='ct1' value='1'><label for='ct1'>Start/stop synching (always required)<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct1' name='ct1' value='1'><label for='ct1'>Start synching on start<label>").appendTo($mdiv);
                 
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2' name='ct2' value='1'><label for='ct2'>Start Internal GPS (on from start if not checked)<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2' name='ct2' value='1'><label for='ct2'>Start Internal GPS on start<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' id='ct3'><label for='ct3' name='ct3' value='1'>Connect to External GPS (leave unchecked if no external GPS)<label>").appendTo($mdiv);
 
                 /* Feb 2014: Brian says tracklog requires extra logic which is not yet available, so this option has been hidden - code exists in exportFAIMS.php to write appropriate logic in bsh file */
@@ -113,6 +134,8 @@
                 } else {
                     $("<div>").css('padding-left','40px').css('padding-bottom','20px').append("No map layers in database. You may add layers manually before loading module in FAIMS server.").appendTo($mdiv);                    
                 }
+
+//                $("<div>").css('font-weight','bold').append("<input type='checkbox' id='ct5' name='ct5' value='1' checked='checked' ><label for='ct5'>Add Certainty and Annotation to constrained data (vocabs)<label>").appendTo($mdiv);
                         
             //$("#rt_selected").val(recordTypesSelected);
             $("#buttondiv").css('display','block');                        
@@ -155,7 +178,7 @@
 
             var URL;
             var args = $("#rt_selected").val();
-            var URL =  top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=select&db="+_db;
+            var URL =  top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=select&db="+_db;
 
             if(args) {
                 URL =  URL + "&ids=" + args;
