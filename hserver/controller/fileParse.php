@@ -920,6 +920,16 @@ function parse_content(){
     return $response;
 }
 
+function _findDisambResoltion($keyvalue, $disamb_resolv){
+    
+    foreach($disamb_resolv as $idx => $disamb_pair){
+        if($keyvalue==$disamb_pair['key']){
+            return $disamb_pair['recid'];
+        }
+    }
+    return null;    
+}
+
 //==================================================================== MATCHING
 /**
 * Perform matching - find record id in heurist db 
@@ -950,13 +960,14 @@ function findRecordIds($imp_session, $params){
 
     //disambiguation resolution 
     $disamb_resolv = @$params['disamb_resolv'];   //record id => $keyvalue
-    if(!$disamb_resolv){
+    if(!$disamb_resolv){ //old way
         $disamb_ids = @$params['disamb_id'];   //record ids
         $disamb_keys = @$params['disamb_key'];  //key values
         $disamb_resolv = array();
         if($disamb_keys){
             foreach($disamb_keys as $idx => $keyvalue){
-                $disamb_resolv[$disamb_ids[$idx]] = str_replace("\'", "'", $keyvalue);  //rec_id => keyvalue
+                array_push($disamb_resolv, array('recid'=>$disamb_ids[$idx], 'key'=>str_replace("\'", "'", $keyvalue) ));
+                //$disamb_resolv[$disamb_ids[$idx]] = str_replace("\'", "'", $keyvalue);  //rec_id => keyvalue
             }
         }
     }
@@ -1085,7 +1096,7 @@ function findRecordIds($imp_session, $params){
 
 //error_log($keyvalue.'  ='.implode(' ',$row));                 
 
-                if(!@$pairs[$keyvalue]){ //id not found
+                if(!@$pairs[$keyvalue]){ //id not found yet
                     //search for ID
 
                     //assign parameters for search query
@@ -1095,6 +1106,12 @@ function findRecordIds($imp_session, $params){
                     while ($search_stmt->fetch()) {
                         //keep pair ID => key value
                         $disamb[$rec_ID] = $rec_Title; //get value from binding
+                    }
+                    
+                    if(count($disamb)>1){
+                        $resolved_recid = _findDisambResoltion($keyvalue, $disamb_resolv);
+                    }else{
+                        $resolved_recid = null;
                     }
 
                     if(count($disamb)==0){ //nothing found - insert
@@ -1106,9 +1123,12 @@ function findRecordIds($imp_session, $params){
                         array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query)
                         $is_insert = true;
 
-                    }else if(count($disamb)==1 ||  array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){
+                    }else if(count($disamb)==1 || $resolved_recid!=null){ 
+                        //array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){
                         //either found exact or disamiguation is resolved
-
+                        if($resolved_recid!=null){
+                            $rec_ID = $resolved_recid;    
+                        }
                         $new_id = $rec_ID;
                         $rec = $row;
                         $rec[0] = $imp_id;

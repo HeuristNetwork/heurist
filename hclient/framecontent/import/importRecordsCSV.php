@@ -478,7 +478,7 @@ If you have missing data for Required fields, you may find it convenient to set 
             <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
             <label for="sa_match2">Skip matching (all new records)</label>
 
-            <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em">
+            <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em;padding-bottom:3px;">
             </div>
         </div>
         <div  id="divPrepareSetting" class="step4" style="padding-top:0.5em;margin-left:2em;display:none">
