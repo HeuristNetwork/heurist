@@ -219,7 +219,8 @@ foreach ($fh_data->children() as $f_gen){
 $zotero = null;
 $zotero = new phpZotero($api_Key);
 
-print "<div>zotero component has been initiated with api key $api_Key   step:$step</div>";
+print "<div><b>zotero has been initiated with api key [$api_Key]</b></div>";
+print "<br>" ;
 
 /* test connection
 $items = $zotero->getItemsTop($group_ID,
@@ -379,14 +380,14 @@ if($step=="1"){  //first step - info about current status
                 flush();
 
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
-                    print " <br/> Undefined Record type".$itemtype."  ".$itemtitle."<br/>";
-                    array_push($arr_ignored, $itemtype.'  '.$itemtitle.'['. $zotero_itemid).']';
+                    #print " <br/> Undefined Record type".$itemtype."  ".$itemtitle."<br/>";
+                    array_push($arr_ignored, $itemtype.':  '.$itemtitle);
                     $cnt_ignored++;
                     continue;
                 }
                 else
                 {
-                    print "<br/>".$itemtype."  ".$itemtitle."<br/>";
+                    print $itemtype.": ".$itemtitle."&nbsp;";
                 }
 
                 $recId = null;
@@ -585,11 +586,14 @@ if($step=="1"){  //first step - info about current status
     print "<div><br>Added: ".$cnt_added."</div>";
     print "<div>Updated: ".$cnt_updated."</div>";
     if($cnt_ignored>0){
-        print "<div>Zotero items ignored: ".$cnt_ignored."</div>";
-        print "<br><div style='color:red;padding-left:20px'>'".implode('<br>',$arr_ignored).'</div>';
+        print "<div>Ignored: ".$cnt_ignored."</div>";
+        print "<br><div style='color:red'><b>Zotero items ignored:</b><br></div>";
+        print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_ignored).'</div>';
     }
     if($cnt_ignored>0 || $isFailure){                    
-        print "<div><br>Please advise the Heurist development team - info at heuristnetwork dot org - of the circumstances so that we can provide a fix</div>";
+        print "<span><br>Please advise the Heurist development team - info  @ </span>" ;
+        print "<a href ='http://heuristnetwork.org'>Heurist Network</a>" ;
+        print "<span> - to provide a mapping for each of the undefined record types.</span>";
     }
 
     if(count($unresolved_pointers)>0){ 
@@ -638,12 +642,12 @@ if($step=="1"){  //first step - info about current status
 
     }
 
-    if($ptr_cnt>0)
-        print "<br><br>Total count of RESOLVED pointers:".$ptr_cnt;
+    #if($ptr_cnt>0)
+        #print "<br><br>Total count of RESOLVED pointers:".$ptr_cnt;
 
     // done - show report log
 
-    print "<br>Sync done";
+    #print "<br>Sync done";
 
 }
 
@@ -1012,7 +1016,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
             $new_recid = $out["bibID"];
 
             if($is_echo){
-                print '&nbsp;&nbsp;&nbsp;'.($recId?"Updated":"Added")."&nbsp; #".$out["bibID"].'<br>';    
+                print '['.($recId?"Updated":"Added")."&nbsp;Id&nbsp".$out["bibID"].']<br>';    
             }
 
 
