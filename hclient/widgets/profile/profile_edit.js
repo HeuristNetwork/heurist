@@ -277,7 +277,7 @@ $.widget( "heurist.profile_edit", {
         	
             var ss = top.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
             if(ss!=''){
-                err_text = err_text + ', Answer question below to prove you are human';
+                err_text = err_text + ', Humanity check';
             }else{
 				ele.val(val);
             }
@@ -289,14 +289,14 @@ $.widget( "heurist.profile_edit", {
             var email = this.edit_form.find("#ugr_eMail");
             var bValid = top.HEURIST4.msg.checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i );
             if(!bValid){
-                err_text = err_text + ', '+top.HR('Wrong email format');
+                err_text = err_text + ', '+top.HR('Email does not appear to be valid');
             }
 
             // validate login
             var login = this.edit_form.find("#ugr_Name");
             if(!top.HEURIST4.msg.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
-                err_text = err_text + ', '+top.HR('Wrong user name format. It may consist of ')
-                    +'a-z, 0-9, _, @ begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
+                err_text = err_text + ', '+top.HR('User name should contain ')
+                    +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
                 var ss = top.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
                 if(ss!=''){
@@ -307,7 +307,7 @@ $.widget( "heurist.profile_edit", {
             var password = this.edit_form.find("#ugr_Password");
             var password2 = this.edit_form.find("#password2");
             if(password.val()!=password2.val()){
-                err_text = err_text + ', '+top.HR(' Passwords are different');
+                err_text = err_text + ', '+top.HR(' Passwords do not match');
                 password.addClass( "ui-state-error" );
             }else  if(password.val()!=''){
                 /* restict password to alphanumeric only - removed at 2016-04-29
@@ -363,7 +363,7 @@ $.widget( "heurist.profile_edit", {
                                 if(that.options.isregistration){
                                     top.HEURIST4.msg.showMsgDlgUrl(top.HAPI4.basePathV4+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
                                 }else{
-                                    top.HEURIST4.msg.showMsgDlg("User information has been saved successfully");
+                                    top.HEURIST4.msg.showMsgDlg("User information saved");
                                 }
 
                             }
