@@ -610,6 +610,11 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <div class="heurist-helper1" style="display: block;padding-top:0.5em">
                     The creation of the primary record type from rows in the input file depends on the prior identification of other entities which will be connected via pointer fields or relationships. The tree below shows the dependencies of the primary record type determined from its pointer and relationship marker fields. Where an input entity matches an existing record, its ID value will be recorded in an ID field which can be used subsequently as a pointer field value; where no existing record is matched a new record is created and the new ID recorded<br><br>
                     Check record types to be imported. <span style="color:red">Red</span> indicates required pointer field
+                    <div style="float:right">View Mode:
+                    <input type="radio" name="mode_view" value="0" id="mode_view0" checked><label for="mode_view0">Dependency list</label>
+                    &nbsp;&nbsp;
+                    <input type="radio" name="mode_view" value="1" id="mode_view1"><label for="mode_view1">Treeview</label>
+                    </div>
                  </div>
             </div>        
         </div>                    
