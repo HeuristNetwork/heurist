@@ -113,8 +113,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             <script type="text/javascript" src="../../../hclient/widgets/profile/profile_edit.js"></script>
 
             <script type="text/javascript">
-            
-                
+
+
                 var edit_data = {};
                 <?php
                 //restore use registration parameters in case creation fails
@@ -126,7 +126,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 }
                 ?>
                 var isRegdataEntered = !$.isEmptyObject(edit_data);
-            
+
                 $(document).ready(function() {
 
                     if($("#createDBForm").length>0){
@@ -143,7 +143,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
 
                         $("#btnRegister").button({label:'Register as User'}).on('click', doRegister);
-                        
+
                         if(isRegdataEntered){
                             onRegisterDialogClose(edit_data);
                         }else{
@@ -158,7 +158,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 var profile_edit_dialog = null;
 
                 function onRegisterDialogClose(new_edit_data){
-                    
+
                     if(!new_edit_data){
                         new_edit_data = profile_edit_dialog.profile_edit('option','edit_data');
                     }
@@ -219,14 +219,14 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
             <!-- already referenced above <link rel="stylesheet" type="text/css" href="../../../h4styles.css"> -->
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-            
+
             <script type="text/javascript">
                 $(document).ready(function() {
                     var ele = document.getElementById("dbname");
                     if(ele) ele.focus();
                 });
             </script>
-            
+
             <?php
         }
         ?>
@@ -324,7 +324,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 if(ele.value==""){
                     ele.value = document.getElementById("ugr_Name").value.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,'');
                 }
-                
+
                 ele = document.getElementById("dbname");
                 if(ele) ele.focus();
             }
@@ -336,13 +336,13 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             function onBeforeSubmit(){
 
                 var ele = document.getElementById("url_template");
-                
+
                 if(document.getElementById("rb3").checked){ //use exemplar database
-                    
+
                     ele.value = '';
                     ele = document.getElementById("exemplar");
                     ele.value = document.getElementById("rb3").value;
-                
+
                 }else if(!document.getElementById("rb1").checked){ //use tempalte database
 
                     ele.value = '';
@@ -374,7 +374,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 }else{
                     ele.value = '';
                 }
-                
+
 
                 ele = document.getElementById("createDBForm");
                 if(ele) ele.style.display = "none";
@@ -553,7 +553,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             <!-- TODO: referencing Shakespeare exemplar database by name will fail on other servers - should use registered ID-->
                             <!-- TODO: would be better to import the Shakespeare (or other) exemplar data directly from HML although this will expose all public data to easy copying -->
                             <!-- Note: the value for the radio button indicates the name of the database whose
-                                 structure will be copied. Data is then inserted from the file <dbname>_data.sql -->
+                            structure will be copied. Data is then inserted from the file <dbname>_data.sql -->
                             <input type="radio" name="dbtype" value="Heurist_Shakespeare_Exemplar" id="rb3"
                                 onclick="{$('#registered_dbs').hide()}"/><label for="rb3"
                                 class="labelBold" style="padding-left: 2em;">Example database (Shakespeare's plays)</label>
@@ -566,16 +566,16 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             <!-- 7 July 2015: Replaced HuNI & FAIMS inbuilt templates with access to registered databases as templates -->
                             <!-- 17 June 2016: Decided to remove this option - the risks of perpetuating bad structures is too high
                             <input type="radio" name="dbtype" value="1" id="rb2" onclick="getRegisteredDatabases()"/><label for="rb2"
-                                class="labelBold"  style="padding-left: 2em;">Use a registered database as template</label>
+                            class="labelBold"  style="padding-left: 2em;">Use a registered database as template</label>
                             <div style="padding-left: 38px;width:600px">
-                                Use a database registered with the Heurist Network as a template.
-                                Copies record types, fields, terms and relationships from the database selected.
-                                Databases with an ID &lt; 1000 are curated by the Heurist team and include templates
-                                for the HuNI and FAIMS infrastructure projects,
-                                as well as community servers maintained by other research groups.
+                            Use a database registered with the Heurist Network as a template.
+                            Copies record types, fields, terms and relationships from the database selected.
+                            Databases with an ID &lt; 1000 are curated by the Heurist team and include templates
+                            for the HuNI and FAIMS infrastructure projects,
+                            as well as community servers maintained by other research groups.
                             </div>
                             <div id="registered_dbs"  style="max-height:150px;overflow-y:auto;overflow-x:hidden;margin-top:10px;
-                                background:url(../../../hclient/assets/loading-animation-white.gif) no-repeat center center;">
+                            background:url(../../../hclient/assets/loading-animation-white.gif) no-repeat center center;">
                             </div>
                             -->
 
@@ -609,8 +609,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 <input type="text" maxlength="64" size="30" id="dbname" name="dbname"  onkeypress="{onKeyPress(event);}">
                                 <input id="btnCreateDb" type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
                                 <div style="padding-top:1em; max-width:500px">No spaces or punctuation other than underscore. Database names are case-sensitive. 
-                                <p><i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for personal
-                                databases so that they are easily identified and appear together in the list of databases.</i></p></div>
+                                    <p><i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for personal
+                                        databases so that they are easily identified and appear together in the list of databases.</i></p></div>
                             </div>
 
                         </div>
@@ -659,7 +659,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 }
                 if($start_tag_count<15){
                     return "Error: core Definition data is invalid: It seems it is truncated. Only "
-                        .$start_tag_count." definitions found. At least 15 expected";
+                    .$start_tag_count." definitions found. At least 15 expected";
                 }
 
                 //verify that start is always before end
@@ -759,172 +759,171 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                     if(true){ // For debugging: set to false to avoid real database creation
 
                         if( $exemplar_db != null) { //from example db
-                            
-                                //1a. verify that sample dump exists 
-                                $templateFoldersContent = HEURIST_DIR."admin/setup/exemplars/".$exemplar_db.'.zip';
-                                if(!file_exists($templateFoldersContent) || filesize($templateFoldersContent)<1){
-                                        errorOut ('Sorry, unable to find the exemplar zip file ('.$templateFoldersContent.')containing the database folders and SQL script.');
-                                        return false;
+
+                            //1a. verify that sample dump exists 
+                            $templateFoldersContent = HEURIST_DIR."admin/setup/exemplars/".$exemplar_db.'.zip';
+                            if(!file_exists($templateFoldersContent) || filesize($templateFoldersContent)<1){
+                                errorOut ('Sorry, unable to find the exemplar zip file ('.$templateFoldersContent.')containing the database folders and SQL script.');
+                                return false;
+                            }
+
+                            //1b. verify that sample dump can be extracted 
+                            $exemplar_dir = HEURIST_DIR."admin/setup/exemplars/";
+                            $exemplar_dir = str_replace('//','/',$exemplar_dir);
+                            $dataInsertionSQLFile = HEURIST_FILESTORE_DIR.'scratch/'.$exemplar_db.".sql";
+                            if(!file_exists($dataInsertionSQLFile) || filesize($templateFoldersContent)<0){
+
+                                //extract dump from archive 
+                                unzip($templateFoldersContent, HEURIST_FILESTORE_DIR.'scratch/', $exemplar_db.'.sql' );
+
+                                if(!file_exists($dataInsertionSQLFile) || filesize($dataInsertionSQLFile)<0){
+
+                                    errorOut ('Sorry, unable to extract the database script "'.$exemplar_db.'.sql" from the zipped file "'.$templateFoldersContent.
+                                        '". This may be due to incorrect permissions on the program code - please consult your system administrator.' );
+                                    return false;
                                 }
-                            
-                                //1b. verify that sample dump can be extracted 
-                                $exemplar_dir = HEURIST_DIR."admin/setup/exemplars/";
-                                $exemplar_dir = str_replace('//','/',$exemplar_dir);
-                                $dataInsertionSQLFile = HEURIST_FILESTORE_DIR.'scratch/'.$exemplar_db.".sql";
-                                if(!file_exists($dataInsertionSQLFile) || filesize($templateFoldersContent)<0){
-                                    
-                                    //extract dump from archive 
-                                    unzip($templateFoldersContent, HEURIST_FILESTORE_DIR.'scratch/', $exemplar_db.'.sql' );
-                                        
-                                    if(!file_exists($dataInsertionSQLFile) || filesize($dataInsertionSQLFile)<0){
-                                        
-                                        errorOut ('Sorry, unable to extract the database script "'.$exemplar_db.'.sql" from the zipped file "'.$templateFoldersContent.
-                                            '". This may be due to incorrect permissions on the program code - please consult your system administrator.' );
-                                        return false;
-                                    }
-                                }
-                                
-                                
-                                //2. create empty database
-                                if(!db_create($newname)){
-                                        errorOut ('Sorry, unable to create new database '.$newname );
-                                        return false;
-                                }
-                                                        
-                                //3. restore from dump
-                                if(!db_script($newname, $dataInsertionSQLFile)){
-                                        errorOut('Error importing sample data from '.$dataInsertionSQLFile);
-                                        cleanupNewDB($newname);
-                                        return false;
-                                }
-                                $dataInsertionSQLFile = null;
-                                
+                            }
+
+
+                            //2. create empty database
+                            if(!db_create($newname)){
+                                errorOut ('Sorry, unable to create new database '.$newname );
+                                return false;
+                            }
+
+                            //3. restore from dump
+                            if(!db_script($newname, $dataInsertionSQLFile)){
+                                errorOut('Error importing sample data from '.$dataInsertionSQLFile);
+                                cleanupNewDB($newname);
+                                return false;
+                            }
+                            $dataInsertionSQLFile = null;
+
                         }else{ //$exemplar_db
 
-                        // this is global variable that is used in buildCrosswalks.php
-                        $templateFileName = "NOT DEFINED";
-                        $templateFoldersContent = "NOT DEFINED";
-                        if($reg_url){ // getting definitions from an external registered database
+                            // this is global variable that is used in buildCrosswalks.php
+                            $templateFileName = "NOT DEFINED";
+                            $templateFoldersContent = "NOT DEFINED";
+                            if($reg_url){ // getting definitions from an external registered database
 
-                            $nouse_proxy = true;
+                                $nouse_proxy = true;
 
-                            $isTemplateDB = true;
+                                $isTemplateDB = true;
 
-                            $data = loadRemoteURLContent($reg_url, $nouse_proxy); //without proxy
-                            $resval = isDefinitionsInvalid($data);
-                            if($resval){
-                                if(defined("HEURIST_HTTP_PROXY")){
-                                    $nouse_proxy = false;
-                                    $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
-                                    $resval = isDefinitionsInvalid($data);
-                                    if($resval){
+                                $data = loadRemoteURLContent($reg_url, $nouse_proxy); //without proxy
+                                $resval = isDefinitionsInvalid($data);
+                                if($resval){
+                                    if(defined("HEURIST_HTTP_PROXY")){
+                                        $nouse_proxy = false;
+                                        $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
+                                        $resval = isDefinitionsInvalid($data);
+                                        if($resval){
+                                            $data = null;
+                                        }
+                                    }else{
                                         $data = null;
                                     }
-                                }else{
-                                    $data = null;
                                 }
-                            }
-                            if($resval){
-                                errorOut ("Error importing core definitions from template database $reg_url for database $newname<br>"
-                                    .$resval
-                                    .'<br>Please check whether this database is valid; consult Heurist support if needed');
+                                if($resval){
+                                    errorOut ("Error importing core definitions from template database $reg_url for database $newname<br>"
+                                        .$resval
+                                        .'<br>Please check whether this database is valid; consult Heurist support if needed');
 
-                                return false;
-                            }
+                                    return false;
+                                }
 
-                            //save data into file
-                            if(defined('HEURIST_SETTING_DIR')){
-                                $templateFileName = HEURIST_SETTING_DIR . get_user_id() . '_dbtemplate.txt';
-                            }else{
-                                $templateFileName = HEURIST_UPLOAD_ROOT . '0_dbtemplate.txt';
-                            }
-
-                            $res = file_put_contents ( $templateFileName, $data );
-                            if(!$res){
-                                errorOut('Error: cannot save definitions from template database into local file.'
-                                    .' Please verify that folder '
-                                    .(defined('HEURIST_SETTING_DIR')?HEURIST_SETTING_DIR:HEURIST_UPLOAD_ROOT)
-                                    .' is writeable');
-                                return false;
-                            }
-
-                            //download content of some folder from template database ======================
-
-                            $reg_url = str_replace("getDBStructureAsSQL", "getDBFoldersForNewDB", $reg_url); //replace to other script
-                            $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
-
-                            if($data){
+                                //save data into file
                                 if(defined('HEURIST_SETTING_DIR')){
-                                    $templateFoldersContent = HEURIST_SETTING_DIR . get_user_id() . '_dbfolders.zip';
+                                    $templateFileName = HEURIST_SETTING_DIR . get_user_id() . '_dbtemplate.txt';
                                 }else{
-                                    $templateFoldersContent = HEURIST_UPLOAD_ROOT . '0_dbfolders.zip';
+                                    $templateFileName = HEURIST_UPLOAD_ROOT . '0_dbtemplate.txt';
                                 }
 
-                                $res = file_put_contents ( $templateFoldersContent, $data );
+                                $res = file_put_contents ( $templateFileName, $data );
                                 if(!$res){
-                                    errorOut ('Warning: cannot save content of settings folders from template database into local file. '
+                                    errorOut('Error: cannot save definitions from template database into local file.'
                                         .' Please verify that folder '
                                         .(defined('HEURIST_SETTING_DIR')?HEURIST_SETTING_DIR:HEURIST_UPLOAD_ROOT)
                                         .' is writeable');
                                     return false;
                                 }
+
+                                //download content of some folder from template database ======================
+
+                                $reg_url = str_replace("getDBStructureAsSQL", "getDBFoldersForNewDB", $reg_url); //replace to other script
+                                $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
+
+                                if($data){
+                                    if(defined('HEURIST_SETTING_DIR')){
+                                        $templateFoldersContent = HEURIST_SETTING_DIR . get_user_id() . '_dbfolders.zip';
+                                    }else{
+                                        $templateFoldersContent = HEURIST_UPLOAD_ROOT . '0_dbfolders.zip';
+                                    }
+
+                                    $res = file_put_contents ( $templateFoldersContent, $data );
+                                    if(!$res){
+                                        errorOut ('Warning: cannot save content of settings folders from template database into local file. '
+                                            .' Please verify that folder '
+                                            .(defined('HEURIST_SETTING_DIR')?HEURIST_SETTING_DIR:HEURIST_UPLOAD_ROOT)
+                                            .' is writeable');
+                                        return false;
+                                    }
+                                }else{
+                                    errorOut ('Warning: server does not return the content of settings folders from template database. '
+                                        .'Please ask system adminstrator to verify that zip extension on remote server is installed and that upload folder is writeable');
+                                    return false;
+                                }
+
+                                // Example database: download data to insert into new database =================================
+                                if($dbTemplateName!='1'){
+                                    // TODO: Artem: correct way is the donwloading data from sample database, however at the moment it is included into code. Ian: NASAT - would exposes databases to easy harvesting, but potentially OK as long as data marked public
+                                    // $dbTemplateNsme is the name of the database which is used to populate the example database, the corresponding data file has the same name with _data.sql appended
+                                    $dataInsertionSQLFile = HEURIST_DIR."admin/setup/dbcreate/".$dbTemplateName."_data.sql";
+                                    if(!file_exists($dataInsertionSQLFile)){
+                                        errorOut ('Warning: cannot find sample data file in code '.$dataInsertionSQLFile );
+                                        return false;
+                                    }
+                                }
+
+                            }else if($isTemplateDB){
+                                errorOut ('Wrong parameters: Template database is not defined.');
+                                return false;
                             }else{
-                                errorOut ('Warning: server does not return the content of settings folders from template database. '
-                                    .'Please ask system adminstrator to verify that zip extension on remote server is installed and that upload folder is writeable');
+                                $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
+                            }
+
+                            if(!file_exists($templateFileName)){
+                                errorOut('Error: template database structure file '.$templateFileName.' not found');
                                 return false;
                             }
 
-                            // Example database: download data to insert into new database =================================
-                            if($dbTemplateName!='1'){
-                                // TODO: Artem: correct way is the donwloading data from sample database, however at the moment it is included into code. Ian: NASAT - would exposes databases to easy harvesting, but potentially OK as long as data marked public
-                                // $dbTemplateNsme is the name of the database which is used to populate the example database, the corresponding data file has the same name with _data.sql appended
-                                $dataInsertionSQLFile = HEURIST_DIR."admin/setup/dbcreate/".$dbTemplateName."_data.sql";
-                                if(!file_exists($dataInsertionSQLFile)){
-                                        errorOut ('Warning: cannot find sample data file in code '.$dataInsertionSQLFile );
-                                        return false;
-                                }
+                            if(!createDatabaseEmpty($newDBName)){
+                                $isDefineNewDatabase = true;
+                                return false;
                             }
 
-                        }else if($isTemplateDB){
-                            errorOut ('Wrong parameters: Template database is not defined.');
-                            return false;
-                        }else{
-                            $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
-                        }
+                            // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
+                            // yes, this is badly structured, but it works - if it ain't broke ...
 
-                        if(!file_exists($templateFileName)){
-                            errorOut('Error: template database structure file '.$templateFileName.' not found');
-                            return false;
-                        }
+                            $isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
 
-                        if(!createDatabaseEmpty($newDBName)){
-                            $isDefineNewDatabase = true;
-                            return false;
-                        }
+                            require_once(dirname(__FILE__).'/../../structure/import/buildCrosswalks.php');
 
-                        // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
-                        // yes, this is badly structured, but it works - if it ain't broke ...
+                            // errorCreatingTables is set to true by buildCrosswalks if an error occurred
+                            if($errorCreatingTables) {
+                                errorOut('Error importing core definitions from '
+                                    .($isTemplateDB?"template database":"coreDefinitions.txt")
+                                    .' for database '.$newname.'<br>'
+                                    .'Please check whether this file or database is valid; consult Heurist support if needed');
+                                cleanupNewDB($newname);
+                                return false;
+                            }
 
-                        $isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
-
-                        require_once(dirname(__FILE__).'/../../structure/import/buildCrosswalks.php');
-
-                        // errorCreatingTables is set to true by buildCrosswalks if an error occurred
-                        if($errorCreatingTables) {
-                            errorOut('Error importing core definitions from '
-                                .($isTemplateDB?"template database":"coreDefinitions.txt")
-                                .' for database '.$newname.'<br>'
-                                .'Please check whether this file or database is valid; consult Heurist support if needed');
-                            cleanupNewDB($newname);
-                            return false;
-                        }
-                        
                         }//not $exemplar_db
-                        
-                        // Get and clean information for the user creating the database
-                        if(!is_logged_in()) {
-                            $longName = "";
 
+                        // Get and clean information for the user creating the database
+                        if(!is_logged_in()) {  // getUsrField sanitises data entered
+                            $longName = "";
                             $firstName = getUsrField('ugr_FirstName');
                             $lastName = getUsrField('ugr_LastName');
                             $eMail = getUsrField('ugr_eMail');
@@ -984,7 +983,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         mysql_connection_insert($newname);
 
                         // Make the current user the owner and admin of the new database
-                        mysql_query('UPDATE sysUGrps SET ugr_Enabled="Y", ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
+                        $res = mysql_query('UPDATE sysUGrps SET ugr_Enabled="Y", ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
                             ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'",
                             ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'",
                             ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'",
@@ -992,8 +991,29 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             ugr_TargetEmailAddresses="'.$ugr_TargetEmailAddresses.'",
                             ugr_URLs="'.$ugr_URLs.'",
                             ugr_interests="'.$interests.'" WHERE ugr_ID=2');
-                        // TODO: error check, although this is unlikely to fail
+                        if (!$res) {?>
+                            <b>Warning: Failed to make the current user the owner and admin of the new database, error:</b>
+                            <?php print(mysql_error());
+                        }
 
+                        // Add the default navigation tree for the DATABASE MANAGERS group (user #1). This is copied from the Heurist_Core_Definitions database}
+                        $navTree = mysql_real_escape_string('{"expanded":true,"folder":true,"key":"root_3","title":"root","children":[{"expanded":true,"folder":true,"key":"_6","title":"Recent changes","children":[{"folder":false,"key":"19","title":"Recent changes (last week)","data":{"isfaceted":false}},{"folder":false,"key":"20","title":"Recent changes (last month)","data":{"isfaceted":false}},{"folder":false,"key":"21","title":"Recent changes (last year)","data":{"isfaceted":false}},{"folder":false,"key":"14","title":"All (most recent first)","data":{"isfaceted":false}}]},{"expanded":true,"folder":true,"key":"_5","title":"Experiments","children":[{"key":"24","title":"Mapping (layers, data sources)","data":{"isfaceted":false}}]},{"folder":true,"key":"_5","title":"Facet searches","children":[{"key":"25","title":"Persons","data":{"isfaceted":true}}]}]}');
+                        $res=mysql_query('UPDATE sysUGrps SET ugr_NavigationTree='.$navTree.' WHERE ugr_ID=1');
+                        if (!$res) {?>
+                            <b>Warning: Failed to copy navigation tree for user (group) 1 (DB Managers) to new database, error:</b>
+                            <?php print(mysql_error());
+                        }
+
+                        // Add the default navigation tree for the DATABASE OWNER (user #2). This is copied from the Heurist_Core_Definitions database}
+                        $navTree = mysql_real_escape_string('"bookmark":{"expanded":true,"key":"root_1","title":"root","children":[{"folder":false,"key":"_1","title":"Recent changes","data":{"url":"?w=bookmark&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_2","title":"All (date order)","data":{"url":"?w=bookmark&q=sortby:-m&label=All records"}}]},"all":{"expanded":true,"key":"root_2","title":"root","children":[{"folder":false,"key":"_3","title":"Recent changes","data":{"url":"?w=all&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_4","title":"All (date order)","data":{"url":"?w=all&q=sortby:-m&label=All records"}},{"folder":true,"key":"_5","title":"Rules","children":[{"folder":false,"key":"12","title":"Person > anything they created","data":{"isfaceted":false}},{"folder":false,"key":"13","title":"Organisation > Assoc. places","data":{"isfaceted":false}}]}]}');
+                        $res=mysql_query('UPDATE sysUGrps SET ugr_NavigationTree='.$navTree.' WHERE ugr_ID=2');
+                        if (!$res)
+                        {?>
+                            <b>Warning: Failed to copy navigation tree for user 2 (DB Owner) to new database, error:</b>
+                            <?php print(mysql_error());
+                        }
+
+                        // email the system administrator to tell them a new database has been created
                         user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName, $interests);
                     }
 
@@ -1003,7 +1023,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         }
                     }
 
-                
+
                     ?>
                     <div  style='padding:0px 0 10px 0; font-size:larger;'>
                         <h2 style='padding-bottom:10px'>Congratulations, your new database  [ <?php echo $newDBName;?>  ]  has been created</h2>
@@ -1026,7 +1046,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
                             using Database &gt; Structure &gt; Acquire from Databases 
                             <!--or Database &gt; Structure &gt; Acquire from Templates -->
-                            </p>
+                        </p>
                     </div>
                     <?php
                     // TODO: automatically redirect to the new database in a new window

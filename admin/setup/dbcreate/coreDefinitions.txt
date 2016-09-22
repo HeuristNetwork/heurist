@@ -26,6 +26,9 @@
 -- This file is used, through the buildCrosswalks function, to populate a blank Heurist
 -- database structure with a minimal set of essential record type, detail type etc. definitions.
 
+-- Also copy the ugr_NavigationTree from User #2 in this database to the corresponding Query in createNewDB.php
+-- (around line 1000 or a page up from the end)
+
 -- It exists in order to allow creation of new databases even if the Heurist reference server is offline
 
 -- -----------------------------------------------------------------------------------------------------
