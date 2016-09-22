@@ -448,11 +448,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                 var i,j,k, sequence = [];
                 for(i=0;i<rectypes.length;i++){
+                    if($(rectypes[i]).attr('data-mode')==2) continue;
+                    
                     recTypeID = $(rectypes[i]).attr('data-rectype');
                     field_key = $(rectypes[i]).attr('data-rt');
 
                     //find names of identification fields
-                    var ele = treeElement.find('.id_fieldname[data-res-rt="'+field_key+'"]');
+                    var ele = treeElement.find('.id_fieldname[data-res-rt="'+field_key+'"][data-mode="0"]');
                     for(j=0;j<ele.length;j++){
                         var isfound = false;
                         for(k=0;k<sequence.length;k++){
@@ -612,7 +614,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
                 
                 s =  sid_fields +  '<span data-cnt="1" id="rt_count_'
-                        + i + '">' + s_count + '</span><br><span data-cnt="1" class="id_fieldname" style="padding-left:0em">'
+                        + i + '">' + s_count + '</span><br><span data-cnt="1" class="id_fieldname" data-mode="0" style="padding-left:0em">'
                         +fieldname+'</span></div>'+s;
                 
                 
@@ -633,11 +635,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
          $('.select_rectype_seq').click(function(event){
 
                 var sp = $(event.target)
-                if($(event.target).attr('data-cnt')>0){
+                /*if($(event.target).attr('data-cnt')>0){
                     sp = $(event.target).parent();
-                }
+                }*/
              
                 //get next id field
+                if(!sp.hasClass('select_rectype_seq')){
+                    sp = sp.parents('.select_rectype_seq');
+                }
+                
                 var idx = sp.attr('data-seq-order');
                 
                 _skipToNextRecordType(idx);
@@ -754,9 +760,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 //fill dependecies list in popup dialog where we choose primary rectype
                 treeElement.empty();
                 
+                var depList = $('<div id="dep_list">').appendTo(treeElement);
+                
                 var idx_reqtype = top.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
                 var idx_title = top.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
-
+                
+                //Dependency list==================================================
                 do{
                     //find all record types for particular level 
                     isfound = false;
@@ -846,7 +855,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
 
                             sRectypeItem = sRectypeItem + '</div>';
-                            $(sRectypeItem).appendTo(treeElement);
+                            $(sRectypeItem).appendTo(depList);
 
                             //resorce fields
                             var rt_fields = field['depend'], sid_fields = '', prev_field='';
@@ -872,7 +881,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                     + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
                                     + rt_field['rt_title'] + '</div>' 
 
-                                    + '<span style="float:right" class="id_fieldname rename" data-res-rt="'
+                                    + '<span style="float:right" class="id_fieldname rename" data-mode="0" data-res-rt="'
                                     + rt_field_key +'">' + rt_field['id_field'] + '</span><br>';
 
                                     prev_field = field_title;//rt_field['title'];
@@ -884,14 +893,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                         //+ field['rt_title']
                                         + sid_fields
                                         +'</div>')
-                                    .appendTo(treeElement);
+                                    .appendTo(depList);
 
                                 }
                             }else{
                                 $('<div style="padding-left:4em;">'
                                     + '<i>No pointer fields defined</i>'
                                     +'</div>')
-                                .appendTo(treeElement);
+                                .appendTo(depList);
 
                             }
 
@@ -907,20 +916,104 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     treeElement.text('No dependencies found');
                 }else{
 
+                    var rt_added = [];
+                    var treeList = $('<div id="tree_list">').appendTo(treeElement);
+                    
+                //Treview==========================================================
+                function __renderTree(field_key, depth){
+                    
+                    var field = rtOrder['fields'][field_key];
+                    
+                    var parent_rt = field['rt_id'];
+                    
+                    if(depth==0){ //add PRIMARY field
+                            var sRectypeItem = '<div>'
+                            + field['rt_title']
+                            + ' <span style="font-size:0.8em;font-weight:bold">(primary record type)</span>' 
+                            + '<span class="id_fieldname" style="float:right"  data-res-rt="'+field_key+'">'
+                            + field['id_field'] 
+                            
+                            + '&nbsp;<input type="checkbox" class="rt_select" data-mode="2" data-rectype="'+field['rt_id']
+                            +  '" data-rt="'+field_key+'" '
+                            +  ' data-lvl="'+depth+'" checked="checked" disabled="disabled">'
+                            +  '</span></div>';
+                            $(sRectypeItem).appendTo(treeList);                            
 
+                    }
+                    
+                    var j, rt_fields = field['depend'];
+                    
+                    if(rt_fields && rt_fields.length>0){
+                        for (j=0;j<rt_fields.length;j++){
+
+                            var rt_field_key = rt_fields[j];
+
+                            var rt_field = rtOrder['fields'][rt_field_key];
+                            
+                            if(rt_added.indexOf(parent_rt+'.'+rt_field_key)>=0) continue;
+                            rt_added.push(parent_rt+'.'+rt_field_key);
+
+                            var field_id = _getFt_ID(rt_field_key);
+                            var recStruc = top.HEURIST4.rectypes['typedefs'][field['rt_id']]['dtFields'];
+                            var field_title = recStruc[field_id][idx_title];
+                            var is_required = (recStruc[field_id][idx_reqtype]=='required');
+                            
+                            var sid_fields =  
+                            '<div style="padding-left:'+(depth*2+1)+'em;display:inline-block;">'
+                            + '<div style="min-width:150px;display:inline-block">'
+                            //+ (prev_field!=field_title? :'')  //rt_field['title']
+                                + '<i style="'+(is_required?'color:red':'')+'">' + field_title + '</i>'
+                                + '</div>'
+                            + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
+                            + rt_field['rt_title'] + '</div>' 
+
+                            + '<span style="float:right">&nbsp;<input type="checkbox" class="rt_select" data-mode="2" data-rectype="'+rt_field['rt_id']
+                            +  '" data-rt="'+rt_field_key+'"></span>'                            
+                            + '<span style="float:right" class="id_fieldname rename" data-mode="2" data-res-rt="'
+                            + rt_field_key +'">' + rt_field['id_field']  
+                            + '</span><br>';
+
+                            $('<div style="padding-left:1em;">'
+                                + sid_fields
+                                +'</div>')
+                            .appendTo(treeList);   
+                            
+                            if(depth<4)
+                                __renderTree(rt_field_key, depth+1);
+
+                        }
+                    }                    
+                }
+                
+                __renderTree(primary_rt, 0);
+                    
+                    
                 //
                 // auto select dependent requried fields
                 //    
-                function __rt_checkbox_click(rt_checkbox, disable_dependent){                                      
-
+                function __rt_checkbox_click(rt_checkbox, mode){
                     
                     //keep id of clicked to avoid reverse disability
                     var i, j;
-
+                    
                     var recTypeID = rt_checkbox.attr('data-rectype');
                     var keep_field_key = rt_checkbox.attr('data-rt');
-
-
+                    var cb;
+                    
+                    if(rt_checkbox.attr('data-mode')==2){
+                        cb = treeElement.find('.rt_select[data-rt="'+keep_field_key+'"][data-mode!="2"]');
+                    }else{
+                        cb = treeElement.find('.rt_select[data-rt="'+keep_field_key+'"][data-mode="2"]');
+                    }
+                    if(rt_checkbox.is(':checked')){
+                        cb.prop('checked', true);     
+                    }else{
+                        cb.prop('checked', false);     
+                    }
+                    if(rt_checkbox.attr('data-mode')==2){
+                        rt_checkbox = cb;
+                    }
+                    
                     //all rt that will be checked and disabled
                     var f_key_selected_all = [];
 
@@ -990,13 +1083,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }//end  __rt_checkbox_click                           
 
                 treeElement.find('.rt_select').click(
-                    function(event){ __rt_checkbox_click( $(event.target) ) }
+                    function(event){ __rt_checkbox_click( $(event.target)) }
                 );
+                
                 //click and disable first (primary) record type
 
                 var cb = treeElement.find('.rt_select[data-rt="'+primary_rt+'"]');
                 cb.prop('checked',true);
-                __rt_checkbox_click( cb );
+                __rt_checkbox_click( cb, '' );
                 top.HEURIST4.util.setDisabled(cb, true);
                 cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
 
@@ -1004,7 +1098,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 function __idfield_rename(ele_span){
 
                     //keep id of clicked to avoid disability
-                    var i, j, dtyID = ele_span.attr('data-dt');
+                    var i, j, field_key = ele_span.attr('data-res-rt');
                     var idfield_name_old = ele_span.text();
 
                     //show popup to rename
@@ -1012,7 +1106,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         if(!top.HEURIST4.util.isempty(idfield_name)){
 
                             //set span content
-                            ele_span.html(idfield_name);
+                            treeElement.find('span[data-res-rt="'+field_key+'"]').html(idfield_name);
+                            
+                            //set span content
+                            //ele_span.html(idfield_name);
                             //change value in rtStruct
                             //rtOrder['idfields'][dtyID] = idfield_name;
 
@@ -1027,6 +1124,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     function(event){ __idfield_rename($(event.target)) }
                 );
 
+                function __switchViewMode(event){ 
+                        if($('#mode_view0').is(':checked')){
+                            $('#tree_list').hide();
+                            $('#dep_list').show();
+                        }else{
+                            $('#tree_list').show();
+                            $('#dep_list').hide();
+                        }        
+                }
+
+                $('input[name="mode_view"]').click( __switchViewMode );
+
+                __switchViewMode();
 
             } //endif
 
@@ -1056,6 +1166,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             currentSeqIndex = Number(currentSeqIndex);
             var seq_index_prev = -1;
             
+            if(seq_index_next>currentSeqIndex){
+                
+                __changeRectype();
+                
+            }else{
+            
             if(seq_index_next>=0){ 
                 if(seq_index_next<imp_session['sequence'].length-1){
                     seq_index_prev = seq_index_next+1;
@@ -1076,7 +1192,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 +'is simply to update fields other than pointer fields';
                 
                 top.HEURIST4.msg.showMsgDlg(sWarning, __changeRectype, 
-                        {title:'Confirmation',yes:'Proceed',no:'Cancel'} );                                                             }
+                        {title:'Confirmation',yes:'Proceed',no:'Cancel'} );                                                             
+            }
+            }
             
             function __changeRectype(){
                 _showStep(3);
@@ -1142,7 +1260,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
          var i, j, k, recTypeID, parent_rectype_id = '';
          
          if(depth==0){
-            if($.isArray(rectypeTree) && rectypeTree.length>0){
+            if(top.HEURIST4.util.isArrayNotEmpty(rectypeTree)){
                 rectypeTree = rectypeTree[0];
                 parent_field_key = rectypeTree.key; //'0.'+
                 parent_rectype_id = rectypeTree.key;
@@ -1155,6 +1273,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                     id_field: _getColumnNameForPresetIndex(parent_rectype_id),
                                     depend:[]
                                 }                
+                                
             }
          }else{
              //parent_field_key = parent_field_key+'.'+currentTypeID;
@@ -1563,7 +1682,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         
         //show counts
-        if(currentSeqIndex>=0){
+        if(currentSeqIndex>=0 && 
+            !top.HEURIST4.util.isnull(imp_session['sequence'][currentSeqIndex]['counts'])){
             
             //show counts in count table 
             counts = _getInsertUpdateCounts( currentSeqIndex );
@@ -2358,13 +2478,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     //
     function _doPrepare(){
-        
+
         currentSeqIndex = Number(currentSeqIndex);
         if(!(Number(currentSeqIndex)>=0)){
             top.HEURIST4.msg.showMsgErr(top.HR('You have to select record type'));
             return;
         }
-        
+
         var rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
         var key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
         if(!(key_idx>=0)){
@@ -2373,12 +2493,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 +'</b> in the first section below. This is used to identify the records to be created/updated');
             return;
         }
-        
+
         //do we have field to match?
         var haveMapping = false; 
         var field_mapping = {};
         var ele = $("input[id^='cbsa_dt_']");
-        
+
         $.each(ele, function(idx, item){
             var item = $(item);
             if(item.is(':checked')){ // && item.val()!=key_idx){
@@ -2389,29 +2509,48 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
             }
         });
-            
+
         if(!haveMapping){
             top.HEURIST4.msg.showMsgErr(
-'You have not mapped any columns in the incoming data to fields in the record, '
-+'so the records created would be empty. Please select the fields which should '
-+'be imported into "'+top.HEURIST4.rectypes.names[rtyID]+'" records.');
-            
+                'You have not mapped any columns in the incoming data to fields in the record, '
+                +'so the records created would be empty. Please select the fields which should '
+                +'be imported into "'+top.HEURIST4.rectypes.names[rtyID]+'" records.');
+
             return;
         }
-        
+
         //check if any field besides matching fields is selected
-        
-        if(false){
-            top.HEURIST4.msg.showMsgErr(
-'<h3>WARNING</h3>You have not selected any additional fields to insert into the "'+top.HEURIST4.rectypes.names[rtyID]
-+'" records to be created (n = '+0+'). This may result in placeholder records containing incomplete data. '
-+'Are you sure?  [Proceed] [Cancel] ');
-            return;
-            
-//top.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart, {title:'Confirmation',yes:'Proceed',no:'Cancel'});
-            
+        var insertFieldsNotYetSet = true;
+
+        //if there is new record and no new fields set besides mapping_keys
+        var counts = _getInsertUpdateCounts( currentSeqIndex );
+        if(counts[2]>0 && imp_session['sequence'][currentSeqIndex]['mapping_keys']){
+            var i, cols = Object.keys(field_mapping)
+            for(i=0;i<cols.length;i++){
+                if(cols[i]!=key_idx && !imp_session['sequence'][currentSeqIndex]['mapping_keys'][cols[i]]){
+                     insertFieldsNotYetSet = false;
+                     break;
+                }
+            }
+
+        }else{
+            insertFieldsNotYetSet = false;
         }
+ 
+        if(insertFieldsNotYetSet){
+            top.HEURIST4.msg.showMsgDlg(
+                'You have not selected any additional fields to insert into the "'+top.HEURIST4.rectypes.names[rtyID]
+                +'" records to be created (n = '+counts[2]+'). This may result in placeholder records containing incomplete data. '
+                +'Are you sure?', 
+                __doPrepareStart, {title:'Warning',yes:'Proceed',no:'Cancel'});
+            
+        }else{
+           __doPrepareStart(); 
+        }
+        return;
         
+        function __doPrepareStart(){
+
         var request = {
             db        : top.HAPI4.database,
             imp_ID    : imp_ID,
@@ -2484,6 +2623,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     }
                 
                 });
+                
+        }
         
     } 
     
@@ -2805,9 +2946,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             buttons[top.HR('Confirm and cotinue to assign IDs')]  = function() {
                     
                     var keyvalues = Object.keys(res['disambiguation']);
-                    var disamb_resolv = {};  //recid=>keyvalue
+                    var disamb_resolv = [];  //recid=>keyvalue
                     $dlg.find('.sel_disamb').each(function(idx, item){
-                         disamb_resolv[$(item).val()] = keyvalues[$(item).attr('data-key')];
+                         disamb_resolv.push({recid:$(item).val(),key:keyvalues[$(item).attr('data-key')]});
+                         //disamb_resolv[$(item).val()] = keyvalues[$(item).attr('data-key')];
                     });
 
                     $dlg.dialog( "close" );
