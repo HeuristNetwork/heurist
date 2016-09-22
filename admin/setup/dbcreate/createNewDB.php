@@ -997,22 +997,19 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         }
 
                         // Add the default navigation tree for the DATABASE MANAGERS group (user #1). This is copied from the Heurist_Core_Definitions database}
-                        $navTree = mysql_real_escape_string('{"expanded":true,"folder":true,"key":"root_3","title":"root","children":[{"expanded":true,"folder":true,"key":"_6","title":"Recent changes","children":[{"folder":false,"key":"19","title":"Recent changes (last week)","data":{"isfaceted":false}},{"folder":false,"key":"20","title":"Recent changes (last month)","data":{"isfaceted":false}},{"folder":false,"key":"21","title":"Recent changes (last year)","data":{"isfaceted":false}},{"folder":false,"key":"14","title":"All (most recent first)","data":{"isfaceted":false}}]},{"expanded":true,"folder":true,"key":"_5","title":"Experiments","children":[{"key":"24","title":"Mapping (layers, data sources)","data":{"isfaceted":false}}]},{"folder":true,"key":"_5","title":"Facet searches","children":[{"key":"25","title":"Persons","data":{"isfaceted":true}}]}]}');
-                        $res=mysql_query('UPDATE sysUGrps SET ugr_NavigationTree='.$navTree.' WHERE ugr_ID=1');
-                        if (!$res) {?>
-                            <b>Warning: Failed to copy navigation tree for user (group) 1 (DB Managers) to new database, error:</b>
-                            <?php print(mysql_error());
+                        $navTree = '{"expanded":true,"folder":true,"key":"root_3","title":"root","children":[{"expanded":true,"folder":true,"key":"_6","title":"Recent changes","children":[{"folder":false,"key":"19","title":"Recent changes (last week)","data":{"isfaceted":false}},{"folder":false,"key":"20","title":"Recent changes (last month)","data":{"isfaceted":false}},{"folder":false,"key":"21","title":"Recent changes (last year)","data":{"isfaceted":false}},{"folder":false,"key":"14","title":"All (most recent first)","data":{"isfaceted":false}}]},{"expanded":true,"folder":true,"key":"_5","title":"Experiments","children":[{"key":"24","title":"Mapping (layers, data sources)","data":{"isfaceted":false}}]},{"folder":true,"key":"_5","title":"Facet searches","children":[{"key":"25","title":"Persons","data":{"isfaceted":true}}]}]}';
+                        $res = mysql__insertupdate($newname, 'sysUGrps', 'ugr', array('ugr_ID'=>1, 'ugr_NavigationTree'=>$navTree ));
+                        if(!is_int($res)){
+                            print '<b>Warning: Failed to copy navigation tree for user (group) 1 (DB Managers) to new database, error:</b>'.$res;
                         }
 
                         // Add the default navigation tree for the DATABASE OWNER (user #2). This is copied from the Heurist_Core_Definitions database}
-                        $navTree = mysql_real_escape_string('"bookmark":{"expanded":true,"key":"root_1","title":"root","children":[{"folder":false,"key":"_1","title":"Recent changes","data":{"url":"?w=bookmark&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_2","title":"All (date order)","data":{"url":"?w=bookmark&q=sortby:-m&label=All records"}}]},"all":{"expanded":true,"key":"root_2","title":"root","children":[{"folder":false,"key":"_3","title":"Recent changes","data":{"url":"?w=all&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_4","title":"All (date order)","data":{"url":"?w=all&q=sortby:-m&label=All records"}},{"folder":true,"key":"_5","title":"Rules","children":[{"folder":false,"key":"12","title":"Person > anything they created","data":{"isfaceted":false}},{"folder":false,"key":"13","title":"Organisation > Assoc. places","data":{"isfaceted":false}}]}]}');
-                        $res=mysql_query('UPDATE sysUGrps SET ugr_NavigationTree='.$navTree.' WHERE ugr_ID=2');
-                        if (!$res)
-                        {?>
-                            <b>Warning: Failed to copy navigation tree for user 2 (DB Owner) to new database, error:</b>
-                            <?php print(mysql_error());
+                        $navTree = '"bookmark":{"expanded":true,"key":"root_1","title":"root","children":[{"folder":false,"key":"_1","title":"Recent changes","data":{"url":"?w=bookmark&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_2","title":"All (date order)","data":{"url":"?w=bookmark&q=sortby:-m&label=All records"}}]},"all":{"expanded":true,"key":"root_2","title":"root","children":[{"folder":false,"key":"_3","title":"Recent changes","data":{"url":"?w=all&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_4","title":"All (date order)","data":{"url":"?w=all&q=sortby:-m&label=All records"}},{"folder":true,"key":"_5","title":"Rules","children":[{"folder":false,"key":"12","title":"Person > anything they created","data":{"isfaceted":false}},{"folder":false,"key":"13","title":"Organisation > Assoc. places","data":{"isfaceted":false}}]}]}';
+                        $res = mysql__insertupdate($newname, 'sysUGrps', 'ugr', array('ugr_ID'=>2, 'ugr_NavigationTree'=>$navTree ));
+                        if(!is_int($res)){
+                            print '<b>Warning: Failed to copy navigation tree for user 2 (DB Owner) to new database, error:</b>'.$res;
                         }
-
+                        
                         // email the system administrator to tell them a new database has been created
                         user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName, $interests);
                     }
