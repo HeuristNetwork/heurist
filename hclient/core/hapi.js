@@ -123,7 +123,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
         
         
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
 
         var url = that.basePathV4+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 
@@ -985,7 +985,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         LayoutMgr: null,
 
         /*RecordMgr: function(){
-        return hRecordMgr();
+        return /();
         }*/
 
         /**
