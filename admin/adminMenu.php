@@ -365,7 +365,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 
                         menuEntry('','Clear database locks','verification/removeDatabaseLocks.php?db='.HEURIST_DBNAME,
                             'Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions');
-                        menuEntry('','Database usage statistics (slow)','verification/dbStatistics.php?db='.HEURIST_DBNAME,
+                        menuEntry('','Database usage statistics (slow)','describe/dbStatistics.php?db='.HEURIST_DBNAME,
                             'Size and usage statistics for all Heurist databases on this server');
                         menuEntry('','File linking errors (slow)','verification/fileLinkingError.php?db='.HEURIST_DBNAME,
                             'Find uploaded file records which point at non-existent files for all Heurist databases on this server');
