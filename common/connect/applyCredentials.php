@@ -309,6 +309,7 @@ function isForAdminOnly($message="", $redirect=true)
     }
 }
 
+// TODO: Replace this ugly popup with a brief duration message
 function outWarning($role, $message){
         ?>
         <html>

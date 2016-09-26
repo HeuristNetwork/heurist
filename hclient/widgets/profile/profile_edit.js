@@ -82,7 +82,7 @@ $.widget( "heurist.profile_edit", {
                     if(that.options.isregistration){
                         
                         if(top.HEURIST4.util.isempty(top.HAPI4.sysinfo.dbowner_email)){ //new db creation and not logged in
-                            $("#contactDetails").html(top.HR('Email to')+': System Administrator '+
+                            $("#contactDetails").html(top.HR('Email')+' System Administrator '+
                                 '<a href="mailto:'+top.HAPI4.sysinfo.sysadmin_email+'">'+top.HAPI4.sysinfo.sysadmin_email+'</a>');
                         }else{
                             $("#contactDetails").html(top.HR('Email to')+': '+top.HAPI4.sysinfo.dbowner_name+'  '+
