@@ -108,7 +108,7 @@ function EditTerms() {
             dv1.style.display = "none";
             dv2.style.display = "block";
         }
-        
+
         _initFileUploader();
     }
 
@@ -204,7 +204,7 @@ function EditTerms() {
                                 //if(child==5746){ //debug
                                 //    term.id = child;
                                 //}
-                                
+
                                 term.id = child;
                                 term.parent_id = parent_id;
                                 term.conceptid = arTerm[fi.trm_ConceptID];
@@ -317,21 +317,21 @@ function EditTerms() {
             }
         }
     }
-    
+
     function _isNodeChanged(){
-        
+
         var ischanged = false;
-        
+
         if(_currentNode!=null){
-        
-                ischanged =  
+
+                ischanged =
                     Dom.get('edName').value.trim() != _currentNode.label ||
-                    Dom.get('edDescription').value.trim() != _currentNode.data.description || 
+                    Dom.get('edDescription').value.trim() != _currentNode.data.description ||
                     Dom.get('edCode').value.trim() != _currentNode.data.termcode ||
                     Dom.get("trm_Status").value != _currentNode.data.status ||
-                    Dom.get('edInverseTermId').value != _currentNode.data.inverseid; 
+                    Dom.get('edInverseTermId').value != _currentNode.data.inverseid;
         }
-        
+
           var ele = $('#btnSave');
           if (ischanged) {
                 ele.removeProp('disabled');
@@ -340,9 +340,9 @@ function EditTerms() {
                 ele.prop('disabled', 'disabled');
                 ele.css('color','lightgray');
           }
-            
+
     }
-    
+
 
     /**
     * Loads values to edit form
@@ -383,7 +383,7 @@ function EditTerms() {
                     Dom.get('div_ConceptID').innerHTML = 'Concept ID: '+node.data.conceptid;
                 }
 
-                
+
                 //	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
                 Dom.get('edId').value = node.data.id;
                 Dom.get('edParentId').value = node.data.parent_id;
@@ -403,9 +403,9 @@ function EditTerms() {
                 }
                 Dom.get('edDescription').value = node.data.description;
                 Dom.get('edCode').value = node.data.termcode;
-                
+
                 //image
-                if(node.data.id>0){                                       
+                if(node.data.id>0){
                     var curtimestamp = (new Date()).getMilliseconds();
                     Dom.get('termImage').innerHTML =
             '<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
@@ -416,7 +416,7 @@ function EditTerms() {
                 }else{
                     Dom.get('termImage').style.display = 'none';
                 }
-                
+
 
                 var node_invers = null;
                 if(node.data.inverseid>0){
@@ -493,7 +493,7 @@ function EditTerms() {
             var tv = (ind===0)?_termTree1:_termTree2;
             tv.onEventToggleHighlight(node);
         }
-        
+
         _isNodeChanged();
     }
 
@@ -555,7 +555,7 @@ function EditTerms() {
         Dom.get('formInverse').style.display = "block";
         Dom.get('edInverseTerm').value = "";
     }
-    
+
     /**
     * Clear button listener
     */
@@ -674,16 +674,19 @@ function EditTerms() {
         if(Hul.isempty(arTerm[fi.trm_Label])){
             $('#mergeLabel2').hide();
         }else{
-            $('#mergeLabel2').show();
-            $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
-            $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
+           // $('#mergeLabel2').show();
+            //$('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
+            //$('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
         }
         if(Hul.isempty(arTerm[fi.trm_Code])){
             $('#mergeCode2').hide();
         }else{
-            $('#mergeCode2').show();
-            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+            //$('#mergeCode2').show();
+            //$('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+           // $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+          // $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+           // $('#rb  MergeCode2').disabled=true;
+
         }
         if(Hul.isempty(arTerm[fi.trm_Description])){
             $('#mergeDescr2').hide();
@@ -698,20 +701,23 @@ function EditTerms() {
         $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['+arTerm2[fi.trm_ConceptID]+']');
 
         if(Hul.isempty(arTerm2[fi.trm_Label])){
-            $('#mergeLabel2').hide();
-            $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
-            $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
+            //$('#mergeLabel2').hide();
+           // $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
+           // $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
         }else{
-            $('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
-            $('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
+            //$('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
+            //$('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
         }
         if(Hul.isempty(arTerm2[fi.trm_Code])){
-            $('#mergeCode2').hide();
-            $('#lblMergeCode1').html(arTerm[fi.trm_Code]);
-            $('#rbMergeCode1').val(arTerm[fi.trm_Code]);
+            //$('#mergeCode2').hide();
+            //$('#lblMergeCode1').html(arTerm[fi.trm_Code]);
+            //$('#rbMergeCode1').val(arTerm[fi.trm_Code]);
+            //$('#rb  MergeCode1').disabled=true;
+
         }else{
             $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
             $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+           // $('#rb  MergeCode1').disabled=true;
         }
         if(Hul.isempty(arTerm2[fi.trm_Description])){
             $('#mergeDescr2').hide();
@@ -739,7 +745,7 @@ function EditTerms() {
                 "no-resize": true,
                 title: 'Select values to be retained',
                 height: 300,
-                width: 400
+                width: 650
         });
 
 
@@ -775,12 +781,12 @@ function EditTerms() {
             (_currentNode.data.status !== sStatus) ||
             (iParentId_prev !== iParentId) ||
             (iInverseId_prev !== iInverseId));
-            
-            
+
+
         if(wasChanged){
             $('#btnSave').removeProp('disabled');
             $('#btnSave').css('color','black');
-        }    
+        }
 
         //( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
         //	Number(_currentNode.data.inverseid) !== iInverseId));
@@ -828,7 +834,7 @@ function EditTerms() {
                 _currentNode.title = _currentNode.data.description;
 
                 _currentNode.data.parent_id = iParentId;
-                            
+
                 _currTreeView.render();
 
                 _updateTermsOnServer(_currentNode, needReload);
@@ -1117,7 +1123,7 @@ function EditTerms() {
 
 
     }
-    
+
     function _getTermLabel(domain, term_id){
         var trm = top.HEURIST.terms.termsByDomainLookup[domain][term_id];
         return (trm)?trm[top.HEURIST.terms.fieldNamesToIndex.trm_Label]:'';
@@ -1143,9 +1149,9 @@ function EditTerms() {
         /*if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
         }*/
-        
-        var name_with_path = _getTermLabel(_currentDomain, _keepCurrentParent) + '/' 
-                                + _getTermLabel(_currentDomain, retain_nodeid);
+
+        var name_with_path = _getTermLabel(_currentDomain, _keepCurrentParent) + ' - '
+                                        + _getTermLabel(_currentDomain, retain_nodeid);
 
         Hul.popupURL(top, url,
             {
@@ -1258,24 +1264,24 @@ function EditTerms() {
 
     //
     // export vocabulary as human readable list
-    //    
+    //
     function _export(isRoot){
-        
+
         if(!Hul.isnull(_currentNode)){
-            
+
             var term_ID = 0;
             if(_currentNode.children && _currentNode.children.length>0){
                 term_ID = _currentNode.data.id;
             }else{
                 term_ID = _currentNode.data.parent_id;
             }
-            
-            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/printVocabulary.php?db="+ _db 
+
+            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/printVocabulary.php?db="+ _db
                 + '&domain=' + _currentDomain + '&trm_ID=' + term_ID;
 
             window.open(sURL, '_blank');
         }
-        
+
     }
 
     /**
@@ -1287,7 +1293,7 @@ function EditTerms() {
 
             var term_id = (isRoot)?0:_currentNode.data.id;
             var term_label = (isRoot)?'root vocabulary':_currentNode.label;
-            
+
             /* old way
             var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/editTermsImport.php?db="+ _db +
             "&parent="+term_id+
@@ -1296,7 +1302,7 @@ function EditTerms() {
 
             var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/import/importDefTerms.php?db="+ _db +
                         "&trm_ID="+term_id;
-            
+
             Hul.popupURL(top, sURL, {
                 "close-on-blur": false,
                 "no-resize": false,
@@ -1308,7 +1314,7 @@ function EditTerms() {
                 'context_help':top.HEURIST.baseURL_V3+'context_help/defTerms.html #import',
                 callback: _import_complete
             });
-            
+
         }
     }
 
@@ -1318,15 +1324,15 @@ function EditTerms() {
     function _import_complete(context){
         if(!Hul.isnull(context) && !Hul.isnull(context.terms))
         {
-            
+
             if(top.HEURIST4 && top.HEURIST4.msg){
             top.HEURIST4.msg.showMsgDlg(context.result.length
                                 + ' term'
                                 + (context.result.length>1?'s were':' was')
                                 + ' added.', null, 'Terms imported');
             }
-            
-            
+
+
             top.HEURIST.terms = context.terms;
             var res = context.result,
             ind,
@@ -1581,30 +1587,30 @@ function EditTerms() {
         });
 
     }
-    
+
     function _clearImage(){
-        
+
         if(_currentNode===null) return;
-        
+
         var baseurl = top.HEURIST.iconBaseURL + _currentNode.data.id + "&ent=term&deletemode=1";
         Hul.getJsonData(baseurl, function(context){
             if(!Hul.isnull(context) && !context.error){
                  if(context.res=='ok'){
-                    $('#termImage').find('img').prop('src', top.HEURIST.baseURL_V3 + 'hclient/assets/100x100click.png'); 
+                    $('#termImage').find('img').prop('src', top.HEURIST.baseURL_V3 + 'hclient/assets/100x100click.png');
                  }
             }
         }, null);
-        
+
     }
 
     function _initFileUploader(){
-        
+
             var $input = $('#new_term_image');
             var $input_img = $('#termImage');
-        
+
             $input.fileupload({
-    url: top.HEURIST.baseURL_V3 +  'hserver/utilities/fileUpload.php', 
-    formData: [ {name:'db', value: _db}, 
+    url: top.HEURIST.baseURL_V3 +  'hserver/utilities/fileUpload.php',
+    formData: [ {name:'db', value: _db},
                 {name:'entity', value:'terms'},
                 {name:'newfilename', value: Dom.get('edId').value }],
     acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
@@ -1612,11 +1618,11 @@ function EditTerms() {
     sequentialUploads:true,
     dataType: 'json',
     //dropZone: $input_img,
-    add: function (e, data) {  
+    add: function (e, data) {
         $input_img.addClass('loading');
         $input_img.find('img').hide();
-        data.submit(); 
-    },    
+        data.submit();
+    },
     done: function (e, response) {
                 $input_img.removeClass('loading');
                 $input_img.find('img').show();
@@ -1634,9 +1640,9 @@ function EditTerms() {
                         }
                     });
                 }
-            }                    
+            }
                         });
-        
+
     }
 
     //
@@ -1666,7 +1672,7 @@ function EditTerms() {
         isChanged: function(){
             _isNodeChanged();
         },
-        
+
         applyChanges: function(event){ //for window mode only
             if(_isWindowMode){
                 window.close(_isSomethingChanged);
@@ -1679,17 +1685,17 @@ function EditTerms() {
         },
 
         showFileUploader: function(){
-            
+
             var $input = $('#new_term_image');
             $input.fileupload('option','formData',
-                [ {name:'db', value: _db}, 
+                [ {name:'db', value: _db},
                 {name:'entity', value:'terms'},
                 {name:'newfilename', value: Dom.get('edId').value }]);
-    
+
             $input.click();
-            
+
         },
-        
+
         getClass: function () {
             return _className;
         },

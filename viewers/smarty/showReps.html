@@ -130,7 +130,7 @@
                 right: 60px;
                 left: 5px;
                 top:7px;
-                height: 18px;                
+                height: 18px;
             }
             .progress-label {
                 position: absolute;
@@ -138,7 +138,7 @@
                 top: 4px;
                 font-weight: bold;
                 text-shadow: 1px 1px 0 #fff;
-            }  
+            }
         </style>
         <script type="text/javascript">
             var showReps, isEditorVisible=false;
@@ -173,7 +173,7 @@
                         <td colspan='2'>
                             <span id='insert-popup-header'></span>
                         </td>
-                    </tr>                        
+                    </tr>
                     <tr>
                         <td>
                             <select id="selInsertMode" style="width:200px"
@@ -228,7 +228,7 @@
                     <!-- only shows if there is a within-loop option -->
                     <tr style="margin-top: 20px;">
                         <td colspan="2">
-                            <div class="ins_isloop"><br/>Use buttons below to insert field or test within a repeat loop</div>
+                            <div class="ins_isloop"><br/>Use buttons on the right to insert field or test within a repeat loop</div>
                         </td>
                     </tr>
                     <tr class="ins_isloop">
@@ -294,7 +294,7 @@
 
                     <span id="recordCount"></span>
                 </div>
-                
+
                 <div style="display:inline-block;padding-left:0.5em;">
                     <button id="btnRepEdit" title="Edit the selected template">Edit</button>
                     <button id="btnRepNew" title="Create a new template">New</button>
@@ -321,7 +321,7 @@
         </div>
         <div id="editorcontainer" style="display:none">
             <h2>Template <span id="edTemplateName"></span></h2>
-            
+
             <div style="position:absolute;top:4px;right:4px;">
                 <button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
                 <button onClick="doEditor(1)">Save As</button>
@@ -334,7 +334,7 @@
                 <button onClick="{$('#fileupload').click();}" title="Upload template">Import</button>
                 -->
             </div>
-            
+
             <div id="templateCode">
                 <!-- PLAIN MODE <textarea id="edTemplateBody" name="edTemplateBody"></textarea>
                 <div id="editor"></div>-->
@@ -356,7 +356,7 @@
                     </div>
 
                     <div style="margin-top: 4px;">
-                    
+
                             <select id="selInsertPattern" style="width:100px">
                                 <option value="1">Heading for record type</option>
                                 <option value="2">Simple table</option>
@@ -378,7 +378,7 @@
 
             <div class="actionButtons">
                 <div style="display:inline-block;">
-                    truncate output at 
+                    truncate output at
                     <select id="cbDebugReportLimit" title="If some record types are only represented later in the data, use a tighter filter or Collected  > Add, then Collected > Show as search to create a smaller resultset.">
                         <option value="50" selected="selected">50 records</option>
                         <option value="250">250 records</option>
@@ -397,12 +397,12 @@
                     </select>
                 </div>
                 &nbsp;
-                <button onClick="doExecuteFromEditor()" title="Test your template" 
+                <button onClick="doExecuteFromEditor()" title="Test your template"
                     style="font-size:1.1em;background-color:teal;color:white;">TEST</button>
-                &nbsp;    
-                <div style="display:inline-block;color:teal;height:20px;vertical-align:middle" 
+                &nbsp;
+                <div style="display:inline-block;color:teal;height:20px;vertical-align:middle"
                     class="ui-icon ui-icon-circle-arrow-s" onClick="doExecuteFromEditor()">&nbsp;</div>
-                
+
                 <span class="fileinput-button" style="display: none;">
                     <input id="fileupload" type="file" name="import_template" accept=".gpl">
                 </span>
@@ -447,7 +447,7 @@
                 } );
 
             }
-            
+
 
             //
             function onShowEditor()
@@ -482,35 +482,35 @@
             }
 
             function onSaveOutput(){
-                
+
                 if(top.HEURIST && top.HEURIST.currentQuery_all && top.HEURIST4)
                 {
                     var sel = document.getElementById('selTemplates');
                     if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
-                    
+
                     var template_file = sel.options[sel.selectedIndex].value; // by default first entry
-                    
+
                     var currentSearchQuery = top.HEURIST.currentQuery_all.replace('"','%22');
                     var surl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php?"+
                         currentSearchQuery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
-                        
-                        
-                    $("#btnRepSave").hide();    
+
+
+                    $("#btnRepSave").hide();
                     top.HEURIST4.util.downloadURL(surl, function(){
                         $("#btnRepSave").show();
                     });
                 }
-                
+
                 /* OLD WAY - it saves only current output in UI
                 if(top.HEURIST4)
-                    
+
                     var iframe = document.getElementById("rep_container_frame");
                     var ele = $(iframe.contentWindow.document).find('body');
                     top.HEURIST4.util.downloadInnerHtml('heurist_report.html', ele );
                 }
                 */
             }
-            
+
             function onExportTemplate()
             {
                 var sel = document.getElementById('selTemplates');
@@ -598,19 +598,19 @@
                 window.showReps.onResize(this.innerWidth);
 
                 $("#btnRepPrint2").button({text:false, icons: { primary: "ui-icon-print" }}).click(onPrint);
-                
+
                 $("#btnRepEdit").button({text:false, icons: { primary: "ui-icon-pencil" }}).click(onShowEditor);
                 $("#btnRepNew").button({text:false, icons: { primary: "ui-icon-plusthick" }}).click(onGenerate);
                 $("#btnRepDelete").button({text:false, icons: { primary: "ui-icon-closethick" }}).click(onDeleteTemplate);
                 $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-in" }}).click(function(){
-                            $('#fileupload').click();return false;                        
+                            $('#fileupload').click();return false;
                 });
                 $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).click(onExportTemplate);
                 $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }}).click(onSaveOutput);
                 $("#btnRepPublish").button({text:false, icons: { primary: "ui-icon-globe-b" }}).click(onFile);
                 $("#btnRepRefresh").button({text:false, icons: { primary: "ui-icon-refresh" }}).click(onSelectTemplate);
-                
-                
+
+
 /*replaced with toolbar 2015-01-15
                 $("#btnRepMenu2").button({text:false, icons: {
                     primary: "ui-icon-gear"
@@ -623,24 +623,24 @@
             function onLoadUserInfoHandler(){
 
                 $('button[id^="btnRep"]').hide();
-                
+
                 if(top.HEURIST.is_logged_in()){
                     if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
-                        $('#btnRepEdit').show();    
-                        $('#btnRepNew').show();    
-                        $('#btnRepDelete').show();    
+                        $('#btnRepEdit').show();
+                        $('#btnRepNew').show();
+                        $('#btnRepDelete').show();
                     }
-                    $('#btnRepImport').show();    
-                    $('#btnRepExport').show();    
-                    $('#btnRepPublish').show();    
-                }                                                       
-                $('#btnRepPrint2').show();    
-                $('#btnRepRefresh').show();    
-                                    
+                    $('#btnRepImport').show();
+                    $('#btnRepExport').show();
+                    $('#btnRepPublish').show();
+                }
+                $('#btnRepPrint2').show();
+                $('#btnRepRefresh').show();
+
                 return;
 
                 //replaced with toolbar 2015-01-15
-                
+
                 var s = '';
 
                 if(top.HEURIST.is_logged_in()){
@@ -717,16 +717,16 @@
                         }else if(obj.ok) {
                             window.showReps.showEditor(obj.ok, true);
                             if(obj.details_not_found){
-                                
+
                                 var list_of_notfound = obj.details_not_found.join(', ');
-                                
+
                                 top.HEURIST4.msg.showMsgDlg(
 'Unable to convert IDs for following concept codes: '+list_of_notfound
 +'<p style="padding-top:1.5em">Concept IDs which failed to convert are enclosed in [[  ]] in the template file eg. f[[2-27]]. You will need to edit the template in order to remove these IDs or to replace them with the internal code of an equivalent concept.</p>'
 +'<p style="padding-top:1.5em">Failure to convert Concept IDs (global codes for particular record types, fields and terms) to local codes indicates that the Concept IDs are not known within your database.</p>'
 +'<p style="padding-top:1.5em">You may wish to import the missing concepts using Database > Structure > Import from databases. The first part of the code indicates the database in which the concept was originally defined.</p>'
                                 ,null,'Conversion of template file to internal codes');
-                                
+
                                 /* old
                                 alert('Conversion of template file to internal codes. '+
                                     'Unable to convert '+obj.details_not_found.length+

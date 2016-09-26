@@ -56,14 +56,14 @@ $.widget( "heurist.svs_list", {
         .appendTo( this.search_tree );
 
         var toppos = 1;
-        
+
         if(top.HAPI4.sysinfo['layout']!='original'){
             toppos = toppos + 2.5;
             $('<div>'+top.HR('Saved Filters')+'</div>')
                 .css({'padding-left': '1.1em', 'font-size': '1.4em', 'font-weight': 'bold', 'color':'rgb(142, 169, 185)'})
                 .appendTo(this.div_header);
         }
-        
+
         this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
         .addClass('logged-in-only heurist-helper1')
         .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding-left':'1.4em'}).appendTo(this.div_header) )
@@ -173,17 +173,17 @@ $.widget( "heurist.svs_list", {
             //new
             var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="'+this._HINT_FACETED+'">'
             //+'<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
-            +'<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;Faceted search</div>'
+            +'Faceted search'
+            +'&nbsp;<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span></div>'
 
             +'<div style="font-style:italic;" title="'+this._HINT_WITHRULES+'">'
-            +'<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
-            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
-            +'&nbsp;Search with rules</div>'
+            +'Search with rules'
+            +'&nbsp<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
+            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>                 </div>'
 
             +'<div style="font-style:italic;" title="'+this._HINT_RULESET+'">'
-            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;RuleSet</div>';
+            +'RuleSet'
+            +'&nbsp<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span></div>';
 
             this.helper_btm = $( '<div>'+t1+'</div>' )
             //IAN request 2015-06-23 .addClass('heurist-helper1')
@@ -420,11 +420,11 @@ $.widget( "heurist.svs_list", {
                     }
                     //save
                     top.HAPI4.save_pref('svs_list_status', JSON.stringify(keep_status));
-                    
+
                     //replace all ui-icon-triangle-1-s to se
                     cdivs.find('.ui-icon-triangle-1-e').removeClass('ui-icon-triangle-1-se');
                     cdivs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-se');
-                    
+
                 }
             });
             //replace all ui-icon-triangle-1-s to se
@@ -491,7 +491,7 @@ $.widget( "heurist.svs_list", {
     },
 
     _defineHeader: function(name, domain){
-        
+
         if(domain=='all' || domain=='bookmark'){
             sIcon = 'user';
         }else if(domain=='dbs'){
@@ -1236,7 +1236,7 @@ $.widget( "heurist.svs_list", {
         if(!svs) return;
 
         top.HEURIST4.msg.showMsgDlg(top.HR("Delete '"+ svsTitle  +"'? Please confirm"),  function(){
-                 
+
             top.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){

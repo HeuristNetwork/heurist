@@ -169,7 +169,7 @@
                             </div>
 
                         </div>
-                        
+
                         <div class="dtyField">
                             <label class="dtyLabel" style="vertical-align: top;">Description of term</label>
                             <textarea id="edDescription" rows="3"  style="width:350px; margin-top:5px;" title=""
@@ -204,7 +204,7 @@
                         </div>
                         <input id="edInverseTermId" type="hidden"/>
 
-                        
+
             <div  class="dtyField" id="divImage">
                 <div style="float:left;">
                     <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">Image (~400x400):</label>
@@ -213,23 +213,23 @@
                     <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
                     </div>
                 </div>
-                
+
                 <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top;"
                         onClick="{editTerms.clearImage(); return false;}">
                         <img src="../../../common/images/cross-grey.png" style="vertical-align:top;width:12px;height:12px">Clear image</a>
-<!--                            
+<!--
                 <input id="btnClearImage" type="button" value="Clear"
-                                title="Remove image" 
+                                title="Remove image"
                                 style="margin-top:10px;vertical-align: top;"
                                 onClick="{editTerms.clearImage()}"/>
--->                                
-                
+-->
+
                 <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                     Images can be used to provide a visual description of a term such as an architectural or clothing style, structural position, artefact type or soil texture"
                 </div>
-            </div>                        
+            </div>
 
-                        
+
 
                         <!--
                         NOTE: button labelling is set in the JS file
@@ -250,12 +250,12 @@
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
-                            <input id="btnSave" type="button" value="Save changes" 
+                            <input id="btnSave" type="button" value="Save changes"
                                 style="margin-left:80px;font-style: bold !important; color:black; display:none"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
-                            
-                            <div id='div_btnAddChild' 
+
+                            <div id='div_btnAddChild'
                                 style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
                                 <input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
                             </div>
@@ -330,7 +330,7 @@
                                 <td id="lblTerm_toMerge"></td>
                             </tr>
 
-                            <tr>
+                           <!-- <tr>
                                 <td>Label:</td>
                                 <td>
                                     <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
@@ -343,7 +343,7 @@
                                     <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
                                     <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
                                 </td>
-                            </tr>
+                            </tr> -->
 
                             <tr>
                                 <td>Code:</td>
@@ -426,7 +426,7 @@
                             </div>
                         </div>
 -->
-                        <div style="margin-top:30px;width:96%;text-align:center;">
+                        <div style="margin-top:30px;width:120%;text-align:center;">
                             <input id="btnMergeOK" type="button" value="Merge"
                                 title=""/>
                             <input id="btnMergeCancel" type="button" value="Cancel"
@@ -437,7 +437,7 @@
                 <input type="file" id="new_term_image" style="display:none">
 
         <script  type="text/javascript">
-        
+
             YAHOO.util.Event.addListener(window, "load", function(){ editTerms = new EditTerms();} );
             //YAHOO.util.Event.onDOMReady(EditTerms.init);
         </script>

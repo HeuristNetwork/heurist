@@ -57,6 +57,7 @@ function hSvsEdit(args) {
             //svs_query.parent().show();
             //svs_ugrid.parent().show();
 
+
             var selObj = svs_ugrid.get(0);
             top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                 [{key:'bookmark', title:top.HR('My Bookmarks (private)')},
@@ -64,7 +65,9 @@ function hSvsEdit(args) {
                     //{key:0, title:top.HR('Searches for guests')}  removed 2016-02-18
                 ],
                 function(){
-                    svs_ugrid.val(top.HEURIST4.util.isempty(groupID)?'all':groupID); //  top.HAPI4.currentUser.ugr_ID);
+                     //svs_ugrid.val(top.HAPI4.currentUser.ugr_ID?domain:svs[0]);
+                     svs_ugrid.val(top.HEURIST4.util.isempty(groupID)?'all':groupID); //  top.HAPI4.currentUser.ugr_ID);
+                    //svs_ugrid.val(svs[_GRPID]==top.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
             });
 
             var isEdit = (parseInt(svsID)>0);
@@ -278,18 +281,18 @@ function hSvsEdit(args) {
                 .click(function( event ) {
                     $dlg.find('#svs_Rules').val('');
                 });
-                
+
                 $dlg.find("#svs_GetQuery").button({
                         label:'Get filter + rules as string',
                         title:'Gety query string for Mappable Query'})
                 .click(function( event ) {
-                    
+
                     var filter = $dlg.find('#svs_Query').val();
                     if(filter.trim()!=''){
                         var rules = $dlg.find('#svs_Rules').val();
-                    
+
                         var res = '';
-                    
+
                         try {
                             var r = $.parseJSON(filter);
                             if($.isArray(r) || $.isPlainObject(r)){
@@ -301,19 +304,19 @@ function hSvsEdit(args) {
                         if(res==''){
                             res = '{"q":"'+filter+'"';
                         }
-                        
+
                         if(rules!=''){
                             res = res + ',"rules":'+rules+'}';
                         } else{
                             res = res + '}';
                         }
-                    
+
                         top.HEURIST4.msg.showPrompt(
                         '<label>Edit and copy it to paste in Mappable Query filter field</label>'
                         + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
                         + ' style="min-width: 400px; margin-left:0.2em" rows="4" cols="80">'
                         +res
-                        +'</textarea>'                    
+                        +'</textarea>'
                         );
                     }
                 });
@@ -381,7 +384,7 @@ function hSvsEdit(args) {
                         //
                         top.HAPI4.SystemMgr.ssearch_save(request,
                             function(response){
-                                
+
                                 if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                     var svsID = response.data;
