@@ -91,7 +91,7 @@ $.widget( "heurist.resultList", {
             this.div_header =  $( "<div>" ).css('height','2.2em').appendTo( this.element );
 
             if(this.options.innerHeader){
-                $('<h3>'+top.HR('Search Result')+'</h3>')
+                $('<h3>'+top.HR('Filtered results')+'</h3>')
                 .css('padding','1em 0 0 0.7em')
                 .appendTo(this.div_header);
                 //set background to none
@@ -313,7 +313,7 @@ $.widget( "heurist.resultList", {
 
                         if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
                             //new search from outside
-                            var new_title = top.HR(data.qname || that.options.title || 'Search Result');
+                            var new_title = top.HR(data.qname || that.options.title || 'Filtered results');
                             that._clearAllRecordDivs(new_title);
 
                             if(!top.HEURIST4.util.isempty(data.q)){
