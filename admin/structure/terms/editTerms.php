@@ -322,7 +322,7 @@
 
                         <table border="0" cellpadding="2px;">
                             <tr>
-                                <td width="100">Term to be retained:</td>
+                                <td>Term to be retained:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                                 <td id="lblTerm_toRetain"></td>
                             </tr>
                             <tr>
@@ -330,7 +330,7 @@
                                 <td id="lblTerm_toMerge"></td>
                             </tr>
 
-                           <!-- <tr>
+                          <!--  <tr>
                                 <td>Label:</td>
                                 <td>
                                     <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
@@ -426,11 +426,11 @@
                             </div>
                         </div>
 -->
-                        <div style="margin-top:30px;width:120%;text-align:center;">
+                        <div style="margin-top:30px;width:100%;text-align:center;">
                             <input id="btnMergeOK" type="button" value="Merge"
-                                title=""/>
+                                title=""  style="width:70px"/>
                             <input id="btnMergeCancel" type="button" value="Cancel"
-                                title=""/>
+                                title=""  style="width:70px"/>
                         </div>
                 </div>
 

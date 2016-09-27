@@ -250,10 +250,10 @@ function EditTerms() {
         if(_keepCurrentParent!=null){
             //need some time for render
             setTimeout(function(){
-                    var node = _findNodeById(_keepCurrentParent);
-                    node.focus();
-                    node.toggle();
-            }, 1000);
+                var node = _findNodeById(_keepCurrentParent);
+                node.focus();
+                node.toggle();
+                }, 1000);
             //_onNodeClick(node);
         }
     }
@@ -324,22 +324,22 @@ function EditTerms() {
 
         if(_currentNode!=null){
 
-                ischanged =
-                    Dom.get('edName').value.trim() != _currentNode.label ||
-                    Dom.get('edDescription').value.trim() != _currentNode.data.description ||
-                    Dom.get('edCode').value.trim() != _currentNode.data.termcode ||
-                    Dom.get("trm_Status").value != _currentNode.data.status ||
-                    Dom.get('edInverseTermId').value != _currentNode.data.inverseid;
+            ischanged =
+            Dom.get('edName').value.trim() != _currentNode.label ||
+            Dom.get('edDescription').value.trim() != _currentNode.data.description ||
+            Dom.get('edCode').value.trim() != _currentNode.data.termcode ||
+            Dom.get("trm_Status").value != _currentNode.data.status ||
+            Dom.get('edInverseTermId').value != _currentNode.data.inverseid;
         }
 
-          var ele = $('#btnSave');
-          if (ischanged) {
-                ele.removeProp('disabled');
-                ele.css('color','black');
-          }else{
-                ele.prop('disabled', 'disabled');
-                ele.css('color','lightgray');
-          }
+        var ele = $('#btnSave');
+        if (ischanged) {
+            ele.removeProp('disabled');
+            ele.css('color','black');
+        }else{
+            ele.prop('disabled', 'disabled');
+            ele.css('color','lightgray');
+        }
 
     }
 
@@ -408,10 +408,10 @@ function EditTerms() {
                 if(node.data.id>0){
                     var curtimestamp = (new Date()).getMilliseconds();
                     Dom.get('termImage').innerHTML =
-            '<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
-            '<img id="imgThumb" style="max-width: 380px;" src="'+
-            top.HEURIST.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
-            '"></a>';
+                    '<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
+                    '<img id="imgThumb" style="max-width: 380px;" src="'+
+                    top.HEURIST.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
+                    '"></a>';
                     Dom.get('termImage').style.display = 'block';
                 }else{
                     Dom.get('termImage').style.display = 'none';
@@ -612,52 +612,52 @@ function EditTerms() {
         var _dialogbox;
 
         var _updateResult = function(context){
-                if(!Hul.isnull(context) && !context.error){
+            if(!Hul.isnull(context) && !context.error){
 
-                        top.HEURIST.terms = context.terms;
+                top.HEURIST.terms = context.terms;
 
-                        /*_isSomethingChanged = true;
-                        Dom.get('div_btnAddChild').style.display = "inline-block";
-                        Dom.get('btnDelete').value = "Delete";
-                        Dom.get('btnSave').value = "Save";
-                        Dom.get('div_SaveMessage').style.display = "inline-block";
-                        setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);*/
+                /*_isSomethingChanged = true;
+                Dom.get('div_btnAddChild').style.display = "inline-block";
+                Dom.get('btnDelete').value = "Delete";
+                Dom.get('btnSave').value = "Save";
+                Dom.get('div_SaveMessage').style.display = "inline-block";
+                setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);*/
 
-                        var ind = _tabView.get("activeIndex");
-                        _fillTreeView((ind===0)?_termTree1:_termTree2);
-                }
+                var ind = _tabView.get("activeIndex");
+                _fillTreeView((ind===0)?_termTree1:_termTree2);
+            }
         };
 
         var _updateOnServer = function(){
 
-                        var trmLabel = $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
+            var trmLabel = $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
 
-                        var retain_nodeid = $(top.document).find('#lblRetainId').html();
-                        var nodeid = $(top.document).find('#lblMergeId').html();
+            var retain_nodeid = $(top.document).find('#lblRetainId').html();
+            var nodeid = $(top.document).find('#lblMergeId').html();
 
 
-                        if(Hul.isempty(trmLabel)){
-                            alert('Term label cannot be empty');
-                            return;
-                        }
+            if(Hul.isempty(trmLabel)){
+                alert('Term label cannot be empty');
+                return;
+            }
 
-                        var oTerms = {terms:{
-                            colNames:['trm_Label','trm_Description','trm_Code'],
-                            defs: {}
-                        }};
-                        oTerms.terms.defs[retain_nodeid] = [
-                        trmLabel,
-                        $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
-                        $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
+            var oTerms = {terms:{
+                colNames:['trm_Label','trm_Description','trm_Code'],
+                defs: {}
+            }};
+            oTerms.terms.defs[retain_nodeid] = [
+                trmLabel,
+                $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
+                $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
 
-                        var str = YAHOO.lang.JSON.stringify(oTerms);
+            var str = YAHOO.lang.JSON.stringify(oTerms);
 
-                        //alert(str);
+            //alert(str);
 
-                        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
-                        var callback = _updateResult;
-                        var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
-                        Hul.getJsonData(baseurl, callback, params);
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var callback = _updateResult;
+            var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
+            Hul.getJsonData(baseurl, callback, params);
 
 
             if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
@@ -666,26 +666,26 @@ function EditTerms() {
 
 
         var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
-                             fi = top.HEURIST.terms.fieldNamesToIndex;
+        fi = top.HEURIST.terms.fieldNamesToIndex;
 
         var arTerm = termsByDomainLookup[nodeid];
-        $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['+arTerm[fi.trm_ConceptID]+']');
+        $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['.fontsize(1)+arTerm[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
 
         if(Hul.isempty(arTerm[fi.trm_Label])){
             $('#mergeLabel2').hide();
         }else{
            // $('#mergeLabel2').show();
-            //$('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
+           // $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
             //$('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
         }
         if(Hul.isempty(arTerm[fi.trm_Code])){
             $('#mergeCode2').hide();
         }else{
-            //$('#mergeCode2').show();
-            //$('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-           // $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
-          // $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-           // $('#rb  MergeCode2').disabled=true;
+            $('#mergeCode2').show();
+            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+            //$('#rb  MergeCode2').disabled=true;
 
         }
         if(Hul.isempty(arTerm[fi.trm_Description])){
@@ -698,26 +698,28 @@ function EditTerms() {
 
 
         var arTerm2 = termsByDomainLookup[retain_nodeid];
-        $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['+arTerm2[fi.trm_ConceptID]+']');
 
+        $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+
+        //$('#lblTerm_toRetain').html(' ['+arTerm2[fi.trm_ConceptID]+']').style.fontSize= "x-small";
         if(Hul.isempty(arTerm2[fi.trm_Label])){
             //$('#mergeLabel2').hide();
-           // $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
-           // $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
+            //$('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
+            //$('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
         }else{
             //$('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
             //$('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
         }
         if(Hul.isempty(arTerm2[fi.trm_Code])){
-            //$('#mergeCode2').hide();
-            //$('#lblMergeCode1').html(arTerm[fi.trm_Code]);
-            //$('#rbMergeCode1').val(arTerm[fi.trm_Code]);
+            $('#mergeCode2').hide();
+            $('#lblMergeCode1').html(arTerm[fi.trm_Code]);
+            $('#rbMergeCode1').val(arTerm[fi.trm_Code]);
             //$('#rb  MergeCode1').disabled=true;
 
         }else{
             $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
             $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
-           // $('#rb  MergeCode1').disabled=true;
+            //$('#rb  MergeCode1').disabled=true;
         }
         if(Hul.isempty(arTerm2[fi.trm_Description])){
             $('#mergeDescr2').hide();
@@ -745,7 +747,7 @@ function EditTerms() {
                 "no-resize": true,
                 title: 'Select values to be retained',
                 height: 300,
-                width: 650
+                width: 500
         });
 
 
@@ -956,14 +958,14 @@ function EditTerms() {
                                 /*update inverse term
                                 var trm0 = context.terms['termsByDomainLookup']['relation'][node.data.id]; //get term by id
                                 if(trm0){ //if found - this is relation term
-                                    //get inverse id
-                                    node.data.inverseid = Number(trm0[context.terms['fieldNamesToIndex']['trm_InverseTermID']]);
-                                    //set inverse id for other term
-                                    if(node.data.inverseid>0){
-                                        var node2 = _findNodeById(node.data.inverseid, false);
-                                        if(node2)
-                                            node2.data.inverseid = node.data.id;
-                                    }
+                                //get inverse id
+                                node.data.inverseid = Number(trm0[context.terms['fieldNamesToIndex']['trm_InverseTermID']]);
+                                //set inverse id for other term
+                                if(node.data.inverseid>0){
+                                var node2 = _findNodeById(node.data.inverseid, false);
+                                if(node2)
+                                node2.data.inverseid = node.data.id;
+                                }
                                 }*/
 
 
@@ -1045,13 +1047,13 @@ function EditTerms() {
 
                     if(!Hul.isnull(context) && !context['error']){
 
-                            top.HEURIST.terms = context.terms;
-                            //remove from tree
-                            _currTreeView.popNode(_currentNode);
-                            _currTreeView.render();
-                            _currentNode = null;
-                            _onNodeClick(null);
-                            _isSomethingChanged = true;
+                        top.HEURIST.terms = context.terms;
+                        //remove from tree
+                        _currTreeView.popNode(_currentNode);
+                        _currTreeView.render();
+                        _currentNode = null;
+                        _onNodeClick(null);
+                        _isSomethingChanged = true;
                     }else{
                         Dom.get('formEditor').style.display = "block";
                     }
@@ -1088,7 +1090,7 @@ function EditTerms() {
 
 
         var url = top.HEURIST.baseURL_V3 +
-            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
+        "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
         if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
         }
@@ -1113,7 +1115,7 @@ function EditTerms() {
                         /*//reselct the edited node
                         var node = _findNodeById(nodeid, true);
                         if(!Hul.isnull(node)){
-                            _onNodeClick(node);
+                        _onNodeClick(node);
                         }*/
                         return true;
                     }
@@ -1145,13 +1147,13 @@ function EditTerms() {
 
 
         var url = top.HEURIST.baseURL_V3 +
-            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
+        "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
         /*if(keep_target_newparent_id){
-            url = url + "&parent=" + keep_target_newparent_id;
+        url = url + "&parent=" + keep_target_newparent_id;
         }*/
 
         var name_with_path = _getTermLabel(_currentDomain, _keepCurrentParent) + ' - '
-                                        + _getTermLabel(_currentDomain, retain_nodeid);
+        + _getTermLabel(_currentDomain, retain_nodeid);
 
         Hul.popupURL(top, url,
             {
@@ -1277,7 +1279,7 @@ function EditTerms() {
             }
 
             var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/printVocabulary.php?db="+ _db
-                + '&domain=' + _currentDomain + '&trm_ID=' + term_ID;
+            + '&domain=' + _currentDomain + '&trm_ID=' + term_ID;
 
             window.open(sURL, '_blank');
         }
@@ -1301,7 +1303,7 @@ function EditTerms() {
             */
 
             var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/import/importDefTerms.php?db="+ _db +
-                        "&trm_ID="+term_id;
+            "&trm_ID="+term_id;
 
             Hul.popupURL(top, sURL, {
                 "close-on-blur": false,
@@ -1326,10 +1328,10 @@ function EditTerms() {
         {
 
             if(top.HEURIST4 && top.HEURIST4.msg){
-            top.HEURIST4.msg.showMsgDlg(context.result.length
-                                + ' term'
-                                + (context.result.length>1?'s were':' was')
-                                + ' added.', null, 'Terms imported');
+                top.HEURIST4.msg.showMsgDlg(context.result.length
+                    + ' term'
+                    + (context.result.length>1?'s were':' was')
+                    + ' added.', null, 'Terms imported');
             }
 
 
@@ -1595,35 +1597,35 @@ function EditTerms() {
         var baseurl = top.HEURIST.iconBaseURL + _currentNode.data.id + "&ent=term&deletemode=1";
         Hul.getJsonData(baseurl, function(context){
             if(!Hul.isnull(context) && !context.error){
-                 if(context.res=='ok'){
+                if(context.res=='ok'){
                     $('#termImage').find('img').prop('src', top.HEURIST.baseURL_V3 + 'hclient/assets/100x100click.png');
-                 }
+                }
             }
-        }, null);
+            }, null);
 
     }
 
     function _initFileUploader(){
 
-            var $input = $('#new_term_image');
-            var $input_img = $('#termImage');
+        var $input = $('#new_term_image');
+        var $input_img = $('#termImage');
 
-            $input.fileupload({
-    url: top.HEURIST.baseURL_V3 +  'hserver/utilities/fileUpload.php',
-    formData: [ {name:'db', value: _db},
+        $input.fileupload({
+            url: top.HEURIST.baseURL_V3 +  'hserver/utilities/fileUpload.php',
+            formData: [ {name:'db', value: _db},
                 {name:'entity', value:'terms'},
                 {name:'newfilename', value: Dom.get('edId').value }],
-    acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
-    autoUpload: true,
-    sequentialUploads:true,
-    dataType: 'json',
-    //dropZone: $input_img,
-    add: function (e, data) {
-        $input_img.addClass('loading');
-        $input_img.find('img').hide();
-        data.submit();
-    },
-    done: function (e, response) {
+            acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+            autoUpload: true,
+            sequentialUploads:true,
+            dataType: 'json',
+            //dropZone: $input_img,
+            add: function (e, data) {
+                $input_img.addClass('loading');
+                $input_img.find('img').hide();
+                data.submit();
+            },
+            done: function (e, response) {
                 $input_img.removeClass('loading');
                 $input_img.find('img').show();
                 response = response.result;
@@ -1641,7 +1643,7 @@ function EditTerms() {
                     });
                 }
             }
-                        });
+        });
 
     }
 
@@ -1689,8 +1691,8 @@ function EditTerms() {
             var $input = $('#new_term_image');
             $input.fileupload('option','formData',
                 [ {name:'db', value: _db},
-                {name:'entity', value:'terms'},
-                {name:'newfilename', value: Dom.get('edId').value }]);
+                    {name:'entity', value:'terms'},
+                    {name:'newfilename', value: Dom.get('edId').value }]);
 
             $input.click();
 
