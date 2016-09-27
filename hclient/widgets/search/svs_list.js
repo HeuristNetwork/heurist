@@ -59,7 +59,7 @@ $.widget( "heurist.svs_list", {
 
         if(top.HAPI4.sysinfo['layout']!='original'){
             toppos = toppos + 2.5;
-            $('<div>'+top.HR('Saved Filters')+'</div>')
+                    $('<div>'+top.HR('Saved Filters')+'</div>')
                 .css({'padding-left': '1.1em', 'font-size': '1.4em', 'font-weight': 'bold', 'color':'rgb(142, 169, 185)'})
                 .appendTo(this.div_header);
         }
@@ -173,8 +173,8 @@ $.widget( "heurist.svs_list", {
             //new
             var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="'+this._HINT_FACETED+'">'
             //+'<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
-            +'Faceted search'
-            +'&nbsp;<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span></div>'
+            +'<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span></div>'
+            +'&nbsp;Faceted search'
 
             +'<div style="font-style:italic;" title="'+this._HINT_WITHRULES+'">'
             +'Search with rules'
@@ -636,7 +636,7 @@ $.widget( "heurist.svs_list", {
                             //'<span style="display:inline-block;">'+node.title+ '</span>'
                             //'<div style="display:inline-block;">'+node.title+'</div>'
                             //
-                            $span.find("> span.fancytree-title").html( node.title+' '+s );
+                            $span.find("> span.fancytree-title").html(s+' '+node.title);
                             //.attr('title', s_hint);
                         }
                     }
