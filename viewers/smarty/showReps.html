@@ -174,6 +174,12 @@
                             <span id='insert-popup-header'></span>
                         </td>
                     </tr>
+
+                    <tr>
+                        <td></td>
+                        <td><b>Normal</b></td>
+                    </tr>
+
                     <tr>
                         <td>
                             <select id="selInsertMode" style="width:200px"
@@ -226,19 +232,38 @@
                     </tr>
 
                     <!-- only shows if there is a within-loop option -->
-                    <tr style="margin-top: 20px;">
-                        <td colspan="2">
-                            <div class="ins_isloop"><br/>Use buttons on the right to insert field or test within a repeat loop</div>
+
+                    <tr class="ins_isloop">
+                        <td></td>
+                        <td>
+                            <br/><b>Within repeat loop</b>
                         </td>
                     </tr>
-                    <tr class="ins_isloop">
+
+                    <tr class="ins_isloop" >
+                        <td >
+                            <div class="ins_isloop">Use these buttons to insert field<br/> or test within a repeat loop</div>
+                        </td>
                         <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, false )">
                             Insert field value</button></div>
                         </td>
+                    </tr>
+
+
+                    <tr class="ins_isloop">
+                        <td></td>
                         <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, true )">
                             Test value (If ...)</button></div>
                         </td>
                     </tr>
+
+
+                    <!--<tr style="margin-top: 20px;">
+                    <td colspan="2">
+                    <div class="ins_isloop"><br/>Use buttons on the right to insert field<br/> or test within a repeat loop</div>
+                    </td>
+                    </tr> -->
+
 
                     <tr>
                         <td colspan="2">
@@ -246,22 +271,22 @@
                         </td>
                     </tr>
 
-<!-- this section is moved above field tree
+                    <!-- this section is moved above field tree
                     <tr style="margin-top: 20px;">
-                        <td colspan="2">
-                            <select id="selInsertPattern" style="width:200px">
-                                <option value="1">Heading for record type</option>
-                                <option value="2">Simple table</option>
-                                <option value="3">Information on first element of a loop</option>
-                                <option value="4">Information on last element of a loop</option>
-                                <option value="99">Outer records loop</option>
-                            </select>
-                            <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
-                                Insert pattern
-                            </button>
-                        </td>
+                    <td colspan="2">
+                    <select id="selInsertPattern" style="width:200px">
+                    <option value="1">Heading for record type</option>
+                    <option value="2">Simple table</option>
+                    <option value="3">Information on first element of a loop</option>
+                    <option value="4">Information on last element of a loop</option>
+                    <option value="99">Outer records loop</option>
+                    </select>
+                    <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
+                    Insert pattern
+                    </button>
+                    </td>
                     </tr>
--->
+                    -->
                 </table>
 
                 <br />
@@ -306,14 +331,14 @@
                     <button id="btnRepPrint2" title="">Print</button>
                     <button id="btnRepRefresh" title="Refresh memory - updates lists, dropdowns and report output">Refresh</button>
                 </div>
-<!-- replaced with toolbar 2015-01-15
+                <!-- replaced with toolbar 2015-01-15
                 <ul id="rep_list" class="horizontal menu" style="float:right">
-                    <li style="width:22px;"><button id="btnRepMenu2">Menu</button>
-                        <ul id="toolMenuItems" style="zdisplay:block;">
-                        </ul>
-                    </li>
+                <li style="width:22px;"><button id="btnRepMenu2">Menu</button>
+                <ul id="toolMenuItems" style="zdisplay:block;">
                 </ul>
--->
+                </li>
+                </ul>
+                -->
             </div>
             <div id="rep_container">
                 <iframe id="rep_container_frame" style="width:99%;height:99%;border:none"></iframe>
@@ -357,16 +382,16 @@
 
                     <div style="margin-top: 4px;">
 
-                            <select id="selInsertPattern" style="width:100px">
-                                <option value="1">Heading for record type</option>
-                                <option value="2">Simple table</option>
-                                <option value="3">Information on first element of a loop</option>
-                                <option value="4">Information on last element of a loop</option>
-                                <option value="99">Outer records loop</option>
-                            </select>
-                            <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
-                                Insert pattern
-                            </button>
+                        <select id="selInsertPattern" style="width:100px">
+                            <option value="1">Heading for record type</option>
+                            <option value="2">Simple table</option>
+                            <option value="3">Information on first element of a loop</option>
+                            <option value="4">Information on last element of a loop</option>
+                            <option value="99">Outer records loop</option>
+                        </select>
+                        <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
+                            Insert pattern
+                        </button>
                     </div>
                 </div>
 
@@ -440,9 +465,9 @@
                 Hul.popupURL(this, top.HEURIST.baseURL_V3 + 'viewers/smarty/repMenu.html?template_file='+template_file,
                     {   title: 'Publish report',
                         callback: function(filename){
-                        if(!Hul.isnull(filename)) {
-                            window.showReps.onPublish( filename )
-                        }
+                            if(!Hul.isnull(filename)) {
+                                window.showReps.onPublish( filename )
+                            }
                         }
                 } );
 
@@ -492,7 +517,7 @@
 
                     var currentSearchQuery = top.HEURIST.currentQuery_all.replace('"','%22');
                     var surl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php?"+
-                        currentSearchQuery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
+                    currentSearchQuery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
 
 
                     $("#btnRepSave").hide();
@@ -504,9 +529,9 @@
                 /* OLD WAY - it saves only current output in UI
                 if(top.HEURIST4)
 
-                    var iframe = document.getElementById("rep_container_frame");
-                    var ele = $(iframe.contentWindow.document).find('body');
-                    top.HEURIST4.util.downloadInnerHtml('heurist_report.html', ele );
+                var iframe = document.getElementById("rep_container_frame");
+                var ele = $(iframe.contentWindow.document).find('body');
+                top.HEURIST4.util.downloadInnerHtml('heurist_report.html', ele );
                 }
                 */
             }
@@ -603,7 +628,7 @@
                 $("#btnRepNew").button({text:false, icons: { primary: "ui-icon-plusthick" }}).click(onGenerate);
                 $("#btnRepDelete").button({text:false, icons: { primary: "ui-icon-closethick" }}).click(onDeleteTemplate);
                 $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-in" }}).click(function(){
-                            $('#fileupload').click();return false;
+                    $('#fileupload').click();return false;
                 });
                 $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).click(onExportTemplate);
                 $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }}).click(onSaveOutput);
@@ -611,11 +636,11 @@
                 $("#btnRepRefresh").button({text:false, icons: { primary: "ui-icon-refresh" }}).click(onSelectTemplate);
 
 
-/*replaced with toolbar 2015-01-15
+                /*replaced with toolbar 2015-01-15
                 $("#btnRepMenu2").button({text:false, icons: {
-                    primary: "ui-icon-gear"
+                primary: "ui-icon-gear"
                 }});
-*/
+                */
 
 
             }
@@ -721,18 +746,18 @@
                                 var list_of_notfound = obj.details_not_found.join(', ');
 
                                 top.HEURIST4.msg.showMsgDlg(
-'Unable to convert IDs for following concept codes: '+list_of_notfound
-+'<p style="padding-top:1.5em">Concept IDs which failed to convert are enclosed in [[  ]] in the template file eg. f[[2-27]]. You will need to edit the template in order to remove these IDs or to replace them with the internal code of an equivalent concept.</p>'
-+'<p style="padding-top:1.5em">Failure to convert Concept IDs (global codes for particular record types, fields and terms) to local codes indicates that the Concept IDs are not known within your database.</p>'
-+'<p style="padding-top:1.5em">You may wish to import the missing concepts using Database > Structure > Import from databases. The first part of the code indicates the database in which the concept was originally defined.</p>'
-                                ,null,'Conversion of template file to internal codes');
+                                    'Unable to convert IDs for following concept codes: '+list_of_notfound
+                                    +'<p style="padding-top:1.5em">Concept IDs which failed to convert are enclosed in [[  ]] in the template file eg. f[[2-27]]. You will need to edit the template in order to remove these IDs or to replace them with the internal code of an equivalent concept.</p>'
+                                    +'<p style="padding-top:1.5em">Failure to convert Concept IDs (global codes for particular record types, fields and terms) to local codes indicates that the Concept IDs are not known within your database.</p>'
+                                    +'<p style="padding-top:1.5em">You may wish to import the missing concepts using Database > Structure > Import from databases. The first part of the code indicates the database in which the concept was originally defined.</p>'
+                                    ,null,'Conversion of template file to internal codes');
 
                                 /* old
                                 alert('Conversion of template file to internal codes. '+
-                                    'Unable to convert '+obj.details_not_found.length+
-                                    '. Failure to convert the Concept IDs (global codes for particular record types and fields) '+
-                                    'to local codes indicates that the Concept IDs are not known within your database. Concept IDs '+
-                                    'which failed to convert are enclosed in [[ ]] in the template file eg. f[[2-27]]'
+                                'Unable to convert '+obj.details_not_found.length+
+                                '. Failure to convert the Concept IDs (global codes for particular record types and fields) '+
+                                'to local codes indicates that the Concept IDs are not known within your database. Concept IDs '+
+                                'which failed to convert are enclosed in [[ ]] in the template file eg. f[[2-27]]'
                                 );
                                 */
                             }
