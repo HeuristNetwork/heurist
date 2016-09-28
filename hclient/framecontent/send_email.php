@@ -161,8 +161,8 @@ if(isset($_POST['data'])) {
         var definitions; // Record type field definitions
         var rectype_index = 4; // Record type index in object
         var type_index = 23; // Field type index in object
-        var ids =  top.HAPI4.selectedRecordIds; // Selected record ID's
-        var records = top.HAPI4.currentRecordset.getSubSetByIds(ids).getRecords(); // Array of record objects
+        var ids =  window.hWin.HAPI4.selectedRecordIds; // Selected record ID's
+        var records = window.hWin.HAPI4.currentRecordset.getSubSetByIds(ids).getRecords(); // Array of record objects
         var record; // First record in the list, used to determine the Record Types
 
         // Retrieves an item from localStorage
@@ -233,7 +233,7 @@ if(isset($_POST['data'])) {
             for(var r in records) {
                 this.record = records[r]; // Reference to first record
                 var rectype = record[rectype_index]; // Record type of first record
-                this.definitions = top.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
+                this.definitions = window.hWin.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
                 console.log("Rectype: " + rectype + ", definitions", this.definitions);
 
                 // TEXT ONLY DROPDOWNS
@@ -295,7 +295,7 @@ if(isset($_POST['data'])) {
             }else if(type == "enum") {
                 var enumID = record.d[index];
                 if(enumID) {
-                    return top.HEURIST4.terms.termsByDomainLookup.enum[enumID][0];
+                    return window.hWin.HEURIST4.terms.termsByDomainLookup.enum[enumID][0];
                 }
 
             }else if(type == "termlist") {
@@ -365,22 +365,22 @@ if(isset($_POST['data'])) {
                         email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
                         data.emails.push(email);
                     }else{
-                         top.HEURIST4.msg.showMsgErr("Define email field. It is mandatory");
+                         window.hWin.HEURIST4.msg.showMsgErr("Define email field. It is mandatory");
                          return;
                     }
                 }
 
                 // Include e-mail to current user/database owner
-                var owner = {recipients: [top.HAPI4.sysinfo.dbowner_email], message: rawMessage};
+                var owner = {recipients: [window.hWin.HAPI4.sysinfo.dbowner_email], message: rawMessage};
                 data.emails.push(owner);
 
                 // Send data to PHP file, everything is checked server-sided
                 console.log("Data to send", data);
                 $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
                     console.log("Posted data, response: ", response);
-                    top.HEURIST4.msg.showMsgDlg(response);
+                    window.hWin.HEURIST4.msg.showMsgDlg(response);
                 }).fail(function(jqXHR, textStatus, errorThrown) {
-                    top.HEURIST4.msg.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);
+                    window.hWin.HEURIST4.msg.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);
                 });
 
             }

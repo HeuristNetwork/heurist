@@ -49,13 +49,13 @@ $.widget( "heurist.dh_maps", {
         //perform search for maps
         var that = this;
 
-        $(this.document).on(top.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {
+        $(this.document).on(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {
 
 
             //531 (not individ), 4802 (35), 4803 (pre35)
             //LOAD MAP DOCUMENTS
             var query = {"t":"19"};
-            if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
+            if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
                 query["f:144"] = "4802";
             }else{
                 query["f:144"] = "531,4802,4803";
@@ -67,14 +67,14 @@ $.widget( "heurist.dh_maps", {
                     detail: 'header', l:3000, source:that.element.attr('id') };
 
             //perform search
-            top.HAPI4.RecordMgr.search(request,
+            window.hWin.HAPI4.RecordMgr.search(request,
                 function(response) {
 
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         that._resultset = new hRecordSet(response.data);
                     }else{
                         that._resultset = null;
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
 
                     that._refresh();
@@ -132,7 +132,7 @@ $.widget( "heurist.dh_maps", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        $(this.document).off(top.HAPI4.Event.ON_SYSTEM_INITED);
+        $(this.document).off(window.hWin.HAPI4.Event.ON_SYSTEM_INITED);
         this.div_content.remove();
     },
 
@@ -165,7 +165,7 @@ $.widget( "heurist.dh_maps", {
         var recID = fld('rec_ID');
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
-        var recTitle = top.HEURIST4.util.htmlEscape(fld('rec_Title'));
+        var recTitle = window.hWin.HEURIST4.util.htmlEscape(fld('rec_Title'));
 
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
@@ -174,7 +174,7 @@ $.widget( "heurist.dh_maps", {
 
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
-        + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
+        + '<div class="recTypeThumb" style="background-image: url(&quot;'+ window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
         + html_thumb
         + '<div title="'+recTitle+'" class="recordTitle">'
         +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + " AAAAAA</a>") :recTitle)
@@ -191,7 +191,7 @@ $.widget( "heurist.dh_maps", {
 
             $rdiv = $rdiv.parents('.recordDiv')
             var rectypeID = $rdiv.attr('rectype');
-            var title = top.HEURIST4.rectypes.names[rectypeID] + ' [' + rectypeID + ']';
+            var title = window.hWin.HEURIST4.rectypes.names[rectypeID] + ' [' + rectypeID + ']';
             $rdiv.attr('title', title);
         }
     },
@@ -213,10 +213,10 @@ $.widget( "heurist.dh_maps", {
         var recId = $rdiv.attr('recid');
 
         //hack $('#map-doc-select').click();
-        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51');
+        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
         if(app && app.widget){
             //switch to Map Tab
-            top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
+            window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
 
             //load Map Document
             $(app.widget).app_timemap('loadMapDocumentById', recId);

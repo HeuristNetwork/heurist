@@ -36,13 +36,13 @@
                     editing = new hEditing($container);
                     
                     //@todo take from HAPI parameters
-                    var q = top.HEURIST4.util.getUrlParameter('q', window.location.search);
+                    var q = window.hWin.HEURIST4.util.getUrlParameter('q', window.location.search);
                     //t:26 f:85:3313  f:1:building
                     if( q )
                     {
-                        top.HAPI4.RecordMgr.search({q: q, w: "all", f:"structure", l:1},
+                        window.hWin.HAPI4.RecordMgr.search({q: q, w: "all", f:"structure", l:1},
                             function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                                     var recset = new hRecordSet(response.data);
                                     editing.load(recset);
@@ -55,11 +55,11 @@
 
                     }else{ //add new record
 
-                        var rt = top.HEURIST4.util.getUrlParameter('rt', window.location.search);
+                        var rt = window.hWin.HEURIST4.util.getUrlParameter('rt', window.location.search);
 
-                        top.HAPI4.RecordMgr.add( {rt:rt}, //ro - owner,  rv - visibility
+                        window.hWin.HAPI4.RecordMgr.add( {rt:rt}, //ro - owner,  rv - visibility
                             function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                                     var recset = new hRecordSet(response.data);
                                     editing.load(recset);

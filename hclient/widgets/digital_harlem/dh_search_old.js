@@ -216,7 +216,7 @@ $.widget( "heurist.dh_search", {
 
                             //find input widget and get its value
                             var vals = $(_inputs[val]).editing_input('getValues');
-                            if(vals && vals.length>0 && !top.HEURIST4.util.isempty(vals[0])){
+                            if(vals && vals.length>0 && !window.hWin.HEURIST4.util.isempty(vals[0])){
                                 predicate[key] = vals[0];
                                 isbranch_empty = false;
                             }else{
@@ -285,7 +285,7 @@ $.widget( "heurist.dh_search", {
 
         this.res_name = $('<input>').css('padding','0.4em').appendTo(this.res_div);
 
-        this.res_btn = $('<button>', {text:top.HR('Map')+' >'})
+        this.res_btn = $('<button>', {text:window.hWin.HR('Map')+' >'})
         .button().on("click", function(event){ that._onAddLayer(); } )
         .appendTo(this.res_div);
 
@@ -330,7 +330,7 @@ $.widget( "heurist.dh_search", {
         this._createFacetQueries( content_id );
 
         //var $d = $(document.createElement('div')).appendTo(this.element);
-        this.tab_header.append('<li><a href="#dh_search_'+content_id+'">'+ top.HR(name) +'</a></li>');
+        this.tab_header.append('<li><a href="#dh_search_'+content_id+'">'+ window.hWin.HR(name) +'</a></li>');
 
         //create form
         var $container = $('<div id="dh_search_'+content_id+'">');
@@ -349,7 +349,7 @@ $.widget( "heurist.dh_search", {
                         recID: -1,
                         rectypeID: field['rtid'],
                         dtID: field['id'],
-                        rectypes: top.HEURIST4.rectypes,
+                        rectypes: window.hWin.HEURIST4.rectypes,
                         values: '',
                         readonly: false,
                         title: field['title'],
@@ -373,7 +373,7 @@ $.widget( "heurist.dh_search", {
         .css({'width':'212px', 'text-align':'right'})
         .appendTo($container);
 
-        var btn_submit = $('<button>', {text:top.HR('Submit')})
+        var btn_submit = $('<button>', {text:window.hWin.HR('Submit')})
         .button()  //.on("click", function(event){ this._save(); } )
         .appendTo(btn_div);
 
@@ -399,7 +399,7 @@ $.widget( "heurist.dh_search", {
                 var isform_empty = this._fillQuery(query, _input_fields, 0);
 
                 if(isform_empty){
-                    top.HEURIST4.msg.showMsgErr('Define at least one search criterion');
+                    window.hWin.HEURIST4.msg.showMsgErr('Define at least one search criterion');
                     return;
                 }
 
@@ -407,17 +407,17 @@ $.widget( "heurist.dh_search", {
                 var request = {qa: query, w: 'a', detail: 'detail', l:3000, source:this.element.attr('id') }; //, facets: facets
 
                 //perform search
-                top.HAPI4.RecordMgr.search(request,
+                window.hWin.HAPI4.RecordMgr.search(request,
                     function(response) {
 
                         that.loadanimation(false);
 
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             that._currentquery = query;
                             that._currenttype  = content_id;
                             that._resultset = new hRecordSet(response.data);
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                             return;
                         }
 
@@ -447,7 +447,7 @@ $.widget( "heurist.dh_search", {
 
         }});
 
-        $('<button>', {text:top.HR('Reset')})
+        $('<button>', {text:window.hWin.HR('Reset')})
         .button().on("click", function(event){  } )
         .appendTo(btn_div);
 
@@ -505,7 +505,7 @@ $.widget( "heurist.dh_search", {
 
     _getFacets: function(request)
     {
-        //if(top.HEURIST4.util.isArrayNotEmpty(requests)) {
+        //if(window.hWin.HEURIST4.util.isArrayNotEmpty(requests)) {
         //var request = requests.shift();
 
         var term = request.term;
@@ -514,10 +514,10 @@ $.widget( "heurist.dh_search", {
 
         function __onResponse(response){
 
-            if(response.status == top.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                 //@TODO that.cached_counts.push(response);
-                var allTerms = top.HEURIST4.terms;
+                var allTerms = window.hWin.HEURIST4.terms;
 
                 var svs_id = parseInt(response.svs_id);
                 var facet_index = parseInt(response.facet_index);
@@ -583,7 +583,7 @@ $.widget( "heurist.dh_search", {
                         if(facet_index>=0){
                             var rtID = cterm[0];
                             var f_link = that._createFacetLink(facet_index,
-                                {text:top.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
+                                {text:window.hWin.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
                             $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
                         }
                     }
@@ -620,14 +620,14 @@ $.widget( "heurist.dh_search", {
                 }
 
                 if($facet_values.is(':empty')){
-                    $("<span>").text(top.HR('no values')).css({'font-style':'italic'}).appendTo($facet_values);
+                    $("<span>").text(window.hWin.HR('no values')).css({'font-style':'italic'}).appendTo($facet_values);
                 }
 
                 //that._getFacets(requests);
                 that._recalculateFacets(svs_id, facet_index);
 
             }else{
-                top.HEURIST4.msg.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
 
 
@@ -654,7 +654,7 @@ $.widget( "heurist.dh_search", {
     loadanimation: function(show){
         if(show){
             //this.tab_control.hide();
-            this.res_div.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.res_div.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.res_div.css('background','none');
             //this.tab_control.show();
@@ -664,8 +664,8 @@ $.widget( "heurist.dh_search", {
     // add kayer to current map document
     _onAddLayer: function(){
 
-        if(top.HEURIST4.util.isempty(this.res_name.val() )){
-            top.HEURIST4.msg.showMsgErr('Define name of layer');
+        if(window.hWin.HEURIST4.util.isempty(this.res_name.val() )){
+            window.hWin.HEURIST4.msg.showMsgErr('Define name of layer');
             return;
         }
 
@@ -678,9 +678,9 @@ $.widget( "heurist.dh_search", {
             rules = [{"query":"t:12 relatedfrom:14"}];
         }
 
-        var params = {id:"dhs"+top.HEURIST4.util.random(), title:this.res_name.val(), query: {qa:this._currentquery, rules:rules} };
+        var params = {id:"dhs"+window.hWin.HEURIST4.util.random(), title:this.res_name.val(), query: {qa:this._currentquery, rules:rules} };
 
-        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51');
+        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
         if(app && app.widget){
             $(app.widget).app_timemap('addQueryLayer', params);
         }

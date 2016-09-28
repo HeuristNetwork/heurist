@@ -26,7 +26,7 @@ $.widget( "heurist.file_manager", {
         isdialog: false, //show in dialog or embedded
 
         current_mediatype: null,
-        // we take tags from top.HAPI4.currentUser.usr_Files - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from window.hWin.HAPI4.currentUser.usr_Files - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
 
         record_ids: null, //array of record ids the file selection will be applied for
 
@@ -42,7 +42,7 @@ $.widget( "heurist.file_manager", {
     // the constructor
     _create: function() {
 
-        top.HAPI4.currentUser.usr_Files = {}; // {type:[]; type2:[]}
+        window.hWin.HAPI4.currentUser.usr_Files = {}; // {type:[]; type2:[]}
 
         var that = this;
 
@@ -59,24 +59,24 @@ $.widget( "heurist.file_manager", {
                 height: 640,
                 width: 800,
                 modal: true,
-                title: top.HR("Manage files"),
+                title: window.hWin.HR("Manage files"),
                 resizeStop: function( event, ui ) {
                     that.wcontainer.css('width','100%');
                 },
                 buttons: [
-                    {text:top.HR('Delete'),
-                        title: top.HR("Delete selected tags"),
+                    {text:window.hWin.HR('Delete'),
+                        title: window.hWin.HR("Delete selected tags"),
                         disabled: 'disabled',
                         class: 'recs-actions',
                         click: function() {
                             that._deleteFile();
                     }},
-                    {text:top.HR('Add'),
-                        title: top.HR("Upload/register new file"),
+                    {text:window.hWin.HR('Add'),
+                        title: window.hWin.HR("Upload/register new file"),
                         click: function() {
                             that._editFile();
                     }},
-                    {text:top.HR('Close'), click: function() {
+                    {text:window.hWin.HR('Close'), click: function() {
                         $( this ).dialog( "close" );
                     }}
                 ]
@@ -88,22 +88,22 @@ $.widget( "heurist.file_manager", {
 
         //---------------------------------------- HEADER
 
-        //<option value='all'>"+top.HR("all")+"</option>
+        //<option value='all'>"+window.hWin.HR("all")+"</option>
         this.div_toolbar = $('<div id="file-toolbar">').css({'width':'100%'}).appendTo( this.wcontainer );
 
         this.lbl_message1 = $( "<label>").css({'padding-right':'5px'})
-        .html(top.HR('Type'))
+        .html(window.hWin.HR('Type'))
         .appendTo( this.div_toolbar );
 
         // file/media type selector
         this.select_mediatype = $( "<select><option value='image'>"+
-            top.HR("image")+"</option><option value='video'>"+
-            top.HR("video")+"</option><option value='audio'>"+
-            top.HR("audio")+"</option><option value='text/html'>"+
-            top.HR("text/html")+"</option><option value='document'>"+
-            top.HR("document")+"</option><option value='flash'>"+
-            top.HR("flash")+"</option><option value='xml'>"+
-            top.HR("xml")+"</option></select>", {'width':'100px'} )
+            window.hWin.HR("image")+"</option><option value='video'>"+
+            window.hWin.HR("video")+"</option><option value='audio'>"+
+            window.hWin.HR("audio")+"</option><option value='text/html'>"+
+            window.hWin.HR("text/html")+"</option><option value='document'>"+
+            window.hWin.HR("document")+"</option><option value='flash'>"+
+            window.hWin.HR("flash")+"</option><option value='xml'>"+
+            window.hWin.HR("xml")+"</option></select>", {'width':'100px'} )
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.div_toolbar );
 
@@ -115,19 +115,19 @@ $.widget( "heurist.file_manager", {
 
                 //var that = this;
 
-                if(top.HAPI4.currentUser.usr_Files && top.HAPI4.currentUser.usr_Files[val]){  //already found
+                if(window.hWin.HAPI4.currentUser.usr_Files && window.hWin.HAPI4.currentUser.usr_Files[val]){  //already found
                     this.options.current_mediatype = val;
                     this._renderItems();
                 }else{
-                    top.HAPI4.RecordMgr.file_get({recIDs:this.options.record_ids, mediaType:val},
+                    window.hWin.HAPI4.RecordMgr.file_get({recIDs:this.options.record_ids, mediaType:val},
                         function(response) {
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                 that.options.current_mediatype = val;
-                                if(!top.HAPI4.currentUser.usr_Files){
-                                    top.HAPI4.currentUser.usr_Files = {};
+                                if(!window.hWin.HAPI4.currentUser.usr_Files){
+                                    window.hWin.HAPI4.currentUser.usr_Files = {};
                                 }
 
-                                //top.HAPI4.currentUser.usr_Files[val] = response.data;
+                                //window.hWin.HAPI4.currentUser.usr_Files[val] = response.data;
 
                                 that.options.header = response.data[0];
                                 var files = [];
@@ -137,12 +137,12 @@ $.widget( "heurist.file_manager", {
                                         files.push(response.data[idx]);
                                     }
                                 }
-                                top.HAPI4.currentUser.usr_Files[val] = files;
+                                window.hWin.HAPI4.currentUser.usr_Files[val] = files;
 
 
                                 that._renderItems();
                             }else{
-                                top.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                     });
                 }
@@ -155,7 +155,7 @@ $.widget( "heurist.file_manager", {
         //this.search_div = $( "<div>").css({ width:'36%', 'display':'inline-block' }).appendTo( this.div_toolbar );
 
         this.lbl_message2 = $( "<label>").css({'padding-right':'5px', 'padding-left':'5px'})
-        .html(top.HR('Search'))
+        .html(window.hWin.HR('Search'))
         .appendTo( this.div_toolbar );
 
         this.input_search = $( "<input>", {width:'25%'} )
@@ -173,16 +173,16 @@ $.widget( "heurist.file_manager", {
         //this.sort_div = $( "<div>").css({ 'float':'right' }).appendTo( this.div_toolbar );
 
         this.lbl_message3 = $( "<label>").css({'padding-right':'5px', 'padding-left':'5px'})
-        .html(top.HR('Sort'))
+        .html(window.hWin.HR('Sort'))
         .appendTo( this.div_toolbar );
 
         //order index is correspond to index in data array
         this.select_order = $( "<select><option value='1'>"+
-            top.HR("by name")+"</option><option value='5'>"+
-            top.HR("by size")+"</option><option value='6'>"+
-            top.HR("by usage")+"</option><option value='7'>"+
-            top.HR("by date")+"</option><option value='8'>"+
-            top.HR("marked")+"</option></select>", {'width':'80px'} )
+            window.hWin.HR("by name")+"</option><option value='5'>"+
+            window.hWin.HR("by size")+"</option><option value='6'>"+
+            window.hWin.HR("by usage")+"</option><option value='7'>"+
+            window.hWin.HR("by date")+"</option><option value='8'>"+
+            window.hWin.HR("marked")+"</option></select>", {'width':'80px'} )
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.div_toolbar );
 
@@ -204,8 +204,8 @@ $.widget( "heurist.file_manager", {
             },text:true});
 
         this.menu_view = $('<ul>'+
-            '<li id="menu-view-list"><a href="#">'+top.HR('list')+'</a></li>'+
-            '<li id="menu-view-thumbs"><a href="#">'+top.HR('thumbs')+'</a></li>'+
+            '<li id="menu-view-list"><a href="#">'+window.hWin.HR('list')+'</a></li>'+
+            '<li id="menu-view-thumbs"><a href="#">'+window.hWin.HR('thumbs')+'</a></li>'+
             '</ul>')
         .addClass('menu-or-popup')
         .css('position','absolute')
@@ -250,8 +250,8 @@ $.widget( "heurist.file_manager", {
             .appendTo( this.wcontainer );
 
             this.btn_add = $( "<button>", {
-            text: top.HR("Add File"),
-            title: top.HR("Upload/register new file")
+            text: window.hWin.HR("Add File"),
+            title: window.hWin.HR("Upload/register new file")
             })
             .appendTo( this.div_toolbar )
             .button();
@@ -260,8 +260,8 @@ $.widget( "heurist.file_manager", {
 
             this.btn_manage = $( "<button>", {
             id: 'manageTags',
-            text: top.HR("Manage"),
-            title: top.HR("Manage tags")
+            text: window.hWin.HR("Manage"),
+            title: window.hWin.HR("Manage tags")
             })
             .appendTo( this.div_toolbar )
             .button();
@@ -271,8 +271,8 @@ $.widget( "heurist.file_manager", {
             this.btn_assign = $( "<button>", {
             id: 'assignTags',
             //disabled: 'disabled',
-            text: top.HR("Assign"),
-            title: top.HR("Assign selected tags")
+            text: window.hWin.HR("Assign"),
+            title: window.hWin.HR("Assign selected tags")
             })
             .appendTo( this.div_toolbar )
             .button();
@@ -293,9 +293,9 @@ $.widget( "heurist.file_manager", {
 
     _reloadFiles: function(mediaType){
         if(mediaType){
-            top.HAPI4.currentUser.usr_Files[mediaType] = null;
+            window.hWin.HAPI4.currentUser.usr_Files[mediaType] = null;
         }else{
-            top.HAPI4.currentUser.usr_Files = {}; //clear all
+            window.hWin.HAPI4.currentUser.usr_Files = {}; //clear all
         }
         this.options.current_mediatype = null;
         this.select_mediatype.change();
@@ -343,11 +343,11 @@ $.widget( "heurist.file_manager", {
         btn.attr('disabled','disabled');       */
 
 
-        if(top.HAPI4.currentUser.usr_Files && top.HAPI4.currentUser.usr_Files[this.options.current_mediatype])
+        if(window.hWin.HAPI4.currentUser.usr_Files && window.hWin.HAPI4.currentUser.usr_Files[this.options.current_mediatype])
         {
             //convert from object to array
             var that = this;
-            var recfiles = top.HAPI4.currentUser.usr_Files[this.options.current_mediatype];
+            var recfiles = window.hWin.HAPI4.currentUser.usr_Files[this.options.current_mediatype];
 
             recfiles.sort(function (a,b){
                 var val = that.options.current_order;
@@ -392,13 +392,13 @@ $.widget( "heurist.file_manager", {
                 if(obf_recID){
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css({ 'background-image':'url('+ top.HAPI4.basePathV4+'/redirects/file_download.php?db=' + top.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
+                    .css({ 'background-image':'url('+ window.hWin.HAPI4.basePathV4+'/redirects/file_download.php?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
                     .appendTo($recdiv);
                 }else{
                     //@todo - thumbnail and icons for all mediatype
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css('background-image', 'url('+ top.HAPI4.basePathV4 + 'hclient/assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)')
+                    .css('background-image', 'url('+ window.hWin.HAPI4.basePathV4 + 'hclient/assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)')
                     .appendTo($recdiv);
                 }
 
@@ -412,7 +412,7 @@ $.widget( "heurist.file_manager", {
                 .css('margin','0.4em')
                 .click(function(event){
 
-                top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][$(this).attr('tagID')][5] = event.target.checked;
+                window.hWin.HAPI4.currentUser.usr_Files[that.options.current_mediatype][$(this).attr('tagID')][5] = event.target.checked;
                 //event.target.keepmark = event.target.checked;
 
                 if(that.options.isdialog){  //tag management
@@ -449,12 +449,12 @@ $.widget( "heurist.file_manager", {
                 .append( $('<div>')
                 .addClass('edit-delete-buttons')
                 .css('margin','0.4em 1.2em')
-                .append( $('<div>', { tagID:tagID, title: top.HR('Edit tag') })
+                .append( $('<div>', { tagID:tagID, title: window.hWin.HR('Edit tag') })
                 .button({icons: {primary: "ui-icon-pencil"}, text:false})
                 .click(function( event ) {
                 that._editFile( $(this).attr('tagID') );
                 }) )
-                .append($('<div>',{ tagID:tagID, title: top.HR('Delete tag') })
+                .append($('<div>',{ tagID:tagID, title: window.hWin.HR('Delete tag') })
                 .button({icons: {primary: "ui-icon-close"}, text:false})
                 .click(function( event ) {
                 that._deleteFile( $(this).attr('tagID') );
@@ -488,7 +488,7 @@ $.widget( "heurist.file_manager", {
         }
         this.div_content.addClass(newmode);
 
-        this.btn_view.button( "option", "label", top.HR(newmode));
+        this.btn_view.button( "option", "label", window.hWin.HR(newmode));
 
         this._applyFilter(null);
     },
@@ -517,7 +517,7 @@ $.widget( "heurist.file_manager", {
 
         var tagIDs = [];
         if(fileID){
-            var tag = top.HAPI4.currentUser.usr_Files[this.options.current_mediatype][tagID];
+            var tag = window.hWin.HAPI4.currentUser.usr_Files[this.options.current_mediatype][tagID];
             if(!tag) return;
             tagIDs.push(tagID);
         }else{
@@ -529,21 +529,21 @@ $.widget( "heurist.file_manager", {
         var request = {ids: tagIDs.join(',')};
         var that = this;
 
-        top.HEURIST4.msg.showMsgDlg(top.HR("Delete? Please confirm"), function(){
+        window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Delete? Please confirm"), function(){
 
-            top.HAPI4.RecordMgr.tag_delete(request,
+            window.hWin.HAPI4.RecordMgr.tag_delete(request,
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                         $.each(tagIDs, function(i,e){
                             //remove from UI
                             $('#tag-'+e).remove();
                             //remove from
-                            delete top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][e];
+                            delete window.hWin.HAPI4.currentUser.usr_Files[that.options.current_mediatype][e];
                         });
 
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 }
 
@@ -568,7 +568,7 @@ $.widget( "heurist.file_manager", {
             var isEdit = (parseInt(tagID)>0);
 
             if(isEdit){
-                var tag = top.HAPI4.currentUser.usr_Files[this.options.current_mediatype][tagID];
+                var tag = window.hWin.HAPI4.currentUser.usr_Files[this.options.current_mediatype][tagID];
                 tag_id.val(tagID);
                 tag_name.val(tag[0]);
                 tag_desc.val(tag[1]);
@@ -589,8 +589,8 @@ $.widget( "heurist.file_manager", {
     */
     _editTag: function(tagID, tagIDs){
 
-        var sTitle = top.HR(top.HEURIST4.util.isnull(tagIDs)
-            ?(top.HEURIST4.util.isempty(tagID)?"Add Tag":"Edit Tag")
+        var sTitle = window.hWin.HR(window.hWin.HEURIST4.util.isnull(tagIDs)
+            ?(window.hWin.HEURIST4.util.isempty(tagID)?"Add Tag":"Edit Tag")
             :"Define new tag that replaces old ones");
 
         if(  this.edit_dialog==null )
@@ -599,11 +599,11 @@ $.widget( "heurist.file_manager", {
             var $dlg = this.edit_dialog = $( "<div>" ).appendTo( this.element );
 
             //load edit dialogue
-            $dlg.load(top.HAPI4.basePathV4+"hclient/widgets/tag_edit.html", function(){
+            $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/tag_edit.html", function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
-                    $(this).html(top.HR($(this).html()));
+                    $(this).html(window.hWin.HR($(this).html()));
                 })
 
                 //-----------------
@@ -617,7 +617,7 @@ $.widget( "heurist.file_manager", {
                     allFields.removeClass( "ui-state-error" );
 
                     var message = $dlg.find('.messages');
-                    var bValid = top.HEURIST4.msg.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
+                    var bValid = window.hWin.HEURIST4.msg.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
 
                     if(bValid){
 
@@ -637,34 +637,34 @@ $.widget( "heurist.file_manager", {
                         }
 
                         //get hapi and save tag
-                        top.HAPI4.RecordMgr.tag_save(request,
+                        window.hWin.HAPI4.RecordMgr.tag_save(request,
                             function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                                     var tagID = response.data;
 
-                                    if(!top.HAPI4.currentUser.usr_Files){
-                                        top.HAPI4.currentUser.usr_Files = {};
+                                    if(!window.hWin.HAPI4.currentUser.usr_Files){
+                                        window.hWin.HAPI4.currentUser.usr_Files = {};
                                     }
-                                    if(!top.HAPI4.currentUser.usr_Files[that.options.current_mediatype]){
-                                        top.HAPI4.currentUser.usr_Files[that.options.current_mediatype] = {};
+                                    if(!window.hWin.HAPI4.currentUser.usr_Files[that.options.current_mediatype]){
+                                        window.hWin.HAPI4.currentUser.usr_Files[that.options.current_mediatype] = {};
                                     }
 
                                     if(isEdit){
-                                        var oldtag = top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID];
-                                        top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
+                                        var oldtag = window.hWin.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID];
+                                        window.hWin.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
                                     }else{
-                                        top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
+                                        window.hWin.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
                                     }
 
-                                    if(!top.HEURIST4.util.isnull(tag_ids)){
+                                    if(!window.hWin.HEURIST4.util.isnull(tag_ids)){
                                         //send request to replace selected tags with new one
                                         var request = {ids: tag_ids,
                                             new_id: tagID,
                                             UGrpID: that.options.current_mediatype};
 
-                                        top.HAPI4.RecordMgr.tag_replace(request, function(response){
-                                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                                        window.hWin.HAPI4.RecordMgr.tag_replace(request, function(response){
+                                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                 $dlg.dialog( "close" );
 
                                                 that._reloadFiles(that.options.current_mediatype);
@@ -708,8 +708,8 @@ $.widget( "heurist.file_manager", {
                     resizable: false,
                     title: sTitle,
                     buttons: [
-                        {text:top.HR('Save'), click: __doSave},
-                        {text:top.HR('Cancel'), click: function() {
+                        {text:window.hWin.HR('Save'), click: __doSave},
+                        {text:window.hWin.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );
                         }}
                     ],
@@ -765,12 +765,12 @@ $.widget( "heurist.file_manager", {
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
             var that = this;
 
-            top.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_mediatype, recIDs:this.options.record_ids},
+            window.hWin.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_mediatype, recIDs:this.options.record_ids},
                 function(response) {
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         that.element.hide();
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
             });
 

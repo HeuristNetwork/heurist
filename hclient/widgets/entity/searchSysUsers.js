@@ -38,30 +38,30 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         this.selectGroup = this.element.find('#sel_group');
         this.selectGroup.empty();
             
-        top.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
+        window.hWin.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
                         'entity':'sysUGrps','ugr_Type':'workgroup','ugr_ID':that.options.filter_groups},
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             var groups = new hRecordSet(response.data).makeKeyValueArray('ugr_Name');
                             
-                            if(top.HEURIST4.util.isempty(that.options.filter_groups)){
-                                groups.unshift({key:'',title:top.HR('Any Group')});
+                            if(window.hWin.HEURIST4.util.isempty(that.options.filter_groups)){
+                                groups.unshift({key:'',title:window.hWin.HR('Any Group')});
                             }
                             
-                            top.HEURIST4.ui.createUserGroupsSelect(that.selectGroup.get(0), 
+                            window.hWin.HEURIST4.ui.createUserGroupsSelect(that.selectGroup.get(0), 
                                 [], 
                                 groups,
                                 function(){ //on load completed
                                     //force search 
                                     //predefined search values
-                                    if(!top.HEURIST4.util.isempty(that.options.filter_group_selected)){
+                                    if(!window.hWin.HEURIST4.util.isempty(that.options.filter_group_selected)){
                                             that.selectGroup.val(that.options.filter_group_selected);  
                                     } 
                                     that.selectGroup.change(); //force search
                                 });
                             
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
                       
@@ -104,7 +104,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
 
 
             if(this.element.find('#cb_selected').is(':checked')){
-                request['ugr_ID'] = top.HAPI4.get_prefs('recent_Users');
+                request['ugr_ID'] = window.hWin.HAPI4.get_prefs('recent_Users');
             }
             if(this.element.find('#cb_modified').is(':checked')){
                 var d = new Date(); 
@@ -125,20 +125,20 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                 request['a']          = 'search'; //action
                 request['entity']     = 'sysUGrps';
                 request['details']    = 'id';
-                request['request_id'] = top.HEURIST4.util.random();
+                request['request_id'] = window.hWin.HEURIST4.util.random();
                 request['ugr_Type']    = 'user';
                 
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
                 //that.loadanimation(true);
-                top.HAPI4.EntityMgr.doRequest(request, 
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
                                 {recordset:new hRecordSet(response.data), request:request} );
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
 

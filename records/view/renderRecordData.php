@@ -87,6 +87,30 @@ $rec_id = intval(@$_REQUEST['recID']);
 
         <script type="text/javascript">
 
+            //find heurist object in parent windows or init new one if current window is a top most
+            function _detectHeurist( win ){
+                if(win.HEURIST4){ //defined
+                    return win;
+                }
+
+                try{
+                    win.parent.document;
+                }catch(e){
+                    // not accessible - this is cross domain
+                    return win;
+                }    
+                if (win.top == win.self) { 
+                    //we are in frame and this is top most window and Heurist is not defined 
+                    //lets current window will be heurist window
+                    return window;
+                }else{
+                    return _detectHeurist( win.parent );
+                }
+            }
+            //detect wether this window is top most or inside frame
+            window.hWin = _detectHeurist(window);
+        
+        
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
                 var url = url;
@@ -111,6 +135,28 @@ $rec_id = intval(@$_REQUEST['recID']);
                     currentImg.style.display = 'none';
                     currentImg.parentNode.className = "fullSize";
                     //add content to player div
+        $.ajax({
+            url: url,
+            type: "GET",
+            //data: request,
+            //dataType: "json",
+            cache: false,
+            error: function(jqXHR, textStatus, errorThrown ) {
+            },
+            success: function( response, textStatus, jqXHR ){
+                        var obj = jqXHR.responseText;
+                        //console.log('!!!!'+obj);
+                        if (obj){
+                            var  elem = document.getElementById('player'+id);
+                            elem.innerHTML = obj;
+                            elem.style.display = 'block';
+                            elem = document.getElementById('lnk'+id);
+                            elem.style.display = 'block';
+                        }
+            }
+        });
+                    
+                    /*
                     top.HEURIST.util.sendRequest(url, function(xhr) {
                         var obj = xhr.responseText;
                         //alert('!!!!'+obj);
@@ -122,7 +168,7 @@ $rec_id = intval(@$_REQUEST['recID']);
                             elem.style.display = 'block';
                         }
                         }, null);
-
+                     */
                 }
             }
             function hidePlayer(id) {
@@ -171,20 +217,26 @@ $rec_id = intval(@$_REQUEST['recID']);
             }
 
             function link_open(link) {
+                try{
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
                     top.HEURIST.util.popupURL(top, link.href, { width: 600, height: 500 });
                     return false;
                 }
                 else return true;
+                }catch(e){
+                }
             }
 
             //on document load
             function add_sid() {
+                try{
                 if (top.HEURIST  &&  top.HEURIST.search  &&  top.HEURIST.search.results.querySid) {
                     var e = document.getElementById("edit-link");
                     if (e) {
                         e.href = e.href.replace(/editRecord\.html\?/, "editRecord.html?sid="+top.HEURIST.search.results.querySid+"&");
                     }
+                }
+                }catch(e){
                 }
             }
 

@@ -51,15 +51,15 @@ $.widget( "heurist.tag_rating", {
                 height: 220,
                 width: 250,
                 modal: true,
-                title: top.HR("Set Ratings"),
+                title: window.hWin.HR("Set Ratings"),
                 buttons: [
-                    {text:top.HR('Assign'),
-                        title: top.HR("Set Ratings"),
+                    {text:window.hWin.HR('Assign'),
+                        title: window.hWin.HR("Set Ratings"),
                         class: 'tags-actions',
                         click: function() {
                             that._assignRating();
                     }},
-                    {text:top.HR('Close'), click: function() {
+                    {text:window.hWin.HR('Close'), click: function() {
                         $( this ).dialog( "close" );
                     }}
                 ]
@@ -72,7 +72,7 @@ $.widget( "heurist.tag_rating", {
         //---------------------------------------- CONTENT
 
         $('<table>'+
-                '<tr><td><input type="radio" value="0" name="r" id="r0" checked="checked"></td><td><label for="r0">'+top.HR("No Rating")+'</label></td></tr>'+
+                '<tr><td><input type="radio" value="0" name="r" id="r0" checked="checked"></td><td><label for="r0">'+window.hWin.HR("No Rating")+'</label></td></tr>'+
                 '<tr><td><input type="radio" value="1" name="r" id="r1"></td><td><label for="r1" class="bookmarked" style="width:14px;display: block;"></label></td></tr>'+
                 '<tr><td><input type="radio" value="2" name="r" id="r2"></td><td><label for="r2" class="bookmarked" style="width:24px;display: block;"></label></td></tr>'+
                 '<tr><td><input type="radio" value="3" name="r" id="r3"></td><td><label for="r3" class="bookmarked" style="width:38px;display: block;"></label></td></tr>'+
@@ -91,8 +91,8 @@ $.widget( "heurist.tag_rating", {
             this.btn_assign = $( "<button>", {
                 id: 'assignTags',
                 //disabled: 'disabled',
-                text: top.HR("Assign"),
-                title: top.HR("Set Ratings")
+                text: window.hWin.HR("Assign"),
+                title: window.hWin.HR("Set Ratings")
             })
             .appendTo( this.div_toolbar )
             .button();
@@ -134,12 +134,12 @@ $.widget( "heurist.tag_rating", {
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
             var that = this;
 
-            top.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_GrpID, recIDs:this.options.record_ids},
+            window.hWin.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_GrpID, recIDs:this.options.record_ids},
                 function(response) {
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         that.element.hide();
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
             });
 

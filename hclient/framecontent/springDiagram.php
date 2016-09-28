@@ -105,7 +105,7 @@
                     triggerSelection: onSelectEvent,
                     /*function(selection){
                         //parentDocument    top.window.document
-                        $(parentDocument).trigger(top.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );
+                        $(parentDocument).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );
                     },*/
 
                     entityradius: 1,

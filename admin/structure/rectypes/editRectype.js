@@ -741,8 +741,8 @@ function _onPreventChars(event){
             event.preventDefault();
             if (event.stopPropagation) event.stopPropagation();
             
-            if(top.HEURIST4)
-            top.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
+            if(window.hWin)
+            window.hWin.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
             setTimeout(function(){
                     $(event.target).focus();
             }, 750);

@@ -110,7 +110,7 @@ function getFiltersArray(){
     var rules = [];
     $.each($('.level1'), function( index, value ) {
         var subrule = $(value).ruleBuilder("getRules");
-        if(!top.HEURIST4.util.isempty(subrule)) rules.push(subrule);
+        if(!window.hWin.HEURIST4.util.isempty(subrule)) rules.push(subrule);
     });
     return rules;
     /*
@@ -120,10 +120,10 @@ function getFiltersArray(){
     $.each(ruleBuilders, function( index, value ) {
     var $div = $(value);
     var qs = $div.ruleBuilder("queries"); //queries for this rule
-    if(!top.HEURIST4.util.isempty(qs)){
+    if(!window.hWin.HEURIST4.util.isempty(qs)){
     var level = $div.ruleBuilder('option' , 'level');
 
-    if(top.HEURIST4.util.isnull(res[level])){
+    if(window.hWin.HEURIST4.util.isnull(res[level])){
     res[level] = [];
     }
     res[level] = res[level].concat(qs);

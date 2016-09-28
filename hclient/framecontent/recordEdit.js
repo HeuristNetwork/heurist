@@ -75,15 +75,15 @@ function hEditing() {
         _isaddnewrecord = true;
         recdata = null;
 
-        top.HAPI4.RecordMgr.add( {rt:_recordtype}, //ro - owner,  rv - visibility
+        window.hWin.HAPI4.RecordMgr.add( {rt:_recordtype}, //ro - owner,  rv - visibility
             function(response){
-                if(response.status == top.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                     recdata = new hRecordSet(response.data);
                     _load();
 
                 }else{
-                    top.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             }
 
@@ -111,21 +111,21 @@ function hEditing() {
             }
         } else if( !isNaN(parseInt(_recdata)) ) {
 
-            top.HAPI4.RecordMgr.search({q: 'ids:'+_recdata, w: "all", f:"structure", l:1},
+            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+_recdata, w: "all", f:"structure", l:1},
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                         recdata = new hRecordSet(response.data);
                         _load();
 
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 }
             );
 
         }else{
-            top.HEURIST4.msg.showMsgErr('Wrong parameters for record edit');
+            window.hWin.HEURIST4.msg.showMsgErr('Wrong parameters for record edit');
         }
     }
 
@@ -145,7 +145,7 @@ function hEditing() {
 
         rectypeID = recdata.fld(record, 'rec_RecTypeID');
         if(!rectypes || rectypes.length==0){
-            rectypes = top.HEURIST4.rectypes;
+            rectypes = window.hWin.HEURIST4.rectypes;
         }
 
         recID = recdata.fld(record, 'rec_ID');
@@ -167,20 +167,20 @@ function hEditing() {
         .css({position:'absolute', right:'0.4em', top:'0.4em'})
         .appendTo($header);
 
-        $('<button>', {text:top.HR('Save')})
+        $('<button>', {text:window.hWin.HR('Save')})
         .button().on("click", function(event){ _save(); } )
         .appendTo(btn_div);
-        $('<button>', {text:top.HR('Cancel')})
+        $('<button>', {text:window.hWin.HR('Cancel')})
         .button().on("click", function(event){ if(_isdialog) $container.dialog( "close" ); } )
         .appendTo(btn_div);
 
         $('<div>')
         .css('display','inline-block')
         .append( $('<img>',{
-            src:  top.HAPI4.basePathV4+'hclient/assets/16x16.gif',
+            src:  window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
             })
-            .css({'background-image':'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
+            .css({'background-image':'url('+ window.hWin.HAPI4.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
         .append('<span>'+(rectypes ?rectypes.names[rectypeID]: 'rectypes not defined')+'</span>')
         .appendTo($header);
 
@@ -200,7 +200,7 @@ function hEditing() {
                 var dtID = order[i];
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
-                    (top.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
+                    (window.hWin.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
                         rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
                 {
                     continue;
@@ -212,7 +212,7 @@ function hEditing() {
                 if( (rfrs[dtID][fi['dty_Type']])=="separator" || !values) continue;
                 var isempty = true;
                 $.each(values, function(idx,value){
-                if(!top.HEURIST4.util.isempty(value)){ isempty=false; return false; }
+                if(!window.hWin.HEURIST4.util.isempty(value)){ isempty=false; return false; }
                 } );
                 if(isempty) continue;
                 */
@@ -253,7 +253,7 @@ function hEditing() {
                 modal: true,
                 resizable: true,
                 draggable: true,
-                title: top.HR(_isaddnewrecord?"Add new record":"Edit record"),
+                title: window.hWin.HR(_isaddnewrecord?"Add new record":"Edit record"),
                 resizeStop: function( event, ui ) {
                     $container.css('width','100%');
                 }                        
@@ -295,15 +295,15 @@ function hEditing() {
         var request = {ID: recID, RecTypeID: rectypeID, 'details': details};
 
 
-        top.HAPI4.RecordMgr.save( request,
+        window.hWin.HAPI4.RecordMgr.save( request,
             function(response){
-                if(response.status == top.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                     alert('Record saved');
 
                 }else{
 
-                    top.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             }
 

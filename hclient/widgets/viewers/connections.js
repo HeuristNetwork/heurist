@@ -39,31 +39,31 @@ $.widget( "heurist.connections", {
         this.framecontent = $('<div>')
                    .css({
                         position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-                        'background':'url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
+                        'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
                    .appendTo( this.element );
                    
         this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.framecontent );
 
 
         //-----------------------     listener of global events
-        this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT + ' ' 
-            + top.HAPI4.Event.ON_REC_SEARCH_FINISH + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+        this._events = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT + ' ' 
+            + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
 
         $(this.document).on(this._events, function(e, data) {
             // Login
-            if(e.type == top.HAPI4.Event.LOGIN){
+            if(e.type == window.hWin.HAPI4.Event.LOGIN){
 
                 that._refresh();
 
             // Logout
-            }else  if(e.type == top.HAPI4.Event.LOGOUT) { 
+            }else  if(e.type == window.hWin.HAPI4.Event.LOGOUT) { 
                 
                 that.recordset_changed = true;
                 that.option("recordset", null);
                 that._refresh();
 
             // Search results
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
                 //find all relation within given result set
                 that.recordset_changed = true;
@@ -73,7 +73,7 @@ $.widget( "heurist.connections", {
                 //that.loadanimation(false);
 
             // Search start
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 that.option("recordset", null);
                 that.option("selection", null);
@@ -87,11 +87,11 @@ $.widget( "heurist.connections", {
                 //???? that._refresh();
               
             // Record selection  
-            }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
                 
                 if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
                   
-                    that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
+                    that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
                 }            
             }
         });
@@ -135,7 +135,7 @@ $.widget( "heurist.connections", {
         
             if(this.dosframe.attr('src')!==this.options.url){
                 
-                this.options.url = top.HAPI4.basePathV4 + 'hclient/framecontent/springDiagram.php?db=' + top.HAPI4.database;
+                this.options.url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/springDiagram.php?db=' + window.hWin.HAPI4.database;
                 this.dosframe.attr('src', this.options.url);
               
             // Content loaded already    
@@ -185,7 +185,7 @@ $.widget( "heurist.connections", {
     loadanimation: function(show){
         if(show){
             //this.dosframe.hide();
-            this.framecontent.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.framecontent.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.framecontent.css('background','none');
             //this.dosframe.show();
@@ -200,7 +200,7 @@ $.widget( "heurist.connections", {
         //console.log("getRelations CALLED");
         //console.log(recordset);
         
-        if(top.HEURIST4.util.isnull(recordset)) return;
+        if(window.hWin.HEURIST4.util.isnull(recordset)) return;
 
         this.option("relations", null);
         
@@ -217,7 +217,7 @@ $.widget( "heurist.connections", {
             var callback = function(response)
             {
                 var resdata = null;
-                if(response.status == top.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                     // Store relationships
                     console.log("Successfully retrieved relationship data!", response.data);
                     that.option("relations", response.data);
@@ -226,7 +226,7 @@ $.widget( "heurist.connections", {
                     var data = that._parseData(records_ids, response.data);
                     that._doVisualize(data);
                 }else{
-                    top.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 
                 that.option("recordset", recordset); //hRecordSet
@@ -234,7 +234,7 @@ $.widget( "heurist.connections", {
                 
             }
 
-            top.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
+            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
         }
     }
     
@@ -262,7 +262,7 @@ $.widget( "heurist.connections", {
                 var recId = records_ids[i];
                 var node = {id: parseInt(recId),
                             name: relations.headers[recId][0],  //record title   records[id][5]
-                            image: top.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
+                            image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
                             count: 0,
                             depth: 1
                            };
@@ -287,8 +287,8 @@ $.widget( "heurist.connections", {
                     var dtID = relations[i].dtID;
                     var type = "Floating relationship";
                     if(dtID > 0) {
-                        //type = top.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
-                        type = top.HEURIST4.detailtypes.names[dtID];
+                        //type = window.hWin.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
+                        type = window.hWin.HEURIST4.detailtypes.names[dtID];
                     }
 
                     // Link check
@@ -297,7 +297,7 @@ $.widget( "heurist.connections", {
                         var link = {source: nodes[source],
                                     target: nodes[target],
                                     targetcount: 1,
-                                    relation: {name: type}  //top.HEURIST4.detailtypes.typedefs[id].commonfields[1]
+                                    relation: {name: type}  //window.hWin.HEURIST4.detailtypes.typedefs[id].commonfields[1]
                                    };
                         links.push(link); 
                     }      
@@ -324,11 +324,11 @@ $.widget( "heurist.connections", {
     , _doVisualize: function (data) {
         //console.log("Visualize called in connections.js");
         
-        if( !top.HEURIST4.util.isnull(this.dosframe) && this.dosframe.length > 0 ){
+        if( !window.hWin.HEURIST4.util.isnull(this.dosframe) && this.dosframe.length > 0 ){
             var that = this;
             this.dosframe[0].contentWindow.showData(data, this.options.selection, 
                     function(selected){
-                        $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT, 
+                        $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         { selection:selected, source:that.element.attr('id') } );
                     }            
             
@@ -344,12 +344,12 @@ $.widget( "heurist.connections", {
 
     , _doVisualizeSelection: function (selection) {
 
-            if(top.HEURIST4.util.isnull(this.options.recordset)) return;
+            if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
 
             this.option("selection", selection);
             
             if(!this.element.is(':visible')
-                || top.HEURIST4.util.isnull(this.dosframe) || this.dosframe.length < 1){
+                || window.hWin.HEURIST4.util.isnull(this.dosframe) || this.dosframe.length < 1){
                     return;
             }
             

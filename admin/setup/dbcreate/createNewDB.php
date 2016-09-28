@@ -130,10 +130,10 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 $(document).ready(function() {
 
                     if($("#createDBForm").length>0){
-                        top.HAPI4 = new hAPI(null);
-                        var prefs = top.HAPI4.get_prefs();
+                        window.hWin.HAPI4 = new hAPI(null);
+                        var prefs = window.hWin.HAPI4.get_prefs();
                         //loads localization
-                        top.HR = top.HAPI4.setLocale(prefs['layout_language']);
+                        window.hWin.HR = window.hWin.HAPI4.setLocale(prefs['layout_language']);
 
                         <?php if(!$passwordForDatabaseCreation)
                         {
@@ -183,7 +183,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                 function doRegister(event){
 
-                    top.HEURIST4.util.stopEvent(event);
+                    window.hWin.HEURIST4.util.stopEvent(event);
 
                     if($.isFunction($('body').profile_edit)){
 
@@ -199,11 +199,11 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
 
                     }else{
-                        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
+                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
                             if($.isFunction($('body').profile_edit)){
                                 doRegister();
                             }else{
-                                top.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
+                                window.hWin.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
                             }
                         });
                     }

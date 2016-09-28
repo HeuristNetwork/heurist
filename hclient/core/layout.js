@@ -28,7 +28,7 @@ function hLayout(args) {
      var _className = "hLayout",
          _version   = "0.4";      
 
-    var Hul = top.HEURIST4.util;
+    var Hul = window.hWin.HEURIST4.util;
 
      var widgetinstances = [], //@todo array of all inited widgets 
          widgets = [],
@@ -213,12 +213,12 @@ function hLayout(args) {
               togglerAlign_closed:'top',
               togglerLength_closed:16,  //makes it square
               onopen_start : function(){ 
-                  var  w = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
-                  var mw = 250; //top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
+                  var  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
+                  var mw = 250; //window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
                   if(w<310){
-                      var tw = (top?top.innerWidth:window.innerWidth);
-                      top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', tw-w-mw]);
-                      setTimeout( function(){top.HAPI4.LayoutMgr.cardinalPanel('open', ['west'] );}, 500 );
+                      var tw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+                      window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', tw-w-mw]);
+                      setTimeout( function(){window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', ['west'] );}, 500 );
                       return 'abort';
                   }
               },
@@ -231,12 +231,12 @@ function hLayout(args) {
               togglerLength_closed:16,  //makes it square
               onopen_start: function(){ 
                   
-                  var  w = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
+                  var  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
                   var mw = 350;
                   if(w<310){
-                      var tw = (top?top.innerWidth:window.innerWidth);
-                      top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['west', tw-w-mw]);
-                      setTimeout( function(){top.HAPI4.LayoutMgr.cardinalPanel('open', ['east'] );}, 500 );
+                      var tw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+                      window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['west', tw-w-mw]);
+                      setTimeout( function(){window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', ['east'] );}, 500 );
                       return 'abort';
                   }
                   
@@ -248,7 +248,7 @@ function hLayout(args) {
                 Resize:               "Drag to resize panel"
             },
             onresize_end: function(){
-                $(document).trigger(top.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
+                $(document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
             }
             /*,
             onopen_end: function(pane_name, pane_element){
@@ -327,7 +327,7 @@ function hLayout(args) {
         
         // 3) add tabs/apps to panes
 
-        var bg_color = top.HEURIST4.util.getCSS('background-color', 'ui-widget-content');
+        var bg_color = window.hWin.HEURIST4.util.getCSS('background-color', 'ui-widget-content');
         //$('.ui-widget-content:first').css('background-color');
         $('body').css('background-color', bg_color);
 
@@ -444,7 +444,7 @@ function hLayout(args) {
     function _initLayoutGridster(layout, $container){
 
             if(!$.isFunction($('body').gridster)){
-                $.getScript(top.HAPI4.basePathV4+'ext/gridster/jquery.gridster.js', initLayoutGridster );
+                $.getScript(window.hWin.HAPI4.basePathV4+'ext/gridster/jquery.gridster.js', initLayoutGridster );
                 return;
             }
 
@@ -667,7 +667,7 @@ function hLayout(args) {
 
             if(app.hasheader){
                 var $header = $("<div>");
-                $header.append(top.HR(app.name || application.name))
+                $header.append(window.hWin.HR(app.name || application.name))
                 .addClass('ui-widget-header')
                 .addClass('ui-corner-all')
                 .addClass('header'+app.appid+'_'+app_counter)
@@ -789,7 +789,7 @@ function hLayout(args) {
                             if($.isFunction($content[app.widgetname])){
                                 $content[app.widgetname]( options );   //call function
                             }else{
-                                top.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
+                                window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
                             }
                         });
                     }
@@ -852,7 +852,7 @@ function hLayout(args) {
                     content_id = app.id+'_'+app_counter;
                 }
 
-                $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (top.HR(_app.name || app.name)) +'</a></li>')
+                $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (window.hWin.HR(_app.name || app.name)) +'</a></li>')
                 
                 if(!_app.content_id){ //already exists
                     appAddContent($tab_ctrl, app, _app);
@@ -1038,7 +1038,7 @@ function hLayout(args) {
     //**********************************************************
 
         if(layout==null){
-            top.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
+            window.hWin.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
             if(layoutid!='H4Default') layout = layoutGetById('H4Default');
             if(layout==null){
                 return;

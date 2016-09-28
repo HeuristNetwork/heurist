@@ -25,6 +25,50 @@
     require_once (dirname(__FILE__).'/../System.php');
     //require_once (dirname(__FILE__).'/db_users.php');
 
+    
+    /**
+    * Get all saved searches for given list of ids
+    *
+    * @param mixed $system
+    * @param mixed $ugrID - if not defined it searches all
+    */
+    function svsGetByIds($system, $rec_ids=null, $ugrID=null){
+
+        if ($rec_ids) {
+
+            if(is_string($rec_ids)){
+                $rec_ids = explode(",", $rec_ids);
+            }
+
+            if (is_array($rec_ids) && count($rec_ids)>0) {
+
+                $mysqli = $system->get_mysqli();
+                $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_ID in ('
+                        .implode(',', $rec_ids).')';
+            
+                $res = $mysqli->query($query);
+
+                if ($res){
+                    $result = array();
+                    while ($row = $res->fetch_row()){
+                        $id = array_shift($row);
+                        $result[$id] = $row;
+                    }
+                    $res->close();
+                    return $result;
+                }else{
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot get saved searches', $mysqli->error);
+                    return false;
+                }
+            }
+        }
+        
+        $system->addError(HEURIST_INVALID_REQUEST,
+                'Cannot get filter criteria. IDs are not defined');
+        return false;
+    }
+    
+    
     /**
     * Get all saved searches for given user
     *
@@ -39,13 +83,16 @@
 
             $current_User = $system->getCurrentUser();
             if($current_User && @$current_User['ugr_Groups'] && count(array_keys($current_User['ugr_Groups']))>0 ){
-                $ugrID = implode(",", array_keys($current_User['ugr_Groups'])).",".$ugrID;
+                $ugrID = implode(',', array_keys($current_User['ugr_Groups'])).",".$ugrID;
             }
             if($system->is_admin()){ //returns guest searches for admin
-                $ugrID = $ugrID.",0";
+                $ugrID = $ugrID.',0';
             }
 
+        }else if(is_array($ugrID)){
+            $ugrID = implode(',', $ugrID);
         }
+        
         if(!$ugrID) {
             $ugrID = 0; //get saved searches for guest
         }

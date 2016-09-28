@@ -42,7 +42,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 mapping = new hMappingDraw('map_digitizer');
                 
                 // init helper (see utils.js)
-                top.HEURIST4.ui.initHelper( $('#btn_help'), 
+                window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
                             'Mapping Drawing Overview', 
                             '../../context_help/mapping_drawing.html #content');
 

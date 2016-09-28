@@ -129,7 +129,7 @@ if(!$system->init(@$_REQUEST['db']) ){
             function onrowclick(rt_ID, innewtab){
                 var query = "w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
-                    window.open(top.HAPI4.basePathV4+"?"+query, "_blank");
+                    window.open(window.hWin.HAPI4.basePathV4+"?"+query, "_blank");
                     return false;
                 }else{
                     console.log("SEARCH");
@@ -138,9 +138,9 @@ if(!$system->init(@$_REQUEST['db']) ){
                     
                     var request = {source: 'dbsummary',
                                         q:  't:'+rt_ID};
-                    top.HAPI4.SearchMgr.doSearch( $(parent.document), request );                    
+                    window.hWin.HAPI4.SearchMgr.doSearch( $(parent.document), request );                    
 
-                    //parent.top.HAPI4.RecordMgr.search(query, $(parent.document));
+                    //parent.window.hWin.HAPI4.RecordMgr.search(query, $(parent.document));
 
                     window.close();
                     return false;

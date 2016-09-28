@@ -111,15 +111,17 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 if(!success) return;
                 
                 // OLD H3 stuff
-                window.HEURIST.baseURL_V3  = window.HAPI4.basePathV3;
-                window.HEURIST.loadScript(window.HAPI4.basePathV3+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
-                window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
-                window.HEURIST.database = {  name: window.HAPI4.database };
+                if(window.HEURIST){
+                    window.HEURIST.baseURL_V3  = window.HAPI4.basePathV3;
+                    window.HEURIST.loadScript(window.HAPI4.basePathV3+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
+                    window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
+                    window.HEURIST.database = {  name: window.HAPI4.database };
+                }
                 
                 //
                 // cfg_widgets and cfg_layouts are defined in layout_default.js
                 //
-                top.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
+                window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
 
                 
                 $( "#heurist-about" ).dialog("close");
@@ -127,7 +129,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 //
                 // init layout
                 //
-                top.HAPI4.LayoutMgr.appInitAll( top.HAPI4.sysinfo['layout'], "#layout_panes");
+                window.hWin.HAPI4.LayoutMgr.appInitAll( window.hWin.HAPI4.sysinfo['layout'], "#layout_panes");
                 
 //console.log('ipage layout '+(new Date().getTime() / 1000 - _time_debug));
 _time_debug = new Date().getTime() / 1000;
@@ -171,53 +173,55 @@ _time_debug = new Date().getTime() / 1000;
 ?>
                
                
-                if(top.HAPI4.sysinfo['layout']=='H4Default'){
+                if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
                     //switch to FAP tab if q parameter is defined
                     if(db_total_records<1){
                         showTipOfTheDay(false);   
                     }else{
-                        top.HAPI4.LayoutMgr.putAppOnTopById('FAP');
+                        window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
                     }
                 }else if(db_total_records<1){
                     showTipOfTheDay(false);
                 }
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
-                if(db_total_records>0 && !top.HEURIST4.util.isempty(qsearch)){
+                if(db_total_records>0 && !window.hWin.HEURIST4.util.isempty(qsearch)){
                     var qdomain = '<?=@$_REQUEST['w']?>';
                     var rules = '<?=@$_REQUEST['rules']?>';
-                    if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
+                    if(window.hWin.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
                     var request = {q: qsearch, w: qdomain, f: 'map', rules: rules, source:'init' };
-                    //top.HEURIST4.query_request = request;
+                    //window.hWin.HEURIST4.query_request = request;
                     setTimeout(function(){
-                            top.HAPI4.SearchMgr.doSearch(document, request);
+                            window.hWin.HAPI4.SearchMgr.doSearch(document, request);
                     }, 3000);
-                }else if(!(top.HAPI4.sysinfo['layout']=='DigitalHarlem' || top.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
-                    var init_search = top.HEURIST.displayPreferences['defaultSearch'];
-                    if(!top.HEURIST4.util.isempty(init_search)){
+                }else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
+                        || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
+                            
+                    var init_search = window.hWin.HEURIST?window.hWin.HEURIST.displayPreferences['defaultSearch']:'';
+                    if(!window.hWin.HEURIST4.util.isempty(init_search)){
                         var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                         setTimeout(function(){
-                            top.HAPI4.SearchMgr.doSearch(document, request);
+                            window.hWin.HAPI4.SearchMgr.doSearch(document, request);
                         }, 3000);
                     }else{
                         //trigger search finish to init some widgets
-                        $(document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
+                        $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
                     }
                 }
 
                 //if database is empty show welcome screen
-                //if(!(top.HAPI4.sysinfo.db_total_records>0)){
+                //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
                 //    showTipOfTheDay(false);
                 //}
  
 var fin_time = new Date().getTime() / 1000;
 //console.log('ipage finished '+( fin_time - _time_debug)+ '  total: '+(fin_time-_time_start));
 
-                $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
+                $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
 
                 var os = platform?platform.os.family.toLowerCase():'';
                 if(os.indexOf('android')>=0 || os.indexOf('ios')>=0){ //test || os.indexOf('win')>=0
-                    top.HEURIST4.msg.showElementAsDialog(
+                    window.hWin.HEURIST4.msg.showElementAsDialog(
                         {element:document.getElementById('heurist-platform-warning'),
                          width:480, height:220,
                          title: 'Welcome',
@@ -231,12 +235,12 @@ var fin_time = new Date().getTime() / 1000;
     <body style="background-color:#c9c9c9">
 
 
+    <?php if(@$_REQUEST['ll']!='WebSearch'){?>
         <!-- These are old H3 stuff - needed to support existing features in popups -->
         <script>top.installDirFromH4="<?=HEURIST_BASE_URL?>";</script>
         <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
         <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
-
-
+    <?php } ?>
         <div id="layout_panes" style="height:100%">
             &nbsp;
         </div>

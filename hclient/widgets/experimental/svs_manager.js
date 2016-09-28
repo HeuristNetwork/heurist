@@ -25,7 +25,7 @@ $.widget( "heurist.svs_manager", {
         isdialog: false, //show in dialog or embedded
 
         current_UGrpID: null,
-        // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from window.hWin.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
         current_order: 0  // order by name
     },
 
@@ -47,17 +47,17 @@ $.widget( "heurist.svs_manager", {
                 height: 620,
                 width: 400,
                 modal: true,
-                title: top.HR("Manage Saved Searches"),
+                title: window.hWin.HR("Manage Saved Searches"),
                 resizeStop: function( event, ui ) {
                     that.element.css({overflow: 'none !important','width':'100%'});
                 },
                 buttons: [
-                    {text:top.HR('Create'),
-                        title: top.HR("Create new search"),
+                    {text:window.hWin.HR('Create'),
+                        title: window.hWin.HR("Create new search"),
                         click: function() {
                             that._editSavedSearch();
                     }},
-                    {text:top.HR('Close'), click: function() {
+                    {text:window.hWin.HR('Close'), click: function() {
                         $( this ).dialog( "close" );
                     }}
                 ]
@@ -109,8 +109,8 @@ $.widget( "heurist.svs_manager", {
             .appendTo( this.wcontainer );
 
             this.btn_add = $( "<button>", {
-                text: top.HR("Create"),
-                title: top.HR("Create new saved search")
+                text: window.hWin.HR("Create"),
+                title: window.hWin.HR("Create new saved search")
             })
             .appendTo( this.div_toolbar )
             .button();
@@ -118,14 +118,14 @@ $.widget( "heurist.svs_manager", {
             this._on( this.btn_add, { click: "_editSavedSearch" } );
         }
 
-        if(!top.HAPI4.currentUser.usr_GroupsList){
+        if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
 
             var that = this;
             //get details about Workgroups (names etc)
-            top.HAPI4.SystemMgr.mygroups(
+            window.hWin.HAPI4.SystemMgr.mygroups(
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
-                        top.HAPI4.currentUser.usr_GroupsList = response.data;
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
                         that._updateGroups();
                     }
             });
@@ -138,14 +138,14 @@ $.widget( "heurist.svs_manager", {
     /* private function */
     _refresh: function(){
 
-        if(!top.HAPI4.currentUser.usr_SavedSearch){
+        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
 
             var that = this;
 
-            top.HAPI4.SystemMgr.ssearch_get( null,
+            window.hWin.HAPI4.SystemMgr.ssearch_get( null,
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
-                        top.HAPI4.currentUser.usr_SavedSearch = response.data;
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
                         that._renderItems();
                     }
             });
@@ -181,10 +181,10 @@ $.widget( "heurist.svs_manager", {
         var that = this;
         // list of groups for current user
         var selObj = this.select_grp.get(0);
-        top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-            [{key:"bookmark"+top.HAPI4.currentUser.ugr_ID, title:top.HR('My Bookmarks')},{key:top.HAPI4.currentUser.ugr_ID, title:top.HR('All Records')}],
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+            [{key:"bookmark"+window.hWin.HAPI4.currentUser.ugr_ID, title:window.hWin.HR('My Bookmarks')},{key:window.hWin.HAPI4.currentUser.ugr_ID, title:window.hWin.HR('All Records')}],
             function(){
-                that.select_grp.val(top.HAPI4.currentUser.ugr_ID);
+                that.select_grp.val(window.hWin.HAPI4.currentUser.ugr_ID);
                 that.select_grp.change();
         });
     },
@@ -199,22 +199,22 @@ $.widget( "heurist.svs_manager", {
         }
 
         var that = this;
-        var ssearches = top.HAPI4.currentUser.usr_SavedSearch;
+        var ssearches = window.hWin.HAPI4.currentUser.usr_SavedSearch;
 
         for (var svsID in ssearches)
         {
             if(svsID && (ssearches[svsID][2]== this.options.current_GrpID || "bookmark"+ssearches[svsID][2]== this.options.current_GrpID)){
 
                 var name = ssearches[svsID][0];
-                var request = top.HEURIST4.util.parseHeuristQuery(ssearches[svsID][1]);
+                var request = window.hWin.HEURIST4.util.parseHeuristQuery(ssearches[svsID][1]);
                 var qsearch = request.q;
                 var domain2 = request.w;
 
-                if(this.options.current_GrpID==top.HAPI4.currentUser.ugr_ID){
+                if(this.options.current_GrpID==window.hWin.HAPI4.currentUser.ugr_ID){
                     if(domain2=="bookmark"){
                         continue;
                     }
-                }else if(this.options.current_GrpID == "bookmark"+top.HAPI4.currentUser.ugr_ID){
+                }else if(this.options.current_GrpID == "bookmark"+window.hWin.HAPI4.currentUser.ugr_ID){
                     if(domain2=="all"){
                         continue;
                     }
@@ -241,12 +241,12 @@ $.widget( "heurist.svs_manager", {
                 $itemdiv.append( $('<div>')
                     .addClass('edit-delete-buttons')
                     .css('margin','0.4em 1.2em')
-                    .append( $('<div>', { svsid:svsID, title: top.HR('Save filter criteria') })
+                    .append( $('<div>', { svsid:svsID, title: window.hWin.HR('Save filter criteria') })
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
                         .click(function( event ) {
                             that._editSavedSearch( $(this).attr('svsid') );
                     }) )
-                    .append($('<div>',{ svsID:svsID, title: top.HR('Delete saved filter criteria') })
+                    .append($('<div>',{ svsID:svsID, title: window.hWin.HR('Delete saved filter criteria') })
                         .button({icons: {primary: "ui-icon-close"}, text:false})
                         .click(function( event ) {
                             that._deleteSavedSearch( $(this).attr('svsid') );
@@ -263,22 +263,22 @@ $.widget( "heurist.svs_manager", {
     */
     _deleteSavedSearch: function(svsID){
 
-        var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+        var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
         if(!svs) return;
         var that = this;
 
-        top.HEURIST4.msg.showMsgDlg(top.HR("Delete? Please confirm"),  function(){
-            top.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
+        window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Delete? Please confirm"),  function(){
+            window.hWin.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                         //remove from UI
                         that.find('#svs-list-'+svsID).remove();
                         //remove from
-                        delete top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                        delete window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
 
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response, true);
+                        window.hWin.HEURIST4.msg.showMsgErr(response, true);
                     }
                 }
 
@@ -305,9 +305,9 @@ $.widget( "heurist.svs_manager", {
             var isEdit = (parseInt(svsID)>0);
 
             if(isEdit){
-                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
 
-                var request = top.HEURIST4.util.parseHeuristQuery(svs[1]);
+                var request = window.hWin.HEURIST4.util.parseHeuristQuery(svs[1]);
                 var domain  = request.w;
 
                 svs_id.val(svsID);
@@ -316,7 +316,7 @@ $.widget( "heurist.svs_manager", {
                 svs_rules.val( request.rules );
                 svs_notes.val( request.notes );
 
-                svs_ugrid.val( svs[2]==top.HAPI4.currentUser.ugr_ID ?domain:svs[2] );
+                svs_ugrid.val( svs[2]==window.hWin.HAPI4.currentUser.ugr_ID ?domain:svs[2] );
                 svs_ugrid.parent().hide();
 
             }else{ //add new saved search
@@ -332,10 +332,10 @@ $.widget( "heurist.svs_manager", {
 
                 //fill with list of Workgroups in case non bookmark search
                 var selObj = svs_ugrid.get(0);
-                top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-                    [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
+                window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+                    [{key:'bookmark', title:window.hWin.HR('My Bookmarks')}, {key:'all', title:window.hWin.HR('All Records')}],
                     function(){
-                        svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
+                        svs_ugrid.val(window.hWin.HAPI4.currentUser.ugr_ID);
                 });
                 svs_ugrid.parent().show();
             }

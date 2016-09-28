@@ -2,7 +2,7 @@
 *
 * dh_search_minimal.js (Digital Harlem) : Special search class (based on search_minimal.js Minimal search)
 *
-* Replaces standard search in top.HAPI4.SearchMgr
+* Replaces standard search in window.hWin.HAPI4.SearchMgr
 *
 * 1) it adds special parameters to search request:
 *       getrelrecs - get relationship records
@@ -47,26 +47,26 @@ function hSearchMinimalDigitalHarlem() {
         request.getrelrecs = 1;
         request.detail = 'detail'; //'5,6,7,9,10,11,28,74';  //@todo - take codes from magic numbers
 
-        top.HEURIST4._time_debug = new Date().getTime() / 1000;
+        window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
-        console.log('Start search');
+//console.log('Start search');
 
-        top.HAPI4.RecordMgr.search(request,
+        window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
-                if(response.status != top.HAPI4.ResponseStatus.OK){
+                if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
                     callback( null );
-                    top.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                     return;
                 }
 
-                console.log('get result '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug ) );
-                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+//console.log('get result '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug ) );
+                window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
                 var original_recordset = new hRecordSet(response.data);
                 var final_recordset = _prepareResultSet( original_recordset );
 
-                console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+//console.log('prepared '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
+                window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
                 callback( final_recordset, original_recordset );
 
@@ -74,8 +74,8 @@ function hSearchMinimalDigitalHarlem() {
                 //@todo - change to special DH events
 
                 /*
-                if(!top.HEURIST4.util.isnull(originator.document)){
-                $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ final_recordset ]);  //gloal app event
+                if(!window.hWin.HEURIST4.util.isnull(originator.document)){
+                $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, [ final_recordset ]);  //gloal app event
                 }*/
 
         });
@@ -103,15 +103,15 @@ function hSearchMinimalDigitalHarlem() {
     //this version of search  is IN USE
     function _doSearch( originator, request ){
 
-        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
+        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
         if(app && app.widget){
 
-            if(originator && !top.HEURIST4.util.isnull(originator.document)){
-                $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
+            if(originator && !window.hWin.HEURIST4.util.isnull(originator.document)){
+                $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
             }
 
             // switch to map tab
-            top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
+            window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
 
             //add new layer with given name
             var params = {id:'main',
@@ -120,18 +120,18 @@ function hSearchMinimalDigitalHarlem() {
                 color: '#ff0000',
                 callback: function( final_recordset, original_recordset ){
                     //that.res_div_progress.hide();
-                    if(originator && !top.HEURIST4.util.isnull(originator.document) ) { // && recordset.length()>0){
+                    if(originator && !window.hWin.HEURIST4.util.isnull(originator.document) ) { // && recordset.length()>0){
                         //global app event - in dh faceted search listens it
-                        $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ original_recordset ]);
+                        $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, [ original_recordset ]);
 
                         //call dh_search to show add button
-                        var app1 = top.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');
+                        var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');
                         if(app1 && app1.widget){
                             $(app1.widget).dh_search('updateResultSet', final_recordset);
                         }
 
                         /*call result list to fill with results
-                        var app2 = top.HAPI4.LayoutMgr.appGetWidgetByName('resultList');
+                        var app2 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('resultList');
                         if(app2 && app2.widget){
                         $(app2.widget).resultList('updateResultSet', final_recordset);
                         }*/
@@ -154,12 +154,12 @@ function hSearchMinimalDigitalHarlem() {
 
         if(request==null) return;
 
-        if( top.HEURIST4.util.isnull(request.id) ) { //unique id for request
-            request.id = top.HEURIST4.util.random();
+        if( window.hWin.HEURIST4.util.isnull(request.id) ) { //unique id for request
+            request.id = window.hWin.HEURIST4.util.random();
         }
 
         //keep rules for further search
-        var keepRequest = top.HEURIST4.util.cloneJSON(request);
+        var keepRequest = window.hWin.HEURIST4.util.cloneJSON(request);
 
         request.limit = 2000;
         request.needall = 1;
@@ -167,28 +167,28 @@ function hSearchMinimalDigitalHarlem() {
         request.detail = 'ids';
         request.rules = null;
 
-        if(originator && !top.HEURIST4.util.isnull(originator.document)){
-            $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
+        if(originator && !window.hWin.HEURIST4.util.isnull(originator.document)){
+            $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
         }
 
         // 1. search main request  if result > 1000 warning message and exit
-        top.HAPI4.RecordMgr.search(request,
+        window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
 
-                if(response.status != top.HAPI4.ResponseStatus.OK){
-                    top.HEURIST4.msg.showMsgErr(response);
+                if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                     return;
                 }
 
                 var recordset = new hRecordSet(response.data);
 
-                var app = top.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51');
+                var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
                 if(app && app.widget){
                     $(app.widget).dh_search('updateResultSet', recordset, keepRequest);
                 }
 
-                if(originator && !top.HEURIST4.util.isnull(originator.document) && recordset.length()>0){
-                    $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ recordset ]); //global app event
+                if(originator && !window.hWin.HEURIST4.util.isnull(originator.document) && recordset.length()>0){
+                    $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, [ recordset ]); //global app event
                 }
 
 
@@ -272,7 +272,7 @@ function hSearchMinimalDigitalHarlem() {
                         recordset.setFld(record, 'rec_Icon', 'term4326' );
                         recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
                         recordset.setFld(record, 'rec_Info',
-                            top.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+recID);
+                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database+"&recID="+recID);
 
                     }else{
 
@@ -297,7 +297,7 @@ function hSearchMinimalDigitalHarlem() {
                                 if(rels2.length<1){
                                     //3a. this is event->address
                                     recordset.setFld(record, 'rec_Info',
-                                        top.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+top.HAPI4.database
+                                        window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database
                                         +"&recID="+eventID+"&addrID="+recID);
 
                                     //add links for this event
@@ -329,7 +329,7 @@ function hSearchMinimalDigitalHarlem() {
                                         var rel_person = records[ personID ];
 
                                         recordset.setFld(record, 'rec_Info',
-                                            top.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database+"&recID="+
                                             personID+"&addrID="+recID+"&eventID="+eventID );
 
                                         //add links for this person
@@ -352,7 +352,7 @@ function hSearchMinimalDigitalHarlem() {
                                 recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
                                 recordset.setFld(record, 'rec_Icon',     'term'+relation_type );   //role at this address: resident (primary)
 
-                                var recInfoUrl = top.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                var recInfoUrl = window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database+"&recID="+
                                 recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
                                 recordset.setFld(record, 'rec_Info', recInfoUrl);
                                 recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');
@@ -414,7 +414,7 @@ function hSearchMinimalDigitalHarlem() {
                         var pathAddr = res_records[ path[i].recID ];
                         var type     = recordset.fld(pathAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
                         var wkt      = recordset.fld(pathAddr, 'dtl_Geo');
-                        var pnt      = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                        var pnt      = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
                         if(pnt!=null){
                             vertices.push(pnt.point);
                         }
@@ -435,7 +435,7 @@ function hSearchMinimalDigitalHarlem() {
                     var d_end1   = recordset.fld(mainAddr, DT_ENDDATE);
                     var type     = recordset.fld(mainAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
                     var wkt      = recordset.fld(mainAddr, 'dtl_Geo');
-                    var pnt1     = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                    var pnt1     = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
 
                     if(pnt1==null) continue;
 
@@ -450,7 +450,7 @@ function hSearchMinimalDigitalHarlem() {
                         if(is_event || __isIntersects(d_start1, d_end1, d_start2, d_end2)){
                             type     = recordset.fld(secAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
                             wkt      = recordset.fld(secAddr, 'dtl_Geo');
-                            var pnt2     = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                            var pnt2     = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
                             if(pnt2!=null){
                                 shapes.push( {polyline:[ pnt1.point, pnt2.point ]} );
 
@@ -500,9 +500,9 @@ function hSearchMinimalDigitalHarlem() {
     //
     function _doApplyRules( originator, rules ){
         /*
-        if(top.HAPI4.currentRecordset && top.HEURIST4.util.isArrayNotEmpty(top.HAPI4.currentRecordset.getMainSet())){
+        if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getMainSet())){
 
-        var request = { q: 'ids:'+top.HAPI4.currentRecordset.getMainSet().join(','),
+        var request = { q: 'ids:'+window.hWin.HAPI4.currentRecordset.getMainSet().join(','),
         rules: rules,
         w: _query_request?_query_request.w:'a'};
 

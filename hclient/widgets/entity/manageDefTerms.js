@@ -65,7 +65,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.options.select_mode=='manager'){            
             iheight = iheight + 2;
         }
-        if(top.HEURIST4.util.isempty(this.options.filter_groups)){
+        if(window.hWin.HEURIST4.util.isempty(this.options.filter_groups)){
             iheight = iheight + 2;    
         }
         this.searchForm.css({'height':iheight+'em'});
@@ -156,10 +156,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         function fld2(fldname, col_width){
             swidth = '';
-            if(!top.HEURIST4.util.isempty(col_width)){
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+top.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
         }
         
         var recID   = fld('trm_ID');
@@ -215,9 +215,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 var that = this;
                 
                 //open import dialog
-                top.HEURIST4.msg.showDialog(
-                    top.HAPI4.basePathV4 + 'hclient/framecontent/importDefTerms.php?db='
-                            +top.HAPI4.database
+                window.hWin.HEURIST4.msg.showDialog(
+                    window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/importDefTerms.php?db='
+                            +window.hWin.HAPI4.database
                             +'&trm_ID='+this._currentParentID,
                   {
                      title: 'Import children from structured data (CSV)',
@@ -229,17 +229,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
             }else if(action=='merge'){
                 
-                var url = top.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='
-                        +top.HAPI4.database+'&action=merge_term&value='+encodeURIComponent();
+                var url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='
+                        +window.hWin.HAPI4.database+'&action=merge_term&value='+encodeURIComponent();
 
-                top.HEURIST4.msg.showDialog(url, {height:450, width:700,
+                window.hWin.HEURIST4.msg.showDialog(url, {height:450, width:700,
                     padding: '0px',
-                    title: top.HR(action_type),
+                    title: window.hWin.HR(action_type),
                     class:'ui-heurist-bg-light'} );
                 
             }
         }else{
-            top.HEURIST4.msg.showMsgFlash('Save current term before add a child term');
+            window.hWin.HEURIST4.msg.showMsgFlash('Save current term before add a child term');
         }
         
     },
@@ -250,15 +250,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     */
     _onImportComplete: function (context){
         
-        if(!top.HEURIST4.util.isnull(context) && !top.HEURIST4.util.isnull(context.terms))
+        if(!window.hWin.HEURIST4.util.isnull(context) && !window.hWin.HEURIST4.util.isnull(context.terms))
         {
             var tree = this._treeview.fancytree("getTree");        
             
-            top.HEURIST4.terms = context.terms;
+            window.hWin.HEURIST4.terms = context.terms;
             var res = context.result,
             ind,
             parentNode, node,
-            fi = top.HEURIST4.terms.fieldNamesToIndex;
+            fi = window.hWin.HEURIST4.terms.fieldNamesToIndex;
 
             var isVocab = !(context.parent>0);
             if(isVocab){ //add to root
@@ -275,7 +275,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         var termid = Number(res[ind]);
                         if(!isNaN(termid))
                         {
-                            var arTerm = top.HEURIST4.terms.termsByDomainLookup[this._currentDomain][termid];
+                            var arTerm = window.hWin.HEURIST4.terms.termsByDomainLookup[this._currentDomain][termid];
                             if(!Hul.isnull(arTerm)){
                                 node = parentNode.addChildren( { title:arTerm[fi.trm_Label], key:termid});    
                             }
@@ -312,15 +312,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
                 var that = this;                                                
                 //that.loadanimation(true);
-                top.HAPI4.EntityMgr.doRequest(request, 
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             if(callback && $.isFunction(callback)){
                                 callback();                                
                             }
-                            top.HEURIST4.msg.showMsgFlash(top.HR('Parent has been changed'));
+                            window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Parent has been changed'));
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
     },     
@@ -507,7 +507,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var wtree = this._treeview.fancytree("getTree");
             
             wtree.filterNodes(function(node){
-                return !top.HEURIST4.util.isnull(recordset.getById(node.key));
+                return !window.hWin.HEURIST4.util.isnull(recordset.getById(node.key));
             }, true);
         }
 

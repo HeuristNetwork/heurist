@@ -31,7 +31,7 @@
             sel = sel.get(0);
             for(key in regional){
                 if(key){
-                    top.HEURIST4.ui.addoption(sel, key, regional[key].language);
+                    window.hWin.HEURIST4.ui.addoption(sel, key, regional[key].language);
                 }
             }
         }
@@ -44,7 +44,7 @@
             sel = sel.get(0);
             for(key in cfg_layouts){
                 if(key){
-                    top.HEURIST4.ui.addoption(sel, cfg_layouts[key]['id'], cfg_layouts[key]['name']);
+                    window.hWin.HEURIST4.ui.addoption(sel, cfg_layouts[key]['id'], cfg_layouts[key]['name']);
                 }
             }
         }
@@ -55,24 +55,24 @@
         if(sel.length==1){ //global variable defined in layout_default.js
             sel.attr('href',
                 "javascript:(function(){"
-                + "e=encodeURIComponent;d=document;h='" + top.HAPI4.basePathV3 + "';"
+                + "e=encodeURIComponent;d=document;h='" + window.hWin.HAPI4.basePathV3 + "';"
                 + "if(location.protocol=='https:'){if(window.confirm('Only the URL and web page title can be extracted from https:// pages."
                 + "\\nAdditional information will need to be set manually."
                 + "\\n\\nClick OK to add a record for this page.')){"
-                + "window.open(h+'records/add/addRecord.php?addref=1&db="+top.HAPI4.database
+                + "window.open(h+'records/add/addRecord.php?addref=1&db="+window.hWin.HAPI4.database
                 + "&rec_rectype=2&rec_owner=1&rec_visibility=viewable&t='+e(d.title)+'&u='+e(location.href));}return;}"
                 
                 + "c=d.contentType;"
                 + "if(c=='text/html'||!c){"
                 + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
                 + "s=d.createElement('script');s.type='text/javascript';"
-                + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+top.HAPI4.database+"';"
+                + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+window.hWin.HAPI4.database+"';"
                 + "d.getElementsByTagName('head')[0].appendChild(s);}"
-                + "else{w=open(h+'records/add/addRecordPopup.php?db="+top.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
+                + "else{w=open(h+'records/add/addRecordPopup.php?db="+window.hWin.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
                 //+ "window.setTimeout('w.focus()',200);}"
                 + "}})();"
             );
-            sel.text('>> '+top.HAPI4.database)
+            sel.text('>> '+window.hWin.HAPI4.database)
         }
     }
     

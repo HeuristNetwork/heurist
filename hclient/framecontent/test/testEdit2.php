@@ -78,7 +78,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                     var editing = hEditing('main_div');
                     editing.initEditForm(defDetailTypes);
                     
-                    top.HEURIST4.ui.initHintButton($('#btn_help_hints'));
+                    window.hWin.HEURIST4.ui.initHintButton($('#btn_help_hints'));
                     
                     var isOnTop = false;
                     $('#btn_style').button().on({click:function(e){

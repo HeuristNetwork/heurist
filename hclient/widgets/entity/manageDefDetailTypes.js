@@ -55,13 +55,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         function fld2(fldname, col_width){
             swidth = '';
-            if(!top.HEURIST4.util.isempty(col_width)){
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+top.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
         }
         
-        var showActionInList = (top.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
+        var showActionInList = (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
         //&& (this.options.select_mode=='manager')
         
         var recID   = fld('dty_ID');
@@ -69,7 +69,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var recTitle = fld2('dty_ID','4em')
                 + fld2('dty_Name','14em')
                 + '<div class="item inlist" style="width:25em;">'+fld('dty_HelpText')+'</div>'
-                + '<div class="item inlist" style="width:10em;">'+top.HEURIST4.detailtypes.lookups[fld('dty_Type')]+'</div>'
+                + '<div class="item inlist" style="width:10em;">'+window.hWin.HEURIST4.detailtypes.lookups[fld('dty_Type')]+'</div>'
                 + (showActionInList?this._rendererActionButton('edit'):'');
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="min-height: 2.6em;">'  
@@ -151,7 +151,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         //add lister for dty_Type field to show hide these fields
         var elements = this._editing.getInputs('dty_Type');
-        if(top.HEURIST4.util.isArrayNotEmpty(elements)){
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(elements)){
             this._on( $(elements[0]), {    
                 'change': function(event){
                        var dt_type = $(event.target).val();

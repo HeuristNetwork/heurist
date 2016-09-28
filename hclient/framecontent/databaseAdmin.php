@@ -129,7 +129,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                     <!--
                     <li style="padding-left:5px;"><a href="javascript:void(0)"
-                    onClick="{/*top.HEURIST4.util.reloadStrcuture()*/;}"
+                    onClick="{/*window.hWin.HEURIST4.util.reloadStrcuture()*/;}"
                     title="Click to refresh the internal working memory - use to resynchronise if newly added structure elements do not show up" >
                     Refresh</a>
                     </li>
@@ -155,7 +155,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <ul>
                     <li class="admin-only" style="padding-left:5px;">
                         <a  href="#" id="menulink-database-admin"
-                            onclick="{window.open(top.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.HAPI4.database, '_self'); return false;}"
+                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.HAPI4.database, '_self'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
                             Full database administration, <br />utilities &amp; special functions</a>
                     </li>

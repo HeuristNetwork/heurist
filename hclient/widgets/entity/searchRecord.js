@@ -53,11 +53,11 @@ $.widget( "heurist.searchForm", {
             var that = this;
             
             if(this._need_load_content){        
-                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/searchForm.html', 
+                this.element.load(window.hWin.HAPI4.basePathV4+'hclient/widgets/entity/searchForm.html', 
                 function(response, status, xhr){
                     that._need_load_content = false;
                     if ( status == "error" ) {
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }else{
                         that._init();
                     }
@@ -68,13 +68,13 @@ $.widget( "heurist.searchForm", {
             //init buttons
             this.btn_search_start = this.element.find('#btn_search_start')
                 //.css({'width':'6em'})
-                .button({label: top.HR("Start search"), text:false, icons: {
+                .button({label: window.hWin.HR("Start search"), text:false, icons: {
                     secondary: "ui-icon-search"
                 }});
                         
             this.btn_add_record = this.element.find('#btn_add_record')
                 .css({'min-width':'11.9em'})
-                .button({label: top.HR("Add Record"), icons: {
+                .button({label: window.hWin.HR("Add Record"), icons: {
                     primary: "ui-icon-plus"
                 }})
                 .click(function(e) {
@@ -86,7 +86,7 @@ $.widget( "heurist.searchForm", {
                 function(e){
                     var code = (e.keyCode ? e.keyCode : e.which);
                         if (code == 13) {
-                            top.HEURIST4.util.stopEvent(e);
+                            window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
                             that.startSearch();
                         }
@@ -96,11 +96,11 @@ $.widget( "heurist.searchForm", {
             this.selectRectype = this.element.find('#sel_rectypes');
             
             this.selectRectype.empty();
-            top.HEURIST4.ui.createRectypeSelect(this.selectRectype.get(0), 
+            window.hWin.HEURIST4.ui.createRectypeSelect(this.selectRectype.get(0), 
                 this.options.rectype_set, 
-                this.options.rectype_set?null:top.HR('Any Record Type'));
+                this.options.rectype_set?null:window.hWin.HR('Any Record Type'));
                       
-            var ishelp_on = top.HAPI4.get_prefs('help_on')==1;
+            var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
             this.element.find('.heurist-helper1').css('display',ishelp_on?'block':'none');
     
             //force search if rectype_set is defined
@@ -112,9 +112,9 @@ $.widget( "heurist.searchForm", {
                 change: function(event){
                     
                     if(this.selectRectype.val()>0){
-                        lbl = top.HR('Add')+' '+ this.selectRectype.find( "option:selected" ).text();
+                        lbl = window.hWin.HR('Add')+' '+ this.selectRectype.find( "option:selected" ).text();
                     }else{
-                        lbl = top.HR("Add Record");
+                        lbl = window.hWin.HR("Add Record");
                     }
                     
                     this.btn_add_record.button('option','label',lbl);
@@ -177,7 +177,7 @@ $.widget( "heurist.searchForm", {
             }
             
             if(this.element.find('#cb_selected').is(':checked')){
-                qstr = qstr + ' ids:' + top.HAPI4.get_prefs('recent_Records');
+                qstr = qstr + ' ids:' + window.hWin.HAPI4.get_prefs('recent_Records');
             }
             if(this.element.find('#cb_modified').is(':checked')){
                 qstr = qstr + ' sortby:-m after:"1 week ago"';
@@ -200,19 +200,19 @@ $.widget( "heurist.searchForm", {
                                 limit: 100000,
                                 needall: 1,
                                 detail: 'ids',
-                                id: top.HEURIST4.util.random()}
+                                id: window.hWin.HEURIST4.util.random()}
                                 //source: this.element.attr('id') };
 
                 var that = this;                                                
                 //that.loadanimation(true);
 
-                top.HAPI4.RecordMgr.search(request, function( response ){
+                window.hWin.HAPI4.RecordMgr.search(request, function( response ){
                     //that.loadanimation(false);
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         that._trigger( "onresult", null, 
                             {recordset:new hRecordSet(response.data), request:request} );
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
 
                 });

@@ -49,28 +49,28 @@ $.widget( "heurist.help_tips", {
                 height: 650,
                 width: 930,
                 modal: true,
-                title: top.HR("Welcome to Heurist"), //Tip of the day
+                title: window.hWin.HR("Welcome to Heurist"), //Tip of the day
                 resizeStop: function( event, ui ) {
                     //that.wcontainer.css('width','100%');
                     //.css({clear:'both'})
                     that.element.css({overflow: 'none !important','width':'100%'}); //,'height': that.element.parent().css('height')-90});
                 },
                 buttons: [
-                    {text:top.HR('Previous'),
+                    {text:window.hWin.HR('Previous'),
                         id: 'btnTipPrev',
-                        title: top.HR("Show previous tip"),
+                        title: window.hWin.HR("Show previous tip"),
                         class: 'tags-actions',
                         click: function() {
                             that._previous();
                     }},
-                    {text:top.HR('Next'),
+                    {text:window.hWin.HR('Next'),
                         id: 'btnTipNext',
-                        title: top.HR("Show next tip"),
+                        title: window.hWin.HR("Show next tip"),
                         class: 'tags-actions',
                         click: function() {
                             that._next();
                     }},
-                    {text:top.HR('Close'), click: function() {
+                    {text:window.hWin.HR('Close'), click: function() {
                         $( this ).dialog( "close" );
                     }}
                 ]
@@ -80,7 +80,7 @@ $.widget( "heurist.help_tips", {
             this.wcontainer.addClass('ui-widget-content ui-corner-all').css({'padding':'0.4em',height:'500px'}).appendTo( this.element );
         }
 
-        this._setOption("current_tip", parseInt(top.HAPI4.get_prefs('help_tip')));
+        this._setOption("current_tip", parseInt(window.hWin.HAPI4.get_prefs('help_tip')));
 
         this._refresh();
 
@@ -115,11 +115,11 @@ $.widget( "heurist.help_tips", {
 
         var idx = this.options.current_tip;
 
-        if(top.HEURIST4.util.isnull(idx) || isNaN(idx) || idx<0) idx = 1;
+        if(window.hWin.HEURIST4.util.isnull(idx) || isNaN(idx) || idx<0) idx = 1;
 
         var that = this;
 
-        this.wcontainer.load("context_help/tips/tip"+idx+".html?t="+top.HEURIST4.util.random() , function(response, status, xhr){
+        this.wcontainer.load("context_help/tips/tip"+idx+".html?t="+window.hWin.HEURIST4.util.random() , function(response, status, xhr){
             if(status=="error"){
                 if(idx!=1){
                     that._setOption("current_tip", 1); //reset to 1
@@ -128,30 +128,30 @@ $.widget( "heurist.help_tips", {
                 }
             }else{
                 that.options.current_tip = idx;
-                top.HAPI4.save_pref('help_tip_show', idx);
-                top.HAPI4.save_pref('help_tip_last', (new Date()));
+                window.hWin.HAPI4.save_pref('help_tip_show', idx);
+                window.hWin.HAPI4.save_pref('help_tip_last', (new Date()));
                 
-                top.HEURIST4.util.setDisabled($.find('#btnTipPrev'), (idx==1));
+                window.hWin.HEURIST4.util.setDisabled($.find('#btnTipPrev'), (idx==1));
                 if(that.last_tip_idx>0){
                     if(idx+1==that.last_tip_idx){
-                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
+                        window.hWin.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
                     }else{
-                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);
+                        window.hWin.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);
                     }
                     return;
                 }
                 
                 $.ajax( {
-                    url: top.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php?check=context_help/tips/tip'+(idx+1)+'.html',
+                    url: window.hWin.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php?check=context_help/tips/tip'+(idx+1)+'.html',
                     })
                     .error(function() {
                     })
                     .success(function(response, textStatus, jqXHR){
                         if(response=='ok'){
-                            top.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);    
+                            window.hWin.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);    
                         }else{
                             that.last_tip_idx = idx+1;
-                            top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
+                            window.hWin.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
                         }
                     });                
                 
@@ -181,11 +181,11 @@ $.widget( "heurist.help_tips", {
 function showTipOfTheDay(verify){
 
     if(verify){
-        var showtip = top.HAPI4.get_prefs('help_tip_show');
-        if(top.HEURIST4.util.isnull(showtip) || showtip){
+        var showtip = window.hWin.HAPI4.get_prefs('help_tip_show');
+        if(window.hWin.HEURIST4.util.isnull(showtip) || showtip){
 
-            var lastshown = top.HAPI4.get_prefs('help_tip_last');
-            if(!top.HEURIST4.util.isnull(lastshown) && (new Date()).getHours() - (new Date(lastshown)).getHours() < 24){
+            var lastshown = window.hWin.HAPI4.get_prefs('help_tip_last');
+            if(!window.hWin.HEURIST4.util.isnull(lastshown) && (new Date()).getHours() - (new Date(lastshown)).getHours() < 24){
                 return;
             }
 

@@ -179,13 +179,17 @@ function jump_sessions() {
         session_write_close();
     }
 
-    $tmp = array();
-    foreach ($copy_vars as $varname) $tmp[$varname] = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname];
+    $tmp = array(); //keep variables
+    foreach ($copy_vars as $varname) $tmp[$varname] = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname];
 
     session_id($alt_sessionid);
     session_start();
 
-    foreach ($copy_vars as $varname) $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname] = $tmp[$varname];
+    foreach ($copy_vars as $varname) {
+        if($tmp[$varname]){
+            $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname] = $tmp[$varname];   
+        }
+   }
 }
 
 /**

@@ -59,11 +59,11 @@ function hDatabaseAddData() {
         menu.find('[name="auto-popup"]').each(function(){
             var ele = $(this);
             var href = ele.attr('href');
-            if(!top.HEURIST4.util.isempty(href)){
-                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + top.HAPI4.database;
+            if(!window.hWin.HEURIST4.util.isempty(href)){
+                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
 
                 if(ele.hasClass('h3link')){
-                    href = top.HAPI4.basePathV3 + href;
+                    href = window.hWin.HAPI4.basePathV3 + href;
                     //h3link class on menus implies location of older (vsn 3) code
                 }
                 
@@ -88,18 +88,18 @@ function hDatabaseAddData() {
         
         menu.find('#menu-import-csv').click(
             function(event){
-                top.HAPI4.SystemMgr.is_logged(
+                window.hWin.HAPI4.SystemMgr.is_logged(
                 function(){
-                   var url = top.HAPI4.basePathV4 + "hclient/framecontent/import/importRecordsCSV.php?db="+ top.HAPI4.database;
+                   var url = window.hWin.HAPI4.basePathV4 + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
                    
                    var body = $(this.document).find('body');
                    var dim = {h:body.innerHeight(), w:body.innerWidth()};
                    
-                   top.HEURIST4.msg.showDialog(url, {    
+                   window.hWin.HEURIST4.msg.showDialog(url, {    
                         title: 'Import Records from CSV/TSV',
                         height: dim.h-5,
                         width: dim.w-5,
-                        'context_help':top.HAPI4.basePathV4+'context_help/importRecordsCSV.html #content'
+                        'context_help':window.hWin.HAPI4.basePathV4+'context_help/importRecordsCSV.html #content'
                         //callback: _import_complete
                     });
                 
@@ -173,7 +173,7 @@ function hDatabaseAddData() {
         }else if(link.hasClass('embed')) {
         
             //check if login
-            top.HAPI4.SystemMgr.is_logged(function(){
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){
                 $('.accordion_pnl').find('a').removeClass('selected');
                 link.addClass('selected');
                 $('#frame_container2').attr('src', url); 
@@ -184,9 +184,9 @@ function hDatabaseAddData() {
                 
         }else if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
-            top.HAPI4.SystemMgr.is_logged(function(){top.HEURIST4.msg.showDialog(url, options);});
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
         }else{
-            top.HEURIST4.msg.showDialog(url, options);
+            window.hWin.HEURIST4.msg.showDialog(url, options);
         }        
 
         return false;

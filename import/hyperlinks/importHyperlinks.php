@@ -422,7 +422,7 @@ Note: the list only shows links which you have not already bookmarked.<br>
         if(context){
             document.forms[0].style.display = 'none';
             document.location.reload();
-            //top.HEURIST4.msg.showMsgDlg('Rerun '+context);
+            //window.hWin.HEURIST4.msg.showMsgDlg('Rerun '+context);
             //document.forms[0].submit(); 
         }
     } });}" 

@@ -57,7 +57,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
 
     function _init(_database, _query, _query_domain)
     {
-        if(top.HEURIST4 && !top.HEURIST4.util.isempty(_query)){
+        if(window.hWin.HEURIST4 && !window.hWin.HEURIST4.util.isempty(_query)){
             _isPopupMode = true;
         }else{
             $('#btnCancel').hide();
@@ -80,9 +80,9 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
         });
 
         //hide left panel(saved searches) and maximize analysis
-        //var _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
-        //top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
-        //top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
+        //var _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
+        //window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
+        //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
         
         
     }
@@ -686,10 +686,10 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
             modal: true,
             resizable: false,
             draggable: true,
-            title: top.HR("Select terms"),
+            title: window.hWin.HR("Select terms"),
             buttons: [
-            {text:top.HR('Apply'), click: __addeditInterval},
-            {text:top.HR('Cancel'), click: function() {
+            {text:window.hWin.HR('Apply'), click: __addeditInterval},
+            {text:window.hWin.HR('Cancel'), click: function() {
             $( this ).dialog( "close" );
             }}
             ]

@@ -47,22 +47,22 @@ function hAPI(_db, _oninit) { //, _currentUser
         if(_db){
             _database = _db;
         }else{
-            _database = top.HEURIST4.util.getUrlParameter('db');
+            _database = window.hWin.HEURIST4.util.getUrlParameter('db');
         }
 
         //
-        var installDir = top.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, ""); // Upddate in 2 places this file and 6 other files if changed
+        var installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, ""); // Upddate in 2 places this file and 6 other files if changed
         //TODO: top directories - admin|applications|common| ... are defined in SEVEN separate locations. Rationalise.
-        that.basePathV4 = top.location.protocol + '//'+top.location.host + installDir;
+        that.basePathV4 = window.hWin.location.protocol + '//'+window.hWin.location.host + installDir;
         // TODO: This is actually a proto URL rather than a base URL. Rename.
         that.iconBaseURL= that.basePathV4 + 'hserver/dbaccess/rt_icon.php?db='+_database+'&id=';
         // TODO: why is this todo? Explain or delete
-        //top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!
+        //window.hWin.location.protocol + '//'+window.hWin.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!
         that.database = _database;
 
         //path to old interface - it will be get from server sysinfo
-        installDir = top.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
-        that.basePathV3 = top.location.protocol + '//'+top.location.host  + installDir;
+        installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
+        that.basePathV3 = window.hWin.location.protocol + '//'+window.hWin.location.host  + installDir;
 
         //global variable defined in localization.js
         if(!(typeof regional === 'undefined')){
@@ -88,13 +88,13 @@ function hAPI(_db, _oninit) { //, _currentUser
         // Get current user if logged in, and global database settings
         that.SystemMgr.sys_info(
             function(response){
-                var  success = (response.status == top.HAPI4.ResponseStatus.OK);
+                var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
                 if(success){
                     if(response.data.currentUser) that.setCurrentUser(response.data.currentUser);
                     that.sysinfo = response.data.sysinfo;
                     that.basePathV3 = that.sysinfo['basePathV3'];
                 }else{
-                    top.HEURIST4.msg.showMsgErr(response.message);
+                    window.hWin.HEURIST4.msg.showMsgErr(response.message);
                 }
                 if(_oninit){
                     _oninit(that.database && success);
@@ -123,11 +123,11 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
         
         
-        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
 
         var url = that.basePathV4+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 
-        //top.HEURIST4.ajax.getJsonData(url, callback, request);
+        //window.hWin.HEURIST4.ajax.getJsonData(url, callback, request);
 
         //note jQuery ajax does not properly in the loop - success callback does not work often
         $.ajax({
@@ -138,8 +138,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             cache: false,
             error: function( jqXHR, textStatus, errorThrown ) {
 
-                err_message = (top.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
-                var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
+                var response = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
                 //_processerror(response);
 
                 if(callback){
@@ -156,8 +156,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
             },
             fail: function(  jqXHR, textStatus, errorThrown ){
-                err_message = (top.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
-                var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
+                var response = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
 
                 if(callback){
                     callback(response);
@@ -210,7 +210,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   sys_info     - get current user info and database settings
     *   save_prefs   - save user preferences  in session
     *   mygroups     - description of current Workgroups
-    *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber
+    *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber, or by list of ids
     *   ssearch_save - save saved search in database
     *   ssearch_delete - delete saved searches by IDs
     *   ssearch_savetree - save saved search treeview data
@@ -258,15 +258,15 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //check if login
                 _callserver('usr_info', {a:'is_logged'}, 
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK && response.data=='0'){
-                            response.status = top.HAPI4.ResponseStatus.REQUEST_DENIED;
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK && response.data=='0'){
+                            response.status = window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED;
                             response.message = 'To perform this operation you have to be logged in';
                             response.sysmsg = 0;
                     }
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         callback();
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response, true);
+                        window.hWin.HEURIST4.msg.showMsgErr(response, true);
                     }
                 });
                
@@ -379,19 +379,19 @@ function hAPI(_db, _oninit) { //, _currentUser
             ,get_defs_all: function(is_message, document){
                 
                 this.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
-                        top.HEURIST4.rectypes = response.data.rectypes;
-                        top.HEURIST4.terms = response.data.terms;
-                        top.HEURIST4.detailtypes = response.data.detailtypes;
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                        window.hWin.HEURIST4.terms = response.data.terms;
+                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
 
-                        if(top.HEURIST && top.HEURIST.rectypes){
-                            top.HEURIST.util.reloadStrcuture( is_message ); //relaod H3 structure
+                        if(window.hWin.HEURIST && window.hWin.HEURIST.rectypes){
+                            window.hWin.HEURIST.util.reloadStrcuture( is_message ); //relaod H3 structure
                         }else if (is_message==true) {
-                            top.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
+                            window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
                         }
                         
-                        $(document).trigger(top.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                        $(document).trigger(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
 
                     }
                 });
@@ -515,38 +515,38 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 if(!$.isFunction(callback)){   //@todo - remove all this stuff since it is implemented in SearchMgr
 
-                    if(!request.increment || top.HEURIST4.util.isnull(request.id)){
-                        request.id = top.HEURIST4.util.random();
+                    if(!request.increment || window.hWin.HEURIST4.util.isnull(request.id)){
+                        request.id = window.hWin.HEURIST4.util.random();
                     }
 
                     var document = callback;
-                    if(!top.HEURIST4.util.isnull(document) && !request.increment){
-                        document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
+                    if(!window.hWin.HEURIST4.util.isnull(document) && !request.increment){
+                        document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
                     }
 
                     callback = function(response)
                     {
                         var resdata = null;
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             resdata = new hRecordSet(response.data);
                         }else{
 
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
 
-                            if(!top.HEURIST4.util.isnull(document)){
-                                document.trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
+                            if(!window.hWin.HEURIST4.util.isnull(document)){
+                                document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
                             }
                         }
-                        if(!top.HEURIST4.util.isnull(document)){
-                            document.trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
+                        if(!window.hWin.HEURIST4.util.isnull(document)){
+                            document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
                         }
                     }
                 }
 
 
                 //if limit is not defined - get it from preferences
-                //if(top.HEURIST4.util.isnull(request.limit)){
-                //    request.limit = top.HAPI4.get_prefs('search_detail_limit'); //if needall is set it is ignored on server side
+                //if(window.hWin.HEURIST4.util.isnull(request.limit)){
+                //    request.limit = window.hWin.HAPI4.get_prefs('search_detail_limit'); //if needall is set it is ignored on server side
                 //}
 
                 // start search
@@ -715,7 +715,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }else{
                     _callserver('entityScrud', {a:'config', 'entity':entityName},
                        function(response){
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                 
                                 var entity_cfg = response.data;
                                 
@@ -733,7 +733,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                                 
                                 callback(entity_cfg);
                             }else{
-                                top.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                        }
 
@@ -747,11 +747,11 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
                     _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'},
                        function(response){
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                 entity_data[response.data.entityName] = new hRecordSet(response.data);
                                 if($.isFunction(callback)) callback(entity_data[response.data.entityName]);
                             }else{
-                                top.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                        }
 
@@ -768,7 +768,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             doRequest:function(request, callback){
                 //todo - verify basic params
-                request['request_id'] = top.HEURIST4.util.random();
+                request['request_id'] = window.hWin.HEURIST4.util.random();
                 request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
                 _callserver('entityScrud', request, callback);
             },
@@ -894,14 +894,14 @@ function hAPI(_db, _oninit) { //, _currentUser
                                          layout_theme: 'heurist',
                                 'search_detail_limit': 2000, 'help_on':'0', 'userCompetencyLevel': 'beginner'};
             }
-            if(top.HEURIST4.util.isempty(name)){
+            if(window.hWin.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];
             }else{
                 var res = that.currentUser['ugr_Preferences'][name];
 
                 //take from old set
-                if(top.HEURIST4.util.isnull(res) && top.HEURIST && top.HEURIST.displayPreferences){
-                    res = top.HEURIST.displayPreferences[name];
+                if(window.hWin.HEURIST4.util.isnull(res) && window.hWin.HEURIST && window.hWin.HEURIST.displayPreferences){
+                    res = window.hWin.HEURIST.displayPreferences[name];
                 }
 
                 // TODO: redundancy: this duplicates same in System.php
@@ -917,12 +917,12 @@ function hAPI(_db, _oninit) { //, _currentUser
         // limit - to save limited list of ids - for example: last selected tags
         //
         save_pref: function(name, value, limit){
-                //top.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
+                //window.hWin.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
 
                 if($.isArray(value) && limit>0) {
                         value = value.slice(0,limit);
 
-                        var cur_value = top.HAPI4.get_prefs(name);
+                        var cur_value = window.hWin.HAPI4.get_prefs(name);
                         cur_value = (cur_value?cur_value.split(','):null);
 
                         if($.isArray(cur_value)){
@@ -936,9 +936,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                 var request = {};
                 request[name] = value;
 
-                top.HAPI4.SystemMgr.save_prefs(request,
+                window.hWin.HAPI4.SystemMgr.save_prefs(request,
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             that.currentUser['ugr_Preferences'][name] = value;
                         }
                     }
@@ -946,7 +946,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         is_ui_normal: function(){
-            return (top.HAPI4.get_prefs('layout_style')=='normal');
+            return (window.hWin.HAPI4.get_prefs('layout_style')=='normal');
         },
 
 
@@ -1040,8 +1040,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         
         , getImageUrl: function(entityName, recID, version){
             if(recID>0){
-                     return top.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php'
-                            +'?db='+ top.HAPI4.database
+                     return window.hWin.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php'
+                            +'?db='+ window.hWin.HAPI4.database
                             +'&entity='+entityName
                             +'&recID='+recID
                             +'&version='+version;

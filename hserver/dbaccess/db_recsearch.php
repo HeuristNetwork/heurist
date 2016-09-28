@@ -538,12 +538,23 @@ if(@$params['debug']) echo $query."<br>";
             if(@$params['vo']) unset($params['vo']);
 
             $params['needall'] = 1; //return all records
+            
+            $resSearch = recordSearch($system, $params);
 
-            //find main query results
-            $fin_result = recordSearch($system, $params);
-            //main result set
-            $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] 
+            $keepMainSet = true;
+            
+            if($keepMainSet){
+                //find main query results
+                $fin_result = $resSearch;
+                //main result set
+                $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] 
                                                      :array_keys($fin_result['data']['records']); //get ids
+            }else{
+                //empty main result set
+                
+                //remove from $fin_result! but keep in $flat_rules[0]['results']?
+                
+            }
 
             $is_get_relation_records = (@$params['getrelrecs']==1); //get all related and relationship records
 

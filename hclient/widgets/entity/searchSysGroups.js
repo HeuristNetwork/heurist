@@ -36,7 +36,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         this._super();
         
         //assign unique name for radio group (to avoid conflicts with other instances of widget)
-        this.element.find('.ent_search_cb input[type="radio"]').prop('name', 'rbg_'+top.HEURIST4.util.random());
+        this.element.find('.ent_search_cb input[type="radio"]').prop('name', 'rbg_'+window.hWin.HEURIST4.util.random());
         
         this.startSearch();
     },  
@@ -59,7 +59,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
             
             if(gr_role!='anygroup'){
             
-                request['ugl_UserID'] = top.HAPI4.currentUser['ugr_ID'];
+                request['ugl_UserID'] = window.hWin.HAPI4.currentUser['ugr_ID'];
                 
                 if(gr_role=='admin'){
                     request['ugl_Role'] = 'admin';
@@ -78,20 +78,20 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
                 request['a']          = 'search'; //action
                 request['entity']     = 'sysUGrps';
                 request['details']    = 'id';
-                request['request_id'] = top.HEURIST4.util.random();
+                request['request_id'] = window.hWin.HEURIST4.util.random();
                 request['ugr_Type']    = 'workgroup';
                 
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
                 //that.loadanimation(true);
-                top.HAPI4.EntityMgr.doRequest(request, 
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
                                 {recordset:new hRecordSet(response.data), request:request} );
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
             }

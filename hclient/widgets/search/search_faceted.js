@@ -110,19 +110,19 @@ $.widget( "heurist.search_faceted", {
 
         this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","float":"right","padding-top":"1.8em","padding-right":"0.6em"}).appendTo( this.div_header );
 
-        this.btn_submit = $( "<button>", { text: top.HR("Submit") })
+        this.btn_submit = $( "<button>", { text: window.hWin.HR("Submit") })
         .appendTo( this.div_toolbar )
         .button();
         
-        this.btn_reset = $( "<button>", { text: top.HR("Initial state"), title:top.HR("Reset all facets to their initial states") })
+        this.btn_reset = $( "<button>", { text: window.hWin.HR("Initial state"), title:window.hWin.HR("Reset all facets to their initial states") })
         .appendTo( this.div_toolbar )
         .button({icons: {primary: "ui-icon-arrowreturnthick-1-w"}, text:false}).hide();
         
-        this.btn_save = $( "<button>", { text: top.HR("Save state") })
+        this.btn_save = $( "<button>", { text: window.hWin.HR("Save state") })
         .appendTo( this.div_toolbar )
         .button().hide(); //@todo
 
-        this.btn_close = $( "<button>", { text: top.HR("Close"), title:top.HR("Close this facet search and return to the list of saved searches") })
+        this.btn_close = $( "<button>", { text: window.hWin.HR("Close"), title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
         .appendTo( this.div_toolbar )
         .button({icons: {secondary: "ui-icon-close"}});
 
@@ -150,11 +150,11 @@ $.widget( "heurist.search_faceted", {
         var that = this;
         var current_query_request_id;
         
-        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+top.HAPI4.Event.ON_REC_SEARCHSTART, 
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, 
         
         function(e, data) {
 
-            if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+            if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
             
                     if(data){
                         if(data.source==that.element.attr('id') ){   //search from this widget
@@ -166,7 +166,7 @@ $.widget( "heurist.search_faceted", {
                         }
                     }
                 
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                 
                 if(data && data.queryid()==current_query_request_id) {
                       //search from this widget
@@ -200,7 +200,7 @@ $.widget( "heurist.search_faceted", {
          var facets = this.options.params.facets;
          var hasHistory = false, facet_index, len = facets?facets.length:0;
          for (facet_index=0;facet_index<len;facet_index++){
-              if( !top.HEURIST4.util.isempty(facets[facet_index].history) ){
+              if( !window.hWin.HEURIST4.util.isempty(facets[facet_index].history) ){
                   hasHistory = true;
                   break;
               }
@@ -234,7 +234,7 @@ $.widget( "heurist.search_faceted", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         
-        $(this.document).off( top.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+top.HAPI4.Event.ON_REC_SEARCHSTART );
+        $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART );
         
         // remove generated elements
         if(this.div_title) this.div_title.remove();
@@ -262,7 +262,7 @@ $.widget( "heurist.search_faceted", {
        $.each(this.options.params.facets, function(index, field){
        
            //value is defined - it will be used to create query
-           if( !top.HEURIST4.util.isnull(field['var']) && field['code']){
+           if( !window.hWin.HEURIST4.util.isnull(field['var']) && field['code']){
                //create new query and add new parameter
                var code = field['code'];
                code = code.split(':');
@@ -318,9 +318,9 @@ $.widget( "heurist.search_faceted", {
                     var len0 = qarr.length, notfound = true, isarray;
                     
                     for (var i=0;i<len0;i++){
-                        if(! top.HEURIST4.util.isnull( qarr[i][key] ) ){ //such key already exsits
+                        if(! window.hWin.HEURIST4.util.isnull( qarr[i][key] ) ){ //such key already exsits
                             
-                            if(top.HEURIST4.util.isArray(qarr[i][key])){ //next level
+                            if(window.hWin.HEURIST4.util.isArray(qarr[i][key])){ //next level
                                 return qarr[i][key];   
                             }else if(qarr[0][key]==val){ //already exists
                                 return qarr;
@@ -332,7 +332,7 @@ $.widget( "heurist.search_faceted", {
                     predicat[key] = val;
                     qarr.push(predicat);
                     
-                    if(top.HEURIST4.util.isArray(val)){
+                    if(window.hWin.HEURIST4.util.isArray(val)){
                         return val;
                     }else{
                          return qarr;
@@ -391,25 +391,25 @@ $.widget( "heurist.search_faceted", {
     //
     ,doReset: function(){
 
-        $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
         
         var facets = this.options.params.facets;
 
-        if(top.HEURIST4.util.isArrayNotEmpty(facets)){
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(facets)){
             var facet_index, len = facets.length;
 
             for (facet_index=0;facet_index<len;facet_index++){
                 facets[facet_index].history = [];
                 facets[facet_index].selectedvalue = null;
                 
-                if(top.HEURIST4.util.isnull(facets[facet_index].isfacet) || 
+                if(window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet) || 
                         facets[facet_index].isfacet==true || facets[facet_index].isfacet==1){
                             facets[facet_index].isfacet=1;
                 }else if (facets[facet_index].isfacet==false){
                             facets[facet_index].isfacet=0;
                 }
                 
-                //facets[facet_index].isfacet = facets[facet_index].isfacet || top.HEURIST4.util.isnull(facets[facet_index].isfacet);
+                //facets[facet_index].isfacet = facets[facet_index].isfacet || window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet);
             }
         }
         
@@ -453,13 +453,13 @@ $.widget( "heurist.search_faceted", {
           var j = 0;
           var harchy = [];
           while (j<codes.length){
-               harchy.push(top.HEURIST4.rectypes.names[codes[j]]);
+               harchy.push(window.hWin.HEURIST4.rectypes.names[codes[j]]);
                j = j + 2;
           }
           
           harchy = "<span>"+ harchy.join(" &gt; ") + "</span><br/>&nbsp;&nbsp;&nbsp;";
            
-           if(!top.HEURIST4.util.isnull(field['var']) && field['code'] ){
+           if(!window.hWin.HEURIST4.util.isnull(field['var']) && field['code'] ){
                
              if(!field['help']) field['help'] = '';
                
@@ -483,7 +483,7 @@ $.widget( "heurist.search_faceted", {
                                 recID: -1,
                                 rectypeID: field['rtid'],
                                 dtID: field['id'],
-                                rectypes: top.HEURIST4.rectypes,
+                                rectypes: window.hWin.HEURIST4.rectypes,
                                 values: '',
                                 readonly: false,
                                 title:  harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
@@ -522,7 +522,7 @@ $.widget( "heurist.search_faceted", {
                         function(e){
                         var code = (e.keyCode ? e.keyCode : e.which);
                             if (code == 13) {
-                                top.HEURIST4.util.stopEvent(e);
+                                window.hWin.HEURIST4.util.stopEvent(e);
                                 e.preventDefault();
                                 that.doSearch();
                             }
@@ -547,7 +547,7 @@ $.widget( "heurist.search_faceted", {
        
        this._isInited = true;
        //get empty query
-       this._first_query = top.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
+       this._first_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
        this._fillQueryWithValues( this._first_query );
        this._recalculateFacets(-1);
 
@@ -558,7 +558,7 @@ $.widget( "heurist.search_faceted", {
     }
 
     ,doClose: function(){
-        $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
         this._trigger( "onclose");
     }
 
@@ -610,7 +610,7 @@ $.widget( "heurist.search_faceted", {
                                 
                                 var selval = facets[facet_index].selectedvalue;;
                                 
-                                if(selval && !top.HEURIST4.util.isempty(selval.value)){
+                                if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
                                     predicate[key] = selval.value;
                                     isbranch_empty = false;
                                 }else{
@@ -648,7 +648,7 @@ $.widget( "heurist.search_faceted", {
     
     ,doSearch : function(){
 
-            var query = top.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
+            var query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
             var isform_empty = this._fillQueryWithValues(query);
             
             if(isform_empty){
@@ -657,7 +657,7 @@ $.widget( "heurist.search_faceted", {
                     
                     this.doReset();
                 }else{
-                    top.HEURIST4.msg.showMsgErr('Define at least one search criterion');
+                    window.hWin.HEURIST4.msg.showMsgErr('Define at least one search criterion');
                 }
                 return;
             }else if(!this.options.ispreview){
@@ -670,7 +670,7 @@ $.widget( "heurist.search_faceted", {
             if(div_facets.length>0)  div_facets.empty();
 
             //add additional/supplementary filter
-            this._current_query = top.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
+            this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
             
             //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             
@@ -685,7 +685,7 @@ $.widget( "heurist.search_faceted", {
                             }; //, facets: facets
             
             //perform search
-            top.HAPI4.SearchMgr.doSearch( this, request );
+            window.hWin.HAPI4.SearchMgr.doSearch( this, request );
             
             //perform search for facet values
             //that._recalculateFacets(content_id);
@@ -710,7 +710,7 @@ $.widget( "heurist.search_faceted", {
                 var div_facets = this.facets_list.find(".facets");
                 if(div_facets.length>0)
                     div_facets.empty()
-                    .css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white20.gif) no-repeat center center');
+                    .css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white20.gif) no-repeat center center');
         }
         
         var that = this;
@@ -788,7 +788,7 @@ $.widget( "heurist.search_faceted", {
                         query = this._first_query;
                         
                         //add additional/supplementary filter
-                        query = top.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
+                        query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
                         
                     }else{
                         //replace with list of ids
@@ -798,14 +798,14 @@ $.widget( "heurist.search_faceted", {
                     needcount = 1;
                     
                 }else{
-                    query = top.HEURIST4.util.cloneJSON(field['facet']); //clone 
+                    query = window.hWin.HEURIST4.util.cloneJSON(field['facet']); //clone 
                     
                     //change $IDS for current set of target record type
                     __fillQuery(query);                
                     
                     //add other parameters for rectype of this facet
                     if(this._current_query){
-                        var copyquery = top.HEURIST4.util.cloneJSON(this._current_query); 
+                        var copyquery = window.hWin.HEURIST4.util.cloneJSON(this._current_query); 
                         var otherparams = __getOtherParameters(copyquery, field['rtid']);
                         if(null!=otherparams){
                              query = query.concat(otherparams);
@@ -815,10 +815,10 @@ $.widget( "heurist.search_faceted", {
                 }
                         
                 /* alas, ian want to get count on every step
-                if( (!top.HEURIST4.util.isnull(field['selectedvalue'])) 
+                if( (!window.hWin.HEURIST4.util.isnull(field['selectedvalue'])) 
                     && (field['type']=="float" || field['type']=="integer" || field['type']=="date" || field['type']=="year")){  //run only once to get min/max values
                 
-                       var response = {status:top.HAPI4.ResponseStatus.OK, facet_index:i, data:[field['selectedvalue']]};
+                       var response = {status:window.hWin.HAPI4.ResponseStatus.OK, facet_index:i, data:[field['selectedvalue']]};
                        that._redrawFacets(response)
                        break;
                 }
@@ -841,7 +841,7 @@ $.widget( "heurist.search_faceted", {
 
 
                 // try to find in cache by facet index and query string
-                var hashQuery = top.HEURIST4.util.hashString(JSON.stringify(request.q));
+                var hashQuery = window.hWin.HEURIST4.util.hashString(JSON.stringify(request.q));
                 for (var k=0; k<this.cached_counts.length; k++){
                     if( parseInt(this.cached_counts[k].facet_index) == request.facet_index && 
                         this.cached_counts[k].q == hashQuery) // && this.cached_counts[k].dt == request.dt)
@@ -866,15 +866,15 @@ $.widget( "heurist.search_faceted", {
     //
     , _redrawFacets: function( response, keep_cache ) {
         
-                if(response.status == top.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                     if(keep_cache){
-                        response.q = top.HEURIST4.util.hashString(JSON.stringify(response.q));
+                        response.q = window.hWin.HEURIST4.util.hashString(JSON.stringify(response.q));
                         this.cached_counts.push(response);
                     }
                     
-                    var allTerms = top.HEURIST4.terms;
-                    var detailtypes = top.HEURIST4.detailtypes.typedefs;
+                    var allTerms = window.hWin.HEURIST4.terms;
+                    var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
                     
                     var facet_index = parseInt(response.facet_index); 
                     
@@ -893,15 +893,15 @@ $.widget( "heurist.search_faceted", {
                     $facet_values.css('background','none');
                     
                     //add current value to history
-                    if(top.HEURIST4.util.isnull(field.selectedvalue)){ //reset history
+                    if(window.hWin.HEURIST4.util.isnull(field.selectedvalue)){ //reset history
                         field.history = []; 
                     }else{
                         //replace/add for current step and remove that a bigger
-                        if( top.HEURIST4.util.isArrayNotEmpty(field.history) ){
+                        if( window.hWin.HEURIST4.util.isArrayNotEmpty(field.history) ){
                             field.history = field.history.slice(0, field.selectedvalue.step);
                         }else{
                             field.history = [];
-                            field.history.push({text:top.HR('all'), value:null});
+                            field.history.push({text:window.hWin.HR('all'), value:null});
                         }
                         field.history.push(field.selectedvalue);
                     }
@@ -917,7 +917,7 @@ $.widget( "heurist.search_faceted", {
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
                         
-                        var term = top.HEURIST4.ui.getChildrenTerms('enum', allTerms, disabledTerms, null ); //get entire tree
+                        var term = window.hWin.HEURIST4.ui.getChildrenTerms('enum', allTerms, disabledTerms, null ); //get entire tree
                         
                         //field.selectedvalue = {text:label, value:value, step:step};                    
                         
@@ -934,7 +934,7 @@ $.widget( "heurist.search_faceted", {
                                 return null; //no entries
                         }
                         
-                        //{id:null, text:top.HR('all'), children:termtree}
+                        //{id:null, text:window.hWin.HR('all'), children:termtree}
                         //draw terms and all its parents    
                         function __drawTerm(term, level, $container, as_list){
                             
@@ -963,7 +963,7 @@ $.widget( "heurist.search_faceted", {
                             
                             var res_count = 0;
                             
-                            if(top.HEURIST4.util.isArrayNotEmpty(term.children)){ //is root or has children
+                            if(window.hWin.HEURIST4.util.isArrayNotEmpty(term.children)){ //is root or has children
 
                                 var k;
                                 if(term.children)
@@ -990,7 +990,7 @@ $.widget( "heurist.search_faceted", {
                                         term_value = term.id;
                                     }
                                     
-                                    if(!top.HEURIST4.util.isempty(term_value) || !top.HEURIST4.util.isnull(field.selectedvalue)){                               
+                                    if(!window.hWin.HEURIST4.util.isempty(term_value) || !window.hWin.HEURIST4.util.isnull(field.selectedvalue)){                               
                                     
                                         term.value = term_value;
                                         term.count = 0;
@@ -1019,7 +1019,7 @@ $.widget( "heurist.search_faceted", {
                         var as_list = (field['isfacet']==1 && tot_cnt < that._MIN_DROPDOWN_CONTENT);
 
 
-                        if(top.HEURIST4.util.isArrayNotEmpty(field.history)){
+                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
                             var $span = $('<span>').css('display','block');
                             var f_link = this._createFacetLink(facet_index, term);
                             $span.append(f_link).appendTo($facet_values);
@@ -1032,7 +1032,7 @@ $.widget( "heurist.search_faceted", {
                                 $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
                                 $sel.change(function(event){ that._onTermSelect(event); });
                                 
-                                that._createOption( facet_index, 0, {text:top.HR('select...'), value:null, count:0} ).appendTo($sel);
+                                that._createOption( facet_index, 0, {text:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
                                 __drawTerm(term, 0, $sel, false);
                         }
                         
@@ -1107,7 +1107,7 @@ $.widget( "heurist.search_faceted", {
                             if(facet_index>=0){
                                 var rtID = cterm[0];
                                 var f_link = this._createFacetLink(facet_index, 
-                                    {text:top.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
+                                    {text:window.hWin.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
                                 $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
                             }
                         }
@@ -1122,7 +1122,7 @@ $.widget( "heurist.search_faceted", {
 
                         var cterm = response.data[0];
                         
-                        if(top.HEURIST4.util.isArrayNotEmpty(field.history)){
+                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
                                     var f_link = this._createFacetLink(facet_index, {test:'',value:null,step:0});
                                     $('<span>').css('display','block').append(f_link).appendTo($facet_values);
                         }
@@ -1140,7 +1140,7 @@ $.widget( "heurist.search_faceted", {
                         var mmax  = cterm[1];
                         var daymsec = 86400000; //24*60*60*1000;   1day
                         
-                        if(!(top.HEURIST4.util.isempty(mmin) || top.HEURIST4.util.isempty(mmax))){
+                        if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
                             if(field['type']=="date"){
                                 if(mmin.indexOf("-00-00")>0){
@@ -1173,7 +1173,7 @@ $.widget( "heurist.search_faceted", {
                                 mmax = Number(mmax);
                             }
                             
-                            var delta = top.HEURIST4.util.isArrayNotEmpty(field.history)?(mmax-mmin)/2:0;
+                            var delta = window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)?(mmax-mmin)/2:0;
                             
                             if(field['type']=="date" && mmax-mmin<daymsec){
                                 delta = daymsec;
@@ -1246,7 +1246,7 @@ $.widget( "heurist.search_faceted", {
 
                                 var value = (min==max)?min :min + '<>' + max; //search in between
                                 
-                                if(top.HEURIST4.util.isempty(value)){
+                                if(window.hWin.HEURIST4.util.isempty(value)){
                                     value = '';
                                     field.selectedvalue = null;
                                 }else{
@@ -1283,7 +1283,7 @@ $.widget( "heurist.search_faceted", {
                         $facet_values.css('padding-left','5px');
                         
                         //draw history
-                        if(top.HEURIST4.util.isArrayNotEmpty(field.history)){
+                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
 
                             var k, len = field.history.length;
                             for (k=0;k<1;k++){
@@ -1314,14 +1314,14 @@ $.widget( "heurist.search_faceted", {
                     }
 
                     if($facet_values.is(':empty')){
-                        $("<span>").text(top.HR('no values')).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);
+                        $("<span>").text(window.hWin.HR('no values')).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);
                     }
 
                     //search next facet
                     this._recalculateFacets( facet_index );
 
                 }else{
-                    top.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 
                 
@@ -1357,7 +1357,7 @@ $.widget( "heurist.search_faceted", {
                 
                 var prevvalue = field.selectedvalue?field.selectedvalue.value:null;
                 
-                if(top.HEURIST4.util.isempty(value)){
+                if(window.hWin.HEURIST4.util.isempty(value)){
                     value = '';
                     field.selectedvalue = null;
                 }else{
@@ -1383,12 +1383,12 @@ $.widget( "heurist.search_faceted", {
         
         var f_link = $("<a>",{href:'#', facet_index:facet_index, facet_value:cterm.value, facet_label:cterm.text, step:step}).addClass("facet_link")
         
-        if(top.HEURIST4.util.isempty(cterm.value)){
+        if(window.hWin.HEURIST4.util.isempty(cterm.value)){
             $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w").appendTo(f_link);    
         }else{
             var f_link_content = $("<span>").text(cterm.text).appendTo(f_link);    
             
-            if(!top.HEURIST4.util.isempty(currval)){
+            if(!window.hWin.HEURIST4.util.isempty(currval)){
                 iscurrent = (currval == cterm.value);
                 if(iscurrent || 
                     (currval.length==2 && 
@@ -1419,7 +1419,7 @@ $.widget( "heurist.search_faceted", {
                 
                 var field = this.options.params.facets[facet_index];
                 
-                if(top.HEURIST4.util.isempty(value)){
+                if(window.hWin.HEURIST4.util.isempty(value)){
                     value = '';
                     field.selectedvalue = null;
                 }else{
@@ -1460,7 +1460,7 @@ $.widget( "heurist.search_faceted", {
                             recID: -1,
                             rectypeID: field['rtid'],
                             dtID: field['id'],
-                            rectypes: top.HEURIST4.rectypes,
+                            rectypes: window.hWin.HEURIST4.rectypes,
                             values: '',
                             readonly: false,
                             title:  "<span style='font-weight:bold'>" + field['title'] + "</span>",

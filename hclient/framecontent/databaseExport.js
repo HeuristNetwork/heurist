@@ -50,11 +50,11 @@ function hDatabaseExport() {
         menu.find('[name="auto-popup"]').each(function(){
             var ele = $(this);
             var href = ele.attr('href');
-            if(!top.HEURIST4.util.isempty(href)){
-                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + top.HAPI4.database;
+            if(!window.hWin.HEURIST4.util.isempty(href)){
+                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
 
                 if(ele.hasClass('h3link')){
-                    href = top.HAPI4.basePathV3 + href;
+                    href = window.hWin.HAPI4.basePathV3 + href;
                     //h3link class on menus implies location of older (vsn 3) code
                 }
                 
@@ -128,9 +128,9 @@ function hDatabaseExport() {
 
         if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
-            top.HAPI4.SystemMgr.is_logged(function(){top.HEURIST4.msg.showDialog(url, options);});
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
         }else{
-            top.HEURIST4.msg.showDialog(url, options);
+            window.hWin.HEURIST4.msg.showDialog(url, options);
         }        
 
         event.preventDefault();
@@ -144,19 +144,19 @@ function hDatabaseExport() {
     function _menuActionHandler(event, action){
 
         if(action == "menu-export-hml-0"){ // Result set
-            top.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,false)}); // isAll, includeRelated, ishuni
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,false)}); // isAll, includeRelated, ishuni
         }else if(action == "menu-export-hml-1"){ //selected
-            top.HAPI4.SystemMgr.is_logged(function(){_exportHML(false,false,false)});
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(false,false,false)});
         }else if(action == "menu-export-hml-2"){ // selected
-            top.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,true,false)});
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,true,false)});
         }else if(action == "menu-export-hml-3"){ // selected + related
-            top.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,true)});
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,true)});
         }else if(action == "menu-export-kml"){
-            top.HAPI4.SystemMgr.is_logged(function(){_exportKML(true)});
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportKML(true)});
         }else if(action == "menu-export-rss"){
-            top.HAPI4.SystemMgr.is_logged(function(){_exportFeed('rss')});
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportFeed('rss')});
         }else if(action == "menu-export-atom"){
-            top.HAPI4.SystemMgr.is_logged(function(){_exportFeed('atom')});
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportFeed('atom')});
         }
       
         event.preventDefault();
@@ -173,17 +173,17 @@ function hDatabaseExport() {
 
         if(isAll){
 
-            if(!top.HEURIST4.util.isnull(top.HEURIST4.current_query_request)){
-                q = encodeURIComponent(top.HEURIST4.current_query_request.q);
-                if(!top.HEURIST4.util.isempty(top.HEURIST4.current_query_request.rules)){
-                    q = q + '&rules=' + encodeURIComponent(top.HEURIST4.current_query_request.rules);
+            if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
+                q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
+                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
+                    q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
                 }
             }
 
         }else{    //selected only
 
-            if (!top.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
-                top.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
+            if (!window.hWin.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
+                window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
                 return false;
             }
             q = "ids:"+this._selectionRecordIDs.join(",");
@@ -197,7 +197,7 @@ function hDatabaseExport() {
 
         if(q!=''){
 
-            var url = top.HAPI4.basePathV3 + "export/xml/flathml.php?"+
+            var url = window.hWin.HAPI4.basePathV3 + "export/xml/flathml.php?"+
             "w=all"+
             "&a=1"+
             "&depth="+depth +
@@ -207,10 +207,10 @@ function hDatabaseExport() {
             (rtFilter ? "&" + rtFilter : "") +
             (relFilter ? "&" + relFilter : "") +
             (ptrFilter ? "&" + ptrFilter : "") +*/
-            "&db=" + top.HAPI4.database +
+            "&db=" + window.hWin.HAPI4.database +
             (ishuni?'&file=1':'');
 
-            top.open(url, '_blank');
+            window.hWin.open(url, '_blank');
         }
 
         return false;
@@ -221,26 +221,26 @@ function hDatabaseExport() {
         var q = "";
         if(isAll){
 
-            q = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
+            q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request);
 
             if(q=='?'){
-                top.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
+                window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
                 return;
             }
 
 
         }else{
 
-            if (!top.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
-                top.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
+            if (!window.hWin.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
+                window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
                 return false;
             }
             q = "?w=all&q=ids:"+this._selectionRecordIDs.join(",");
         }
 
         if(q!=''){
-            var url = top.HAPI4.basePathV3 + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + top.HAPI4.database;
-            top.open(url, '_blank');
+            var url = window.hWin.HAPI4.basePathV3 + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
+            window.hWin.open(url, '_blank');
         }
 
         return false;
@@ -248,25 +248,25 @@ function hDatabaseExport() {
 
     function _exportFeed(mode){
 
-        if(!top.HEURIST4.util.isnull(top.HEURIST4.current_query_request)){
-            var q = encodeURIComponent(top.HEURIST4.current_query_request.q);
+        if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
+            var q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
 
-            if(!top.HEURIST4.util.isempty(q)){
-                var w = top.HEURIST4.current_query_request.w;
-                if(top.HEURIST4.util.isempty(w)) w = 'a';
+            if(!window.hWin.HEURIST4.util.isempty(q)){
+                var w = window.hWin.HEURIST4.current_query_request.w;
+                if(window.hWin.HEURIST4.util.isempty(w)) w = 'a';
                 if(mode=='rss') {
                     mode = '';
                 }else{
                     mode = '&feed='+mode;
                 }
                 var rules = '';
-                if(!top.HEURIST4.util.isempty(top.HEURIST4.current_query_request.rules)){
-                    rules = '&rules=' + encodeURIComponent(top.HEURIST4.current_query_request.rules);
+                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
+                    rules = '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
                 }
 
 
-                var url = top.HAPI4.basePathV3 + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + top.HAPI4.database + mode + rules;
-                top.open(url, '_blank');
+                var url = window.hWin.HAPI4.basePathV3 + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + window.hWin.HAPI4.database + mode + rules;
+                window.hWin.open(url, '_blank');
             }
         }
     }     

@@ -78,7 +78,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     }
 
     function _isEmptyDataset(_mapdata){
-        return (top.HEURIST4.util.isnull(_mapdata) ||  (_mapdata['mapenabled']==0 && _mapdata['timeenabled']==0));
+        return (window.hWin.HEURIST4.util.isnull(_mapdata) ||  (_mapdata['mapenabled']==0 && _mapdata['timeenabled']==0));
     }
 
     /**
@@ -166,11 +166,11 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
         var res = false;
 
-        if(!top.HEURIST4.util.isnull(_mapdata)){
+        if(!window.hWin.HEURIST4.util.isnull(_mapdata)){
 
             var dataset_id = _mapdata.id;
 
-            top.HEURIST4._time_debug = new Date().getTime() / 1000;
+            window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
             if(_isEmptyDataset(_mapdata)){ //show/hide panels
 
@@ -182,15 +182,15 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
                 _updateLayout();   //show hide panels
 
-//console.log('add dataset '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+//console.log('add dataset '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
 //console.log('map: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
-                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+                window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
                 _reloadDataset( dataset_id );
 
 
-//console.log('ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+//console.log('ADDED '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
+                window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
 
                 res = true;
@@ -199,8 +199,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
             //reload timeline content
             _loadVisTimeline();
 
-//console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-            top.HEURIST4._time_debug = new Date().getTime() / 1000;
+//console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
+            window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
 
         }
@@ -222,7 +222,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
                 for (var i=0; i<mapdata.options.items.length; i++){
                     mapdata.options.items[i].options.icon =
-                        top.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId + 'm.png&color='+encodeURIComponent(new_color);
+                        window.hWin.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId + 'm.png&color='+encodeURIComponent(new_color);
 
                     mapdata.options.items[i].options.color = new_color;
                     mapdata.options.items[i].options.lineColor = new_color;
@@ -543,32 +543,32 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
-            },text:false, label:top.HR("Zoom In")})
+            },text:false, label:window.hWin.HR("Zoom In")})
             .click(function(){ __timelineZoom(-0.25); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-circle-minus"
-            },text:false, label:top.HR("Zoom Out")})
+            },text:false, label:window.hWin.HR("Zoom Out")})
             .click(function(){ __timelineZoom(0.5); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthick-2-e-w"
-            },text:false, label:top.HR("Zoom to All")})
+            },text:false, label:window.hWin.HR("Zoom to All")})
             .click(function(){ _timelineZoomToAll(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-s"
-            },text:false, label:top.HR("Zoom to selection")})
+            },text:false, label:window.hWin.HR("Zoom to selection")})
             .click(function(){ __timelineZoomToSelection(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-w"
-            },text:false, label:top.HR("Move to Start")})
+            },text:false, label:window.hWin.HR("Move to Start")})
             .click(function(){ __timelineMoveToLeft(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-e"
-            },text:false, label:top.HR("Move to End")})
+            },text:false, label:window.hWin.HR("Move to End")})
             .click(function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
 
@@ -606,7 +606,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         $("<button>").button({icons: {
             primary: "ui-icon-tag",
             secondary: "ui-icon-triangle-1-s"
-            },text:false, label:top.HR("Label settings")})
+            },text:false, label:window.hWin.HR("Label settings")})
             .click(function(){
                 $('.menu-or-popup').hide(); //hide other
 
@@ -642,7 +642,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         $("<label for='btn_timeline_labels'>Show labels2</label>").appendTo(toolbar);
         $("#btn_timeline_labels").button({icons: {
             primary: "ui-icon-tag"
-            },text:false, label:top.HR("Show labels")})
+            },text:false, label:window.hWin.HR("Show labels")})
             .click(function(){ __timelineShowLabels(); })
             .appendTo(toolbar);
         */
@@ -700,8 +700,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
         var is_stack = true;//(timeline_groups.length<2 && timeline_data.length<250);
 
- //DEBUG console.log('TIMELINE DATASET '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-        top.HEURIST4._time_debug = new Date().getTime() / 1000;
+ //DEBUG console.log('TIMELINE DATASET '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
+        window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
         var timeline_ele = document.getElementById(timelinediv_id)
 
@@ -765,11 +765,11 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         //apply label settings
         _applyTimeLineLabelsSettings(vis_timeline_label_mode);
         
-//console.log('TIMELINE DATASET. set data: '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-//        top.HEURIST4._time_debug = new Date().getTime() / 1000;
+//console.log('TIMELINE DATASET. set data: '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
+//        window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
         _timelineZoomToAll();
-// console.log('TIMELINE DATASET. zoom to all: '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-//        top.HEURIST4._time_debug = new Date().getTime() / 1000;
+// console.log('TIMELINE DATASET. zoom to all: '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
+//        window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 //        //vis_timeline.fit(); //short way
 
         if(!is_stack){
@@ -793,7 +793,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                     //first map initialization
                 var nativemap = tmap.getNativeMap();
 
-//console.log('is native map '+top.HEURIST4.util.isnull(nativemap));
+//console.log('is native map '+window.hWin.HEURIST4.util.isnull(nativemap));
 
                 google.maps.event.addListenerOnce(nativemap, 'tilesloaded', function(){
 
@@ -896,7 +896,7 @@ console.log('tileloaded 2');
                 options: {
                     mapZoom: defaultZoom,
                     theme: customTheme,
-                    eventIconPath: top.HAPI4.iconBaseURL
+                    eventIconPath: window.hWin.HAPI4.iconBaseURL
                 }
                 , dataLoadedFunction: __onDataLoaded
                 }, tmap);
@@ -1208,7 +1208,7 @@ console.log('tileloaded 2');
                             title: (item.opts.title+'+'),
                             //thumb: record.thumb_url,
                             eventIconImage: item.opts.rectype + '.png',
-                            icon: top.HAPI4.iconBaseURL + item.opts.rectype + '.png',
+                            icon: window.hWin.HAPI4.iconBaseURL + item.opts.rectype + '.png',
 
                             start: item.opts.start,
                             end: item.opts.end,
@@ -1224,7 +1224,7 @@ console.log('tileloaded 2');
 
                             //was itemdata
                             itemdata.options.eventIconImage = item.opts.iconId + 's.png';   //it will have selected record (blue bg)
-                            itemdata.options.icon = top.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
+                            itemdata.options.icon = window.hWin.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
                             itemdata.options.color = "#FF0000";
                             itemdata.options.lineColor = "#FF0000";
 
@@ -1242,7 +1242,7 @@ console.log('tileloaded 2');
 
                                 //was itemdata
                                 itemdata.options.eventIconImage = usual_icon;
-                                itemdata.options.icon = top.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
+                                itemdata.options.icon = window.hWin.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
                                 itemdata.options.color = "#0000FF";
                                 itemdata.options.lineColor = "#0000FF";
 
@@ -1364,7 +1364,7 @@ console.log('tileloaded 2');
             var ed_html =  '';
             var popupURL = null;
 
-            if(!top.HEURIST4.util.isnull(item.opts.info)){
+            if(!window.hWin.HEURIST4.util.isnull(item.opts.info)){
 
                 if(!item.opts.info){
                     return;   //supress popup
@@ -1380,23 +1380,23 @@ console.log('tileloaded 2');
                 var recID       = item.opts.recid,
                     rectypeID   = item.opts.rectype,
                     bkm_ID      = item.opts.bkmid,
-                    recTitle    = top.HEURIST4.util.htmlEscape(item.opts.title),
+                    recTitle    = window.hWin.HEURIST4.util.htmlEscape(item.opts.title),
                     startDate   = item.opts.start,
                     endDate     = item.opts.end,
-                    description = top.HEURIST4.util.htmlEscape(item.opts.description),
+                    description = window.hWin.HEURIST4.util.htmlEscape(item.opts.description),
                     recURL      = item.opts.URL,
                     html_thumb  = item.opts.thumb || '';
 
                 ed_html = bubble_header
             +   '<div style="display:inline-block;">'
-            +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
-            +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+            +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+window.hWin.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
+            +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
             +   '</div>'
-            +  ((top.HAPI4.currentUser.ugr_ID>0)?
+            +  ((window.hWin.HAPI4.currentUser.ugr_ID>0)?
                 '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" >'
               /*  '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" '
             + 'class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
-            //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathV3+'records/edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
+            //+ ' onclick={event.preventDefault(); window.open("'+(window.hWin.HAPI4.basePathV3+'records/edit/editRecord.html?db='+window.hWin.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'*/
             +   '</div>':'')
             + '</div>';
@@ -1496,15 +1496,15 @@ ed_html +
                 }
             }
 
-            if(top.HAPI4.currentUser.ugr_ID>0){
+            if(window.hWin.HAPI4.currentUser.ugr_ID>0){
                 $("#btnEditRecordFromBubble")
                     .button({icons: {
                         primary: "ui-icon-pencil"
                         }, text:false})
                      .click(function( event ) {
                 event.preventDefault();
-                //window.open(top.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
-                window.open(top.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+                //window.open(window.hWin.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
+                window.open(window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
                     });
             }
 

@@ -1319,8 +1319,8 @@ function EditTerms() {
         if(!Hul.isnull(context) && !Hul.isnull(context.terms))
         {
             
-            if(top.HEURIST4 && top.HEURIST4.msg){
-            top.HEURIST4.msg.showMsgDlg(context.result.length
+            if(window.hWin){
+            window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
                                 + ' term'
                                 + (context.result.length>1?'s were':' was')
                                 + ' added.', null, 'Terms imported');
@@ -1626,7 +1626,7 @@ function EditTerms() {
                     $.each(data.files, function (index, file) {
                         if(file.error){
                             $input_img.find('img').prop('src', '');
-                            //top.HEURIST4.msg.showMsgErr(file.error);
+                            //window.hWin.HEURIST4.msg.showMsgErr(file.error);
                         }else{
                             var curtimestamp = (new Date()).getMilliseconds();
                             var url = top.HEURIST.iconBaseURL + Dom.get('edId').value+ "&ent=term&t=" + curtimestamp

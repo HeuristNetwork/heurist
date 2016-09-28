@@ -96,7 +96,7 @@ $.widget( "heurist.manageRecord", {
             
         
         
-        var ishelp_on = top.HAPI4.get_prefs('help_on')==1;
+        var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
         $('.heurist-helper1').css('display',ishelp_on?'block':'none');
         
         
@@ -133,8 +133,8 @@ $.widget( "heurist.manageRecord", {
                     that = this;
         
             if(options['select_mode']=='multi'){
-                btn_array.push({text:top.HR('Select'),
-                        title: top.HR("Select marked records"),
+                btn_array.push({text:window.hWin.HR('Select'),
+                        title: window.hWin.HR("Select marked records"),
                         click: function() {
                                     that._trigger( "onselect", null, that.selection() );
                                     that._closeDialog();
@@ -143,7 +143,7 @@ $.widget( "heurist.manageRecord", {
                                   }
                                });
             }
-            btn_array.push({text:top.HR('Close'), 
+            btn_array.push({text:window.hWin.HR('Close'), 
                     click: function() {
                         that._closeDialog();
                     }});
@@ -155,7 +155,7 @@ $.widget( "heurist.manageRecord", {
                 modal:  (options['modal']!==true),
                 title: options['title']
                             ?options['title']
-                            :(options['select_mode']=='multi')?top.HR("Select Record"):top.HR("Manage Records"),
+                            :(options['select_mode']=='multi')?window.hWin.HR("Select Record"):window.hWin.HR("Manage Records"),
                 resizeStop: function( event, ui ) {//fix bug
                 
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
@@ -194,7 +194,7 @@ $.widget( "heurist.manageRecord", {
     //    
     selection: function(value){
         
-        if(top.HEURIST4.util.isnull(value)){
+        if(window.hWin.HEURIST4.util.isnull(value)){
             //getter
             return this._selection;
         }else{

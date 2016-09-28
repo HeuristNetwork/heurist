@@ -83,7 +83,7 @@ $.widget( "heurist.queryBuilderItem", {
         .addClass('text ui-corner-all')
         .appendTo( this.sel_container );
         
-        top.HEURIST4.ui.createSelector(this.select_token.get(0), 
+        window.hWin.HEURIST4.ui.createSelector(this.select_token.get(0), 
             [{key:'t',title:'Entity(Record) Type'},  //t,type
              {key:'f',title:'Field'},                //f,field   
              {key:'links',title:'Link/relation'},    //linked_to,linkedfrom,related_to,relatedfrom,links
@@ -151,15 +151,15 @@ $.widget( "heurist.queryBuilderItem", {
 
         if(this.options.token=='f'){
             
-            var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
+            var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
             allowed.splice(allowed.indexOf("separator"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
             allowed.splice(allowed.indexOf("resource"),1);
             allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("file"),1);
         
-            top.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.option.rtyIDs, 
-                        allowed, top.HR('Any field type'));
+            window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.option.rtyIDs, 
+                        allowed, window.hWin.HR('Any field type'));
             
             this.select_fields.show();
             
@@ -223,14 +223,14 @@ $.widget( "heurist.queryBuilderItem", {
            dtFields = {dty_Type:field_type, rst_DisplayName:'', rst_MaxValues:100};
            
            if(field_type=="rectype"){
-                dtFields['cst_EmptyValue'] = top.HR('Any record type');
+                dtFields['cst_EmptyValue'] = window.hWin.HR('Any record type');
            }
 
            var ed_options = {
                         recID: -1,
                         //dtID: dtID,
                         //rectypeID: rectypeID,
-                        //rectypes: top.HEURIST4.rectypes,
+                        //rectypes: window.hWin.HEURIST4.rectypes,
                         values: '',
                         readonly: false,
                         showclear_button: true,
@@ -252,7 +252,7 @@ $.widget( "heurist.queryBuilderItem", {
         var i;
         for (i in _predicate_values){
             var val = $(_predicate_values[i]).editing_input('getValues');
-            if(!top.HEURIST4.util.isempty(val)){
+            if(!window.hWin.HEURIST4.util.isempty(val)){
                 return true;
             }
         }
@@ -299,7 +299,7 @@ $.widget( "heurist.queryBuilderItem", {
     this._super( key, value );
     if ( key === "recordtypes" ) {
 
-    top.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false);
+    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false);
     this._onSelectRectype();
     this._refresh();
     }

@@ -416,7 +416,10 @@
             {
                 try{
                     var oIframe = document.getElementById("ifrmPrint");
-                    var oContent = document.getElementById("rep_container").innerHTML;
+                    var iframe = document.getElementById("rep_container_frame");
+                    var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+                    var oContent = iframeDocument.body.innerHTML;
+                    //.innerHTML
                     var oDoc = (oIframe.contentWindow || oIframe.contentDocument);
                     if (oDoc.document) oDoc = oDoc.document;
                     oDoc.write("<head><title></title>");
@@ -483,7 +486,7 @@
 
             function onSaveOutput(){
                 
-                if(top.HEURIST && top.HEURIST.currentQuery_all && top.HEURIST4)
+                if(top.HEURIST && top.HEURIST.currentQuery_all && window.hWin)
                 {
                     var sel = document.getElementById('selTemplates');
                     if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
@@ -496,17 +499,17 @@
                         
                         
                     $("#btnRepSave").hide();    
-                    top.HEURIST4.util.downloadURL(surl, function(){
+                    window.hWin.HEURIST4.util.downloadURL(surl, function(){
                         $("#btnRepSave").show();
                     });
                 }
                 
                 /* OLD WAY - it saves only current output in UI
-                if(top.HEURIST4)
+                if(window.hWin)
                     
                     var iframe = document.getElementById("rep_container_frame");
                     var ele = $(iframe.contentWindow.document).find('body');
-                    top.HEURIST4.util.downloadInnerHtml('heurist_report.html', ele );
+                    window.hWin.HEURIST4.util.downloadInnerHtml('heurist_report.html', ele );
                 }
                 */
             }
@@ -708,7 +711,7 @@
                     done: function (e, data) {
 
                         var obj = data.jqXHR.responseJSON; //Hul.evalJson(data.jqXHR.responseJSON);
-                        if(top.HEURIST4.util.isnull(obj)){
+                        if(window.hWin.HEURIST4.util.isnull(obj)){
                             obj = data.jqXHR.responseText;
                             obj = JSON.parse(obj);
                         }
@@ -720,7 +723,7 @@
                                 
                                 var list_of_notfound = obj.details_not_found.join(', ');
                                 
-                                top.HEURIST4.msg.showMsgDlg(
+                                window.hWin.HEURIST4.msg.showMsgDlg(
 'Unable to convert IDs for following concept codes: '+list_of_notfound
 +'<p style="padding-top:1.5em">Concept IDs which failed to convert are enclosed in [[  ]] in the template file eg. f[[2-27]]. You will need to edit the template in order to remove these IDs or to replace them with the internal code of an equivalent concept.</p>'
 +'<p style="padding-top:1.5em">Failure to convert Concept IDs (global codes for particular record types, fields and terms) to local codes indicates that the Concept IDs are not known within your database.</p>'

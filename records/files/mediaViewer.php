@@ -80,6 +80,30 @@ if (@$_REQUEST['ulf_ID']){
 <link rel="stylesheet" type="text/css" href="../../external/js/simple_js_viewer/script/extension/toolbar-ext.css" />
 
 <link rel=stylesheet href="../../common/css/global.css">
+<script>
+            //find heurist object in parent windows or init new one if current window is a top most
+            function _detectHeurist( win ){
+                if(win.HEURIST4){ //defined
+                    return win;
+                }
+
+                try{
+                    win.parent.document;
+                }catch(e){
+                    // not accessible - this is cross domain
+                    return win;
+                }    
+                if (win.top == win.self) { 
+                    //we are in frame and this is top most window and Heurist is not defined 
+                    //lets current window will be heurist window
+                    return window;
+                }else{
+                    return _detectHeurist( win.parent );
+                }
+            }
+            //detect wether this window is top most or inside frame
+            window.hWin = _detectHeurist(window);
+</script>
 
 </head>
 
@@ -260,12 +284,21 @@ if (@$_REQUEST['ulf_ID']){
 
 		} //end util
 	};
-
-	if (!top.HEURIST) top.HEURIST = HRST;
+    
+    try{
+        top.document;
+        if (!top.HEURIST) top.HEURIST = HRST;
+    }catch(e){
+        window.HEURIST = HRST;
+    }
+    
+    
 </script>
+<!--
 <script src="../../common/php/getMagicNumbers.php"></script>
-<script type="text/javascript" src="../../records/files/initViewer.js"></script>
 <script type="text/javascript" src="../../records/files/imageAnnotation.js"></script>
+-->
+<script type="text/javascript" src="../../records/files/initViewer.js"></script>
 
 <?php
 if(@$_REQUEST['db']){

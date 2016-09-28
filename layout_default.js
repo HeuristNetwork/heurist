@@ -131,7 +131,19 @@ var cfg_layouts = [
         }
      },
       
-
+    // WebSearch to embed into other websites
+    {id:'WebSearch', name:'Heurist Embed', theme:'heurist', type:'cardinal',
+        west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false,
+                options:{buttons_mode: true},
+                css:{border:'none', 'xbackground':'none'} }]},  //saved searches
+        center:{minsize:300, dropable:false, 
+                apps:[{appid:'h3_resultList', hasheader:false, 
+                        dockable:false, dragable:false, 
+                            css:{'background-color':'white'}, 
+                            options:{title:'List', view_mode:'icons', recordview_onselect: true, 
+                            showmenu:false, showcounter:true, innerHeader: true} }]}  //search result
+     },
+      
     {id:'original', name:'Heurist Def Original', theme:'heurist', type:'cardinal',
         north:{size:'12em', resizable:false, overflow:'hidden',
             apps:[
@@ -141,7 +153,9 @@ var cfg_layouts = [
                     'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
-        center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
+        center:{minsize:300, dropable:false, 
+                apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, 
+                            css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
@@ -217,7 +231,8 @@ var cfg_layouts = [
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
                     {appid:'ha51', options:{layout:['map','timeline'], startup:50926, eventbased:false} } //mapping
-                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false, eventbased:false} }
+                    ,{appid:'h3_resultList', hasheader:true, name: 'List', 
+                        options:{title:'List', showmenu:false, eventbased:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                 ]
             }]

@@ -60,14 +60,14 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
-            return top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
             swidth = '';
-            if(!top.HEURIST4.util.isempty(col_width)){
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
@@ -78,21 +78,21 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         var recTitle = fld2('ugr_ID','4em')+fld2('ugr_Name','14em')+fld2('ugr_Description','25em');
         
         
-        var recIcon = top.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
+        var recIcon = window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
 
         var html_thumb = '';
         if(fld('ugr_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('ugr_ThumbnailURL') + '&quot;);opacity:1"></div>';
         }else{
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ 
-                top.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/thumb/' + rectype + '.png&quot;);"></div>';
+                window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/thumb/' + rectype + '.png&quot;);"></div>';
         }
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">'
-        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+        +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'   //class="rt-icon" 
         + '</div>'
         + '<div class="recordTitle">'
@@ -126,7 +126,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
         };
         
-        top.HAPI4.EntityMgr.doRequest(request, callback);
+        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     }
     
 });

@@ -108,6 +108,38 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 var _time_debug = new Date().getTime() / 1000;
 var _time_start = _time_debug;
 //console.log('ipage start');
+
+//find heurist object in parent windows or init new one if current window is a top most
+function _detectHeurist( win ){
+    if(win.HEURIST4){ //defined
+        return win;
+    }
+
+    try{
+        win.parent.document;
+    }catch(e){
+        // not accessible - this is cross domain
+        return win;
+    }    
+    if (win.top == win.self) { 
+        //we are in frame and this is top most window and Heurist is not defined 
+        //lets current window will be heurist window
+        return window;
+    }else{
+        return _detectHeurist( win.parent );
+    }
+}
+    //detect wether this window is top most or inside frame
+    window.hWin = _detectHeurist(window);
+
+    /*if (window.top != window.self) {
+        //this is frame
+    } else { 
+        //top most window
+        window.h4win = window.top;
+    }*/ 
+
+
 </script>       
 
 <?php
@@ -171,18 +203,18 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         // if hAPI is not defined in parent(top most) window we have to create new instance
         $(document).ready(function() {
        
-//console.log('ipage doc ready '+(top.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
+//console.log('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
 _time_debug = new Date().getTime() / 1000;
             
             // Standalone check
-            if(!top.HAPI4){
+            if(!window.hWin.HAPI4){
                 // In case of standalone page
                 //load minimum set of required scripts
                 $.getMultiScripts(['localization.js'/*, , 'utils_msg.js'
                                    'utils_ui.js', 'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR;?>hclient/core/')
                 .done(function() {
                     // all done
-                    top.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+                    window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
                     
                 }).fail(function(error) {
                     // one or more scripts failed to load
@@ -209,19 +241,19 @@ _time_debug = new Date().getTime() / 1000;
 //console.log('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
 _time_debug = new Date().getTime() / 1000;
             
-            if(!top.HEURIST4.rectypes){
+            if(!window.hWin.HEURIST4.rectypes){
                 
-                if(!top.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
+                if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
                     onAboutInit();
                 }
                 
-                top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
-                        top.HEURIST4.rectypes = response.data.rectypes;
-                        top.HEURIST4.terms = response.data.terms;
-                        top.HEURIST4.detailtypes = response.data.detailtypes;
+                window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                        window.hWin.HEURIST4.terms = response.data.terms;
+                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                     }else{
-                        top.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
+                        window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
                         success = false;
                     }
 
@@ -229,7 +261,7 @@ _time_debug = new Date().getTime() / 1000;
 _time_debug = new Date().getTime() / 1000;
                     
                     
-                    if(!top.HEURIST4.util.isnull(onPageInit) && $.isFunction(onPageInit)){
+                    if(!window.hWin.HEURIST4.util.isnull(onPageInit) && $.isFunction(onPageInit)){
                         onPageInit(success);
                     }
 
@@ -238,7 +270,7 @@ _time_debug = new Date().getTime() / 1000;
             }
 
         }else{
-            top.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
+            window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
             success = false;
         }
 
@@ -252,10 +284,10 @@ _time_debug = new Date().getTime() / 1000;
     //
     function applyTheme(){
 
-        var prefs = top.HAPI4.get_prefs();
-        if(!top.HR){
+        var prefs = window.hWin.HAPI4.get_prefs();
+        if(!window.hWin.HR){
             //loads localization
-            top.HR = top.HAPI4.setLocale(prefs['layout_language']);
+            window.hWin.HR = window.hWin.HAPI4.setLocale(prefs['layout_language']);
         }
 
         /* unfortunately dynamic addition of theme and style is not applied properly.
@@ -274,18 +306,18 @@ _time_debug = new Date().getTime() / 1000;
         */
 
         var layoutid = '<?=@$_REQUEST['ll']?>';
-        if(top.HEURIST4.util.isempty(layoutid)){
-            layoutid = top.HAPI4.get_prefs('layout_id');
-            if(top.HEURIST4.util.isempty(layoutid)){
+        if(window.hWin.HEURIST4.util.isempty(layoutid)){
+            layoutid = window.hWin.HAPI4.get_prefs('layout_id');
+            if(window.hWin.HEURIST4.util.isempty(layoutid)){
                 layoutid = "H4Default";
             }
         }
-        if(!top.HAPI4.sysinfo['layout']){
-            top.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
+        if(!window.hWin.HAPI4.sysinfo['layout']){
+            window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
             if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
-            $.getScript(top.HAPI4.basePathV4+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
-                top.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
+            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
+                window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
             });
             }
         }
@@ -293,7 +325,7 @@ _time_debug = new Date().getTime() / 1000;
 
 
         //add version to title
-        window.document.title = window.document.title+' V'+top.HAPI4.sysinfo.version;
+        window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
     }
 
 </script>

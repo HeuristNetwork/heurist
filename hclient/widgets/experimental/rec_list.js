@@ -75,10 +75,10 @@ $.widget( "heurist.rec_list", {
             },text:true});
 
         this.menu_view = $('<ul>'+
-            '<li id="menu-view-list"><a href="#">'+top.HR('list')+'</a></li>'+
+            '<li id="menu-view-list"><a href="#">'+window.hWin.HR('list')+'</a></li>'+
             //'<li id="menu-view-detail"><a href="#">Details</a></li>'+
-            '<li id="menu-view-icons"><a href="#">'+top.HR('icons')+'</a></li>'+
-            '<li id="menu-view-thumbs"><a href="#">'+top.HR('thumbs')+'</a></li>'+
+            '<li id="menu-view-icons"><a href="#">'+window.hWin.HR('icons')+'</a></li>'+
+            '<li id="menu-view-thumbs"><a href="#">'+window.hWin.HR('thumbs')+'</a></li>'+
             '</ul>')
         .addClass('menu-or-popup')
         .css('position','absolute')
@@ -91,7 +91,7 @@ $.widget( "heurist.rec_list", {
         }})
         .hide();
 
-        var view_mode = top.HAPI4.get_prefs('rec_list_viewmode');        
+        var view_mode = window.hWin.HAPI4.get_prefs('rec_list_viewmode');        
         if(view_mode){
             this._applyViewMode(view_mode);
         }
@@ -109,30 +109,30 @@ $.widget( "heurist.rec_list", {
 
 
         //-----------------------     listener of global events
-        var sevents = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
+        var sevents = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT;
         if(this.options.isapplication){
-            sevents = sevents + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+            sevents = sevents + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
         }
 
         $(this.document).on(sevents, function(e, data) {
 
-            if(e.type == top.HAPI4.Event.LOGIN){
+            if(e.type == window.hWin.HAPI4.Event.LOGIN){
 
                 that._refresh();
 
-            }else  if(e.type == top.HAPI4.Event.LOGOUT)
+            }else  if(e.type == window.hWin.HAPI4.Event.LOGOUT)
             {
                 that.option("recordset", null);
 
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){
 
                 that.option("recordset", data); //hRecordSet
                 that.loadanimation(false);
 
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
 
-                var new_title = top.HR(data.qname || 'Search result');
+                var new_title = window.hWin.HR(data.qname || 'Search result');
                 var $header = $(".header"+that.element.attr('id'));
                 $header.html(new_title);
                 $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
@@ -141,11 +141,11 @@ $.widget( "heurist.rec_list", {
                 that.option("recordset", null);
                 that.loadanimation(true);
                 
-            }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
                 
                    if(data) data = data.selection;
                    
-                   var res = top.HAPI4.getSelection(data, true);
+                   var res = window.hWin.HAPI4.getSelection(data, true);
                    if(res!=null){
                        that.action_buttons.rec_actions('option','record_ids', res);
                    }
@@ -155,7 +155,7 @@ $.widget( "heurist.rec_list", {
         });
         /*
         if(this.options.isapplication){
-        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
         that.option("recordset", data); //hRecordSet
         that._refresh();
         });
@@ -189,7 +189,7 @@ $.widget( "heurist.rec_list", {
         this._renderRecords();  //@todo add check that recordset really changed
         this._applyViewMode();
 
-        if(top.HAPI4.currentUser.ugr_ID>0){
+        if(window.hWin.HAPI4.currentUser.ugr_ID>0){
             $(this.div_toolbar).find('.logged-in-only').css('visibility','visible');
             $(this.div_content).find('.logged-in-only').css('visibility','visible');
         }else{
@@ -229,7 +229,7 @@ $.widget( "heurist.rec_list", {
     // revert other modifications here
     _destroy: function() {
 
-        $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT);
+        $(this.document).off(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT);
 
         var that = this;
         $.each(this._allbuttons, function(index, value){
@@ -272,14 +272,14 @@ $.widget( "heurist.rec_list", {
             this.div_content.removeClass(oldmode);
 
             //save viewmode is session
-            top.HAPI4.save_pref('rec_list_viewmode', newmode);
+            window.hWin.HAPI4.save_pref('rec_list_viewmode', newmode);
 
         }else{
             newmode = this.options.view_mode;
         }
         this.div_content.addClass(newmode);
 
-        this.btn_view.button( "option", "label", top.HR(newmode));
+        this.btn_view.button( "option", "label", window.hWin.HR(newmode));
     },
 
     // @todo move record related stuff to HAPI
@@ -315,18 +315,18 @@ $.widget( "heurist.rec_list", {
             }else{
 
                 var $emptyres = $('<div>')
-                .html(top.HR('No records match the search')+
-                    '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
+                .html(window.hWin.HR('No records match the search')+
+                    '<div class="prompt">'+window.hWin.HR((window.hWin.HAPI4.currentUser.ugr_ID>0)
                         ?'Note: some records are only visible to members of particular workgroups'
                         :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
                 )
                 .appendTo(this.div_content);                   
 
-                if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
+                if(window.hWin.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
                     var domain = this._query_request.w
                     if((domain=='b' || domain=='bookmark')){
                         var $al = $('<a href="#">')
-                        .text(top.HR('Click here to search the whole database'))
+                        .text(window.hWin.HR('Click here to search the whole database'))
                         .appendTo($emptyres);
                         this._on(  $al, {
                             click: this._doSearch4
@@ -385,7 +385,7 @@ $.widget( "heurist.rec_list", {
 
         $(document.createElement('div'))
         .addClass('recTypeThumb')
-        .css('background-image', 'url('+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png)')
+        .css('background-image', 'url('+ window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png)')
         .appendTo($recdiv);
 
         if(fld('rec_ThumbnailURL')){
@@ -403,16 +403,16 @@ $.widget( "heurist.rec_list", {
 
         //record type icon
         $('<img>',{
-            src:  top.HAPI4.basePathV4+'hclient/assets/16x16.gif',
+            src:  window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
         })
         //!!! .addClass('rtf')
-        .css('background-image', 'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)')
+        .css('background-image', 'url('+ window.hWin.HAPI4.iconBaseURL + rectypeID + '.png)')
         .appendTo($iconsdiv);
 
         //bookmark icon - asterics
         $('<img>',{
-            src:  top.HAPI4.basePathV4+'hclient/assets/13x13.gif'
+            src:  window.hWin.HAPI4.basePathV4+'hclient/assets/13x13.gif'
         })
         .addClass(fld('bkm_ID')?'bookmarked':'unbookmarked')
         .appendTo($iconsdiv);
@@ -435,23 +435,23 @@ $.widget( "heurist.rec_list", {
             text:false})
         .click(function( event ) {
             event.preventDefault();
-            window.open(top.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+            window.open(window.hWin.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
         })
         .appendTo($recdiv);
 
 
         /*
         var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
-        top.HAPI4.basePathV4+ "records/edit/editRecord.html?sid=" +
-        top.HEURIST4.search.results.querySid + "&recID="+ res[2] +
-        (top.HEURIST4.database && top.HEURIST4.database.name ? '&db=' + top.HEURIST4.database.name : '');
+        window.hWin.HAPI4.basePathV4+ "records/edit/editRecord.html?sid=" +
+        window.hWin.HEURIST4.search.results.querySid + "&recID="+ res[2] +
+        (window.hWin.HEURIST4.database && window.hWin.HEURIST4.database.name ? '&db=' + window.hWin.HEURIST4.database.name : '');
 
-        if (top.HEURIST4.user && res[6] && (top.HEURIST4.user.isInWorkgroup(res[6])|| res[6] == top.HEURIST4.get_user_id()) || res[6] == 0) {
+        if (window.hWin.HEURIST4.user && res[6] && (window.hWin.HEURIST4.user.isInWorkgroup(res[6])|| res[6] == window.hWin.HEURIST4.get_user_id()) || res[6] == 0) {
         editLinkIcon += "' target='_blank' title='Click to edit record'><img src='"+
-        top.HAPI4.basePathV4 + "common/images/edit-pencil.png'/></a></div>";
+        window.hWin.HAPI4.basePathV4 + "common/images/edit-pencil.png'/></a></div>";
         }else{
         editLinkIcon += "' target='_blank' title='Click to edit record extras only'><img src='"+
-        top.HAPI4.basePathV4 + "common/images/edit-pencil-no.png'/></a></div>";
+        window.hWin.HAPI4.basePathV4 + "common/images/edit-pencil-no.png'/></a></div>";
         }
         */
 
@@ -487,7 +487,7 @@ $.widget( "heurist.rec_list", {
         var selected = this.getSelected();
 
         if(this.options.isapplication){
-                $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
+                $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
         }
         this._trigger( "onselect", event, selected );
     },
@@ -523,7 +523,7 @@ $.widget( "heurist.rec_list", {
     
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }
@@ -536,7 +536,7 @@ $.widget( "heurist.rec_list", {
             this._query_request.w = 'a';
             this._query_request.source = this.element.attr('id');//'rec_list';
 
-            top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+            window.hWin.HAPI4.RecordMgr.search(this._query_request, $(this.document));
         }
 
         return false;

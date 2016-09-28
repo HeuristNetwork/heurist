@@ -67,13 +67,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         function fld_head(content, sclass, col_width){ //only for list
             var swidth = '';
-            if(!top.HEURIST4.util.isempty(col_width)){
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = 'width:'+col_width;
             }
             return '<div class="'+sclass+'" style="display:inline-block;border-right:1px solid;'+swidth+'">'+content+'</div>';
         }
         
-        var showActionInList = (top.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
+        var showActionInList = (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
         
         var header = 
               ((this.options.select_mode!='select_multi')?'':
@@ -110,23 +110,23 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
         function fld2(fldname, col_width){
             swidth = '';
-            if(!top.HEURIST4.util.isempty(col_width)){
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+top.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
         }
         function fld3(fldname, col_width){ //only for list
             var s = fld2(fldname, col_width).replace('class="item"', 'class="item inlist"');
             return s;
         }
         
-        var showActionInList = (top.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
+        var showActionInList = (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
         //&& (this.options.select_mode=='manager')
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
         var recID   = fld('rty_ID');
-        var recIcon = top.HAPI4.iconBaseURL + recID + '.png';
+        var recIcon = window.hWin.HAPI4.iconBaseURL + recID + '.png';
         
         var recTitle = fld2('rty_ID','4em')
                 + (showActionInList?this._rendererActionButton('edit'):'')
@@ -134,7 +134,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 + '<div class="item inlist" style="width:25em;">'+fld('rty_Description')+'</div>';
                 //fld3('rty_Description','25em');
 
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + recID + '.png&quot;);"></div>';
+        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + recID + '.png&quot;);"></div>';
 
         
 
@@ -142,7 +142,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">'
-        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+        +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'
         +     '" style="margin-left:15px;background-image: url(&quot;'+recIcon+'&quot;);">'   //class="rt-icon" 
         + '</div>'
         + '<div class="recordTitle">'
@@ -208,7 +208,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
         };
         
-        top.HAPI4.EntityMgr.doRequest(request, callback);
+        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     }
     
 });

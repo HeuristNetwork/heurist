@@ -44,14 +44,14 @@ $.widget( "heurist.rec_viewer_ext", {
         .appendTo( this.element ).hide();
 
         //-----------------------   listener for global event
-        $(this.document).on(top.HAPI4.Event.ON_REC_SELECT,
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SELECT,
             function(e, data) {
 
                 var _recID;
                 if(data) data = data.selection;
 
-                var res = top.HAPI4.getSelection(data, true);
-                if(top.HEURIST4.util.isArrayNotEmpty(res)){
+                var res = window.hWin.HAPI4.getSelection(data, true);
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(res)){
                     _recID = res[0];
                 }
 
@@ -78,7 +78,7 @@ $.widget( "heurist.rec_viewer_ext", {
     /* private function */
     _refresh: function(){
 
-        if(this.options.databases && this.options.databases.indexOf(top.HAPI4.database)<0){
+        if(this.options.databases && this.options.databases.indexOf(window.hWin.HAPI4.database)<0){
 
             this.framecontent.hide();
             this.lbl_message.show();
@@ -95,7 +95,7 @@ $.widget( "heurist.rec_viewer_ext", {
             }else{
                 this.lbl_message.hide();
                 this.framecontent.show();
-                var newurl = this.options.url.replace("[recID]",  this.options.recID).replace("[dbname]",  top.HAPI4.database);
+                var newurl = this.options.url.replace("[recID]",  this.options.recID).replace("[dbname]",  window.hWin.HAPI4.database);
                 if(this.dosframe.attr('src')!==newurl){
                     this.dosframe.attr('src', newurl); //recID
                 }
@@ -109,7 +109,7 @@ $.widget( "heurist.rec_viewer_ext", {
     // revert other modifications here
     _destroy: function() {
         this.element.off("myOnShowEvent");
-        $(this.document).off(top.HAPI4.Event.ON_REC_SELECT);
+        $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SELECT);
 
         // remove generated elements
         this.dosframe.remove();

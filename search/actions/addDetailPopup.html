@@ -137,8 +137,8 @@ function getRecType(recID){
      if(top.HEURIST.search){
         return top.HEURIST.search.results.recSet[recID].record[4];
      }else{
-        var record = top.HAPI4.currentRecordset.getById(recID) ;
-        return top.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
+        var record = window.hWin.HAPI4.currentRecordset.getById(recID) ;
+        return window.hWin.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
      }
 }
 

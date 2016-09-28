@@ -57,7 +57,7 @@ function get_config_bytes($val) {
                 if(success){
                     var max_size = Math.min(<?php echo $file_max_size;?>, <?php echo $post_max_size;?>);
                     importRecordsCSV = new hImportRecordsCSV(
-                                top.HEURIST4.util.getUrlParameter('imp_ID', window.location.search), 
+                                window.hWin.HEURIST4.util.getUrlParameter('imp_ID', window.location.search), 
                                 max_size);
                 }
             }

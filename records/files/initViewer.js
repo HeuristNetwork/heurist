@@ -35,7 +35,7 @@
  * imageAnnotation.js
  */
 var viewerObject,
-	Hul = top.HEURIST.util;
+	Hul = window.hWin?window.hWin.HEURIST4.util:top.HEURIST.util;
 
 /*
 // Parse a URL and return its components
@@ -168,7 +168,7 @@ function detectSourceAndType(link, extension){
 
 		do{
 
-		if ( !top.HEURIST.util.isnull(extension ) ){ //
+		if ( !Hul.isnull(extension ) ){ //
 			extension = extension.toLowerCase();
 		}
 
@@ -278,7 +278,7 @@ function showViewer(container, url_and_cfg, _recordID, sTypeDef){
 	   	   acfg = url_and_cfg;
 	   }
 
-	   if(top.HEURIST.util.isnull(acfg) || acfg.length<1){
+	   if(Hul.isnull(acfg) || acfg.length<1){
 				return;
 	   }
 
@@ -305,18 +305,21 @@ function showViewer(container, url_and_cfg, _recordID, sTypeDef){
  			container.style.bottom = 22;
 
  			viewerObject = null;
-			viewer.toolbarImages = top.HEURIST.baseURL_V3+"external/js/simple_js_viewer/images/toolbar";
+			viewer.toolbarImages = (window.hWin?window.hWin.HEURIST4.baseURL_V3:top.HEURIST.baseURL_V3)
+                +"external/js/simple_js_viewer/images/toolbar";
 			viewer.onload =  viewer.toolbar;
 			image_digitizer_container = document.getElementById('image_digitizer_container');
 			if(image_digitizer_container){
 				image_digitizer_container.style.display = 'block';
 			}
 			if(_recordID!=null){
+                /* ARTEM 2016-09-28 to allow work in cross-domain this feature has been disabled
 				viewer.onload2 = function(self){
-									var image_digitizer = ImageAnnotation(self, _recordID);
+				                    var image_digitizer = ImageAnnotation(self, _recordID);
 									//image_digitizer.createAnnotations();
 									return image_digitizer;
   								};
+                */
 			}
 
 			viewerObject = new viewer({

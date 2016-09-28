@@ -128,7 +128,11 @@
 
             } else if ($action=="svs_get" ) {
 
-                $res = svsGetByUser($system, @$_REQUEST['UGrpID']);
+                if(@$_REQUEST['svsIDs']){
+                    $res = svsGetByIds($system, $_REQUEST['svsIDs'], @$_REQUEST['UGrpID']);
+                }else{
+                    $res = svsGetByUser($system, @$_REQUEST['UGrpID']);
+                }
 
             } else if ($action=="svs_savetree" ) { //save saved searches tree status
 

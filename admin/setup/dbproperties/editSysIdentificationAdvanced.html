@@ -37,12 +37,12 @@
         <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
         <script>
             // quite weird way - since it is not possibel (or unknown) how to treat t1000 in case of error
-            function showMessage(){
+            function showMessage(){                                            
                 var is_processed = top.HEURIST.util.getUrlParameter('was', this.location.search);
                 if(document.getElementById('divErrors').innerHTML=="" && is_processed){
 
-                    if(top.HEURIST4 && top.HEURIST4.msg){
-                        top.HEURIST4.msg.showMsgFlash('Database Properties have been saved', 1000);
+                    if(window.hWin){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Database Properties have been saved', 1000);
                     }else{
                         top.HEURIST.util.popupTinyElement(this, document.getElementById('divMessage'));
                         setTimeout(function(){

@@ -19,10 +19,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-if (!top.HEURIST4){
-    top.HEURIST4 = {};
+if (!window.hWin.HEURIST4){
+    window.hWin.HEURIST4 = {};
 }
-if (! top.HEURIST4.ajax) top.HEURIST4.ajax = {
+if (! window.hWin.HEURIST4.ajax) window.hWin.HEURIST4.ajax = {
 
 /**
 * sendRequest
@@ -39,9 +39,9 @@ if (! top.HEURIST4.ajax) top.HEURIST4.ajax = {
     sendRequest: function(url,callback,postData) {
         // if we don't have a fully formed or root URL then prepend the base path
         if (! url.match(/^http:/)  &&  ! url.match(/^\//))
-            url = top.HAPI4.basePathV4 + url;
+            url = window.hWin.HAPI4.basePathV4 + url;
         var file = url;
-        var req = top.HEURIST4.ajax.createXMLHTTPObject();
+        var req = window.hWin.HEURIST4.ajax.createXMLHTTPObject();
         if (!req) return;
         var method = (postData) ? "POST" : "GET";
         req.open(method,url,true);// set for asynch call
@@ -78,10 +78,10 @@ if (! top.HEURIST4.ajax) top.HEURIST4.ajax = {
 */
     createXMLHTTPObject: function() {
         var xmlhttp = false;
-        for (var i=0;i<top.HEURIST4.ajax.XMLHttpFactories.length;i++) {
+        for (var i=0;i<window.hWin.HEURIST4.ajax.XMLHttpFactories.length;i++) {
             try {
-                xmlhttp = top.HEURIST4.ajax.XMLHttpFactories[i]();
-                xmlhttp = top.HEURIST4.ajax.XMLHttpFactories[i]();
+                xmlhttp = window.hWin.HEURIST4.ajax.XMLHttpFactories[i]();
+                xmlhttp = window.hWin.HEURIST4.ajax.XMLHttpFactories[i]();
             }
             catch (e) {
                 continue;
@@ -113,7 +113,7 @@ if (! top.HEURIST4.ajax) top.HEURIST4.ajax = {
             postData += encodeURIComponent(elt.name) + "=" + encodeURIComponent(elt.value);
         }
 
-        top.HEURIST4.ajax.sendRequest((form.getAttribute && form.getAttribute("jsonAction")) || form.action, callback, postData);
+        window.hWin.HEURIST4.ajax.sendRequest((form.getAttribute && form.getAttribute("jsonAction")) || form.action, callback, postData);
     },
 
     evalJson: function() {
@@ -140,11 +140,11 @@ if (! top.HEURIST4.ajax) top.HEURIST4.ajax = {
              postData = postData+paramName+"="+encodeURIComponent(request[paramName])+"&";
         }
         
-        top.HEURIST4.ajax.sendRequest(url, function(xhr) {
+        window.hWin.HEURIST4.ajax.sendRequest(url, function(xhr) {
             
                 var obj;
                 if(xhr.responseText==""){
-                    obj = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
+                    obj = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
                             message: "No response from server at "+url+", please try again later" };
                 }else{
                     
@@ -152,14 +152,14 @@ if (! top.HEURIST4.ajax) top.HEURIST4.ajax = {
                         obj = $.parseJSON(xhr.responseText);
                     }
                     catch (err) {
-                        obj = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
+                        obj = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
                                 message: "Server at "+url+" responded with incorrectly structured data. Excerpt of data: "+xhr.responseText.substring(0,250)};
                     }
                     
                     /*
-                    var obj = top.HEURIST4.ajax.evalJson(xhr.responseText);
+                    var obj = window.hWin.HEURIST4.ajax.evalJson(xhr.responseText);
                     if(!obj) {
-                        obj = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
+                        obj = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
                                 message: "Server at "+url+" responded with incorrectly structured data. Excerpt of data: "+xhr.responseText.substring(0,250)};
                     }*/
                 }

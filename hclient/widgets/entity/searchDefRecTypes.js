@@ -40,25 +40,25 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this.selectGroup = this.element.find('#sel_group');
         this.selectGroup.empty();
             
-        top.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
+        window.hWin.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
                         'entity':'defRecTypeGroups','rtg_ID':that.options.filter_groups},
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             var groups = new hRecordSet(response.data).makeKeyValueArray('rtg_Name');
                             
-                            if(top.HEURIST4.util.isempty(that.options.filter_groups)){
-                                groups.unshift({key:'',title:top.HR('Any Group')});
+                            if(window.hWin.HEURIST4.util.isempty(that.options.filter_groups)){
+                                groups.unshift({key:'',title:window.hWin.HR('Any Group')});
                             }
                             
-                            top.HEURIST4.ui.createSelector(that.selectGroup.get(0), groups);
+                            window.hWin.HEURIST4.ui.createSelector(that.selectGroup.get(0), groups);
                             
-                            if(!top.HEURIST4.util.isempty(that.options.filter_group_selected)){
+                            if(!window.hWin.HEURIST4.util.isempty(that.options.filter_group_selected)){
                                 that.selectGroup.val(that.options.filter_group_selected);
                             }
                             
                             that.startSearch();
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
                       
@@ -100,19 +100,19 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 request['a']          = 'search'; //action
                 request['entity']     = 'defRecTypes';
                 request['details']    = 'list'; //'id';
-                request['request_id'] = top.HEURIST4.util.random();
+                request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
                 //that.loadanimation(true);
-                top.HAPI4.EntityMgr.doRequest(request, 
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
                                 {recordset:new hRecordSet(response.data), request:request} );
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
 

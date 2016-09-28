@@ -38,7 +38,7 @@ $.widget( "heurist.staticPage", {
         this.div_content = $('<div>')  //.css('overflow','auto')
         /*.css({
         position:'absolute', top:(this.options.title==''?0:'2.5em'), bottom:0, left:0, right:0,
-        'background':'url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})*/
+        'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})*/
         .appendTo( this.element );
 
         this.element.on("myOnShowEvent", function(event){
@@ -48,13 +48,13 @@ $.widget( "heurist.staticPage", {
         });
 
         
-        $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
+        $(this.document).on(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT, function(e, data) {
             that._loaded_url = null; //reload on login-logout
             that._refresh();
         });
         
         that._refresh();
-        //$(this.document).on(top.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {});
+        //$(this.document).on(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {});
 
     }, //end _create
 
@@ -67,7 +67,7 @@ $.widget( "heurist.staticPage", {
     /*
     _setOption: function( key, value ) {
     if(key=='url'){
-    value = top.HAPI4.basePathV3 + value;
+    value = window.hWin.HAPI4.basePathV3 + value;
     }else if (key=='title'){
     var id = this.element.attr('id');
     $(".header"+id).html(value);
@@ -88,15 +88,15 @@ $.widget( "heurist.staticPage", {
         }
 
         //refesh if element is visible only - otherwise it costs much resources
-        if(!this.element.is(':visible') || top.HEURIST4.util.isempty(this.options.url)) return;
+        if(!this.element.is(':visible') || window.hWin.HEURIST4.util.isempty(this.options.url)) return;
 
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
 
-            var url = this.options.url.replace("[dbname]",  top.HAPI4.database);
-            url = url.replace("[layout]",  top.HAPI4.sysinfo['layout']);
+            var url = this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
+            url = url.replace("[layout]",  window.hWin.HAPI4.sysinfo['layout']);
             if(this.options.url.indexOf('http://')<0){
-                this.options.url = top.HAPI4.basePathV4 + url;
+                this.options.url = window.hWin.HAPI4.basePathV4 + url;
             }
 
             
@@ -120,7 +120,7 @@ $.widget( "heurist.staticPage", {
     _destroy: function() {
 
         this.element.off("myOnShowEvent");
-        //$(this.document).off(top.HAPI4.Event.ON_SYSTEM_INITED);
+        //$(this.document).off(window.hWin.HAPI4.Event.ON_SYSTEM_INITED);
 
         // remove generated elements
         //this.dosframe.remove();
@@ -129,7 +129,7 @@ $.widget( "heurist.staticPage", {
 
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }

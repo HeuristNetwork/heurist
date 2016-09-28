@@ -63,7 +63,7 @@ if (@$argv) {
     // handle command-line queries
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {
-        if ($argv[$i][0] === '-') {
+        if ($argv[$i][0] === '-') {                    
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
@@ -148,14 +148,19 @@ function output($str){
         echo $str;
     }
 
-}
+}                   
 
+function xmlspecialchars($value){
+   $value = htmlspecialchars($value);
+   $value = str_replace('%', '&#37;', $value);
+   return $value;
+}
 
 function makeTag($name, $attributes = null, $textContent = null, $close = true, $encodeContent = true) {
     $tag = "<$name";
     if (is_array($attributes)) {
         foreach ($attributes as $attr => $value) {
-            $tag.= ' ' . htmlspecialchars($attr) . '="' . htmlspecialchars($value) . '"';
+            $tag.= ' ' . xmlspecialchars($attr) . '="' . xmlspecialchars($value) . '"';
         }
     }
     if ($close && !$textContent) {
@@ -165,7 +170,7 @@ function makeTag($name, $attributes = null, $textContent = null, $close = true, 
     }
     if ($textContent) {
         if ($encodeContent) {
-            $tag.= htmlspecialchars($textContent);
+            $tag.= xmlspecialchars($textContent);
         } else {
             $tag.= $textContent;
         }

@@ -62,9 +62,9 @@ mysql_connection_overwrite(DATABASE);
     <script type="text/javascript">
             
             function deleteSubmit(){
-                if(top.HEURIST4.msg){
+                if(window.hWin.HEURIST4.msg){
                     
-                    top.HEURIST4.msg.showMsgDlg('<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'+
+                    window.hWin.HEURIST4.msg.showMsgDlg('<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'+
                     'Please confirm that you really wish to delete the selected records, <br/>along with all associated bookmarks?', function(){
                         document.forms[0].submit();
                         $(document.forms[0]).hide();

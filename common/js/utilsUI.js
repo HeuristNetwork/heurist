@@ -456,7 +456,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     */
     popupURL: function(parentWindow, url, options) {
         
-        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
+        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(window.hWin)){
             
             if (! options) {
                 options = { "url": url };
@@ -467,7 +467,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             return top.HEURIST.util.popupWindow(parentWindow, options);
             
         }else{
-            top.HEURIST4.msg.showDialog(url, options);
+            window.hWin.HEURIST4.msg.showDialog(url, options);
         }
     },
 
@@ -486,10 +486,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             options["element"] = element;
         }
         
-        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
+        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(window.hWin)){
             return top.HEURIST.util.popupWindow(parentWindow, options);
         }else{
-            return top.HEURIST4.msg.showElementAsDialog(options);
+            return window.hWin.HEURIST4.msg.showElementAsDialog(options);
         }
     },
     /**
@@ -510,11 +510,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if (options["close-on-blur"] === undefined) options["close-on-blur"] = true;
         if (options["no-resize"] === undefined) options["no-resize"] = true;
 
-        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
+        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(window.hWin)){
             top.HEURIST.util.popupWindow(parentWindow, options);
             return null;
         }else{
-            return top.HEURIST4.msg.showElementAsDialog(options);
+            return window.hWin.HEURIST4.msg.showElementAsDialog(options);
         }
     },
 
@@ -1242,8 +1242,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 }
                 
                 if(msg){
-                    if(top.HEURIST4 && top.HEURIST4.msg){
-                        top.HEURIST4.msg.showMsgErr(msg);                           
+                    if(window.hWin){
+                        window.hWin.HEURIST4.msg.showMsgErr(msg);                           
                     }else{
                         top.HEURIST.util.showError(msg);
                     }
@@ -1369,8 +1369,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(is_message==true){
                     var sMsg = 'Database structure definitions in browser memory have been refreshed. <br/>'+
                             'You may need to reload pages to see changes.';
-                    if(top.HEURIST4){
-                        top.HEURIST4.msg.showMsgDlg(sMsg);
+                    if(window.hWin){
+                        window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
                     }else{
                         alert(sMsg);
                     }
@@ -2030,15 +2030,15 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }else if (msg.toLowerCase().indexOf("error")<0){
             msg = "Error occurred: " + msg;
         }
-        if(top.HEURIST4 && top.HEURIST4.msg){
-            top.HEURIST4.msg.showMsgErr(msg);
+        if(window.hWin){
+            window.hWin.HEURIST4.msg.showMsgErr(msg);
         }else{
             alert(msg);    
         }
     },
     showMessage: function(msg){
-        if(top.HEURIST4 && top.HEURIST4.msg){
-            top.HEURIST4.msg.showMsgDlg(msg);
+        if(window.hWin){
+            window.hWin.HEURIST4.msg.showMsgDlg(msg);
         }else{
             alert(msg);    
         }
@@ -2453,7 +2453,7 @@ if(document.getElementById) {
 function createCustomAlert(txt,args) {
     
     
-        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
+        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(window.hWin)){
             
             
     // shortcut reference to the document object
@@ -2489,7 +2489,7 @@ function createCustomAlert(txt,args) {
         return ; }
         
         }else{
-            top.HEURIST4.msg.showMsgDlg(txt, null, ""); // removed "Info" title - inelegant and not useful
+            window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // removed "Info" title - inelegant and not useful
         }
         
 }
