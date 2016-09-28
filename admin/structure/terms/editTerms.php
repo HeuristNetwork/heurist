@@ -329,8 +329,8 @@
                                 <td>Term to be merged:</td>
                                 <td id="lblTerm_toMerge"></td>
                             </tr>
-
-                          <!--  <tr>
+                <!--
+                          <tr>
                                 <td>Label:</td>
                                 <td>
                                     <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
@@ -343,12 +343,12 @@
                                     <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
                                     <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
                                 </td>
-                            </tr> -->
-
+                            </tr>
+                -->
                             <tr>
-                                <td>Code:</td>
-                                <td>
-                                    <input id="rbMergeCode1" type="radio" name="rbMergeCode" checked="checked"/>
+                                <td><br/>Standard Code:</td>
+                                <td><br/>
+                                    <input id="rbMergeCode1" type="radio" name="rbMergeCode"/> <!-- initially was checked="checked"-->
                                     <label for="rbMergeCode1" id="lblMergeCode1"></label>
                                 </td>
                             </tr>
@@ -356,14 +356,14 @@
                                 <td>&nbsp;</td>
                                 <td>
                                     <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
-                                    <label for="rbMergeCode2" id="lblMergeCode2"></label>
+                                    <label for="rbMergeCode2" id="lblMergeCode2" ></label>
                                 </td>
                             </tr>
 
                             <tr>
-                                <td>Description:</td>
-                                <td>
-                                    <input id="rbMergeDescr1" type="radio" name="rbMergeDescr" checked="checked"/>
+                                <td><br/>Description:</td>
+                                <td><br/>
+                                    <input id="rbMergeDescr1" type="radio" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
                                     <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
                                 </td>
                             </tr>
@@ -430,7 +430,7 @@
                             <input id="btnMergeOK" type="button" value="Merge"
                                 title=""  style="width:70px"/>
                             <input id="btnMergeCancel" type="button" value="Cancel"
-                                title=""  style="width:70px"/>
+                                title=""  style="width:70px; padding-left:10px"/>
                         </div>
                 </div>
 

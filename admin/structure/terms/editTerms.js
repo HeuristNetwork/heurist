@@ -671,55 +671,128 @@ function EditTerms() {
         var arTerm = termsByDomainLookup[nodeid];
         $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['.fontsize(1)+arTerm[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
 
-        if(Hul.isempty(arTerm[fi.trm_Label])){
+        var arTerm2 = termsByDomainLookup[retain_nodeid];
+        $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+
+
+      /*  if(Hul.isempty(arTerm[fi.trm_Label])){
             $('#mergeLabel2').hide();
         }else{
-           // $('#mergeLabel2').show();
-           // $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
-            //$('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
-        }
-        if(Hul.isempty(arTerm[fi.trm_Code])){
-            $('#mergeCode2').hide();
-        }else{
+            $('#mergeLabel2').show();
+           $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
+            $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
+        } */
+
+
+        /***  Check and Description Buttons-- if "Neither" - disable both buttons and show <none> in both
+        if "One" - select the one and disable the other and show <none> in the empty one
+        if "Both" - Select the first one and the other
+
+        ***/
+        if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  && (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
+            $('#mergeCode1').show();
             $('#mergeCode2').show();
-            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
-            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-            //$('#rb  MergeCode2').disabled=true;
+            $('#mergeDescr1').show();
+            $('#mergeDescr2').show();
+            $('input[name ="rbMergeCode"]').attr('disabled', 'disabled');
+            $('input[name ="rbMergeDescr"]').attr('disabled', 'disabled' );
+            $('#lblMergeCode2').html('&#60;none&#62;');
+            $('#rbMergeCode2').val('&#60;none&#62;');
+            $('#lblMergeCode1').html('&#60;none&#62;');
+            $('#rbMergeCode1').val('&#60;none&#62;');
+            $('#lblMergeDescr1').html('&#60;none&#62;');
+            $('#rbMergeDescr1').val('&#60;none&#62;');
+            $('#lblMergeDescr2').html('&#60;none&#62;');
+            $('#rbMergeDescr2').val('&#60;none&#62;');
 
         }
-        if(Hul.isempty(arTerm[fi.trm_Description])){
+        else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Code])))
+        {
+            $('#mergeCode1').show();
+            $('#mergeCode2').show();
+            $('#mergeDescr1').show();
+            $('#mergeDescr2').show();
+            $('#rbMergeCode1').attr('disabled', 'disabled');
+            $("#rbMergeCode2").attr('checked', 'checked');
+            $('#rbMergeDescr1').attr('disabled', 'disabled');
+            $("#rbMergeDescr2").attr('checked', 'checked');
+            $('#lblMergeCode2').html(arTerm[fi.trm_Label]);
+            $('#rbMergeCode2').val(arTerm[fi.trm_Label]);
+            $('#lblMergeDescr2').html(arTerm[fi.trm_Label]);
+            $('#rbMergeDescr2').val(arTerm[fi.trm_Label]);
+        }
+        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
+        {
+            $('#mergeCode1').show();
+            $('#mergeCode2').show();
+            $('#mergeDescr1').show();
+            $('#mergeDescr2').show();
+            $('#rbMergeCode2').attr('disabled', 'disabled');
+            $("rbMergeCode1").attr('checked', 'checked');
+            $('#rbMergeDescr2').attr('disabled', 'disabled');
+            $("#rbMergeDescr1").attr('checked', 'checked');
+            $('#lblMergeCode1').html(arTerm2[fi.trm_Label]);
+            $('#rbMergecode1').val(arTerm2[fi.trm_Label]);
+            $('#lblMergeDescr1').html(arTerm2[fi.trm_Label]);
+            $('#rbMergeDescr1').val(arTerm2[fi.trm_Label]);
+        }
+        else
+        {
+            $('#mergeCode1').show();
+            $('#mergeCode2').show();
+            $('#mergeDescr1').show();
+            $('#mergeDescr2').show();
+            $('input[name ="rbMergeCode"]').removeAttr( "disabled" );
+            $('input[name ="rbMergeCode"]').attr('checked', 'checked');
+            $('input[name ="rbMergeDescr"]').removeAttr( "disabled" );
+            $('input[name ="rbMergeDescr"]').attr('checked', 'checked');
+            $('#lblMergeCode1').html(arTerm2[fi.trm_Label]);
+            $('#rbMergecode1').val(arTerm2[fi.trm_Label]);
+            $('#lblMergeCode2').html(arTerm[fi.trm_Label]);
+            $('#rbMergeCode2').val(arTerm[fi.trm_Label]);
+            $('#lblMergeDescr1').html(arTerm2[fi.trm_Label]);
+            $('#rbMergeDescr1').val(arTerm2[fi.trm_Label]);
+            $('#lblMergeDescr2').html(arTerm[fi.trm_Label]);
+            $('#rbMergeDescr2').val(arTerm[fi.trm_Label]);
+        }
+
+
+        /*if((Hul.isempty(arTerm[fi.trm_Description]))){
             $('#mergeDescr2').hide();
+
+             $('#lblMergeDescr2')
+            $('#rbMergeDescr2').val('&#60;none&#62;');;
         }else{
             $('#mergeDescr2').show();
             $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
             $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
-        }
+        } */
 
 
-        var arTerm2 = termsByDomainLookup[retain_nodeid];
+        //var arTerm2 = termsByDomainLookup[retain_nodeid];
 
-        $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+        //$('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
 
         //$('#lblTerm_toRetain').html(' ['+arTerm2[fi.trm_ConceptID]+']').style.fontSize= "x-small";
-        if(Hul.isempty(arTerm2[fi.trm_Label])){
-            //$('#mergeLabel2').hide();
-            //$('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
-            //$('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
+     /*   if(Hul.isempty(arTerm2[fi.trm_Label])){
+            $('#mergeLabel2').hide();
+            $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
+            $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
         }else{
-            //$('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
-            //$('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
-        }
-        if(Hul.isempty(arTerm2[fi.trm_Code])){
-            $('#mergeCode2').hide();
-            $('#lblMergeCode1').html(arTerm[fi.trm_Code]);
-            $('#rbMergeCode1').val(arTerm[fi.trm_Code]);
-            //$('#rb  MergeCode1').disabled=true;
+            $('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
+            $('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
+        } */
+       /* if(Hul.isempty(arTerm2[fi.trm_Code])){
+             $('#mergeCode2').hide();
+            $('#lblMergeCode1').html('&#60;none&#62;');
+            $('#rbMergeCode1').val('&#60;none&#62;');
+
 
         }else{
-            $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-            $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
-            //$('#rb  MergeCode1').disabled=true;
+
+            $('#lblMergeCode1').html('&#60;none&#62;');
+            $('#rbMergeCode1').val('&#60;none&#62;');
+
         }
         if(Hul.isempty(arTerm2[fi.trm_Description])){
             $('#mergeDescr2').hide();
@@ -728,7 +801,8 @@ function EditTerms() {
         }else{
             $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
             $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
-        }
+        } */
+
 
         $('#lblRetainId').html(retain_nodeid);
         $('#lblMergeId').html(nodeid);
@@ -746,8 +820,8 @@ function EditTerms() {
                 "close-on-blur": false,
                 "no-resize": true,
                 title: 'Select values to be retained',
-                height: 300,
-                width: 500
+                height: 310,
+                width: 560
         });
 
 
