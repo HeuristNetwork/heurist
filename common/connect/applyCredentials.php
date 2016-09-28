@@ -316,18 +316,18 @@ function outWarning($role, $message){
         <head>
             <link rel=stylesheet href='../../../common/css/global.css'>
             <meta http-equiv="content-type" content="text/html; charset=utf-8">
-            <style>
+           <!-- <style>
                 html {
                     position: absolute;
                     width: 400px;
                     height: 400px;
                 }
-            </style>
+            </style> -->
         </head>
 
         <body>
             <div class=wrap>
-                <div id=errorMsg>
+                <div id=errorMsg style="width:400px; height:400px;position:absolute">
                     <span>You do not have the permission to perform this action</span>
                     <p>
                         <a href="<?php echo HEURIST_BASE_URL;?>common/connect/login.php?logout=1&db=<?php echo HEURIST_DBNAME;?>"
@@ -337,7 +337,7 @@ function outWarning($role, $message){
             </div>
             <script>
                 $(document ).ready(function() {
-                    $("errorMsg").delay(3000).fadeOut("slow");
+                    $("errorMsg").delay(1000).fadeOut("slow");
 
                 });
             </script>
