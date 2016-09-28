@@ -272,10 +272,10 @@ if($step=="1"){  //first step - info about current status
         }
     }else{
 
-        //DEBUG print '<xmp>'.$items.'</xmp>';    
+        //DEBUG print '<xmp>'.$items.'</xmp>';
         //it does not work anymore
         //intval(substr($items,strpos($items, "<zapi:totalResults>") + 19,strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
-        //Responses for multi-object read requests will include a custom HTTP header, Total-Results        
+        //Responses for multi-object read requests will include a custom HTTP header, Total-Results
         $totalitems = $zotero->getTotalCount();
 
         //print $items;
@@ -290,20 +290,20 @@ if($step=="1"){  //first step - info about current status
 
 
         // 2) show mapping issues report
-        if(count($mapping_rt_errors)>0 || count($mapping_rt_errors2)>0 || count($mapping_dt_errors)>0){
+ if(count($mapping_rt_errors)>0 || count($mapping_rt_errors2)>0 || count($mapping_dt_errors)>0){
 
             /* old version of message
             print "<div style='color:red'><br />
             The following record types required for Zotero synchronisation are not present in your database
-            Synchronisation requires bibliographic record types to be defined in the database (Zotero to Heurist type mappings are defined in the code at /import/biblio/zoteroMap.xml)."; 
+            Synchronisation requires bibliographic record types to be defined in the database (Zotero to Heurist type mappings are defined in the code at /import/biblio/zoteroMap.xml).";
             */
 
             if(count($mapping_rt_errors)>0){
-                print "<p style='color:red'>The following record types required for Zotero synchronisation are not present in your database:";                    
+                print "<p style='color:red'>The following record types required for Zotero synchronisation are not present in your database:";
                 print "<br />".implode("<br />",$mapping_rt_errors).'</p>';
             }
             if(count($mapping_rt_errors2)>0){
-                print "<p style='color:red'><br />No proper field mapping found for record types:";                    
+                print "<p style='color:red'><br />No proper field mapping found for record types:";
                 print "<br />".implode("<br />",$mapping_rt_errors2).'</p>';
             }
             if(count($mapping_dt_errors)>0){
@@ -590,13 +590,13 @@ if($step=="1"){  //first step - info about current status
         print "<br><div style='color:red'><b>Zotero items ignored:</b><br></div>";
         print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_ignored).'</div>';
     }
-    if($cnt_ignored>0 || $isFailure){                    
+    if($cnt_ignored>0 || $isFailure){
         print "<span><br>Please advise the Heurist development team - info  @ </span>" ;
         print "<a href ='http://heuristnetwork.org'>Heurist Network</a>" ;
         print "<span> - to provide a mapping for each of the undefined record types.</span>";
     }
 
-    if(count($unresolved_pointers)>0){ 
+    if(count($unresolved_pointers)>0){
         //print "<div><br>Create/update resource records</div>";//ij: need hide this info
         print "<br>";
 
@@ -1016,7 +1016,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
             $new_recid = $out["bibID"];
 
             if($is_echo){
-                print '['.($recId?"Updated":"Added")."&nbsp;Id&nbsp".$out["bibID"].']<br>';    
+                print '['.($recId?"Updated":"Added")."&nbsp;Id&nbsp".$out["bibID"].']<br>';
             }
 
 

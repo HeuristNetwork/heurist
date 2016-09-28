@@ -211,13 +211,13 @@ $.widget( "heurist.svs_list", {
             +'&nbsp;Faceted search</div>'
 
             +'<div style="font-style:italic;" title="'+this._HINT_WITHRULES+'">'
-            +'<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
-            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
-            +'&nbsp;Search with rules</div>'
+            +'Search with rules'
+            +'&nbsp<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
+            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>                 </div>'
 
             +'<div style="font-style:italic;" title="'+this._HINT_RULESET+'">'
-            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;RuleSet</div>';
+            +'RuleSet'
+            +'&nbsp<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span></div>';
 
             this.helper_btm = $( '<div>'+t1+'</div>' )
             //IAN request 2015-06-23 .addClass('heurist-helper1')
@@ -461,11 +461,10 @@ $.widget( "heurist.svs_list", {
                     }
                     //save
                     window.hWin.HAPI4.save_pref('svs_list_status', JSON.stringify(keep_status));
-                    
                     //replace all ui-icon-triangle-1-s to se
                     cdivs.find('.ui-icon-triangle-1-e').removeClass('ui-icon-triangle-1-se');
                     cdivs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-se');
-                    
+
                 }
             });
             //replace all ui-icon-triangle-1-s to se
@@ -592,7 +591,7 @@ $.widget( "heurist.svs_list", {
     },
 
     _defineHeader: function(name, domain){
-        
+
         if(domain=='all' || domain=='bookmark'){
             sIcon = 'user';
         }else if(domain=='dbs'){
@@ -737,7 +736,7 @@ $.widget( "heurist.svs_list", {
                             //'<span style="display:inline-block;">'+node.title+ '</span>'
                             //'<div style="display:inline-block;">'+node.title+'</div>'
                             //
-                            $span.find("> span.fancytree-title").html( node.title+' '+s );
+                            $span.find("> span.fancytree-title").html(s+' '+node.title);
                             //.attr('title', s_hint);
                         }
                     }

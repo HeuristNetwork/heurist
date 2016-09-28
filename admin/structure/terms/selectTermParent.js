@@ -18,7 +18,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -69,7 +69,7 @@ function SelectTermParent() {
 				_childTerm = top.HEURIST.parameters.child;
 				_currentDomain = top.HEURIST.parameters.domain;
                 _target_parent_id = top.HEURIST.parameters.parent;
-                
+
                 var childTermName = '';
                 if(_childTerm){
                     childTermName = top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm]
@@ -77,7 +77,7 @@ function SelectTermParent() {
                 }
 
                 if(top.HEURIST.parameters.mode==1){
-                    Dom.get('header1').innerHTML = 'Select term you wish to merge into term '+ childTermName;
+                    Dom.get('header1').innerHTML = 'Select term you wish to merge into '+ childTermName;
                     Dom.get('btnSet').innerHTML = 'SELECT';
                     //Dom.get('divParentIsRoot').style.display = 'none';
                     Dom.get("childTermName").innerHTML = "";
@@ -89,7 +89,7 @@ function SelectTermParent() {
 				}
 
 		}
-        
+
 
 		if(Hul.isnull(_currentDomain)) {
 			Dom.get("childTermName").innerHTML = "ERROR: Domain is not defined";
@@ -139,7 +139,7 @@ function SelectTermParent() {
 			treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
 			termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
 			fi = top.HEURIST.terms.fieldNamesToIndex;
-            
+
         var node_tomove = null;
 
 		tv.removeChildren(tv_parent); // Reset the the tree
@@ -200,7 +200,7 @@ function SelectTermParent() {
                     if(_target_parent_id == term.id){
                         node_tomove = childNode;
                     }
-                    
+
 					__createChildren(parentNode[child], term.id, childNode); // createChildren() again for every child found
 					}
 				}
@@ -222,14 +222,14 @@ function SelectTermParent() {
 		tv.render();
 		//first_node.focus();
 		//first_node.toggle();
-        
+
         setTimeout(function(){
             if(node_tomove!=null){
                 node_tomove.focus()
                 node_tomove.toggle();
             }}, 1000);
-        
-        
+
+
 	}
 
 	/**

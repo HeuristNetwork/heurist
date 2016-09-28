@@ -91,8 +91,8 @@
             </field>
         </typeMap>
 
-        <!-- 
-        The Mapping works likes this: for example, the H3id for Volume in JournalArticle is 
+        <!--
+        The Mapping works likes this: for example, the H3id for Volume in JournalArticle is
         "3-1035.3-113.3-1002". This means volume in journal Article(3-1035) points to
         Journal Volume(3-113), and Journal voulme points to the actual volume(3-1002)
         -->
@@ -229,7 +229,7 @@
             <field label="Archive" value="archive"/>
             <field label="Loc. in Archive" value="archiveLocation"/>
             <field label="Library Catalog" value="libraryCatalog"/>
-            <field label="Call Number" value="callNumber" h3id="3-1019"/> 
+            <field label="Call Number" value="callNumber" h3id="3-1019"/>
             <field label="Rights" value="rights" h3id="2-35"/>
             <field label="Extra" value="extra" h3id="2-4"/>
             <field value="creator" >
@@ -261,7 +261,7 @@
                 <creatorType label="Contributor" value="contributor" h3id="2-15"/>
                 <creatorType label="Organisation" value="organisation" h3id="2-15"/>
             </field>
-        </typeMap> 
+        </typeMap>
 
         <typeMap zType="conferencePaper" cslType="book_chapter" h3id="3-108">
             <field label="Title" value="title" h3id="2-1"/>
@@ -437,7 +437,7 @@
 <typeMap zType="dictionaryEntry" cslType="dictionaryEntry">
 <field label="Title" value="title"/>
 <field label="Abstract" value="abstract"/>
-<field label="Dictionary Title" value="dictionaryTitle"/> 
+<field label="Dictionary Title" value="dictionaryTitle"/>
 <field label="Series" value="series" />
 <field label="Series Number" value="seriesNmber"/>
 <field label="Volume" value="volume"/>
@@ -458,7 +458,7 @@
 <field label="Call Number" value="callNumber"/>
 <field label="Accesssed" value="accessed"/>
 <field label="Rights" value="url"/>
-<field label="Extra" value="Extra"/>  
+<field label="Extra" value="Extra"/>
 <field value="creator" >
 <creatorType label="Author" value="author"/>
 <creatorType label="Contributor" value="contributor"/>
@@ -491,7 +491,7 @@
 <field label="Call Number" value="callNumber"/>
 <field label="Accesssed" value="accessed"/>
 <field label="Rights" value="url"/>
-<field label="Extra" value="Extra"/>  
+<field label="Extra" value="Extra"/>
 <field value="creator" >
 <creatorType label="Author" value="author"/>
 <creatorType label="Contributor" value="contributor"/>
@@ -520,7 +520,7 @@
 <field label="Library Catalog" value="libraryCatalog"/>
 <field label="Call Number" value="callNumber"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="Extra"/>  
+<field label="Extra" value="Extra"/>
 <field value="creator" >
 <creatorType label="Director" value="director"/>
 <creatorType label="Contributor" value="contributor"/>
@@ -539,11 +539,11 @@
 <field label="URL" value="urls" h3id ="3-1058"/>
 <field label="Accesssed" value="accessed"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="Extra"/>  
+<field label="Extra" value="Extra"/>
 <field value="creator" >
 <creatorType label="Author" value="author" h3id= "2-15"/>
 <creatorType label="Recipient" value="recipient" h3id ="3-1047"/>
-</field>     
+</field>
 </typeMap>
 
 
@@ -565,7 +565,7 @@
 <field label="URL" value="urls"/>
 <field label="Accesssed" value="accessed"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="Extra"/>  
+<field label="Extra" value="Extra"/>
 <field value="creator" >
 <creatorType label="Contributor" value="contributor"/>
 </field>
@@ -581,12 +581,12 @@
 <field label="URL" value="url" h3id = "3-1058"/>
 <field label="Accesssed" value="accessed"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="Extra"/>  
+<field label="Extra" value="Extra"/>
 <field value="creator" >
 <creatorType label="Author" value="author" h3id ="2-15" />
 <creatorType label="Contributor" value="contributor"/>
 <creatorType label="Recipient" value="recipient" h3id = "3-1047"/>
-</field>   
+</field>
 </typeMap>
 
 
@@ -613,7 +613,7 @@
 <field label="Extra" value="extra" />
 <field value="creator" >
 <creatorType label="Inventor" value="inventor"/>
-<creatorType label="Contributor" value="contributor"/> 
+<creatorType label="Contributor" value="contributor"/>
 </field>
 </typeMap>
 
@@ -631,7 +631,7 @@
 <field label="Language" value="language"/>
 <field label="Short Title" value="shortTitle"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="Extra"/>  
+<field label="Extra" value="Extra"/>
 <field value="creator" >
 <creatorType label="Podcaster" value="podcaster"/>
 </field>
@@ -650,7 +650,7 @@
 <field label="Language" value="language"/>
 <field label="Short Title" value="shortTitle"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="extra"/>  
+<field label="Extra" value="extra"/>
 <field value="creator" >
 <creatorType label="Presenter" value="presenter"/>
 </field>
@@ -676,7 +676,7 @@
 <field label="Library Catalog" value="libraryCatalog"/>
 <field label="Call Number" value="callNumber"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="extra"/>  
+<field label="Extra" value="extra"/>
 <field value="creator" >
 <creatorType label="Director" value="director"/>
 </field>
@@ -725,7 +725,7 @@
 <field label="Library Catalog" value="libraryCatalog"/>
 <field label="Call Number" value="callNumber"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="extra"/>  
+<field label="Extra" value="extra"/>
 <field value="creator" >
 <creatorType label="Director" value="director"/>
 </field>
@@ -748,7 +748,7 @@
 <field label="DOI" value="doi"/>
 <field label="Edition" value="edition" />
 <field label="Episode Number" value="episodeNumber"/>
-<field label="Format" value="format"/> 
+<field label="Format" value="format"/>
 <field label="History" value="history"/>
 <field label="ISBN" value="isbn"/>
 <field label="ISSN" value="issn"/>
@@ -774,12 +774,12 @@
 <field label="Archive" value="archive"/>
 <field label="Loc. in Archive" value="archiveLocation"/>
 <field label="Library Catalog" value="libraryCatalog"/>
-<field label="Call Number" value="callNumber" h3id="3-1019"/> 
+<field label="Call Number" value="callNumber" h3id="3-1019"/>
 <field label="Rights" value="rights" h3id="2-35"/>
 <field label="Extra" value="extra" h3id="2-4"/>
 <field value="creator" >
 <creatorType label="Author" value="author" h3id="2-15"/>
-<creatorType label="Contributor" value="contributor" h3id="2-15"/> 
+<creatorType label="Contributor" value="contributor" h3id="2-15"/>
 <creatorType label="Series Editor" value="seriesEditor" h3id="3-1018.3-104.3-1013.2-10.2-1"/>
 <creatorType label="Translator" value="translator" h3id="2-15"/>
 </field>
@@ -808,11 +808,11 @@
 <field label="Library Catalog" value="libraryCatalog"/>
 <field label="Call Number" value="callNumber"/>
 <field label="Rights" value="rights"/>
-<field label="Extra" value="extra"/>  
+<field label="Extra" value="extra"/>
 <field value="creator" >
 <creatorType label="Director" value="director"/>
 </field>
-</typeMap> 
+</typeMap>
 
 
 -->

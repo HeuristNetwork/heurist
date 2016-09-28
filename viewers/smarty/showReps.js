@@ -1426,15 +1426,14 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 break;
 
             case 2: // simple table
-                _text='\n\n {* Use this as a guideline for creating a simple tabular format *} \n' +
-                '{* Put narrow specified-width columns at the start and any long text columns at the end *} \n' +
-                '<table> \n' +
-                '   <tr style="padding-top:10px;"> \n' +
-                '      <td style="width:200px"> \n' +
-                '      </td> \n' +
-                '      <td> \n' +
-                '      </td> \n' +
-                '      {* Add more columns as required *}\n' +
+                _text='\n\n{* Put narrow specified-width columns at the start and any long text columns at the end *} \n' +
+                '<table style="text-align:left;margin-left:120px;margin-top:2px;" border="0" cellpadding="2"> \n' +
+                '   <tr> \n' +
+                '      <td style="width: 50px"> {$r.recID}    </td> \n' +
+                '      <td style="width:400px"> {$r.recTitle} </td> \n' +
+                '      <td style=" "> </td> \n' +
+                '      <td style=" "> </td> \n' +
+                '      <td style=" "> </td> \n' +
                 '   </tr> \n' +
                 '</table> ' +
                 '\n\n';
