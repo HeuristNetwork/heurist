@@ -51,6 +51,12 @@ $.widget( "heurist.svs_list", {
         
         this._setOptionFromUrlParam('allowed_UGrpID', 'groupID');
         this._setOptionFromUrlParam('allowed_svsIDs', 'searchIDs');
+        if(window.hWin.HAPI4.is_logged() && this.options.buttons_mode){
+            this._setOptionFromUrlParam('treeview_mode','treeViewLoggedIn', 'bool');
+            if(this.options.treeview_mode){
+                this.options.buttons_mode= false;    
+            }
+        }
 
         var that = this;
 
@@ -181,15 +187,21 @@ $.widget( "heurist.svs_list", {
         }*/
     },
     
-    _setOptionFromUrlParam: function( key, param_name ){
+    _setOptionFromUrlParam: function( key, param_name, dtype ){
         
         var param_value = window.hWin.HEURIST4.util.getUrlParameter(param_name);
         //overwrite with param values
         if(!window.hWin.HEURIST4.util.isempty(param_value)){
-            param_value = param_value.split(',');
-            if(window.hWin.HEURIST4.util.isArrayNotEmpty(param_value)){
-                this.options[key] = param_value;  
+            
+            if(dtype=='bool'){
+                this.options[key] = (param_value==1 || param_value=='true');  
+            }else{
+                param_value = param_value.split(',');
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(param_value)){
+                    this.options[key] = param_value;  
+                }
             }
+            
         } 
         
     },
@@ -199,6 +211,9 @@ $.widget( "heurist.svs_list", {
         
         // show saved searches as a list of buttons
         if(this.options.buttons_mode){
+            
+            this._updateAccordeon();
+            return;
             
         }else if(!window.hWin.HAPI4.is_logged()){
             window.hWin.HAPI4.currentUser.usr_GroupsList = [];
@@ -519,9 +534,11 @@ $.widget( "heurist.svs_list", {
         this.accordeon.hide();
         this.accordeon.empty();
         
+        var i, svsIDs = Object.keys(this.allowed_svsIDs);
         
-        for (var svsID in this.allowed_svsIDs)
+        for (i=0; i<svsIDs.length; i++)
         {
+            var svsID = svsIDs[i];
 
             isfaceted = false;
             try {
@@ -548,6 +565,10 @@ $.widget( "heurist.svs_list", {
                 })
                 .appendTo(this.accordeon);
             
+        }
+        
+        if(this.allowed_svsIDs && svsIDs.length==1){
+            $(this.accordeon).find('button[data-svs-id="'+svsIDs[0]+'"]').click();
         }
         
         

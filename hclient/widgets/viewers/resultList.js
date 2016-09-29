@@ -24,7 +24,7 @@ $.widget( "heurist.resultList", {
 
     // default options
     options: {
-        view_mode: null, // list|icons|thumbnails   @toimplement detail, condenced
+        view_mode: null, // list|icons|thumbs   @toimplement detail, condenced
         hide_view_mode: false,
         select_mode:null,//manager, select_single, select_multi
         selectbutton_label:'Select',
@@ -502,7 +502,7 @@ $.widget( "heurist.resultList", {
     //
     _applyViewMode: function(newmode){
         
-        var allowed = ['list','icons','thumbnails'];
+        var allowed = ['list','icons','thumbs'];
         
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = 'list';
