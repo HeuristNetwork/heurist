@@ -329,22 +329,22 @@
                                 <td>Term to be merged:</td>
                                 <td id="lblTerm_toMerge"></td>
                             </tr>
-                <!--
-                          <tr>
+
+                          <tr style="display: none;">
                                 <td>Label:</td>
                                 <td>
                                     <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
                                     <label for="rbMergeLabel1" id="lblMergeLabel1"></label>
                                 </td>
                             </tr>
-                            <tr id="mergeLabel2">
+                            <tr id="mergeLabel2" style="display: none;">
                                 <td>&nbsp;</td>
                                 <td>
                                     <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
                                     <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
                                 </td>
                             </tr>
-                -->
+
                             <tr>
                                 <td><br/>Standard Code:</td>
                                 <td><br/>
