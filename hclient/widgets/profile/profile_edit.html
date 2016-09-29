@@ -1,7 +1,8 @@
 <!--
 /**
 * Form for editing user's profile
-* Equivalent H4 version of H3 /admin/ugrps/editUser.html
+* Equivalent H4 version of older (vsn 3) /admin/ugrps/editUser.html (which is used for profile editing)
+* ideally the H4 function should take over profile editing as well and editUser.html shoudl be retired
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -112,8 +113,19 @@
         </div>
     </div>
 </fieldset>
+
+
+<div class="mode-registration" style="margin-left: 60px; margin-bottom: 20px;">
+<p>Please read the Terms and Conditions of Use below
+<p style="font-size:0.9em">
+Note: This system should not be used for the storage of confidential and/or personally-identifiable
+<br>information, such as health information, without the express permission of the system managers.</p>
+<p id="contactDetails"> (database owner)</p>
+</div>
+
+
 <!-- OPTIONAL FIELDS  -->
-<div id="accordion">
+<div id="accordion" style="margin-left: 60px; margin-right: 70px;">
     <h3><label>Optional information</label></h3>
     <fieldset style="display: none;" class="ui-heurist-bg-light">
 
@@ -159,6 +171,7 @@
         </div>
 
     </fieldset>
+    
     <h3 class="mode-registration"><label>Terms and Conditions of Use</label></h3>
     <div>
 
@@ -224,19 +237,12 @@
     </div>
 </div>
 
-<div class="mode-registration"">
-<p style="font-size:0.9em">
-Please read the Terms and Conditions of Use above, then click the Register button at the end of the page.
-Note: This system should not be used for the storage of confidential personally-identifiable information
-such as health information without the express permission of the system managers.</p>
-<p id="contactDetails"> (database owner)</p>
-</div>
 
 <br />
 <p class="messages"></p>
 
 </div>
-<div class="mode-registration" style="position:absolute;height:2em;bottom:0;width:90%">
+<div class="mode-registration" style="position:absolute;height:2em;bottom:0;width:90%; margin-left: 60px;">
 <input type="checkbox" id="agree" onClick="enable_register(this.checked)">
 <label for="agree">I have read and agree to the Terms and Conditions of Use above</label>
 </div>

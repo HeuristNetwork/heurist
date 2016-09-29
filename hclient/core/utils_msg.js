@@ -237,7 +237,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
         }
 
-        var title = 'Info',
+        var title = '', // 'Info' removed - it's a useless popup window title, better to have none at all
             lblYes = window.hWin.HR('Yes'),
             lblNo =  window.hWin.HR('No'),
             lblOk = window.hWin.HR('OK'),
