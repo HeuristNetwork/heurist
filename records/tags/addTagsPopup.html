@@ -178,7 +178,7 @@
                 if (!location.search.match(/no-tags/)) {
                     if(!tags){
                         var sMsg = "The links you have selected will only be saved if you enter at least one tag.";
-                        if(window.hWin){
+                        if(window.hWin && window.hWin.HEURIST4){
                             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
                                 {'Return to Enter tags':function(){
                                     $dlg.dialog('close');

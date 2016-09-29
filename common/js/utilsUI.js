@@ -32,6 +32,7 @@
 * @subpackage  Common 
 */
 
+window.hWin = detectHeurist(window);
 
 if (!top.HEURIST){
     top.HEURIST = {};
@@ -456,7 +457,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     */
     popupURL: function(parentWindow, url, options) {
         
-        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(window.hWin)){
+        if(typeof jQuery == "undefined" || !hasH4()){
             
             if (! options) {
                 options = { "url": url };
@@ -486,7 +487,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             options["element"] = element;
         }
         
-        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(window.hWin)){
+        if(typeof jQuery == "undefined" || !hasH4()){
             return top.HEURIST.util.popupWindow(parentWindow, options);
         }else{
             return window.hWin.HEURIST4.msg.showElementAsDialog(options);
@@ -510,7 +511,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if (options["close-on-blur"] === undefined) options["close-on-blur"] = true;
         if (options["no-resize"] === undefined) options["no-resize"] = true;
 
-        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(window.hWin)){
+        if(typeof jQuery == "undefined" || !hasH4()){
             top.HEURIST.util.popupWindow(parentWindow, options);
             return null;
         }else{
@@ -1242,7 +1243,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 }
                 
                 if(msg){
-                    if(window.hWin){
+                    if(hasH4()){
                         window.hWin.HEURIST4.msg.showMsgErr(msg);                           
                     }else{
                         top.HEURIST.util.showError(msg);
@@ -1369,7 +1370,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(is_message==true){
                     var sMsg = 'Database structure definitions in browser memory have been refreshed. <br/>'+
                             'You may need to reload pages to see changes.';
-                    if(window.hWin){
+                    if(hasH4()){
                         window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
                     }else{
                         alert(sMsg);
@@ -2030,14 +2031,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }else if (msg.toLowerCase().indexOf("error")<0){
             msg = "Error occurred: " + msg;
         }
-        if(window.hWin){
+        if(hasH4()){
             window.hWin.HEURIST4.msg.showMsgErr(msg);
         }else{
             alert(msg);    
         }
     },
     showMessage: function(msg){
-        if(window.hWin){
+        if(hasH4()){
             window.hWin.HEURIST4.msg.showMsgDlg(msg);
         }else{
             alert(msg);    
@@ -2453,7 +2454,7 @@ if(document.getElementById) {
 function createCustomAlert(txt,args) {
     
     
-        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(window.hWin)){
+        if(typeof jQuery == "undefined" || !hasH4()){
             
             
     // shortcut reference to the document object
@@ -2497,4 +2498,31 @@ function createCustomAlert(txt,args) {
 // removes the custom alert from the DOM
 function removeCustomAlert() {
     document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));return;
+}
+
+function hasH4(){
+    return window.hWin && window.hWin.HEURIST4;
+}
+
+// in H4 we use similar function once in initPage.
+// in H3 each page is inited in its own way - so this function is defined here
+//
+function detectHeurist(win){
+    if(win.HEURIST4){ //defined
+        return win;
+    }
+
+    try{
+        win.parent.document;
+    }catch(e){
+        // not accessible - this is cross domain
+        return win;
+    }    
+    if (win.top == win.self) { 
+        //we are in frame and this is top most window and Heurist is not defined 
+        //lets current window will be heurist window
+        return window;
+    }else{
+        return detectHeurist( win.parent );
+    }
 }

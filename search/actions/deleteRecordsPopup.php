@@ -62,7 +62,7 @@ mysql_connection_overwrite(DATABASE);
     <script type="text/javascript">
             
             function deleteSubmit(){
-                if(window.hWin.HEURIST4.msg){
+                if(window.hWin && window.hWin.HEURIST4.msg){
                     
                     window.hWin.HEURIST4.msg.showMsgDlg('<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'+
                     'Please confirm that you really wish to delete the selected records, <br/>along with all associated bookmarks?', function(){

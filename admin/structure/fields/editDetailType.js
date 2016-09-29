@@ -909,7 +909,7 @@ function DetailTypeEditor() {
                 _recreateRecTypesPreview(that.keepType, null);
 
                 if((el.value=="freetext" || el.value=="blocktext") && _dtyID<0){
-                    if(window.hWin){
+                    if(hasH4()){
                         $("#topdiv_closebtn").hide();
                     }
                     _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
@@ -978,8 +978,9 @@ function DetailTypeEditor() {
                 event.preventDefault();
                 if (event.stopPropagation) event.stopPropagation();
                 
-                if(window.hWin)
-                window.hWin.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
+                if(hasH4()){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
+                }
                 setTimeout(function(){
                         $(event.target).focus();
                 }, 750);

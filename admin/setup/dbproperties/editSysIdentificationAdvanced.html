@@ -41,7 +41,7 @@
                 var is_processed = top.HEURIST.util.getUrlParameter('was', this.location.search);
                 if(document.getElementById('divErrors').innerHTML=="" && is_processed){
 
-                    if(window.hWin){
+                    if(hasH4()){
                         window.hWin.HEURIST4.msg.showMsgFlash('Database Properties have been saved', 1000);
                     }else{
                         top.HEURIST.util.popupTinyElement(this, document.getElementById('divMessage'));

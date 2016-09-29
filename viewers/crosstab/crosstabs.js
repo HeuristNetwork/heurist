@@ -57,7 +57,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
 
     function _init(_database, _query, _query_domain)
     {
-        if(window.hWin.HEURIST4 && !window.hWin.HEURIST4.util.isempty(_query)){
+        if(!Hul.isempty(_query)){
             _isPopupMode = true;
         }else{
             $('#btnCancel').hide();

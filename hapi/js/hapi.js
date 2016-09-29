@@ -1926,7 +1926,7 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
             var terms = null;
             if (top.HEURIST && typeof top.HEURIST.terms != "undefined"){
                 terms = top.HEURIST.terms;
-            }else if (window.hWin && typeof window.hWin.HEURIST4.terms != "undefined") {
+            }else if (window.hWin && window.hWin.HEURIST4 && typeof window.hWin.HEURIST4.terms != "undefined") {
                 terms = window.hWin.HEURIST4.terms;
             }
             

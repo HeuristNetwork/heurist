@@ -135,7 +135,7 @@ function ShowReps() {
     function _init() {
         _setLayout(true, false); //aftert load show viewer only
 
-        if(window.hWin){
+        if(hasH4()){
             _sQueryMode = "all";
             $('#cbUseAllRecords1').hide();
             $('#cbUseAllRecords2').hide();
@@ -669,7 +669,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             }else{
 
                 //template.gpl
-                if(window.hWin){
+                if(hasH4()){
                     window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
                 }else{
                     window.open(baseurl+'?'+squery, 'Download'); //old way
@@ -780,7 +780,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 ];
                 mySimpleDialog.cfg.queueProperty("buttons", myButtons);*/
 
-                if(window.hWin){
+                if(hasH4()){
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         'Template was changed. Are you sure you wish to exit and lose all modifications?',
                         {'Save': function() {
@@ -1396,7 +1396,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     */
     function _insertPattern(pattern) {
 
-        if(window.hWin){
+        if(hasH4()){
             if(insertPopupID){
                 $(insertPopupID).dialog('close');
                 insertPopupID = null;
@@ -1556,7 +1556,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             document.getElementById("insert-popup-header").innerHTML = 'Inserting: <b>'+title+'</b>';
 
 
-            if(window.hWin){
+            if(hasH4()){
 
                 //show jquery dialog
                 insertPopupID = $(ele).dialog({
@@ -1579,7 +1579,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         }//__shownewpopup
 
 
-        if(window.hWin){
+        if(hasH4()){
 
             if(insertPopupID){
                 $(insertPopupID).dialog('close');
@@ -1619,7 +1619,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             inloop_level = (inloop===true)?1:0;
         }
 
-        if(window.hWin){
+        if(hasH4()){
             if(insertPopupID){
                 $(insertPopupID).dialog('close');
                 insertPopupID = null;
