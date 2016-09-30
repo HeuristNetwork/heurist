@@ -135,12 +135,12 @@ var cfg_layouts = [
     {id:'WebSearch', name:'Heurist Embed', theme:'heurist', type:'cardinal',
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false,
                 options:{buttons_mode: true},
-                css:{border:'none', 'xbackground':'none'} }]},  //saved searches
+                css:{border:'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, 
                 apps:[{appid:'h3_resultList', hasheader:false, 
                         dockable:false, dragable:false, 
                             css:{'background-color':'white'}, 
-                            options:{title:'List', view_mode:'icons', recordview_onselect: true, 
+                            options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
                             showmenu:false, showcounter:true, innerHeader: true} }]}  //search result
      },
       

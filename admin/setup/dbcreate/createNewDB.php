@@ -103,6 +103,10 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
             <!-- TODO: These all climb laboriously out to codebase then into /ext, /js etc...
             /localization does not even exist -->
+            <script>
+                window.hWin = window;
+            </script>
+            
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
             <script type="text/javascript" src="../../../hclient/core/localization.js"></script>
