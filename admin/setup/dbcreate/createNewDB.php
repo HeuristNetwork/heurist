@@ -94,6 +94,9 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
         <title>Create New Heurist Database</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
+        <!-- script type="text/javascript" src="createNewDB.js"></script -->
+        
+        
         <?php
         if($blankServer){
             ?>
@@ -118,9 +121,27 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
             <script type="text/javascript">
 
-
+                var isRegdataEntered = false;
                 var edit_data = {};
                 <?php
+
+                $isRegdataFromParams = false;
+                
+                if(@$_REQUEST['name']){
+                      $names = explode(' ', $_REQUEST['name']);
+                      $_REQUEST['ugr_FirstName'] = $names[0];
+                      if(count($names)>0) $_REQUEST['ugr_LastName'] = $names[1];
+                      $isRegdataFromParams = true;
+                }
+                if(@$_REQUEST['email']){
+                      $_REQUEST['ugr_eMail'] = $_REQUEST['email'];
+                      $isRegdataFromParams = true;
+                }
+                if(@$_REQUEST['interests']){
+                      $_REQUEST['ugr_Interests'] = $_REQUEST['interests'];
+                      $isRegdataFromParams = true;
+                }
+                                
                 //restore use registration parameters in case creation fails
                 foreach ($_REQUEST as $param_name => $param_value){
                     if(strpos($param_name,'ugr_')===0){ //&& $param_name!='ugr_Password' keep password
@@ -128,8 +149,10 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         print "edit_data['$param_name'] = '$param_value';";
                     }
                 }
+                if(!$isRegdataFromParams){
                 ?>
-                var isRegdataEntered = !$.isEmptyObject(edit_data);
+                isRegdataEntered = !$.isEmptyObject(edit_data);
+                <?php } ?>
 
                 $(document).ready(function() {
 
