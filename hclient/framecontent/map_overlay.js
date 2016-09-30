@@ -355,6 +355,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             _removeOverlayById(idx);
         }
         overlays = {};
+        
+        _adjustLegendHeight();
     }
 
     //
@@ -473,7 +475,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             legenditem.find(".overlay-legend-depend").change(_showHideLayer);
         }
 
-
+        _adjustLegendHeight();
     }      
 
     //
@@ -1090,7 +1092,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 //show custom query on top
                 _addLegendEntryForLayer(source.id, mapdata.title, mapdata.color, dependent_layers, true );
             }
-
+                 
+            _adjustLegendHeight();
 
             _initLegendListeners();
 
@@ -1149,6 +1152,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             }
 
             _initLegendListeners();
+            _adjustLegendHeight();
         }
     }
 
@@ -1438,6 +1442,26 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     };
     //end custom overlay
 
+    
+    function _adjustLegendHeight(tocollapse) {
+        
+            var legend = document.getElementById('map_legend');
+            var ch = $("#map_legend .content").height();
+            var nt = parseInt($(legend).css('bottom'), 10);
+            var mh = $('#map').height();
+            
+            if(tocollapse===true){
+                $(legend).css('top', mh-nt-60);   
+            }else{
+            
+            if(ch > mh-nt-70){
+                $(legend).css('top', 60);
+            }else{
+                $(legend).css('top', mh-nt-ch-70);        
+            }
+        
+            }
+    }
 
     /**
     * Initialization
@@ -1446,11 +1470,20 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
         mapping = _mapping;
         map = _mapping.getNativeMap();
-        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('map_legend'));
+        var legend = document.getElementById('map_legend');
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend);
+        
+        //$(legend).css('top','60px');
+        
         // Legend collapse listener
         $("#collapse").click(function(e) {
-            $(this).text() == "-" ? $(this).text("+") : $(this).text("-");  // Update text to + or -
-            $("#map_legend .content").toggle(400);
+            var tocollapse = ($(this).text() == "-");
+            tocollapse ? $(this).text("+") : $(this).text("-");  // Update text to + or -
+            
+            $("#map_legend .content").toggle();//(400);
+            
+            _adjustLegendHeight(tocollapse);
+            
         });
 
         _loadMapDocuments(startup_mapdocument_id);
