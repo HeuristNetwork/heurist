@@ -451,6 +451,7 @@ div .selected_last{
     padding: 0;
     position: relative;
 }
+
 .thumbs .recordDiv:hover {
     z-index:10;
     -moz-box-shadow:0px 3px 8px #666;
@@ -460,6 +461,14 @@ div .selected_last{
     width:134px;
     margin:3px;
 }
+
+.smaller{
+    width: 110px !important;
+} 
+.smaller:hover{
+    width: 112px !important;
+} 
+
 
 .thumbs .recordDiv .recordTitle {
     bottom: 18px;

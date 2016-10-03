@@ -59,6 +59,23 @@ TODO: Remove, enable or explain
             </tr>
         </tbody></table>
 
+    <p><b>EVENTS</b></p>                  
+    <table>
+        <tbody>
+            <?php
+            $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.EVENT_TYPE.' ORDER BY trm_Label';
+            $res = $system->get_mysqli()->query($query);
+            while($row = $res->fetch_assoc()) {
+                $filename = HEURIST_TERM_ICON_URL.$row['trm_ID'].'.png';
+                if(file_exists(HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png')){
+                    print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
+                    print '<td class="legend_text">'.$row['trm_Label'].'</td></tr>';
+
+                }
+            }
+            ?>
+        </tbody>
+    </table>
 
     <p><b>PEOPLE</b></p>
     <table>
@@ -81,22 +98,5 @@ TODO: Remove, enable or explain
         </tbody>
     </table>
 
-    <p><b>EVENTS</b></p>
-    <table>
-        <tbody>
-            <?php
-            $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.EVENT_TYPE.' ORDER BY trm_Label';
-            $res = $system->get_mysqli()->query($query);
-            while($row = $res->fetch_assoc()) {
-                $filename = HEURIST_TERM_ICON_URL.$row['trm_ID'].'.png';
-                if(file_exists(HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png')){
-                    print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
-                    print '<td class="legend_text">'.$row['trm_Label'].'</td></tr>';
-
-                }
-            }
-            ?>
-        </tbody>
-    </table>
 </div>
 

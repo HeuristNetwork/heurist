@@ -155,7 +155,7 @@ a.menuitem {
 
 
 .ui-widget-header{
-    background: #7EF581 !important;
+    background: black !important; /* was #7EF581 */
     color: white;
 }
 .ui-widget-content{
