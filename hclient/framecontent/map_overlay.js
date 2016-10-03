@@ -293,6 +293,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
 
             var selBookmakrs = document.getElementById('selMapBookmarks')                  
+            selBookmakrs.onmousedown = function(){ selBookmakrs.selectedIndex = 0; }
             selBookmakrs.onchange = function(){
                 var val = $(selBookmakrs).val();
                 if(val>=0){
