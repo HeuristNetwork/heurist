@@ -713,6 +713,7 @@ $.widget( "heurist.svs_list", {
             //titlesTabbable: false,     // Add all node titles to TAB chain
             source: treeData,
             quicksearch: true,
+            selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
 
             renderNode: function(event, data) {
                 // Optionally tweak data.node.span
@@ -731,8 +732,34 @@ $.widget( "heurist.svs_list", {
                         //s = '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+window.hWin.HAPI4.basePathV4+'hclient/assets/fa-cubes.png&quot;);">';
                     }else{
 
-                        var s_hint = '';
-
+                        var s_hint = '';  //NOT USED this hint shows explanatory text about mode of search:faceted,with rules,rules only
+                        var s_hint2 = ''; //this hint shows notes and RAW text of query,rules 
+                        
+                        var prms = null;
+                        if(node.data.url){
+                            s_hint2 = node.title;
+                            prms = Hul.parseHeuristQuery(node.data.url);
+                        }else{
+                            s_hint2 = node.key+':'+node.title;
+                            if(window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key]){
+                                var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key];
+                                if(!node.data.isfaceted){
+                                    var qsearch = svs[_QUERY];
+                                    prms = Hul.parseHeuristQuery(qsearch);
+                                }
+                            }
+                        }
+                        if(prms!=null){
+                            if(!Hul.isempty(prms.notes)){
+                                    s_hint2 = s_hint2 + '\nNotes: '+prms.notes;        
+                            }
+                            if(!Hul.isempty(prms.q)){
+                                    s_hint2 = s_hint2 + '\nFilter: '+prms.q;        
+                            }
+                            if(!Hul.isempty(prms.rules)){
+                                    s_hint2 = s_hint2 + '\nRules: '+prms.rules;
+                            }
+                        }
 
                         if(node.data.isfaceted){
                             s = '<span class="ui-icon ui-icon-box svs-type-icon" title="faceted" ></span>';
@@ -758,8 +785,8 @@ $.widget( "heurist.svs_list", {
                             //'<div style="display:inline-block;">'+node.title+'</div>'
                             //
                             $span.find("> span.fancytree-title").html(s+' '+node.title);
-                            //.attr('title', s_hint);
                         }
+                        $span.attr('title', s_hint2)
                     }
 
                     //<span class="fa-ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span>
@@ -789,7 +816,14 @@ $.widget( "heurist.svs_list", {
                             isfaceted = data.node.data.isfaceted;
                         }
                     }
+                    //data.node.setSelected(true);
+                    //remove highlight from others
+                    that.search_tree.find('li.ui-state-active').removeClass('ui-state-active');
                     that._doSearch2( qname, qsearch, isfaceted, event.target );
+                    setTimeout(function(){
+                            that.search_tree.find('div.svs-contextmenu2').parent().addClass('leaves');
+                            $(data.node.li).css('border','none').addClass('ui-state-active leaves');
+                    },500);
                 }
 
             }
@@ -1052,9 +1086,32 @@ $.widget( "heurist.svs_list", {
             });
 
             $.each( tree.find('li'), function( idx, item ){
-                $('<div class="svs-contextmenu ui-icon ui-icon-pencil"></div>')
+                $('<div class="svs-contextmenu2 ui-icon ui-icon-pencil"></div>')
                 .click(function(event){ tree.contextmenu("open", $(event.target) ); window.hWin.HEURIST4.util.stopEvent(event); return false;})
                 .appendTo(item);
+                
+                if($(item).find('span.fancytree-folder').length==0) 
+                {
+                $(item).addClass('leaves');
+
+                $(item).mouseenter( 
+                function(event){ 
+                        var ele = $(item).find('.svs-contextmenu2');
+                        ele.css('display','inline-block'); 
+                }).mouseleave( 
+                function(event){ 
+                        var ele = $(item).find('.svs-contextmenu2');
+                        ele.hide();
+                });
+                /*
+                $(item).hover( 
+                function(event){ 
+                        $(event.target).find('.svs-contextmenu2').css('display','inline-block'); 
+                },
+                function(event){ 
+                        $(event.target).find('.svs-contextmenu2').hide();
+                });*/
+                }
             })
 
 
