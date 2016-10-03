@@ -144,6 +144,10 @@ $(document).ready(function() {
 	$(container).find('[name="savebutton"]').css('color','lightgray').prop('disabled','disabled');
     
 
+    $('#hint_more_info1').click(function(){ top.HEURIST.util.popupElement(window, document.getElementById('div_more_info1'), 
+                {'title':'More info', 'close-on-blur':true}); });
+    $('#hint_more_info2').click(function(){ top.HEURIST.util.popupElement(window, document.getElementById('div_more_info2'),
+                {'title':'More info', 'close-on-blur':true}); });
 	
 	$('.input-cell > .prompt').hide(); //hide help text
 	$('.input-header-cell').css({'width':'0','min-width':'15ex','font-size':'0.8em'});
@@ -162,6 +166,8 @@ $(document).ready(function() {
     $('.file-resource-div > .resource-title').css(csobj);
     $('.resource-div > .resource-title').css({'font-size':'0.8em','width':'20ex'});
     $('.temporal-div img').css({'vertical-align':'baseline'});
+    
+    $('.separator > .input-header-cell').css({'text-align':'right','min-width':'15ex'});
 
     $('input[name="ft_type"]').change(function(){
         $('#btnSelect').removeProp('disabled');
