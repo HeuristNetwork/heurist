@@ -1747,10 +1747,16 @@ class LinkedFromParentPredicate extends Predicate {
         $select = 'exists (select bd.dtl_RecID  ';
         */
         //NEW  ---------------------------
+        
+        if($rty_ID==1){ //special case for relationship records
+            $add_where = 'rd.rec_RecTypeID='.$rty_ID.' and rl.rl_RelationID=rd.rec_ID';
+        }else{
+            $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'')
+            . ' rl.rl_SourceID=rd.rec_ID and '
+            . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+        }
+        
         $add_from  = 'recLinks rl ';
-        $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'')
-        . ' rl.rl_SourceID=rd.rec_ID and '
-        . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
 
@@ -1765,7 +1771,8 @@ class LinkedFromParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where
+                        .' '.$query["sort"].$query["limit"].$query["offset"].')';
 
         }else{
             
@@ -1778,9 +1785,11 @@ class LinkedFromParentPredicate extends Predicate {
                 $add_where = '';
             }
             
-            $add_where = $add_where
-                . ' rl.rl_TargetID=rd.rec_ID and '
-                . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+            $add_where = $add_where.' rl.rl_TargetID=rd.rec_ID ';
+            if($rty_ID!=1){
+                $add_where = $add_where . ' and ' 
+                 .(($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );    
+            }    
             
             $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
         }
@@ -1835,10 +1844,14 @@ class LinkedToParentPredicate extends Predicate {
         */
 
         //NEW  ---------------------------
+        if($rty_ID==1){ //special case for relationship records
+            $add_where = 'rd.rec_RecTypeID='.$rty_ID.' and rl.rl_RelationID=rd.rec_ID';
+        }else{
+            $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'')
+                . ' rl.rl_TargetID=rd.rec_ID and '
+                . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+        }
         $add_from  = 'recLinks rl ';
-        $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'')
-        . ' rl.rl_TargetID=rd.rec_ID and '
-        . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_SourceID ';
 
@@ -1868,9 +1881,12 @@ class LinkedToParentPredicate extends Predicate {
                 $add_where = '';
             }
             
-            $add_where = $add_where
-                . ' rl.rl_SourceID=rd.rec_ID and '
-                . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+            $add_where = $add_where.' rl.rl_SourceID=rd.rec_ID ';
+            if($rty_ID!=1){
+                $add_where = $add_where . ' and ' 
+                 .(($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );    
+            }    
+            
             
             $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
 
