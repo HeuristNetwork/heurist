@@ -424,8 +424,13 @@ class System {
         
         if($status==HEURIST_REQUEST_DENIED){
             $sysmsg = $this->get_user_id();
-        }
-        
+        }else if($status==HEURIST_DB_ERROR){
+            error_log($message.' '.$sysmsg);
+            if(!$this->is_dbowner()){ //reset to null if not database owner
+                $sysmsg = null;
+            }
+        }            
+                    
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
         return $this->errors;
     }

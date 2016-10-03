@@ -763,7 +763,8 @@ if(@$params['debug']) echo $query."<br>";
 
             $fres = $mysqli->query('select found_rows()');
             if (!$fres)     {
-                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error (retrieving number of records)', $mysqli->error);
+                $response = $system->addError(HEURIST_DB_ERROR, 
+                            $savedSearchName.'Search query error (retrieving number of records)', $mysqli->error);
             }else{
 
                 $total_count_rows = $fres->fetch_row();
@@ -859,7 +860,9 @@ if(@$params['debug']) echo $query."<br>";
 
 
                             if (!$res_det){
-                                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error (retrieving details)', $mysqli->error);
+                                $response = $system->addError(HEURIST_DB_ERROR, 
+                                                $savedSearchName.'Search query error (retrieving details)', 
+                                                $mysqli->error);
                                 return $response;
                             }else{
                                 
