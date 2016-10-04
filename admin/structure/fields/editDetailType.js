@@ -873,7 +873,7 @@ function DetailTypeEditor() {
         var isInitialCall = (event===null);
 
         //prevent setting outdated types for new field type
-        if(!isInitialCall && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
+        if( event!=null && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
             top.HEURIST.util.showError('You selected an outdated type. It is not allowed anymore');
             if(that.keepType){
                 el.value = that.keepType;
@@ -888,7 +888,7 @@ function DetailTypeEditor() {
         Dom.get("pnl_fieldsetmarker").style.display = "none";
 
         var changeToNewType = true;
-        if( ((that.keepType==="resource") || (that.keepType==="relmarker") || (that.keepType==="enum")
+        if( event!=null && ((that.keepType==="resource") || (that.keepType==="relmarker") || (that.keepType==="enum")
             || (that.keepType==="relationtype") || (that.keepType==="fieldsetmarker"))
             && el.value!==that.keepType){
             changeToNewType = confirm("If you change the type to '"+el.value+	//saw TODO change this to the selected options text
@@ -898,7 +898,9 @@ function DetailTypeEditor() {
 
         if(changeToNewType) {
             //clear hidden fields
-            if (!isInitialCall){
+            //if (!isInitialCall){
+            if(that.keepType!=el.value){
+                
                 Dom.get("dty_JsonTermIDTree").value = "";
                 Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
                 Dom.get("dty_PtrTargetRectypeIDs").value = "";
@@ -914,10 +916,10 @@ function DetailTypeEditor() {
                     }
                     _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
                 }
-
             }
         }else{
             el.value = that.keepType;  //rollback
+            Dom.get("typeValue").value = top.HEURIST.detailTypes.lookups[that.keepType];
         }
 
         // setting visibility
