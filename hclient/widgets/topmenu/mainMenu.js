@@ -51,7 +51,7 @@ $.widget( "heurist.mainMenu", {
 
 
         $("<div>")
-            .css({'font-size':'0.8em', 'text-align':'center', 'padding-top':'32px', 'width':'100%'})
+            .css({'font-size':'0.8em', 'text-align':'center', 'margin-left': '100px', 'padding-top':'16px', 'width':'100%'})
             .text("v"+window.hWin.HAPI4.sysinfo.version).appendTo( this.div_logo );
 
         // bind click events

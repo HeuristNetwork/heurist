@@ -59,7 +59,7 @@ $.widget( "heurist.search", {
         $.getScript(window.hWin.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'5.8em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
+        this.element.css({'height':'5.8em', 'min-width':'1100px'}); //, 'border-bottom':'1px solid lightgray'
         if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
             this.element.addClass('ui-heurist-header1');
         }else{
@@ -128,7 +128,7 @@ $.widget( "heurist.search", {
         
         //header-label
         this.div_search_header = $('<div>')
-        .css({'width':'100px','text-align':'right'})
+        .css({'width':'110px','text-align':'right'})
         .addClass('div-table-cell')
         .appendTo( this.div_search );
         $( "<label>" ).text(window.hWin.HR("Filter"))
@@ -195,17 +195,17 @@ $.widget( "heurist.search", {
 
         this.div_search_as_user = $('<div>')
         .addClass('div-table-cell logged-in-only')
-        .css({'min-width': '150px'})
+        .css({'padding-right': '10px'})
         .appendTo( this.div_search );
 
         this.btn_search_as_user = $( "<button>", {
             text: window.hWin.HR("filter"), title: "Apply the filter/search in the search field and display results in the central panel below"
         })
-        .css({'width':'10em', 'vertical-align':'top'})
+        .css({'vertical-align':'top'})  //'width':'10em', 
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1')
-        .button({icons: {
-            secondary: "ui-icon-search"
+        .button({text:false, icons: {
+            secondary: 'ui-icon-filter'  //was "ui-icon-search"
         }});
 
         this.btn_search_domain = $( "<button>", {
@@ -215,7 +215,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1')
         .button({icons: {
-            primary: "ui-icon-triangle-1-s"
+            primary: 'ui-icon-carat-1-s' //"ui-icon-triangle-1-s"
             }, text:false});
 
 
@@ -246,7 +246,7 @@ $.widget( "heurist.search", {
             click: function() {
                 $('.ui-menu').not('.horizontalmenu').hide(); //hide other
                 var menu = $( this.menu_search_domain )
-                .css('width', this.div_search_as_user.width())
+                .css('width', '100px')     //was this.div_search_as_user.width()
                 .show()
                 .position({my: "right top", at: "right bottom", of: this.btn_search_domain });
                 $( document ).one( "click", function() { menu.hide(); });
@@ -353,8 +353,10 @@ $.widget( "heurist.search", {
 
         this.div_buttons = $('<div>')
         .addClass('div-table-cell logged-in-only')
-        .css({'text-align': 'center', 'width':'50px'}) // 'width': '56px',
+        .css({'text-align': 'center'}) // , 'width':'50px'
         .insertBefore( this.div_search_as_guest );
+        
+        /* according to new design 2016-10-05 - outdated
 
         // Quick search builder dropdown form
         var link = $('<button>')
@@ -365,24 +367,14 @@ $.widget( "heurist.search", {
             title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
         .addClass('ui-heurist-btn-header1')
         .css({'width':'40px','vertical-align': '-4px'})  //'padding':'0 1.0em',
-        .appendTo(this.div_buttons);
+        .appendTo(this.div_buttons);*/
 
-        this._on( link, {  click: this.showSearchAssistant });
-
-
-        // Info button
-        this.div_buttons = $('<div>')
-        .addClass('div-table-cell')
-        .css({'text-align': 'center','width': '20px'}) // ,
-        .insertBefore( this.div_search_as_guest );
-
-        var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language'})
-        .css({'padding-right':'1.5em','display':'inline-block'})
+        var link = $('<a>',{href:'#', 
+        title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
+        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px'})
         .addClass('ui-icon ui-icon-gear')
         .appendTo(this.div_buttons);
-        this._on( link, {  click: function(){
-            window.open('context_help/advanced_search.html','_blank');
-        } });
+        this._on( link, {  click: this.showSearchAssistant });
 
         this.search_assistant = null;
 
@@ -397,6 +389,21 @@ $.widget( "heurist.search", {
             //.val(value)
             .appendTo( this.div_search );
         }
+        
+        // Info button - moved after search buttons
+        this.div_buttons = $('<div>')
+        .addClass('div-table-cell')
+        .css({'text-align': 'center'}) // ,     ,'width': '20px'
+        .appendTo( this.div_search ); //.insertBefore( this.div_search_as_guest );
+
+        var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language', text:'help'})
+        .css({'display':'inline-block','text-decoration':'none','color':'gray', 'outline':0})
+        //.addClass('ui-icon ui-icon-gear') 'padding-right':'1.5em',
+        .appendTo(this.div_buttons);
+        this._on( link, {  click: function(){
+            window.open('context_help/advanced_search.html','_blank');
+        } });
+
 
         // bind click events
         this._on( this.btn_search_as_user, {
