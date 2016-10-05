@@ -187,9 +187,9 @@ function jump_sessions() {
 
     foreach ($copy_vars as $varname) {
         if($tmp[$varname]){
-            $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname] = $tmp[$varname];   
+            $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname] = $tmp[$varname];
         }
-   }
+    }
 }
 
 /**
@@ -318,33 +318,41 @@ function outWarning($role, $message){
     ?>
     <html>
         <head>
-            <link rel=stylesheet href='../../../common/css/global.css'>
+            <!--<link rel=stylesheet href='../../../common/css/global.css'> -->
+            <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+            <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.js"></script>
+            <script src="../../../hclient/framecontent/databaseAdmin.js"></script>
+            <script>
+
+                $(document ).ready(function() {
+                    $('#errorMsg').show(2000, function(){
+                        //Toast.defaults.displayDuration= 2000;
+                        toastr.options = {
+                            "timeOut" : 2000,
+                            "positionClass": "toast-top-full-width"
+                        };
+                        toastr.info("you don't have required permission to perform action");
+
+                    });
+
+                });
+            </script>
             <meta http-equiv="content-type" content="text/html; charset=utf-8">
-           <!-- <style>
-                html {
-                    position: absolute;
-                    width: 400px;
-                    height: 400px;
-                }
-            </style> -->
+
         </head>
 
         <body>
             <div class=wrap>
-                <div id=errorMsg style="width:400px; height:400px;position:absolute">
-                    <span>You do not have the permission to perform this action</span>
+                <div id=errorMsg>
+                    <!--  <span>You do not have the permission to perform this action</span>
                     <p>
-                        <a href="<?php echo HEURIST_BASE_URL;?>common/connect/login.php?logout=1&db=<?php echo HEURIST_DBNAME;?>"
-                            target="_top">Log out / log in again</a>
-                    </p>
+                    <a href="<?php //echo HEURIST_BASE_URL;?>common/connect/login.php?logout=1&db=<?php// echo HEURIST_DBNAME;?>"
+                    target="_top">Log out / log in again</a>
+                    </p>-->
                 </div>
             </div>
-            <script>
-                $(document ).ready(function() {
-                    $("errorMsg").delay(1000).fadeOut("slow");
 
-                });
-            </script>
         </body>
     </html>
     <?php
