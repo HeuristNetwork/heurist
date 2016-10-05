@@ -69,7 +69,7 @@ if(defined('LOGIN_REQUIRED') && !$system->is_logged_in()){
     exit();
 
 
-}else if(defined('MANAGER_REQUIRED') && !$system->is_admin() &!$system->is_member()){ //A member should also be able to creatte and open database
+}else if(defined('MANAGER_REQUIRED') && !$system->is_admin() & !$system->is_member(0)){ //A member should also be able to creatte and open database
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Administrator of group \'Database Managers\''));
     exit();
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){

@@ -69,7 +69,7 @@ $.widget( "heurist.mainMenu", {
         });
 
         this.div_dbname = $( "<div>")
-            .css({'float':'left', 'padding-left':'2em', 'margin-top':'2em', 'text-align':'center' })
+            .css({'float':'left', 'padding-left':'2em', 'margin-top':'1.6em', 'text-align':'center' })
             .appendTo(this.element);
             
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.sysinfo.dbrecent)){

@@ -1093,7 +1093,7 @@ function hLayout(args) {
                 $(tabb).children('.ui-tabs-panel[layout_id!="FAP"]').css({position:'absolute', top:'4.01em',
                         left:0,bottom:'0.2em',right:0, 'min-width':'75em',overflow:'hidden'});
                 
-                tabheader.find('a').css({'width':'100%','float':'none','outline':0});
+                tabheader.find('a').css({'width':'100%','outline':0});
                 
                 var lis = tabheader.children('li');
                 var count_lis = lis.length;
@@ -1102,7 +1102,7 @@ function hLayout(args) {
                             'border':'none',
                             'font-weight': 'bold',
                             //'font-size': '1.2em',
-                            'padding': '10px 10px 0 0',
+                            'padding': '10px 20px 0 0',
                             'margin': '0px 0px 0px -4px',
                             'z-index': 3,
                             'background': 'url(hclient/assets/tab_shape.png)',

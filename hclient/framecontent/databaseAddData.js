@@ -52,7 +52,7 @@ function hDatabaseAddData() {
 
         _initLinks(parentdiv);
 
-        //parentdiv.accordion('option', 'active', 1); //STRUCTURE
+        $(parentdiv[0]).accordion('option', 'active', 0); //KEYBOARD
         $('#menulink-add-record').click();
     }
     
