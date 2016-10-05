@@ -62,6 +62,8 @@ $.widget( "heurist.search", {
         this.element.css({'height':'5.8em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
         if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
             this.element.addClass('ui-heurist-header1');
+        }else{
+            this.element.addClass('ui-widget-content');
         }
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',

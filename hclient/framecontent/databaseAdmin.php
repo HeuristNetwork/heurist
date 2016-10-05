@@ -40,10 +40,9 @@ require_once(dirname(__FILE__)."/initPage.php");
 <style>
 </style>
 </head>
-<body style="background-color:white">
-    <div style="width:280px;top:0;bottom:0;left:0;position:absolute;padding:5px;">
-        <!-- <ul id="menu_container" style="margin-top:10;padding:2px"></ul> -->
-        <div class="accordion_pnl" style="margin-top:10px;padding:2px">
+<body class="ui-widget-content">
+    <div style="width:280px;top:0;bottom:0;left:0;position:absolute;">
+        <div class="accordion_pnl" style="margin-top:21px">
             <h3>DATABASE</h3>
             <div>
                 <ul>
@@ -164,7 +163,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         </div>
         
     </div>
-    <div style="left:300px;right:0;top:0;bottom:20;position:absolute;overflow:auto;padding:20px 10px 0 0;">
+    <div style="left:281px;right:0;top:0;bottom:20;position:absolute;overflow:auto;padding:20px 10px 0 0;">
         <iframe id="frame_container">
         </iframe>
     </div>

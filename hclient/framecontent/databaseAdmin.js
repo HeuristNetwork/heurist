@@ -45,23 +45,19 @@ function hDatabaseAdmin() {
     //
     function _init(){
 
-        //init buttons
-        /*$('#btnVisualizeStructure')
-        .button({label: window.hWin.HR("Visualize Structure")})
-        .click(function(e) {
-        _showDbSummary()
-        });
-        */                
-
         var parentdiv = $('.accordion_pnl').accordion({
             heightStyle: "content",
             collapsible: true, 
-            active: false
+            active: false,
+            icons:{"header": "ui-icon-carat-1-e", "activeHeader": "ui-icon-carat-1-s" }
         });
+        
+        parentdiv.find('h3').addClass('ui-heurist-header2');
 
         parentdiv.find('div')
-        .addClass('menu-list')
-        .css({'border-color':'white !important', 'background':'none'});   // ui-corner-all
+        .addClass('menu-list');
+        //.css({'background':'none'});   // ui-corner-all
+        
         $( parentdiv ).find('h3')
         .css({border:'none', 'background':'none'});
 
@@ -144,14 +140,14 @@ function hDatabaseAdmin() {
             //check if login
             window.hWin.HAPI4.SystemMgr.is_logged(function(){
                 //window.hWin.HEURIST4.msg.showDialog(url, options);
-                $('.accordion_pnl').find('a').removeClass('selected'); //was #menu_container
-                link.addClass('selected');
+                $('.accordion_pnl').find('a').parent().removeClass('item-selected'); //was #menu_container
+                link.parent().addClass('item-selected');
                 $('#frame_container').attr('src', url); 
             });
         }else{
             //window.hWin.HEURIST4.msg.showDialog(url, options);
-            $('.accordion_pnl').find('a').removeClass('selected');
-            link.addClass('selected');
+            $('.accordion_pnl').find('a').parent().removeClass('item-selected');
+            link.parent().addClass('item-selected');
             $('#frame_container').attr('src', url); 
         }        
         

@@ -82,7 +82,7 @@ $.widget( "heurist.mainMenu", {
             
             var wasCtrl = false;
             var selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);        
-            $(selObj).css({'font-size':'1.3em', 'font-weight':'bold','border':'none' })
+            $(selObj).css({'font-size':'1.3em', 'font-weight':'bold','border':'none', 'min-width':'150px' })
             .click(function(event){
                 wasCtrl = event.shiftKey;
 //console.log('1'+wasCtrl+'  '+event.metaKey);                
@@ -130,14 +130,17 @@ $.widget( "heurist.mainMenu", {
         .addClass('logged-in-only')
         .appendTo(this.element);
 
+        /* moved to Profile menu
         var logout = $('<a>',{text: 'log out', href:'#' })
         .css({'font-size':'1.1em', 'padding-top':'0.5em', 'padding-left':'0.5em', 'float':'right'})
         .appendTo(this.divMainMenu);
         this._on(logout, { click: this.logout });
 
+        //current user name is displayed as Profile menu header
         this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'})
         .css({'font-size':'1.1em', 'padding-top':'0.5em', 'float':'right'})
         .appendTo(this.divMainMenu);
+        */
 
 
         this.divMainMenuItems = $('<ul>')
@@ -264,7 +267,7 @@ $.widget( "heurist.mainMenu", {
     _refresh: function(){
 
         if(window.hWin.HAPI4.is_logged()){
-            this.divCurrentUser.html( window.hWin.HAPI4.currentUser.ugr_FullName );
+            //this.divCurrentUser.html( window.hWin.HAPI4.currentUser.ugr_FullName );
             //': <a href="../../common/connect/login.php?logout=1&amp;db='+window.hWin.HAPI4.database+'">log&nbsp;out</a>');
 
             $(this.element).find('.logged-in-only').show();
@@ -278,7 +281,7 @@ $.widget( "heurist.mainMenu", {
             $(this.element).find('.logged-out-only').show();
 
 
-            this.divCurrentUser.empty();
+            //this.divCurrentUser.empty();
         }
 
     },
@@ -351,6 +354,13 @@ $.widget( "heurist.mainMenu", {
                 }
                 //that._onPopupLink
             });
+        }else if(name=='Profile'){
+            
+            link = $('<div><span class="ui-icon ui-icon-user" style="color:white;">'
+            +'</span><a href="#" style="padding:2px 24px 0 2px">'
+            +window.hWin.HAPI4.currentUser.ugr_FullName
+            +'</a><span class="ui-icon ui-icon-carat-1-s"  style="color:white;" id="carat1"></span></div>');
+                             
         }else{
             link = $('<a>',{
                 text: window.hWin.HR((name=='Help_lo'?'Help':name)), href:'#'
@@ -360,12 +370,14 @@ $.widget( "heurist.mainMenu", {
         this['btn_'+name] = $('<li>').append(link)
         .appendTo( parentdiv?parentdiv:this.divMainMenuItems );
 
+        
         // Load content for all menus except Database when user is logged out
         if(name!='Database_lo'){
 
             this['menu_'+name] = $('<ul>')
-            .load(window.hWin.HAPI4.basePathV4+'hclient/widgets/topmenu/mainMenu'+
-             (name=='Help_lo'?'Help':name)+'.html', function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
+            .load(
+                window.hWin.HAPI4.basePathV4+'hclient/widgets/topmenu/mainMenu'+(name=='Help_lo'?'Help':name)+'.html',
+              function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
              
                 that['menu_'+name].find('.list-menu-only').hide();
              
@@ -401,6 +413,11 @@ $.widget( "heurist.mainMenu", {
             mouseleave : function(){_hide(this['menu_'+name])}
         });
 
+        var ele = $('#carat1');
+        if(ele.length>0){
+            ele.css({'left': (ele.parent().width())+'px'});// (link.width()-16+'px !important')});
+        }
+        
 
     },
 

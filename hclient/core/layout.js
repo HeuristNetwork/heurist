@@ -758,9 +758,9 @@ function hLayout(args) {
             }else if(app.widgetname=='app_timemap'){
                 //DEBUG
                 widget = $content.app_timemap( options );
-            }else if(app.widgetname=='connections'){
+            }else if(app.widgetname=='mainMenu'){
                 //DEBUG
-                widget = $content.connections( options );
+                widget = $content.mainMenu( options );
             }else if(app.widgetname=='svs_list'){
                     //DEBUG
                     widget = $content.svs_list( options ); //options
@@ -1072,7 +1072,20 @@ function hLayout(args) {
             var tabb = $container.find('div[layout_id="main_header_tab"]');
             if(tabb.length>0){
                 
-                $(tabb).tabs({activate: function( event, ui ) { $(window).resize(); }});
+                $(tabb).tabs({activate: function( event, ui ) { 
+                        $(window).resize(); 
+                        //change/restore z-index and background color
+                        $(ui.newTab[0]).css({'z-index': ui.newTab.attr('data-zmax'),
+                                       'background': 'url(hclient/assets/tab_shape_sel.png)',
+                            'background-size': 'cover',
+                            'background-repeat': 'no-repeat',
+                        });
+                        $(ui.oldTab[0]).css({'z-index': ui.newTab.attr('data-zkeep'),
+                                       'background': 'url(hclient/assets/tab_shape.png)',
+                            'background-size': 'cover',
+                            'background-repeat': 'no-repeat',
+                        });   
+                }});
                 
                 var tabheader = $(tabb).children('ul');
                 tabheader.css({'border':'none', 'background':'#8ea9b9', 'padding-top':'1em'})
@@ -1080,21 +1093,31 @@ function hLayout(args) {
                 $(tabb).children('.ui-tabs-panel[layout_id!="FAP"]').css({position:'absolute', top:'4.01em',
                         left:0,bottom:'0.2em',right:0, 'min-width':'75em',overflow:'hidden'});
                 
+                tabheader.find('a').css({'width':'100%','float':'none','outline':0});
+                
                 var lis = tabheader.children('li');
                 var count_lis = lis.length;
                     lis.css({
+                            'outline':0,
+                            'border':'none',
                             'font-weight': 'bold',
-                            'font-size': '1.2em',
-                            'border': '2px solid black',
-                            'border-bottom-width': 0,
-                            'border-top-right-radius': '8px',
-                            'padding':'4 8 4 8',
-                            'margin':'0 0 0 -4px'});
+                            //'font-size': '1.2em',
+                            'padding': '10px 10px 0 0',
+                            'margin': '0px 0px 0px -4px',
+                            'z-index': 3,
+                            'background': 'url(hclient/assets/tab_shape.png)',
+                            'background-size': 'cover',
+                            'background-repeat': 'no-repeat',
+                            'text-align': 'center',
+                            'width': '180px',
+                            'height': (navigator.userAgent.indexOf('Firefox')<0)?'25px':'35px' });
                             
                 lis.each(function(idx,item){
-                   $(item).css('z-index',count_lis-idx);
+                   $(item).css('z-index', count_lis - idx);
+                   $(item).attr('data-zkeep', count_lis - idx);
+                   $(item).attr('data-zmax', count_lis+1);
                    if(idx>0){
-                       $(item).css({'padding-left':12, 'border-left':'none'});
+                       $(item).css({'padding-left':'12px', 'margin-left':'-12px', 'border-left':'none'});
                    }
                 });
                 

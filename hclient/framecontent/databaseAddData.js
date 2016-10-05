@@ -31,12 +31,16 @@ function hDatabaseAddData() {
         var parentdiv = $('.accordion_pnl').accordion({
             heightStyle: "content",
             collapsible: true, 
-            active: false
+            active: false,
+            icons:{"header": "ui-icon-carat-1-e", "activeHeader": "ui-icon-carat-1-s" }
         });
+        
+        parentdiv.find('h3').addClass('ui-heurist-header2');
+        
 
         parentdiv.find('div')
-        .addClass('menu-list')
-        .css({'border-color':'white !important', 'background':'none'});   // ui-corner-all
+        .addClass('menu-list');
+        
         $( parentdiv ).find('h3')
         .css({border:'none', 'background':'none'});
 
@@ -164,8 +168,8 @@ function hDatabaseAddData() {
 
         if(link.attr('id')=='menulink-add-record'){
                 
-                $('.accordion_pnl').find('a').removeClass('selected');
-                link.addClass('selected');
+                $('.accordion_pnl').find('a').parent().removeClass('item-selected');
+                link.parent().addClass('item-selected');
                 $('#frame_container2').attr('src', url); 
                 event.preventDefault();
                 return false;
@@ -174,8 +178,8 @@ function hDatabaseAddData() {
         
             //check if login
             window.hWin.HAPI4.SystemMgr.is_logged(function(){
-                $('.accordion_pnl').find('a').removeClass('selected');
-                link.addClass('selected');
+                $('.accordion_pnl').find('a').parent().removeClass('item-selected');
+                link.parent().addClass('item-selected');
                 $('#frame_container2').attr('src', url); 
                 event.preventDefault();
                 return false;

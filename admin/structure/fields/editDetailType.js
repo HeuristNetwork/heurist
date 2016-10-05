@@ -870,7 +870,6 @@ function DetailTypeEditor() {
     function _onChangeType(event){
 
         var el = Dom.get("dty_Type"); //event.target;
-        var isInitialCall = (event===null);
 
         //prevent setting outdated types for new field type
         if( event!=null && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
@@ -898,7 +897,6 @@ function DetailTypeEditor() {
 
         if(changeToNewType) {
             //clear hidden fields
-            //if (!isInitialCall){
             if(that.keepType!=el.value){
                 
                 Dom.get("dty_JsonTermIDTree").value = "";
