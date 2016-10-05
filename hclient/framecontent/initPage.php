@@ -62,15 +62,17 @@ $login_warning = 'To perform this action you must be logged in';
 
 //
 // to limit access to particular page
-// define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php"); 
+// define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
 //
-if(defined('LOGIN_REQUIRED') && !$system->is_logged_in()){    
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning));
+if(defined('LOGIN_REQUIRED') && !$system->is_logged_in()){
+    //header('Location: '.ERROR_REDIR); //'&msg='.rawurlencode($login_warning)); //No Need to show error message when login is required, login page ia already rendered
     exit();
-}else if(defined('MANAGER_REQUIRED') && !$system->is_admin()){    
+
+
+}else if(defined('MANAGER_REQUIRED') && !$system->is_admin() &!$system->is_member()){ //A member should also be able to creatte and open database
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Administrator of group \'Database Managers\''));
     exit();
-}else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){    
+}else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Database Owner'));
     exit();
 }
@@ -87,149 +89,149 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
     $cssLink = 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'.$layout_theme.'/jquery-ui.css';
 }
 
-// BASE tag is convenient however it does not suit 
-// reason: some jquery widgets uses href (tabcontrol for example) 
+// BASE tag is convenient however it does not suit
+// reason: some jquery widgets uses href (tabcontrol for example)
 // <base href="<?php echo PDIR;">
 
 ?>
 <html>
-    <head>
-        <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<head>
+<title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-        <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
-        <meta content="telephone=no" name="format-detection">
-        
+<meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+<meta content="telephone=no" name="format-detection">
 
-        <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
-        
+
+<link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+
 <script>
-var _time_debug = new Date().getTime() / 1000;
-var _time_start = _time_debug;
-//console.log('ipage start');
+    var _time_debug = new Date().getTime() / 1000;
+    var _time_start = _time_debug;
+    //console.log('ipage start');
 
-//find heurist object in parent windows or init new one if current window is a top most
-function _detectHeurist( win ){
-    if(win.HEURIST4){ //defined
-        return win;
-    }
+    //find heurist object in parent windows or init new one if current window is a top most
+    function _detectHeurist( win ){
+        if(win.HEURIST4){ //defined
+            return win;
+        }
 
-    try{
-        win.parent.document;
-    }catch(e){
-        // not accessible - this is cross domain
-        return win;
-    }    
-    if (win.top == win.self) { 
-        //we are in frame and this is top most window and Heurist is not defined 
-        //lets current window will be heurist window
-        return window;
-    }else{
-        return _detectHeurist( win.parent );
+        try{
+            win.parent.document;
+        }catch(e){
+            // not accessible - this is cross domain
+            return win;
+        }
+        if (win.top == win.self) {
+            //we are in frame and this is top most window and Heurist is not defined
+            //lets current window will be heurist window
+            return window;
+        }else{
+            return _detectHeurist( win.parent );
+        }
     }
-}
     //detect wether this window is top most or inside frame
     window.hWin = _detectHeurist(window);
 
     /*if (window.top != window.self) {
-        //this is frame
-    } else { 
-        //top most window
-        window.h4win = window.top;
-    }*/ 
+    //this is frame
+    } else {
+    //top most window
+    window.h4win = window.top;
+    }*/
 
 
-</script>       
+</script>
 
 <?php
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
-?>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-file-upload/js/jquery.fileupload.js"></script>
-<?php
+    ?>
+    <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-file-upload/js/jquery.fileupload.js"></script>
+    <?php
 }else{
-?>
-        <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
-        <script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.fileupload.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.iframe-transport.min.js"></script>
-<?php
+    ?>
+    <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.fileupload.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.iframe-transport.min.js"></script>
+    <?php
 }
 ?>
 
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-        
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 
-        <!-- for debug  remark it and use getMultiScripts for production -->
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/search_minimal.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
-        
-        <!-- loaded by demand script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script -->
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
-        
-    <script type="text/javascript">
-    
-        // overwrite the standard jquery show method 
-        // apply listener in widgets on this page to refresh content on show
-        // example
-        //        var that = this;                      
-        //        this.element.on("myOnShowEvent", function(event){
-        //            if( event.target.id == that.element.attr('id')){
-        //                that._refresh();
-        //            }
-        //        });
-        //        this.element.off("myOnShowEvent");
-        var orgShow = $.fn.show;
-        $.fn.show = function()
-        {
-            orgShow.apply( this, arguments ); //apply original show
-            $(this).trigger( 'myOnShowEvent' );
-            return this;
+<!-- for debug  remark it and use getMultiScripts for production -->
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/search_minimal.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+
+<!-- loaded by demand script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script -->
+
+<link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
+
+<script type="text/javascript">
+
+    // overwrite the standard jquery show method
+    // apply listener in widgets on this page to refresh content on show
+    // example
+    //        var that = this;
+    //        this.element.on("myOnShowEvent", function(event){
+    //            if( event.target.id == that.element.attr('id')){
+    //                that._refresh();
+    //            }
+    //        });
+    //        this.element.off("myOnShowEvent");
+    var orgShow = $.fn.show;
+    $.fn.show = function()
+    {
+        orgShow.apply( this, arguments ); //apply original show
+        $(this).trigger( 'myOnShowEvent' );
+        return this;
+    }
+
+    var onAboutInit, onPageInit;
+
+
+    // if hAPI is not defined in parent(top most) window we have to create new instance
+    $(document).ready(function() {
+
+        //console.log('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
+        _time_debug = new Date().getTime() / 1000;
+
+        // Standalone check
+        if(!window.hWin.HAPI4){
+            // In case of standalone page
+            //load minimum set of required scripts
+            $.getMultiScripts(['localization.js'/*, , 'utils_msg.js'
+                'utils_ui.js', 'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR;?>hclient/core/')
+            .done(function() {
+                // all done
+                window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+
+            }).fail(function(error) {
+                // one or more scripts failed to load
+                onHapiInit(false);
+
+            }).always(function() {
+                // always called, both on success and error
+            });
+
+        }else{
+            // Not standalone, use HAPI from parent window
+            onHapiInit( true );
         }
-        
-        var onAboutInit, onPageInit;
-    
-    
-        // if hAPI is not defined in parent(top most) window we have to create new instance
-        $(document).ready(function() {
-       
-//console.log('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
-_time_debug = new Date().getTime() / 1000;
-            
-            // Standalone check
-            if(!window.hWin.HAPI4){
-                // In case of standalone page
-                //load minimum set of required scripts
-                $.getMultiScripts(['localization.js'/*, , 'utils_msg.js'
-                                   'utils_ui.js', 'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR;?>hclient/core/')
-                .done(function() {
-                    // all done
-                    window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
-                    
-                }).fail(function(error) {
-                    // one or more scripts failed to load
-                    onHapiInit(false);
-                    
-                }).always(function() {
-                    // always called, both on success and error
-                });                    
-                
-            }else{
-                // Not standalone, use HAPI from parent window
-                onHapiInit( true );
-            }
 
-        });
+    });
 
     // Callback function on hAPI initialization
     function onHapiInit(success)
@@ -238,15 +240,15 @@ _time_debug = new Date().getTime() / 1000;
         {
             applyTheme();
 
-//console.log('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
-_time_debug = new Date().getTime() / 1000;
-            
+            //console.log('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
+            _time_debug = new Date().getTime() / 1000;
+
             if(!window.hWin.HEURIST4.rectypes){
-                
+
                 if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
                     onAboutInit();
                 }
-                
+
                 window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         window.hWin.HEURIST4.rectypes = response.data.rectypes;
@@ -257,10 +259,10 @@ _time_debug = new Date().getTime() / 1000;
                         success = false;
                     }
 
-//console.log('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
-_time_debug = new Date().getTime() / 1000;
-                    
-                    
+                    //console.log('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
+                    _time_debug = new Date().getTime() / 1000;
+
+
                     if(!window.hWin.HEURIST4.util.isnull(onPageInit) && $.isFunction(onPageInit)){
                         onPageInit(success);
                     }
@@ -316,9 +318,9 @@ _time_debug = new Date().getTime() / 1000;
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
             if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
-                window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
-            });
+                $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
+                    window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
+                });
             }
         }
 
