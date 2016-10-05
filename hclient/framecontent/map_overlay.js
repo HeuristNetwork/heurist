@@ -48,6 +48,16 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     */
     function _loadMapDocuments(startup_mapdocument) {
 
+        var ele = $("#map-doc-select");
+        if(ele.length>0){
+            
+        if(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'])){
+            ele.empty();
+            ele.append("<option value='-1'>Map Document type not defined</option>");
+            ele.prop('title','The record type (Heurist Map Document, Concept 3-1019) has not been defined.')
+            return;
+        }
+        
         // Load Map Documents & Map Layers       
         // @TODO - change it to HAPI method!!!!
         var request = { q: {"t":window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']},
@@ -55,9 +65,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             detail: 'header',
             source: 'map-doc-select'};
 
-        var ele = $("#map-doc-select");
-        if(ele.length>0){
-
+        
+            ele.prop('title','');
             ele.empty();
             var btnMapRefresh = $("#btnMapRefresh");
             var btnMapEdit = $("#btnMapEdit");
@@ -106,50 +115,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             });
 
         }  //ele.length
-
-
-        /* OLD JJ code    
-        // @TODO - load only list of documents, load document details individually on select
-        var api = window.hWin.HAPI4.basePathV4 + "hserver/controller/map_data.php?db=" + window.hWin.HAPI4.database; // window.location.search;
-        //console.log("API call URL: " + api);
-        $.getJSON(api, function(_data) {
-        map_data = _data;
-        //console.log("DATA");
-        //console.log(map_data);
-
-        // Have any map documents been defined?
-        if(map_data && map_data.length > 0) {
-
-        // Show options in dropdown
-        var ele = $("#map-doc-select");
-        ele.empty();
-        ele.append("<option value='-1'>"+(map_data.length>0?'select...':'none available')+"</option>");
-        for(var i = 0; i < map_data.length; i++) {
-        ele.append("<option value='"+map_data[i].id+"'>"+map_data[i].title+"</option>"); //["+map_data[i].id+"]
-
-        if(map_data[i].bookmarks==null){
-        map_data[i].bookmarks = [];
-        }
-        map_data[i].bookmarks.push([window.hWin.HR('World'),-90,90,-30,50,1800,2050]); //default
-        }
-
-        // select listener - load map documents
-        ele.change(function(e) {
-        if(current_map_document_id == $(this).val()) return;
-        current_map_document_id = $(this).val();
-        _loadMapDocumentById( null );
-        });
-
-        if(startup_mapdocument > 0){
-        _loadMapDocumentById(startup_mapdocument);
-        }
-        }
-        }).fail(function( jqxhr, textStatus, error ) {
-        var msg = "Map Document API call failed: " + textStatus + ", " + error;
-        console.log(msg);
-        window.hWin.HEURIST4.msg.showMsgErr(msg);
-        });
-        */    
+          
     }
 
     //
