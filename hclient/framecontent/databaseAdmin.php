@@ -35,7 +35,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
             var $container = $("<div>").appendTo($("body"));
         }
-    }            
+    }
 </script>
 <style>
 </style>
@@ -47,7 +47,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div>
                 <ul>
                     <li style="padding-left:5px;"><a href="common/connect/getListOfDatabases.php?v=4" name="auto-popup" class="portrait h3link"
-                        onClick="{return false;}" data-nologin="1" 
+                        onClick="{return false;}" data-nologin="1"
                         title="Open and login to another Heurist database - current database remains open">
                         Open database</a>
                     </li>
@@ -60,6 +60,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 </ul>
             </div>
         </div>
+
         <div class="accordion_pnl">
             <h3 id="divStructure">STRUCTURE</h3>
             <div>
@@ -67,7 +68,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                     <!-- database name is appended automatically by auto-popup -->
 
                     <li style="padding-left:5px;">
-                        <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure"
+                        <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
                             onClick="{return false;}" id="linkEditRectypes"
                             title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
                             Manage record types / fields</a>
@@ -98,11 +99,19 @@ require_once(dirname(__FILE__)."/initPage.php");
                     </li>
                     -->
 
-                    <li style="padding-left:5px;">
-                        <a href="admin/structure/terms/editTerms.php" name="auto-popup" class="verylarge h3link refresh_structure"
-                            onClick="{return false;}"
-                            title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields">
-                            Manage terms / relation types</a>
+                    <li  style="padding-left:5px;">
+                        <a id= "manage_terms" href="admin/structure/terms/editTerms.php?treetype=<?php echo'terms'?>" name="auto-popup" class="verylarge h3link refresh_structure info_link"
+
+                            title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
+                            Manage terms</a>
+                    </li>
+
+                    <!-- Adding Manage relation types menu -->
+                    <li  style="padding-left:5px;">
+                        <a  href="admin/structure/terms/editTerms.php?treetype=<?php echo'relationships'?>" name="auto-popup" class="verylarge h3link refresh_structure info_link"
+
+                            title="Browse and edit the relationship types"  onclick= "{return false;}">
+                            Manage relation types</a>
                     </li>
 
                     <li style="padding-left:5px;">
@@ -121,7 +130,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                     <li style="padding-left:5px;" id="menu-database-refresh">
                         <a href="#" id="menulink-database-refresh"
-                            onClick="{return false;}" data-nologin="1" 
+                            onClick="{return false;}" data-nologin="1"
                             title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
                             Refresh</a>
                     </li>
@@ -161,11 +170,12 @@ require_once(dirname(__FILE__)."/initPage.php");
                 </ul>
             </div>
         </div>
-        
+
     </div>
     <div style="left:281px;right:0;top:0;bottom:20;position:absolute;overflow:auto;padding:20px 10px 0 0;">
         <iframe id="frame_container">
         </iframe>
     </div>
+
 </body>
 </html>

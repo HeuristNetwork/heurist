@@ -29,7 +29,10 @@ if(isForAdminOnly("to modify database structure")){
     return;
 }
 
-?>
+ $value = $_GET['treetype'];
+ ?>
+
+
 
 <html>
     <head>
@@ -84,6 +87,7 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
         <script src="../../../common/php/loadCommonInfo.php"></script>
 
+        <script type="text/javascript">var treetype = "<?= $value ?>";</script>
         <script type="text/javascript" src="editTerms.js"></script>
 
         <div id="divBanner" class="banner">
@@ -443,7 +447,7 @@ if(isForAdminOnly("to modify database structure")){
             </div>
         </div>
 
-        <input type="file" id="new_term_image" style="display:none">
+        <input type="file" id="new_term_image" style="display:none"/>
 
         <script  type="text/javascript">
 

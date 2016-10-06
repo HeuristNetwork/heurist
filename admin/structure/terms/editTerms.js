@@ -68,6 +68,8 @@ function EditTerms() {
     */
     function _init (){
 
+
+
         top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
         _isWindowMode = !Hul.isnull(top.HEURIST.parameters.popup);
@@ -80,19 +82,25 @@ function EditTerms() {
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
+        if (treetype == "terms")
+        {
         _tabView.addTab(new YAHOO.widget.Tab({
             id: 'enum',
             label: 'Terms',
             content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
-        }));
+        }));}
+
+        if (treetype == "relationships")
+        {
         _tabView.addTab(new YAHOO.widget.Tab({
             id: 'relation',
             label: 'Relationship types',
             content: '<div style="height:90%; max-width:300; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
-        }));
+
+        }));}
+
         _tabView.addListener("activeTabChange", _handleTabChange);
         _tabView.appendTo("tabContainer");
-
         _tabView.set("activeIndex", initdomain);
 
         var dv1 = Dom.get('divApply');
@@ -118,7 +126,7 @@ function EditTerms() {
     function _handleTabChange (e) {
         var ind = _tabView.get("activeIndex");
         if(e.newValue!==e.prevValue){
-            if(ind===0){
+            if(treetype=="terms"){
                 _currentDomain = "enum";
 
                 if(Hul.isnull(_termTree1)){
@@ -128,7 +136,7 @@ function EditTerms() {
                 }
                 _currTreeView = _termTree1;
 
-            }else if(ind===1){
+            }else if(treetype=="relationships"){
                 _currentDomain = "relation";
 
                 if(Hul.isnull(_termTree2)){
@@ -675,12 +683,12 @@ function EditTerms() {
         $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
 
 
-      /*  if(Hul.isempty(arTerm[fi.trm_Label])){
-            $('#mergeLabel2').hide();
+        /*  if(Hul.isempty(arTerm[fi.trm_Label])){
+        $('#mergeLabel2').hide();
         }else{
-            $('#mergeLabel2').show();
-           $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
-            $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
+        $('#mergeLabel2').show();
+        $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
+        $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
         } */
 
 
@@ -758,14 +766,14 @@ function EditTerms() {
 
 
         /*if((Hul.isempty(arTerm[fi.trm_Description]))){
-            $('#mergeDescr2').hide();
+        $('#mergeDescr2').hide();
 
-             $('#lblMergeDescr2')
-            $('#rbMergeDescr2').val('&#60;none&#62;');;
+        $('#lblMergeDescr2')
+        $('#rbMergeDescr2').val('&#60;none&#62;');;
         }else{
-            $('#mergeDescr2').show();
-            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-            $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
+        $('#mergeDescr2').show();
+        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
         } */
 
 
@@ -774,33 +782,33 @@ function EditTerms() {
         //$('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
 
         //$('#lblTerm_toRetain').html(' ['+arTerm2[fi.trm_ConceptID]+']').style.fontSize= "x-small";
-     /*   if(Hul.isempty(arTerm2[fi.trm_Label])){
-            $('#mergeLabel2').hide();
-            $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
-            $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
+        /*   if(Hul.isempty(arTerm2[fi.trm_Label])){
+        $('#mergeLabel2').hide();
+        $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
+        $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
         }else{
-            $('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
-            $('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
+        $('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
+        $('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
         } */
-       /* if(Hul.isempty(arTerm2[fi.trm_Code])){
-             $('#mergeCode2').hide();
-            $('#lblMergeCode1').html('&#60;none&#62;');
-            $('#rbMergeCode1').val('&#60;none&#62;');
+        /* if(Hul.isempty(arTerm2[fi.trm_Code])){
+        $('#mergeCode2').hide();
+        $('#lblMergeCode1').html('&#60;none&#62;');
+        $('#rbMergeCode1').val('&#60;none&#62;');
 
 
         }else{
 
-            $('#lblMergeCode1').html('&#60;none&#62;');
-            $('#rbMergeCode1').val('&#60;none&#62;');
+        $('#lblMergeCode1').html('&#60;none&#62;');
+        $('#rbMergeCode1').val('&#60;none&#62;');
 
         }
         if(Hul.isempty(arTerm2[fi.trm_Description])){
-            $('#mergeDescr2').hide();
-            $('#lblMergeDescr1').html(arTerm[fi.trm_Description]);
-            $('#rbMergeDescr1').val(arTerm[fi.trm_Description]);
+        $('#mergeDescr2').hide();
+        $('#lblMergeDescr1').html(arTerm[fi.trm_Description]);
+        $('#rbMergeDescr1').val(arTerm[fi.trm_Description]);
         }else{
-            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-            $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+        $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
         } */
 
 
@@ -1402,9 +1410,9 @@ function EditTerms() {
         {
             if(hasH4()){
                 window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
-                                + ' term'
-                                + (context.result.length>1?'s were':' was')
-                                + ' added.', null, 'Terms imported');
+                    + ' term'
+                    + (context.result.length>1?'s were':' was')
+                    + ' added.', null, 'Terms imported');
             }
 
 
