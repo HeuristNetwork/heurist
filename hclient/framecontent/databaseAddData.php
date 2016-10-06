@@ -43,7 +43,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         <div class="accordion_pnl" style="margin-top:21px">
 
-            <h3>KEYBOARD</h3>
+            <h3><span class="ui-icon ui-iconalign ui-icon-screen-laptop"></span>KEYBOARD</h3>
             <div>
                 <ul>
 
@@ -60,7 +60,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         
         <div class="accordion_pnl">
 
-            <h3>IMPORT</h3>
+            <h3><span class="ui-icon ui-iconalign ui-icon-circle-b-plus"></span>IMPORT</h3>
             <div>
                 <ul>
 
@@ -117,7 +117,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         </div>
 
         <div class="accordion_pnl">
-            <h3>UTILITIES</h3>
+            <h3><span class="ui-icon ui-iconalign ui-icon-wrench"></span>UTILITIES</h3>
             <div>
                 <ul>
 

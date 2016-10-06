@@ -769,7 +769,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = window.hWin.HEURIST4.util.random();
-                request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
+                //request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
                 _callserver('entityScrud', request, callback);
             },
             
@@ -1055,7 +1055,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         //        
         , parseCSV: function(request, callback){
             //if(request) request.a = 'svs_delete';
-            request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
+            //request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
             
             _callserver('fileParse', request, callback);
         }

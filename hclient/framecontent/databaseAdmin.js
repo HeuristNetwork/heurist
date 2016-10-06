@@ -52,16 +52,17 @@ function hDatabaseAdmin() {
             icons:{"header": "ui-icon-carat-1-e", "activeHeader": "ui-icon-carat-1-s" }
         });
         
-        parentdiv.find('h3').addClass('ui-heurist-header2');
+        parentdiv.find('h3').addClass('ui-heurist-header2-fade');
 
         parentdiv.find('div')
-        .addClass('menu-list');
+        .addClass('menu-list')
+        .css('width','100%');
         //.css({'background':'none'});   // ui-corner-all
         
         $( parentdiv ).find('h3')
         .css({border:'none', 'background':'none'});
 
-        parentdiv.find('li').addClass('ui-menu-item');
+        parentdiv.find('li').addClass('ui-menu-item').css('background','#99ABBA !important');
 
         parentdiv.find('li').each(function(idx,item){
             $('<div class="svs-contextmenu ui-icon ui-icon-arrowthick-1-e"></div>').appendTo($(item));

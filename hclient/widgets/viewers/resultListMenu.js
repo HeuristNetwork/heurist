@@ -55,7 +55,8 @@ $.widget( "heurist.resultListMenu", {
 
         this.divMainMenuItems.find('li').css('padding-right','3px'); //reduce gap
 
-
+        this.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');
+        
         //-----------------------     listener of global events
         var sevents = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT;
         /*window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT;

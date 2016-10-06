@@ -29,6 +29,7 @@ $.widget( "heurist.svs_list", {
         isapplication:true,  // send and recieve the global events
         btn_visible_dbstructure: true,
         btn_visible_filter: false,
+        btn_visible_save: true,
         
         buttons_mode: false,
         allowed_UGrpID: [], // allowed groups
@@ -75,27 +76,51 @@ $.widget( "heurist.svs_list", {
         var toppos = 1;
         
         if(window.hWin.HAPI4.sysinfo['layout']!='original' && !this.options.buttons_mode){
-            toppos = toppos + 2.5;
+            toppos = toppos + 3;
             $('<div>'+window.hWin.HR('Saved Filters')+'</div>')
-                .css({'padding-left': '1.1em', 'font-size': '1.4em', 'font-weight': 'bold', 'color':'rgb(142, 169, 185)'})
+                .css({'padding': '0.5em 1em', 'font-size': '1.4em', 'font-weight': 'bold', 'color':'rgb(142, 169, 185)'})
                 .appendTo(this.div_header);
+        
+            if(this.options.btn_visible_save){
+
+                this.btn_search_save = $( "<button>", {
+                    text: window.hWin.HR("Save"),
+                    title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
+                })
+                .css({'min-width': '110px','vertical-align':'top','margin-left': '12px','font-size':'1.2em'})
+                //.addClass('ui-heurist-btn-header1')
+                .appendTo(this.div_header)
+                .button({icons: {
+                    primary: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"
+                }})
+                .hide();
+
+                this._on( this.btn_search_save, {  click: function(){
+                    window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
+                        that.editSavedSearch('saved');
+                    });
+                } });
+                
+                toppos = toppos + 2.5
+            }
         }
         
         this.helper_top = $( '<div>'+window.hWin.HR('right-click for actions')+'</div>' )
         .addClass('logged-in-only heurist-helper1')
-        .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding-left':'1.4em'}).appendTo(this.div_header) )
+        .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding':'1em 0 0 1.2em'}).appendTo(this.div_header) )
         //.appendTo( this.accordeon );
         if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
 
 
+
         if(this.options.btn_visible_filter){
 
-            this.filter = $( "<div>" ).css({'height':'2em', 'width':'100%'}).appendTo( this.search_tree );
+            this.filter_div = $( "<div>" ).css({'height':'2em', 'width':'100%'}).appendTo( this.search_tree );
 
             this.filter_input = $('<input name="search" placeholder="Filter...">')
-            .css('width','100px').appendTo(this.filter);
+            .css('width','100px').appendTo(this.filter_div);
             this.btn_reset = $( "<button>" )
-            .appendTo( this.filter )
+            .appendTo( this.filter_div )
             .button({icons: {
                 primary: "ui-icon-close"
                 },
@@ -104,7 +129,7 @@ $.widget( "heurist.svs_list", {
             .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
             .attr("disabled", true);
             this.btn_save = $( "<button>" )
-            .appendTo( this.filter )
+            .appendTo( this.filter_div )
             .button({icons: {
                 primary: "ui-icon-disk"
                 },
@@ -123,7 +148,8 @@ $.widget( "heurist.svs_list", {
         if(this.options.buttons_mode){
             this.helper_top.hide();
             toppos = 1;
-            if(this.filter) this.filter.hide();
+            if(this.filter_div) this.filter_div.hide();
+            if(this.btn_search_save) this.btn_search_save.hide();
             this.options.btn_visible_filter = false;
         }
 
@@ -175,6 +201,19 @@ $.widget( "heurist.svs_list", {
                 that.currentSearch = Hul.cloneJSON(data);
             }
         });
+        
+        if(this.btn_search_save){
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data){
+                //show if there is resulst
+                if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0) 
+                {
+                    that.btn_search_save.show();
+                }else{
+                    that.btn_search_save.hide();
+                }
+        });
+        }
+               
 
         this._refresh();
     }, //end _create
@@ -1511,11 +1550,12 @@ $.widget( "heurist.svs_list", {
             this.edit_dialog.remove();
         }
 
-        if(this.filter){
+        if(this.filter_div){
             this.btn_save.remove();
             this.btn_reset.remove();
-            this.filter.remove();
+            this.filter_div.remove();
         }
+        if(this.btn_search_save) this.btn_search_save.remove();
         this.accordeon.remove();
         //this.tree.remove();
 

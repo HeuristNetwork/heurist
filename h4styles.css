@@ -1049,7 +1049,7 @@ background: #8ea9b9
         outline: 0;
     }        
     .item-selected{    
-        background:#8CD1F2 !important;
+        background:#9CC4D9 !important;
     }
 
     /* main menu on front */
@@ -1068,3 +1068,5 @@ background: #8ea9b9
 }
     
 .ui-icon-filter { background-image: url(hclient/assets/filter_icon.png) !important; }
+
+.ui-iconalign { display: inline-block; vertical-align: text-bottom; padding-right:1em }

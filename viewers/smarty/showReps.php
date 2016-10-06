@@ -117,7 +117,7 @@ function executeSmartyTemplate($params){
 
             $limit_for_interface = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
             if (!$limit_for_interface || $limit_for_interface<1){
-                $limit_for_interface = 1000; //default limit in dispPreferences
+                $limit_for_interface = 50; //default limit in dispPreferences
             }
 
             $params["limit"] = $limit_for_interface; //force limit

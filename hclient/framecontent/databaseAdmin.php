@@ -43,7 +43,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 <body class="ui-widget-content">
     <div style="width:280px;top:0;bottom:0;left:0;position:absolute;">
         <div class="accordion_pnl" style="margin-top:21px">
-            <h3>DATABASE</h3>
+            <h3><span class="ui-icon ui-iconalign ui-icon-database"></span>DATABASE</h3>
             <div>
                 <ul>
                     <li style="padding-left:5px;"><a href="common/connect/getListOfDatabases.php?v=4" name="auto-popup" class="portrait h3link"
@@ -62,7 +62,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         </div>
 
         <div class="accordion_pnl">
-            <h3 id="divStructure">STRUCTURE</h3>
+            <h3 id="divStructure"><span class="ui-icon ui-iconalign ui-icon-structure"></span>STRUCTURE</h3>
             <div>
                 <ul>
                     <!-- database name is appended automatically by auto-popup -->

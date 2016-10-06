@@ -858,7 +858,7 @@ $.widget( "heurist.mainMenu", {
                             }
                             if(prefs['bookmarks_on'] != request['bookmarks_on']){
                                 $('.heurist-bookmark-search').css('display',
-                                    (request['bookmarks_on']=='1')?'block':'none');
+                                    (request['bookmarks_on']=='1')?'inline-block':'none');
                             }
 
 

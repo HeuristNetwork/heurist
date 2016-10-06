@@ -32,6 +32,7 @@ $.widget( "heurist.search", {
         isloginforced:true,
 
         btn_visible_newrecord: true, //show add record button
+        btn_visible_save: false,
 
         // before this widget was generic, however search on main page became very distinctive and got
         // lot of additional ui comonents. thus, we have the specific search widget and this one remains for main ui
@@ -59,7 +60,7 @@ $.widget( "heurist.search", {
         $.getScript(window.hWin.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'5.8em', 'min-width':'1100px'}); //, 'border-bottom':'1px solid lightgray'
+        this.element.css({'height':'5.8em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
         if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
             this.element.addClass('ui-heurist-header1');
         }else{
@@ -201,7 +202,7 @@ $.widget( "heurist.search", {
         this.btn_search_as_user = $( "<button>", {
             text: window.hWin.HR("filter"), title: "Apply the filter/search in the search field and display results in the central panel below"
         })
-        .css({'vertical-align':'top'})  //'width':'10em', 
+        .css({'vertical-align':'top', 'font-size':'1.3em'})  //'width':'10em', 
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1')
         .button({text:false, icons: {
@@ -211,13 +212,12 @@ $.widget( "heurist.search", {
         this.btn_search_domain = $( "<button>", {
             text: window.hWin.HR("filter option")
         })
-        .css({'vertical-align':'top'})
+        .css({'vertical-align':'top', 'font-size':'1.3em'})
         .appendTo( this.div_search_as_user )
-        .addClass('ui-heurist-btn-header1')
+        .addClass('ui-heurist-btn-header1 heurist-bookmark-search')
         .button({icons: {
             primary: 'ui-icon-carat-1-s' //"ui-icon-triangle-1-s"
             }, text:false});
-
 
         this.div_search_as_user.buttonset();
 
@@ -265,28 +265,27 @@ $.widget( "heurist.search", {
             div_save_filter.insertBefore( this.div_search_header );
         }
         
+        if(this.options.btn_visible_save){
+            this.btn_search_save = $( "<button>", {
+                text: window.hWin.HR("Save"),
+                title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
+            })
+            .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
+            .addClass('ui-heurist-btn-header1')
+            .appendTo(div_save_filter)
+            .button({icons: {
+                primary: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"
+            }});
 
-        this.btn_search_save = $( "<button>", {
-            text: window.hWin.HR("Save"),
-            title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
-        })
-        .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
-        .addClass('ui-heurist-btn-header1')
-        .appendTo(div_save_filter)
-        .button({icons: {
-            primary: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"
-        }});
-
-        this._on( this.btn_search_save, {  click: function(){
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
-            var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-            if(app && app.widget){
-                $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-            }
-            });
-        } });
-
-        
+            this._on( this.btn_search_save, {  click: function(){
+                window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
+                var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+                if(app && app.widget){
+                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+                }
+                });
+            } });
+        }
 
         // Add record button
         if(this.options.btn_visible_newrecord){
@@ -369,12 +368,15 @@ $.widget( "heurist.search", {
         .css({'width':'40px','vertical-align': '-4px'})  //'padding':'0 1.0em',
         .appendTo(this.div_buttons);*/
 
-        var link = $('<a>',{href:'#', 
+        var linkGear = $('<a>',{href:'#', 
         title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
         .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px'})
         .addClass('ui-icon ui-icon-gear')
         .appendTo(this.div_buttons);
-        this._on( link, {  click: this.showSearchAssistant });
+        this._on( linkGear, {  click: this.showSearchAssistant });
+        
+        setInterval( function(){ linkGear.addClass('rotate'); 
+                    setTimeout( function(){ linkGear.removeClass('rotate'); }, 1000 ) }, 5000 );
 
         this.search_assistant = null;
 
@@ -493,6 +495,7 @@ $.widget( "heurist.search", {
 
         this.btn_search_as_user.button( "option", "label", window.hWin.HR(this._getSearchDomainLabel(this.options.search_domain)));
 
+        this.btn_search_domain.css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'inline-block':'none');
 
         if(this.select_rectype){
             this.select_rectype.empty();
@@ -563,14 +566,15 @@ $.widget( "heurist.search", {
             window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
             this.input_search.focus();
             
-            //show if there is reulst
-            if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0) //
-            {
-                this.btn_search_save.show();
-            }else{
-                this.btn_search_save.hide();
+            //show if there is resulst
+            if(this.btn_search_save){
+                if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0) //
+                {
+                    this.btn_search_save.show();
+                }else{
+                    this.btn_search_save.hide();
+                }
             }
-            
 
         }else if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
             if(this.search_assistant!=null){
