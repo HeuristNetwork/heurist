@@ -75,6 +75,7 @@ function _getTermByID($system, $id) {
             $term->id = $row["trm_ID"];
             $term->label = $row["trm_Label"];
             $term->description = $row["trm_Description"];
+            $term->code = $row["trm_Code"];
         }
     }
 
@@ -256,6 +257,18 @@ function getRecordDetails($system, $record) {
                 // Opacity
                 $record->opacity = floatval($value);
 
+            }else if(defined('DT_COLOR') && $type == DT_COLOR) {
+                // Color - take value from term code
+                $color = _getTermByID($system, $value);
+                if($color->code) {
+                    $record->color = $color->code;   
+                }
+                /* alas timemap understands color only as hex or rgb 
+                else{
+                    $record->color = $color->label;   
+                }-*
+                        
+                
             }else if(defined('DT_MINOR_SPAN') && $type == DT_MINOR_SPAN) {
                 // Initial minor span
                 $record->minorSpan = floatval($value);

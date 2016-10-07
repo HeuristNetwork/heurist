@@ -214,6 +214,9 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         return all_mapdata[dataset_id];
     }
 
+    //
+    // chnage color andn reload dataset 
+    //
     function _changeDatasetColor( dataset_id, new_color, updateOnMap ){
 
             var mapdata = _getDataset( dataset_id );

@@ -335,7 +335,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         legendid,
         rectypeID = 0,
         ismapdoc = (overlay_idx>0);
-        var icon_bg;
+        var icon_bg = null;
 
 
         if (ismapdoc) {
@@ -343,13 +343,15 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             overlay = overlays[overlay_idx];
             rectypeID = rectypeID_or_color;
 
-            icon_bg = ' style="background-image: ';
             if(rectypeID==RT_SHP_SOURCE && overlay.visible){
-                icon_bg = icon_bg+'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white20.gif);'
+                icon_bg = 'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white20.gif);'
                 + 'background-position: center; background-repeat: no-repeat;"'            
                 + ' data-icon="'+window.hWin.HAPI4.iconBaseURL + rectypeID + '.png"';
-            } else{
-                icon_bg = icon_bg+'url('+ window.hWin.HAPI4.iconBaseURL + rectypeID + '.png)"';
+            } else if(Number.isInteger(rectypeID)){
+                icon_bg = 'url('+ window.hWin.HAPI4.iconBaseURL + rectypeID + '.png)"';
+            }
+            if(icon_bg!=null){
+                icon_bg = ' style="background-image: '+icon_bg;
             }
         }else{
             legendid = overlay_idx;
@@ -368,7 +370,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
         + overlay_idx+'" id="chbox-'+legendid+'" class="overlay-legend" '
         + (overlay.visible?'checked="checked">':'>')
-        + ((ismapdoc)
+        + ((ismapdoc && icon_bg)
             ? ('<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif"'
                 + ' align="top" class="rt-icon" ' + icon_bg     
                 + '>')
@@ -489,34 +491,35 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         // Determine way of displaying
         if(layer !== undefined && layer.dataSource !== undefined) {
             var source = layer.dataSource;
-            console.log(source);
+//DEBUG console.log(source);
 
+            source.color = layer.color;
             source.title = layer.title;
 
             /** MAP IMAGE FILE (TILED) */
             if(source.rectypeID == RT_TILED_IMAGE_SOURCE) {
-                console.log("MAP IMAGE FILE (tiled)");
+//DEBUG console.log("MAP IMAGE FILE (tiled)");
                 addTiledMapImageLayer(source, bounds, index);
 
                 /** MAP IMAGE FILE (NON-TILED) */
             }else if(source.rectypeID == RT_GEOTIFF_SOURCE) {
                 // Map image file (non-tiled)
-                console.log("MAP IMAGE FILE (non-tiled)");
+//DEBUG console.log("MAP IMAGE FILE (non-tiled)");
                 addUntiledMapImageLayer(source, bounds, index);
 
                 /** KML FILE OR SNIPPET */
             }else if(source.rectypeID == RT_KML_SOURCE) {
-                console.log("KML FILE or SNIPPET");
+//DEBUG console.log("KML FILE or SNIPPET");
                 addKMLLayer(source, index, is_mapdoc);
 
                 /** SHAPE FILE */
             }else if(source.rectypeID == RT_SHP_SOURCE) {
-                console.log("SHAPE FILE");
+//DEBUG console.log("SHAPE FILE");
                 addShapeLayer(source, index);
 
                 /* MAPPABLE QUERY */
             }else if(source.rectypeID == RT_MAPABLE_QUERY) {
-                console.log("MAPPABLE QUERY");
+//DEBUG console.log("MAPPABLE QUERY");
                 _addQueryLayer(source, index);
             }
 
@@ -883,6 +886,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         }
     }
 
+    //set of color for Digital Harlem dynamically added layers (or if color is not defined for layer in map document )
     var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,127,39)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)'];
     var colors_idx = -1;
 
@@ -895,6 +899,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     *       title
     *       recordset - in harlem format
     *       mapdata - in timemap/vis format
+    *       color
     * 
     * @todo - unite with mapping.addDataset
     */
@@ -974,6 +979,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 }else{
 
                     mapdata = recset.toTimemap(source.id, null, source.color);
+                    if(source.color) mapdata.color = source.color;
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
 
@@ -1043,7 +1049,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             if(index>=0){  //this layer belong to map document
                 overlays[index] = overlay;
 
-                _addLegendEntryForLayer(index, mapdata.title, RT_MAPABLE_QUERY, dependent_layers);
+                _addLegendEntryForLayer(index, mapdata.title, mapdata.color, dependent_layers); //was RT_MAPABLE_QUERY insteadof color
 
             }else{ // this layer is explicitely (by user) added
 
