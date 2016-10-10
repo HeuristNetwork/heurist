@@ -121,8 +121,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         if(request.notes){
             request.notes = null; //unset to reduce traffic
         }
-        
-        
+
+
         //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
 
         var url = that.basePathV4+"hserver/controller/"+action+".php"; //+(new Date().getTime());
@@ -254,9 +254,9 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
             */
             , is_logged: function(callback){
-        
+
                 //check if login
-                _callserver('usr_info', {a:'is_logged'}, 
+                _callserver('usr_info', {a:'is_logged'},
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK && response.data=='0'){
                             response.status = window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED;
@@ -266,13 +266,13 @@ function hAPI(_db, _oninit) { //, _currentUser
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         callback();
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                       // window.hWin.HEURIST4.msg.showMsgErr(response, true); Login Page is already rendered no need to  display Error Message
                     }
                 });
-               
+
             }
-            
-            
+
+
             /**
             * Get current user if logged in, and global database settings
             */
@@ -377,7 +377,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             ,get_defs_all: function(is_message, document){
-                
+
                 this.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         window.hWin.HEURIST4.rectypes = response.data.rectypes;
@@ -390,15 +390,15 @@ function hAPI(_db, _oninit) { //, _currentUser
                             window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
                         }
-                        
+
                         $(document).trigger(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
 
                     }
                 });
-                
+
             }
-            
-            
+
+
             /*
             ,databases: function(request, callback){
             _callserver('sys_databases', request, callback);
@@ -689,7 +689,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *
     * see entityScrud.php and db[TableName].php in dbaccess
     *
-    * methods: 
+    * methods:
     *   config - loads entity config
     *   search
     *   save
@@ -716,9 +716,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                     _callserver('entityScrud', {a:'config', 'entity':entityName},
                        function(response){
                             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                
+
                                 var entity_cfg = response.data;
-                                
+
                                 //find key and title fields
                                 var idx;
                                 for(idx in entity_cfg.fields){
@@ -730,7 +730,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                                     }
                                 }
                                 entity_configs[response.data.entityName] = entity_cfg;
-                                
+
                                 callback(entity_cfg);
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -772,7 +772,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
                 _callserver('entityScrud', request, callback);
             },
-            
+
             getTitlesByIds:function(entityName, recIDs){
                 var idx, display_value = [];
                 if(entity_data[entityName]){
@@ -784,11 +784,11 @@ function hAPI(_db, _oninit) { //, _currentUser
                             edata.fld(edata.getById(recIDs[idx]), ecfg.titleField));
                    }
                 }else{
-                   display_value = recIDs; 
+                   display_value = recIDs;
                 }
                 return display_value;
             }
-            
+
         }
         return that;
     }
@@ -1037,7 +1037,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
                 return null;
         }
-        
+
         , getImageUrl: function(entityName, recID, version){
             if(recID>0){
                      return window.hWin.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php'
@@ -1047,20 +1047,20 @@ function hAPI(_db, _oninit) { //, _currentUser
                             +'&version='+version;
             }else{
                 return '';
-            }    
+            }
         }
 
         //
         //
-        //        
+        //
         , parseCSV: function(request, callback){
             //if(request) request.a = 'svs_delete';
             //request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
-            
+
             _callserver('fileParse', request, callback);
         }
-        
-        
+
+
     }
 
     _init(_db, _oninit); //, _currentUser);

@@ -332,7 +332,7 @@ function outWarning($role, $message){
                             "timeOut" : 2000,
                             "positionClass": "toast-top-full-width"
                         };
-                        toastr.info("you don't have required permission to perform action");
+                        toastr.info("it appears you have insufficient access rights for this operation");
 
                     });
 
