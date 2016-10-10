@@ -29,8 +29,11 @@ if(isForAdminOnly("to modify database structure")){
     return;
 }
 
- $value = $_GET['treetype'];
- ?>
+if(isset($_GET['treetype']))
+{
+    $value = $_GET['treetype'];
+}
+?>
 
 
 
