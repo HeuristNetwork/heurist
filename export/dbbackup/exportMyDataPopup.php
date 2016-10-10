@@ -179,6 +179,10 @@ if($mode=='2' && file_exists($folder.".zip") ){
             ob_flush();flush();
 
             $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
+            if (is_file($to_include)) {
+                include $to_include;
+            }
+            /* OLD WAY. It works but leads to memory overflow for large database
             $content = "";
             
             if (is_file($to_include)) {
@@ -194,7 +198,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
             }
             fwrite($file, $content);
             fclose ($file);
-
+            */
+            
             // Export database definitions as readable text
 
             print "Exporting database definitions as readable text<br>";

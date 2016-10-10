@@ -3,6 +3,7 @@
 /**
 * flathml.php:  flattened version of HML - records are not generated redundantly but are indicated by references within other records.
 *               $hunifile indicates special one-file-per-record + manifest file for HuNI (huni.net.au)
+*               $output_file - file handler to write output, it allows to avoid memory overflow for large databases
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -98,21 +99,33 @@ require_once (dirname(__FILE__) . '/../../records/files/fileUtils.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbUtils.php');
 
 if(@$_REQUEST['file']){ // output manifest + files ??
-    $intofile = true;
+    $intofile = true; //flag one-record-per-file mode for HuNI  
 }else{
     $intofile = false;
 }
 
-$hunifile = null; //flag one-record-per-file mode for HuNI
+$hunifile = null; //name of file-per-record for HuNI mode
+
+if(@$_REQUEST['filename']){ //write the output into single file
+    $output_file_name = $_REQUEST['filename'];
+    $output_file = fopen ($output_file_name, "w");    
+    if(!$output_file){
+        die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
+    }
+    
+}else{
+    $output_file = null;     
+}
+
+
 // why is this left to be set later as a success on file access??
 
 if(!$intofile){
     if (@$_REQUEST['mode'] != '1') {
         header('Content-type: text/xml; charset=utf-8');
     }
-    echo "<?xml version='1.0' encoding='UTF-8'?>\n";
+    output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
 }
-
 
 set_time_limit(0); //no limit
 
@@ -138,14 +151,18 @@ if ($res) {
 //----------------------------------------------------------------------------//
 
 function output($str){
-    global $intofile, $hunifile;
+    global $intofile, $hunifile, $output_file;
 
     if($intofile){
         if($hunifile){
             fwrite($hunifile, $str);
         }
     }else{
-        echo $str;
+        if($output_file){
+            fwrite($output_file, $str);
+        }else{
+            echo $str;   
+        }
     }
 
 }                   
@@ -1620,5 +1637,10 @@ if($intofile){ // flags HuNI manifest + separate files per record
         if (@$result['recordCount'] > 0) outputRecords($result);
     }
     closeTag('hml');
+    
+    if($output_file){
+        fclose ($output_file);
+    }
+    
 }
 ?>
