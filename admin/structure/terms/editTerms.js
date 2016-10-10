@@ -62,6 +62,8 @@ function EditTerms() {
     _isSomethingChanged=false,
     _affectedVocabs = [],
     keep_target_newparent_id = null;
+    tab_view = 0;// variable to selct vwhich tab to fill with treeview
+
 
     /**
     *	Initialization of tabview with 2 tabs with treeviews
@@ -82,23 +84,44 @@ function EditTerms() {
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        if (treetype == "terms")
+        if (typeof treetype !== 'undefined')
         {
-        _tabView.addTab(new YAHOO.widget.Tab({
-            id: 'enum',
-            label: 'Terms',
-            content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
-        }));}
+            if (treetype == "terms")
+            {
+                _tabView.addTab(new YAHOO.widget.Tab({
+                    id: 'enum',
+                    label: 'Terms',
+                    content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+                }));}
 
-        if (treetype == "relationships")
+            if (treetype == "relationships")
+            {
+                _tabView.addTab(new YAHOO.widget.Tab({
+                    id: 'relation',
+                    label: 'Relationship types',
+                    content: '<div style="height:90%; max-width:300; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+
+                }));}
+        }
+
+        else
         {
-        _tabView.addTab(new YAHOO.widget.Tab({
-            id: 'relation',
-            label: 'Relationship types',
-            content: '<div style="height:90%; max-width:300; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+            tab_view = 0;
+            _tabView.addTab(new YAHOO.widget.Tab({
+                id: 'enum',
+                label: 'Terms',
+                content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+            }));
 
-        }));}
+            tab_view = 1;
+            _tabView.addTab(new YAHOO.widget.Tab({
+                id: 'relation',
+                label: 'Relationship types',
+                content: '<div style="height:90%; max-width:300; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
 
+            }));
+
+        }
         _tabView.addListener("activeTabChange", _handleTabChange);
         _tabView.appendTo("tabContainer");
         _tabView.set("activeIndex", initdomain);
@@ -126,31 +149,54 @@ function EditTerms() {
     function _handleTabChange (e) {
         var ind = _tabView.get("activeIndex");
         if(e.newValue!==e.prevValue){
-            if(treetype=="terms"){
-                _currentDomain = "enum";
+            if (typeof treetype !== 'undefined')
+            {
+                if(treetype=="terms"){
+                    _currentDomain = "enum";
 
+                    if(Hul.isnull(_termTree1)){
+                        _termTree1 = new YAHOO.widget.TreeView("termTree1");
+                        //fill treeview with content
+                        _fillTreeView(_termTree1);
+                    }
+                    _currTreeView = _termTree1;
+
+                } else if(treetype=="relationships"){
+                    _currentDomain = "relation";
+
+                    if(Hul.isnull(_termTree2)){
+                        _termTree2 = new YAHOO.widget.TreeView("termTree2");
+                        //fill treeview with content
+                        _fillTreeView(_termTree2);
+                    }
+                    _currTreeView = _termTree2;
+                }
+            }
+            else{
                 if(Hul.isnull(_termTree1)){
+                    _currentDomain = "enum";
                     _termTree1 = new YAHOO.widget.TreeView("termTree1");
                     //fill treeview with content
                     _fillTreeView(_termTree1);
+                    _currTreeView = _termTree1;
                 }
-                _currTreeView = _termTree1;
 
-            }else if(treetype=="relationships"){
-                _currentDomain = "relation";
-
-                if(Hul.isnull(_termTree2)){
+                else  if(Hul.isnull(_termTree2))
+                {
+                    _currentDomain = "relation";
                     _termTree2 = new YAHOO.widget.TreeView("termTree2");
                     //fill treeview with content
                     _fillTreeView(_termTree2);
+                    _currTreeView = _termTree2;
                 }
-                _currTreeView = _termTree2;
-            }
-        }
 
-        if(_vocabulary_toselect){
-            _findNodeById(_vocabulary_toselect, true);
-            _vocabulary_toselect=null;
+
+            }
+
+            if(_vocabulary_toselect){
+                _findNodeById(_vocabulary_toselect, true);
+                _vocabulary_toselect=null;
+            }
         }
     }
 
