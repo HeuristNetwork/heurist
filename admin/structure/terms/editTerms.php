@@ -446,7 +446,7 @@ if(isset($_GET['treetype']))
                 <input id="btnMergeOK" type="button" value="Merge"
                     title=""  style="width:70px"/>
                 <input id="btnMergeCancel" type="button" value="Cancel"
-                    title=""  style="width:70px; padding-left:10px" onclick="editTerms.applyChanges();"/>
+                    title=""  style="width:70px; padding-left:10px"/>
             </div>
         </div>
 

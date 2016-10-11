@@ -1208,7 +1208,11 @@ function EditTerms() {
     function _selectParent(){
 
         if(_currentNode===null) return;
-
+        if (_currentNode === _findTopLevelForId(_currentNode.data.id))
+        {
+            alert("you can't move top vocabulary");
+            return;
+        }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
         var nodeid = _currentNode.data.id;
 
@@ -1265,7 +1269,11 @@ function EditTerms() {
     function _mergeTerms(){
 
         if(_currentNode===null) return;
-
+        if (_currentNode === _findTopLevelForId(_currentNode.data.id))
+        {
+            alert("you can't merge top vocabulary");
+            return;
+        }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
         var retain_nodeid = _currentNode.data.id;
 
@@ -1381,9 +1389,19 @@ function EditTerms() {
         if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
 
             var nodeid = sel.options[sel.selectedIndex].value;
+            var node = _findNodeById(nodeid, false);
             if(false && _currentNode.data.id===nodeid){
                 alert("Not possible to inverse on itself");
+            }
+            else if(_currentNode === _findTopLevelForId(_currentNode.data.id))
+            {
+                alert("you can't set inverse on top level vocabulary");
+
+            }
+            else if( node === _findTopLevelForId(nodeid) ){
+                alert("you can't make top level vocabulary an inverse");
             }else{
+
                 Dom.get('edInverseTerm').value = sel.options[sel.selectedIndex].text;
                 Dom.get('edInverseTermId').value = nodeid;
                 Dom.get('btnInverseSetClear').value = 'clear';

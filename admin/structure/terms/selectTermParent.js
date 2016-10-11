@@ -33,7 +33,7 @@ var selectTermParent;
 
 //aliases
 var Dom = YAHOO.util.Dom,
-	Hul = top.HEURIST.util;
+Hul = top.HEURIST.util;
 
 /**
 * SelectTerms - class for pop-up window to select terms for editing detail type
@@ -46,182 +46,187 @@ var Dom = YAHOO.util.Dom,
 */
 function SelectTermParent() {
 
-	var _className = "SelectTermParent",
-		_currentDomain,
-		_childTerm,
-		_currentNode,
-		_termTree,
-        _target_parent_id = null;
+    var _className = "SelectTermParent",
+    _currentDomain,
+    _childTerm,
+    _currentNode,
+    _termTree,
+    _target_parent_id = null;
 
-	/**
-	* Initialization of input form
-	*
-	* Reads GET parameters, creates TabView and triggers init of first tab
-	*/
-	function _init() {
+    /**
+    * Initialization of input form
+    *
+    * Reads GET parameters, creates TabView and triggers init of first tab
+    */
+    function _init() {
 
-		// read parameters from GET request
-		// if ID is defined take all data from detail type record
-		// otherwise try to get these parameters from request
-		//
-		if(location.search.length > 1) {
-				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-				_childTerm = top.HEURIST.parameters.child;
-				_currentDomain = top.HEURIST.parameters.domain;
-                _target_parent_id = top.HEURIST.parameters.parent;
+        // read parameters from GET request
+        // if ID is defined take all data from detail type record
+        // otherwise try to get these parameters from request
+        //
+        if(location.search.length > 1) {
+            top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+            _childTerm = top.HEURIST.parameters.child;
+            _currentDomain = top.HEURIST.parameters.domain;
+            _target_parent_id = top.HEURIST.parameters.parent;
 
-                var childTermName = '';
+            var childTermName = '';
+            if(_childTerm){
+                childTermName = top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm]
+                [top.HEURIST.terms.fieldNamesToIndex.trm_Label];
+            }
+
+            if(top.HEURIST.parameters.mode==1){
+                Dom.get('header1').innerHTML = 'Select term you wish to merge into '+ childTermName;
+                Dom.get('btnSet').innerHTML = 'SELECT';
+                //Dom.get('divParentIsRoot').style.display = 'none';
+                Dom.get("childTermName").innerHTML = "";
+            }else
                 if(_childTerm){
-                    childTermName = top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm]
-                                                [top.HEURIST.terms.fieldNamesToIndex.trm_Label];
+                    Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+childTermName+"</h2>";
+                }else{
+                    Dom.get("childTermName").innerHTML = "";
                 }
 
-                if(top.HEURIST.parameters.mode==1){
-                    Dom.get('header1').innerHTML = 'Select term you wish to merge into '+ childTermName;
-                    Dom.get('btnSet').innerHTML = 'SELECT';
-                    //Dom.get('divParentIsRoot').style.display = 'none';
-                    Dom.get("childTermName").innerHTML = "";
-                }else
-				if(_childTerm){
-						Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+childTermName+"</h2>";
-				}else{
-						Dom.get("childTermName").innerHTML = "";
-				}
-
-		}
+        }
 
 
-		if(Hul.isnull(_currentDomain)) {
-			Dom.get("childTermName").innerHTML = "ERROR: Domain is not defined";
-			// TODO: Stop page from loading
-			return;
-		}
+        if(Hul.isnull(_currentDomain)) {
+            Dom.get("childTermName").innerHTML = "ERROR: Domain is not defined";
+            // TODO: Stop page from loading
+            return;
+        }
 
-				if (!(_currentDomain === "enum" || _currentDomain === "relation")){
-					Dom.get("dtyName").innerHTML = "ERROR: Domain '" + _currentDomain + "' is of invalid value";
-					// TODO: Stop page from loading
-					return;
-				}
+        if (!(_currentDomain === "enum" || _currentDomain === "relation")){
+            Dom.get("dtyName").innerHTML = "ERROR: Domain '" + _currentDomain + "' is of invalid value";
+            // TODO: Stop page from loading
+            return;
+        }
 
-				//create trees
-				if(Hul.isnull(_termTree)){
-					_termTree = new YAHOO.widget.TreeView("termTree");
-					//fill treeview with content
-					_fillTreeView(_termTree);
-				}
-	}//end _init
+        //create trees
+        if(Hul.isnull(_termTree)){
+            _termTree = new YAHOO.widget.TreeView("termTree");
+            //fill treeview with content
+            _fillTreeView(_termTree);
+        }
+    }//end _init
 
-	/**
-	* Result function for public "apply" method
-	*
-	* Creates 2 result strings from selected and disabled terms, returns then to invoker window
-	* and closes this window
-	*/
-	function _getNewParent(isRoot) {
-		if(isRoot){
-			window.close("root");
-		}else if(_currentNode){
-			var newparent_id = _currentNode.data.id;
-			window.close(newparent_id);
-		}else{
-			alert("Please select a term in the tree");
-		}
-	}
+    /**
+    * Result function for public "apply" method
+    *
+    * Creates 2 result strings from selected and disabled terms, returns then to invoker window
+    * and closes this window
+    */
+    function _getNewParent(isRoot) {
+        if(isRoot){
+            window.close("root");
+        }else if(_currentNode){
+            if (_currentNode === _findTopLevelForId(_currentNode.data.id)){
+                alert("you can't Select top vocabulary");
+                return;
 
-	/**
-	*	Fills the given treeview with the appropriate content
-	*/
-	function _fillTreeView (tv) {
+            }
+            var newparent_id = _currentNode.data.id;
+            window.close(newparent_id);
+        }else{
+            alert("Please select a term in the tree");
+        }
+    }
 
-		var termid,
-			tv_parent = tv.getRoot(),
-			first_node,
-			treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
-			termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
-			fi = top.HEURIST.terms.fieldNamesToIndex;
+    /**
+    *	Fills the given treeview with the appropriate content
+    */
+    function _fillTreeView (tv) {
+
+        var termid,
+        tv_parent = tv.getRoot(),
+        first_node,
+        treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
+        termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+        fi = top.HEURIST.terms.fieldNamesToIndex;
 
         var node_tomove = null;
 
-		tv.removeChildren(tv_parent); // Reset the the tree
+        tv.removeChildren(tv_parent); // Reset the the tree
 
-		//first level terms
-		for (termid in treesByDomain)
-		{
-		if(!Hul.isnull(termid) && termid!=_childTerm){
+        //first level terms
+        for (termid in treesByDomain)
+        {
+            if(!Hul.isnull(termid) && termid!=_childTerm){
 
-			var nodeIndex = tv.getNodeCount()+1;
+                var nodeIndex = tv.getNodeCount()+1;
 
-			var arTerm = termsByDomainLookup[termid];
+                var arTerm = termsByDomainLookup[termid];
 
-			var term = {};//new Object();
-			term.id = termid;
-			term.parent_id = null;
-			term.domain = _currentDomain;
-			term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
-			term.description = arTerm[fi.trm_Description];
-			term.inverseid = arTerm[fi.trm_InverseTermID];
-            term.status = arTerm[fi.trm_Status];
-            term.original_db = arTerm[fi.trm_OriginatingDBID];
+                var term = {};//new Object();
+                term.id = termid;
+                term.parent_id = null;
+                term.domain = _currentDomain;
+                term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
+                term.description = arTerm[fi.trm_Description];
+                term.inverseid = arTerm[fi.trm_InverseTermID];
+                term.status = arTerm[fi.trm_Status];
+                term.original_db = arTerm[fi.trm_OriginatingDBID];
 
-			//'<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[parentElement]+'</div>';
-			//term.href = "javascript:void(0)";
-		//internal function
-			function __createChildren(parentNode, parent_id, parentEntry) { // Recursively get all children
-				var term,
-					childNode,
-					nodeIndex,
-					child;
+                //'<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[parentElement]+'</div>';
+                //term.href = "javascript:void(0)";
+                //internal function
+                function __createChildren(parentNode, parent_id, parentEntry) { // Recursively get all children
+                    var term,
+                    childNode,
+                    nodeIndex,
+                    child;
 
-				for(child in parentNode)
-				{
-				if(!Hul.isnull(child)){
-					nodeIndex = tv.getNodeCount()+1;
+                    for(child in parentNode)
+                    {
+                        if(!Hul.isnull(child)){
+                            nodeIndex = tv.getNodeCount()+1;
 
-					var arTerm = termsByDomainLookup[child];
+                            var arTerm = termsByDomainLookup[child];
 
-					if(!Hul.isnull(arTerm)){
+                            if(!Hul.isnull(arTerm)){
 
-					term = {};//new Object();
-					term.id = child;
-					term.parent_id = parent_id;
-					term.domain = _currentDomain;
-					term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
-					term.description = arTerm[fi.trm_Description];
-					term.inverseid = arTerm[fi.trm_InverseTermID];
-                    term.status = arTerm[fi.trm_Status];
-                    term.original_db = arTerm[fi.trm_OriginatingDBID];
+                                term = {};//new Object();
+                                term.id = child;
+                                term.parent_id = parent_id;
+                                term.domain = _currentDomain;
+                                term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
+                                term.description = arTerm[fi.trm_Description];
+                                term.inverseid = arTerm[fi.trm_InverseTermID];
+                                term.status = arTerm[fi.trm_Status];
+                                term.original_db = arTerm[fi.trm_OriginatingDBID];
 
 
-					//term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[child]+'</div>';
-					//term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
+                                //term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[child]+'</div>';
+                                //term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
 
-					childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+                                childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
 
-                    if(_target_parent_id == term.id){
-                        node_tomove = childNode;
-                    }
+                                if(_target_parent_id == term.id){
+                                    node_tomove = childNode;
+                                }
 
-					__createChildren(parentNode[child], term.id, childNode); // createChildren() again for every child found
-					}
-				}
-				}//for
-			}
+                                __createChildren(parentNode[child], term.id, childNode); // createChildren() again for every child found
+                            }
+                        }
+                    }//for
+                }
 
-			var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
-			if(!first_node) { first_node = topLayerParent;}
+                var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
+                if(!first_node) { first_node = topLayerParent;}
 
-			var parentNode = treesByDomain[termid];
-			__createChildren(parentNode, termid, topLayerParent); // Look for children of the node
-		}
-		}//for
+                var parentNode = treesByDomain[termid];
+                __createChildren(parentNode, termid, topLayerParent); // Look for children of the node
+            }
+        }//for
 
-		tv.subscribe("labelClick", _onNodeClick);
-		tv.singleNodeHighlight = true;
-		tv.subscribe("clickEvent", tv.onEventToggleHighlight);
+        tv.subscribe("labelClick", _onNodeClick);
+        tv.singleNodeHighlight = true;
+        tv.subscribe("clickEvent", tv.onEventToggleHighlight);
 
-		tv.render();
-		//first_node.focus();
-		//first_node.toggle();
+        tv.render();
+        //first_node.focus();
+        //first_node.toggle();
 
         setTimeout(function(){
             if(node_tomove!=null){
@@ -230,46 +235,90 @@ function SelectTermParent() {
             }}, 1000);
 
 
-	}
+    }
 
-	/**
-	* Loads values to edit form (NOT USED)
-	*/
-	function _onNodeClick(node){
-		_currentNode = node;
-	}
+    /**
+    * Loads values to edit form (NOT USED)
+    */
+    function _onNodeClick(node){
+        _currentNode = node;
+    }
 
-	//
-	//public members
-	//
-	var that = {
+    /*
+    * find vocabulary term (top level node)
+    */
+    function _findTopLevelForId(nodeid){
 
-				/**
-				*	Apply form
-				*/
-				apply : function (isRoot) {
-						_getNewParent(isRoot);
-				},
-
-				/**
-				* Cancel form
-				*/
-				cancel : function () {
-					window.close();
-				},
-
-				getClass: function () {
-					return _className;
-				},
-
-				isA: function (strClass) {
-					return (strClass === _className);
-				}
-
-	};
+        var node = _findNodeById(nodeid, false);
+        if(Hul.isnull(node)){
+            return null;
+        }else{
+            var parent_id = Number(node.data.parent_id)
+            if(Hul.isnull(parent_id) || isNaN(parent_id) || parent_id===0){
+                return node;
+            }else{
+                return _findTopLevelForId(parent_id);
+            }
+        }
+    }
 
 
-	_init();  // initialize before returning
-	return that;
+    // select node by id and expand it
+
+    function _findNodeById(nodeid, needExpand) {
+
+        nodeid = ""+nodeid;
+
+        function __doSearchById(node){
+            return (node.data.id===nodeid);
+        }
+
+        var nodes = _termTree.getNodesBy(__doSearchById);
+
+        //select and expand the node
+        if(nodes){
+            var node = nodes[0];
+            if(needExpand) {
+                node.focus();
+                node.toggle();
+            }
+            return node;
+        }else{
+            return null;
+        }
+        //internal
+    }
+    //
+    //public members
+    //
+    var that = {
+
+        /**
+        *	Apply form
+        */
+        apply : function (isRoot) {
+            _getNewParent(isRoot);
+        },
+
+        /**
+        * Cancel form
+        */
+        cancel : function () {
+            window.close();
+        },
+
+        getClass: function () {
+            return _className;
+        },
+
+        isA: function (strClass) {
+            return (strClass === _className);
+        }
+
+    };
+
+
+    _init();  // initialize before returning
+    return that;
 
 }
