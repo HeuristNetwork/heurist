@@ -1160,7 +1160,9 @@ $.widget( "heurist.resultList", {
 
         var total_inquery = (this._currentRecordset!=null)?this._currentRecordset.count_total():0;
 
-        var sinfo = 'Records: '+total_inquery;
+        //IJ wants just n=
+        var sinfo = 'n='+total_inquery;
+        //var sinfo = 'Records: '+total_inquery;
 
         this.span_pagination.attr('title', sinfo);
         
@@ -1179,14 +1181,18 @@ $.widget( "heurist.resultList", {
                 this.span_info.hide();
             }else {
                 this.span_info.show();
+
+                //IJ wants just n=
+                this.span_info.html(w>340 || total_inquery<1000?('n='+total_inquery):'i');
             
+                /* alternative  Records->Rec->n= ->i
                 if(w<340){
-                    this.span_info.html(total_inquery<1000?total_inquery:'i');
+                    this.span_info.html(total_inquery<1000?('n='+total_inquery):'i');
                 }else if(w<360){
-                    this.span_info.html(total_inquery);
+                    this.span_info.html('n='+total_inquery);
                 }else{
                     this.span_info.html('Rec:'+total_inquery);
-                }
+                }*/
             }
             
         }else{
