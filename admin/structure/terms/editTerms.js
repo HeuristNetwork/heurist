@@ -310,6 +310,27 @@ function EditTerms() {
                 }, 1000);
             //_onNodeClick(node);
         }
+        Add_dragAndDrop();
+    }
+
+    function Add_dragAndDrop()
+    {
+        // $("#termTree1").hide();
+
+    //alert('drag-n-drop extension for tree not loaded');
+        $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js').done(function() {
+      alert('drag-n-drop extension for tree  loaded');
+});
+
+      /*  if(!$.ui.fancytree._extensions["dnd"]){
+            alert('drag-n-drop extension for tree not loaded');
+            return;
+        } */
+
+
+
+        // $("#termTree1").fancytree({});
+
     }
 
     //
@@ -663,7 +684,7 @@ function EditTerms() {
     */
     function _doTermMerge(retain_nodeid, nodeid){
 
-        var _dialogbox;
+        var $_dialogbox;
 
         var _updateResult = function(context){
             if(!Hul.isnull(context) && !context.error){
@@ -714,8 +735,8 @@ function EditTerms() {
             Hul.getJsonData(baseurl, callback, params);
 
 
-            if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
-            _dialogbox = null;
+            if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);
+            $_dialogbox = null;
         };
 
 
@@ -864,12 +885,13 @@ function EditTerms() {
         //fill elements of con
         var ele = document.getElementById('divTermMergeConfirm');
 
-        $("#btnMergeCancel").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
-        $("#btnMergeOK").click( _updateOnServer );
+        $("#btnMergeCancel").click(function(){$_dialogbox.remove();});//if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);});
+        $("#btnMergeOK").click(function(){_updateOnServer; $_dialogbox.remove(); });
+
 
 
         //show confirmation dialog
-        _dialogbox = Hul.popupElement(top, ele,
+        $_dialogbox = Hul.popupElement(top, ele,
             {
                 "close-on-blur": false,
                 "no-resize": true,
