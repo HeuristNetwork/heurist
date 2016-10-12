@@ -1161,7 +1161,7 @@ $.widget( "heurist.resultList", {
         var total_inquery = (this._currentRecordset!=null)?this._currentRecordset.count_total():0;
 
         //IJ wants just n=
-        var sinfo = 'n='+total_inquery;
+        var sinfo = 'n = '+total_inquery;
         //var sinfo = 'Records: '+total_inquery;
 
         this.span_pagination.attr('title', sinfo);
@@ -1183,7 +1183,7 @@ $.widget( "heurist.resultList", {
                 this.span_info.show();
 
                 //IJ wants just n=
-                this.span_info.html(w>340 || total_inquery<1000?('n='+total_inquery):'i');
+                this.span_info.html(w>340 || total_inquery<1000?('n = '+total_inquery):'i');
             
                 /* alternative  Records->Rec->n= ->i
                 if(w<340){
