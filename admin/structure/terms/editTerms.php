@@ -90,7 +90,7 @@ if(isset($_GET['treetype']))
         <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
         <script src="../../../common/php/loadCommonInfo.php"></script>
 
-        <script type="text/javascript">var treetype = "<?= $value ?>";</script>
+        <script type="text/javascript">var treetype = "<?= ((isset($value) && $value)?$value:'') ?>";</script>
         <script type="text/javascript" src="editTerms.js"></script>
 
         <div id="divBanner" class="banner">
