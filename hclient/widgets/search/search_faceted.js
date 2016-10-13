@@ -530,6 +530,8 @@ $.widget( "heurist.search_faceted", {
                     that._on( inpt.find('select'), {
                         change: "doSearch"});                   
                     
+                    inpt.find('input').removeClass('text').css({'width':'150px'});
+                    inpt.find('select').removeClass('text').css({'width':'150px'});
                     
                     var btn_add = $( "<button>")
                     .addClass("smallbutton")
@@ -537,6 +539,17 @@ $.widget( "heurist.search_faceted", {
                     .insertBefore( inpt.find('.input-cell .heurist-helper1') )
                     .button({icons:{primary: "ui-icon-search"}, text:false})
                     that._on( btn_add, { click: "doSearch" });
+
+                    var btn_clear = $( "<span>")
+                    .insertBefore( inpt.find('.input-cell .input-div') )
+                    .addClass("ui-icon ui-icon-arrowreturnthick-1-w")
+                    .css({'display':'inline-block', 'font-size':'0.9em', 'vertical-align':'middle'});
+                    that._on( btn_clear, { click: function(){
+                        inpt.find('input').val('');
+                        inpt.find('select').val('');
+                        that.doSearch();
+                    } });
+
                     
              }
            }
@@ -943,7 +956,7 @@ $.widget( "heurist.search_faceted", {
                                     
                                         if(as_list){                                    
                                             f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count} );
-                                            $("<div>").css({"display":"block","padding":"0 "+(level*5)+"px"})
+                                            $("<div>").css({"display":"inline-block","padding":"0 "+(level*5)+"px"})
                                                     .append(f_link)
                                                     .appendTo($container);
                                         }else{
@@ -1020,7 +1033,7 @@ $.widget( "heurist.search_faceted", {
 
 
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
-                            var $span = $('<span>').css('display','block');
+                            var $span = $('<span>').css({'display':'inline-block','vertical-align':'middle'});
                             var f_link = this._createFacetLink(facet_index, term);
                             $span.append(f_link).appendTo($facet_values);
                         }                        
@@ -1030,10 +1043,15 @@ $.widget( "heurist.search_faceted", {
                         }else{
                                 var $sel = $('<select>').css({"font-size": "0.6em !important", "width":"180px"});
                                 $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
-                                $sel.change(function(event){ that._onTermSelect(event); });
                                 
                                 that._createOption( facet_index, 0, {text:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
                                 __drawTerm(term, 0, $sel, false);
+                                
+                                if(field.selectedvalue && field.selectedvalue.value){
+                                    var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
+                                    $opt.attr('selected',true);
+                                }
+                                $sel.change(function(event){ that._onTermSelect(event); });
                         }
                         
                         
@@ -1124,7 +1142,7 @@ $.widget( "heurist.search_faceted", {
                         
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
                                     var f_link = this._createFacetLink(facet_index, {test:'',value:null,step:0});
-                                    $('<span>').css('display','block').append(f_link).appendTo($facet_values);
+                                    $('<span>').css({'display':'inline-block','vertical-align':'middle'}).append(f_link).appendTo($facet_values);
                         }
                         var sl_count = (cterm && cterm.length==3)?cterm[2]:0;
                         
@@ -1295,7 +1313,7 @@ $.widget( "heurist.search_faceted", {
                                     //$span.append($('<br>'));
                                 }else{
                                     var f_link = this._createFacetLink(facet_index, cvalue);
-                                    $span.append(f_link).appendTo($facet_values);
+                                    $span.css({'display':'inline-block','vertical-align':'middle'}).append(f_link).appendTo($facet_values);
                                     //$span.append($('<span class="ui-icon ui-icon-carat-1-e" />').css({'display':'inline-block','height':'13px'}));
                                 }
                             }
@@ -1305,9 +1323,18 @@ $.widget( "heurist.search_faceted", {
                             var cterm = response.data[i];
 
                             var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]});
-                            $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
-                            if(i>50){
-                                 $("<div>").css({"display":"inline-block","padding":"0 3px"}).html('more '+(response.data.length-i)+' results').appendTo($facet_values);
+                            $("<div>").css({"display":(i>50?'none':"inline-block"),"padding":"0 3px"})
+                                                .append(f_link).appendTo($facet_values);
+                            if(i==51){
+                                 $("<div>").css({"display":"inline-block","padding":"0 3px",'cursor':'pointer'})
+                                           .html('more...( '+(response.data.length-i)+' results )')
+                                           .click(function(event){ 
+                                                $(event.target).parent().find('div:hidden').css('display','inline-block');
+                                                $(event.target).hide();
+                                           })
+                                           .appendTo($facet_values);
+                            }else if(i>250){ 
+                                 $("<div>").css({"display":"none","padding":"0 3px"}).html('still more...( '+(response.data.length-i)+' results )').appendTo($facet_values);
                                  break;       
                             }
                         }
@@ -1381,20 +1408,22 @@ $.widget( "heurist.search_faceted", {
         
         var currval = field.selectedvalue?field.selectedvalue.value:null;
         
-        var f_link = $("<a>",{href:'#', facet_index:facet_index, facet_value:cterm.value, facet_label:cterm.text, step:step}).addClass("facet_link")
+        var f_link = $("<a>",{href:'#', facet_index:facet_index, facet_value:cterm.value, facet_label:cterm.text, step:step})
+                    .addClass("facet_link")
         
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
-            $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w").appendTo(f_link);    
+            $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w").css({'font-size':'0.9em','height':'10px'}).appendTo(f_link);    
         }else{
             var f_link_content = $("<span>").text(cterm.text).appendTo(f_link);    
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){
                 iscurrent = (currval == cterm.value);
-                if(iscurrent || 
-                    (currval.length==2 && 
-                     currval.substr(1,1)=='%' && currval.substr(0,1)==cterm.value.substr(0,1)) )
+                if(iscurrent) 
+                    //do not highlight if initals selected
+                    //|| (currval.length==2 &&  currval.substr(1,1)=='%' && currval.substr(0,1)==cterm.value.substr(0,1)) )
                 {
-                     f_link_content.css({ 'font-weight': 'bold', 'font-size':'1.1em', 'font-style':'normal' })   
+                     
+                     f_link_content.css({ 'font-weight': 'bold', 'font-size':'1.1em', 'font-style':'normal' });   
                 }
             
             }

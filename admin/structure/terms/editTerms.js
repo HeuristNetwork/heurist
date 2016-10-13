@@ -84,7 +84,7 @@ function EditTerms() {
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        if (typeof treetype !== 'undefined')
+        if (!top.HEURIST.util.isempty(treetype))
         {
             if (treetype == "terms")
             {
@@ -149,7 +149,7 @@ function EditTerms() {
     function _handleTabChange (e) {
         var ind = _tabView.get("activeIndex");
         if(e.newValue!==e.prevValue){
-            if (typeof treetype !== 'undefined')
+            if (!top.HEURIST.util.isempty(treetype))
             {
                 if(treetype=="terms"){
                     _currentDomain = "enum";
@@ -705,7 +705,7 @@ function EditTerms() {
 
         var _updateOnServer = function(){
 
-            var trmLabel = $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
+            var trmLabel = $(top.document).find('#lblMergeLabel1').text();// $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
 
             var retain_nodeid = $(top.document).find('#lblRetainId').html();
             var nodeid = $(top.document).find('#lblMergeId').html();
@@ -749,7 +749,9 @@ function EditTerms() {
         var arTerm2 = termsByDomainLookup[retain_nodeid];
         $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
 
-
+        $('#lblMergeLabel1').text(arTerm2[fi.trm_Label]);
+        
+        
         /*  if(Hul.isempty(arTerm[fi.trm_Label])){
         $('#mergeLabel2').hide();
         }else{
@@ -764,7 +766,8 @@ function EditTerms() {
         if "Both" - Select the first one and the other
 
         ***/
-        if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  && (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
+        if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  && 
+            (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
             $('#mergeCode1').show();
             $('#mergeCode2').show();
             $('#mergeDescr1').show();
@@ -779,7 +782,6 @@ function EditTerms() {
             $('#rbMergeDescr1').val('&#60;none&#62;');
             $('#lblMergeDescr2').html('&#60;none&#62;');
             $('#rbMergeDescr2').val('&#60;none&#62;');
-
         }
         else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Code])))
         {
@@ -791,12 +793,13 @@ function EditTerms() {
             $("#rbMergeCode2").attr('checked', 'checked');
             $('#rbMergeDescr1').attr('disabled', 'disabled');
             $("#rbMergeDescr2").attr('checked', 'checked');
-            $('#lblMergeCode2').html(arTerm[fi.trm_Label]);
-            $('#rbMergeCode2').val(arTerm[fi.trm_Label]);
-            $('#lblMergeDescr2').html(arTerm[fi.trm_Label]);
-            $('#rbMergeDescr2').val(arTerm[fi.trm_Label]);
+            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+            $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
         }
-        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
+        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code])) 
+                && (!Hul.isempty(arTerm2[fi.trm_Description])))
         {
             $('#mergeCode1').show();
             $('#mergeCode2').show();
@@ -806,10 +809,10 @@ function EditTerms() {
             $("rbMergeCode1").attr('checked', 'checked');
             $('#rbMergeDescr2').attr('disabled', 'disabled');
             $("#rbMergeDescr1").attr('checked', 'checked');
-            $('#lblMergeCode1').html(arTerm2[fi.trm_Label]);
-            $('#rbMergecode1').val(arTerm2[fi.trm_Label]);
-            $('#lblMergeDescr1').html(arTerm2[fi.trm_Label]);
-            $('#rbMergeDescr1').val(arTerm2[fi.trm_Label]);
+            $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+            $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+            $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
         }
         else
         {
@@ -821,14 +824,14 @@ function EditTerms() {
             $('input[name ="rbMergeCode"]').attr('checked', 'checked');
             $('input[name ="rbMergeDescr"]').removeAttr( "disabled" );
             $('input[name ="rbMergeDescr"]').attr('checked', 'checked');
-            $('#lblMergeCode1').html(arTerm2[fi.trm_Label]);
-            $('#rbMergecode1').val(arTerm2[fi.trm_Label]);
-            $('#lblMergeCode2').html(arTerm[fi.trm_Label]);
-            $('#rbMergeCode2').val(arTerm[fi.trm_Label]);
-            $('#lblMergeDescr1').html(arTerm2[fi.trm_Label]);
-            $('#rbMergeDescr1').val(arTerm2[fi.trm_Label]);
-            $('#lblMergeDescr2').html(arTerm[fi.trm_Label]);
-            $('#rbMergeDescr2').val(arTerm[fi.trm_Label]);
+            $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+            $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+            $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+            $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
         }
 
 

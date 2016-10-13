@@ -1058,6 +1058,7 @@ background: #8ea9b9
         font-weight:bold;
         border-top: 1px solid black !important;
         margin:0;
+        padding-left:.7em;
 }    
 .accordion_pnl > .ui-accordion-header > .ui-accordion-header-icon{
     position: inherit !important;
