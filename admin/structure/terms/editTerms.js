@@ -310,7 +310,7 @@ function EditTerms() {
                 }, 1000);
             //_onNodeClick(node);
         }
-        Add_dragAndDrop();
+      //  Add_dragAndDrop();
     }
 
     function Add_dragAndDrop()
