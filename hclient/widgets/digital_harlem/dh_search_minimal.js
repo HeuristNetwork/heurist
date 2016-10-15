@@ -383,8 +383,6 @@ function hSearchMinimalDigitalHarlem() {
             }
         }
 
-
-
         // add links
         function __isIntersects(r1start, r1end, r2start, r2end)
         {

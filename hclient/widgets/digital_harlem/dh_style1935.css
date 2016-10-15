@@ -161,6 +161,13 @@ a.menuitem {
 .ui-widget-content{
     background: white !important;
 }
+.ui-dialog .ui-dialog-buttonpane {
+    background: black !important;
+}
+.ui-dialog {
+    border: 2px solid black !important; 
+}
+
 
 .legend_text{
     font-size:0.7em;
