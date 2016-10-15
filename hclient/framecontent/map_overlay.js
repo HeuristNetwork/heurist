@@ -596,8 +596,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             });
 
             // Set map options
-            map.overlayMapTypes.insertAt(index, tileType);
-            map.overlayMapTypes.setAt(index, tileType);
+            var overlay_index = map.overlayMapTypes.push( tileType )-1;
 
             var overlay = {
                 visible:true,
@@ -606,13 +605,13 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     console.log("Setting visibility to: " + checked);
                     this.visible = checked;
                     if(checked) {
-                        map.overlayMapTypes.setAt(index, tileType);
+                        map.overlayMapTypes.setAt(overlay_index, tileType);
                     }else{
-                        map.overlayMapTypes.setAt(index, null);
+                        map.overlayMapTypes.setAt(overlay_index, null);        
                     }
                 },
                 removeOverlay: function(){
-                    map.overlayMapTypes.setAt(index, null);
+                    map.overlayMapTypes.setAt(overlay_index, null);
                 }
             };
 
