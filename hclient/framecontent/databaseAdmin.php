@@ -100,7 +100,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                     -->
 
                     <li  style="padding-left:5px;">
-                        <a id= "manage_terms" href="admin/structure/terms/editTerms.php?treetype=<?php echo'terms'?>" name="auto-popup" class="verylarge h3link refresh_structure info_link"
+                        <a id= "manage_terms" href="admin/structure/terms/editTerms.php?treetype=enum" name="auto-popup" class="verylarge h3link refresh_structure info_link"
 
                             title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
                             Manage terms</a>
@@ -108,7 +108,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                     <!-- Adding Manage relation types menu -->
                     <li  style="padding-left:5px;">
-                        <a  href="admin/structure/terms/editTerms.php?treetype=<?php echo'relationships'?>" name="auto-popup" class="verylarge h3link refresh_structure info_link"
+                        <a  href="admin/structure/terms/editTerms.php?treetype=relation" name="auto-popup" class="verylarge h3link refresh_structure info_link"
 
                             title="Browse and edit the relationship types"  onclick= "{return false;}">
                             Manage relation types</a>

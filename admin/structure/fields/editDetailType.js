@@ -445,7 +445,7 @@ function DetailTypeEditor() {
         if(is_add_vocab || (el_sel && el_sel.value>0)){ //add term to vocabulary
 
             Hul.popupURL(top, top.HEURIST.baseURL_V3 +
-                "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
+                "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
                 {
                     "close-on-blur": false,
                     "no-resize": true,
@@ -1090,7 +1090,8 @@ function DetailTypeEditor() {
             var el_sel = Dom.get("selVocab");
             var vocab_id =  el_sel.value>0?el_sel.value:'';
 
-            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/terms/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
+            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/terms/editTerms.php?"+
+                "popup=1&vocabid="+vocab_id+"&treetype="+type+"&db="+_db,
                 {
                     "close-on-blur": false,
                     "no-resize": false,

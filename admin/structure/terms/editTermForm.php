@@ -115,18 +115,14 @@
                 padding-right: 10px;
             }
         </style>
-
-    </head>
-
-    <body class="popup">
-        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
+        
         <script type="text/javascript">
 
             var context_return_res = "<?=$return_res ?>";
 
             function showOtherTerms(){
                 top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
-                    "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&domain=<?=$_REQUEST['domain'] ?>&db=<?=$_REQUEST['db'] ?>",
+                    "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&treetype=<?=$_REQUEST['treetype'] ?>&db=<?=$_REQUEST['db'] ?>",
                     {
                         "close-on-blur": false,
                         "no-resize": false,
@@ -158,6 +154,11 @@
             }
         </script>
 
+        
+    </head>
+
+    <body class="popup">
+        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
         <div>
             <form name="main" action="editTermForm.php" method="post"
                 onsubmit="{document.getElementById('btnPanel').style.display = 'none'}">

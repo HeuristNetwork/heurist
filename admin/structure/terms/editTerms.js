@@ -57,6 +57,7 @@ function EditTerms() {
     _vocabulary_toselect,
     _parentNode,
     _currentDomain,
+    treetype = null,
     _db,
     _isWindowMode=false,
     _isSomethingChanged=false,
@@ -77,9 +78,16 @@ function EditTerms() {
         _isWindowMode = !Hul.isnull(top.HEURIST.parameters.popup);
 
         _vocabulary_toselect = top.HEURIST.parameters.vocabid;
+        
+        treetype = top.HEURIST.parameters.treetype;
+        if (!top.HEURIST.util.isempty(treetype)){
+            treetype = (treetype == 'enum')?'terms':'relationships';
+        }
+
         var initdomain = 0;
-        if(top.HEURIST.parameters.domain=='relation'){
-            initdomain  = 1;
+        
+        if(top.HEURIST.parameters.domain=='relation' && top.HEURIST.util.isempty(treetype)) {
+            if(top.HEURIST.util.isempty(treetype)) initdomain  = 1;
         }
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
