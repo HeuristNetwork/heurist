@@ -46,7 +46,7 @@
 
     $local_message = "";
 
-    if(@$_REQUEST['domain']==null){
+    if(@$_REQUEST['treetype']==null){
         $local_message = "Terms domain is not defined";
     }else if($parent_id==null){
         $local_message = "Parent vocabulary is not defined";
@@ -57,9 +57,9 @@
         }else{
 
             $mysqli = mysqli_connection_overwrite(DATABASE); //artem's
-
+            
             $res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $parent_id."-1",
-                array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), $mysqli);
+                array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['treetype'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), $mysqli);
 
             $mysqli->close();
 
@@ -88,7 +88,7 @@
 
     if($parent_id!=0){
         $terms = getTerms(true);
-        $parent_name = $terms['termsByDomainLookup'][$_REQUEST['domain']][$parent_id][0];
+        $parent_name = $terms['termsByDomainLookup'][$_REQUEST['treetype']][$parent_id][0];
     }
 
 ?>
@@ -164,7 +164,7 @@
                 onsubmit="{document.getElementById('btnPanel').style.display = 'none'}">
 
                 <input name="process" value="action" type="hidden" />
-                <input name="domain" value="<?=$_REQUEST['domain']?>" type="hidden" />
+                <input name="treetype" value="<?=@$_REQUEST['treetype']?>" type="hidden" />
                 <input name="db" value="<?=HEURIST_DBNAME?>" type="hidden" />
                 <input name="return_res" value="<?=$return_res?>" type="hidden" />
                 <input name="parent" value="<?=$parent_id?>" type="hidden" />

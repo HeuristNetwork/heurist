@@ -121,10 +121,11 @@ function SelectTermParent() {
         if(isRoot){
             window.close("root");
         }else if(_currentNode){
-            if (_currentNode === _findTopLevelForId(_currentNode.data.id)){
-                alert("you can't Select top vocabulary");
-                return;
-
+            if(top.HEURIST.parameters.mode==1){
+                if (_currentNode === _findTopLevelForId(_currentNode.data.id)){
+                    alert("You can't select top vocabulary for merge");
+                    return;
+                }
             }
             var newparent_id = _currentNode.data.id;
             window.close(newparent_id);

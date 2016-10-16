@@ -318,17 +318,16 @@ function EditTerms() {
                 }, 1000);
             //_onNodeClick(node);
         }
-      //  Add_dragAndDrop();
+        //Add_dragAndDrop();
     }
 
     function Add_dragAndDrop()
     {
-        // $("#termTree1").hide();
+    // $("#termTree1").hide();
 
     //alert('drag-n-drop extension for tree not loaded');
-        $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js').done(function() {
-      alert('drag-n-drop extension for tree  loaded');
-});
+    $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js').done(function() {
+    });
 
       /*  if(!$.ui.fancytree._extensions["dnd"]){
             alert('drag-n-drop extension for tree not loaded');
@@ -1243,7 +1242,7 @@ function EditTerms() {
         if(_currentNode===null) return;
         if (_currentNode === _findTopLevelForId(_currentNode.data.id))
         {
-            alert("you can't move top vocabulary");
+            alert("You can't move top vocabulary");
             return;
         }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1265,7 +1264,7 @@ function EditTerms() {
                 "close-on-blur": false,
                 "no-resize": true,
                 height: 500,
-                width: 450,
+                width: 500,
                 callback: function(newparent_id) {
                     if(newparent_id) {
                         if(newparent_id === "root") {
@@ -1330,7 +1329,7 @@ function EditTerms() {
                 "no-resize": true,
                 title: 'Merge into: '+name_with_path,
                 height: 500,
-                width: 450,
+                width: 500,
                 callback: function(merge_nodeid) {
                     if(merge_nodeid && merge_nodeid !== "root") {
 
