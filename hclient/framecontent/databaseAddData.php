@@ -47,7 +47,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div>
                 <ul>
 
-                    <li style="padding-left:5px;" class="list-menu-only">
+                    <li class="list-menu-only">
                         <a href="records/add/addRecordPopup.php" id="menulink-add-record" name="auto-popup" class="h3link"
                             title="Add new record of specified record type">
                             Add record</a>
@@ -65,7 +65,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <ul>
 
                     <!-- OLD 
-                    <li class="admin-only" style="padding-left:5px;">
+                    <li class="admin-only">
                     <a href="import/delimited/importCSV.php" name="auto-popup" class="verylarge h3link"
                     onClick="{return false;}" target="_blank"
                     title="Import data from delimited text file. Supports matching, record creation, record update." >
@@ -73,39 +73,39 @@ require_once(dirname(__FILE__)."/initPage.php");
                     </li>
                     -->
 
-                    <li id="menu-import-csv" style="padding-left:5px;">
+                    <li id="menu-import-csv">
                         <a href="#"
                             title="Import data from delimited text file. Supports matching, record creation, record update.">
                             Delimited text (csv, tsv)</a>
                     </li>
 
-                    <li style="padding-left:5px;">
+                    <li>
                         <a href="import/biblio/syncZotero.php" name="auto-popup"  class="fixed h3link embed"
                             onClick="{return false;}"
                             title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
                             Zotero synchronisation</a>
                     </li>
 
-                    <li class="admin-only" style="padding-left:5px;">
+                    <li class="admin-only">
                         <a href="import/fieldhelper/synchroniseWithFieldHelper.php" name="auto-popup" class="fixed h3link embed"
                             onClick="{return false;}" target="_blank"
                             title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
                             Index multimedia</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="import/email/emailProcessingSetup.php" name="auto-popup" class="fixed h3link embed"
+                    <li><a href="import/email/emailProcessingSetup.php" name="auto-popup" class="fixed h3link embed"
                         onClick="{return false;}"
                         title="Harvest email from a designated IMAP email server (set in database administrtion > Databsae > Advanced Properties)">
                         Harvest emails</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="import/hyperlinks/importHyperlinks.php" name="auto-popup" class="h3link embed"
+                    <li><a href="import/hyperlinks/importHyperlinks.php" name="auto-popup" class="h3link embed"
                         onClick="{return false;}"
                         title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
                         Import hyperlinks</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="import/importerFramework.php?format=GEO" name="auto-popup" class="fixed h3link embed"
+                    <li><a href="import/importerFramework.php?format=GEO" name="auto-popup" class="fixed h3link embed"
                         onClick="{return false;}"
                         title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
                         Import KML</a>
@@ -121,14 +121,14 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div>
                 <ul>
 
-                    <li class="admin-only" style="padding-left:5px;"><a href="import/utilities/manageFilesUpload.php" name="auto-popup" 
+                    <li class="admin-only"><a href="import/utilities/manageFilesUpload.php" name="auto-popup" 
                     class="large h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
                         Multi-file upload</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="import/utilities/convertTagsToCSV.php" name="auto-popup" class="fixed h3link embed"
+                    <li><a href="import/utilities/convertTagsToCSV.php" name="auto-popup" class="fixed h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="Convert file with tag + value per line (space separated), to a CSV file with pipe-separated repeat values">
                         Tag-value to CSV</a>
@@ -139,13 +139,13 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                     <li>UNMAINTAINED</li>
 
-                    <li style="padding-left:5px;"><a href="import/delimited/importRecordsFromDelimited.html" name="auto-popup" class="large h3link"
+                    <li><a href="import/delimited/importRecordsFromDelimited.html" name="auto-popup" class="large h3link"
                     onClick="{return false;}" target="_blank"
                     title="Import data from delimited text for one record type at a time, addition only (no matching or merging)" >
                     CSV simple import</a>
                     </li>
 
-                    <li class="admin-only" style="padding-left:5px;"><a href="import/delimited/updateDetailsFromDelimited.html" class="large h3link"
+                    <li class="admin-only"><a href="import/delimited/updateDetailsFromDelimited.html" class="large h3link"
                     onClick="{return false;}" target="_blank"
                     title="Update or add fields in existing records from delimited text, specify fields using internal codes" name="auto-popup">
                     CSV field updater</a>

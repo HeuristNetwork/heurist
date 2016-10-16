@@ -1067,7 +1067,12 @@ background: #8ea9b9
     height: 30px;
     margin-right: 0.5em;
 }
+.accordion_pnl > div > ul > .ui-menu-item  {
+    padding-left:35px;
+}
     
 .ui-icon-filter { background-image: url(hclient/assets/filter_icon.png) !important; }
+
+.ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon.png) !important; }
 
 .ui-iconalign { display: inline-block; vertical-align: text-bottom; padding-right:1em }

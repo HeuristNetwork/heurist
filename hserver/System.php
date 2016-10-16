@@ -427,7 +427,7 @@ class System {
         }else if($status==HEURIST_DB_ERROR){
             error_log($message.' '.$sysmsg);
             if(!$this->is_dbowner()){ //reset to null if not database owner
-                $sysmsg = null;
+                $sysmsg = 'reported in the server\'s PHP error log';
             }
         }            
                     

@@ -60,7 +60,7 @@ $.widget( "heurist.search", {
         $.getScript(window.hWin.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'5.8em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
+        this.element.css({'height':'5.8em', 'min-width':'1100px', 'border-bottom':'2px solid lightgray'});
         if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
             this.element.addClass('ui-heurist-header1');
         }else{
@@ -370,13 +370,15 @@ $.widget( "heurist.search", {
 
         var linkGear = $('<a>',{href:'#', 
         title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px'})
-        .addClass('ui-icon ui-icon-gear')
+        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px','height':'18px'})
+        .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
         .appendTo(this.div_buttons);
         this._on( linkGear, {  click: this.showSearchAssistant });
         
+        /* rotate icon with given interval
         setInterval( function(){ linkGear.addClass('rotate'); 
                     setTimeout( function(){ linkGear.removeClass('rotate'); }, 1000 ) }, 5000 );
+        */            
 
         this.search_assistant = null;
 

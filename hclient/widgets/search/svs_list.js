@@ -88,7 +88,7 @@ $.widget( "heurist.svs_list", {
                     title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
                 })
                 .css({'min-width': '110px','vertical-align':'top','margin-left': '12px','font-size':'1.2em'})
-                //.addClass('ui-heurist-btn-header1')
+                .addClass('ui-heurist-btn-header1')
                 .appendTo(this.div_header)
                 .button({icons: {
                     primary: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"
@@ -101,13 +101,13 @@ $.widget( "heurist.svs_list", {
                     });
                 } });
                 
-                toppos = toppos + 2.5
+                //toppos = toppos + 2.5
             }
         }
         
         this.helper_top = $( '<div>'+window.hWin.HR('right-click for actions')+'</div>' )
         .addClass('logged-in-only heurist-helper1')
-        .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding':'1em 0 0 1.2em'}).appendTo(this.div_header) )
+        .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding':'0.2em 0 0 1.2em'}).appendTo(this.div_header) )
         //.appendTo( this.accordeon );
         if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
 
@@ -205,12 +205,21 @@ $.widget( "heurist.svs_list", {
         if(this.btn_search_save){
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data){
                 //show if there is resulst
+                var is_changed = 0;
                 if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0) 
                 {
+                    if(!that.btn_search_save.is(':visible')) is_changed = 1;
                     that.btn_search_save.show();
                 }else{
+                    if(that.btn_search_save.is(':visible')) is_changed = -1;
                     that.btn_search_save.hide();
+                    
                 }
+                if(is_changed!=0){
+                    var px = window.hWin.HEURIST4.util.em(2.5);
+                    that.accordeon.css('top', that.accordeon.position().top + is_changed * px );
+                }                
+                
         });
         }
                

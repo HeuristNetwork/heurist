@@ -81,9 +81,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 } 
                 
             }else if(response.status==window.hWin.HAPI4.ResponseStatus.DB_ERROR){
-                msg = msg + "<br><br>Please consult your system administrator. Error may be due to an incomplete "
-                        +"database eg. missing stored procedures, functions, triggers, or there may be an "
-                        +"error in our code (in which case we need to know so we can fix it";
+                msg = msg + '<br><br>If this error occurs repeatedly, please contact '
+                +'your system administrator or email us (support at HeuristNetwork dot org)'
+                +' and describe the circumstances under which it occurs so that we/they can find a solution';
             }
         }
         if(window.hWin.HEURIST4.util.isempty(msg)){
@@ -237,7 +237,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
         }
 
-        var title = '', // 'Info' removed - it's a useless popup window title, better to have none at all
+        var title = '·', // 'Info' removed - it's a useless popup window title, better to have none at all
             lblYes = window.hWin.HR('Yes'),
             lblNo =  window.hWin.HR('No'),
             lblOk = window.hWin.HR('OK'),
