@@ -123,7 +123,7 @@ if(isForAdminOnly("to modify database structure")){
             </div>
 
             <div id="formContainer" style="position:absolute;left:303px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
-                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:300px;">Rollover items in the tree to show available actions<br/>Drag terms to reposition, merge or set as inverse of one-another<br/> Select term to edit label and description</h3>
+                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Rollover items in the tree to show available actions<br/>Drag terms to reposition, merge or set as inverse of one another<br/> Select term to edit label and description</h3>
                 <h3 id="formMessage" style="margin-left:10px; border-style:none;display:none;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
                 </h3>
