@@ -186,14 +186,14 @@ var cfg_layouts = [
                     {appid:'h3_recordListExt', name: 'Record View', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
                     {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
+                    {appid:'h4_static', name: 'Export',
+                        options:{url: 'hclient/framecontent/databaseExport.php?db=[dbname]', isframe:true}
+                        ,css:{position:'absolute', top:0,left:0,bottom:0,right:0,'min-width':'75em'}},
+                    
                     {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}},
  
                     {appid:'h3_recordListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
-                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]'}},
-                    
-                    {appid:'h4_static', name: 'Export',
-                        options:{url: 'hclient/framecontent/databaseExport.php?db=[dbname]', isframe:true}
-                        ,css:{position:'absolute', top:0,left:0,bottom:0,right:0,'min-width':'75em'}}
+                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]'}}
                     
             ]}]
         }

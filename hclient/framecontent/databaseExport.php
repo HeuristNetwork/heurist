@@ -39,7 +39,46 @@ require_once(dirname(__FILE__)."/initPage.php");
 </script>
 </head>
 <body style="background-color:white">
-    <div style="width:280px;top:0;bottom:0;left:0;position:absolute;padding:5px;">
+    <div style="width:280px;top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
+    
+            <h2>Text file export</h2>
+            
+            <br><br>
+    
+            <div class="admin-only" style="padding-left:5px;">
+                <button class="export-button">CSV</button>
+                <a href="export/delimited/exportDelimitedForRectype.html" name="auto-popup" class="fixed h3link"
+                    title="Export records as delimited text (comma/tab), applying record type and additional Heurist search filter as required">
+                    Comma or tab-separated text file</a>
+            </div>
+
+            <div id="menu-export-hml-0" style="padding-left:5px;">
+                <button class="export-button">HML</button>
+                <a href="#"
+                    data-action="menu-export-hml-0"
+                    title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
+                    HML</a>
+            </div>
+
+            <div id="menu-export-hml-3" style="padding-left:5px;">
+                <button class="export-button">XML</button>
+                <a href="#" 
+                    data-action="menu-export-hml-3"
+                    title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
+                    One file per record</a>
+            </div>
+            
+            <div id="menu-export-kml" style="padding-left:5px;">
+                <button class="export-button">KML</button>
+                <a href="#" 
+                    data-action="menu-export-kml"
+                    title="Generate KML for current set of search results (current query + expansion)">
+                    KML</a>
+            </div>
+            
+    
+               <!--
+ 
         <ul id="menu_container" style="margin-top:10px;padding:2px">
 
             <li>EXPORT RESULTS SET</li>
@@ -62,7 +101,6 @@ require_once(dirname(__FILE__)."/initPage.php");
                     KML</a>
             </li>
 
-            <!--
             <li  id="menu-export-rss" style="padding-left:5px;">
                 <a href="#"
                     title="Generate RSS feed for current set of search results (current query + expansion)">
@@ -92,7 +130,6 @@ require_once(dirname(__FILE__)."/initPage.php");
                     Selected with related records</a>
             </li>
 
-            -->
 
             <li id="menu-export-hml-3" style="padding-left:5px;">
                 <a href="#"
@@ -104,6 +141,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
 
         </ul>
+            -->
     </div>
 </body>
 </html>

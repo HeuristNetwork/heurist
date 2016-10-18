@@ -119,7 +119,7 @@ function hDatabaseAdmin() {
 
         $('#menulink-database-admin').click( //.attr('href', 
             function(event){
-                window.hWin.open(window.hWin.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.hWin.HAPI4.database, '_self');
+                window.hWin.open(window.hWin.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.hWin.HAPI4.database, '_blank');
                 event.preventDefault();
                 return false;
             }

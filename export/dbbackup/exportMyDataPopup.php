@@ -64,8 +64,9 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
     </head>
 
-    <body class="popup" width: 250px; height: 200px;>
+    <body class="popup" style="padding-top:30px">
 
+        <div class="banner"  style="padding-left:3px"><h2>Complete data archive package</h2></div>    
         <?php
 
         $please_advise = "<br>Please consult with your system administrator for a resolution.";
@@ -101,6 +102,9 @@ if($mode=='2' && file_exists($folder.".zip") ){
             
                 <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
                 <input name='mode' value='1' type='hidden'>
+<?php if(@$_REQUEST['inframe']==1) { ?>                    
+                <input name='inframe' value='1' type='hidden'>
+<?php } ?>                
 
                 <div class="input-row">
                     <div class="input-header-cell">Include attached (uploaded) files eg. images</div> <!--  (output everything as one ZIP file) -->
@@ -121,7 +125,9 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
                 <div id="buttons" class="actionButtons">
                     <input type="submit" value="Export" style="margin-right: 20px; padding-left:5px; padding-right:5px;">
-                    <input type="button" value="cancel"  style="margin-right: 200px; padding-left:5px; padding-right:5px;" onClick="window.close();">
+<?php if(@$_REQUEST['inframe']!=1) { ?>                    
+                    <input type="button" value="Cancel"  style="margin-right: 200px; padding-left:5px; padding-right:5px;" onClick="window.close();">
+<?php } ?>                    
                 </div>
             </form>
 

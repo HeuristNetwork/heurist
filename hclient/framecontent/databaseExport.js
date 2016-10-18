@@ -47,6 +47,41 @@ function hDatabaseExport() {
     //init listeners for auto-popup links
     function _initLinks(menu){
 
+        $('.export-button').each(function(){
+            var ele = $(this);
+            
+            ele.parent().css('padding','5px');
+            //find url
+            var lnk = ele.parent().find('a').css({'text-decoration':'none','color':'black'});
+            var href = lnk.attr('href');
+            if(!window.hWin.HEURIST4.util.isempty(href)){
+                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
+                if(lnk.hasClass('h3link')){
+                    //h3link class on menus implies location of older (vsn 3) code
+                    href = window.hWin.HAPI4.basePathV3 + href;
+                }
+                
+                lnk.attr('href', href).click(
+                    function(event){
+                        var action = $(event.target).attr('data-action');
+                        if(action){
+                            _menuActionHandler(event, action);
+                            return false;
+                        }else{
+                            _onPopupLink(event);
+                        }
+                    }
+                );
+            }
+
+            ele.button().click(
+                    function(event){
+                        $(event.target).parent().find('a').click();
+                    });
+            
+        });
+
+        
         menu.find('[name="auto-popup"]').each(function(){
             var ele = $(this);
             var href = ele.attr('href');
@@ -54,8 +89,8 @@ function hDatabaseExport() {
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
 
                 if(ele.hasClass('h3link')){
-                    href = window.hWin.HAPI4.basePathV3 + href;
                     //h3link class on menus implies location of older (vsn 3) code
+                    href = window.hWin.HAPI4.basePathV3 + href;
                 }
                 
                 ele.attr('href', href).click(

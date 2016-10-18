@@ -145,7 +145,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                         <h3 id="table-header">Record types (entities)</h3>
                         <button id="expand">Expand &#10142;</button>
                     </div>
-                    <div class="ent_content_full">
+                    <div class="ent_content_full" style="padding-left:10px">
     
                     <table id="records" class="records" cellpadding="4" cellspacing="1">
 

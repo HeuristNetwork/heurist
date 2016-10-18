@@ -163,11 +163,13 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <ul>
                     <li class="admin-only">
                         <a  href="#" id="menulink-database-admin"
-                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.HAPI4.database, '_self'); return false;}"
+                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
                             Full database administration, <br />utilities &amp; special functions</a>
                     </li>
-                    <li class="admin-only" style="padding-left:5px;"><a href="export/dbbackup/exportMyDataPopup.php" name="auto-popup" class="portrait h3link"
+                    <li class="admin-only">
+                        <a href="export/dbbackup/exportMyDataPopup.php?inframe=1" name="auto-popup" class="portrait h3link"
+                        onclick= "{return false;}"
                         title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
                         Complete data archive package</a>
                     </li>
