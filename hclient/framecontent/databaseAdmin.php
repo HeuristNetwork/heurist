@@ -167,6 +167,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                             title="Full set of database administration functions, utilities and special project extensions">
                             Full database administration, <br />utilities &amp; special functions</a>
                     </li>
+                    <li class="admin-only" style="padding-left:5px;"><a href="export/dbbackup/exportMyDataPopup.php" name="auto-popup" class="portrait h3link"
+                        title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
+                        Complete data archive package</a>
+                    </li>
+
                 </ul>
             </div>
         </div>

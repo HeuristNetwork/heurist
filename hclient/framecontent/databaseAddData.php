@@ -128,12 +128,6 @@ require_once(dirname(__FILE__)."/initPage.php");
                         Multi-file upload</a>
                     </li>
 
-                    <li><a href="import/utilities/convertTagsToCSV.php" name="auto-popup" class="fixed h3link embed"
-                        onClick="{return false;}" target="_blank"
-                        title="Convert file with tag + value per line (space separated), to a CSV file with pipe-separated repeat values">
-                        Tag-value to CSV</a>
-                    </li>
-
                     <!--
                     <li>-</li>
 
