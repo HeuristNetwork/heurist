@@ -143,7 +143,8 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) 
+        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 'max-width':sz_input, 
+            'min-width':'10em', 'width':sz_input, 'padding-right':'18px' }) 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         window.hWin.HEURIST4.util.setDisabled(this.input_search, true);
