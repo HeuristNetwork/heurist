@@ -76,12 +76,13 @@ function hDatabaseExport() {
 
             ele.button().click(
                     function(event){
-                        $(event.target).parent().find('a').click();
+                        $(this).parent().find('a').click();
                     });
             
         });
 
         
+       //old way 
         menu.find('[name="auto-popup"]').each(function(){
             var ele = $(this);
             var href = ele.attr('href');
@@ -152,9 +153,17 @@ function hDatabaseExport() {
         }
 
         var url = link.attr('href');
-        if (link.hasClass('currentquery')) {
-            url = url + that._current_query_string
-        }
+        
+            if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
+                var q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
+                if(!window.hWin.HEURIST4.util.isempty(q)) q = '&'+q;
+                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
+                    q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
+                }
+                url = url + '&w=all&a=1' + q;
+            }
+        
+        
         
         if (link.hasClass('refresh_structure')) {
                options['afterclose'] = this._refreshLists;

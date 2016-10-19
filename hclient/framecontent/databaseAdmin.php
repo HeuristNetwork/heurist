@@ -158,7 +158,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             </div>
         </div>
         <div class="accordion_pnl">
-            <h3>ADMINISTRATION</h3>
+            <h3><span class="ui-icon ui-iconalign ui-icon-gears"></span>ADMINISTRATION</h3>
             <div>
                 <ul>
                     <li class="admin-only">

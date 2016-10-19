@@ -87,8 +87,8 @@ $.widget( "heurist.svs_list", {
                     text: window.hWin.HR("Save"),
                     title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
                 })
-                .css({'min-width': '110px','vertical-align':'top','margin-left': '12px','font-size':'1.2em'})
-                .addClass('ui-heurist-btn-header1')
+                .css({'min-width': '110px','vertical-align':'top','margin-left': '12px','font-size':'1.2em', 'font-weight': 'bold'})
+                .addClass('ui-state-focus')
                 .appendTo(this.div_header)
                 .button({icons: {
                     primary: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"

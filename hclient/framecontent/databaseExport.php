@@ -57,7 +57,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <a href="#"
                     data-action="menu-export-hml-0"
                     title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
-                    HML</a>
+                    HML <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
             </div>
 
             <div id="menu-export-hml-3" style="padding-left:5px;">
@@ -65,7 +65,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <a href="#" 
                     data-action="menu-export-hml-3"
                     title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
-                    One file per record</a>
+                    One file per record <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
             </div>
             
             <div id="menu-export-kml" style="padding-left:5px;">
@@ -73,7 +73,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <a href="#" 
                     data-action="menu-export-kml"
                     title="Generate KML for current set of search results (current query + expansion)">
-                    KML</a>
+                    KML <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
             </div>
             
     
