@@ -35,7 +35,7 @@
  * imageAnnotation.js
  */
 var viewerObject,
-	Hul = window.hWin?window.hWin.HEURIST4.util:top.HEURIST.util;
+	Hul = (window.hWin && window.hWin.HEURIST4)?window.hWin.HEURIST4.util:top.HEURIST.util;
 
 /*
 // Parse a URL and return its components
@@ -305,7 +305,7 @@ function showViewer(container, url_and_cfg, _recordID, sTypeDef){
  			container.style.bottom = 22;
 
  			viewerObject = null;
-			viewer.toolbarImages = (window.hWin?window.hWin.HEURIST4.baseURL_V3:top.HEURIST.baseURL_V3)
+			viewer.toolbarImages = ((window.hWin && window.hWin.HEURIST4)?window.hWin.HEURIST4.baseURL_V3:top.HEURIST.baseURL_V3)
                 +"external/js/simple_js_viewer/images/toolbar";
 			viewer.onload =  viewer.toolbar;
 			image_digitizer_container = document.getElementById('image_digitizer_container');
