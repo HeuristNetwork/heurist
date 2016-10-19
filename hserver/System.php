@@ -421,7 +421,7 @@ class System {
     * keep error message (for further use with getError)
     */
     public function addError($status, $message='', $sysmsg=null) {
-        
+
         if($status==HEURIST_REQUEST_DENIED){
             $sysmsg = $this->get_user_id();
         }else if($status==HEURIST_DB_ERROR){
@@ -429,8 +429,8 @@ class System {
             if(!$this->is_dbowner()){ //reset to null if not database owner
                 $sysmsg = 'reported in the server\'s PHP error log';
             }
-        }            
-                    
+        }
+
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
         return $this->errors;
     }
@@ -450,14 +450,14 @@ class System {
         }
 
         if($this->mysqli && defined('HEURIST_DBNAME')){
-            
+
             $dbowner = user_getDbOwner($this->mysqli);
 
-            
+
             $dbrecent = array();
             if(@$user['ugr_ID']>0){
                 foreach ($_SESSION as $db=>$session){
-                    
+
                     $user_id = @$_SESSION[$db]['ugr_ID'] ?$_SESSION[$db]['ugr_ID'] :@$_SESSION[$db.'.heurist']['user_id'];
                     if($user_id == $user['ugr_ID']){
                         if(strpos($db, HEURIST_DB_PREFIX)===0){
@@ -467,10 +467,10 @@ class System {
                     }
                 }
             }
-       
-            
-            
-            
+
+
+
+
             $res = array(
                 "currentUser"=>$user,
                 "sysinfo"=>array(
@@ -485,7 +485,7 @@ class System {
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
                     "basePathV3"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
-                    "dbrecent"=>$dbrecent) 
+                    "dbrecent"=>$dbrecent)
             );
 
         }else{
@@ -672,7 +672,7 @@ class System {
     * verify session only (without database connection and initialization)
     */
     public function is_logged($db){
-       
+
        if($db){
             $this->dbname = $db;
             if(!(strpos($db, HEURIST_DB_PREFIX)===0)){
@@ -685,9 +685,9 @@ class System {
             return false;
         }
         $this->start_my_session();
-        return $this->login_verify()?'1':'0';        
+        return $this->login_verify()?'1':'0';
     }
-    
+
 
     /**
     * Load user info from session
@@ -710,7 +710,7 @@ class System {
         $islogged = ($userID != null);
         if($islogged){
 
-            //@todo do not update session on every request, update in on user membership changes    
+            //@todo do not update session on every request, update in on user membership changes
             if(true || !@$_SESSION[$this->dbname_full]['ugr_Groups']){
                 $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
             }

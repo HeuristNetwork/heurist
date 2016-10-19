@@ -199,6 +199,14 @@ if(isForAdminOnly("to modify database structure")){
                         </div>
 
 
+                        <div class="dtyField">
+                            <label class="dtyLabel">Definition URL(s)</label>
+                            <input id="edURL" style="width:350px; margin-top:5px;"/>
+                            <div style="padding-left:105;padding-top:3px;  font-size:smaller;">
+                                One or more comma-seperated URls to sources which provide an authorative definition<br/>of the term. By default the definition is asumming to resolve to an html page, but an <br/> alternative form, such as XML can be specified by preceding the URl with an appropraite<br/> term e.g XML htpp://somesite.org.terms/123
+                            </div>
+                        </div>
+
                         <!--
                         Fields for relationship type terms only
                         -->
@@ -276,6 +284,27 @@ if(isForAdminOnly("to modify database structure")){
                         -->
 
                     </div>
+
+                    <div style="padding-top:20px; margin-left:10px">
+                        Term(s) have been added to the term tree but this does not add them to the  individual trees for different fields, since these are individually selected from the complete term tree. Please update the lists for each field to which these terms should be added. <br/><br/> The felds most likely to be affected are
+
+                    </div>
+
+                    <div style="margin-left:10px; padding-top:15px; width:600px;; padding-left:30px">
+                        <label>Relationship type:</label>
+                        <input id="btnChangeVocab" type="button" style="display:inline-block"
+                            value="Change Vocabulary" />
+
+                        <span>
+                            <select style="background-color:buttonface; font-weight:bold; color:#666; width:200px" id="trm_relationtype" >
+                                <option   selected="selected">isRelatedTo</option>
+                                <option>#</option>
+                                <option>#</option>
+
+                            </select></span>
+
+                    </div>
+
 
                     <div id="formAffected" style="display:none;padding:10px;width:480px;">
                         <p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS
