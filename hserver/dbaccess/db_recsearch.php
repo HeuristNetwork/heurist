@@ -431,7 +431,11 @@ if(@$params['debug']) echo $query."<br>";
                 $fieldtypes_ids = '9,10,11,28';
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
 
-            $fieldtypes_ids = explode(',', $params['detail']);
+            if(is_array($params['detail'])){
+                $fieldtypes_ids = $params['detail'];
+            } else {
+                $fieldtypes_ids = explode(',', $params['detail']);
+            }
             if(is_array($fieldtypes_ids) && (count($fieldtypes_ids)>1 || is_numeric($fieldtypes_ids[0])) ){
                 $fieldtypes_ids = implode(',', $fieldtypes_ids);
                 $params['detail'] = 'detail';

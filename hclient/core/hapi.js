@@ -499,7 +499,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             /**
-            * Search for records
+            * Search for records via global events
+            * to search directly use SearchMgr
             *
             * request { }
             *  q - query string
