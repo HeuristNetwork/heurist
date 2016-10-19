@@ -100,6 +100,7 @@ HEURIST_THUMB_URL
 HEURIST_SMARTY_TEMPLATES_DIR
 HEURIST_XSL_TEMPLATES_DIR
 HEURIST_HML_DIR
+HEURIST_HML_URL
 
 HEURIST_HTML_DIR
 HEURIST_HTML_URL
@@ -392,6 +393,7 @@ if ($path) {
 }
 if (!defined('HEURIST_HML_DIR')) {
     testDirWriteableAndDefine('HEURIST_HML_DIR', HEURIST_FILESTORE_DIR.'hml-output/', "HML output directory");
+    define('HEURIST_HML_URL', HEURIST_FILESTORE_URL . 'hml-output/');
 }
 allowWebAccessForForlder( HEURIST_HML_DIR );
 

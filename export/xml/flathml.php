@@ -735,13 +735,18 @@ function outputRecords($result) {
     if (array_key_exists('expandColl', $_REQUEST)) {
         $rec_ids = expandCollections($rec_ids);
     }
+    
+    if(!is_array($rec_ids)){
+        $rec_ids = array();
+    }
 
     if(count($rec_ids)>1000){
         set_time_limit( 30 * count($rec_ids) % 1000 );
     }
 
     foreach ($rec_ids as $recID) {
-        $recSet['relatedSet'][$recID] = array('depth' => 0, 'recID' => $recID );
+        if($recID>0)
+            $recSet['relatedSet'][$recID] = array('depth' => 0, 'recID' => $recID );
     }
 
     buildGraphStructure($rec_ids, $recSet);
@@ -782,7 +787,8 @@ function outputRecords($result) {
     if(!$intofile){
         closeTag('records');
     }
-
+    
+    
     return $resout;
 }
 
@@ -1505,9 +1511,19 @@ if($intofile){ // flags HuNI manifest + separate files per record
         print "Error: ".$result['error'];
     }else{
 
+        // remove all files form  HEURIST_HML_DIR
+        delFolderTree(HEURIST_HML_DIR, false);
+        copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', HEURIST_HML_DIR.'/.htaccess');
+        
+        
         // write out all records as separate files
         $resout = outputRecords($result);
 
+        if(count($resout)<1){
+            print '<h3>There are no results to export</h3>';
+        }else{
+        
+        
         // create HuNI manifest
         $huni_resources = fopen( HEURIST_HML_DIR."resources.xml","w");
         fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
@@ -1540,7 +1556,9 @@ if($intofile){ // flags HuNI manifest + separate files per record
         fwrite( $huni_resources, "</resources>");
         fclose( $huni_resources );
 
-        print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
+        //was   print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
+        print '<h3>Export completed</h3> Files are in <b><a href='.HEURIST_HML_URL.' target="_blank">'.HEURIST_HML_URL.'</a></b>';
+        }
     }
     /*
 
