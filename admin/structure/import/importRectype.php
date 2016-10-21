@@ -82,7 +82,19 @@ if(!(is_numeric($database_id) && is_numeric($rectype_id))){
 // ------------------------------------------------------------------------------------------------
 
 // 1. get database url by looking it up from the Heusit Master index using database registered ID
+   
+    $to_include = dirname(__FILE__).'/../../setup/dbproperties/getDatabaseURL.php';
+    if (is_file($to_include)) {
+        include $to_include;
+    }
+    
+    if(isset($error_msg)){
+        error_exit($error_msg);
+        return;
+    }
+    $reg_url = $database_url;
 
+/* OLD WAY   
 $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getDatabaseURL.php" . "?db=Heurist_Master_Index&id=".$database_id;
 
 $data = loadRemoteURLContentSpecial($reg_url);
@@ -100,12 +112,13 @@ if(!@$data['rec_URL']){
         " The page may contain an invalid database reference (0 indicates no reference has been set)");
 }
 
+$reg_url = $data['rec_URL'];         //base url for source database
+*/
 
 // ------------------------------------------------------------------------------------------------
 
 // 2. get definitions from remote database
 
-$reg_url = $data['rec_URL'];         //base url for source database
 $reg_url = explode("?",$reg_url);
 
 $remote_url_params = @$reg_url[1];

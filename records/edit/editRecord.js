@@ -2883,7 +2883,7 @@ console.log('heurist not defined');
                 }
 
                 top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
-                    "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+Number(sAllTerms)+"&db="+db,
+                    "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+Number(sAllTerms)+"&db="+db,
                     {
                         "close-on-blur": false,
                         'no-close': true, //hide close button
