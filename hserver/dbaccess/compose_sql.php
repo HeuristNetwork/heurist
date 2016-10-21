@@ -1496,8 +1496,16 @@ class FieldPredicate extends Predicate {
                     .$this->value.' or trm_ParentTermID='.$this->value.')';
             }else{
                 $value = $mysqli->real_escape_string($this->value);
-                $match_pred = ' in (select trm_ID from defTerms where trm_Label="'
-                    .$value.'" or trm_Code="'.$value.'")';
+                    
+                $match_pred  = ' in (select trm_ID from defTerms where trm_Label ';
+                if($this->parent->exact){
+                    $match_pred  =  $match_pred.'="'.$value.'"'; 
+                } else {
+                    $match_pred  =  $match_pred.'like "%'.$value.'%"';
+                }
+                $match_pred  =  $match_pred.' or trm_Code="'.$value.'")';
+                    
+                    
             }
             
         }else
