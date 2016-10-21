@@ -52,6 +52,8 @@ if(@$_REQUEST['fmt']){
     $format = $_REQUEST['fmt'];    
 }elseif(@$_REQUEST['format']){
     $format = $_REQUEST['format'];        
+}else{
+    $format = 'xml';
 }
 
 //form accepting recID=123-3456 which redirects to record 3456 on database 123

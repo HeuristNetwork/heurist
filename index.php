@@ -29,8 +29,10 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] ){
         $format = $_REQUEST['fmt'];    
     }elseif(@$_REQUEST['format']){
         $format = $_REQUEST['format'];        
+    }else{
+        $format = 'xml';
     }
-    header('Location: redirects/resolver.php?db='.$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
+    header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
     return;
 }
 
