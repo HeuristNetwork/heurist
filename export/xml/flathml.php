@@ -480,7 +480,7 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
         } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']])) {
             array_push($recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']], $row['ptrDetailTypeID']);
         }
-    }
+    }//while
     return array_keys($nlrIDs);
     //	return $rv;
 }

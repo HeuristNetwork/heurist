@@ -134,6 +134,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
             <?php
 
         }else{
+            
+            set_time_limit(0); //no limit
 
             if(file_exists($folder)){
                 //clean folder
@@ -188,6 +190,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             if (is_file($to_include)) {
                 include $to_include;
             }
+            
             /* OLD WAY. It works but leads to memory overflow for large database
             $content = "";
             
