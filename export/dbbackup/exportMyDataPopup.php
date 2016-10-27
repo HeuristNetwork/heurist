@@ -39,7 +39,8 @@ if (isForAdminOnly("to carry out a database content dump - please ask your datab
 }
 
 $username = get_user_username();
-$folder = HEURIST_FILESTORE_DIR."backup/".HEURIST_DBNAME;
+$folder = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME;
+$progress_flag = HEURIST_FILESTORE_DIR.'backup/inprogress.info';
 
 $mode = @$_REQUEST['mode'];
 
@@ -107,6 +108,13 @@ if($mode=='2' && file_exists($folder.".zip") ){
 <?php } ?>                
 
                 <div class="input-row">
+                    <div class="input-header-cell" 
+                        title="Adds fully self-documenting HML (Heurist XML) file">
+                        Include HML</div>
+                    <div class="input-cell"><input type="checkbox" name="include_hml" value="1"></div>
+                </div>
+                
+                <div class="input-row">
                     <div class="input-header-cell">Include attached (uploaded) files eg. images</div> <!--  (output everything as one ZIP file) -->
                     <div class="input-cell"><input type="checkbox" name="includeresources" value="1" checked></div>
                 </div>
@@ -124,48 +132,80 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 </div>
 
                 <div id="buttons" class="actionButtons">
-                    <input type="submit" value="Export" style="margin-right: 20px; padding-left:5px; padding-right:5px;">
+                    <input type="submit" value="Export" style="margin-right: 20px; padding-left:5px; padding-right:5px;"
+                        onClick="function(event){ event.target.style.visibility = 'hidden'; }">
 <?php if(@$_REQUEST['inframe']!=1) { ?>                    
                     <input type="button" value="Cancel"  style="margin-right: 200px; padding-left:5px; padding-right:5px;" onClick="window.close();">
 <?php } ?>                    
                 </div>
             </form>
-
             <?php
 
         }else{
+            
+            //flag that backup in progress
+            if(file_exists($progress_flag)){
+               print 'It appears that backup opearation has been started already. Please try this function later'; 
+               if(file_exists($progress_flag)) unlink($progress_flag);
+               exit();
+            }
+            
+            
+            $fp = fopen($progress_flag,'w');
+            fwrite($fp, '1');
+            fclose($fp);            
+            
             
             set_time_limit(0); //no limit
 
             if(file_exists($folder)){
                 //clean folder
-                delFolderTree($folder, true);
+                $res = delFolderTree($folder, true);
+                if(!$res){
+                    print 'It appears that backup opearation has been started already. Please try this function later'; 
+                    if(file_exists($progress_flag)) unlink($progress_flag);
+                    exit();
+                }
             }
             if (!mkdir($folder, 0777, true)) {
+                if(file_exists($progress_flag)) unlink($progress_flag);
                 die('Failed to create folder '.$folder.'<br/> in which to create the backup. Please consult your sysadmin.');
             }
 
+            ?>
+            <div id="divProgress" style="cursor:wait;width:50%;height:100%;margin:0 auto;position:relative;z-index:999999;background:url(../../hclient/assets/loading-animation-white.gif)  no-repeat center center"></div>
+            <div style="position:absolute;top:30;left:10;right:20">
+            <?php
+            
+            
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
                 
                 $system_folders = array(
                     HEURIST_ICON_DIR,
                     HEURIST_FILESTORE_DIR.'documentation_and_templates/',
-                    HEURIST_FILESTORE_DIR."generated-reports/",
+                    //HEURIST_FILESTORE_DIR."generated-reports/",
                     HEURIST_FILESTORE_DIR."settings/",
                     HEURIST_FILESTORE_DIR.'term-images/',
                     HEURIST_SMARTY_TEMPLATES_DIR,
                     HEURIST_XSL_TEMPLATES_DIR);
-                if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
-                if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
+                // 2016-10-25  Don't copy generated-reports, html-output, hml-output, backup, filethumbs 
+                // - these are derivative products, which don't therefore need to be archived    
+                //if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
+                //if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
                 
                 print "Exporting system folder<br>";
                 //print HEURIST_FILESTORE_DIR.' to '.$folder.'<br>';             
                 ob_flush();flush();
                 
                 recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders);
+                
+                // 2016-10-25  
+                recurse_copy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
             }
             
+
+            if(@$_REQUEST['include_hml']=='1'){
             
             //load hml output into string file and save it
             if(@$_REQUEST['allrecs']!="1"){
@@ -208,6 +248,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             fwrite($file, $content);
             fclose ($file);
             */
+            }//export HML
             
             // Export database definitions as readable text
 
@@ -217,6 +258,11 @@ if($mode=='2' && file_exists($folder.".zip") ){
             $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
             saveURLasFile($url, $folder."/Database_Structure.txt");
 
+            print "Exporting database definitions as XML<br>";
+            ob_flush();flush();
+            
+            $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
+            saveURLasFile($url, $folder."/Database_Structure.xml");
 
 
             if(is_admin()){
@@ -228,6 +274,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
                     $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
                     $dump->start($folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
                 } catch (Exception $e) {
+                    if(file_exists($progress_flag)) unlink($progress_flag);
+                    print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
                     die ("<h2>Error</h2>Unable to generate MySQL database dump.".$e->getMessage().$please_advise);
                 }
 
@@ -308,6 +356,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 "' target='_blank' style='color:blue; font-size:1.2em'>Click here to download your data as a zip archive</a>";
             }
 
+            print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
+            if(file_exists($progress_flag)) unlink($progress_flag);
         }
 
         /*
