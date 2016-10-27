@@ -115,8 +115,29 @@ function getGephiFormat() {
     gexf +=       '</gexf>';
     
     // DOWNLOAD
-    var pom = document.createElement('a');
-    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(gexf));
-    pom.setAttribute('download', getDatabaseName()+".gexf");
-    pom.click();
+    //window.hWin.HEURIST4.util.downloadData(getDatabaseName()+".gexf", gexf);
+    var filename = getDatabaseName()+".gexf";
+    var mimeType = 'text/plain';
+    var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(gexf);
+
+    var link = document.createElement("a");
+    link.setAttribute('download', filename);
+    link.setAttribute('href', content);
+    if (window.webkitURL != null)
+    {
+        // Chrome allows the link to be clicked
+        // without actually adding it to the DOM.
+        link.click();        
+        link = null;
+    }
+    else
+    {
+        // Firefox requires the link to be added to the DOM
+        // before it can be clicked.
+        link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();        
+    }
+
 }
