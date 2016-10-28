@@ -111,7 +111,7 @@ $.widget( "heurist.profile", {
                 }else if(action == "menu-options-help"){
                     window.open(window.hWin.HAPI4.sysinfo.help, '_blank');
                 }else if(action == "menu-options-db-design"){
-                    window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.hWin.HAPI4.database, '_blank');
+                    window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank');
                 }else if(action == "menu-options-db-summary"){
 
                     if($.isFunction($('body').rectype_manager)){ //already loaded

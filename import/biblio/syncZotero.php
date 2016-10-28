@@ -84,7 +84,7 @@ if($dt_SourceRecordID==0){
         $mapping_rt_errors2 = array();
         $rep_errors_only = true;
 
-        $linkToAdvancedProperties = "<a target=\"_blank\" href=\"../../admin/adminMenu.php?db="
+        $linkToAdvancedProperties = "<a target=\"_blank\" href=\"../../admin/adminMenuStandalone.php?db="
         . HEURIST_DBNAME
         ."&mode=properties2\">Database administration page > Database > Advanced Properties</a>";
 
