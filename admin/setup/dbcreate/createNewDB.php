@@ -76,7 +76,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
     "Organisation:  ".$ugr_Organisation."\n".
     "Research interests:  ".$ugr_Interests."\n".
     "Go to the address below to review further details:\n".
-    HEURIST_BASE_URL."admin/adminMenu.php?db=".$newDatabaseName;
+    HEURIST_BASE_URL."?db=".$newDatabaseName;
 
     $email_title = 'New database: '.$newDatabaseName.' by '.$ugr_FullName.' ['.$ugr_eMail.']';
 

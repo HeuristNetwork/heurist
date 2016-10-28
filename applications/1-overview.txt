@@ -14,9 +14,9 @@ Overview:	Applications developed within Heurist vsn 3
 
 Notes:
 
-faims has been converted to run in Heurist 4
-dictofsyd, huni have not been converted and will therefore most likely require editing to work
+Several applications removed in 2016 cleanup:
+dictofsyd, was not converted and would therefore most likely require editing to work (but no longer needed - may be useful base for other web publishing)
 mobile was never properly finished and would require extensive work
-proxyfilter is a standalone for filtering websites to restyle pages and restrict to listed content
+proxyfilter is a standalone for filtering a specified website to restyle pages and restrict to listed content
 
-Updated: 	16 december 2015
+Updated: 	26 Oct 2016

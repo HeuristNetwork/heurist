@@ -1240,7 +1240,7 @@ function renderPreviewForm(){
 function renderPreviewFormRelated($dep_rectypes, $level) {
     global $defs, $trg_rectypes, $rectypes_correspondence, $remote_url, $remote_url_params;
 
-    $remote_link = $remote_url."admin/adminMenu.php?".$remote_url_params;
+    $remote_link = $remote_url."admin/adminMenuStandalone.php?".$remote_url_params;
 
     $def_rts = $defs['rectypes']['typedefs'];
     $idx_ccode = $def_rts['commonNamesToIndex']['rty_ConceptID'];
@@ -1256,7 +1256,7 @@ function renderPreviewFormRelated($dep_rectypes, $level) {
             print "<td>";
             //list of correspondence
             foreach($info['correspondence'] as $idx=>$local_rectype_id){
-                print "<div><a href='../../adminMenu.php?db=".HEURIST_DBNAME."&mode=rectype&rtID=".$local_rectype_id."' target='_blank'>"
+                print "<div><a href='../../adminMenuStandalone.php?db=".HEURIST_DBNAME."&mode=rectype&rtID=".$local_rectype_id."' target='_blank'>"
                 .$trg_rectypes['names'][$local_rectype_id]."</a></div>";
             }
 

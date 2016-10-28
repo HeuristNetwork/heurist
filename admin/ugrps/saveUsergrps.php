@@ -450,7 +450,7 @@ function sendNewUserInfoEmail($recID){
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
             "Go to the address below to review further details and approve the registration:\n".
-            HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
+            HEURIST_BASE_URL."admin/adminMenuStandalone.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
             $email_title = 'User Registration for '.$ugr_FullName.' '.$ugr_eMail;
 
