@@ -116,7 +116,7 @@ function hmanageMenu() {
                 return false;
             }
         );
-
+/*
         $('#menulink-database-admin').click( //.attr('href', 
             function(event){
                 window.hWin.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank');
@@ -124,6 +124,7 @@ function hmanageMenu() {
                 return false;
             }
         );
+*/        
     }
     
     

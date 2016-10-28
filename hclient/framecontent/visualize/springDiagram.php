@@ -42,15 +42,15 @@
         </style>
 
          <!-- jQuery -->
-        <script type="text/javascript" src="../../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
 
         <!-- D3 -->
-        <script type="text/javascript" src="../../../../ext/d3/d3.js"></script>
-        <script type="text/javascript" src="../../../../ext/d3/fisheye.js"></script>
+        <script type="text/javascript" src="../../../ext/d3/d3.js"></script>
+        <script type="text/javascript" src="../../../ext/d3/fisheye.js"></script>
 
         <!-- Colpick -->
-        <script type="text/javascript" src="../../../../ext/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../../../ext/colpick/colpick.css">
+        <script type="text/javascript" src="../../../ext/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../../ext/colpick/colpick.css">
 
         <!-- Visualize plugin -->
         <script type="text/javascript" src="settings.js"></script>

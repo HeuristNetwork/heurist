@@ -20,7 +20,7 @@ define('LOGIN_REQUIRED',1);
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+if(!defined('PDIR')) define('PDIR','../../../');
 require_once(dirname(__FILE__)."/../initPage.php");
 ?>
 
@@ -42,7 +42,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 </head>
 
 <body style="background-color:white">
-    <div style="width:280px;top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
+    <div style="width:380px;top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
 
         <h2>Text file export</h2>
 

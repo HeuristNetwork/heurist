@@ -135,7 +135,7 @@ $.widget( "heurist.connections", {
         
             if(this.dosframe.attr('src')!==this.options.url){
                 
-                this.options.url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/springDiagram.php?db=' + window.hWin.HAPI4.database;
+                this.options.url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
                 this.dosframe.attr('src', this.options.url);
               
             // Content loaded already    

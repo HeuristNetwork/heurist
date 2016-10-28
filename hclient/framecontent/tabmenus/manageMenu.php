@@ -12,6 +12,7 @@
 */
 
 define('MANAGER_REQUIRED',1);
+if(!defined('PDIR')) define('PDIR','../../../');
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -163,7 +164,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 <ul>
                     <li class="admin-only">
                         <a  href="#" id="menulink-database-admin"
-                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.HAPI4.database, '_blank'); return false;}"
+                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
                             Full database administration, <br />utilities &amp; special functions</a>
                     </li>
