@@ -112,7 +112,7 @@ if(@$_REQUEST['filename']){ //write the output into single file
     if(!$output_file){
         die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
     }
-    
+
 }else{
     $output_file = null;     
 }
@@ -168,9 +168,9 @@ function output($str){
 }                   
 
 function xmlspecialchars($value){
-   $value = htmlspecialchars($value);
-   $value = str_replace('%', '&#37;', $value);
-   return $value;
+    $value = htmlspecialchars($value);
+    $value = str_replace('%', '&#37;', $value);
+    return $value;
 }
 
 function makeTag($name, $attributes = null, $textContent = null, $close = true, $encodeContent = true) {
@@ -735,7 +735,7 @@ function outputRecords($result) {
     if (array_key_exists('expandColl', $_REQUEST)) {
         $rec_ids = expandCollections($rec_ids);
     }
-    
+
     if(!is_array($rec_ids)){
         $rec_ids = array();
     }
@@ -787,8 +787,8 @@ function outputRecords($result) {
     if(!$intofile){
         closeTag('records');
     }
-    
-    
+
+
     return $resout;
 }
 
@@ -1124,7 +1124,7 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $par
             }
         } else if (array_key_exists('file', $value)) {
             $file = $value['file'];
-            
+
             if (@$_REQUEST['includeresources'] == '1' && @$_REQUEST['mode'] == '1') {
 
                 $file = get_uploaded_file_info_internal($file['id'], false);
@@ -1132,7 +1132,7 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $par
                 unset($file['thumbURL']);
 
                 if ($file['fullpath'] && file_exists($file['fullpath'])) {
-                    
+
                     //if path is relative then we copy file
                     if(@$file['ulf_FilePath']==null || $file['ulf_FilePath']=='' || substr($file['ulf_FilePath'],1)!='/'){
 
@@ -1142,26 +1142,26 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $par
                         chdir(HEURIST_FILESTORE_DIR);  // relatively db root
                         $fpath = realpath($file['fullpath']);
                         $fpath = str_replace('\\','/',$fpath);
-                        
+
                         recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'/', null, 
-                                        $fpath);
-                        
+                            $fpath);
+
                         $file['URL'] = @$file['ulf_FilePath'].@$file['ulf_FileName']; //relative path to db root    
-                        
+
                     }else{
                         //otherwise skip copy and use downloadURL
                         //$file['URL'] - it is already has  downloadFile or remote URL
                     }
-                    
+
                     /* this code is not use anymore - we copy the entire file_uploads folder
                     // backup file into backup/user folder
                     $folder = HEURIST_FILESTORE_DIR . "backup/" . get_user_username() . "/resources/";
-                    
+
                     if(!file_exists($folder) && !mkdir($folder, 0777, true)){
-                        print "<p class='error'>'Failed to create folder for file resources: ".$folder.'</p>';
-                        break;
+                    print "<p class='error'>'Failed to create folder for file resources: ".$folder.'</p>';
+                    break;
                     }
-                    
+
                     $path_parts = pathinfo($file['fullpath']);
                     $file['URL'] = $path_parts['basename'];
                     $filename_bk = $folder . $file['URL'];
@@ -1457,7 +1457,7 @@ if(@$_REQUEST['filename']){
     $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only
 
 }else{
-// true || @$_REQUEST['rules']){ //search with h4 search engine
+    // true || @$_REQUEST['rules']){ //search with h4 search engine
 
     $url = HEURIST_BASE_URL."hserver/controller/record_search.php";
 
@@ -1511,53 +1511,73 @@ if($intofile){ // flags HuNI manifest + separate files per record
         print "Error: ".$result['error'];
     }else{
 
+        ?>
+
+        <div style='background: url(../../common/images/logo_huni.png) center top no-repeat;height:50px;'>&nbsp;</div>
+        <h2>The HuNI Project</h2>
+        <p style="margin-top: 1em;"> </p>
+
+        <p style="font-size: x-small;margin-top: 1em;">
+            The HuNI project (Humanities Networked Infrastructure, <a href="http://huni.net.au" target="_blank">http://huni.net.au</a>) 
+             funded as a Virtual Laboratory by the Australian National eResearch Collaboration Tools and Resources Project 
+            (<a href="http://nectar.org.au">NeCTAR</a>, has built a central searchable aggregate of metadata harvested from 28 Australian 
+            cultural datasets, including AusStage, AusLit, Dictionary of Art and Architecture Online, Australian Dictionary of Biography, 
+            Circus Oz and Paradisec</p>
+
+        <p style="font-size: x-small;margin-top: 1em;">
+            Heurist provides a database-on-demand function for HuNI. Databases created using the HuNI Core Metadata template can be immediately
+            exported to a HuNI harvestable format. Other databases can be made available for harvesting by mapping fields to the HuNI Core naming conventions.
+        </p>
+
+        <?php
+
         // remove all files form  HEURIST_HML_DIR
         delFolderTree(HEURIST_HML_DIR, false);
         copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', HEURIST_HML_DIR.'/.htaccess');
-        
-        
+
+
         // write out all records as separate files
         $resout = outputRecords($result);
 
         if(count($resout)<1){
             print '<h3>There are no results to export</h3>';
         }else{
-        
-        
-        // create HuNI manifest
-        $huni_resources = fopen( HEURIST_HML_DIR."resources.xml","w");
-        fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
-        fwrite( $huni_resources, '<resources recordCount="'.count($resout)."\">\n");
 
-        // dbID set at start of script
-        if (isset($dbID) && ($dbID != 0)) {
-            fwrite( $huni_resources, "<dbID>".$dbID."</dbID>\n");
-        }
-        else
-        {
-            fwrite( $huni_resources, "<dbID>0</dbID>\n"); // unregistered indicated by 0
-        }
 
-        // add each output file to the manifest
-        foreach ($resout as $recID => $recTypeID) {
+            // create HuNI manifest
+            $huni_resources = fopen( HEURIST_HML_DIR."resources.xml","w");
+            fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
+            fwrite( $huni_resources, '<resources recordCount="'.count($resout)."\">\n");
 
-            $resfile = HEURIST_HML_DIR.$recID.".xml";
-
-            if(file_exists($resfile)){
-                $conceptID = getRecTypeConceptID($recTypeID);
-                fwrite( $huni_resources, "<record>\n");
-                fwrite( $huni_resources, "<name>".$recID.".xml</name>\n");
-                fwrite( $huni_resources, "<hash>".md5_file($resfile)."</hash>\n");
-                fwrite( $huni_resources, "<RTConceptID>".$conceptID."</RTConceptID>\n");
-                fwrite( $huni_resources, "</record>\n");
+            // dbID set at start of script
+            if (isset($dbID) && ($dbID != 0)) {
+                fwrite( $huni_resources, "<dbID>".$dbID."</dbID>\n");
             }
-        }
+            else
+            {
+                fwrite( $huni_resources, "<dbID>0</dbID>\n"); // unregistered indicated by 0
+            }
 
-        fwrite( $huni_resources, "</resources>");
-        fclose( $huni_resources );
+            // add each output file to the manifest
+            foreach ($resout as $recID => $recTypeID) {
 
-        //was   print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
-        print '<h3>Export completed</h3> Files are in <b><a href='.HEURIST_HML_URL.' target="_blank">'.HEURIST_HML_URL.'</a></b>';
+                $resfile = HEURIST_HML_DIR.$recID.".xml";
+
+                if(file_exists($resfile)){
+                    $conceptID = getRecTypeConceptID($recTypeID);
+                    fwrite( $huni_resources, "<record>\n");
+                    fwrite( $huni_resources, "<name>".$recID.".xml</name>\n");
+                    fwrite( $huni_resources, "<hash>".md5_file($resfile)."</hash>\n");
+                    fwrite( $huni_resources, "<RTConceptID>".$conceptID."</RTConceptID>\n");
+                    fwrite( $huni_resources, "</record>\n");
+                }
+            }
+
+            fwrite( $huni_resources, "</resources>");
+            fclose( $huni_resources );
+
+            //was   print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
+            print '<h3>Export completed</h3> Files are in <b><a href='.HEURIST_HML_URL.' target="_blank">'.HEURIST_HML_URL.'</a></b>';
         }
     }
     /*
@@ -1655,10 +1675,10 @@ if($intofile){ // flags HuNI manifest + separate files per record
         if (@$result['recordCount'] > 0) outputRecords($result);
     }
     closeTag('hml');
-    
+
     if($output_file){
         fclose ($output_file);
     }
-    
+
 }
 ?>

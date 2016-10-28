@@ -86,7 +86,29 @@
 
     <div class="banner"><h2>Build FAIMS Project</h2></div>
     <div id="page-inner" style="padding-left: 30px;padding-right:10px">
+    
+    <!-- TODO: This takes up too much space, but would be nice to include it:
+    <div style='background: url(../../common/images/logo_faims.png) center top no-repeat;height:120px;'>&nbsp;</div> -->
 
+    <p style="margin-top: 1em;"> </p>
+
+            <p style="font-size: x-small;margin-top: 1em;">
+                The FAIMS project &copy; ( Federated Archaeological Information Management System, 
+                <a href="http://fedarch.org" target="_blank">http://fedarch.org</a>) has built a highly configurable system for data
+                collection using consumer grade Android tablets, funded by the Australian Research Council (ARC) and 
+                National eResearch Collaboration Tools and Resources (NeCTAR). The FAIMS system is suitable for collection of information in libraries, 
+                archives and museums, for social surveys, and for a range of natural science field projects, as well as for archaeological survey 
+                or excavation (the original target audience). The system is geographically aware, connects to internal or external cameras and GPS, 
+                and can synchronise data collection across multiple tablets for team use.
+            </p>
+            <p style="font-size: x-small;margin-top: 1em;">
+                The FAIMS functions in Heurist allow the creation of a FAIMS project from a Heurist database, allowing the definition of
+                the types of entities and attributes (fields) to be set up using the database administration interface. Heurist can also
+                import data from a FAIMS project, building the Heurist data definitions on the fly, and can export data to the tDAR 
+                and Open Context repository systems (see functions in the Export tab).
+            </p>
+
+    
 <?php
 
     $invalid = (!$projname || preg_match('/[^A-Za-z0-9_\$]/', $projname)); //'[\W]'
