@@ -661,18 +661,35 @@ window.hWin.HEURIST4.util = {
     //
     downloadInnerHtml: function (filename, ele, mimeType) {
         
-        var elHtml = $(ele).html();
+            var elHtml = $(ele).html();
+            window.hWin.HEURIST4.util.downloadData(filename, elHtml, mimeType);
+    }, 
+       
+    downloadData: function (filename, data, mimeType) {
         
         mimeType = mimeType || 'text/plain';
-        var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml);
+        var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(data);
 
-        var link = document.createElement('a');
-        mimeType = mimeType || 'text/plain';
+        var link = document.createElement("a");
         link.setAttribute('download', filename);
         link.setAttribute('href', content);
-        link.click(); 
-
-        link = null;
+        if (window.webkitURL != null)
+        {
+            // Chrome allows the link to be clicked
+            // without actually adding it to the DOM.
+            link.click();        
+            link = null;
+        }
+        else
+        {
+            // Firefox requires the link to be added to the DOM
+            // before it can be clicked.
+            link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link;
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();        
+        }
+        
     },    
     
     isRecordSet: function(recordset){

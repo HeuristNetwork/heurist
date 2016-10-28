@@ -18,6 +18,25 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+if( @$_REQUEST['recID'] || @$_REQUEST['recid'] ){
+    if(@$_REQUEST['recID']){
+        $recid = $_REQUEST['recID'];    
+    }elseif(@$_REQUEST['recid']){
+        $recid = $_REQUEST['recid'];        
+    }
+    if(@$_REQUEST['fmt']){
+        $format = $_REQUEST['fmt'];    
+    }elseif(@$_REQUEST['format']){
+        $format = $_REQUEST['format'];        
+    }else{
+        $format = 'xml';
+    }
+    header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
+    return;
+}
+
+
 define('IS_INDEX_PAGE',true);
 define('PDIR','');
 

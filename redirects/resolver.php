@@ -26,6 +26,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+if(!defined('NO_DB_ALLOWED')) define('NO_DB_ALLOWED',1);
 
 require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 
@@ -36,14 +37,59 @@ require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 //       The location of database 123 should then be cached so it does not require a hit on the
 //       master index server for every record. By proceeding in this way, every Heurist database
 //       becomes a potential global resolver.
-
-$id = @$_REQUEST["recID"];
-
 // Redirect to .../records/view/viewRecordAsXML.php (TODO:)
 // TODO: write /redirects/resolver.php as an XML feed with parameterisation for a human-readable view
 // TODO: the following is a temporary redirect to viewRecord.php which renders a human-readable form
-header('Location: '.HEURIST_BASE_URL.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$id);
 
+
+         
+if(@$_REQUEST['recID']){
+    $recid = $_REQUEST['recID'];    
+}elseif(@$_REQUEST['recid']){
+    $recid = $_REQUEST['recid'];        
+}
+if(@$_REQUEST['fmt']){
+    $format = $_REQUEST['fmt'];    
+}elseif(@$_REQUEST['format']){
+    $format = $_REQUEST['format'];        
+}else{
+    $format = 'xml';
+}
+
+//form accepting recID=123-3456 which redirects to record 3456 on database 123
+if(strpos($recid, '-')>0){
+    list($database_id, $recid) = explode('-', $recid, 2);
+}else if (is_int(@$_REQUEST['db'])){
+    $database_id = $_REQUEST['db'];
+}
+
+$database_url = null;    
+
+if ($database_id>0) {
+    
+    $to_include = dirname(__FILE__).'/../admin/setup/dbproperties/getDatabaseURL.php';
+    if (is_file($to_include)) {
+        include $to_include;
+    }
+    
+    if(isset($error_msg)){
+        print $error_msg;
+        return;
+    }
+
+}
+
+if($database_url!=null){ //redirect to resolver for another database
+    $redirect = $database_url.'&recID='.$recid.'&fmt'.$format;
+}else if(!defined('HEURIST_DBNAME')){
+    print 'Database parameter is not defined';
+    return;
+}else if($format=='html'){
+    $redirect = HEURIST_BASE_URL.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$recid;
+}else{
+    $redirect = HEURIST_BASE_URL.'export/xml/flathml.php?db='.HEURIST_DBNAME.'&depth=5&w=a&q=ids:'.$recid;
+}
+
+header('Location: '.$redirect);
 return;
-
 ?>

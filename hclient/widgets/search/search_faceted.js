@@ -901,7 +901,7 @@ $.widget( "heurist.search_faceted", {
                     var $facet_values = $input_div.find('.facets');
                     if( $facet_values.length < 1 ){
                         var dd = $input_div.find('.input-cell');
-                        $facet_values = $('<div>').addClass('facets').css({'padding':'4px 0 10px'}).appendTo( $(dd[0]) );
+                        $facet_values = $('<div>').addClass('facets').css({'padding':'4px 0 10px 10px'}).appendTo( $(dd[0]) );
                     }
                     $facet_values.css('background','none');
                     
@@ -1142,7 +1142,8 @@ $.widget( "heurist.search_faceted", {
                         
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
                                     var f_link = this._createFacetLink(facet_index, {test:'',value:null,step:0});
-                                    $('<span>').css({'display':'inline-block','vertical-align':'middle'}).append(f_link).appendTo($facet_values);
+                                    $('<span>').css({'display':'inline-block','vertical-align':'middle','margin-left':'-15px'})
+                                        .append(f_link).appendTo($facet_values);
                         }
                         var sl_count = (cterm && cterm.length==3)?cterm[2]:0;
                         
@@ -1298,7 +1299,7 @@ $.widget( "heurist.search_faceted", {
                     }
                     else{
                         
-                        $facet_values.css('padding-left','5px');
+                        //$facet_values.css('padding-left','5px');
                         
                         //draw history
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
@@ -1412,7 +1413,8 @@ $.widget( "heurist.search_faceted", {
                     .addClass("facet_link")
         
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
-            $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w").css({'font-size':'0.9em','height':'10px'}).appendTo(f_link);    
+            $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
+                .css({'font-size':'0.9em','height':'10px','margin-left':'-15px'}).appendTo(f_link);    
         }else{
             var f_link_content = $("<span>").text(cterm.text).appendTo(f_link);    
             
