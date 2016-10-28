@@ -20,9 +20,9 @@ define('MANAGER_REQUIRED',1);
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once(dirname(__FILE__)."/initPage.php");
+require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/databaseAdmin.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/tabmenus/manageMenu.js"></script>
 
 <script type="text/javascript">
     var editing;
@@ -31,7 +31,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     function onPageInit(success){
         if(success){
 
-            var databaseAdmin = new hDatabaseAdmin();
+            var manageMenu = new hmanageMenu();
 
             var $container = $("<div>").appendTo($("body"));
         }
@@ -163,15 +163,15 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <ul>
                     <li class="admin-only">
                         <a  href="#" id="menulink-database-admin"
-                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.HAPI4.database, '_blank'); return false;}"
+                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
                             Full database administration, <br />utilities &amp; special functions</a>
                     </li>
                     <li class="admin-only">
                         <a href="export/dbbackup/exportMyDataPopup.php?inframe=1" name="auto-popup" class="portrait h3link"
-                        onclick= "{return false;}"
-                        title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
-                        Complete data archive package</a>
+                            onclick= "{return false;}"
+                            title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
+                            Complete data archive package</a>
                     </li>
 
                 </ul>

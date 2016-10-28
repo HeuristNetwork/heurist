@@ -322,7 +322,7 @@ function outWarning($role, $message){
             <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
             <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.js"></script>
-            <script src="../../../hclient/framecontent/databaseAdmin.js"></script>
+            <script src="../../../hclient/framecontent/tabmenus/manageMenu.js"></script>
             <script>
 
                 $(document ).ready(function() {

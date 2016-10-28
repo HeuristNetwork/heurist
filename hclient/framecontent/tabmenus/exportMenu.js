@@ -22,8 +22,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hDatabaseExport() {
-    var _className = "DatabaseExport",
+function hexportMenu() {
+    var _className = "exportMenu",
     _version   = "0.4";
 
     function _init(){
@@ -187,13 +187,13 @@ function hDatabaseExport() {
     //
     function _menuActionHandler(event, action){
 
-        if(action == "menu-export-hml-0"){ // Result set
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,false)}); // isAll, includeRelated, ishuni
-        }else if(action == "menu-export-hml-1"){ //selected
+        if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,false)}); // isAll, includeRelated, multifile = separate files
+        }else if(action == "menu-export-hml-selected"){ // Currently selected records only
             window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(false,false,false)});
-        }else if(action == "menu-export-hml-2"){ // selected
+        }else if(action == "menu-export-hml-plusrelated"){ // Current resulteset plus any related records
             window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,true,false)});
-        }else if(action == "menu-export-hml-3"){ // selected + related
+        }else if(action == "menu-export-hml-multifile"){ // selected + related
             window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,true)});
         }else if(action == "menu-export-kml"){
             window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportKML(true)});
@@ -209,7 +209,7 @@ function hDatabaseExport() {
     //
     //
     //
-    function _exportHML(isAll, includeRelated, ishuni){
+    function _exportHML(isAll, includeRelated, multifile){ // isAll = resultset, false = current selection only
 
         var q = "",
         layoutString,rtFilter,relFilter,ptrFilter,
@@ -252,7 +252,7 @@ function hDatabaseExport() {
             (relFilter ? "&" + relFilter : "") +
             (ptrFilter ? "&" + ptrFilter : "") +*/
             "&db=" + window.hWin.HAPI4.database +
-            (ishuni?'&file=1':'');
+            (multifile?'&file=1':'');
 
             window.hWin.open(url, '_blank');
         }

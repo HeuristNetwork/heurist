@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Database structure / administration page
+* Accordion menu of data addition / import functions
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -20,9 +20,9 @@ define('LOGIN_REQUIRED',1);
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once(dirname(__FILE__)."/initPage.php");
+require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/databaseAddData.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/tabmenus/addDataMenu.js"></script>
 
 <script type="text/javascript">
     var editing;
@@ -31,7 +31,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     function onPageInit(success){
         if(success){
 
-            var databaseAddData = new hDatabaseAddData();
+            var addDataMenu = new haddDataMenu();
 
             var $container = $("<div>").appendTo($("body"));
         }
@@ -57,7 +57,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             </div>
 
         </div>
-        
+
         <div class="accordion_pnl">
 
             <h3><span class="ui-icon ui-iconalign ui-icon-circle-b-plus"></span>IMPORT</h3>
@@ -122,7 +122,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <ul>
 
                     <li class="admin-only"><a href="import/utilities/manageFilesUpload.php" name="auto-popup" 
-                    class="large h3link embed"
+                        class="large h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
                         Multi-file upload</a>
