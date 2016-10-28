@@ -62,7 +62,7 @@ var cfg_widgets = [
     {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'hclient/widgets/viewers/rec_viewer_ext.js'},
     */
 
-    {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/topmenu/mainMenu.js'},
+    {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/dropdownmenus/mainMenu.js'},
     {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js'},
     {id:'h3_recordDetails', name:'Record Viewer', widgetname:'recordDetails', script:'hclient/widgets/viewers/recordDetails.js'},
     {id:'h3_recordListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
@@ -118,10 +118,10 @@ var cfg_layouts = [
 
                 apps:[
                     {appid:'h4_static', name: 'Manage',  dragable:false,
-                        options:{url: 'hclient/framecontent/databaseAdmin.php?db=[dbname]', isframe:true}}
+                        options:{url: 'hclient/framecontent/tabmenus/manageMenu.php?db=[dbname]', isframe:true}}
                         //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0, 'min-width':'75em'}}             
                     ,{appid:'h4_static', name: 'Add Data',  dragable:false,
-                        options:{url: 'hclient/framecontent/databaseAddData.php?db=[dbname]', isframe:true}}
+                        options:{url: 'hclient/framecontent/tabmenus/addDataMenu.php?db=[dbname]', isframe:true}}
                         //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0,'min-width':'75em'}}
                     ,{appid:'include_layout', name: 'Find-Analyse-Publish', layout_id:'FAP',dragable:false,
                         options:{ref: 'SearchAnalyze'}
@@ -162,7 +162,7 @@ var cfg_layouts = [
                     {appid:'h3_recordListExt', name: 'Record View', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
                     {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
-                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}            ]}]
+                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]'}}            ]}]
         }
     },
 
@@ -187,10 +187,10 @@ var cfg_layouts = [
                     {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
                     {appid:'h4_static', name: 'Export',
-                        options:{url: 'hclient/framecontent/databaseExport.php?db=[dbname]', isframe:true}
+                        options:{url: 'hclient/framecontent/tabmenus/exportMenu.php?db=[dbname]', isframe:true}
                         ,css:{position:'absolute', top:0,left:0,bottom:0,right:0,'min-width':'75em'}},
                     
-                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}},
+                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]'}},
  
                     {appid:'h3_recordListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
                                 url: 'viewers/crosstab/crosstabs.php?db=[dbname]'}}
@@ -210,7 +210,7 @@ var cfg_layouts = [
     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
     {appid:'ha51'}, // H4 map V2
     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty
-    {appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}  //H4 connections
+    {appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]'}}  //H4 connections
     ]}]
     }
     },
@@ -298,7 +298,7 @@ var cfg_layouts = [
 
     pane1:{col:4, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result
     pane2:{col:12, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', name: 'Record' }]},
-    pane5:{col:20, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'} }]},
+    pane5:{col:20, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]'} }]},
     pane3:{col:4, row:9, size_x:7, size_y:7, dockable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },
     pane4:{col:12, row:9, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},
 
