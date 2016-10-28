@@ -190,7 +190,7 @@ $.widget( "heurist.mainMenu", {
             .appendTo( this.div_BottomRow )
             .button()
             .click(function( event ) {
-                var url = window.hWin.HAPI4.basePathV3 + "admin/adminMenu.php?db=" + window.hWin.HAPI4.database;
+                var url = window.hWin.HAPI4.basePathV3 + "admin/adminMenuStandalone.php?db=" + window.hWin.HAPI4.database;
                 window.open(url, "_blank");
             });
         }
@@ -376,7 +376,7 @@ $.widget( "heurist.mainMenu", {
 
             this['menu_'+name] = $('<ul>')
             .load(
-                window.hWin.HAPI4.basePathV4+'hclient/widgets/topmenu/mainMenu'+(name=='Help_lo'?'Help':name)+'.html',
+                window.hWin.HAPI4.basePathV4+'hclient/widgets/dropdownmenus/mainMenu'+(name=='Help_lo'?'Help':name)+'.html',
               function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
              
                 that['menu_'+name].find('.list-menu-only').hide();
@@ -536,13 +536,13 @@ $.widget( "heurist.mainMenu", {
             this._refreshLists( true ); p=true;
         }else if(action == "menu-import-csv"){ // Result set
             window.hWin.HAPI4.SystemMgr.is_logged(function(){that.importCSV()}); p=true;
-        }else if(action == "menu-export-hml-0"){ // Result set
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,false,false)}); p=true; // isAll, includeRelated, ishuni
-        }else if(action == "menu-export-hml-1"){ //selected
+        }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rule-based expansion if applied
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,false,false)}); p=true; // isAll, includeRelated, multifile
+        }else if(action == "menu-export-hml-selected"){ //Currently selected records only
             window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(false,false,false)}); p=true;
-        }else if(action == "menu-export-hml-2"){ // selected
+        }else if(action == "menu-export-hml-plusrelated"){ // Current resulktset with any related records
             window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,true,false)}); p=true;
-        }else if(action == "menu-export-hml-3"){ // selected + related
+        }else if(action == "menu-export-hml-multifile"){ // selected + related
             window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,false,true)}); p=true;
         }else if(action == "menu-export-kml"){
             window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportKML(true)}); p=true;
@@ -610,7 +610,7 @@ $.widget( "heurist.mainMenu", {
 
 
 
-    exportHML: function(isAll, includeRelated, ishuni){
+    exportHML: function(isAll, includeRelated, multifile){
 
         var q = "",
         layoutString,rtFilter,relFilter,ptrFilter,
@@ -681,7 +681,7 @@ $.widget( "heurist.mainMenu", {
             (relFilter ? "&" + relFilter : "") +
             (ptrFilter ? "&" + ptrFilter : "") +*/
             "&db=" + window.hWin.HAPI4.database +
-            (ishuni?'&file=1':'');
+            (multifile?'&file=1':'');
 
             window.open(url, '_blank');
         }
