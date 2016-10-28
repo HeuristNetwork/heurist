@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../../hserver/System.php');
+    require_once (dirname(__FILE__).'/../../../hserver/System.php');
 
     $system = new System();
     if(!$system->init(@$_REQUEST['db']) ){
@@ -31,7 +31,7 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Spring Diagram</title>
+        <title>Spring Diagram - Heurist results set</title>
 
         <!-- Css4 -->
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
@@ -42,29 +42,29 @@
         </style>
 
          <!-- jQuery -->
-        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
 
         <!-- D3 -->
-        <script type="text/javascript" src="../../ext/d3/d3.js"></script>
-        <script type="text/javascript" src="../../ext/d3/fisheye.js"></script>
+        <script type="text/javascript" src="../../../../ext/d3/d3.js"></script>
+        <script type="text/javascript" src="../../../../ext/d3/fisheye.js"></script>
 
         <!-- Colpick -->
-        <script type="text/javascript" src="../../ext/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../ext/colpick/colpick.css">
+        <script type="text/javascript" src="../../../../ext/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../../../ext/colpick/colpick.css">
 
         <!-- Visualize plugin -->
-        <script type="text/javascript" src="visualize/settings.js"></script>
-        <script type="text/javascript" src="visualize/overlay.js"></script>
-        <script type="text/javascript" src="visualize/selection.js"></script>
-        <script type="text/javascript" src="visualize/gephi.js"></script>
-        <script type="text/javascript" src="visualize/drag.js"></script>
-        <script type="text/javascript" src="visualize/visualize.js"></script>
-        <link rel="stylesheet" type="text/css" href="visualize/visualize.css">
+        <script type="text/javascript" src="settings.js"></script>
+        <script type="text/javascript" src="overlay.js"></script>
+        <script type="text/javascript" src="selection.js"></script>
+        <script type="text/javascript" src="gephi.js"></script>
+        <script type="text/javascript" src="drag.js"></script>
+        <script type="text/javascript" src="visualize.js"></script>
+        <link rel="stylesheet" type="text/css" href="visualize.css">
     </head>
 
     <body>
         <!-- Visualize HTML -->
-        <?php include "visualize/visualize.html"; ?>
+        <?php include "visualize.html"; ?>
 
         <!-- Call from parent iframe -->
         <script>
