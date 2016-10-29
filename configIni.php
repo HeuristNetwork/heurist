@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.2.11"; // sets current program version number, determined by Heurist development lead
+$version = "4.2.12"; // sets current program version number, determined by Heurist development lead
 
+// Vsn 4.2.12 29 Nov 2016  Lots of small fixes on new layout
 // Vsn 4.2.11 4 Nov 2016  New layout of search interfacve using tabs with menus for major function groups
 // Vsn 4.2.10 22 Aug 2016  Update distribution on Heurist server
 // Vsn 4.2.9 11 Aug 2016  First fully working draft of new importer

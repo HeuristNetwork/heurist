@@ -814,7 +814,7 @@ $.widget( "heurist.resultList", {
         + '</div>'
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
-        + '<div title="'+recTitle+' &nbsp;&nbsp;&nbsp;[ dbl-click to edit ]" class="recordTitle">'
+        + '<div title="dbl-click to edit : '+recTitle+'" class="recordTitle">'
         +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
         + recTitle + "</a>") :recTitle)
         + '</div>'
