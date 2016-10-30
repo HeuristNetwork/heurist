@@ -58,6 +58,21 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         title="Create a new database on the current server - essential structure elements are populated automatically">
                         New database</a>
                     </li>
+                    
+                    <li class="admin-only">
+                        <a href="admin/setup/dbproperties/editSysIdentification.php" name="auto-popup" class="portrait h3link"
+                            onclick= "{return false;}"
+                            title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
+                            Properties</a>
+                    </li>
+                    
+                    <li class="admin-only">
+                        <a href="admin/setup/dbproperties/registerDB.php" name="auto-popup" class="portrait h3link"
+                            onclick= "{return false;}"
+                            title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
+                            Register database</a>
+                    </li>
+                    
                 </ul>
             </div>
         </div>
@@ -135,6 +150,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
                             Refresh</a>
                     </li>
+                    
+                    <li>
+                        <a href="applications/faims/exportFAIMS.php" name="auto-popup" class="verylarge h3link"
+                            onClick="{return false;}"
+                            title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
+                            Tablet configuration</a>
+                    </li>
 
                     <!--
                     <li><a href="javascript:void(0)"
@@ -175,6 +197,17 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             Complete data archive package</a>
                     </li>
 
+                    <!--
+                        TEMPORARILY REMOVED. TODO: SOMETHING IS WRONG 3/7/2014 WITH THE EXPORT FUNCTION,
+                        IT OPENS UP THE EXPORT MODULE FORM AND WON'T CLOSE THE RECORD TYPE SELECTION POPUP
+                    <li class="admin-only">
+                        <a href="applications/faims/exportTDar.php" name="auto-popup" class="portrait h3link"
+                            onclick= "{return false;}"
+                            title="Export the current database as tables, files and metadata directly into a specified tDAR repository">
+                            Export to tDAR repository</a>
+                    </li>
+                    -->
+                    
                 </ul>
             </div>
         </div>

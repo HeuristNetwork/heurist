@@ -279,11 +279,17 @@ $.widget( "heurist.mainMenu", {
             //not logged -guest
             $(this.element).find('.logged-in-only').hide();
             $(this.element).find('.logged-out-only').show();
-
-
             //this.divCurrentUser.empty();
         }
 
+        if(window.hWin.HAPI4.is_admin()){
+            this.menu_Profile.find('.admin-only').show();
+        }else{
+            this.menu_Profile.find('.admin-only').hide();    
+        }
+        
+        this['btn_Profile'].find('a').text(window.hWin.HAPI4.currentUser.ugr_FullName);
+        
     },
 
 
@@ -366,7 +372,7 @@ $.widget( "heurist.mainMenu", {
                 text: window.hWin.HR((name=='Help_lo'?'Help':name)), href:'#'
             });
         }
-
+        
         this['btn_'+name] = $('<li>').append(link)
         .appendTo( parentdiv?parentdiv:this.divMainMenuItems );
 
@@ -390,12 +396,13 @@ $.widget( "heurist.mainMenu", {
                         return false; 
                 }});
 
-                if(window.hWin.HAPI4.is_logged()){
+                that._refresh();
+                
+                /*if(window.hWin.HAPI4.is_logged()){
                     that['menu_'+name].find('.logged-in-only').show();
                 }else{
                     that['menu_'+name].find('.logged-in-only').hide();
-                }
-
+                }*/
 
                 that._initLinks(that['menu_'+name]);
             })

@@ -446,6 +446,7 @@ class System {
         if($user) {
             $user['ugr_Password'] = ''; // do not send password to client side
             $user['ugr_Admin'] = $this->is_admin();
+            $user['ugr_DbOwner'] = $this->is_dbowner();
             if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getDefaultPreferences();
         }
 

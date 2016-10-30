@@ -80,10 +80,7 @@
 </head>
 
 <body style="padding:44px;" class="popup">
-
-
     <script src="../../common/php/loadCommonInfo.php"></script>
-
     <div class="banner"><h2>Build FAIMS Project</h2></div>
     <div id="page-inner" style="padding-left: 30px;padding-right:10px">
     

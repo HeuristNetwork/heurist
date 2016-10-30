@@ -46,7 +46,7 @@
             // quite weird way - since it is not possibel (or unknown) how to treat t1000 in case of error
             function showMessage(){
                 if(document.getElementById('divErrors').innerHTML=="" && top.HEURIST.util.getUrlParameter('was', this.location.search)){
-                    top.HEURIST.util.popupTinyElement(this, document.getElementById('divMessage'));
+                    top.HEURIST.util.popupTinyElement(this, document.getElementById('divMessage'), {width:220,height:140});
                     setTimeout(function(){
                         top.HEURIST.util.closePopupLast();
                         }, 1000);

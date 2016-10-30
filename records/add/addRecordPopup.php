@@ -95,7 +95,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 var i, l, kwd, val;
                 $("#tag").empty();
                 $("<option value='' selected></option>").appendTo("#tag"); //(select workgroup tag)
-                if(top.HEURIST.user.workgroupTagOrder){
+                if(top.HEURIST.user && top.HEURIST.user.workgroupTagOrder){
                     l = top.HEURIST.user.workgroupTagOrder.length;
                     for (i = 0; i < l; ++i) {
                         kwd = top.HEURIST.user.workgroupTags[top.HEURIST.user.workgroupTagOrder[i]];

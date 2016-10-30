@@ -1429,7 +1429,6 @@ if (@$_REQUEST['mode'] != '1') { //not include
     }
     ob_implicit_flush(1);
 }
-
 //----------------------------------------------------------------------------//
 //  Output
 //----------------------------------------------------------------------------//
@@ -1512,23 +1511,39 @@ if($intofile){ // flags HuNI manifest + separate files per record
     }else{
 
         ?>
-
-        <div style='background: url(../../common/images/logo_huni.png) center top no-repeat;height:50px;'>&nbsp;</div>
-        <h2>The HuNI Project</h2>
-        <p style="margin-top: 1em;"> </p>
-
-        <p style="font-size: x-small;margin-top: 1em;">
+<html>
+<head>
+    <style>
+* {
+    font-family: Helvetica,Arial,sans-serif;
+    font-size: 12px;
+}
+    </style>
+    </head>
+            <body>
+        <table style='width:500px;'>
+            <tr>
+                <td style='width:150px;'><img src='../../common/images/logo_huni.png'></td>
+                <td><h2 style="padding-top:1em;font-size: 16px;">The HuNI Project</h2></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                
+        <p style="margin-top: 1em;">
             The HuNI project (Humanities Networked Infrastructure, <a href="http://huni.net.au" target="_blank">http://huni.net.au</a>) 
              funded as a Virtual Laboratory by the Australian National eResearch Collaboration Tools and Resources Project 
             (<a href="http://nectar.org.au">NeCTAR</a>, has built a central searchable aggregate of metadata harvested from 28 Australian 
             cultural datasets, including AusStage, AusLit, Dictionary of Art and Architecture Online, Australian Dictionary of Biography, 
             Circus Oz and Paradisec</p>
 
-        <p style="font-size: x-small;margin-top: 1em;">
+        <p style="margin-top: 1em;">
             Heurist provides a database-on-demand function for HuNI. Databases created using the HuNI Core Metadata template can be immediately
             exported to a HuNI harvestable format. Other databases can be made available for harvesting by mapping fields to the HuNI Core naming conventions.
         </p>
-
+                
+                </td>
+            </tr>
+        </table>
         <?php
 
         // remove all files form  HEURIST_HML_DIR
@@ -1541,6 +1556,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
 
         if(count($resout)<1){
             print '<h3>There are no results to export</h3>';
+            print '</body></html>';
         }else{
 
 
@@ -1578,6 +1594,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
 
             //was   print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
             print '<h3>Export completed</h3> Files are in <b><a href='.HEURIST_HML_URL.' target="_blank">'.HEURIST_HML_URL.'</a></b>';
+            print '</body></html>';
         }
     }
     /*

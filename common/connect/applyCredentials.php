@@ -321,7 +321,8 @@ function outWarning($role, $message){
             <!--<link rel=stylesheet href='../../../common/css/global.css'> -->
             <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
             <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.js"></script>
+            <!-- not accessible  script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.js"></script -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.3/toastr.min.js"></script>
             <script src="../../../hclient/framecontent/tabmenus/manageMenu.js"></script>
             <script>
 
