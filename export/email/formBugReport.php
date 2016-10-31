@@ -123,8 +123,8 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
                     if (bdValue.file.nonce) {
                         link.href = top.HEURIST.baseURL_V3+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
                         "?ulf_ID=" + encodeURIComponent(bdValue.file.nonce)+"&db=<?=HEURIST_DBNAME?>";
-                    } else if (bdValue.file.URL) {
-                        link.href = bdValue.file.URL;
+                    } else if (bdValue.file.remoteURL) {
+                        link.href = bdValue.file.remoteURL;
                     }
                     link.target = "_surf";
                     link.onclick = function() { top.open(link.href, "", "width=300,height=300,resizable=yes"); return false; };

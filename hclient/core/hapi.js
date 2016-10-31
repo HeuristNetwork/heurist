@@ -86,6 +86,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         that.currentUser = _currentUser;
         }else{}*/
         // Get current user if logged in, and global database settings
+        // see usr_info.php sysinfo method  and then system->getCurrentUserAndSysInfo
         that.SystemMgr.sys_info(
             function(response){
                 var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);

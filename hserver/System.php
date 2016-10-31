@@ -486,7 +486,10 @@ class System {
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
                     "basePathV3"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
-                    "dbrecent"=>$dbrecent)
+                    "dbrecent"=>$dbrecent,
+                    'max_post_size'=>$this->_get_config_bytes(ini_get('post_max_size')),
+                    'max_file_size'=>$this->_get_config_bytes(ini_get('upload_max_filesize'))
+                    )
             );
 
         }else{
@@ -878,5 +881,26 @@ class System {
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
     }
 
+    //
+    // convert php.ini config value to valid integer
+    //
+    private function _get_config_bytes($val) {
+        $val = trim($val);
+        $last = strtolower($val[strlen($val)-1]);
+        switch($last) {
+            case 'g':
+                $val *= 1024;
+            case 'm':
+                $val *= 1024;
+            case 'k':
+                $val *= 1024;
+        }
+        //_fix_integer_overflow
+        if ($val < 0) {
+            $val += 2.0 * (PHP_INT_MAX + 1);
+        }
+        return $val;
+    }
+    
 }
 ?>
