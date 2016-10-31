@@ -1,6 +1,7 @@
 
 /**
-* filename: explanation
+* selectTectype.js : select the record/entity types to be used in writing the FAIMS tablet app configuration
+*                    Selection of record types as the primary entry points also selects any dependent record types required
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
