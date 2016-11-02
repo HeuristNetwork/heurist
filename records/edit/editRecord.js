@@ -4298,8 +4298,11 @@ console.log('heurist not defined');
 
         if(element.hiddenElt.value){
             var filedata = top.HEURIST.util.expandJsonStructure(element.hiddenElt.value);
-            var thumbURL = filedata.remoteURL.replace('/records/files/downloadFile.php','/common/php/resizeImage.php');
-            element.thumbDiv.style.backgroundImage = "url("+thumbURL+")";       
+            //change to resizer
+            if(filedata.URL){
+                var thumbURL = filedata.URL.replace('/records/files/downloadFile.php','/common/php/resizeImage.php');
+                element.thumbDiv.style.backgroundImage = "url("+thumbURL+")";       
+            }
         }
         
         
