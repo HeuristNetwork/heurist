@@ -712,7 +712,17 @@ function parse_db_save($preproc){
 
 
     if (!$mysqli->query($query)) {
-        $system->addError(HEURIST_DB_ERROR, 'Unable to import data. MySQL command: "'.$query.'" returns error: '.$mysqli->error);                
+        
+        $system->addError(HEURIST_DB_ERROR, 'Unable to import data. '
+.'Your MySQL system is not set up correctly for text file import. Please ask your system adminstrator to make the following changes:<br>'
+.'<br><br>1. Add to  /etc/mysql/my.cnf'
+.'<br>[mysqld] '
+.'<br>local-infile = 1'
+.'<br>[mysql] '
+.'<br>local-infile = 1'
+.'<br>2. Replace the driver php5-mysql by the native driver'
+.'<br><br>see: http://stackoverflow.com/questions/10762239/mysql-enable-load-data-local-infile');
+        //$system->addError(HEURIST_DB_ERROR, 'Unable to import data. MySQL command: "'.$query.'" returns error: '.$mysqli->error);                
         return false;
     }
 
