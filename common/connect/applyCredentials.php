@@ -186,7 +186,7 @@ function jump_sessions() {
     session_start();
 
     foreach ($copy_vars as $varname) {
-        if($tmp[$varname]){
+        if(@$tmp[$varname]){
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname] = $tmp[$varname];
         }
     }

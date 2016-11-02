@@ -300,7 +300,10 @@ class System {
                 $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
             }
 
-            define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
+            if(!defined('HEURIST_FILESTORE_DIR')){
+                define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
+            }
+            
 
             if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                 return false;
@@ -312,7 +315,9 @@ class System {
 
         }else{
 
-            define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
+            if(!defined('HEURIST_FILESTORE_DIR')){
+                define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
+            }
             if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                 return false;
             }
@@ -320,7 +325,7 @@ class System {
             define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/');
         }
 
-        if(!defined('HEURIST_FILESTORE_DIR ')){
+        if(!defined('HEURIST_THUMB_DIR')){
             define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
         }
         define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . 'filethumbs/');

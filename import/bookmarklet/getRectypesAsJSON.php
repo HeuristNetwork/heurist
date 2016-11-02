@@ -50,7 +50,6 @@ mysql_connection_select(DATABASE);
 
 header("Content-type: text/javascript");
 
-
 $res = mysql_query("select tlu_DateStamp from sysTableLastUpdated where tlu_TableName = 'defRecTypes'");
 $lastModified = mysql_fetch_row($res);
 $lastModified = strtotime($lastModified[0]);
@@ -59,6 +58,8 @@ if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
   header('HTTP/1.1 304 Not Modified');
   exit();
 }
+
+ob_start();
 
 print "HEURIST_rectypes = {};\n\n";
 
