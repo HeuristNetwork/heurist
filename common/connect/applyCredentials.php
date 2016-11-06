@@ -348,7 +348,7 @@ function outWarning($role, $message){
                 <div id=errorMsg>
                     <!--  <span>You do not have the permission to perform this action</span>
                     <p>
-                    <a href="<?php //echo HEURIST_BASE_URL;?>common/connect/login.php?logout=1&db=<?php// echo HEURIST_DBNAME;?>"
+                    <a href="<?php //echo HEURIST_BASE_URL; ?>common/connect/login.php?logout=1&db=<?php // echo HEURIST_DBNAME; ?>"
                     target="_top">Log out / log in again</a>
                     </p>-->
                 </div>

@@ -908,7 +908,7 @@ if(@$params['debug']) echo $query."<br>";
                                     $order = array();
                                     $rectypes = array();
                                     foreach ($records as $recID => $record) {
-                                        if(is_array($record['d']) && count($record['d'])>0){
+                                        if(is_array(@$record['d']) && count($record['d'])>0){
                                             //this record is time enabled 
                                             if($istimemap_counter<$chunk_size){
                                                 $tm_records[$recID] = $record;        
