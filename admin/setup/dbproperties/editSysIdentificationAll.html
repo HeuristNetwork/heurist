@@ -1,7 +1,7 @@
 <!--
 
 /**
-* editSysIdentificationAdvanced.html, T1000 template for editing the email and locations section of the system identification record
+* editSysIdentificationAll.html, T1000 template for editing the email and locations section of the system identification record
 * defining email server and addresses for incoming and outgoing mail
 *
 * @package     Heurist academic knowledge management system
@@ -25,7 +25,7 @@
 
 <html>
     <head>
-        <title>Database Advanced Properties</title>
+        <title>Database Properties</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
@@ -69,7 +69,7 @@
             }
         </script>
 
-        <div id="headertitle" class="banner"><h2>Database Advanced Properties</h2></div>
+        <div id="headertitle" class="banner"><h2>Database Properties</h2></div>
 
         <!--{PageHeader} -->
 
@@ -80,18 +80,76 @@
 
             [foreach SYSID sys]
 
-            <form action="editSysIdentificationAdvanced.php?was=1&amp;db=[dbname!]&amp;popup=[popup!]" method="post">
+            <form action="editSysIdentificationAll.php?was=1&amp;db=[dbname!]&amp;popup=[popup!]" method="post">
 
                 [update SYSID sysid_update]
 
+                
+<h3>General information</h3>
+
                 <div class="input-row">
-                    <div class="input-header-cell">Heurist registration number and format version (0 = not registered)
-                    </div>
-                    <div class="input-cell"><br />Database Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;
-                        Database format version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b>
-                    </div>
+                    <div class="input-header-cell">Heurist registration number (0 = not registered) and database version</div>
+                    <div class="input-cell">Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;
+                        Database format version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></div>
+                </div>
+                <div class="input-row"><div class="input-header-cell">Display name (more informative than database name at top of page) * </div>
+                    <div class="input-header-cell"> [textbox required : sys_dbName : : size=40] </div></div>
+                <div class="input-row"><div class="input-header-cell">Database rights statement (or URL to rights statement) </div>
+                    <div class="input-header-cell"> [textbox : sys_dbRights : : size=100]</div></div>
+                <div class="input-row"><div class="input-header-cell">Name/institution of owner (or URL to owner information)</div>
+                    <div class="input-header-cell">[textbox : sys_dbOwner : : size=100]         </div></div>
+                <div class="input-row"><div class="input-header-cell">Description of the database/content up to 1Kb (may reference a URL)</div>
+                    <div class="input-header-cell">[textarea : sys_dbDescription : : rows="8" cols=100 ] </div></div>
+
+
+                <!--
+                <div class="input-row"><div class="input-header-cell">[sys_SyncDefsWithDB] </div>
+                <div class="input-header-cell"></div></div>
+                <div class="input-row"><div class="input-header-cell">[sys_AutoIncludeFieldSetIDs] </div>
+                <div class="input-header-cell"></div></div>
+                -->
+                <h3>Behaviours</h3>
+
+
+                <!-- This has caused lots of trouble - it is not really necessary because system remembers user's choice.
+                If we do re-enable it, it shoudl be a pulldown and should be changed to OVERRIDE the user's choice -->
+                <div class="input-row"  style="display:none">
+                    <div class="input-header-cell">Owner group for new records ('0' indicates 'everyone') </div>
+                    <div class="input-cell" > [textbox : sys_NewRecOwnerGrpID : : size=3] 0 indicates the 'all users' pseudo-group </div>
+                </div>
+                <!-- This should really be 'required' but T1000 treats 0 as False, so it is rejected -->
+
+                <div class="input-row">
+                    <div class="input-header-cell">Default access outside owner group on bulk imported records (only owners can edit)</div>
+                    <div class="input-cell">[dropdown : sys_NewRecAccess : Default access outside owner group when records are imported : enum( "hidden", "viewable", "pending", "public")]</div>
                 </div>
 
+
+                <!-- PROBLEM: If these checkboxes are not checked, they set the field to missing, but these are NOT NULL fields,
+                              and although defaulted to 0 at the start, they do not get set by T1000 -->
+
+                <div class="input-row">
+                    <div class="input-header-cell">Set 'public' to 'pending' when record edited (use to stage record edits)</div>
+                    <div class="input-cell">[checkbox : sys_SetPublicToPendingOnEdit : : size=1] </div>
+                </div>
+
+                <!-- Sep 2011: bug - even the owners couldn't see the records -->
+                <div class="input-row" style="display:none">
+                <div class="input-header-cell">Restrict database access to members of the owners group  </div>
+                <div class="input-cell">[checkbox : sys_RestrictAccessToOwnerGroup  : : size=20]</div>
+                </div>
+
+
+                <div class="input-row">
+                    <div class="input-header-cell">Allow online registration as user (confirmed by Database Owner)  </div>
+                    <div class="input-cell">[checkbox : sys_AllowRegistration : : size=20] </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-header-cell">Carry out nightly URL validation (can overload targets)  </div>
+                    <div class="input-cell">[checkbox : sys_URLCheckFlag  : : size=20]</div>
+                </div>
+                                
                 <h3>Incoming / outgoing email</h3>
                 <div class="input-row">
                     <div class="input-header-cell">IMAP server for server receiving emails which can be harvested
@@ -111,7 +169,7 @@
                 <div class="input-row">
                     <div class="input-header-cell">Addresses from which incoming mail to be harvested may be received
                     </div>
-                    <div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=180] <br />
+                    <div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=120] <br />
                         comma separated, shared list, additional addresses can be added in personal profile, other addresses are ignored
                     </div>
                 </div>
@@ -151,7 +209,7 @@
 
                 <div class="input-row">
                     <div class="input-header-cell">File extensions to index (FieldHelper function creates records + metadata)</div>
-                    <div class="input-cell">[textbox : sys_MediaExtensions : : size=180] <br />comma separated list
+                    <div class="input-cell">[textbox : sys_MediaExtensions : : size=120] <br />comma separated list
                     </div>
                 </div>
 
@@ -160,7 +218,7 @@
                     Path(s) which contain files to be indexed as multimedia records for Picasa/FieldHelper compatibility.
 
                     </div>
-                    <div class="input-cell">[textbox : sys_MediaFolders : : size=160] <br />
+                    <div class="input-cell">[textbox : sys_MediaFolders : : size=120] <br />
                         separated by semi-colon ( ; )<br />
                         They relative to database directory for additional directory(ies). Subdirectories are also indexed. <br />
                         A fieldhelper.xml file is written in each (sub)directory.
@@ -213,7 +271,7 @@
         </div>
 
         <div id="divMessage" style="display:none;width:180px;height:80px;text-align: center; ">
-            <div id="divMessage-text" style="color:black;font-weight:bold;margin:10px;">Advanced Properties saved
+            <div id="divMessage-text" style="color:black;font-weight:bold;margin:10px;">Database Properties saved
             </div>
         </div>
 

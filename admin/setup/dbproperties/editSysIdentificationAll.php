@@ -40,7 +40,7 @@ require_once(dirname(__FILE__).'/../../../common/t1000/t1000.php');
 
 mysql_connection_overwrite(DATABASE);
 
-$template = file_get_contents('editSysIdentificationAdvanced.html');
+$template = file_get_contents('editSysIdentificationAll.html');
 // $template = str_replace('{PageHeader}', '[literal]'.file_get_contents('menu.html').'[end-literal]', $template);
 $lexer = new Lexer($template);
 

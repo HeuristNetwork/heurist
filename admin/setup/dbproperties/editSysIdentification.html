@@ -58,7 +58,7 @@
             <!--{PageHeader} -->
         </div>
 
-        <div id="page-inner">
+        <div id="page-inner" style="top:20px">
 
             <div id="divErrors">[errors]</div>
 
@@ -96,7 +96,7 @@
 
                 <!-- This has caused lots of trouble - it is not really necessary because system remembers user's choice.
                 If we do re-enable it, it shoudl be a pulldown and should be changed to OVERRIDE the user's choice -->
-                <div class="input-row"  style="visibility:hidden">
+                <div class="input-row"  style="display:none">
                     <div class="input-header-cell">Owner group for new records ('0' indicates 'everyone') </div>
                     <div class="input-cell" > [textbox : sys_NewRecOwnerGrpID : : size=3] 0 indicates the 'all users' pseudo-group </div>
                 </div>
@@ -117,7 +117,7 @@
                 </div>
 
                 <!-- Sep 2011: bug - even the owners couldn't see the records -->
-                <div class="input-row">
+                <div class="input-row" style="display:none">
                 <div class="input-header-cell">Restrict database access to members of the owners group  </div>
                 <div class="input-cell">[checkbox : sys_RestrictAccessToOwnerGroup  : : size=20]</div>
                 </div>

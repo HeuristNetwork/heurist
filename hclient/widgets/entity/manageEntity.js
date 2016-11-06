@@ -26,7 +26,7 @@
 //_rendererActionButton  - renderer of item for resultlist
 //_recordListHeaderRenderer  - renderer of header for resultlist
 //_recordListItemRenderer    - renderer of item for resultlist
-//_recordListGetFullData     - callback function to retrieve full record info (incase we use 2 steps search: ids then list per page)  
+//_recordListGetFullData     - callback function to retrieve full record info (in case we use 2 steps search: ids then list per page)  
 //_initDialog - init dialog widget 
 //popupDialog
 //closeDialog

@@ -60,7 +60,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
                     
                     <li class="admin-only">
-                        <a href="admin/setup/dbproperties/editSysIdentification.php" name="auto-popup" class="portrait h3link"
+                        <a href="admin/setup/dbproperties/editSysIdentificationAll.php" name="auto-popup" class="portrait h3link"
                             onclick= "{return false;}"
                             title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
                             Properties</a>
