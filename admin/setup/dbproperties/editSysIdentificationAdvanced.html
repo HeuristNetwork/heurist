@@ -155,16 +155,21 @@
                     </div>
                 </div>
 
+                <div class="input-row">
+                    <div class="input-header-cell">
+                    Path(s) which contain files to be indexed as multimedia records for Picasa/FieldHelper compatibility.
+
+                    </div>
+                    <div class="input-cell">[textbox : sys_MediaFolders : : size=160] <br />
+                        separated by semi-colon ( ; )<br />
+                        They relative to database directory for additional directory(ies). Subdirectories are also indexed. <br />
+                        A fieldhelper.xml file is written in each (sub)directory.
+                    </div>
+                </div>
+
                 <!-- These options should only be enabled for tightly controlled installations as they
                      allow files to be indexed/written outside the database directory. This may not only
                      be undesirable, but may cause failure if permissions are not correctly set.
-
-                <div class="input-row">
-                    <div class="input-header-cell">Additional folder(s) containing files for indexing (Picasa/FieldHelper compatibility). A fieldhelper.xml file is written in each (sub)directory.
-                    </div>
-                    <div class="input-cell">[textbox : sys_MediaFolders : : size=160] <br />
-                        separated by semi-colon ( ; ), child folders are included automatically</div>
-                </div>
 
                 <div class="input-row">
                     <div class="input-header-cell">Directory in which to write HTML representation of published records
