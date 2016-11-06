@@ -224,11 +224,13 @@
                         <input type="file" name="files[]" multiple>
                     </span>
                     <button type="submit" class="start">Start uploads</button>
-                    <button type="reset" class="cancel">Cancel uploads</button>
+                    <button type="reset" class="cancel" id="btnCancel">Cancel uploads</button>
                     <!-- Ian 17/6/16 It's quite confusing what these are for
                     <button type="button" class="delete">Delete selected</button>
                     <input type="checkbox" class="toggle">
                     -->
+                    <div style="display:inline-block;min-width:40px"></div>
+                    <button id="btnFinished">Finished</button>
                     <!-- The global file processing state -->
                     <span class="fileupload-process"></span>
                 </div>
@@ -294,9 +296,9 @@
             <p class="name">
             <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
             </p>
-            {% if (file.error) { %}
+              {% if (file.error) { %}
                 <div><span class="error">Upload error</span> {%=file.error%}</div>
-                {% } %}
+              {% } %}
                 </td>
                 <td>
                 <span class="size">{%=o.formatFileSize(file.size)%}</span>
@@ -308,6 +310,9 @@
                 <!-- another confuising control - presumably meant to be a selection checkbox for multiple removals
                 <input type="checkbox" name="delete" value="1" class="toggle">
                 -->
+              {% if (!file.error) { %}
+                <div style="color:blue;display:inline-block;font-weight:bold;">Upload OK</div>
+              {% } %}
                 </td>
                 </tr>
                 {% } %}
@@ -353,6 +358,14 @@
                     //xhrFields: {withCredentials: true},
                     url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/'
                 });
+                
+                $('#btnFinished')
+                        .button({icons:{primary: 'ui-icon-check'}})
+                        .click( function(e){ 
+                            e.preventDefault();
+                            $('#btnCancel').click(); 
+                            return false; });
+                
                 // Enable iframe cross-domain access via redirect option:
                 $('#fileupload').fileupload(
                     'option',
