@@ -134,17 +134,33 @@
                 $mediaFolders = $row1[0];
                 $dirs = explode(';', $mediaFolders); // get an array of folders
                 $dirs2 = array();
+                
+                // MEDIA FOLDERS ALWAYS RELATIVE TO HEURIST_FILESTORE_DIR
                 foreach ($dirs as $dir){
                     if( $dir && $dir!="*") {
-                        if(substr($dir, -1) != '/'){
+                        
+                        if(substr($dir, -1) != '/'){  //add last slash
                             $dir .= "/";
                         }
 
+                        /* changed to check that folder is in HEURIST_FILESTORE_DIR 
                         if(!file_exists($dir) ){ //probable this is relative
                             $orig = $dir;
                             chdir(HEURIST_FILESTORE_DIR);
                             $dir = realpath($dir);
                         }
+                        */
+                        $dir = str_replace('\\','/',$dir);     
+                        if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
+                            chdir(HEURIST_FILESTORE_DIR);
+                            $dir = realpath($dir);
+                            $dir = str_replace('\\','/',$dir);     
+                            if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
+                                // Folder must be in heurist filestore directory
+                                continue;
+                            }
+                        }
+                        
                         if(file_exists($dir) && is_dir($dir) && !in_array($dir, $system_folders)){
                              array_push($dirs2, $dir);
                         }
@@ -156,6 +172,7 @@
                 // add the scratch directory, which will be the default for upload of material for import
                 array_push($dirs, HEURIST_FILESTORE_DIR.'scratch/');
                 array_push($dirs, HEURIST_FILES_DIR);
+//error_log('3.'.print_r($dirs,true));                            
 
                 // The defined list of file extensions for FieldHelper indexing.
                 // For the moment keep this in as a restriction on file types which can be uploaded

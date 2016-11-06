@@ -256,6 +256,7 @@ if (! is_logged_in()) {
                         $dir .= "/";
                     }
 
+                    /* changed to check that folder is in HEURIST_FILESTORE_DIR 
                     if(!file_exists($dir) ){ //probable this is relative
                         $orig = $dir;
                         chdir(HEURIST_FILESTORE_DIR);
@@ -264,6 +265,19 @@ if (! is_logged_in()) {
                             $dir = $orig; //restore
                         }
                     }
+                    */
+                    $dir = str_replace('\\','/',$dir);
+                    if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
+                        $orig = $dir;
+                        chdir(HEURIST_FILESTORE_DIR);
+                        $dir = realpath($dir);
+                        $dir = str_replace('\\','/',$dir);     
+                        if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
+                            print "<div style=\"color:red\">$orig is ignored. Folder must be in heurist filestore directory.</div>";
+                            continue;
+                        }
+                    }
+                    
                 }
 
                 if(in_array($dir, $system_folders)){
