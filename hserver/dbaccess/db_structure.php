@@ -628,15 +628,27 @@
         $query.= " from defDetailTypes left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID" . " order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
         $res = $mysqli->query($query);
         //ARTEM    $dtStructs['sortedNames'] = mysql__select_assoc('defDetailTypes', 'dty_Name', 'dty_ID', '1 order by dty_Name');
-        while ($row = $res->fetch_row()) {
-            if($imode!=1){
-                array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['allTypes'], $row[2]);
-                if ($row[17]) {// dty_ShowInLists
-                    array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['showTypes'], $row[2]);
+        try{
+            if(!$res){
+                error_log('FAILED QUERY: '.$query);
+                error_log('Database: '.HEURIST_DBNAME);
+            }else{
+                while ($row = $res->fetch_row()) {
+                    if($imode!=1){
+                        array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['allTypes'], $row[2]);
+                        if ($row[17]) {// dty_ShowInLists
+                            array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['showTypes'], $row[2]);
+                        }
+                        $dtStructs['names'][$row[2]] = $row[3];
+                    }
+                    $dtStructs['typedefs'][$row[2]]['commonFields'] = array_slice($row, 2);
                 }
-                $dtStructs['names'][$row[2]] = $row[3];
             }
-            $dtStructs['typedefs'][$row[2]]['commonFields'] = array_slice($row, 2);
+        }catch(Exception $e) {
+            //trying to find veird error - missed trm_Modified column
+            error_log('Message: ' .$e->getMessage());
+            error_log('QUERY: '.$query);
+            error_log('Database: '.HEURIST_DBNAME);
         }
         
         //SPECIAL CASE for relation type #6
