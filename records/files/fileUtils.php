@@ -392,5 +392,23 @@ function getScriptOutput($path, $print = FALSE)
     else
         echo ob_get_clean();
 }
-
+  
+  
+function _get_config_bytes($val) {
+        $val = trim($val);
+        $last = strtolower($val[strlen($val)-1]);
+        switch($last) {
+            case 'g':
+                $val *= 1024;
+            case 'm':
+                $val *= 1024;
+            case 'k':
+                $val *= 1024;
+        }
+        //_fix_integer_overflow
+        if ($val < 0) {
+            $val += 2.0 * (PHP_INT_MAX + 1);
+        }
+        return $val;
+}  
 ?>
