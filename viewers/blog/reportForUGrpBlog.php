@@ -118,7 +118,7 @@ function print_blog_entries($uid, $name, $date) {
 function print_comments($rec_id) {
 	$query = "SELECT concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname, cmt_Added, cmt_Text
 	          FROM recThreadedComments
-			  LEFT JOIN sysUGrps usr ON usr.ID = cmt_OwnerUGrpID
+			  LEFT JOIN sysUGrps usr ON usr.ID = cmt_OwnerUgrpID
 	          WHERE cmt_RecID = $rec_id
 	          AND ! cmt_Deleted
 	          ORDER BY cmt_Added";
