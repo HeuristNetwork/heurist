@@ -297,7 +297,7 @@ function updateFromChild( ele_id_toupdate, value){
 function editRecordType_inNewWindow(){
     //var document = top.document;
 
-    window.open("../../admin/adminMenu.php?db="+
+    window.open("../../admin/adminMenuStandalone.php?db="+
     top.HEURIST.database.name+
     "&mode=rectype&rtID="+
     top.HEURIST.edit.record.rectypeID, "_blank");

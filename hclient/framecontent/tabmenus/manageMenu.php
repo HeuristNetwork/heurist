@@ -12,6 +12,7 @@
 */
 
 define('MANAGER_REQUIRED',1);
+if(!defined('PDIR')) define('PDIR','../../../');
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -20,9 +21,9 @@ define('MANAGER_REQUIRED',1);
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once(dirname(__FILE__)."/initPage.php");
+require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/databaseAdmin.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/tabmenus/manageMenu.js"></script>
 
 <script type="text/javascript">
     var editing;
@@ -31,50 +32,65 @@ require_once(dirname(__FILE__)."/initPage.php");
     function onPageInit(success){
         if(success){
 
-            var databaseAdmin = new hDatabaseAdmin();
+            var manageMenu = new hmanageMenu();
 
             var $container = $("<div>").appendTo($("body"));
         }
-    }            
+    }
 </script>
 <style>
 </style>
 </head>
-<body style="background-color:white">
-    <div style="width:280px;top:0;bottom:0;left:0;position:absolute;padding:5px;">
-        <!-- <ul id="menu_container" style="margin-top:10;padding:2px"></ul> -->
-        <div class="accordion_pnl" style="margin-top:10px;padding:2px">
-            <h3>DATABASE</h3>
+<body class="ui-widget-content">
+    <div style="width:280px;top:0;bottom:0;left:0;position:absolute;">
+        <div class="accordion_pnl" style="margin-top:21px">
+            <h3><span class="ui-icon ui-iconalign ui-icon-database"></span>DATABASE</h3>
             <div>
                 <ul>
-                    <li style="padding-left:5px;"><a href="common/connect/getListOfDatabases.php?v=4" name="auto-popup" class="portrait h3link"
-                        onClick="{return false;}" data-nologin="1" 
+                    <li><a href="common/connect/getListOfDatabases.php?v=4" name="auto-popup" class="portrait h3link"
+                        onClick="{return false;}" data-nologin="1"
                         title="Open and login to another Heurist database - current database remains open">
                         Open database</a>
                     </li>
 
-                    <li style="padding-left:5px;"><a href="admin/setup/dbcreate/createNewDB.php" name="auto-popup" class="large h3link"
+                    <li><a href="admin/setup/dbcreate/createNewDB.php" name="auto-popup" class="large h3link"
                         onClick="{return false;}"
                         title="Create a new database on the current server - essential structure elements are populated automatically">
                         New database</a>
                     </li>
+                    
+                    <li class="admin-only">
+                        <a href="admin/setup/dbproperties/editSysIdentificationAll.php" name="auto-popup" class="portrait h3link"
+                            onclick= "{return false;}"
+                            title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
+                            Properties</a>
+                    </li>
+                    
+                    <li class="admin-only">
+                        <a href="admin/setup/dbproperties/registerDB.php" name="auto-popup" class="portrait h3link"
+                            onclick= "{return false;}"
+                            title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
+                            Register database</a>
+                    </li>
+                    
                 </ul>
             </div>
         </div>
+
         <div class="accordion_pnl">
-            <h3 id="divStructure">STRUCTURE</h3>
+            <h3 id="divStructure"><span class="ui-icon ui-iconalign ui-icon-structure"></span>STRUCTURE</h3>
             <div>
                 <ul>
                     <!-- database name is appended automatically by auto-popup -->
 
-                    <li style="padding-left:5px;">
-                        <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure"
+                    <li>
+                        <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
                             onClick="{return false;}" id="linkEditRectypes"
                             title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
                             Manage record types / fields</a>
                     </li>
 
-                    <li style="padding-left:5px;">
+                    <li>
                         <a href="admin/structure/import/selectDBForImport.php" name="auto-popup" class="verylarge h3link refresh_structure"
                             onClick="{return false;}"
                             title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
@@ -82,7 +98,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                     </li>
 
                     <!-- Remarked temporarely 2016-05-11
-                    <li style="padding-left:5px;">
+                    <li>
                     <a href="admin/structure/import/annotatedTemplate.php" name="auto-popup" class="verylarge h3link refresh_structure"
                     onClick="{return false;}"
                     title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
@@ -91,7 +107,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                     -->
 
                     <!-- Removed Ian 13 feb 16: this function is likely to confuse, better to have less in front page menus
-                    <li style="padding-left:5px;">
+                    <li>
                     <a href="admin/structure/fields/manageDetailTypes.php" name="auto-popup" class="verylarge h3link refresh_structure"
                     onClick="{return false;}"
                     title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
@@ -99,37 +115,52 @@ require_once(dirname(__FILE__)."/initPage.php");
                     </li>
                     -->
 
-                    <li style="padding-left:5px;">
-                        <a href="admin/structure/terms/editTerms.php" name="auto-popup" class="verylarge h3link refresh_structure"
-                            onClick="{return false;}"
-                            title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields">
-                            Manage terms / relation types</a>
+                    <li>
+                        <a id= "manage_terms" href="admin/structure/terms/editTerms.php?treetype=enum" name="auto-popup" class="verylarge h3link refresh_structure info_link"
+
+                            title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
+                            Manage terms</a>
                     </li>
 
-                    <li style="padding-left:5px;">
+                    <!-- Adding Manage relation types menu -->
+                    <li>
+                        <a  href="admin/structure/terms/editTerms.php?treetype=relation" name="auto-popup" class="verylarge h3link refresh_structure info_link"
+
+                            title="Browse and edit the relationship types"  onclick= "{return false;}">
+                            Manage relation types</a>
+                    </li>
+
+                    <li>
                         <a href="hclient/framecontent/databaseSummary.php" name="auto-popup" class="large h3link"
                             onClick="{return false;}"  xid="menulink-database-summary"
                             title="Take a look at the internal connections between record types in this database">
                             Visualise structure</a>
                     </li>
 
-                    <li style="padding-left:5px;">
+                    <li>
                         <a href="admin/verification/listDatabaseErrors.php" name="auto-popup" class="verylarge h3link"
                             onClick="{return false;}"
                             title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
                             Verify structure and data</a>
                     </li>
 
-                    <li style="padding-left:5px;" id="menu-database-refresh">
+                    <li id="menu-database-refresh">
                         <a href="#" id="menulink-database-refresh"
-                            onClick="{return false;}" data-nologin="1" 
+                            onClick="{return false;}" data-nologin="1"
                             title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
                             Refresh</a>
                     </li>
+                    
+                    <li>
+                        <a href="applications/faims/exportFAIMS.php" name="auto-popup" class="verylarge h3link"
+                            onClick="{return false;}"
+                            title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
+                            Tablet configuration</a>
+                    </li>
 
                     <!--
-                    <li style="padding-left:5px;"><a href="javascript:void(0)"
-                    onClick="{/*top.HEURIST4.util.reloadStrcuture()*/;}"
+                    <li><a href="javascript:void(0)"
+                    onClick="{/*window.hWin.HEURIST4.util.reloadStrcuture()*/;}"
                     title="Click to refresh the internal working memory - use to resynchronise if newly added structure elements do not show up" >
                     Refresh</a>
                     </li>
@@ -141,7 +172,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             <h3 class="top-menu-only">ANALYSE</h3>
             <div>
                 <ul>
-                    <li style="padding-left:5px;" class="top-menu-only">
+                    <li class="top-menu-only">
                         <a href="viewers/crosstab/crosstabs.php" name="auto-popup" class="verylarge currentquery h3link"
                             title="Tabulate one, two or three variables for the current query, with optional percentages, row and column totals" >
                             Crosstabs analysis</a>
@@ -150,23 +181,42 @@ require_once(dirname(__FILE__)."/initPage.php");
             </div>
         </div>
         <div class="accordion_pnl">
-            <h3>ADMINISTRATION</h3>
+            <h3><span class="ui-icon ui-iconalign ui-icon-gears"></span>ADMINISTRATION</h3>
             <div>
                 <ul>
-                    <li class="admin-only" style="padding-left:5px;">
+                    <li class="admin-only">
                         <a  href="#" id="menulink-database-admin"
-                            onclick="{window.open(top.HAPI4.basePathV3+'admin/adminMenu.php?db='+window.HAPI4.database, '_self'); return false;}"
+                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
                             Full database administration, <br />utilities &amp; special functions</a>
                     </li>
+                    <li class="admin-only">
+                        <a href="export/dbbackup/exportMyDataPopup.php?inframe=1" name="auto-popup" class="portrait h3link"
+                            onclick= "{return false;}"
+                            title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
+                            Complete data archive package</a>
+                    </li>
+
+                    <!--
+                        TEMPORARILY REMOVED. TODO: SOMETHING IS WRONG 3/7/2014 WITH THE EXPORT FUNCTION,
+                        IT OPENS UP THE EXPORT MODULE FORM AND WON'T CLOSE THE RECORD TYPE SELECTION POPUP
+                    <li class="admin-only">
+                        <a href="applications/faims/exportTDar.php" name="auto-popup" class="portrait h3link"
+                            onclick= "{return false;}"
+                            title="Export the current database as tables, files and metadata directly into a specified tDAR repository">
+                            Export to tDAR repository</a>
+                    </li>
+                    -->
+                    
                 </ul>
             </div>
         </div>
-        
+
     </div>
-    <div style="left:300px;right:0;top:0;bottom:20;position:absolute;overflow:auto;padding:20px 10px 0 0;">
+    <div style="left:281px;right:0;top:0;bottom:20;position:absolute;overflow:auto;padding:20px 10px 0 0;">
         <iframe id="frame_container">
         </iframe>
     </div>
+
 </body>
 </html>

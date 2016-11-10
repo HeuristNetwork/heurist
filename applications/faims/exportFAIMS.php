@@ -1,29 +1,24 @@
 <?php
 
-/*
-* Copyright (C) 2005-2016 University of Sydney
+/**
 *
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
+* exportFAIMS.php: write the FAIMS tablet app configuration files for selected record types 
 *
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.1.5
 */
 
-/**
-*   Write FAIMS project definition files (db schema, ui schema, a16N, ui logic)
-*   based on the Heurist database, allowing a FAIMS project to be built from Heurist
-*
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
-* @link        http://HeuristNetwork.org
-* @version     3.1.5
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
 */
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -80,13 +75,32 @@
 </head>
 
 <body style="padding:44px;" class="popup">
-
-
     <script src="../../common/php/loadCommonInfo.php"></script>
-
     <div class="banner"><h2>Build FAIMS Project</h2></div>
     <div id="page-inner" style="padding-left: 30px;padding-right:10px">
+    
+    <!-- TODO: This takes up too much space, but would be nice to include it:
+    <div style='background: url(../../common/images/logo_faims.png) center top no-repeat;height:120px;'>&nbsp;</div> -->
 
+    <p style="margin-top: 1em;"> </p>
+
+            <p style="font-size: x-small;margin-top: 1em;">
+                The FAIMS project &copy; ( Federated Archaeological Information Management System, 
+                <a href="http://fedarch.org" target="_blank">http://fedarch.org</a>) has built a highly configurable system for data
+                collection using consumer grade Android tablets, funded by the Australian Research Council (ARC) and 
+                National eResearch Collaboration Tools and Resources (NeCTAR). The FAIMS system is suitable for collection of information in libraries, 
+                archives and museums, for social surveys, and for a range of natural science field projects, as well as for archaeological survey 
+                or excavation (the original target audience). The system is geographically aware, connects to internal or external cameras and GPS, 
+                and can synchronise data collection across multiple tablets for team use.
+            </p>
+            <p style="font-size: x-small;margin-top: 1em;">
+                The FAIMS functions in Heurist allow the creation of a FAIMS project from a Heurist database, allowing the definition of
+                the types of entities and attributes (fields) to be set up using the database administration interface. Heurist can also
+                import data from a FAIMS project, building the Heurist data definitions on the fly, and can export data to the tDAR 
+                and Open Context repository systems (see functions in the Export tab).
+            </p>
+
+    
 <?php
 
     $invalid = (!$projname || preg_match('/[^A-Za-z0-9_\$]/', $projname)); //'[\W]'

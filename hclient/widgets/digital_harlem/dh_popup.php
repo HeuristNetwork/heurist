@@ -96,7 +96,7 @@
 
 
     $moredetailLink =  '<p><a href="javascript:void(0)" class="moredetail" '.
-        'onClick="top.HEURIST4.msg.showDialog(\''.$_SERVER['REQUEST_URI'].'&full=1\');">More Detail</a></p>';
+        'onClick="window.hWin.HEURIST4.msg.showDialog(\''.$_SERVER['REQUEST_URI'].'&full=1\');">More Detail</a></p>';
 
 
     if($recTypeID==RT_ADDRESS){

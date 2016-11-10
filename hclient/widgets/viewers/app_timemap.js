@@ -44,7 +44,7 @@ $.widget( "heurist.app_timemap", {
 
         this.framecontent = $('<div>').addClass('frame_container')
         //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-        //     'background':'url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center'})
+        //     'background':'url('+window.hWin.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center'})
         .appendTo( this.element );
 
         if($(".header"+that.element.attr('id')).length===0){
@@ -60,19 +60,19 @@ $.widget( "heurist.app_timemap", {
           
         if(this.options.eventbased){
 
-            this._events = top.HAPI4.Event.LOGOUT
-            + ' ' + top.HAPI4.Event.ON_REC_SELECT
-            + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
+            this._events = window.hWin.HAPI4.Event.LOGOUT
+            + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
+            + ' ' + window.hWin.HAPI4.Event.ON_SYSTEM_INITED;
 
             if(this.options.autoupdate){
                 this._events = this._events
-                + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
-                + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART;
+                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART;
             }
 
             $(this.document).on(this._events, function(e, data) {
 
-                if(e.type == top.HAPI4.Event.LOGOUT)
+                if(e.type == window.hWin.HAPI4.Event.LOGOUT)
                 {
                     if(that.options.recordset != null){
                         that.recordset_changed = true;
@@ -80,7 +80,7 @@ $.widget( "heurist.app_timemap", {
                         that._refresh();
                     }
 
-                }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
                     that.recordset_changed = true;
                     that.option("recordset", data); //hRecordSet
@@ -88,7 +88,7 @@ $.widget( "heurist.app_timemap", {
                     that.loadanimation(false);
 
                     // Search start
-                }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
                     that.option("recordset", null);
                     that.option("selection", null);
@@ -101,17 +101,17 @@ $.widget( "heurist.app_timemap", {
                     //???? that._refresh();
 
                     // Record selection
-                }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
                     if(data){
                         if(data.source!=that.element.attr('id')) { //selection happened somewhere else
                             //console.log("_doVisualizeSelection");
-                            that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
+                            that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
                         }
                     }else{
                         that.option("selection",  null);
                     }
-                }else if (e.type == top.HAPI4.Event.ON_SYSTEM_INITED){
+                }else if (e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
 
                     that._refresh();
 
@@ -149,7 +149,7 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap()
             }else {
-                var url = top.HAPI4.basePathV4 + 'hclient/framecontent/map.php?db='+top.HAPI4.database;
+                var url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/map.php?db='+window.hWin.HAPI4.database;
                 if(this.options.layout){
                     if( this.options.layout.indexOf('timeline')<0 )
                         url = url + '&notimeline=1';
@@ -165,7 +165,7 @@ $.widget( "heurist.app_timemap", {
 
     _initmap: function(){
 
-        if( !top.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
+        if( !window.hWin.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
 
 
             var mapping = this.mapframe[0].contentWindow.mapping;
@@ -186,7 +186,7 @@ $.widget( "heurist.app_timemap", {
                 this.options.selection,  //array of record ids
                 this.options.startup,    //map document on load
                 function(selected){  //callback if something selected on map
-                    $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT,
+                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
                         { selection:selected, source:that.element.attr('id') } );
                 },
                 function(){ //callback function
@@ -202,12 +202,12 @@ $.widget( "heurist.app_timemap", {
 
     , _doVisualizeSelection: function (selection) {
 
-        if(top.HEURIST4.util.isnull(this.options.recordset)) return;
+        if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
 
         this.option("selection", selection);
 
         if(!this.element.is(':visible')
-            || top.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
+            || window.hWin.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
             return;
         }
 
@@ -232,7 +232,7 @@ $.widget( "heurist.app_timemap", {
     , loadanimation: function(show){
        
         if(show){
-            this.mapframe.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.mapframe.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
             //this.mapframe.css('cursor', 'progress');
         }else{
             //this.framecontent.css('cursor', 'auto');

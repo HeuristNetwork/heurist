@@ -54,18 +54,18 @@ $.widget( "heurist.searchDefRecTypeGroups", $.heurist.searchEntity, {
                 'a'          : 'search',
                 'entity'     : this.options.entity.entityName, //'defRecTypeGroups',
                 'details'    : 'list',
-                'request_id' : top.HEURIST4.util.random(),
+                'request_id' : window.hWin.HEURIST4.util.random(),
                 };
 
                 var that = this;                                                
                 //that.loadanimation(true);
-                top.HAPI4.EntityMgr.doRequest(request, 
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
                                 {recordset:new hRecordSet(response.data), request:request} );
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
     },

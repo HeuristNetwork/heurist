@@ -1,6 +1,7 @@
 #! /bin/sh
 
 # If you get 'file not found' when you try to run this script, it is due to the file being converted to DoS format (ctrl-M line endings)
+# Use dos2unix copy_distribution_files.sh to fix
 
 # copy_distribution_files.sh: Creates a distribution package in h4-build from a Heurist working directory
 # This file is intended for internal use of the development team and should normally be deleted from the install package.
@@ -107,8 +108,8 @@ cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
 dos2unix install_heurist.sh
 dos2unix update_heurist.sh
 
-
 # PHP extensions verification function
+# TODO: Why is this being zipped? What is the purpose? Who added it? Needs an explanation. [Ian 4 Oct 2016]
 zip -j /var/www/html/HEURIST/DISTRIBUTION/verifyInstallation.zip admin/verification/verifyInstallation.php
 
 echo
@@ -118,18 +119,12 @@ tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2 -C 
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h4/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
 
-chown -R www-data:www-data /var/www/html/HEURIST/DISTRIBUTION
+chown -R apache:apache /var/www/html/HEURIST/DISTRIBUTION
 
+sudo cp /var/www/html/HEURIST/h4-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION
 echo
-echo
-echo ----------------------------------------------------------------------------------------------
-echo
-echo "Now complete distribution (if code ready) with:"
-echo
-echo "    sudo cp /var/www/html/HEURIST/h4-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION"
-echo
-echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name
-echo and the installation is dependant on the filename parameter to find this folder
+echo Distribution $1.tar.bz2 built. DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder 
+echo of this name and the installation is dependant on the filename parameter to find this folder
 echo
 echo
 

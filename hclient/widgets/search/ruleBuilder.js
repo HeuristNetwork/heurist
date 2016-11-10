@@ -69,7 +69,7 @@ $.widget( "heurist.ruleBuilder", {
         .addClass('text ui-corner-all')
         .appendTo( cont );
 
-        top.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, (this.options.level==1?'select....':false) );
+        window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, (this.options.level==1?'select....':false) );
 
         //create list/combobox of pointer/relmarker fields
         this.select_fields = $( "<select>" )
@@ -137,15 +137,15 @@ $.widget( "heurist.ruleBuilder", {
 
 
         // TODO: remove big block of debug or old code -----------------------     listener of global events
-        /*var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT;
+        /*var sevents = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT;
 
         $(this.document).on(sevents, function(e, data) {
 
-        if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
         that._query_request = data;  //keep current query request
 
-        }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
+        }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
         if(data) data = data.selection;
 
@@ -160,18 +160,18 @@ $.widget( "heurist.ruleBuilder", {
         });*/
 
         /* cannot bind event handler for parent document - need to be triggered directly
-        if(top && top.document)
-        $(top.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
+        if(window.hWin && window.hWin.document)
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
 
-        if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
+        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){
         //that.option("recordset", data); //hRecordSet
         alert('1111');s
         }
         });
 
-        $(top.parent.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
+        $(window.hWin.parent.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
 
-        if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
+        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){
         //that.option("recordset", data); //hRecordSet
         alert('22222');s
         }
@@ -245,7 +245,7 @@ $.widget( "heurist.ruleBuilder", {
     this._super( key, value );
     if ( key === "recordtypes" ) {
 
-    top.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false);
+    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false);
     this._onSelectRectype();
     this._refresh();
     }
@@ -258,7 +258,7 @@ $.widget( "heurist.ruleBuilder", {
     _refresh: function(){
 
         // TODO: remove big block of debug or old code
-        /*if(top.HAPI4.currentUser.ugr_ID>0){
+        /*if(window.hWin.HAPI4.currentUser.ugr_ID>0){
         $(this.element).find('.logged-in-only').css('visibility','visible');
         }else{
         $(this.element).find('.logged-in-only').css('visibility','hidden');
@@ -270,9 +270,9 @@ $.widget( "heurist.ruleBuilder", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
 
-        //$(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT);
+        //$(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT);
         if(parent && parent.document)
-            $(parent.document).off(top.HAPI4.Event.ON_REC_SEARCHRESULT);
+            $(parent.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT);
 
         // remove generated elements
         this.select_source_rectype.remove();
@@ -303,7 +303,7 @@ $.widget( "heurist.ruleBuilder", {
         // b. relation types for relmarkers
         // c. all recordtypes contrained in pointer and relmarkers fields
 
-        var rectypes = top.HEURIST4.rectypes,
+        var rectypes = window.hWin.HEURIST4.rectypes,
         details = rectypes.typedefs[rt_ID],
         source_rt_name = rectypes.names[rt_ID];
         
@@ -335,15 +335,15 @@ $.widget( "heurist.ruleBuilder", {
 
                     var name = details[dtyID][fi_name];
 
-                    if(!top.HEURIST4.util.isempty(name)){
+                    if(!window.hWin.HEURIST4.util.isempty(name)){
 
-                        name = top.HEURIST4.util.trim_IanGt(name);
+                        name = window.hWin.HEURIST4.util.trim_IanGt(name);
 
                         //find constraints
                         var constraints = details[dtyID][fi_rectypes];
-                        constraints = ( typeof(constraints) === "string" && !top.HEURIST4.util.isempty(constraints) )
+                        constraints = ( typeof(constraints) === "string" && !window.hWin.HEURIST4.util.isempty(constraints) )
                         ? constraints.split(","):[];  // $.parseJSON(temp)
-                        if(!top.HEURIST4.util.isArray(constraints)){
+                        if(!window.hWin.HEURIST4.util.isArray(constraints)){
                             constraints = [constraints];
                         }
                         if(constraints.length>0) arr_rectypes = arr_rectypes.concat(constraints);
@@ -354,7 +354,7 @@ $.widget( "heurist.ruleBuilder", {
                             this._has_relation = '1';
 
                             var temp = details[dtyID][fi_term_dis];
-                            temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) )
+                            temp = ( typeof(temp) === "string" && !window.hWin.HEURIST4.util.isempty(temp) )
                             ?  temp.split(",") :[];
                             if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
                             arr_fields.push({key:dtyID, title: source_rt_name + ' >> ' + name, 
@@ -383,15 +383,15 @@ $.widget( "heurist.ruleBuilder", {
 
                             var name = details[dtyID][fi_name];
 
-                            if(!top.HEURIST4.util.isempty(name)){
+                            if(!window.hWin.HEURIST4.util.isempty(name)){
 
-                                name = top.HEURIST4.util.trim_IanGt(name);
+                                name = window.hWin.HEURIST4.util.trim_IanGt(name);
 
                                 //find constraints
                                 var constraints = details[dtyID][fi_rectypes];
-                                constraints = ( typeof(constraints) === "string" && !top.HEURIST4.util.isempty(constraints) )
+                                constraints = ( typeof(constraints) === "string" && !window.hWin.HEURIST4.util.isempty(constraints) )
                                 ? constraints.split(","):[];  // $.parseJSON(temp)
-                                if(!top.HEURIST4.util.isArray(constraints)){
+                                if(!window.hWin.HEURIST4.util.isArray(constraints)){
                                     constraints = [constraints];
                                 }
                                 //verify that selected record type is in this constaint
@@ -422,8 +422,8 @@ $.widget( "heurist.ruleBuilder", {
                                 //
                                 if(isnotfound){ //it means this is reverse
 
-                                    name = top.HEURIST4.detailtypes.typedefs[dtyID].commonFields[1];
-                                    name = top.HEURIST4.util.trim_IanGt(name);
+                                    name = window.hWin.HEURIST4.detailtypes.typedefs[dtyID].commonFields[1];
+                                    name = window.hWin.HEURIST4.util.trim_IanGt(name);
 
                                     var rt_name = alldetails[rtyID].commonFields[0];
 
@@ -432,7 +432,7 @@ $.widget( "heurist.ruleBuilder", {
                                         this._has_rev_relation = '1';
 
                                         var temp = details[dtyID][fi_term_dis];
-                                        temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) ) ?  temp.split(",") :[];
+                                        temp = ( typeof(temp) === "string" && !window.hWin.HEURIST4.util.isempty(temp) ) ?  temp.split(",") :[];
                                         if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
 
                                         arr_fields.push({key:dtyID, title:'<< '+name + ' (in: ' + rt_name +')', terms:details[dtyID][fi_term],
@@ -465,7 +465,7 @@ $.widget( "heurist.ruleBuilder", {
 
         // TODO: remove big block of debug or old code
         //fill selectors
-        /*top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_rectypes, 'any');
+        /*window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_rectypes, 'any');
 
         if(this.select_target_rectype.find("option").length>2){
         this.select_target_rectype.show();
@@ -482,13 +482,13 @@ $.widget( "heurist.ruleBuilder", {
             this.select_fields.prop('disabled', false); //true);
         }
 
-        top.HEURIST4.ui.createSelector(this.select_fields.get(0), arr_fields);
+        window.hWin.HEURIST4.ui.createSelector(this.select_fields.get(0), arr_fields);
         this.select_fields.prop("selectedIndex",0);//.val('');
         this._onSelectFieldtype();
 
         // TODO: remove big block of debug or old code
         // selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray
-        //top.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_terms, arr_terms_dis, null, arr_fields, false);
+        //window.hWin.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_terms, arr_terms_dis, null, arr_fields, false);
 
     },
 
@@ -524,12 +524,12 @@ $.widget( "heurist.ruleBuilder", {
                         //this.label_3.show();
                         this.select_reltype.show();
                         this.select_reltype.prop('disabled', false);
-                        top.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'Any relationship type', false);
+                        window.hWin.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'Any relationship type', false);
                     }
                     //reduced list of constraints
-                    top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
+                    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
                     if(arr_field.rectypes.length!=1){
-                        top.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
+                        window.hWin.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
                         this.select_target_rectype.val(0);
                         this.select_target_rectype.prop('disabled', false);
                     }else{
@@ -544,7 +544,7 @@ $.widget( "heurist.ruleBuilder", {
             if(is_not_relation){
                 //this.label_3.hide();
                 this.select_reltype.show();
-                top.HEURIST4.ui.createSelector(this.select_reltype.get(0), [{key:'pointer', title:'pointer'}]);
+                window.hWin.HEURIST4.ui.createSelector(this.select_reltype.get(0), [{key:'pointer', title:'pointer'}]);
                 this.select_reltype.prop('disabled', true);
             }
         }else{
@@ -552,9 +552,9 @@ $.widget( "heurist.ruleBuilder", {
         }
         if(is_not_selected){
             //show all constraints
-            top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null); //this._arr_rectypes.length>1?'any':null);
+            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null); //this._arr_rectypes.length>1?'any':null);
             if(this._arr_rectypes.length>1){
-                top.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
+                window.hWin.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
             }
             this.select_target_rectype.prop('disabled', this.select_target_rectype.find("option").length==1);
 
@@ -586,7 +586,7 @@ $.widget( "heurist.ruleBuilder", {
 
     var rt_target = '';
 
-    if(!top.HEURIST4.util.isempty(this.select_target_rectype.val())){
+    if(!window.hWin.HEURIST4.util.isempty(this.select_target_rectype.val())){
     rt_target = this.select_target_rectype.val();
     }else{
     var opts = this.select_target_rectype.find("option");
@@ -594,20 +594,20 @@ $.widget( "heurist.ruleBuilder", {
     rt_target = $(opts[1]).attr('value');
     }
     }
-    if(!top.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
+    if(!window.hWin.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
 
     var rt_source = this.select_source_rectype.val();
 
     var dt_ID = this.select_fields.val();
 
-    if(!top.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
+    if(!window.hWin.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
 
     var fld = this._findField(dt_ID);
 
     if(this.select_reltype.is(":visible")){
 
     var rel_type = this.select_reltype.val();
-    if(!top.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
+    if(!window.hWin.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
 
     this.options.query = rt_target + 'related'+(fld && fld.isreverse?'_to:':'from:')+rt_source+rel_type;
     }else{
@@ -626,7 +626,7 @@ $.widget( "heurist.ruleBuilder", {
 
     _getTargetRt: function(){
         var rt_target = '';
-        if(!top.HEURIST4.util.isempty(this.select_target_rectype.val())){
+        if(!window.hWin.HEURIST4.util.isempty(this.select_target_rectype.val())){
             rt_target = this.select_target_rectype.val();
         }else{
             var opts = this.select_target_rectype.find("option");
@@ -666,7 +666,7 @@ $.widget( "heurist.ruleBuilder", {
 
         var linktype = 0;
 
-        if(!top.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
+        if(!window.hWin.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
             var fld = this._findField(dt_ID);
             if(rel_term_id=="pointer"){
                 rel_term_id = '';
@@ -683,7 +683,7 @@ $.widget( "heurist.ruleBuilder", {
 
         var query = '';
 
-        if(top.HEURIST4.util.isArray(codes) && codes.length==6){
+        if(window.hWin.HEURIST4.util.isArray(codes) && codes.length==6){
 
             var rt_source = codes[0];
             var dt_ID     = codes[1];
@@ -692,12 +692,12 @@ $.widget( "heurist.ruleBuilder", {
             var filter    = codes[4];
             var linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
 
-            if(!top.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
+            if(!window.hWin.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
 
             if(linktype>0){
 
                 if(linktype>2){
-                    if(!top.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
+                    if(!window.hWin.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
                     query = rt_target + 'related'+(linktype==3?'_to:':'from:')+rt_source+rel_type;
                 }else{
                     query = rt_target + 'linked'+(linktype==1?'_to:':'from:')+rt_source+'-'+dt_ID;
@@ -718,7 +718,7 @@ $.widget( "heurist.ruleBuilder", {
         if(this.options.rules){
 
             var codes = this.options.rules.codes;
-            if(top.HEURIST4.util.isArray(codes) && codes.length==6){
+            if(window.hWin.HEURIST4.util.isArray(codes) && codes.length==6){
 
                 var rt_source = codes[0];
                 var dt_ID     = codes[1];
@@ -735,13 +735,13 @@ $.widget( "heurist.ruleBuilder", {
                 this.select_fields.val(dt_ID);
                 this._onSelectFieldtype();
 
-                this.select_reltype.val(top.HEURIST4.util.isempty(rel_type)?'pointer':rel_type);
+                this.select_reltype.val(window.hWin.HEURIST4.util.isempty(rel_type)?'pointer':rel_type);
                 this.select_target_rectype.val(rt_target);
                 this.additional_filter.val(filter);
 
                 //add and init subrules
                 var that = this;
-                if(top.HEURIST4.util.isArray(this.options.rules.levels))
+                if(window.hWin.HEURIST4.util.isArray(this.options.rules.levels))
                     $.each( this.options.rules.levels , function( index, value ) {
                         that._addChildRule(value);
                     });
@@ -750,7 +750,7 @@ $.widget( "heurist.ruleBuilder", {
             }
         }
 
-        if(!top.HEURIST4.util.isempty(this.options.init_source_rt)){
+        if(!window.hWin.HEURIST4.util.isempty(this.options.init_source_rt)){
             this.select_source_rectype.val(this.options.init_source_rt);
             this.select_source_rectype.prop('disabled', true);
         }

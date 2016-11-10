@@ -780,14 +780,14 @@ function handleComments($recordID, $removals, $modifications, $additions) {
     if ($removals) {
         $removals = array_map("intval", $removals);
         mysql_query("update recThreadedComments set cmt_Deleted=1
-            where cmt_OwnerUGrpID=".get_user_id()." and cmt_RecID=$recordID and cmt_ID in (".implode(",",$removals).")");
+            where cmt_OwnerUgrpID=".get_user_id()." and cmt_RecID=$recordID and cmt_ID in (".implode(",",$removals).")");
     }
 
     // modifications have the values
     // .id, .parentComment, .text
     foreach ($modifications as $modification) {
         // note that parentComment (of course) cannot be modified
-        mysql__update("recThreadedComments", "cmt_ID=".intval($modification["id"])." and cmt_OwnerUGrpID=".get_user_id(),
+        mysql__update("recThreadedComments", "cmt_ID=".intval($modification["id"])." and cmt_OwnerUgrpID=".get_user_id(),
             array("cmt_Text" => $modification["text"], "cmt_Modified" => date('Y-m-d H:i:s')));
     }
 
@@ -808,7 +808,7 @@ function handleComments($recordID, $removals, $modifications, $additions) {
             $parentID = null;
         }
 
-        mysql__insert("recThreadedComments", array("cmt_Text" => $addition["text"], "cmt_Added" => date('Y-m-d H:i:s'), "cmt_OwnerUGrpID" => get_user_id(),
+        mysql__insert("recThreadedComments", array("cmt_Text" => $addition["text"], "cmt_Added" => date('Y-m-d H:i:s'), "cmt_OwnerUgrpID" => get_user_id(),
             "cmt_ParentCmtID" => $parentID, "cmt_RecID" => $recordID));
         array_push($newIDs, array("id" => mysql_insert_id()));
     }

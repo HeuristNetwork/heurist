@@ -40,13 +40,13 @@ function hImportDefTerms(_trm_ParentTermID) {
             var allterms;
             if(top.HEURIST && top.HEURIST.terms){
                 allterms = top.HEURIST.terms;
-            }else if(top.HEURIST4 && top.HEURIST4.terms){
-                allterms = top.HEURIST4.terms;
+            }else if(window.hWin.HEURIST4 && window.hWin.HEURIST4.terms){
+                allterms = window.hWin.HEURIST4.terms;
             }
             
             //get domain   
-            if(top.HEURIST4.util.isnull(allterms.termsByDomainLookup.enum[trm_ParentTermID])){
-                if(top.HEURIST4.util.isnull(allterms.termsByDomainLookup.relation[trm_ParentTermID])){
+            if(window.hWin.HEURIST4.util.isnull(allterms.termsByDomainLookup.enum[trm_ParentTermID])){
+                if(window.hWin.HEURIST4.util.isnull(allterms.termsByDomainLookup.relation[trm_ParentTermID])){
                             $('body').empty();
                             $('body').html('<h2>Parent term #'+trm_ParentTermID+' not found</h2>');
                             return;
@@ -93,26 +93,26 @@ function hImportDefTerms(_trm_ParentTermID) {
         //buttons
         var btnUploadFile = $('#btnUploadFile')
                     .css({'xwidth':'120px','font-size':'0.8em'})
-                    .button({label: top.HR('Upload File')})  //icons:{secondary: "ui-icon-circle-arrow-e"}
+                    .button({label: window.hWin.HR('Upload File')})  //icons:{secondary: "ui-icon-circle-arrow-e"}
                     .click(function(e) {
                             uploadWidget.click();
                         });
         var btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
-                    .button({label: top.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doParse();
                         });
         var btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
-                    .button({label: top.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doPost();
                         });
                         
         $('#csv_header').change(_redrawPreviewTable);                        
                         
-        top.HEURIST4.util.setDisabled(btnStartImport, true);
+        window.hWin.HEURIST4.util.setDisabled(btnStartImport, true);
          
         var src_content = ''; 
         
@@ -125,8 +125,8 @@ function hImportDefTerms(_trm_ParentTermID) {
     
     
             uploadWidget.fileupload({
-    url: top.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
-    formData: [ {name:'db', value: top.HAPI4.database}, 
+    url: window.hWin.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
+    formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:'temp'}, //to place file into scratch folder
                 {name:'max_file_size', value:'1024*1024'}],
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
@@ -137,14 +137,14 @@ function hImportDefTerms(_trm_ParentTermID) {
     // add: function (e, data) {  data.submit(); },
     done: function (e, response) {
             response = response.result;
-            if(response.status==top.HAPI4.ResponseStatus.OK){
+            if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
                 var data = response.data;
                 $.each(data.files, function (index, file) {
                     if(file.error){
                         $('#sourceContent').val(file.error);
                     }else{
                         
-                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')+'&db='+top.HAPI4.database;
+                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')+'&db='+window.hWin.HAPI4.database;
                         
                         $('#sourceContent').load(url_get, function(){
                             _setCurtain( 2 );
@@ -162,7 +162,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                     }
                 });
             }else{
-                top.HEURIST4.msg.showMsgErr(response.message);
+                window.hWin.HEURIST4.msg.showMsgErr(response.message);
             }
              
                 var inpt = this;
@@ -205,7 +205,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
         
             var i, j, maxcol = 0;
             for(i in _parseddata){
-                if(top.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                     maxcol = Math.max(maxcol,_parseddata[i].length);
                 }
             }
@@ -219,10 +219,10 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
             var headers = [], ifrom=0;
             if( $('#csv_header').is(':checked') ){
                 for(i=0;i<_parseddata.length;i++){
-                    if(top.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                         
                         for(j=0;j<maxcol;j++){
-                            if(j>=_parseddata[i].length || top.HEURIST4.util.isempty(_parseddata[i][j])){
+                            if(j>=_parseddata[i].length || window.hWin.HEURIST4.util.isempty(_parseddata[i][j])){
                                 headers.push('column '+j);     
                             }else{
                                 headers.push(_parseddata[i][j]); 
@@ -255,7 +255,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
             //TABLE BODY
             for(i=ifrom;i<_parseddata.length;i++){
                 var tr  = $('<tr>').appendTo(tbl);
-                if(top.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                     for(j=0;j<maxcol;j++){
                         
                         $('<td>').addClass('truncate')
@@ -311,14 +311,14 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                                         csv_delimiter: $('#csv_delimiter').val(),
                                         csv_enclosure: $('#csv_enclosure').val(),
                                         csv_linebreak: $('#csv_linebreak').val(),
-                                        id: top.HEURIST4.util.random()
+                                        id: window.hWin.HEURIST4.util.random()
                                        };
                                        
 
-                        top.HAPI4.parseCSV(request, function( response ){
+                        window.hWin.HAPI4.parseCSV(request, function( response ){
 
                             //that.loadanimation(false);
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                                 _parseddata = response.data;
                                 
@@ -326,7 +326,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                                 
                                 
                             }else{
-                                top.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
 
                         });
@@ -359,7 +359,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
         
         _prepareddata = [];
         
-        if(!top.HEURIST4.util.isArrayNotEmpty(_parseddata)){
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata)){
             msg = '<i>No data. Upload and parse</i>';
         }else{
         
@@ -384,11 +384,11 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                     
                     var lbl = null;
                     
-                    if(!top.HEURIST4.util.isempty(_parseddata[i][field_term])){
+                    if(!window.hWin.HEURIST4.util.isempty(_parseddata[i][field_term])){
                         lbl = _parseddata[i][field_term].trim();
                     }
                     
-                    if(!top.HEURIST4.util.isempty(lbl)){
+                    if(!window.hWin.HEURIST4.util.isempty(lbl)){
                         
                         //verify duplication in parent term and in already added
                         if(trm_ParentChildren.indexOf(lbl.toLowerCase())>=0 || 
@@ -447,7 +447,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
         
         }
         
-        top.HEURIST4.util.setDisabled($('#btnImportData'), (_prepareddata.length<1 || _prepareddata.length==skip_na));
+        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (_prepareddata.length<1 || _prepareddata.length==skip_na));
         
         $('#preparedInfo').html(msg);
     }
@@ -464,34 +464,34 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
             var request = {
                 'a'          : 'save',
                 'entity'     : 'defTerms',
-                'request_id' : top.HEURIST4.util.random(),
+                'request_id' : window.hWin.HEURIST4.util.random(),
                 'fields'     : _prepareddata                     
                 };
                 
                 var that = this;                                                
                 //that.loadanimation(true);
-                top.HAPI4.EntityMgr.doRequest(request, 
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                             var recIDs = response.data;
                             
-                            top.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                            window.hWin.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                 /*    
-                            top.HEURIST4.msg.showMsgDlg(recIDs.length
+                            window.hWin.HEURIST4.msg.showMsgDlg(recIDs.length
                                 + ' term'
                                 + (recIDs.length>1?'s were':' was')
                                 + ' added.', null, 'Terms imported'); // Title was an unhelpful and inelegant "Info"
                                 */    
                                     window.close( {result:recIDs, parent:trm_ParentTermID, terms:response.data.terms } );
                                 }else{
-                                    top.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
+                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
                                 }
                             });
                             
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
         

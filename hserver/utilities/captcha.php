@@ -51,8 +51,10 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     $ran0 = rand(0,13);
     $ran1 = rand(1,9);
     $ran2 = rand(1,9);
-    $captcha_code = strtolower($planets[$ran0]).($ran1+$ran2);
+    // $captcha_code = strtolower($planets[$ran0]).($ran1+$ran2);
+    $captcha_code = ($ran1+$ran2) + 1;
     $_SESSION["captcha_code"] = $captcha_code;
-    print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of ".$ran1." and ".$ran2;
+    // print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of ".$ran1." and ".$ran2;
+    print $ran1." + ".$ran2." + 1 = ";
 }
 ?>

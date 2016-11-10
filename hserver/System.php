@@ -300,7 +300,10 @@ class System {
                 $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
             }
 
-            define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
+            if(!defined('HEURIST_FILESTORE_DIR')){
+                define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
+            }
+            
 
             if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                 return false;
@@ -312,7 +315,9 @@ class System {
 
         }else{
 
-            define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
+            if(!defined('HEURIST_FILESTORE_DIR')){
+                define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
+            }
             if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                 return false;
             }
@@ -320,7 +325,7 @@ class System {
             define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/');
         }
 
-        if(!defined('HEURIST_FILESTORE_DIR ')){
+        if(!defined('HEURIST_THUMB_DIR')){
             define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
         }
         define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . 'filethumbs/');
@@ -421,11 +426,16 @@ class System {
     * keep error message (for further use with getError)
     */
     public function addError($status, $message='', $sysmsg=null) {
-        
+
         if($status==HEURIST_REQUEST_DENIED){
             $sysmsg = $this->get_user_id();
+        }else if($status==HEURIST_DB_ERROR){
+            error_log($message.' '.$sysmsg);
+            if(!$this->is_dbowner()){ //reset to null if not database owner
+                $sysmsg = 'reported in the server\'s PHP error log';
+            }
         }
-        
+
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
         return $this->errors;
     }
@@ -441,18 +451,19 @@ class System {
         if($user) {
             $user['ugr_Password'] = ''; // do not send password to client side
             $user['ugr_Admin'] = $this->is_admin();
+            $user['ugr_DbOwner'] = $this->is_dbowner();
             if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getDefaultPreferences();
         }
 
         if($this->mysqli && defined('HEURIST_DBNAME')){
-            
+
             $dbowner = user_getDbOwner($this->mysqli);
 
-            
+
             $dbrecent = array();
             if(@$user['ugr_ID']>0){
                 foreach ($_SESSION as $db=>$session){
-                    
+
                     $user_id = @$_SESSION[$db]['ugr_ID'] ?$_SESSION[$db]['ugr_ID'] :@$_SESSION[$db.'.heurist']['user_id'];
                     if($user_id == $user['ugr_ID']){
                         if(strpos($db, HEURIST_DB_PREFIX)===0){
@@ -462,10 +473,10 @@ class System {
                     }
                 }
             }
-       
-            
-            
-            
+
+
+
+
             $res = array(
                 "currentUser"=>$user,
                 "sysinfo"=>array(
@@ -480,7 +491,10 @@ class System {
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
                     "basePathV3"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
-                    "dbrecent"=>$dbrecent) 
+                    "dbrecent"=>$dbrecent,
+                    'max_post_size'=>$this->_get_config_bytes(ini_get('post_max_size')),
+                    'max_file_size'=>$this->_get_config_bytes(ini_get('upload_max_filesize'))
+                    )
             );
 
         }else{
@@ -667,7 +681,7 @@ class System {
     * verify session only (without database connection and initialization)
     */
     public function is_logged($db){
-       
+
        if($db){
             $this->dbname = $db;
             if(!(strpos($db, HEURIST_DB_PREFIX)===0)){
@@ -680,9 +694,9 @@ class System {
             return false;
         }
         $this->start_my_session();
-        return $this->login_verify()?'1':'0';        
+        return $this->login_verify()?'1':'0';
     }
-    
+
 
     /**
     * Load user info from session
@@ -705,7 +719,7 @@ class System {
         $islogged = ($userID != null);
         if($islogged){
 
-            //@todo do not update session on every request, update in on user membership changes    
+            //@todo do not update session on every request, update in on user membership changes
             if(true || !@$_SESSION[$this->dbname_full]['ugr_Groups']){
                 $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
             }
@@ -872,5 +886,26 @@ class System {
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
     }
 
+    //
+    // convert php.ini config value to valid integer
+    //
+    private function _get_config_bytes($val) {
+        $val = trim($val);
+        $last = strtolower($val[strlen($val)-1]);
+        switch($last) {
+            case 'g':
+                $val *= 1024;
+            case 'm':
+                $val *= 1024;
+            case 'k':
+                $val *= 1024;
+        }
+        //_fix_integer_overflow
+        if ($val < 0) {
+            $val += 2.0 * (PHP_INT_MAX + 1);
+        }
+        return $val;
+    }
+    
 }
 ?>

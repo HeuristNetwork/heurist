@@ -495,8 +495,6 @@ function processDetailTypeGroups($dataSet) {
 
 function processSavedSearches($dataSet) {
     global $errorCreatingTables;
-    //ARTEM it is not possible to insert saved searches without userID
-    return;
 
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/usrSavedSearchesFields.inc";

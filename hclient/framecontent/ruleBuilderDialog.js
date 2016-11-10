@@ -23,7 +23,7 @@ function onPageInit(success) //callback function of hAPI initialization
     if(success)  //system is inited
     {
 
-        var rules = top.HEURIST4.util.getUrlParameter('rules', window.location.search);
+        var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.location.search);
         if(!rules) rules = '[]'
         else rules = decodeURIComponent(rules);
 
@@ -35,7 +35,7 @@ function onPageInit(success) //callback function of hAPI initialization
         //$('#btn_apply').button().on('click', 3, applyRules);
         $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
         $( "#helper" ).dialog({
-            autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:800,
+            autoOpen: (window.hWin.HAPI4.get_prefs('help_on')=='1'), width:800,
             position: { my: "right bottom", at: "right top", of: $('#btn_help') },
             show: {
                 effect: "slide",
@@ -50,9 +50,9 @@ function onPageInit(success) //callback function of hAPI initialization
         });
 
         //create RuleSets builders in case there is parameter 'rules'
-        if(!top.HEURIST4.util.isempty(rules)){
+        if(!window.hWin.HEURIST4.util.isempty(rules)){
 
-            if(!top.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);
+            if(!window.hWin.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);
             var i;
             for(i=0; i<rules.length; i++){
 
@@ -112,7 +112,7 @@ function getRulesArray(){
     var rules = [];
     $.each($('.level1'), function( index, value ) {
         var subrule = $(value).ruleBuilder("getRules");
-        if(!top.HEURIST4.util.isempty(subrule)) rules.push(subrule);
+        if(!window.hWin.HEURIST4.util.isempty(subrule)) rules.push(subrule);
     });
     return rules;
     /*
@@ -122,10 +122,10 @@ function getRulesArray(){
     $.each(ruleBuilders, function( index, value ) {
     var $div = $(value);
     var qs = $div.ruleBuilder("queries"); //queries for this rule
-    if(!top.HEURIST4.util.isempty(qs)){
+    if(!window.hWin.HEURIST4.util.isempty(qs)){
     var level = $div.ruleBuilder('option' , 'level');
 
-    if(top.HEURIST4.util.isnull(res[level])){
+    if(window.hWin.HEURIST4.util.isnull(res[level])){
     res[level] = [];
     }
     res[level] = res[level].concat(qs);

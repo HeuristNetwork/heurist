@@ -28,7 +28,7 @@ function hLayout(args) {
      var _className = "hLayout",
          _version   = "0.4";      
 
-    var Hul = top.HEURIST4.util;
+    var Hul = window.hWin.HEURIST4.util;
 
      var widgetinstances = [], //@todo array of all inited widgets 
          widgets = [],
@@ -213,12 +213,12 @@ function hLayout(args) {
               togglerAlign_closed:'top',
               togglerLength_closed:16,  //makes it square
               onopen_start : function(){ 
-                  var  w = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
-                  var mw = 250; //top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
+                  var  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
+                  var mw = 250; //window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
                   if(w<310){
-                      var tw = (top?top.innerWidth:window.innerWidth);
-                      top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', tw-w-mw]);
-                      setTimeout( function(){top.HAPI4.LayoutMgr.cardinalPanel('open', ['west'] );}, 500 );
+                      var tw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+                      window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', tw-w-mw]);
+                      setTimeout( function(){window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', ['west'] );}, 500 );
                       return 'abort';
                   }
               },
@@ -231,12 +231,12 @@ function hLayout(args) {
               togglerLength_closed:16,  //makes it square
               onopen_start: function(){ 
                   
-                  var  w = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
+                  var  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
                   var mw = 350;
                   if(w<310){
-                      var tw = (top?top.innerWidth:window.innerWidth);
-                      top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['west', tw-w-mw]);
-                      setTimeout( function(){top.HAPI4.LayoutMgr.cardinalPanel('open', ['east'] );}, 500 );
+                      var tw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+                      window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['west', tw-w-mw]);
+                      setTimeout( function(){window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', ['east'] );}, 500 );
                       return 'abort';
                   }
                   
@@ -248,7 +248,7 @@ function hLayout(args) {
                 Resize:               "Drag to resize panel"
             },
             onresize_end: function(){
-                $(document).trigger(top.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
+                $(document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
             }
             /*,
             onopen_end: function(pane_name, pane_element){
@@ -327,7 +327,7 @@ function hLayout(args) {
         
         // 3) add tabs/apps to panes
 
-        var bg_color = top.HEURIST4.util.getCSS('background-color', 'ui-widget-content');
+        var bg_color = window.hWin.HEURIST4.util.getCSS('background-color', 'ui-widget-content');
         //$('.ui-widget-content:first').css('background-color');
         $('body').css('background-color', bg_color);
 
@@ -444,7 +444,7 @@ function hLayout(args) {
     function _initLayoutGridster(layout, $container){
 
             if(!$.isFunction($('body').gridster)){
-                $.getScript(top.HAPI4.basePathV4+'ext/gridster/jquery.gridster.js', initLayoutGridster );
+                $.getScript(window.hWin.HAPI4.basePathV4+'ext/gridster/jquery.gridster.js', initLayoutGridster );
                 return;
             }
 
@@ -667,7 +667,7 @@ function hLayout(args) {
 
             if(app.hasheader){
                 var $header = $("<div>");
-                $header.append(top.HR(app.name || application.name))
+                $header.append(window.hWin.HR(app.name || application.name))
                 .addClass('ui-widget-header')
                 .addClass('ui-corner-all')
                 .addClass('header'+app.appid+'_'+app_counter)
@@ -758,9 +758,9 @@ function hLayout(args) {
             }else if(app.widgetname=='app_timemap'){
                 //DEBUG
                 widget = $content.app_timemap( options );
-            }else if(app.widgetname=='connections'){
+            }else if(app.widgetname=='mainMenu'){
                 //DEBUG
-                widget = $content.connections( options );
+                widget = $content.mainMenu( options );
             }else if(app.widgetname=='svs_list'){
                     //DEBUG
                     widget = $content.svs_list( options ); //options
@@ -789,7 +789,7 @@ function hLayout(args) {
                             if($.isFunction($content[app.widgetname])){
                                 $content[app.widgetname]( options );   //call function
                             }else{
-                                top.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
+                                window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
                             }
                         });
                     }
@@ -852,7 +852,7 @@ function hLayout(args) {
                     content_id = app.id+'_'+app_counter;
                 }
 
-                $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (top.HR(_app.name || app.name)) +'</a></li>')
+                $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (window.hWin.HR(_app.name || app.name)) +'</a></li>')
                 
                 if(!_app.content_id){ //already exists
                     appAddContent($tab_ctrl, app, _app);
@@ -1038,7 +1038,7 @@ function hLayout(args) {
     //**********************************************************
 
         if(layout==null){
-            top.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
+            window.hWin.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
             if(layoutid!='H4Default') layout = layoutGetById('H4Default');
             if(layout==null){
                 return;
@@ -1072,7 +1072,20 @@ function hLayout(args) {
             var tabb = $container.find('div[layout_id="main_header_tab"]');
             if(tabb.length>0){
                 
-                $(tabb).tabs({activate: function( event, ui ) { $(window).resize(); }});
+                $(tabb).tabs({activate: function( event, ui ) { 
+                        $(window).resize(); 
+                        //change/restore z-index and background color
+                        $(ui.newTab[0]).css({'z-index': ui.newTab.attr('data-zmax'),
+                                       'background': 'url(hclient/assets/tab_shape_sel.png)',
+                            'background-size': 'cover',
+                            'background-repeat': 'no-repeat',
+                        });
+                        $(ui.oldTab[0]).css({'z-index': ui.newTab.attr('data-zkeep'),
+                                       'background': 'url(hclient/assets/tab_shape.png)',
+                            'background-size': 'cover',
+                            'background-repeat': 'no-repeat',
+                        });   
+                }});
                 
                 var tabheader = $(tabb).children('ul');
                 tabheader.css({'border':'none', 'background':'#8ea9b9', 'padding-top':'1em'})
@@ -1080,21 +1093,31 @@ function hLayout(args) {
                 $(tabb).children('.ui-tabs-panel[layout_id!="FAP"]').css({position:'absolute', top:'4.01em',
                         left:0,bottom:'0.2em',right:0, 'min-width':'75em',overflow:'hidden'});
                 
+                tabheader.find('a').css({'width':'100%','outline':0});
+                
                 var lis = tabheader.children('li');
                 var count_lis = lis.length;
                     lis.css({
+                            'outline':0,
+                            'border':'none',
                             'font-weight': 'bold',
-                            'font-size': '1.2em',
-                            'border': '2px solid black',
-                            'border-bottom-width': 0,
-                            'border-top-right-radius': '8px',
-                            'padding':'4 8 4 8',
-                            'margin':'0 0 0 -4px'});
+                            //'font-size': '1.2em',
+                            'padding': '10px 20px 0 0',
+                            'margin': '0px 0px 0px -4px',
+                            'z-index': 3,
+                            'background': 'url(hclient/assets/tab_shape.png)',
+                            'background-size': 'cover',
+                            'background-repeat': 'no-repeat',
+                            'text-align': 'center',
+                            'width': '180px',
+                            'height': (navigator.userAgent.indexOf('Firefox')<0)?'25px':'35px' });
                             
                 lis.each(function(idx,item){
-                   $(item).css('z-index',count_lis-idx);
+                   $(item).css('z-index', count_lis - idx);
+                   $(item).attr('data-zkeep', count_lis - idx);
+                   $(item).attr('data-zmax', count_lis+1);
                    if(idx>0){
-                       $(item).css({'padding-left':12, 'border-left':'none'});
+                       $(item).css({'padding-left':'12px', 'margin-left':'-12px', 'border-left':'none'});
                    }
                 });
                 

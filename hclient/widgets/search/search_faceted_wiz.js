@@ -148,24 +148,24 @@ $.widget( "heurist.search_faceted_wiz", {
             height: 550,
             width: 700,
             modal: true,
-            title: top.HR("Define Faceted Search"),
+            title: window.hWin.HR("Define Faceted Search"),
             resizeStop: function( event, ui ) {
                 that.element.css({overflow: 'none !important','width':'100%'});
             },
             beforeClose: function( event, ui ) {
                 if(event && event.currentTarget){
                     var that_dlg = this;
-                    top.HEURIST4.msg.showMsgDlg(top.HR("Please confirm discard of any changes"),
+                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Please confirm discard of any changes"),
                         function(){ $( that_dlg ).dialog( "close" ); });
                     return false;
                 }
             },
             buttons: [
-                {text:top.HR('Back'), id:'btnBack',
+                {text:window.hWin.HR('Back'), id:'btnBack',
                     click: function() {
                         that.navigateWizard(-1);
                 }},
-                {text:top.HR('Next'), id:'btnNext',
+                {text:window.hWin.HR('Next'), id:'btnNext',
                     click: function() {
                         that.navigateWizard(1);
                 }},
@@ -177,7 +177,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step0 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'block'})
         .appendTo(this.element);
-        //$("<div>").append($("<h4>").html(top.HR("Options"))).appendTo(this.step0);
+        //$("<div>").append($("<h4>").html(window.hWin.HR("Options"))).appendTo(this.step0);
         $("<div>",{id:'facets_options'}).appendTo(this.step0);
         this.step_panels.push(this.step0);
 
@@ -186,7 +186,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step1 = $("<div>")
         .css({'display':'none'})
         .appendTo(this.element);
-        $("<div>").css({'padding':'1em 0'}).append($("<h4>").html(top.HR("Select record types that will be used in search"))).appendTo(this.step1);
+        $("<div>").css({'padding':'1em 0'}).append($("<h4>").html(window.hWin.HR("Select record types that will be used in search"))).appendTo(this.step1);
         //.css({overflow: 'none !important', width:'100% !important'})
         this.step1.rectype_manager({ isdialog:false, list_top:'8em', isselector:true });
 
@@ -199,12 +199,12 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var header = $("<div>").css('font-size','0.8em').appendTo(this.step2);
 
-        header.html("<label>"+top.HR("Select fields that act as facet")+
+        header.html("<label>"+window.hWin.HR("Select fields that act as facet")+
             "</label><br><br><label for='fsw_showreverse'><input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;"+
-            top.HR("Show linked-from record types (reverse pointers)")+"</label>");
+            window.hWin.HR("Show linked-from record types (reverse pointers)")+"</label>");
 
-        //$("<label>").text(top.HR("Select fields that act as facet")).appendTo(header);
-        //$("<checkbox>").text(top.HR("Show linked-from record types (reverse pointers)")).appendTo(header);
+        //$("<label>").text(window.hWin.HR("Select fields that act as facet")).appendTo(header);
+        //$("<checkbox>").text(window.hWin.HR("Show linked-from record types (reverse pointers)")).appendTo(header);
 
         $("<div>",{id:'field_treeview'}).appendTo(this.step2);
         this.step_panels.push(this.step2);
@@ -216,7 +216,7 @@ $.widget( "heurist.search_faceted_wiz", {
         .appendTo(this.element);
 
         var header = $("<div>").css('font-size','0.8em').appendTo(this.step3);
-        header.html("<label>"+top.HR("Define titles, help tips and facet type")+"</label>");
+        header.html("<label>"+window.hWin.HR("Define titles, help tips and facet type")+"</label>");
 
         $("<fieldset>",{id:'facets_list'}).appendTo(this.step3);
         this.step_panels.push(this.step3);
@@ -225,7 +225,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step4 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
         .appendTo(this.element);
-        $("<div>").append($("<h4>").html(top.HR("Preview"))).appendTo(this.step4);
+        $("<div>").append($("<h4>").html(window.hWin.HR("Preview"))).appendTo(this.step4);
         $("<div>",{id:'facets_preview'}).css('top','3.2em').appendTo(this.step4);
         this.step_panels.push(this.step4);
 
@@ -292,7 +292,7 @@ $.widget( "heurist.search_faceted_wiz", {
             }
             newstep = 4;
         } else{
-            $("#btnNext").button('option', 'label', top.HR('Next'));
+            $("#btnNext").button('option', 'label', window.hWin.HR('Next'));
         }
         if(this.step != newstep){
 
@@ -301,14 +301,14 @@ $.widget( "heurist.search_faceted_wiz", {
                 var that = this;
                 var $dlg = this.step0.find("#facets_options");
                 if($dlg.html()==''){
-                    $dlg.load(top.HAPI4.basePathV4+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
+                    $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
 
                         $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
 
                         $dlg.find("#svs_Rules_edit")
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
-                        .attr('title', top.HR('Edit RuleSet'))
+                        .attr('title', window.hWin.HR('Edit RuleSet'))
                         .css({'height':'16px', 'width':'16px'})
                         .click(function( event ) {
                             //that.
@@ -317,14 +317,14 @@ $.widget( "heurist.search_faceted_wiz", {
 
                         $dlg.find("#svs_Rules_clear")
                         .button({icons: {primary: "ui-icon-close"}, text:false})
-                        .attr('title', top.HR('Clear RuleSet'))
+                        .attr('title', window.hWin.HR('Clear RuleSet'))
                         .css({'height':'16px', 'width':'16px'})
                         .click(function( event ) {
                             $dlg.find('#svs_Rules').val('');
                         });
 
 
-                        var ishelp_on = top.HAPI4.get_prefs('help_on');
+                        var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
                         $dlg.find('.heurist-helper1').css('display',ishelp_on?'block':'none');
 
 
@@ -338,10 +338,10 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 var svs_name = this.step0.find('#svs_Name');
                 var message = this.step0.find('.messages');
-                var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
+                var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
                 if(!bValid){
                     svs_name.focus();
-                    //top.HEURIST4.msg.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
+                    //window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR("Define Saved search name"), 2000, "Required", svs_name);
                     //setTimeout(function(){svs_name.focus();},2200);
                     return;
                 }else{
@@ -379,8 +379,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     rectypeIds = [this.step0.find("#opt_rectypes").val()];
                 }
                 //mandatory
-                if(!top.HEURIST4.util.isArrayNotEmpty(rectypeIds)){
-                    top.HEURIST4.msg.showMsgDlg(top.HR("Select record type"));
+                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds)){
+                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Select record type"));
 
                     this.step = (this.options.params.isadvanced)?1:0;
                     return;
@@ -440,7 +440,7 @@ $.widget( "heurist.search_faceted_wiz", {
         if(this.step==3 && newstep==4){ //preview
             this._assignFacetParams();
             this._initStep4_FacetsPreview();
-            $("#btnNext").button('option', 'label', top.HR('Save'));
+            $("#btnNext").button('option', 'label', window.hWin.HR('Save'));
         }
         if(this.step==3 && newstep==2){
             this._assignFacetParams();
@@ -483,7 +483,7 @@ $.widget( "heurist.search_faceted_wiz", {
             svs_name.removeClass( "ui-state-error" );
 
             if($(opt_rectypes).is(':empty')){
-                top.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
+                window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
             }
 
 
@@ -493,15 +493,15 @@ $.widget( "heurist.search_faceted_wiz", {
 
             //fill with list of Workgroups in case non bookmark search
             var selObj = svs_ugrid.get(0); //select element
-            top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-                [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+                [{key:'bookmark', title:window.hWin.HR('My Bookmarks')}, {key:'all', title:window.hWin.HR('All Records')}],
                 function(){
-                    svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
+                    svs_ugrid.val(window.hWin.HAPI4.currentUser.ugr_ID);
             });
 
 
             if(isEdit){
-                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
                 svs_rules.val( this.options.params.rules?this.options.params.rules:'' );
@@ -510,7 +510,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 this.options.domain = this.options.params.domain;
 
-                svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?this.options.params.domain:svs[2]);
+                svs_ugrid.val(svs[2]==window.hWin.HAPI4.currentUser.ugr_ID ?this.options.params.domain:svs[2]);
                 //svs_ugrid.parent().hide();
                 svs_ugrid.attr('disabled','disabled');;
 
@@ -547,7 +547,7 @@ $.widget( "heurist.search_faceted_wiz", {
             var opt_mode_advanced = $dlg.find("#opt_mode_advanced");
 
             if($(opt_rectypes).is(':empty')){
-            top.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
+            window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
             }
 
             this._on( opt_mode, {
@@ -571,13 +571,13 @@ $.widget( "heurist.search_faceted_wiz", {
             var isEdit = (parseInt(svsID)>0);
 
             if(isEdit){
-            var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+            var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
             svs_id.val(svsID);
             svs_name.val(svs[0]);
             this.options.params = $.parseJSON(svs[1]);
             this.options.domain = this.options.params.domain;
 
-            svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?this.options.domain:svs[2]);
+            svs_ugrid.val(svs[2]==window.hWin.HAPI4.currentUser.ugr_ID ?this.options.domain:svs[2]);
             svs_ugrid.parent().hide();
 
             var ft = this.options.params.fieldtypes;
@@ -600,10 +600,10 @@ $.widget( "heurist.search_faceted_wiz", {
 
             //fill with list of Workgroups in case non bookmark search
             var selObj = svs_ugrid.get(0); //select element
-            top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-            [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+            [{key:'bookmark', title:window.hWin.HR('My Bookmarks')}, {key:'all', title:window.hWin.HR('All Records')}],
             function(){
-            svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
+            svs_ugrid.val(window.hWin.HAPI4.currentUser.ugr_ID);
             });
             svs_ugrid.val(this.options.domain);
             svs_ugrid.parent().show();
@@ -626,12 +626,12 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var that = this;
 
-        var url = top.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + top.HAPI4.database;
+        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
         if(!Hul.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
 
-        top.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
+        window.hWin.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
             function(res){
                 if(!Hul.isempty(res)) {
                     ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
@@ -645,7 +645,7 @@ $.widget( "heurist.search_faceted_wiz", {
     // 2d step - init fieldtreeview
     , _initStep2_FieldTreeView: function(rectypeIds){
 
-        if(top.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds){
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds){
             /*if(!this.options.params.rectypes ||
             !($(rectypeIds).not(this.options.params.rectypes).length == 0 &&
             $(this.options.params.rectypes).not(rectypeIds).length == 0))*/
@@ -666,7 +666,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     fieldtypes:['enum','freetext',"year","date","integer","float","resource","relmarker"]},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                             //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
                             /*
@@ -706,7 +706,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             parentquery_new = q;
 
                             //unconstrained or one-type constraint
-                            if(top.HEURIST4.util.isempty(field.rt_ids)
+                            if(window.hWin.HEURIST4.util.isempty(field.rt_ids)
                             || Number(field.rt_ids) === field.rt_ids
                             || field.rt_ids.indexOf(',')<0){
                             recordtype_new = field.rt_ids;
@@ -822,7 +822,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             if(facets && facets.length>0){
                                 tree.visit(function(node){
 
-                                    if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
+                                    if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
                                         //find it among facets
                                         for(var i=0; i<facets.length; i++){
                                             if(facets[i].code && facets[i].code==node.data.code){
@@ -847,7 +847,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                 var showrev = $(event.target).is(":checked");
 
                                 tree.visit(function(node){
-                                    if(node.data.isreverse==1){ //  top.HEURIST4.util.isArrayNotEmpty(node.children) &&
+                                    if(node.data.isreverse==1){ //  window.hWin.HEURIST4.util.isArrayNotEmpty(node.children) &&
                                         if(showrev){
                                             $(node.li).show();
                                         }else{
@@ -864,7 +864,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
 
                         }else{
-                            top.HEURIST4.msg.redirectToError(response.message);
+                            window.hWin.HEURIST4.msg.redirectToError(response.message);
                         }
                 });
 
@@ -873,7 +873,7 @@ $.widget( "heurist.search_faceted_wiz", {
     }
 
     , _findFacetByCode: function(code){
-        if( top.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
+        if( window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
 
             var k, len = this.options.params.facets.length;
             for (k=0;k<len;k++){
@@ -906,7 +906,7 @@ $.widget( "heurist.search_faceted_wiz", {
             for (k=0;k<len;k++){
                 var node =  fieldIds[k];      //FancytreeNode
                 //name, type, query,  ranges
-                if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
+                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
 
                     var ids = node.data.code.split(":");
                     //rtid: ids[ids.length-2],
@@ -1011,7 +1011,7 @@ $.widget( "heurist.search_faceted_wiz", {
     }
 
     , _assignFacetParams: function(){
-        if( top.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
+        if( window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
 
             var listdiv = $(this.step3).find("#facets_list");
 
@@ -1072,13 +1072,13 @@ $.widget( "heurist.search_faceted_wiz", {
         var allFields = $dlg.find('input');
         allFields.removeClass( "ui-state-error" );
 
-        var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 25 );
+        var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 25 );
         if(!bValid){
             this._showStep(0);
             return false;
         }
 
-        var bValid = top.HEURIST4.util.isArrayNotEmpty(this.options.params.facets);
+        var bValid = window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.params.facets);
         if(!bValid){
             this._showStep(2);
             return false;
@@ -1097,7 +1097,7 @@ $.widget( "heurist.search_faceted_wiz", {
             this.options.params.domain = 'all';
         }else{
             this.options.params.domain = svs_ugrid;
-            svs_ugrid = top.HAPI4.currentUser.ugr_ID;
+            svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID;
         }
 
         var request = {svs_Name: svs_name.val(),
@@ -1113,17 +1113,17 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var that = this;
         //
-        top.HAPI4.SystemMgr.ssearch_save(request,
+        window.hWin.HAPI4.SystemMgr.ssearch_save(request,
             function(response){
-                if(response.status == top.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                     var svsID = response.data;
 
-                    if(!top.HAPI4.currentUser.usr_SavedSearch){
-                        top.HAPI4.currentUser.usr_SavedSearch = {};
+                    if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch = {};
                     }
 
-                    top.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
+                    window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
 
                     request.new_svs_ID = svsID;
 
@@ -1132,7 +1132,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     that.element.dialog("close");
 
                 }else{
-                    top.HEURIST4.msg.showMsgErr(response, true);
+                    window.hWin.HEURIST4.msg.showMsgErr(response, true);
                 }
             }
 
@@ -1146,10 +1146,10 @@ $.widget( "heurist.search_faceted_wiz", {
 function showSearchFacetedWizard( params ){
 
     if(!$.isFunction($('body').rectype_manager)){ //@todo - replace to new entity/rectypes as soon as it will be implemented
-        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
     }else if(!$.isFunction($('body').fancytree)){
 
-        $.getScript(top.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
 
     }else{
 

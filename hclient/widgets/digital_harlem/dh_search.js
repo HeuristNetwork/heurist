@@ -18,7 +18,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var Hul = top.HEURIST4.util;
+var Hul = window.hWin.HEURIST4.util;
 
 //constants
 //const _NAME = 0, _QUERY = 1, _GRPID = 2, _ISFACETED=3;
@@ -30,7 +30,7 @@ $.widget( "heurist.dh_search", {
         UGrpID: 1007 // 1915-1930 user group for 'original' Digital Harlem map. 1008 is Year of the Riot (1935) only
     },
 
-    _currenttype:null,  //absolete
+    _currenttype:null,  //obsolete
     usr_SavedSearch: null,   //list of saved searches for given group
 
     _currentRequest:null,
@@ -43,7 +43,7 @@ $.widget( "heurist.dh_search", {
 
         // important - it overwrite default search manager - we use special one
         // it adds some parameters to search request and postprocess the result
-        top.HAPI4.SearchMgr = new hSearchMinimalDigitalHarlem();
+        window.hWin.HAPI4.SearchMgr = new hSearchMinimalDigitalHarlem();
 
 
         var that = this;
@@ -59,14 +59,14 @@ $.widget( "heurist.dh_search", {
         .appendTo(this.search_pane).hide();
         this.res_lbl = $('<label>').css('padding','0.4em').appendTo(this.res_div);
         //this.res_name = $('<input>').appendTo(this.res_div);
-        this.res_btn_add = $('<button>', {text:top.HR('Keep On Map')})
+        this.res_btn_add = $('<button>', {text:window.hWin.HR('Keep On Map')})
         .button({icons:{primary:'ui-icon-circle-plus'}})
         .on("click", function(event){ that._onAddLayer(); } )
         .appendTo(this.res_div);
 
         this.res_div_progress = $('<div>')
         .css({'height':'60px',
-            'background':'url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
+            'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
         .appendTo(this.search_pane).hide();
 
 
@@ -84,7 +84,7 @@ $.widget( "heurist.dh_search", {
         
         var query;
         // "Featured Individuals"
-        if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
+        if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
             query = {"t":"19","f:144":"4749"};
         }else{
             query = {"t":"19","f:144":"532,4749"};
@@ -95,8 +95,8 @@ $.widget( "heurist.dh_search", {
             detail: 'header',
             source:this.element.attr('id') };
         //perform search
-        top.HAPI4.RecordMgr.search(request, function(response){
-            if(response.status == top.HAPI4.ResponseStatus.OK){
+        window.hWin.HAPI4.RecordMgr.search(request, function(response){
+            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                 var resdata = new hRecordSet(response.data);
                 //add SELECT and fill it with values
                 var smenu = '', idx;
@@ -113,7 +113,7 @@ $.widget( "heurist.dh_search", {
                 if(smenu=='') return;
 
                 that.btn_fi_menu = $( "<button>", {
-                    text: top.HR('select a person ')+'...'
+                    text: window.hWin.HR('select a person ')+'...'
                 })
                 .css({'width':'100%','margin-top':'0.4em'})
                 .appendTo(  that.search_list )
@@ -129,10 +129,10 @@ $.widget( "heurist.dh_search", {
                     select: function( event, ui ) {
                         var map_rec_id =  Number(ui.item.attr('id').substr(5));
 
-                        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51');
+                        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
                         if(app && app.widget){
                             //switch to Map Tab
-                            top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
+                            window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
 
                             //load Map Document
                             $(app.widget).app_timemap('loadMapDocumentById', map_rec_id);
@@ -156,20 +156,20 @@ $.widget( "heurist.dh_search", {
 
 
             }else{
-                top.HEURIST4.msg.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
 
         
-        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+top.HAPI4.Event.ON_REC_SEARCHSTART,
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
             function(e, data) {
                 // show progress div
-                if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
-                    if(data && !top.HEURIST4.util.isempty(data.q)){
+                if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+                    if(data && !window.hWin.HEURIST4.util.isempty(data.q)){
                         that.res_div.hide();
                         that.res_div_progress.show();
                     }
-                }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                     that.res_div.show();
                     that.res_div_progress.hide();
                 }
@@ -185,7 +185,7 @@ $.widget( "heurist.dh_search", {
     _destroy: function() {
 
         //
-        $(this.document).off( top.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+top.HAPI4.Event.ON_REC_SEARCHSTART );
+        $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART );
 
         this.search_list.remove();
         this.search_faceted.remove();
@@ -215,9 +215,9 @@ $.widget( "heurist.dh_search", {
         var that = this;
         if(!this.usr_SavedSearch){  //find all saved searches for current user
 
-            top.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.UGrpID},
+            window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.UGrpID},
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         that.usr_SavedSearch = response.data;
                         that._refresh();
                     }
@@ -279,7 +279,7 @@ $.widget( "heurist.dh_search", {
         var qsearch = this.usr_SavedSearch[svsID][_QUERY];
 
         //switch to result List Tab
-        //top.HAPI4.LayoutMgr.putAppOnTop('resultList');
+        //window.hWin.HAPI4.LayoutMgr.putAppOnTop('resultList');
 
         if(this.usr_SavedSearch[svsID][3]){  //_ISFACETED
             var facet_params = null;
@@ -291,7 +291,7 @@ $.widget( "heurist.dh_search", {
             }
             if(!facet_params || !Hul.isArray(facet_params.facets) || facet_params['version']!=2){
                 // Do something about the exception here
-                top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise this search due to corrupted parameters. Please contact Heurist support'), null, "Error");
+                window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise this search due to corrupted parameters. Please contact Heurist support'), null, "Error");
                 return;
             }
 
@@ -323,7 +323,7 @@ $.widget( "heurist.dh_search", {
             request.qname = this.usr_SavedSearch[svsID][_NAME];
 
             //get hapi and perform search
-            top.HAPI4.SearchMgr.doSearch( this, request );
+            window.hWin.HAPI4.SearchMgr.doSearch( this, request );
 
 
         }
@@ -333,7 +333,7 @@ $.widget( "heurist.dh_search", {
 
 
     //
-    // this is public methid, it is called on search complete - see dh_search_minimal._doSearch
+    // this is public method, it is called on search complete - see dh_search_minimal._doSearch
     //
     updateResultSet: function( recordset, request ){
 
@@ -354,7 +354,7 @@ $.widget( "heurist.dh_search", {
         }
 
         //update result set
-        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('resultList');
+        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('resultList');
         if(app && app.widget){
             $(app.widget).resultList('updateResultSet', recordset);
         }
@@ -367,11 +367,11 @@ $.widget( "heurist.dh_search", {
     //
     _onAddLayer: function(){
 
-        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
+        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
         if(app && app.widget){
             var that = this;
             //switch to Map Tab
-            top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
+            window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
             $(app.widget).app_timemap('editLayerProperties', 'main', function(res){
                 if(res){
                     that.res_div.hide();

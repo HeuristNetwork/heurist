@@ -122,7 +122,7 @@ function hRecordSet(initdata) {
         var mapenabled = 0,
             timeenabled = 0;
             
-        var MAXITEMS = top.HAPI4.get_prefs('search_detail_limit');    
+        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
             
         dataset_name = dataset_name || "main";
         iconColor = iconColor || 'rgb(255, 0, 0)'; //'#f00';
@@ -160,7 +160,7 @@ function hRecordSet(initdata) {
                 }
 
                 //need to verify date and convert from                        
-                 var dres = top.HEURIST4.util.parseDates(startDate, endDate);
+                 var dres = window.hWin.HEURIST4.util.parseDates(startDate, endDate);
                  if(dres){
                         
                         if(timeenabled<MAXITEMS){
@@ -169,7 +169,7 @@ function hRecordSet(initdata) {
                                 id: dataset_name+'-'+recID, //unique id
                                 group: dataset_name,
                                 content: 
-                                '<img src="'+top.HAPI4.iconBaseURL + iconId + 
+                                '<img src="'+window.hWin.HAPI4.iconBaseURL + iconId + 
                                            '.png"  align="absmiddle" style="padding-right:3px;"/>&nbsp;<span>'+recName+'</span>',
                                 //'<span>'+recName+'</span>',
                                 title: recName,
@@ -193,7 +193,7 @@ function hRecordSet(initdata) {
                 var shapes = (recShape && geoType!=1)?recShape:[];
                 
                 if(geoType!=2){
-                    var main_shape = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                    var main_shape = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
                     if(main_shape){ //main shape
                         shapes.push(main_shape);
                     }
@@ -219,7 +219,7 @@ function hRecordSet(initdata) {
                                 title: recName,
                                 
                                 eventIconImage: iconId + 'm.png',
-                                icon: top.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor),
+                                icon: window.hWin.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor),
                                 
                                 //color on dataset level works once only - timemap bug
                                 color: iconColor,
@@ -276,15 +276,15 @@ function hRecordSet(initdata) {
 
    
     // some important id for record and detail types in local values
-    var RT_RELATION = top.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
-        DT_TARGET_RESOURCE = top.HAPI4.sysinfo['dbconst']['DT_TARGET_RESOURCE'], //5
-        DT_RELATION_TYPE = top.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'], //6
-        DT_PRIMARY_RESOURCE = top.HAPI4.sysinfo['dbconst']['DT_PRIMARY_RESOURCE'], //7
-        DT_DATE = top.HAPI4.sysinfo['dbconst']['DT_DATE'],     //9
-        DT_START_DATE = top.HAPI4.sysinfo['dbconst']['DT_START_DATE'], //10
-        DT_END_DATE = top.HAPI4.sysinfo['dbconst']['DT_END_DATE'], //11
-        DT_SHORT_SUMMARY = top.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'], //3
-        DT_GEO_OBJECT = top.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']; //28
+    var RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
+        DT_TARGET_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_TARGET_RESOURCE'], //5
+        DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'], //6
+        DT_PRIMARY_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_PRIMARY_RESOURCE'], //7
+        DT_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATE'],     //9
+        DT_START_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_START_DATE'], //10
+        DT_END_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_END_DATE'], //11
+        DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'], //3
+        DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']; //28
         
    
     // find relation records of given type for recID
@@ -536,7 +536,7 @@ function hRecordSet(initdata) {
             if(_records==null){
                 _records = {};
             }
-            if(!top.HEURIST4.util.isArrayNotEmpty(_order)){
+            if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_order)){
                 _order = that.getIds2(_records);    
             }
             
@@ -609,7 +609,7 @@ function hRecordSet(initdata) {
             //remove empty fields from request
             for (fieldName in request) {
                 if (request.hasOwnProperty(fieldName) ){
-                    if(top.HEURIST4.util.isempty(request[fieldName])) {
+                    if(window.hWin.HEURIST4.util.isempty(request[fieldName])) {
                         delete request[fieldName];    
                     }else{
                         //find data type
@@ -978,7 +978,7 @@ function hRecordSet(initdata) {
             for(recID in records){
                 var record = records[recID];
                 var id = this.fld(record, fieldLink);
-                if(!top.HEURIST4.util.isempty(id) && id>0 && $.inArray(recID, vocabs)<0) { //vocabs.indexOf(id)<0){
+                if(!window.hWin.HEURIST4.util.isempty(id) && id>0 && $.inArray(recID, vocabs)<0) { //vocabs.indexOf(id)<0){
                     vocabs.push(id);
                 }
             }
@@ -989,7 +989,7 @@ function hRecordSet(initdata) {
                     var record = records[recID];
                     
                     var id = that.fld(record, fieldLink);
-                    if(top.HEURIST4.util.isempty(id) || id==0) id = null;
+                    if(window.hWin.HEURIST4.util.isempty(id) || id==0) id = null;
                     
                     if(parentId==id){
                         var node = {title: that.fld(record,fieldTitle), key: recID};
@@ -1016,7 +1016,7 @@ function hRecordSet(initdata) {
                 var parentId = this.fld(record, fieldLink);
                 
                 
-                if(top.HEURIST4.util.isempty(parentId)){
+                if(window.hWin.HEURIST4.util.isempty(parentId)){
                    res.push(node); //root
                    refs[recID] = [res.length-1];
                 }else{

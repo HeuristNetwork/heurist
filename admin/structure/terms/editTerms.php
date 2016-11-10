@@ -1,35 +1,36 @@
 <?php
 
-    /**
-    * editTerms.php: add/edit/delete terms. Treeveiew on the left side with tabview to select domain: enum or relation
-    * form to edit term on the right side
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.2
-    */
+/**
+* editTerms.php: add/edit/delete terms. Treeveiew on the left side with tabview to select domain: enum or relation
+* form to edit term on the right side
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
 
-    // User must be system administrator or admin of the owners group for this database
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+// User must be system administrator or admin of the owners group for this database
+require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 
-    if(isForAdminOnly("to modify database structure")){
-        return;
-    }
-
+if(isForAdminOnly("to modify database structure")){
+    return;
+}
 ?>
+
+
 
 <html>
     <head>
@@ -89,9 +90,18 @@
         <div id="divBanner" class="banner">
             <h2>Manage terms for term list fields and relationship type</h2>
         </div>
+        <div><br/></div>
+        <div style="margin-left:10px; padding-top:15px;">
+            <input id="btnAddChild" type="button"
+                value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
+            <span style="margin-top:5px; margin-left:10px;"> Adds a new root to the tree</span>
+        </div>
+
 
         <div id="page-inner">
-
+            <div><br/><br/><br/></div>
+            <div>&nbsp;&nbsp;&nbsp;&#129155;</div>
+            <div><br/></div>
             <div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
                 <!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
@@ -113,15 +123,15 @@
             </div>
 
             <div id="formContainer" style="position:absolute;left:303px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
-
-                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:300px;">
+                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Rollover items in the tree to show available actions<br/>Drag terms to reposition, merge or set as inverse of one another<br/> Select term to edit label and description</h3>
+                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:none;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
                 </h3>
 
-                <div style="margin-left:10px; padding-top:15px;">
+                <div style="margin-left:10px; padding-top:15px;display:none">
                     <input id="btnAddChild" type="button"
                         value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
-                    <span style="margin-top:5px; margin-left:10px;"> Adds a new root to the tree</span>
+                    <span style="margin-top:5px; margin-left:10px; display:none" > Adds a new root to the tree</span>
                 </div>
 
                 <div id="deleteMessage" style="display:none;width:500px;">
@@ -130,10 +140,10 @@
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
                 <div id="formEditor" style="display:none;width:600px;">
-                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block">Edit selected term / vocabulary</h3>
-                            <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-                                <b>term saved</b>
-                            </div>
+                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block"><br/><br/>Edit selected term / vocabulary</h3>
+                    <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
+                        <b>term saved</b>
+                    </div>
 
                     <div style="margin-left:10px; border: black; border-style: solid; border-width:thin; padding:10px;">
 
@@ -169,11 +179,11 @@
                             </div>
 
                         </div>
-                        
+
                         <div class="dtyField">
                             <label class="dtyLabel" style="vertical-align: top;">Description of term</label>
                             <textarea id="edDescription" rows="3"  style="width:350px; margin-top:5px;" title=""
-                                 onkeyup="editTerms.isChanged();"></textarea>
+                                onkeyup="editTerms.isChanged();"></textarea>
                             <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                                 A concise but comprehensive description of this term or category.
                             </div>
@@ -188,6 +198,14 @@
                             </div>
                         </div>
 
+
+                        <div class="dtyField">
+                            <label class="dtyLabel">Definition URL(s)</label>
+                            <input id="edURL" style="width:350px; margin-top:5px;"/>
+                            <div style="padding-left:105;padding-top:3px;  font-size:smaller;">
+                                One or more comma-seperated URls to sources which provide an authorative definition<br/>of the term. By default the definition is asumming to resolve to an html page, but an <br/> alternative form, such as XML can be specified by preceding the URl with an appropraite<br/> term e.g XML htpp://somesite.org.terms/123
+                            </div>
+                        </div>
 
                         <!--
                         Fields for relationship type terms only
@@ -204,32 +222,32 @@
                         </div>
                         <input id="edInverseTermId" type="hidden"/>
 
-                        
-            <div  class="dtyField" id="divImage">
-                <div style="float:left;">
-                    <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">Image (~400x400):</label>
-                </div>
-                <div style="vertical-align: middle;display:inline-block;">
-                    <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
-                    </div>
-                </div>
-                
-                <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top;"
-                        onClick="{editTerms.clearImage(); return false;}">
-                        <img src="../../../common/images/cross-grey.png" style="vertical-align:top;width:12px;height:12px">Clear image</a>
-<!--                            
-                <input id="btnClearImage" type="button" value="Clear"
-                                title="Remove image" 
-                                style="margin-top:10px;vertical-align: top;"
-                                onClick="{editTerms.clearImage()}"/>
--->                                
-                
-                <div style="padding-left:105;padding-top:3px; font-size:smaller;">
-                    Images can be used to provide a visual description of a term such as an architectural or clothing style, structural position, artefact type or soil texture"
-                </div>
-            </div>                        
 
-                        
+                        <div  class="dtyField" id="divImage">
+                            <div style="float:left;">
+                                <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">Image (~400x400):</label>
+                            </div>
+                            <div style="vertical-align: middle;display:inline-block;">
+                                <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
+                                </div>
+                            </div>
+
+                            <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top;"
+                                onClick="{editTerms.clearImage(); return false;}">
+                                <img src="../../../common/images/cross-grey.png" style="vertical-align:top;width:12px;height:12px">Clear image</a>
+                            <!--
+                            <input id="btnClearImage" type="button" value="Clear"
+                            title="Remove image"
+                            style="margin-top:10px;vertical-align: top;"
+                            onClick="{editTerms.clearImage()}"/>
+                            -->
+
+                            <div style="padding-left:105;padding-top:3px; font-size:smaller;">
+                                Images can be used to provide a visual description of a term such as an architectural or clothing style, structural position, artefact type or soil texture"
+                            </div>
+                        </div>
+
+
 
                         <!--
                         NOTE: button labelling is set in the JS file
@@ -250,22 +268,43 @@
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
-                            <input id="btnSave" type="button" value="Save changes" 
+                            <input id="btnSave" type="button" value="Save changes"
                                 style="margin-left:80px;font-style: bold !important; color:black; display:none"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
-                            
-                            <div id='div_btnAddChild' 
+
+                            <div id='div_btnAddChild'
                                 style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
                                 <input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
                             </div>
                         </div>
-                                                                   <!--
+                        <!--
                         <div style="float:right; text-align: right;">
                         </div>
                         -->
 
                     </div>
+
+                    <div style="padding-top:20px; margin-left:10px">
+                        Term(s) have been added to the term tree but this does not add them to the  individual trees for different fields, since these are individually selected from the complete term tree. Please update the lists for each field to which these terms should be added. <br/><br/> The felds most likely to be affected are
+
+                    </div>
+
+                    <div style="margin-left:10px; padding-top:15px; width:600px;; padding-left:30px">
+                        <label>Relationship type:</label>
+                        <input id="btnChangeVocab" type="button" style="display:inline-block"
+                            value="Change Vocabulary" />
+
+                        <span>
+                            <select style="background-color:buttonface; font-weight:bold; color:#666; width:200px" id="trm_relationtype" >
+                                <option   selected="selected">isRelatedTo</option>
+                                <option>#</option>
+                                <option>#</option>
+
+                            </select></span>
+
+                    </div>
+
 
                     <div id="formAffected" style="display:none;padding:10px;width:480px;">
                         <p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS
@@ -305,7 +344,7 @@
                 <div id="divApply" style="margin-left:10px; margin-top:15px; text-align:left; display: block;">
                     Warning: if a field uses individually selected terms, new terms must be selected in record structure edit
                     to appear in data entry dropdown. If field uses a vocabulary, new terms are added automatically.<p>
-                    <input type="button" id="btnApply1" style="float:right;" value="Close window" onclick="editTerms.applyChanges();" /></p>
+                        <input type="button" id="btnApply1" style="float:right;" value="Close window" onclick="editTerms.applyChanges();" /></p>
                 </div>
 
             </div>
@@ -318,126 +357,126 @@
         </div>
 
 
-                <div id="divTermMergeConfirm" style="display:none;width:500px;padding:20px">
+        <div id="divTermMergeConfirm" style="display:none;width:500px;padding:20px">
 
-                        <table border="0" cellpadding="2px;">
-                            <tr>
-                                <td width="100">Term to be retained:</td>
-                                <td id="lblTerm_toRetain"></td>
-                            </tr>
-                            <tr>
-                                <td>Term to be merged:</td>
-                                <td id="lblTerm_toMerge"></td>
-                            </tr>
+            <table border="0" cellpadding="2px;">
+                <tr>
+                    <td>Term to be retained:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    <td id="lblTerm_toRetain"></td>
+                </tr>
+                <tr>
+                    <td>Term to be merged:</td>
+                    <td id="lblTerm_toMerge"></td>
+                </tr>
 
-                            <tr>
-                                <td>Label:</td>
-                                <td>
-                                    <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
-                                    <label for="rbMergeLabel1" id="lblMergeLabel1"></label>
-                                </td>
-                            </tr>
-                            <tr id="mergeLabel2">
-                                <td>&nbsp;</td>
-                                <td>
-                                    <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
-                                    <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
-                                </td>
-                            </tr>
+                <tr style="display: none;">
+                    <td>Label:</td>
+                    <td>
+                        <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
+                        <label for="rbMergeLabel1" id="lblMergeLabel1"></label>
+                    </td>
+                </tr>
+                <tr id="mergeLabel2" style="display: none;">
+                    <td>&nbsp;</td>
+                    <td>
+                        <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
+                        <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
+                    </td>
+                </tr>
 
-                            <tr>
-                                <td>Code:</td>
-                                <td>
-                                    <input id="rbMergeCode1" type="radio" name="rbMergeCode" checked="checked"/>
-                                    <label for="rbMergeCode1" id="lblMergeCode1"></label>
-                                </td>
-                            </tr>
-                            <tr id="mergeCode2">
-                                <td>&nbsp;</td>
-                                <td>
-                                    <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
-                                    <label for="rbMergeCode2" id="lblMergeCode2"></label>
-                                </td>
-                            </tr>
+                <tr>
+                    <td><br/>Standard Code:</td>
+                    <td><br/>
+                        <input id="rbMergeCode1" type="radio" name="rbMergeCode"/> <!-- initially was checked="checked"-->
+                        <label for="rbMergeCode1" id="lblMergeCode1"></label>
+                    </td>
+                </tr>
+                <tr id="mergeCode2">
+                    <td>&nbsp;</td>
+                    <td>
+                        <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
+                        <label for="rbMergeCode2" id="lblMergeCode2" ></label>
+                    </td>
+                </tr>
 
-                            <tr>
-                                <td>Description:</td>
-                                <td>
-                                    <input id="rbMergeDescr1" type="radio" name="rbMergeDescr" checked="checked"/>
-                                    <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
-                                </td>
-                            </tr>
-                            <tr id="mergeDescr2">
-                                <td>&nbsp;</td>
-                                <td>
-                                    <input id="rbMergeDescr2" type="radio" name="rbMergeDescr"/>
-                                    <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
-                                </td>
-                            </tr>
+                <tr>
+                    <td><br/>Description:</td>
+                    <td><br/>
+                        <input id="rbMergeDescr1" type="radio" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
+                        <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
+                    </td>
+                </tr>
+                <tr id="mergeDescr2">
+                    <td>&nbsp;</td>
+                    <td>
+                        <input id="rbMergeDescr2" type="radio" name="rbMergeDescr"/>
+                        <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
+                    </td>
+                </tr>
 
-                            <tr style='display:none'>
-                                <td colspan="2">
-                                <label id="lblRetainId"></label>
-                                <label id="lblMergeId"></label>
-                                </td>
-                            </tr>
-                        </table>
+                <tr style='display:none'>
+                    <td colspan="2">
+                        <label id="lblRetainId"></label>
+                        <label id="lblMergeId"></label>
+                    </td>
+                </tr>
+            </table>
 
 
 
-<!--
-                        <div>
-                            <label class="dtyLabel">Term to be retained:</label>
-                            <label id="lblTerm_toRetain"></label>
-                        </div>
-                        <div style="padding-top: 4px;">
-                            <label class="dtyLabel">Term to be merged:</label>
-                            <label id="lblTerm_toMerge"></label>
-                        </div>
+            <!--
+            <div>
+            <label class="dtyLabel">Term to be retained:</label>
+            <label id="lblTerm_toRetain"></label>
+            </div>
+            <div style="padding-top: 4px;">
+            <label class="dtyLabel">Term to be merged:</label>
+            <label id="lblTerm_toMerge"></label>
+            </div>
 
-                        <div style="padding-top: 4px;">
-                            <label class="dtyLabel">Label:</label>
-                            <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
-                            <label for="rbMergeLabel1" id="lblMergeLabel1"></label>
-                            <div style='padding-left:106px;'>
-                            <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
-                            <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
-                            </div>
-                        </div>
+            <div style="padding-top: 4px;">
+            <label class="dtyLabel">Label:</label>
+            <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
+            <label for="rbMergeLabel1" id="lblMergeLabel1"></label>
+            <div style='padding-left:106px;'>
+            <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
+            <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
+            </div>
+            </div>
 
-                        <div style="padding-top: 4px;">
-                            <label class="dtyLabel">Code:</label>
-                            <input id="rbMergeCode1" type="radio" name="rbMergeCode" checked="checked"/>
-                            <label for="rbMergeCode1" id="lblMergeCode1"></label>
+            <div style="padding-top: 4px;">
+            <label class="dtyLabel">Code:</label>
+            <input id="rbMergeCode1" type="radio" name="rbMergeCode" checked="checked"/>
+            <label for="rbMergeCode1" id="lblMergeCode1"></label>
 
-                            <div style='padding-left:106px;'>
-                            <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
-                            <label for="rbMergeCode2" id="lblMergeCode2"></label>
-                            </div>
-                        </div>
+            <div style='padding-left:106px;'>
+            <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
+            <label for="rbMergeCode2" id="lblMergeCode2"></label>
+            </div>
+            </div>
 
-                        <div style="padding-top: 4px;">
-                            <label class="dtyLabel">Description:</label>
-                            <input id="rbMergeDescr1" type="radio" name="rbMergeDescr" checked="checked"/>
-                            <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
-                            <div style='padding-left:106px;'>
-                            <input id="rbMergeDescr2" type="radio" name="rbMergeDescr"/>
-                            <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
-                            </div>
-                        </div>
--->
-                        <div style="margin-top:30px;width:96%;text-align:center;">
-                            <input id="btnMergeOK" type="button" value="Merge"
-                                title=""/>
-                            <input id="btnMergeCancel" type="button" value="Cancel"
-                                title=""/>
-                        </div>
-                </div>
+            <div style="padding-top: 4px;">
+            <label class="dtyLabel">Description:</label>
+            <input id="rbMergeDescr1" type="radio" name="rbMergeDescr" checked="checked"/>
+            <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
+            <div style='padding-left:106px;'>
+            <input id="rbMergeDescr2" type="radio" name="rbMergeDescr"/>
+            <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
+            </div>
+            </div>
+            -->
+            <div style="margin-top:30px;width:100%;text-align:center;">
+                <input id="btnMergeOK" type="button" value="Merge"
+                    title=""  style="width:70px"/>
+                <input id="btnMergeCancel" type="button" value="Cancel"
+                    title=""  style="width:70px; padding-left:10px"/>
+            </div>
+        </div>
 
-                <input type="file" id="new_term_image" style="display:none">
+        <input type="file" id="new_term_image" style="display:none"/>
 
         <script  type="text/javascript">
-        
+
             YAHOO.util.Event.addListener(window, "load", function(){ editTerms = new EditTerms();} );
             //YAHOO.util.Event.onDOMReady(EditTerms.init);
         </script>

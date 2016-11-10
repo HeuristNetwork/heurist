@@ -362,7 +362,7 @@
 			cmt_Added,
 			cmt_Modified,
 			cmt_Text,
-			cmt_OwnerUGrpID,
+			cmt_OwnerUgrpID,
 			cmt_Deleted
 			from recThreadedComments
 			where cmt_RecID = $recID

@@ -169,9 +169,7 @@ top.HEURIST.ratings = {"0": "not rated",
 	print "\n";
 
 ?>
-
 if (typeof top.HEURIST.fireEvent == "function") top.HEURIST.fireEvent(window, "heurist-obj-common-loaded");
-
 <?php
 	ob_end_flush();
 ?>

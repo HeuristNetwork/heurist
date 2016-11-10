@@ -64,14 +64,14 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
-            return top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
             swidth = '';
-            if(!top.HEURIST4.util.isempty(col_width)){
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
         var recID   = fld('rtg_ID');
@@ -109,7 +109,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
         };
         
-        top.HAPI4.EntityMgr.doRequest(request, callback);
+        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     }
     
 });

@@ -28,13 +28,13 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
         this.selectGroup = this.element.find('#sel_group');
         
         //only one domain to show
-        if(!top.HEURIST4.util.isempty(this.options.filter_groups) && this.options.filter_groups.indexOf(',')<0){
+        if(!window.hWin.HEURIST4.util.isempty(this.options.filter_groups) && this.options.filter_groups.indexOf(',')<0){
             this.options.filter_group_selected = this.options.filter_groups;
             this.selectGroup.hide();
         }
             this.selectGroup.css({position:'absolute','height':'1.8em','bottom':0});
             this.selectGroup.tabs();
-            if(!top.HEURIST4.util.isempty(this.options.filter_group_selected)){
+            if(!window.hWin.HEURIST4.util.isempty(this.options.filter_group_selected)){
                 this.selectGroup.tabs('option','active',this.options.filter_group_selected=='relation'?1:0);
             }
             this.selectGroup.find('ul').css({'background':'none','border':'none'});
@@ -84,19 +84,19 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
                 request['a']          = 'search'; //action
                 request['entity']     = this.options.entity.entityName;
                 request['details']    = 'list'; //'id';
-                request['request_id'] = top.HEURIST4.util.random();
+                request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
                 
-                top.HAPI4.EntityMgr.doRequest(request, 
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
                                 {recordset:new hRecordSet(response.data), request:request} );
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
             }            

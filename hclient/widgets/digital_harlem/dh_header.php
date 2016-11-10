@@ -141,7 +141,7 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
         //find Web Content (25) for header buttons ---------------------------------------
 /*        
         var query;
-        if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
+        if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
             //query = {"t":"25","f:154":"4800"};
             $query = "t:25 f:154:4800 sortby:f:94";
         }else{
@@ -173,12 +173,12 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
                 }
                 print '<div class="menubutton">';
                 print '<a class="menuitem" href="javascript:void(0) onClick="{ 
-                    top.HEURIST4.msg.showMsgDlg(\'#webcontent'.$row["id"].'\', null,\''.$row["title"].'\');}">'
+                    window.hWin.HEURIST4.msg.showMsgDlg(\'#webcontent'.$row["id"].'\', null,\''.$row["title"].'\');}">'
                     .$row["title"].'</a></div>';
             }else{
                 ?>
                 <script>
-                    top.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');
+                    window.hWin.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');
                 </script>
                 <?php
             }

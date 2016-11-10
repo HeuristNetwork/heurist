@@ -266,7 +266,7 @@ function hMappingDraw(_mapdiv_id) {
         
         mapdiv_id = _mapdiv_id;
 
-        map_viewpoints = top.HAPI4.get_prefs('map_viewpoints');
+        map_viewpoints = window.hWin.HAPI4.get_prefs('map_viewpoints');
         
         var map = new google.maps.Map(document.getElementById(mapdiv_id), {
           zoom: 2,
@@ -368,7 +368,7 @@ function hMappingDraw(_mapdiv_id) {
                 position: results[0].geometry.location
             });*/
           } else {
-            alert(top.HR("Geocode was not successful for the following reason: ") + status);
+            alert(window.hWin.HR("Geocode was not successful for the following reason: ") + status);
           }
         });        
     }
@@ -414,7 +414,7 @@ function hMappingDraw(_mapdiv_id) {
             type = selectedShape.type;
         }
         if(type==null){
-            alert(top.HR('Select shape on map first or define drawing mode'));
+            alert(window.hWin.HR('Select shape on map first or define drawing mode'));
             return;
         }
         
@@ -644,7 +644,7 @@ function hMappingDraw(_mapdiv_id) {
     //
     function _loadGeoJSON(mdata){
         
-        if (typeof(mdata) === "string" && !top.HEURIST4.util.isempty(mdata)){
+        if (typeof(mdata) === "string" && !window.hWin.HEURIST4.util.isempty(mdata)){
             try{
                 mdata = $.parseJSON(mdata);
                 //mdata = JSON.parse( mdata );
@@ -653,7 +653,7 @@ function hMappingDraw(_mapdiv_id) {
                 console.log('Not well formed JSON provided. Property names be quoted with double-quote characters');
             }
         }
-        if(top.HEURIST4.util.isnull(mdata) || $.isEmptyObject(mdata)){
+        if(window.hWin.HEURIST4.util.isnull(mdata) || $.isEmptyObject(mdata)){
             alert('Wrong GeoJSON provided');
             return;            
         }
@@ -850,7 +850,7 @@ function hMappingDraw(_mapdiv_id) {
 
         //geocoding ------------------------------------------------------               
         $('#btn_search_start')
-          .button({label: top.HR("Start search"), text:false, icons: {
+          .button({label: window.hWin.HR("Start search"), text:false, icons: {
                       secondary: "ui-icon-search"
           }})
           .click(_startGeocodingSearch);
@@ -860,7 +860,7 @@ function hMappingDraw(_mapdiv_id) {
                     function(e){
                         var code = (e.keyCode ? e.keyCode : e.which);
                             if (code == 13) {
-                                top.HEURIST4.util.stopEvent(e);
+                                window.hWin.HEURIST4.util.stopEvent(e);
                                 e.preventDefault();
                                  _startGeocodingSearch();
                             }
@@ -874,8 +874,8 @@ function hMappingDraw(_mapdiv_id) {
         var $sel_viepoints = $('#sel_viewpoints');
         
         //fill sel_viewpoints with bounds
-        top.HEURIST4.ui.createSelector( $sel_viepoints.get(0), 
-            $.isEmptyObject(map_viewpoints)?top.HR('none defined'): map_viewpoints);
+        window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), 
+            $.isEmptyObject(map_viewpoints)?window.hWin.HR('none defined'): map_viewpoints);
             
         $sel_viepoints.change(function(){
            var bounds = $(this).val();
@@ -891,7 +891,7 @@ function hMappingDraw(_mapdiv_id) {
         });
         
         $('#btn_viewpoint_delete')
-          .button({label: top.HR("Delete selected location"), text:false, icons: {
+          .button({label: window.hWin.HR("Delete selected location"), text:false, icons: {
                       secondary: "ui-icon-close"
           }})
           .click(function(){
@@ -904,31 +904,31 @@ function hMappingDraw(_mapdiv_id) {
                           return false;
                      }
                  });
-                 top.HAPI4.save_pref('map_viewpoints', map_viewpoints);
+                 window.hWin.HAPI4.save_pref('map_viewpoints', map_viewpoints);
                   
                  // remove from selector
                  $sel_viepoints.find('option:selected').remove(); 
                  if($.isEmptyObject(map_viewpoints)){
-                    top.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
-                                '', top.HR('none defined'));
+                    window.hWin.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
+                                '', window.hWin.HR('none defined'));
                  }
               }
           });
 
         $('#btn_viewpoint_save')
-          .button({label: top.HR("Save location")})
+          .button({label: window.hWin.HR("Save location")})
           .click(function(){
-              top.HEURIST4.msg.showPrompt('Name of location', function(location_name){
-                  if(!top.HEURIST4.util.isempty(location_name)){
+              window.hWin.HEURIST4.msg.showPrompt('Name of location', function(location_name){
+                  if(!window.hWin.HEURIST4.util.isempty(location_name)){
                       //save into preferences 
                       if($.isEmptyObject(map_viewpoints)){
                             map_viewpoints=[];   
                             $sel_viepoints.empty();
                       }
                       map_viewpoints.push({key:gmap.getBounds().toUrlValue(), title:location_name});
-                      top.HAPI4.save_pref('map_viewpoints', map_viewpoints);
+                      window.hWin.HAPI4.save_pref('map_viewpoints', map_viewpoints);
                       // and add to selector
-                      top.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
+                      window.hWin.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
                                 gmap.getBounds().toUrlValue(), location_name);
                                 
                   }
@@ -945,8 +945,8 @@ function hMappingDraw(_mapdiv_id) {
         
         $('#load-geometry-button').button().click(function(){
 
-                var titleYes = top.HR('Yes'),
-                    titleNo = top.HR('No'),
+                var titleYes = window.hWin.HR('Yes'),
+                    titleNo = window.hWin.HR('No'),
                     buttons = {};
                 
                 buttons[titleYes] = function() {
@@ -957,11 +957,11 @@ function hMappingDraw(_mapdiv_id) {
                     $dlg.dialog( "close" );
                 };
 
-                var $dlg = top.HEURIST4.msg.showElementAsDialog({window:top, 
+                var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                         element: document.getElementById( "get-set-coordinates" ),
                         'no-resize':true,
                         width:690, height:400,
-                        title:top.HR('Paste or upload geo data'),
+                        title:window.hWin.HR('Paste or upload geo data'),
                         buttons:buttons    
                 });
             
@@ -971,11 +971,11 @@ function hMappingDraw(_mapdiv_id) {
                 
                 $('#geodata-textarea').val(JSON.stringify(_getGeoJSON()));    
         
-                var $dlg = top.HEURIST4.msg.showElementAsDialog({window:top, 
+                var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                         element: document.getElementById( "get-set-coordinates" ),
                         'no-resize':true,
                         width:690, height:400,
-                        title:top.HR('Copy the result')
+                        title:window.hWin.HR('Copy the result')
                 });
         });
     }     

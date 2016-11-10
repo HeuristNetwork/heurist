@@ -20,22 +20,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/../../hserver/System.php');
-
-$system = new System();
-if(!$system->init(@$_REQUEST['db']) ){
-    echo $system->getError();
-}
+require_once(dirname(__FILE__)."/initPage.php");
 ?>
-
-<html>
-
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Database Summary</title>
-
-        <!-- Css -->
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
         <style>
             #rectypes {
                 height: 100%;
@@ -102,47 +89,44 @@ if(!$system->init(@$_REQUEST['db']) ){
             }
         </style>
 
-        <!-- jQuery -->
-        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-
         <!-- D3 -->
-        <script type="text/javascript" src="../../ext/d3/d3.js"></script>
-        <script type="text/javascript" src="../../ext/d3/fisheye.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/d3/d3.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/d3/fisheye.js"></script>
 
         <!-- Colpick -->
-        <script type="text/javascript" src="../../ext/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../ext/colpick/colpick.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/colpick/colpick.css">
 
         <!-- Visualize plugin -->
-        <script type="text/javascript" src="visualize/settings.js"></script>
-        <script type="text/javascript" src="visualize/overlay.js"></script>
-        <script type="text/javascript" src="visualize/selection.js"></script>
-        <script type="text/javascript" src="visualize/gephi.js"></script>
-        <script type="text/javascript" src="visualize/drag.js"></script>
-        <script type="text/javascript" src="visualize/visualize.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/settings.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/overlay.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/selection.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/gephi.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/drag.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/visualize.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="visualize/visualize.css">
-        <link rel="stylesheet" type="text/css" href="../../h4styles.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>hclient/framecontent/visualize/visualize.css">
 
         <!-- On Row Click -->
         <script>
             function onrowclick(rt_ID, innewtab){
                 var query = "w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
-                    window.open(top.HAPI4.basePathV4+"?"+query, "_blank");
+                    window.open(window.hWin.HAPI4.basePathV4+"?"+query, "_blank");
                     return false;
                 }else{
-                    console.log("SEARCH");
-                    console.log(parent.document);
-                    
-                    
-                    var request = {source: 'dbsummary',
+       
+                    var request = {source: 'dbsummary', w:'a',
                                         q:  't:'+rt_ID};
-                    top.HAPI4.SearchMgr.doSearch( $(parent.document), request );                    
-
-                    //parent.top.HAPI4.RecordMgr.search(query, $(parent.document));
-
-                    window.close();
+                    if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
+                        window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
+                    }
+                    window.hWin.HAPI4.SearchMgr.doSearch( $(window.hWin.document), request );                    
+                    
+                    if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
+                        window.close();    
+                    }
+                    
                     return false;
                 }
             }
@@ -161,7 +145,7 @@ if(!$system->init(@$_REQUEST['db']) ){
                         <h3 id="table-header">Record types (entities)</h3>
                         <button id="expand">Expand &#10142;</button>
                     </div>
-                    <div class="ent_content_full">
+                    <div class="ent_content_full" style="padding-left:10px">
     
                     <table id="records" class="records" cellpadding="4" cellspacing="1">
 

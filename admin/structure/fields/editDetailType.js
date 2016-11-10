@@ -445,7 +445,7 @@ function DetailTypeEditor() {
         if(is_add_vocab || (el_sel && el_sel.value>0)){ //add term to vocabulary
 
             Hul.popupURL(top, top.HEURIST.baseURL_V3 +
-                "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
+                "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
                 {
                     "close-on-blur": false,
                     "no-resize": true,
@@ -870,10 +870,9 @@ function DetailTypeEditor() {
     function _onChangeType(event){
 
         var el = Dom.get("dty_Type"); //event.target;
-        var isInitialCall = (event===null);
 
         //prevent setting outdated types for new field type
-        if(!isInitialCall && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
+        if( event!=null && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
             top.HEURIST.util.showError('You selected an outdated type. It is not allowed anymore');
             if(that.keepType){
                 el.value = that.keepType;
@@ -888,7 +887,7 @@ function DetailTypeEditor() {
         Dom.get("pnl_fieldsetmarker").style.display = "none";
 
         var changeToNewType = true;
-        if( ((that.keepType==="resource") || (that.keepType==="relmarker") || (that.keepType==="enum")
+        if( event!=null && ((that.keepType==="resource") || (that.keepType==="relmarker") || (that.keepType==="enum")
             || (that.keepType==="relationtype") || (that.keepType==="fieldsetmarker"))
             && el.value!==that.keepType){
             changeToNewType = confirm("If you change the type to '"+el.value+	//saw TODO change this to the selected options text
@@ -898,7 +897,8 @@ function DetailTypeEditor() {
 
         if(changeToNewType) {
             //clear hidden fields
-            if (!isInitialCall){
+            if(that.keepType!=el.value){
+                
                 Dom.get("dty_JsonTermIDTree").value = "";
                 Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
                 Dom.get("dty_PtrTargetRectypeIDs").value = "";
@@ -909,15 +909,15 @@ function DetailTypeEditor() {
                 _recreateRecTypesPreview(that.keepType, null);
 
                 if((el.value=="freetext" || el.value=="blocktext") && _dtyID<0){
-                    if(top.HEURIST4){
+                    if(hasH4()){
                         $("#topdiv_closebtn").hide();
                     }
                     _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
                 }
-
             }
         }else{
             el.value = that.keepType;  //rollback
+            Dom.get("typeValue").value = top.HEURIST.detailTypes.lookups[that.keepType];
         }
 
         // setting visibility
@@ -978,8 +978,9 @@ function DetailTypeEditor() {
                 event.preventDefault();
                 if (event.stopPropagation) event.stopPropagation();
                 
-                if(top.HEURIST4)
-                top.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
+                if(hasH4()){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
+                }
                 setTimeout(function(){
                         $(event.target).focus();
                 }, 750);
@@ -1089,7 +1090,8 @@ function DetailTypeEditor() {
             var el_sel = Dom.get("selVocab");
             var vocab_id =  el_sel.value>0?el_sel.value:'';
 
-            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/terms/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
+            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/terms/editTerms.php?"+
+                "popup=1&vocabid="+vocab_id+"&treetype="+type+"&db="+_db,
                 {
                     "close-on-blur": false,
                     "no-resize": false,

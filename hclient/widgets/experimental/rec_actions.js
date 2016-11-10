@@ -38,8 +38,8 @@ $.widget( "heurist.rec_actions", {
         var that = this;
 
         this.btn_add = $( "<button>", {
-            text: top.HR("add"),
-            title: top.HR("add new record")
+            text: window.hWin.HR("add"),
+            title: window.hWin.HR("add new record")
         })
         .addClass('logged-in-only')
         .appendTo( this.element )
@@ -48,7 +48,7 @@ $.widget( "heurist.rec_actions", {
         }});
 
         //-----------------------
-        this.btn_tags = $( "<button>", {text: top.HR("tags")} )
+        this.btn_tags = $( "<button>", {text: window.hWin.HR("tags")} )
         .addClass('logged-in-only')
         .appendTo( this.element )
         .button({icons: {
@@ -88,7 +88,7 @@ $.widget( "heurist.rec_actions", {
                     if($.isFunction($('body').tag_manager)){ //already loaded
                         this._initTagMenu();
                     }else{
-                        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/tag_manager.js', function(){ that._initTagMenu(); } );
+                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/tag_manager.js', function(){ that._initTagMenu(); } );
                     }
 
                 }
@@ -97,7 +97,7 @@ $.widget( "heurist.rec_actions", {
         });
 
         //-----------------------
-        this.btn_share = $( "<button>", {text: top.HR("share") } )
+        this.btn_share = $( "<button>", {text: window.hWin.HR("share") } )
         .addClass('logged-in-only')
         .appendTo( this.element )
         .button({icons: {
@@ -105,10 +105,10 @@ $.widget( "heurist.rec_actions", {
             },text:true});
 
         this.menu_share = $('<ul>'+
-            '<li id="menu-share-access"><a href="#">'+top.HR('Access')+'</a></li>'+
-            '<li id="menu-share-notify"><a href="#">'+top.HR('Notify')+'</a></li>'+
-            '<li id="menu-share-embed"><a href="#">'+top.HR('Embed / link')+'</a></li>'+
-            '<li id="menu-share-export"><a href="#">'+top.HR('Export')+'</a></li>'+
+            '<li id="menu-share-access"><a href="#">'+window.hWin.HR('Access')+'</a></li>'+
+            '<li id="menu-share-notify"><a href="#">'+window.hWin.HR('Notify')+'</a></li>'+
+            '<li id="menu-share-embed"><a href="#">'+window.hWin.HR('Embed / link')+'</a></li>'+
+            '<li id="menu-share-export"><a href="#">'+window.hWin.HR('Export')+'</a></li>'+
             '</ul>')
         .addClass('menu-or-popup')
         .css('position','absolute')
@@ -131,7 +131,7 @@ $.widget( "heurist.rec_actions", {
         });
 
         //-----------------------
-        this.btn_more = $( "<button>", {text: top.HR("more")} )
+        this.btn_more = $( "<button>", {text: window.hWin.HR("more")} )
         .addClass('logged-in-only')
         .appendTo( this.element )
         .button({icons: {
@@ -140,10 +140,10 @@ $.widget( "heurist.rec_actions", {
 
 
         this.menu_more = $('<ul>'+
-            '<li id="menu-more-relate"><a href="#">'+top.HR('Relate to')+'</a></li>'+
-            '<li id="menu-more-rate"><a href="#">'+top.HR('Rate')+'</a></li>'+
-            '<li id="menu-more-merge"><a href="#">'+top.HR('Merge')+'</a></li>'+
-            '<li id="menu-more-delete"><a href="#">'+top.HR('Delete')+'</a></li>'+
+            '<li id="menu-more-relate"><a href="#">'+window.hWin.HR('Relate to')+'</a></li>'+
+            '<li id="menu-more-rate"><a href="#">'+window.hWin.HR('Rate')+'</a></li>'+
+            '<li id="menu-more-merge"><a href="#">'+window.hWin.HR('Merge')+'</a></li>'+
+            '<li id="menu-more-delete"><a href="#">'+window.hWin.HR('Delete')+'</a></li>'+
             '</ul>')
         .addClass('menu-or-popup')
         .css('position','absolute')
@@ -158,7 +158,7 @@ $.widget( "heurist.rec_actions", {
                     if($.isFunction($('body').tag_rating)){ //already loaded
                         showRatingTags();
                     }else{
-                        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/tag_rating.js', function(){ showRatingTags(); } );
+                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/tag_rating.js', function(){ showRatingTags(); } );
                     }
 
                 }else if(action == "menu-more-merge"){
@@ -183,7 +183,7 @@ $.widget( "heurist.rec_actions", {
         });
 
         //-----------------------
-        var sevents = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
+        var sevents = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT;
 
         $(this.document).on(sevents, function(e, data) {
             that._refresh();
@@ -202,7 +202,7 @@ $.widget( "heurist.rec_actions", {
     /* private function */
     _refresh: function(){
 
-        if(top.HAPI4.currentUser.ugr_ID>0){
+        if(window.hWin.HAPI4.currentUser.ugr_ID>0){
             $(this.element).find('.logged-in-only').css('visibility','visible');
         }else{
             $(this.element).find('.logged-in-only').css('visibility','hidden');
@@ -225,7 +225,7 @@ $.widget( "heurist.rec_actions", {
     // revert other modifications here
     _destroy: function() {
 
-        $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT);
+        $(this.document).off(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT);
 
         var that = this;
         $.each(this._allbuttons, function(index, value){

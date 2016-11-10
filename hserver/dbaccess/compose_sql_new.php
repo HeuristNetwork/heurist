@@ -1043,7 +1043,7 @@ class HPredicate {
         
         if($this->field_type=='enum' || $this->field_type=='relationtype'){
             
-            if (preg_match('/^\d+(?:,\d+)+$/', $this->value)){
+            if (preg_match('/^\d+(?:,\d+)+$/', $this->value)){   //numeric comma separated
                 $res = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
             }else if(intval($this->value)>0){
@@ -1051,8 +1051,13 @@ class HPredicate {
                     .$this->value.' or trm_ParentTermID='.$this->value.')';
             }else{
                 $value = $mysqli->real_escape_string($this->value);
-                $res  = ' in (select trm_ID from defTerms where trm_Label="'
-                    .$value.'" or trm_Code="'.$value.'")';
+                $res  = ' in (select trm_ID from defTerms where trm_Label ';
+                if($this->exact){
+                    $res  =  $res.'="'.$value.'"'; 
+                } else {
+                    $res  =  $res.'like "%'.$value.'%"';
+                }
+                $res  =  $res.' or trm_Code="'.$value.'")';
             }
             $res = (($this->negate)?' not':'').$res;
             

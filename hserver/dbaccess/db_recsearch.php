@@ -431,7 +431,11 @@ if(@$params['debug']) echo $query."<br>";
                 $fieldtypes_ids = '9,10,11,28';
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
 
-            $fieldtypes_ids = explode(',', $params['detail']);
+            if(is_array($params['detail'])){
+                $fieldtypes_ids = $params['detail'];
+            } else {
+                $fieldtypes_ids = explode(',', $params['detail']);
+            }
             if(is_array($fieldtypes_ids) && (count($fieldtypes_ids)>1 || is_numeric($fieldtypes_ids[0])) ){
                 $fieldtypes_ids = implode(',', $fieldtypes_ids);
                 $params['detail'] = 'detail';
@@ -538,12 +542,23 @@ if(@$params['debug']) echo $query."<br>";
             if(@$params['vo']) unset($params['vo']);
 
             $params['needall'] = 1; //return all records
+            
+            $resSearch = recordSearch($system, $params);
 
-            //find main query results
-            $fin_result = recordSearch($system, $params);
-            //main result set
-            $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] 
+            $keepMainSet = true;
+            
+            if($keepMainSet){
+                //find main query results
+                $fin_result = $resSearch;
+                //main result set
+                $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] 
                                                      :array_keys($fin_result['data']['records']); //get ids
+            }else{
+                //empty main result set
+                
+                //remove from $fin_result! but keep in $flat_rules[0]['results']?
+                
+            }
 
             $is_get_relation_records = (@$params['getrelrecs']==1); //get all related and relationship records
 
@@ -752,7 +767,8 @@ if(@$params['debug']) echo $query."<br>";
 
             $fres = $mysqli->query('select found_rows()');
             if (!$fres)     {
-                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error (retrieving number of records)', $mysqli->error);
+                $response = $system->addError(HEURIST_DB_ERROR, 
+                            $savedSearchName.'Search query error (retrieving number of records)', $mysqli->error);
             }else{
 
                 $total_count_rows = $fres->fetch_row();
@@ -848,7 +864,9 @@ if(@$params['debug']) echo $query."<br>";
 
 
                             if (!$res_det){
-                                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error (retrieving details)', $mysqli->error);
+                                $response = $system->addError(HEURIST_DB_ERROR, 
+                                                $savedSearchName.'Search query error (retrieving details)', 
+                                                $mysqli->error);
                                 return $response;
                             }else{
                                 
@@ -890,7 +908,7 @@ if(@$params['debug']) echo $query."<br>";
                                     $order = array();
                                     $rectypes = array();
                                     foreach ($records as $recID => $record) {
-                                        if(is_array($record['d']) && count($record['d'])>0){
+                                        if(is_array(@$record['d']) && count($record['d'])>0){
                                             //this record is time enabled 
                                             if($istimemap_counter<$chunk_size){
                                                 $tm_records[$recID] = $record;        

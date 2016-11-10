@@ -1,6 +1,6 @@
 
 /**
-* filename: explanation
+* baseclass_template.js: NOT USED (just template for copy paste)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -19,9 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/**
-* NOT USED (just template for copy paste)
-*/
+
 function BaseClass(args) {
      var _className = "BaseClass",
          _version   = "0.4";

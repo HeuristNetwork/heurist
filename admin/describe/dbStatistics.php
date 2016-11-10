@@ -26,6 +26,8 @@
         return;
     }
 
+    set_time_limit(0); //no limit
+    
     mysql_connection_select();
     $dbs = mysql__getdatabases(true);
     $sysadmin = is_systemadmin();

@@ -178,8 +178,8 @@
                 if (!location.search.match(/no-tags/)) {
                     if(!tags){
                         var sMsg = "The links you have selected will only be saved if you enter at least one tag.";
-                        if(top.HEURIST4){
-                            var $dlg = top.HEURIST4.msg.showMsgDlg(sMsg,
+                        if(window.hWin && window.hWin.HEURIST4){
+                            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
                                 {'Return to Enter tags':function(){
                                     $dlg.dialog('close');
                                     } ,

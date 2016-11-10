@@ -163,11 +163,11 @@ function lookupTitle(button) {
             error: function( jqXHR, textStatus, errorThrown ) {
                 button.disabled = false;
                 titleElt.disabled = false;
-                top.HEURIST4.msg.showMsgErr(textStatus);
+                window.hWin.HEURIST4.msg.showMsgErr(textStatus);
             },
             success: function( response, textStatus, jqXHR ){
                     
-                    if(!top.HEURIST4.util.isnull(response)){
+                    if(!window.hWin.HEURIST4.util.isnull(response)){
                         var num = response.num;
                         
                         var lockedLookupElt = document.forms['mainform'].elements['lookup['+num+']'];
@@ -178,7 +178,7 @@ function lookupTitle(button) {
                         if(response.error){
                             lockedLookupElt.value = 'URL error';
                             lockedLookupElt.title = "";
-                            top.HEURIST4.msg.showMsgErr(response.error);
+                            window.hWin.HEURIST4.msg.showMsgErr(response.error);
                         }else{
                             lockedLookupElt.value = 'Revert';
                             lockedLookupElt.title = "Revert title";

@@ -373,7 +373,7 @@ function getAllReminders($recID) {
 * @return    array of comment structures index by comment ID
 */
 function getAllComments($recID) {
-    $res = mysql_query("select cmt_ID, cmt_Deleted, cmt_Text, cmt_ParentCmtID, cmt_Added, cmt_Modified, cmt_OwnerUGrpID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from recThreadedComments left join " . USERS_DATABASE . ".sysUGrps usr on cmt_OwnerUGrpID=usr.ugr_ID where cmt_RecID = $recID order by cmt_Added");
+    $res = mysql_query("select cmt_ID, cmt_Deleted, cmt_Text, cmt_ParentCmtID, cmt_Added, cmt_Modified, cmt_OwnerUgrpID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from recThreadedComments left join " . USERS_DATABASE . ".sysUGrps usr on cmt_OwnerUgrpID=usr.ugr_ID where cmt_RecID = $recID order by cmt_Added");
     $comments = array();
     while ($cmt = mysql_fetch_assoc($res)) {
         if ($cmt["cmt_Deleted"]) {
@@ -389,7 +389,7 @@ function getAllComments($recID) {
             "added" => $cmt["cmt_Added"],
             "modified" => $cmt["cmt_Modified"],
             "user" => $cmt["Realname"],
-            "userID" => $cmt["cmt_OwnerUGrpID"],
+            "userID" => $cmt["cmt_OwnerUgrpID"],
             "deleted" => false);
     }
     return $comments;

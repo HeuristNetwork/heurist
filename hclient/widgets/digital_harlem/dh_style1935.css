@@ -155,12 +155,19 @@ a.menuitem {
 
 
 .ui-widget-header{
-    background: #7EF581 !important;
+    background: black !important; /* was #7EF581 */
     color: white;
 }
 .ui-widget-content{
     background: white !important;
 }
+.ui-dialog .ui-dialog-buttonpane {
+    background: black !important;
+}
+.ui-dialog {
+    border: 2px solid black !important; 
+}
+
 
 .legend_text{
     font-size:0.7em;

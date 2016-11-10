@@ -36,6 +36,7 @@ define('SAVE_URI', 'disabled');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
 
 require_once(dirname(__FILE__).'/../../external/php/geekMail-1.0.php');
 
@@ -154,6 +155,8 @@ if($ids!=""){
             // post 18/11/11 proper file path and name
             if($row[5]){
                 $filename = $row[5].$row[6];
+                
+                $filename = resolveFilePath($filename);
             }else{
                 $filename = HEURIST_FILESTORE_DIR.$row[6];
             }

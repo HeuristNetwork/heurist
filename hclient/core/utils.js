@@ -22,14 +22,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-if (!top.HEURIST4){
-    top.HEURIST4 = {};
+if (!window.hWin.HEURIST4){
+    window.hWin.HEURIST4 = {};
 }
 //init only once
-if (!top.HEURIST4.util) 
+if (!window.hWin.HEURIST4.util) 
 {
 
-top.HEURIST4.util = {
+window.hWin.HEURIST4.util = {
 
 
     isnull: function(obj){
@@ -37,9 +37,9 @@ top.HEURIST4.util = {
     },
 
     isempty: function(obj){
-        if (top.HEURIST4.util.isnull(obj)){
+        if (window.hWin.HEURIST4.util.isnull(obj)){
             return true;
-        }else if(top.HEURIST4.util.isArray(obj)){
+        }else if(window.hWin.HEURIST4.util.isArray(obj)){
             return obj.length<1;
         }else{
             return (obj==="") || (obj==="null");
@@ -118,13 +118,13 @@ top.HEURIST4.util = {
     //
     checkProtocolSupport: function(url){
         
-        if (top.HEURIST4.util.isIE()) { //This bastard always needs special treatment
+        if (window.hWin.HEURIST4.util.isIE()) { //This bastard always needs special treatment
         
             if (typeof (navigator.msLaunchUri) == typeof (Function)) {
                 
                 navigator.msLaunchUri(url,
                     function () { /* Success */ },
-                    function () { /* Failure */ top.HEURIST4.msg.showMsgErr('Not supported') });
+                    function () { /* Failure */ window.hWin.HEURIST4.msg.showMsgErr('Not supported') });
                 return;
             }
                 
@@ -141,7 +141,7 @@ top.HEURIST4.util = {
                 //installed
             } else {
                 //not installed
-                 top.HEURIST4.msg.showMsgErr('Not supported');
+                 window.hWin.HEURIST4.msg.showMsgErr('Not supported');
             }
         }      
       
@@ -152,13 +152,13 @@ top.HEURIST4.util = {
     // from object to query string
     //
     composeHeuristQueryFromRequest: function(query_request, encode){
-            var query_string = 'db=' + top.HAPI4.database;
+            var query_string = 'db=' + window.hWin.HAPI4.database;
         
-            if(!top.HEURIST4.util.isnull(query_request)){
+            if(!window.hWin.HEURIST4.util.isnull(query_request)){
 
                 query_string = query_string + '&w='+query_request.w;
                 
-                if(!top.HEURIST4.util.isempty(query_request.q)){
+                if(!window.hWin.HEURIST4.util.isempty(query_request.q)){
                     
                     if($.isArray(query_request.q)){
                         sq = JSON.stringify(query_request.q);
@@ -172,7 +172,7 @@ top.HEURIST4.util = {
                     
                     query_string = query_string + '&q=' + sq;
                 }
-                if(!top.HEURIST4.util.isempty(query_request.rules)){
+                if(!window.hWin.HEURIST4.util.isempty(query_request.rules)){
                     //@todo simplify rules array - rempove redundant info
                     query_string = query_string + '&rules=' + 
                         (encode?encodeURIComponent(query_request.rules):query_request.rules);
@@ -185,23 +185,23 @@ top.HEURIST4.util = {
 
     composeHeuristQuery2: function(params){
         if(params)
-            return top.HEURIST4.util.composeHeuristQuery(params.q, params.w, params.rules, params.notes);
+            return window.hWin.HEURIST4.util.composeHeuristQuery(params.q, params.w, params.rules, params.notes);
         else
             return '?';
     },
 
     composeHeuristQuery: function(query, domain, rules, notes){
             var query_to_save = [];
-            if(!(top.HEURIST4.util.isempty(domain) || domain=="all")){
+            if(!(window.hWin.HEURIST4.util.isempty(domain) || domain=="all")){
                 query_to_save.push('w='+domain);
             }
-            if(!top.HEURIST4.util.isempty(query)){
+            if(!window.hWin.HEURIST4.util.isempty(query)){
                query_to_save.push('q='+query);
             }
-            if(!top.HEURIST4.util.isempty(rules)){
+            if(!window.hWin.HEURIST4.util.isempty(rules)){
                query_to_save.push('rules='+rules);
             }
-            if(!top.HEURIST4.util.isempty(notes)){
+            if(!window.hWin.HEURIST4.util.isempty(notes)){
                query_to_save.push('notes='+notes);
             }
             return '?'+query_to_save.join('&');
@@ -226,10 +226,10 @@ top.HEURIST4.util = {
                 query2 = {};
             }
         }
-        if(top.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
+        if(window.hWin.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
             return query2;
         }
-        if(top.HEURIST4.util.isnull(query2) || $.isEmptyObject(query2)){
+        if(window.hWin.HEURIST4.util.isnull(query2) || $.isEmptyObject(query2)){
             return query1;
         }
         if(!$.isArray(query1)){
@@ -248,10 +248,10 @@ top.HEURIST4.util = {
     {
         var domain = null, rules = '', notes = '';
         if(qsearch && qsearch.indexOf('?')==0){
-            domain  = top.HEURIST4.util.getUrlParameter('w', qsearch);
-            rules   = top.HEURIST4.util.getUrlParameter('rules', qsearch);
-            notes   = top.HEURIST4.util.getUrlParameter('notes', qsearch);
-            qsearch = top.HEURIST4.util.getUrlParameter('q', qsearch);
+            domain  = window.hWin.HEURIST4.util.getUrlParameter('w', qsearch);
+            rules   = window.hWin.HEURIST4.util.getUrlParameter('rules', qsearch);
+            notes   = window.hWin.HEURIST4.util.getUrlParameter('notes', qsearch);
+            qsearch = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
         }
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
@@ -276,7 +276,7 @@ top.HEURIST4.util = {
     },
 
     isArrayNotEmpty: function (a){
-        return (top.HEURIST4.util.isArray(a) && a.length>0);
+        return (window.hWin.HEURIST4.util.isArray(a) && a.length>0);
     },
 
     isArray: function (a)
@@ -309,7 +309,7 @@ top.HEURIST4.util = {
     sendRequest: function(url, request, caller, callback){
 
         if(!request.db){
-            request.db = top.HAPI4.database;
+            request.db = window.hWin.HAPI4.database;
         }
 
         //note jQuery ajax does not properly in the loop - success callback does not work often
@@ -322,10 +322,10 @@ top.HEURIST4.util = {
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
                     if(caller){
-                        callback(caller, {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                        callback(caller, {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR,
                                 message: jqXHR.responseText });
                     }else{
-                        callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                        callback({status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR,
                                 message: jqXHR.responseText });
                     }
                 }
@@ -661,22 +661,39 @@ top.HEURIST4.util = {
     //
     downloadInnerHtml: function (filename, ele, mimeType) {
         
-        var elHtml = $(ele).html();
+            var elHtml = $(ele).html();
+            window.hWin.HEURIST4.util.downloadData(filename, elHtml, mimeType);
+    }, 
+       
+    downloadData: function (filename, data, mimeType) {
         
         mimeType = mimeType || 'text/plain';
-        var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml);
+        var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(data);
 
-        var link = document.createElement('a');
-        mimeType = mimeType || 'text/plain';
+        var link = document.createElement("a");
         link.setAttribute('download', filename);
         link.setAttribute('href', content);
-        link.click(); 
-
-        link = null;
+        if (window.webkitURL != null)
+        {
+            // Chrome allows the link to be clicked
+            // without actually adding it to the DOM.
+            link.click();        
+            link = null;
+        }
+        else
+        {
+            // Firefox requires the link to be added to the DOM
+            // before it can be clicked.
+            link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link;
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();        
+        }
+        
     },    
     
     isRecordSet: function(recordset){
-        return !top.HEURIST4.util.isnull(recordset) && $.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
+        return !window.hWin.HEURIST4.util.isnull(recordset) && $.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
     },
     
     random: function(){

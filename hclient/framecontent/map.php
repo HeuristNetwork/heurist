@@ -151,16 +151,16 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         // Mapping data
         var mapdata = [];
-        mapping = new hMapping("map", "timeline", top.HAPI4.basePathV4, mylayout);
+        mapping = new hMapping("map", "timeline", window.hWin.HAPI4.basePathV4, mylayout);
 
         var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
         //t:26 f:85:3313  f:1:building
         // Perform database query if possible (for standalone mode - when map.php is separate page)
-        if( !top.HEURIST4.util.isempty(q) )
+        if( !window.hWin.HEURIST4.util.isempty(q) )
         {
-            top.HAPI4.RecordMgr.search({q: q, w: "all", detail:"timemap", l:3000},
+            window.hWin.HAPI4.RecordMgr.search({q: q, w: "all", detail:"timemap", l:3000},
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         //console.log("onMapInit response");
                         //console.log(response);
 
@@ -170,7 +170,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                         mapping.load(mapdataset);
 
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 }
             );
@@ -227,10 +227,10 @@ require_once(dirname(__FILE__)."/initPage.php");
                 $helper.dialog( "open" );
             }
         });
-        $( "#helper" ).load(top.HAPI4.basePathV4+'context_help/mapping_overview.html #content');
+        $( "#helper" ).load(window.hWin.HAPI4.basePathV4+'context_help/mapping_overview.html #content');
         //$( "#helper" ).find('p').css('padding','10px');
         $( "#helper" ).dialog({
-            autoOpen: false, //(top.HAPI4.get_prefs('help_on')=='1'),
+            autoOpen: false, //(window.hWin.HAPI4.get_prefs('help_on')=='1'),
             width:'90%', height:570,
             position: { my: "right top", at: "right bottom", of: $('#btn_help') },
             show: {
@@ -348,9 +348,9 @@ require_once(dirname(__FILE__)."/initPage.php");
 
     function showEmbedDialog(){
 
-        var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
-        query = query + ((query=='?')?'':'&') + 'db='+top.HAPI4.database;
-        var url = top.HAPI4.basePathV4+'hclient/framecontent/map.php' + query;
+        var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request);
+        query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.basePathV4+'hclient/framecontent/map.php' + query;
 
         //document.getElementById("linkTimeline").href = url;
 
@@ -367,18 +367,18 @@ require_once(dirname(__FILE__)."/initPage.php");
             width: 700,
             modal: true,
             resizable: false,
-            title: top.HR('Publish Map')
+            title: window.hWin.HR('Publish Map')
         });
     }
 
     function exportKML(){
 
-        var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
+        var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request);
         if(query=='?'){
-            top.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
+            window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
         }else{
-            query = query + '&a=1&depth=1&db='+top.HAPI4.database;
-            var url_kml = top.HAPI4.basePathV3+"export/xml/kml.php" + query;
+            query = query + '&a=1&depth=1&db='+window.hWin.HAPI4.database;
+            var url_kml = window.hWin.HAPI4.basePathV3+"export/xml/kml.php" + query;
 
             var win = window.open(url_kml, "_new");
         }
@@ -395,20 +395,20 @@ require_once(dirname(__FILE__)."/initPage.php");
     function mapEdit(){
         var recID = $("#map-doc-select").val();
         if(recID>0){
-            window.open(top.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+            window.open(window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
         }
     }
     function addNewRecord(rt){
 
 
         if(parseInt(rt)>0){
-            window.open(top.HAPI4.basePathV3 + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
+            window.open(window.hWin.HAPI4.basePathV3 + 'records/add/addRecord.php?addref=1&db='+window.hWin.HAPI4.database+'&rec_rectype='+rt);
         }else{
-            top.HEURIST4.msg.showMsgDlg(
+            window.hWin.HEURIST4.msg.showMsgDlg(
                 "The required record type "+rt+" has not been defined.<br><br>"+
                 "Please download from the HeuristReferenceSet database using Database &gt; Structure &gt; Acquire from Databases.",
-                {'Show Mapping Help':function() {  $("#helper").dialog( "open" ); var $dlg = top.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) },
-                    'Close':function() { var $dlg = top.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) }
+                {'Show Mapping Help':function() {  $("#helper").dialog( "open" ); var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) },
+                    'Close':function() { var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) }
                 }
                 , "Missing record type"
             );
@@ -489,10 +489,14 @@ require_once(dirname(__FILE__)."/initPage.php");
             </select>-->
 
             <!-- Legend overlay -->
-            <div id="map_legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; display:none;">
-                <span style="font-size: 1.25em">Legend</span>
-                <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
-                <div id="map_extents"  style="font-size: 0.9em;display:none;">Bookmarks:&nbsp;<select id="selMapBookmarks" style="font-size:1.0em;"></select></div>
+            <div id="map_legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; overflow-y:auto; display:none;">
+                <div>
+                    <span style="font-size: 1.25em">&nbsp;</span>
+                    <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
+                </div>
+                <div id="map_extents"  style="font-size: 0.9em;display:none; padding-bottom:1em;">Zoom to:&nbsp;
+                        <select id="selMapBookmarks" style="font-size:1.0em;"></select>
+                </div>
                 <div class="content"></div>
             </div>
         </div>

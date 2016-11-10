@@ -75,7 +75,9 @@ function EditRecStructure() {
         'title="Add a new section heading, to break the data entry form up into groups of related fields. Heading is inserted at bottom, drag up into required position." class="add"/>'+
         '</div>'+
 
-        '<span style="float:right; text-align:right">'+
+        '<span style="float:right; text-align:right;">'+ 
+        '<span id="div_rty_ID" style="font-size:11px;font-weight:normal;"></span>&nbsp;'+
+        '<span id="div_rty_ConceptID" style="font-size:11px;font-weight:normal;"></span>&nbsp;&nbsp;'+
         '<a href="#" onclick="{onEditRecordType();}">edit general description<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;'+
         '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;&nbsp;&nbsp;'+
         '<input type="button" value="Save/Close" onClick="editStructure.closeWin();"/>'+
@@ -2022,8 +2024,18 @@ function EditRecStructure() {
                 recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>"+
                 hToolBar;
         
-        var idx =  top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask;
-        document.getElementById('rty_TitleMask').value = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[idx];
+        var fi  = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
+        var rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
+
+        document.getElementById('rty_TitleMask').value = rectype[fi.rty_TitleMask];
+
+        document.getElementById("div_rty_ID").innerHTML = 'Local ID: '+rty_ID;
+        
+        if(Hul.isempty(rectype[fi.rty_ConceptID])){
+            document.getElementById("div_rty_ConceptID").innerHTML = '';
+        }else{
+            document.getElementById("div_rty_ConceptID").innerHTML = 'Concept Code: '+ rectype[fi.rty_ConceptID];
+        }
     }
     
 

@@ -135,7 +135,7 @@ function ShowReps() {
     function _init() {
         _setLayout(true, false); //aftert load show viewer only
 
-        if(top.HEURIST4){
+        if(hasH4()){
             _sQueryMode = "all";
             $('#cbUseAllRecords1').hide();
             $('#cbUseAllRecords2').hide();
@@ -669,8 +669,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             }else{
 
                 //template.gpl
-                if(top.HEURIST4){
-                    top.HEURIST4.util.downloadURL(baseurl+'?'+squery);
+                if(hasH4()){
+                    window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
                 }else{
                     window.open(baseurl+'?'+squery, 'Download'); //old way
                 }
@@ -780,19 +780,19 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 ];
                 mySimpleDialog.cfg.queueProperty("buttons", myButtons);*/
 
-                if(top.HEURIST4){
-                    top.HEURIST4.msg.showMsgDlg(
+                if(hasH4()){
+                    window.hWin.HEURIST4.msg.showMsgDlg(
                         'Template was changed. Are you sure you wish to exit and lose all modifications?',
                         {'Save': function() {
                             _operationEditor(2);
-                            var $dlg = top.HEURIST4.msg.getMsgDlg();
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                             $dlg.dialog( 'close' );},
                             'Discard': function() {
                                 _setLayout(true, false);
-                                var $dlg = top.HEURIST4.msg.getMsgDlg();
+                                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                 $dlg.dialog( 'close' );},
                             'Cancel':function() {
-                                var $dlg = top.HEURIST4.msg.getMsgDlg();
+                                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                 $dlg.dialog( 'close' );
                             }
                         },
@@ -950,14 +950,14 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
         //resize global cardinal layout
         if(iseditor){
-            _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
-            top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
-            top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
+            _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
+            window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
+            window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
             _doExecuteFromEditor();
         }else if(isviewer){
             if(_kept_width>0)
-                top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width
-            top.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
+                window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width
+            window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
             
             var sel = document.getElementById('selTemplates');
             if(sel.selectedIndex>=0){
@@ -1396,7 +1396,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     */
     function _insertPattern(pattern) {
 
-        if(top.HEURIST4){
+        if(hasH4()){
             if(insertPopupID){
                 $(insertPopupID).dialog('close');
                 insertPopupID = null;
@@ -1426,15 +1426,14 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 break;
 
             case 2: // simple table
-                _text='\n\n {* Use this as a guideline for creating a simple tabular format *} \n' +
-                '{* Put narrow specified-width columns at the start and any long text columns at the end *} \n' +
-                '<table> \n' +
-                '   <tr style="padding-top:10px;"> \n' +
-                '      <td style="width:200px"> \n' +
-                '      </td> \n' +
-                '      <td> \n' +
-                '      </td> \n' +
-                '      {* Add more columns as required *}\n' +
+                _text='\n\n{* Put narrow specified-width columns at the start and any long text columns at the end *} \n' +
+                '<table style="text-align:left;margin-left:120px;margin-top:2px;" border="0" cellpadding="2"> \n' +
+                '   <tr> \n' +
+                '      <td style="width: 50px"> {$r.recID}    </td> \n' +
+                '      <td style="width:400px"> {$r.recTitle} </td> \n' +
+                '      <td style=" "> </td> \n' +
+                '      <td style=" "> </td> \n' +
+                '      <td style=" "> </td> \n' +
                 '   </tr> \n' +
                 '</table> ' +
                 '\n\n';
@@ -1557,7 +1556,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             document.getElementById("insert-popup-header").innerHTML = 'Inserting: <b>'+title+'</b>';
 
 
-            if(top.HEURIST4){
+            if(hasH4()){
 
                 //show jquery dialog
                 insertPopupID = $(ele).dialog({
@@ -1580,7 +1579,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         }//__shownewpopup
 
 
-        if(top.HEURIST4){
+        if(hasH4()){
 
             if(insertPopupID){
                 $(insertPopupID).dialog('close');
@@ -1620,7 +1619,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             inloop_level = (inloop===true)?1:0;
         }
 
-        if(top.HEURIST4){
+        if(hasH4()){
             if(insertPopupID){
                 $(insertPopupID).dialog('close');
                 insertPopupID = null;

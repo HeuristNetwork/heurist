@@ -62,13 +62,13 @@ function hSearchIncremental() {
     // search with callback
     function _doSearchWithCallback( request, callback ){
 
-        top.HAPI4.RecordMgr.search(request,
+        window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
-                if(response.status == top.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                     callback( hRecordSet(response.data) );
                 }else{
                     callback( null );
-                    top.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             }
         );
@@ -107,12 +107,12 @@ function hSearchIncremental() {
             var new_offset = Number(_query_request.o);
             new_offset = (new_offset>0?new_offset:0) + Number(_query_request.l);
 
-            var total_count_of_curr_request = (top.HAPI4.currentRecordset!=null)?top.HAPI4.currentRecordset.count_total():0;
+            var total_count_of_curr_request = (window.hWin.HAPI4.currentRecordset!=null)?window.hWin.HAPI4.currentRecordset.count_total():0;
 
             if(new_offset< total_count_of_curr_request){ //search for next chunk of data within current request
                     _query_request.o = new_offset;
                     _query_request.source = _owner_element_id;
-                    top.HAPI4.RecordMgr.search(_query_request, _onSearchResult);//$(_owner_doc));   //search for next chunk
+                    window.hWin.HAPI4.RecordMgr.search(_query_request, _onSearchResult);//$(_owner_doc));   //search for next chunk
                     return true;
             }else{
 
@@ -168,7 +168,7 @@ function hSearchIncremental() {
                      _query_request.o = 0;
                      _query_request.source = _owner_element_id;
 
-                     top.HAPI4.RecordMgr.search(_query_request, _onSearchResult); //search rules
+                     window.hWin.HAPI4.RecordMgr.search(_query_request, _onSearchResult); //search rules
                      return true;
 
             }
@@ -184,14 +184,14 @@ function hSearchIncremental() {
     function _searchCompleted( is_terminate ){
 
             if(_query_request!=null && is_terminate){
-                _query_request.id = top.HEURIST4.util.random();
+                _query_request.id = window.hWin.HEURIST4.util.random();
             }
 
-            if(!top.HEURIST4.util.isnull(_owner_doc)){
-                if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0)
-                    $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ top.HAPI4.currentRecordset ]); //global app event
+            if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
+                if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0)
+                    $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, [ window.hWin.HAPI4.currentRecordset ]); //global app event
                 else{
-                    $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
+                    $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
                 }
             }
     }
@@ -202,20 +202,20 @@ function hSearchIncremental() {
             var progress_value = 0
 
             // show current records range and total count
-            if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0){
+            if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0){
 
                 var s = '';
 
                 if(_rule_index>0){ //this search by rules
                     s = 'Rules: '+_rule_index+' of '+(_rules.length-1)+'  ';
                 }
-                s = s + 'Total: ' + top.HAPI4.currentRecordset.length();
+                s = s + 'Total: ' + window.hWin.HAPI4.currentRecordset.length();
 
 
                 var curr_offset = Number(_query_request.o);
                 curr_offset = (curr_offset>0?curr_offset:0) + Number(_query_request.l);
 
-                var tot = top.HAPI4.currentRecordset.count_total();  //count of records in current request
+                var tot = window.hWin.HAPI4.currentRecordset.count_total();  //count of records in current request
 
                 if(curr_offset>tot) curr_offset = tot;
 
@@ -288,14 +288,14 @@ function hSearchIncremental() {
         }
 
         //it may be json
-        if(!top.HEURIST4.util.isempty(rules_tree) && !$.isArray(rules_tree)){
+        if(!window.hWin.HEURIST4.util.isempty(rules_tree) && !$.isArray(rules_tree)){
              rules_tree = $.parseJSON(rules_tree);
         }
 
         __createFlatRulesArray(rules_tree, 0);
 
         //assign zero level - top most query
-        if(top.HAPI4.currentRecordset!=null){  //aplying rules to existing set
+        if(window.hWin.HAPI4.currentRecordset!=null){  //aplying rules to existing set
 
             //result for zero level retains
             flat_rules[0].results = _rules[0].results;
@@ -317,20 +317,20 @@ function hSearchIncremental() {
 
             if(request==null) return;
 
-            if(top.HEURIST4.util.isnull(request.id)){ //unique id for request
-                request.id = top.HEURIST4.util.random();
+            if(window.hWin.HEURIST4.util.isnull(request.id)){ //unique id for request
+                request.id = window.hWin.HEURIST4.util.random();
 
             }
-            if(!top.HEURIST4.util.isnull(_owner_doc)){
-                $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
+            if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
+                $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
             }
 
-            if(top.HEURIST4.util.isempty(request.topids)){ //topids not defined - this is not rules request
+            if(window.hWin.HEURIST4.util.isempty(request.topids)){ //topids not defined - this is not rules request
 
-                 top.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
+                 window.hWin.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
                  _query_request = request; //keep for search in current result
 
-                 top.HAPI4.currentRecordset = null;
+                 window.hWin.HAPI4.currentRecordset = null;
 
                  if(request.q!=''){
 
@@ -350,7 +350,7 @@ function hSearchIncremental() {
             //reset rules parameter - since we search incrementally from client side
             request.rules = null;
             //perform search
-            top.HAPI4.RecordMgr.search(request, _onSearchResult); //$(_owner_doc));
+            window.hWin.HAPI4.RecordMgr.search(request, _onSearchResult); //$(_owner_doc));
 
     }
 
@@ -365,7 +365,7 @@ function hSearchIncremental() {
                     _prepareRules( rules ); //indexes are rest inside this function
 
                     //if rules were applied before - need to remove all records except original set and re-render
-                    if(!top.HEURIST4.util.isempty(_rules) && _rules[0].results.length>0){
+                    if(!window.hWin.HEURIST4.util.isempty(_rules) && _rules[0].results.length>0){
 
                          //keep json (to possitble save as saved searches)
                          that.query_request.rules = rules;
@@ -379,7 +379,7 @@ function hSearchIncremental() {
                          }
 
                          //var recordset_level0 - only main set remains all result from rules are removed
-                         top.HAPI4.currentRecordset = top.HAPI4.currentRecordset.getSubSetByIds(rec_ids_level0);
+                         window.hWin.HAPI4.currentRecordset = window.hWin.HAPI4.currentRecordset.getSubSetByIds(rec_ids_level0);
 
                          _rule_index = -2;
                          _res_index = 0;
@@ -391,15 +391,15 @@ function hSearchIncremental() {
                          */
 
                          //fake result search event
-                         if(!top.HEURIST4.util.isnull(_owner_doc)){
-                            $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
-                            $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ top.HAPI4.currentRecordset ]);  //global app event
+                         if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
+                            $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
+                            $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, [ window.hWin.HAPI4.currentRecordset ]);  //global app event
                          }
                          if(!_doSearchIncrement()){//start search rules
                             _searchCompleted( false );
                          }
 
-                    } else if(!top.HEURIST4.util.isempty(_rules)){
+                    } else if(!window.hWin.HEURIST4.util.isempty(_rules)){
                         return false;
                     }
                 }
@@ -411,7 +411,7 @@ function hSearchIncremental() {
     //
     function _onSearchResult(response){
             var resdata = null;
-            if(response.status == top.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                 resdata = new hRecordSet(response.data);
 
 
@@ -432,20 +432,20 @@ function hSearchIncremental() {
                                 _rules = [{results:[]}];
                             }
                             //git main result set
-                            if(ruleindex==1 && !top.HEURIST4.util.isArrayNotEmpty(_rules[ruleindex].results) ){
-                                top.HAPI4.currentRecordset.setMainSet( Hul.cloneJSON(top.HAPI4.currentRecordset.getIds()) );
+                            if(ruleindex==1 && !window.hWin.HEURIST4.util.isArrayNotEmpty(_rules[ruleindex].results) ){
+                                window.hWin.HAPI4.currentRecordset.setMainSet( Hul.cloneJSON(window.hWin.HAPI4.currentRecordset.getIds()) );
                             }
 
                             _rules[ruleindex].results.push(records_ids);
 
                             //unite
-                            if(top.HAPI4.currentRecordset==null){
-                                top.HAPI4.currentRecordset = resdata;
+                            if(window.hWin.HAPI4.currentRecordset==null){
+                                window.hWin.HAPI4.currentRecordset = resdata;
                             }else{
                                 //unite record sets
-                                top.HAPI4.currentRecordset = top.HAPI4.currentRecordset.doUnite(resdata);
+                                window.hWin.HAPI4.currentRecordset = window.hWin.HAPI4.currentRecordset.doUnite(resdata);
                             }
-                            top.HAPI4.currentRecordsetByLevels = _rules; //contains main result set and rules result sets
+                            window.hWin.HAPI4.currentRecordsetByLevels = _rules; //contains main result set and rules result sets
 
                         }
                     }
@@ -460,14 +460,14 @@ function hSearchIncremental() {
 
             }else{
 
-                top.HEURIST4.msg.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
 
-                if(!top.HEURIST4.util.isnull(_owner_doc)){
-                    $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null );
+                if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
+                    $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null );
                 }
             }
-            if(!top.HEURIST4.util.isnull(_owner_doc)){
-                $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
+            if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
+                $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
             }
     }
 

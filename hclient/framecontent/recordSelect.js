@@ -34,21 +34,21 @@ function hRecordSelect(rectype_set) {
                 //init buttons
                 var btn_search_start = $('#btn_search_start')
                     //.css({'width':'6em'})
-                    .button({label: top.HR("Start search"), text:false, icons: {
+                    .button({label: window.hWin.HR("Start search"), text:false, icons: {
                         secondary: "ui-icon-search"
                     }})
                     .click(function(e) {
-                            //top.HAPI4.SearchMgr.doStop();
+                            //window.hWin.HAPI4.SearchMgr.doStop();
                              _startSearch();
                         });
                         
                 var btn_add_record = $('#btn_add_record')
                     .css({'min-width':'11.9em'})
-                    .button({label: top.HR("Add Record"), icons: {
+                    .button({label: window.hWin.HR("Add Record"), icons: {
                         primary: "ui-icon-plus"
                     }})
                     .click(function(e) {
-                            //top.HAPI4.SearchMgr.doStop();
+                            //window.hWin.HAPI4.SearchMgr.doStop();
                             alert('Add record');
                         });
         
@@ -57,7 +57,7 @@ function hRecordSelect(rectype_set) {
                     function(e){
                         var code = (e.keyCode ? e.keyCode : e.which);
                             if (code == 13) {
-                                top.HEURIST4.util.stopEvent(e);
+                                window.hWin.HEURIST4.util.stopEvent(e);
                                 e.preventDefault();
                                  _startSearch();
                             }
@@ -67,9 +67,9 @@ function hRecordSelect(rectype_set) {
                 .on('change',
                     function(e){
                         if(selectRectype.val()>0){
-                            lbl = top.HR('Add')+' '+$( "#sel_rectypes option:selected" ).text();
+                            lbl = window.hWin.HR('Add')+' '+$( "#sel_rectypes option:selected" ).text();
                         }else{
-                            lbl = top.HR("Add Record");
+                            lbl = window.hWin.HR("Add Record");
                         }
                         
                         btn_add_record.button('option','label',lbl);
@@ -77,14 +77,15 @@ function hRecordSelect(rectype_set) {
                     }
                 );
                 selectRectype.empty();
-                top.HEURIST4.ui.createRectypeSelect(selectRectype.get(0), rectype_set, 
-                    rectype_set?null:top.HR('Any Record Type'));
+                window.hWin.HEURIST4.ui.createRectypeSelect(selectRectype.get(0), rectype_set, 
+                    rectype_set?null:window.hWin.HR('Any Record Type'));
                           
                 //init record list          
                 recordList = $('#recordList')
                         .resultList({eventbased: false, 
                                        showmenu: false, 
                                     multiselect: false,
+                                    isapplication: false,
                                        onselect: function(event, selected_recs){
                                            if(selected_recs && selected_recs.length()>0)
                                                 window.close(selected_recs);
@@ -93,7 +94,7 @@ function hRecordSelect(rectype_set) {
                                    +'<div>If there are no suitable records, you may create a new record which is automatically selected as the target.</div>'
                         });     
         
-                var ishelp_on = top.HAPI4.get_prefs('help_on')==1;
+                var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
                 $('.heurist-helper1').css('display',ishelp_on?'block':'none');
         
                 //force search if rectype_set is defined
@@ -127,22 +128,22 @@ function hRecordSelect(rectype_set) {
                                         needall: 1,
                                         detail: 'ids',
                                         
-                                        id: top.HEURIST4.util.random()
+                                        id: window.hWin.HEURIST4.util.random()
                                         //source: this.element.attr('id') 
                                        };
 
                         //that.loadanimation(true);
 
-                        top.HAPI4.RecordMgr.search(request, function( response ){
+                        window.hWin.HAPI4.RecordMgr.search(request, function( response ){
 
                             //that.loadanimation(false);
 
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                                 $(recordList).resultList('updateResultSet', new hRecordSet(response.data), request);
 
                             }else{
-                                top.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
 
                         });

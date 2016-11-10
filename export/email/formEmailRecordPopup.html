@@ -130,7 +130,9 @@ window.HEURIST.edit = {
 			var db = (window.HEURIST.parameters["db"] || "");
 
 			if(form.setAttribute){
-			 	form.setAttribute("jsonAction", top.HEURIST.baseURL_V3+'export/email/emailRecordDetails.php?db='+db);
+                //DBGSESSID=425944380594800002;d=1,p=0,c=07&
+			 	form.setAttribute("jsonAction", 
+                    top.HEURIST.baseURL_V3+'export/email/emailRecordDetails.php?db='+db);
 			}
 			form.action = top.HEURIST.baseURL_V3+'export/email/emailRecordDetails.php?db='+db;
 

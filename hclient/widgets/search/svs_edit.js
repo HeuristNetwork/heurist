@@ -57,27 +57,28 @@ function hSvsEdit(args) {
             //svs_query.parent().show();
             //svs_ugrid.parent().show();
 
+
             var selObj = svs_ugrid.get(0);
-            top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-                [{key:'bookmark', title:top.HR('My Bookmarks (private)')},
-                    {key:'all', title:top.HR('My Filters (private)')}
-                    //{key:0, title:top.HR('Searches for guests')}  removed 2016-02-18
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+                [{key:'bookmark', title:window.hWin.HR('My Bookmarks (private)')},
+                    {key:'all', title:window.hWin.HR('My Filters (private)')}
+                    //{key:0, title:window.hWin.HR('Searches for guests')}  removed 2016-02-18
                 ],
                 function(){
-                    svs_ugrid.val(top.HEURIST4.util.isempty(groupID)?'all':groupID); //  top.HAPI4.currentUser.ugr_ID);
+                    svs_ugrid.val(window.hWin.HEURIST4.util.isempty(groupID)?'all':groupID);
             });
 
             var isEdit = (parseInt(svsID)>0);
             var svs = null;
             if(isEdit){
-                svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
             }
 
-            if(isEdit && !top.HEURIST4.util.isnull(svs)){
+            if(isEdit && !window.hWin.HEURIST4.util.isnull(svs)){
 
-                var request = top.HEURIST4.util.parseHeuristQuery(svs[_QUERY]);
+                var request = window.hWin.HEURIST4.util.parseHeuristQuery(svs[_QUERY]);
                 domain  = request.w;
-                svs_ugrid.val(svs[_GRPID]==top.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
+                svs_ugrid.val(svs[_GRPID]==window.hWin.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
 
                 svs_ugrid.parent().hide();
                 //svs_ugrid.attr('disabled', true);
@@ -101,16 +102,16 @@ function hSvsEdit(args) {
 
                 //var domain = 'all';
 
-                if(top.HEURIST4.util.isArray(squery)) { //this is RULES!!!
+                if(window.hWin.HEURIST4.util.isArray(squery)) { //this is RULES!!!
                     svs_rules.val(JSON.stringify(squery));
                     svs_query.val('');
 
                 } else if( squery && (squery.q || squery.rules) ) {
 
-                    svs_query.val( top.HEURIST4.util.isempty(squery)?'': ($.isArray(squery.q)?JSON.stringify(squery.q):squery.q) );
-                    svs_rules.val( top.HEURIST4.util.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules );
+                    svs_query.val( window.hWin.HEURIST4.util.isempty(squery)?'': ($.isArray(squery.q)?JSON.stringify(squery.q):squery.q) );
+                    svs_rules.val( window.hWin.HEURIST4.util.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules );
 
-                } else if(!top.HEURIST4.util.isempty(squery)){
+                } else if(!window.hWin.HEURIST4.util.isempty(squery)){
                     svs_query.val( squery );
                 } else {
                     svs_query.val( '' );
@@ -122,15 +123,15 @@ function hSvsEdit(args) {
                 /*var selObj = svs_ugrid.get(0);
                 if(domain=="bookmark"){
                     svs_ugrid.empty();
-                    top.HEURIST4.ui.addoption(selObj, 'bookmark', top.HR('My Bookmarks'));
+                    window.hWin.HEURIST4.ui.addoption(selObj, 'bookmark', window.hWin.HR('My Bookmarks'));
                 }else{
                     svs_ugrid.val(domain);
                 }*/
                 //svs_ugrid.parent().show();
-                svs_ugrid.attr('disabled', !top.HEURIST4.util.isempty(groupID));
+                svs_ugrid.attr('disabled', !window.hWin.HEURIST4.util.isempty(groupID));
             }
 
-            var isRules = top.HEURIST4.util.isempty(svs_query.val()) && !top.HEURIST4.util.isempty(svs_rules.val());
+            var isRules = window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val());
 
             if(isRules){
                 svs_query.parent().hide();
@@ -153,7 +154,7 @@ function hSvsEdit(args) {
         if($.isFunction($('body').search_faceted_wiz)){ //already loaded
             showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
-            $.getScript(top.HAPI4.basePathV4+'hclient/widgets/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
+            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
         }
 
     }
@@ -165,24 +166,24 @@ function hSvsEdit(args) {
 
        var that = this;
 
-        var url = top.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + top.HAPI4.database;
-        if(!top.HEURIST4.util.isnull(ele_rules)){
+        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
+        if(!window.hWin.HEURIST4.util.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
 
-        top.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
+        window.hWin.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
             function(res){
-                if(!top.HEURIST4.util.isempty(res)) {
+                if(!window.hWin.HEURIST4.util.isempty(res)) {
 
                     if(res.mode == 'save') {
-                        if(top.HEURIST4.util.isnull(ele_rules)){ //call from resultListMenu - create new rule
+                        if(window.hWin.HEURIST4.util.isnull(ele_rules)){ //call from resultListMenu - create new rule
 
                              //replace rules
-                             if(!top.HEURIST4.util.isObject(squery)){
-                                squery = top.HEURIST4.util.parseHeuristQuery(squery);
+                             if(!window.hWin.HEURIST4.util.isObject(squery)){
+                                squery = window.hWin.HEURIST4.util.parseHeuristQuery(squery);
                              }
                              squery.rules = res.rules;
-                             //squery = top.HEURIST4.util.composeHeuristQuery(params.q, params.w, res.rules, params.notes);
+                             //squery = window.hWin.HEURIST4.util.composeHeuristQuery(params.q, params.w, res.rules, params.notes);
 
                             //mode, groupID, svsID, squery, callback
                             _showDialog('saved', groupID, null, squery ); //open new dialog
@@ -207,9 +208,9 @@ function hSvsEdit(args) {
     function _showDialog( mode, groupID, svsID, squery, callback ){
 
         if(parseInt(svsID)>0){
-            var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
-            if(top.HEURIST4.util.isnull(svs)){
-                top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise edit for this saved search. '
+            var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
+            if(window.hWin.HEURIST4.util.isnull(svs)){
+                window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for this saved search. '
                     +'It does not belong to your group'), null, "Error");
                 return;
             }
@@ -224,14 +225,14 @@ function hSvsEdit(args) {
 
             var facet_params = {};
             if(svsID>0){
-                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 if(svs){
                     try {
                         facet_params = $.parseJSON(svs[_QUERY]);
                     }
                     catch (err) {
                         // TODo something about the exception here
-                        top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
+                        window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
                         return;
                     }
                 }
@@ -240,10 +241,10 @@ function hSvsEdit(args) {
             _showSearchFacetedWizard( {svsID:svsID, domain:groupID, params:facet_params, onsave: callback_method });
             //function(event, request){   that._updateAfterSave(request, 'faceted');
 
-        }else if (mode == 'rules' && top.HEURIST4.util.isnull(svsID)){ //it happens for new rules only
+        }else if (mode == 'rules' && window.hWin.HEURIST4.util.isnull(svsID)){ //it happens for new rules only
 
 
-            if(top.HEURIST4.util.isnull(squery)) squery = {};
+            if(window.hWin.HEURIST4.util.isnull(squery)) squery = {};
              squery.q = ''; // from rule builder we always save pure query only
              _editRules(null, squery, groupID);
 
@@ -253,18 +254,18 @@ function hSvsEdit(args) {
             var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
-            $dlg.load(top.HAPI4.basePathV4+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
+            $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
-                    $(this).html(top.HR($(this).html()));
+                    $(this).html(window.hWin.HR($(this).html()));
                 })
 
                 $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
 
                 $dlg.find("#svs_Rules_edit")
                 .button({icons: {primary: "ui-icon-pencil"}, text:false})
-                .attr('title', top.HR('Edit RuleSet'))
+                .attr('title', window.hWin.HR('Edit RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
                 .click(function( event ) {
                     //that.
@@ -273,23 +274,23 @@ function hSvsEdit(args) {
 
                 $dlg.find("#svs_Rules_clear")
                 .button({icons: {primary: "ui-icon-close"}, text:false})
-                .attr('title', top.HR('Clear RuleSet'))
+                .attr('title', window.hWin.HR('Clear RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
                 .click(function( event ) {
                     $dlg.find('#svs_Rules').val('');
                 });
-                
+
                 $dlg.find("#svs_GetQuery").button({
                         label:'Get filter + rules as string',
                         title:'Gety query string for Mappable Query'})
                 .click(function( event ) {
-                    
+
                     var filter = $dlg.find('#svs_Query').val();
                     if(filter.trim()!=''){
                         var rules = $dlg.find('#svs_Rules').val();
-                    
+
                         var res = '';
-                    
+
                         try {
                             var r = $.parseJSON(filter);
                             if($.isArray(r) || $.isPlainObject(r)){
@@ -301,19 +302,18 @@ function hSvsEdit(args) {
                         if(res==''){
                             res = '{"q":"'+filter+'"';
                         }
-                        
+
                         if(rules!=''){
                             res = res + ',"rules":'+rules+'}';
                         } else{
                             res = res + '}';
                         }
-                    
-                        top.HEURIST4.msg.showPrompt(
+                        window.hWin.HEURIST4.msg.showPrompt(
                         '<label>Edit and copy it to paste in Mappable Query filter field</label>'
                         + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
                         + ' style="min-width: 400px; margin-left:0.2em" rows="4" cols="80">'
                         +res
-                        +'</textarea>'                    
+                        +'</textarea>'
                         );
                     }
                 });
@@ -335,12 +335,12 @@ function hSvsEdit(args) {
 
                     allFields.removeClass( "ui-state-error" );
 
-                    var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
+                    var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
 
                     if(bValid){
 
-                        var bOk = top.HEURIST4.msg.checkLength( svs_query, "Query", null, 1 );
-                        if(!bOk) bOk = top.HEURIST4.msg.checkLength( svs_rules, "Rules", null, 1 );
+                        var bOk = window.hWin.HEURIST4.msg.checkLength( svs_query, "Query", null, 1 );
+                        if(!bOk) bOk = window.hWin.HEURIST4.msg.checkLength( svs_rules, "Rules", null, 1 );
                         if(!bOk){
                             message.text("Define query, rules or both.");
                             message.addClass( "ui-state-highlight" );
@@ -358,18 +358,18 @@ function hSvsEdit(args) {
                         var domain = 'all';
                         if(svs_ugrid=="all" || svs_ugrid=="bookmark"){
                             domain = svs_ugrid;
-                            svs_ugrid = top.HAPI4.currentUser.ugr_ID;
+                            svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID;
                             //if(domain!="all"){query_to_save.push('w='+domain);}
                         }
 
-                        /*if(top.HEURIST4.util.isempty(svs_query.val()) && !top.HEURIST4.util.isempty(svs_rules.val())){   //PURE RuleSet
+                        /*if(window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val())){   //PURE RuleSet
                             domain = 'rules';
-                            svs_ugrid = top.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
+                            svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
                         }*/
 
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
-                            svs_Query: top.HEURIST4.util.composeHeuristQuery(svs_query.val(), domain, svs_rules.val(), svs_notes.val()),
+                            svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery(svs_query.val(), domain, svs_rules.val(), svs_notes.val()),
                             svs_UGrpID: svs_ugrid,
                             domain:domain};
 
@@ -379,18 +379,17 @@ function hSvsEdit(args) {
                         }
 
                         //
-                        top.HAPI4.SystemMgr.ssearch_save(request,
+                        window.hWin.HAPI4.SystemMgr.ssearch_save(request,
                             function(response){
-                                
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                                     var svsID = response.data;
 
-                                    if(!top.HAPI4.currentUser.usr_SavedSearch){
-                                        top.HAPI4.currentUser.usr_SavedSearch = {};
+                                    if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
+                                        window.hWin.HAPI4.currentUser.usr_SavedSearch = {};
                                     }
 
-                                    top.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
+                                    window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
 
                                     $dlg.dialog( "close" );
 
@@ -401,7 +400,7 @@ function hSvsEdit(args) {
 
 
                                 }else{
-                                    top.HEURIST4.msg.showMsgErr(response, true);
+                                    window.hWin.HEURIST4.msg.showMsgErr(response, true);
                                     //message.addClass( "ui-state-highlight" );
                                     //message.text(response.message);
                                 }
@@ -415,7 +414,7 @@ function hSvsEdit(args) {
                 allFields.on("keypress",function(event){
                     var code = (event.keyCode ? event.keyCode : event.which);
                     if (code == 13) {
-                        top.HEURIST4.util.stopEvent(event);
+                        window.hWin.HEURIST4.util.stopEvent(event);
                         __doSave();
                     }
                 });
@@ -427,10 +426,10 @@ function hSvsEdit(args) {
                     width: 650,
                     modal: true,
                     resizable: false,
-                    title: top.HR(isRules?'Edit RuleSet':'Save filter criteria'),
+                    title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
                     buttons: [
-                        {text:top.HR('Save'), click: __doSave},
-                        {text:top.HR('Cancel'), click: function() {
+                        {text:window.hWin.HR('Save'), click: __doSave},
+                        {text:window.hWin.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );
                         }}
                     ],
@@ -446,7 +445,7 @@ function hSvsEdit(args) {
         }else{
             //show dialogue
             var isRules = _fromDataToUI(svsID, squery, groupID);
-            edit_dialog.dialog("option",'title', top.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
+            edit_dialog.dialog("option",'title', window.hWin.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
             edit_dialog.dialog("open");
         }
 

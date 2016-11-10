@@ -30,7 +30,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             // Callback function on map initialization
             function onPageInit(success){
                 if(success){
-                    var recordSelect = new hRecordSelect(top.HEURIST4.util.getUrlParameter('rectype_set',window.location.search));
+                    var recordSelect = new hRecordSelect(window.hWin.HEURIST4.util.getUrlParameter('rectype_set',window.location.search));
                 }
             }
         </script>

@@ -47,6 +47,8 @@ header("Content-type: text/javascript");
 
 if (! @$_REQUEST["url"]) return;
 
+ob_start();
+
 $url = $_REQUEST["url"];
 
 if (substr($url, -1) == "/") $url = substr($url, 0, strlen($url)-1);

@@ -59,14 +59,14 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
-            return top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
             swidth = '';
-            if(!top.HEURIST4.util.isempty(col_width)){
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
@@ -79,7 +79,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         '<div class="item" style="width:25em">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>'+fld2('ugr_Organisation')+fld2('ugl_Role');
         
         
-        var recIcon = top.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
+        var recIcon = window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
 
 
         var html_thumb = '';
@@ -87,14 +87,14 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('ugr_ThumbnailURL') + '&quot;);opacity:1"></div>';
         }else{
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ 
-                top.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/thumb/' + rectype + '.png&quot;);"></div>';
+                window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/thumb/' + rectype + '.png&quot;);"></div>';
         }
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
-        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+        +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'   //class="rt-icon" 
         +     '<span class="ui-icon ui-icon-flag" style="color:'+(isEnabled?'#ff8844':'#dddddd')+';display:inline;left:4px">&nbsp;&nbsp;</span>'           
         + '</div>'
@@ -141,7 +141,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             }
         }
         
-        top.HAPI4.EntityMgr.doRequest(request, callback);
+        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     }
     
 });

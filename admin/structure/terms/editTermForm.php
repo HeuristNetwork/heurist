@@ -46,7 +46,7 @@
 
     $local_message = "";
 
-    if(@$_REQUEST['domain']==null){
+    if(@$_REQUEST['treetype']==null){
         $local_message = "Terms domain is not defined";
     }else if($parent_id==null){
         $local_message = "Parent vocabulary is not defined";
@@ -57,9 +57,9 @@
         }else{
 
             $mysqli = mysqli_connection_overwrite(DATABASE); //artem's
-
+            
             $res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $parent_id."-1",
-                array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), $mysqli);
+                array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['treetype'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), $mysqli);
 
             $mysqli->close();
 
@@ -88,7 +88,7 @@
 
     if($parent_id!=0){
         $terms = getTerms(true);
-        $parent_name = $terms['termsByDomainLookup'][$_REQUEST['domain']][$parent_id][0];
+        $parent_name = $terms['termsByDomainLookup'][$_REQUEST['treetype']][$parent_id][0];
     }
 
 ?>
@@ -115,18 +115,14 @@
                 padding-right: 10px;
             }
         </style>
-
-    </head>
-
-    <body class="popup">
-        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
+        
         <script type="text/javascript">
 
             var context_return_res = "<?=$return_res ?>";
 
             function showOtherTerms(){
                 top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
-                    "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&domain=<?=$_REQUEST['domain'] ?>&db=<?=$_REQUEST['db'] ?>",
+                    "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&treetype=<?=$_REQUEST['treetype'] ?>&db=<?=$_REQUEST['db'] ?>",
                     {
                         "close-on-blur": false,
                         "no-resize": false,
@@ -158,12 +154,17 @@
             }
         </script>
 
+        
+    </head>
+
+    <body class="popup">
+        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
         <div>
             <form name="main" action="editTermForm.php" method="post"
                 onsubmit="{document.getElementById('btnPanel').style.display = 'none'}">
 
                 <input name="process" value="action" type="hidden" />
-                <input name="domain" value="<?=$_REQUEST['domain']?>" type="hidden" />
+                <input name="treetype" value="<?=@$_REQUEST['treetype']?>" type="hidden" />
                 <input name="db" value="<?=HEURIST_DBNAME?>" type="hidden" />
                 <input name="return_res" value="<?=$return_res?>" type="hidden" />
                 <input name="parent" value="<?=$parent_id?>" type="hidden" />

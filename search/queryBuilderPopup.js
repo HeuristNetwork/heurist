@@ -36,10 +36,10 @@
 
     function update(elt) {
         
-        if(!top.HEURIST.detailTypes && top.HEURIST4){
-            top.HEURIST.detailTypes = top.HEURIST4.util.cloneJSON(top.HEURIST4.detailtypes);
-            top.HEURIST.rectypes = top.HEURIST4.util.cloneJSON(top.HEURIST4.rectypes);
-            top.HEURIST.terms = top.HEURIST4.util.cloneJSON(top.HEURIST4.terms);
+        if(!top.HEURIST.detailTypes && window.hWin.HEURIST4){
+            top.HEURIST.detailTypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.detailtypes);
+            top.HEURIST.rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes);
+            top.HEURIST.terms = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.terms);
         }
         
 

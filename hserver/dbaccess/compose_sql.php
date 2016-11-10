@@ -1496,8 +1496,16 @@ class FieldPredicate extends Predicate {
                     .$this->value.' or trm_ParentTermID='.$this->value.')';
             }else{
                 $value = $mysqli->real_escape_string($this->value);
-                $match_pred = ' in (select trm_ID from defTerms where trm_Label="'
-                    .$value.'" or trm_Code="'.$value.'")';
+                    
+                $match_pred  = ' in (select trm_ID from defTerms where trm_Label ';
+                if($this->parent->exact){
+                    $match_pred  =  $match_pred.'="'.$value.'"'; 
+                } else {
+                    $match_pred  =  $match_pred.'like "%'.$value.'%"';
+                }
+                $match_pred  =  $match_pred.' or trm_Code="'.$value.'")';
+                    
+                    
             }
             
         }else
@@ -1747,10 +1755,16 @@ class LinkedFromParentPredicate extends Predicate {
         $select = 'exists (select bd.dtl_RecID  ';
         */
         //NEW  ---------------------------
+        
+        if($rty_ID==1){ //special case for relationship records
+            $add_where = 'rd.rec_RecTypeID='.$rty_ID.' and rl.rl_RelationID=rd.rec_ID';
+        }else{
+            $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'')
+            . ' rl.rl_SourceID=rd.rec_ID and '
+            . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+        }
+        
         $add_from  = 'recLinks rl ';
-        $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'')
-        . ' rl.rl_SourceID=rd.rec_ID and '
-        . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
 
@@ -1765,7 +1779,8 @@ class LinkedFromParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where
+                        .' '.$query["sort"].$query["limit"].$query["offset"].')';
 
         }else{
             
@@ -1778,9 +1793,11 @@ class LinkedFromParentPredicate extends Predicate {
                 $add_where = '';
             }
             
-            $add_where = $add_where
-                . ' rl.rl_TargetID=rd.rec_ID and '
-                . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+            $add_where = $add_where.' rl.rl_TargetID=rd.rec_ID ';
+            if($rty_ID!=1){
+                $add_where = $add_where . ' and ' 
+                 .(($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );    
+            }    
             
             $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
         }
@@ -1835,10 +1852,14 @@ class LinkedToParentPredicate extends Predicate {
         */
 
         //NEW  ---------------------------
+        if($rty_ID==1){ //special case for relationship records
+            $add_where = 'rd.rec_RecTypeID='.$rty_ID.' and rl.rl_RelationID=rd.rec_ID';
+        }else{
+            $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'')
+                . ' rl.rl_TargetID=rd.rec_ID and '
+                . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+        }
         $add_from  = 'recLinks rl ';
-        $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'')
-        . ' rl.rl_TargetID=rd.rec_ID and '
-        . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_SourceID ';
 
@@ -1868,9 +1889,12 @@ class LinkedToParentPredicate extends Predicate {
                 $add_where = '';
             }
             
-            $add_where = $add_where
-                . ' rl.rl_SourceID=rd.rec_ID and '
-                . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+            $add_where = $add_where.' rl.rl_SourceID=rd.rec_ID ';
+            if($rty_ID!=1){
+                $add_where = $add_where . ' and ' 
+                 .(($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );    
+            }    
+            
             
             $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
 
@@ -1950,7 +1974,6 @@ class RelatedFromParentPredicate extends Predicate {
         . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
-
 
         $pquery = &$this->getQuery();
         if ($pquery->parentquery){
@@ -2110,27 +2133,54 @@ class RelatedToParentPredicate extends Predicate {
 class AllLinksPredicate  extends Predicate {
     function makeSQL() {
 
-        $recIDs = $this->value;
+        $source_rty_ID = $this->value;
 
         $add_select1 = 'TOPBIBLIO.rec_ID in (select rl1.rl_SourceID ';
         $add_select2 = 'TOPBIBLIO.rec_ID in (select rl2.rl_TargetID ';
 
-        $add_where1 = 'rl1.rl_SourceID=rd1.rec_ID and ';
-        $add_where2 = 'rl2.rl_TargetID=rd2.rec_ID and ';
+        //NEW
+        $add_from1 = 'recLinks rl1 ';
+        $add_where1 = ((false && $source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'')
+            . ' rl1.rl_TargetID=rd.rec_ID';
+
+        $add_from2 = 'recLinks rl2 ';
+        $add_where2 = ((false && $source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'')
+            . ' rl2.rl_SourceID=rd.rec_ID';
+            
         
-        $ids = array_map('intval', explode(',', $recIDs));
-        if(count($ids)>1){
-            $add_where1 = $add_where1.'rl1.rl_TargetID in ('.implode(',',$ids).')';
-            $add_where2 = $add_where2.'rl2.rl_SourceID in ('.implode(',',$ids).')';
-        }else if(count($ids)>0){
-            $add_where1 = $add_where1.'rl1.rl_TargetID = '.$ids[0];
-            $add_where2 = $add_where2.'rl2.rl_SourceID = '.$ids[0];
+        $pquery = &$this->getQuery();
+        if ($pquery->parentquery){
+
+            $query = $pquery->parentquery;
+            //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+
+            $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+            $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+            $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
+            $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
+
+            $select1 = $add_select1.$query["from"].', '.$add_from1.' WHERE '.$query["where"].' and '.$add_where1.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            
+            $select2 = $add_select2.$query["from"].', '.$add_from2.' WHERE '.$query["where"].' and '.$add_where2.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            
+
         }else{
-            return '(1=0)';
-        }
         
-        $select1 = $add_select1.' FROM Records rd1, recLinks rl1 WHERE '.$add_where1.')';
-        $select2 = $add_select2.' FROM Records rd2, recLinks rl2 WHERE '.$add_where2.')';
+            $ids = array_map('intval', explode(',', $source_rty_ID));
+            if(count($ids)>1){
+                $add_where1 = $add_where1.'and rl1.rl_TargetID in ('.implode(',',$ids).')';
+                $add_where2 = $add_where2.'and rl2.rl_SourceID in ('.implode(',',$ids).')';
+            }else if(count($ids)>0){
+                $add_where1 = $add_where1.'and rl1.rl_TargetID = '.$ids[0];
+                $add_where2 = $add_where2.'and rl2.rl_SourceID = '.$ids[0];
+            }else{
+                return '(1=0)';
+            }
+            
+            $select1 = $add_select1.' FROM Records rd, recLinks rl1 WHERE '.$add_where1.')';
+            $select2 = $add_select2.' FROM Records rd, recLinks rl2 WHERE '.$add_where2.')';
+        
+        }
 
         $select = '(' . $select1 . ' OR ' .$select2. ')';
 

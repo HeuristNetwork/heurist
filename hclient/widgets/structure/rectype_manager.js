@@ -29,7 +29,7 @@ $.widget( "heurist.rectype_manager", {
         selection:[],
 
         current_GrpID: null,
-        // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from window.hWin.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
         current_order: 1  // order by name
     },
 
@@ -53,16 +53,16 @@ $.widget( "heurist.rectype_manager", {
                 height: 620,
                 width: 400,
                 modal: true,
-                title: top.HR(this.options.isselector?"Select Record types":"Manage Record types"),
+                title: window.hWin.HR(this.options.isselector?"Select Record types":"Manage Record types"),
                 resizeStop: function( event, ui ) {
                     that.element.css({overflow: 'none !important','width':'100%'});
                 },
                 buttons: [
-                    {text:top.HR('Select'),
+                    {text:window.hWin.HR('Select'),
                         click: function() {
                             //that._editSavedSearch();
                     }},
-                    {text:top.HR('Close'), click: function() {
+                    {text:window.hWin.HR('Close'), click: function() {
                         $( this ).dialog( "close" );
                     }}
                 ]
@@ -93,7 +93,7 @@ $.widget( "heurist.rectype_manager", {
         this.search_div = $( "<div>").css({'display':'inline-block', height:'2.2em', 'padding-top':'4px' }).appendTo( this.wcontainer ); // width:'36%',
 
         this.lbl_message = $( "<label>").css({'padding-right':'5px'})
-        .html(top.HR('Filter'))
+        .html(window.hWin.HR('Filter'))
         .appendTo( this.search_div );
 
         this.input_search = $( "<input>" ) //, {width:'100%'}
@@ -115,13 +115,13 @@ $.widget( "heurist.rectype_manager", {
         this.sort_div = $( "<div>").css({ 'float':'right', height:'2.2em', height:'2.2em', 'padding-top':'4px' }).appendTo( this.wcontainer );
 
         this.lbl_message = $( "<label>").css({'padding-right':'5px'})
-        .html(top.HR('Sort'))
+        .html(window.hWin.HR('Sort'))
         .appendTo( this.sort_div );
 
         this.select_order = $( "<select><option value='1'>"+
-            top.HR("by name")+"</option><option value='2'>"+
-            //temp top.HR("by usage")+"</option><option value='3'>"+
-            top.HR("selected")+"</option></select>", {'width':'80px'} )
+            window.hWin.HR("by name")+"</option><option value='2'>"+
+            //temp window.hWin.HR("by usage")+"</option><option value='3'>"+
+            window.hWin.HR("selected")+"</option></select>", {'width':'80px'} )
 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.sort_div );
@@ -158,7 +158,7 @@ $.widget( "heurist.rectype_manager", {
 
     _setOptions: function( options ) {
         this._superApply( arguments );
-        if(top.HEURIST4.util.isnull(this.options.selection)){
+        if(window.hWin.HEURIST4.util.isnull(this.options.selection)){
             this.options.selection = [];
         }
         this._refresh();
@@ -189,9 +189,9 @@ $.widget( "heurist.rectype_manager", {
     _updateGroups: function(){
 
         var selObj = this.select_grp.get(0);
-        top.HEURIST4.ui.createRectypeGroupSelect( selObj, top.HR('all groups') );
+        window.hWin.HEURIST4.ui.createRectypeGroupSelect( selObj, window.hWin.HR('all groups') );
 
-        this.select_grp.val( top.HEURIST4.rectypes.groups[0].id);
+        this.select_grp.val( window.hWin.HEURIST4.rectypes.groups[0].id);
         this.select_grp.change();
 
     },
@@ -207,14 +207,14 @@ $.widget( "heurist.rectype_manager", {
 
         var entries = [],
         entryID, name, usage, is_selected;
-        var idx_rty_grpid = top.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
+        var idx_rty_grpid = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
 
-        for (entryID in  top.HEURIST4.rectypes.names)
+        for (entryID in  window.hWin.HEURIST4.rectypes.names)
         {
-            if( entryID && (this.options.current_GrpID==0 || this.options.current_GrpID==top.HEURIST4.rectypes.typedefs[entryID].commonFields[idx_rty_grpid]) ){
+            if( entryID && (this.options.current_GrpID==0 || this.options.current_GrpID==window.hWin.HEURIST4.rectypes.typedefs[entryID].commonFields[idx_rty_grpid]) ){
 
-                name = top.HEURIST4.rectypes.names[entryID];
-                usage = 0; //  top.HEURIST4.rectypes.rtUsage[entryID];
+                name = window.hWin.HEURIST4.rectypes.names[entryID];
+                usage = 0; //  window.hWin.HEURIST4.rectypes.rtUsage[entryID];
                 is_selected =  this.options.selection.indexOf(entryID);
 
                 entries.push([entryID, name, usage, is_selected]);
@@ -278,9 +278,9 @@ $.widget( "heurist.rectype_manager", {
 
             //record type icon
             $('<img>',{
-                src:  top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+                src:  window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'
             })
-            .css('background-image', 'url('+ top.HAPI4.iconBaseURL + entryID + '.png)')
+            .css('background-image', 'url('+ window.hWin.HAPI4.iconBaseURL + entryID + '.png)')
             .appendTo($iconsdiv);
 
             $('<div>',{

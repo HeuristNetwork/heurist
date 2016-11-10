@@ -115,7 +115,7 @@
             <div class="input-cell">
                 <select style="width:80px" id="delimiterSelect" onchange="refreshRecordData()">
                     <option value="," selected>comma</option><option value="&#9;" >tab</option></select>
-                &nbsp;&nbsp;&nbsp;Quotemark for text fields:
+                &nbsp;&nbsp;&nbsp;Quotemark:
                 <select  style="width:40px" id="quoteSelect" onchange="refreshRecordData()">
                     <option selected value='0'>&nbsp;</option><option value='"' selected>"</option><option value="'">'</option></select><br/>
                 </div>
@@ -127,7 +127,7 @@
                 <div class="input-cell" style="padding-top: 4px;"><input type="checkbox" checked id="includeFieldNamesCheckbox" onchange="refreshRecordData()"/></div>
             </div>
 
-            <div class="input-row">
+            <div class="input-row" style="display:none">
                 <label class="input-header-cell">
                     Precede values with column containing internal code</label>
                 <div class="input-cell" style="padding-top: 4px;">

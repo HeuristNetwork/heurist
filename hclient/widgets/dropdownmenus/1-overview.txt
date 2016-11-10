@@ -1,7 +1,7 @@
 
-Directory:	/hclient/widgets/topmenu
+Directory:	/hclient/widgets/dropdownmenus
 
-Overview:   The main Heurist menu displayd at top right of the search/filter page
+Overview:   Dropdown menus for major functions, formerly displayd at top right of the search/filter page, now replaced with framecontent/tabmenus
 
 Updated: 	18 Oct 2015
 

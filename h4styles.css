@@ -451,6 +451,7 @@ div .selected_last{
     padding: 0;
     position: relative;
 }
+
 .thumbs .recordDiv:hover {
     z-index:10;
     -moz-box-shadow:0px 3px 8px #666;
@@ -460,6 +461,14 @@ div .selected_last{
     width:134px;
     margin:3px;
 }
+
+.smaller{
+    width: 110px !important;
+} 
+.smaller:hover{
+    width: 112px !important;
+} 
+
 
 .thumbs .recordDiv .recordTitle {
     bottom: 18px;
@@ -850,7 +859,10 @@ Allow use of icon-large to be properly aligned
     width:1em;
 }
 
-ul > li:hover > .svs-contextmenu, div:hover > .svs-contextmenu {
+ul > li:hover > div.svs-contextmenu{ /*, ul > li.leaves:hover > div.svs-contextmenu2*/
+    display: inline-block;
+} 
+div:hover > .svs-contextmenu {
     display: inline-block;
 }
 ul > li > .svs-contextmenu {
@@ -861,6 +873,11 @@ ul > li > .svs-contextmenu {
     right: 2px;
     /*width:15px;
     padding-right:2px;*/
+}
+ul > li > .svs-contextmenu2 {
+    display: none;
+    cursor: pointer;
+    float:right;
 }
 div > .svs-contextmenu {
     display: none;
@@ -1001,16 +1018,14 @@ background: #8ea9b9
 }
 
 
-    #menu_container > h3, .accordion_pnl > h3{
-        font-weight:bold;
-        border-top: 1px solid lightblue !important;
-    }
     .menu-list {
         list-style: none;
         margin: 0;
         display: block;
         outline: none;
+        padding: 0 !important;
         border: none !important;
+        background:none;
     }        
     .menu-list .ui-menu-item{    
         position: relative;
@@ -1018,6 +1033,9 @@ background: #8ea9b9
         padding: 3px 1em 3px .4em;
         cursor: pointer;
         min-height: 0;
+        border-top: 1px solid #999999;
+        background: #95A7B7;
+        color: white;
     }
     .menu-list .ui-menu-item a{    
         display: block;
@@ -1027,7 +1045,34 @@ background: #8ea9b9
         padding: 2px 0.4em 0 20px;
         margin-right: 10px;
         text-decoration: none;
+        color: white;
+        outline: 0;
     }        
-    .menu-list .ui-menu-item a.selected{    
-        background:lightblue;
+    .item-selected{    
+        background:#9CC4D9 !important;
     }
+
+    /* main menu on front */
+    
+.accordion_pnl > .ui-accordion-header{
+        font-weight:bold;
+        border-top: 1px solid black !important;
+        margin:0;
+        padding-left:.7em;
+}    
+.accordion_pnl > .ui-accordion-header > .ui-accordion-header-icon{
+    position: inherit !important;
+    float: right;
+    font-size: 1.5em;
+    height: 30px;
+    margin-right: 0.5em;
+}
+.accordion_pnl > div > ul > .ui-menu-item  {
+    padding-left:35px;
+}
+    
+.ui-icon-filter { background-image: url(hclient/assets/filter_icon.png) !important; }
+
+.ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon.png) !important; }
+
+.ui-iconalign { display: inline-block; vertical-align: text-bottom; padding-right:1em }

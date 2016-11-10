@@ -73,7 +73,7 @@ function hEditing(container, _recdata, _recstructure) {
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 var val = recdata.fld(record, ele.editing_input('option', 'dtID'));
-                if(!top.HEURIST4.util.isArray(val)) val = [val];
+                if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
                 ele.editing_input('setValue', val );
             }
             
@@ -88,7 +88,7 @@ function hEditing(container, _recdata, _recstructure) {
         recdata = _recdata;
         record = null;
         
-        if(!top.HEURIST4.util.isArrayNotEmpty(_recstructure) && _recdata==null){
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_recstructure) && _recdata==null){
             $('<div class="center-message">Select an entity in the list to edit</div>').appendTo($container);
             $container.show();
             return;     
@@ -153,7 +153,7 @@ function hEditing(container, _recdata, _recstructure) {
             for (idx=0; idx<fields.length; idx++){
                 
                 if( $.isPlainObject(fields[idx]) && 
-                    top.HEURIST4.util.isArrayNotEmpty(fields[idx].children)){ //this is group
+                    window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children)){ //this is group
                     
                     if(fields[idx].groupType != currGroupType){ //create new group container and init previous
                         //init previous one 
@@ -216,8 +216,8 @@ function hEditing(container, _recdata, _recstructure) {
                         //assign values from record
                         if(record!=null){
                             var val = recdata.fld(record, fields[idx]['dtID']);
-                            if(!top.HEURIST4.util.isnull(val)){
-                                if(!top.HEURIST4.util.isArray(val)) val = [val];
+                            if(!window.hWin.HEURIST4.util.isnull(val)){
+                                if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
                                 fields[idx].values = val;
                             }else{
                                 fields[idx].values = null; //[''];

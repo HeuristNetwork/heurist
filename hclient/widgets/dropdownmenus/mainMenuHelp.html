@@ -73,7 +73,7 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
     <a href="#"
         onclick="{  var dlg = $('#heurist-about');
                     dlg.parent().find('.fullmode').css('display','block');
-                    dlg.dialog('option',{height: 360, title:top.HR('About')});
+                    dlg.dialog('option',{height: 360, title:window.hWin.HR('About')});
                     dlg.dialog('open');
                     return false; }"
         title="Version, Credits, Copyright, License">

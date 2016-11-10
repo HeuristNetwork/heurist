@@ -47,20 +47,22 @@ $cmt_id = intval(@$_POST["cmt_ID"]);
 $rec_id = intval(@$_POST["recID"]);
 $owner = intval(@$_POST["owner"]);
 if ($cmt_id) {
+    // UPDATE COMMENT
 	$updates = array("cmt_Modified" => array("now()"));
 	if (@$_POST["text"])
 		$updates["cmt_Text"] = $_POST["text"];
 	if (array_key_exists("delete", $_POST))
 		$updates["cmt_Deleted"] = true;
 
-	mysql__update("recThreadedComments", "cmt_ID=$cmt_id and cmt_OwnerUGrpID=".get_user_id(), $updates);
+	mysql__update("recThreadedComments", "cmt_ID=$cmt_id and cmt_OwnerUgrpID=".get_user_id(), $updates);
 	if (mysql_error()) $error = mysql_error();
 
-	$res = mysql_query("select * from recThreadedComments left join ".USERS_DATABASE.".sysUGrps usr on cmt_OwnerUGrpID=usr.ugr_ID where cmt_ID=$cmt_id and ! cmt_Deleted");
+	$res = mysql_query("select * from recThreadedComments left join ".USERS_DATABASE.".sysUGrps usr on cmt_OwnerUgrpID=usr.ugr_ID where cmt_ID=$cmt_id and ! cmt_Deleted");
 	$cmt = mysql_fetch_assoc($res);
 }
 else if ($rec_id) {
-	$inserts = array("cmt_Text" => $_POST["text"], "cmt_Added" => array("now()"), "cmt_OwnerUGrpID" => get_user_id(), "cmt_RecID" => $rec_id);
+    // ADD NEW COMMENT TO RECORD
+	$inserts = array("cmt_Text" => $_POST["text"], "cmt_Added" => array("now()"), "cmt_OwnerUgrpID" => get_user_id(), "cmt_RecID" => $rec_id);
 	if ($owner) {
 		$inserts["cmt_ParentCmtID"] = $owner;
 	}
@@ -68,10 +70,10 @@ else if ($rec_id) {
 	mysql__insert("recThreadedComments", $inserts);
 	if (mysql_error()) $error = mysql_error();
 
-	$res = mysql_query("select * from recThreadedComments left join ".USERS_DATABASE.".sysUGrps usr on cmt_OwnerUGrpID=usr.ugr_ID where cmt_ID=".mysql_insert_id());
+    $query = "select * from recThreadedComments left join ".USERS_DATABASE.".sysUGrps usr on cmt_OwnerUgrpID=usr.ugr_ID where cmt_ID=".mysql_insert_id();
+	$res = mysql_query($query);
 	$cmt = mysql_fetch_assoc($res);
 }
-
 
 if (@$error) {
 	print "({ error: \"" . slash($error) . "\" })";
@@ -87,7 +89,7 @@ else if (@$cmt) {
 			"modified" => $cmt["cmt_Modified"],
 			*/
 			"user" => $cmt["ugr_FirstName"].' '.$cmt["ugr_LastName"],
-			"userID" => $cmt["cmt_OwnerUGrpID"],
+			"userID" => $cmt["cmt_OwnerUgrpID"],
 			"deleted" => false
 		)) . " })";
 }

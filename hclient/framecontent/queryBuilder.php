@@ -31,11 +31,11 @@
             function onPageInit(success){
                 if(success){
                     //to parse and restore query
-                    var query = top.HEURIST4.util.getUrlParameter('q', window.location.search);
+                    var query = window.hWin.HEURIST4.util.getUrlParameter('q', window.location.search);
                     var queryBuilder = new hQueryBuilder(query, $('#div_main'));
                     
                     // init helper (see utils.js)
-                    top.HEURIST4.ui.initHelper( $('#btn_help'), 
+                    window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
                             'Query Builder', 
                             '../../context_help/search_query_builder.html #content',
                             'top');

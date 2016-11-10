@@ -78,6 +78,30 @@ if(isset($_POST['data'])) {
     }
 
   </style>
+  <script>
+    //find heurist object in parent windows or init new one if current window is a top most
+    function _detectHeurist( win ){
+        if(win.HEURIST4){ //defined
+            return win;
+        }
+
+        try{
+            win.parent.document;
+        }catch(e){
+            // not accessible - this is cross domain
+            return win;
+        }
+        if (win.top == win.self) {
+            //we are in frame and this is top most window and Heurist is not defined
+            //lets current window will be heurist window
+            return window;
+        }else{
+            return _detectHeurist( win.parent );
+        }
+    }
+    //detect wether this window is top most or inside frame
+    window.hWin = _detectHeurist(window);
+  </script>
 </head>
 
 <body class="ui-heurist-bg-light" onload="setup()">
@@ -161,9 +185,10 @@ if(isset($_POST['data'])) {
         var definitions; // Record type field definitions
         var rectype_index = 4; // Record type index in object
         var type_index = 23; // Field type index in object
-        var ids =  top.HAPI4.selectedRecordIds; // Selected record ID's
-        var records = top.HAPI4.currentRecordset.getSubSetByIds(ids).getRecords(); // Array of record objects
-        var record; // First record in the list, used to determine the Record Types
+        var ids =  window.hWin.HAPI4.selectedRecordIds; // Selected record ID's
+        var recordset = window.hWin.HAPI4.currentRecordset.getSubSetByIds(ids);
+        var records = recordset.getRecords(); // Array of record objects
+        var record = recordset.getFirstRecord(); // First record in the list, used to determine the Record Types
 
         // Retrieves an item from localStorage
         function getItem(name) {
@@ -230,25 +255,22 @@ if(isset($_POST['data'])) {
             $("#selected-records").html("# of records selected: " + ids.length);
 
             // Determine record type of first record
-            for(var r in records) {
-                this.record = records[r]; // Reference to first record
-                var rectype = record[rectype_index]; // Record type of first record
-                this.definitions = top.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
-                console.log("Rectype: " + rectype + ", definitions", this.definitions);
+            //this.record = records.getFirstRecord(); // Reference to first record; 
+            var rectype = this.record[rectype_index]; // Record type of first record
+            this.definitions = window.hWin.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
+            console.log("Rectype: " + rectype + ", definitions", this.definitions);
 
-                // TEXT ONLY DROPDOWNS
-                var text_options = determineOptions(text_types);
-                fillDropdown(0, text_options);
-                fillDropdown(1, text_options);
-                fillDropdown(2, text_options);
+            // TEXT ONLY DROPDOWNS
+            var text_options = determineOptions(text_types);
+            fillDropdown(0, text_options);
+            fillDropdown(1, text_options);
+            fillDropdown(2, text_options);
 
-                // OTHER DROPDOWNS
-                var all_options = determineOptions(all_types);
-                fillDropdown(3, all_options);
-                fillDropdown(4, all_options);
-                fillDropdown(5, all_options);
-                break;
-            }
+            // OTHER DROPDOWNS
+            var all_options = determineOptions(all_types);
+            fillDropdown(3, all_options);
+            fillDropdown(4, all_options);
+            fillDropdown(5, all_options);
 
             // Setup subject field
             $("#subject").on("keyup", function(e) {
@@ -281,7 +303,7 @@ if(isset($_POST['data'])) {
 
             // Determine type
             if(type == "freetext" || type =="blocktext" || type == "date") {
-                return record.d[index];
+                return record.d[index]; 
 
             }else if(type == "memo") {
                  alert("Memo");
@@ -295,7 +317,7 @@ if(isset($_POST['data'])) {
             }else if(type == "enum") {
                 var enumID = record.d[index];
                 if(enumID) {
-                    return top.HEURIST4.terms.termsByDomainLookup.enum[enumID][0];
+                    return window.hWin.HEURIST4.terms.termsByDomainLookup.enum[enumID][0];
                 }
 
             }else if(type == "termlist") {
@@ -306,12 +328,26 @@ if(isset($_POST['data'])) {
             return null;
         }
 
+        // get list of field types
+        function getSelectedFieldTypeIds() {
+            var res = [];
+            for(var i=0; i<dropdowns.length; i++) {
+                // Index selected in the dropdown
+                var index = $(dropdowns[i]).val();   // field type index
+                if(index && index > 0) {
+                     res.push(index);
+                }
+            }
+            return res.join(',');
+        }
+        
+        
         // Replaces the raw message text with fields in a record
         function prepareMessage(message, record, fields) {
             // Replace hashtags by actual content
             for(var i=0; i<dropdowns.length; i++) {
                 // Index selected in the dropdown
-                var index = $(dropdowns[i]).val();   // Record index
+                var index = $(dropdowns[i]).val();   // field type index
                 var value = "?";
                 if(index && index > 0) {
                     value = getValue(record, fields[index][type_index], index); // Record value at the given index
@@ -330,8 +366,25 @@ if(isset($_POST['data'])) {
             var rawMessage =  $("#message").val();
             //console.log("Raw message: " + rawMessage);
 
+            var buttonText = $("#prepare > span").text();// stupid check by button text!!!!!
+
+            var details = getSelectedFieldTypeIds();
+            if(details!='' && !this.record.d){
+                //load details if required
+                 var request = request = {q: 'ids:'+ids.join(','), w: 'all', detail:details };
+                 
+                 window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( new_recordset )
+                 {
+                    if(new_recordset!=null){
+                        this.records = new_recordset.getRecords();
+                        this.record = new_recordset.getFirstRecord();
+                        prepare();
+                    }
+                 });
+                 return;
+            }
+
             // Check action
-            var buttonText = $("#prepare > span").text()
             if(buttonText.indexOf("Prepare") >= 0) { // Check button text to determine action
                 // PREPARE EMAILS
                 var message = prepareMessage(rawMessage, record, definitions);
@@ -360,27 +413,28 @@ if(isset($_POST['data'])) {
                     if(emailIndex>0){
                         var emailType = definitions[emailIndex][type_index];  // Field type
                         email.recipients = getValue(records[r], emailType, emailIndex);  // Determine e-mail address(es) [comma seperated]
+                        if(!top.HEURIST4.util.isArrayNotEmpty(email.recipients)) email.recipients = [];
 
                         // Message
                         email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
                         data.emails.push(email);
                     }else{
-                         top.HEURIST4.msg.showMsgErr("Define email field. It is mandatory");
+                         window.hWin.HEURIST4.msg.showMsgErr("Define email field. It is mandatory");
                          return;
                     }
                 }
 
                 // Include e-mail to current user/database owner
-                var owner = {recipients: [top.HAPI4.sysinfo.dbowner_email], message: rawMessage};
+                var owner = {recipients: [window.hWin.HAPI4.sysinfo.dbowner_email], message: rawMessage};
                 data.emails.push(owner);
 
                 // Send data to PHP file, everything is checked server-sided
                 console.log("Data to send", data);
                 $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
                     console.log("Posted data, response: ", response);
-                    top.HEURIST4.msg.showMsgDlg(response);
+                    window.hWin.HEURIST4.msg.showMsgDlg(response);
                 }).fail(function(jqXHR, textStatus, errorThrown) {
-                    top.HEURIST4.msg.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);
+                    window.hWin.HEURIST4.msg.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);
                 });
 
             }

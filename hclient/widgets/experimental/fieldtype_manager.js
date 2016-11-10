@@ -34,7 +34,7 @@ $.widget( "heurist.fieldtype_manager", {
         callback: null,  //callback function
         
         current_GrpID: null,
-        // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from window.hWin.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
         current_order: 1  // order by name
     },
     
@@ -78,17 +78,17 @@ $.widget( "heurist.fieldtype_manager", {
                 height: 620,
                 width: 400,
                 modal: true,
-                title: top.HR(this.options.isselector?"Select Field types":"Manage Field types"),
+                title: window.hWin.HR(this.options.isselector?"Select Field types":"Manage Field types"),
                 resizeStop: function( event, ui ) {
                     that.element.css({overflow: 'none !important','width':'100%'});
                 },
                 close: onDialogClose, 
                 buttons: [
-                    {text:top.HR('Select'),
+                    {text:window.hWin.HR('Select'),
                         click: function() {
                             //that._editSavedSearch();
                     }},
-                    {text:top.HR('Close'), click: function() {
+                    {text:window.hWin.HR('Close'), click: function() {
                         $( this ).dialog( "close" );
                     }}
                 ]
@@ -119,7 +119,7 @@ $.widget( "heurist.fieldtype_manager", {
         this.search_div = $( "<div>").css({'display':'inline-block', height:'2.2em', 'padding-top':'4px' }).appendTo( this.wcontainer ); // width:'36%', 
 
         this.lbl_message = $( "<label>").css({'padding-right':'5px'})
-        .html(top.HR('Filter'))
+        .html(window.hWin.HR('Filter'))
         .appendTo( this.search_div );
         
         this.input_search = $( "<input>" ) //, {width:'100%'}
@@ -141,13 +141,13 @@ $.widget( "heurist.fieldtype_manager", {
         this.sort_div = $( "<div>").css({ 'float':'right', height:'2.2em', height:'2.2em', 'padding-top':'4px' }).appendTo( this.wcontainer );
 
         this.lbl_message = $( "<label>").css({'padding-right':'5px'})
-        .html(top.HR('Sort'))
+        .html(window.hWin.HR('Sort'))
         .appendTo( this.sort_div );
 
         this.select_order = $( "<select><option value='1'>"+
-            top.HR("by name")+"</option><option value='2'>"+
-            top.HR("by type")+"</option><option value='4'>"+
-            top.HR("selected")+"</option></select>", {'width':'80px'} )
+            window.hWin.HR("by name")+"</option><option value='2'>"+
+            window.hWin.HR("by type")+"</option><option value='4'>"+
+            window.hWin.HR("selected")+"</option></select>", {'width':'80px'} )
 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.sort_div );
@@ -187,7 +187,7 @@ $.widget( "heurist.fieldtype_manager", {
 
     _setOptions: function( options ) {
         this._superApply( arguments );
-        if(top.HEURIST4.util.isnull(this.options.selection)){
+        if(window.hWin.HEURIST4.util.isnull(this.options.selection)){
             this.options.selection = [];
         }
         this._refresh();
@@ -226,9 +226,9 @@ $.widget( "heurist.fieldtype_manager", {
     _updateGroups: function(){
 
         var selObj = this.select_grp.get(0);
-        top.HEURIST4.ui.createRectypeGroupSelect( selObj, top.HR('all groups') );
+        window.hWin.HEURIST4.ui.createRectypeGroupSelect( selObj, window.hWin.HR('all groups') );
 
-        this.select_grp.val( top.HEURIST4.detailtypes.groups[0].id);
+        this.select_grp.val( window.hWin.HEURIST4.detailtypes.groups[0].id);
         this.select_grp.change();
 
     },
@@ -245,7 +245,7 @@ $.widget( "heurist.fieldtype_manager", {
         entries = [],
         entryID, name, usage, is_selected;
         
-        var idx_dty_type = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
+        var idx_dty_type = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
         
         if(this.options.forRecordTypes){ //show that belong to particular record type only
         
@@ -258,7 +258,7 @@ $.widget( "heurist.fieldtype_manager", {
             if(rectypes!='all'){
 
 
-                if(!top.HEURIST4.util.isArray(rectypes)){
+                if(!window.hWin.HEURIST4.util.isArray(rectypes)){
                     rectypes = [rectypes];
                 }
                 
@@ -275,9 +275,9 @@ $.widget( "heurist.fieldtype_manager", {
                 //find common fields
                 for (var i=0; i<rectypes.length; i++){
                     var rtId = rectypes[i];
-                    if(top.HEURIST4.rectypes.typedefs[rtId]){
+                    if(window.hWin.HEURIST4.rectypes.typedefs[rtId]){
                         fieldtypes_ids2 = [];
-                        for (entryID in  top.HEURIST4.rectypes.typedefs[1].dtFields)
+                        for (entryID in  window.hWin.HEURIST4.rectypes.typedefs[1].dtFields)
                             if(entryID){
                                 fieldtypes_ids2.push(entryID);
                         }
@@ -296,16 +296,16 @@ $.widget( "heurist.fieldtype_manager", {
                         entryID = fieldtypes_ids[i];
 
                         if(rectypes.length>1){ //take from generallist
-                              name = top.HEURIST4.detailtypes.names[entryID];
-                              dttype = top.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_type];
+                              name = window.hWin.HEURIST4.detailtypes.names[entryID];
+                              dttype = window.hWin.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_type];
                         }else{
-                              var field = top.HEURIST4.rectypes.typedefs[rectypes[0]].dtFields[entryID];
-                              name = field[top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName];
-                              dttype = field[top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.dty_Type];
+                              var field = window.hWin.HEURIST4.rectypes.typedefs[rectypes[0]].dtFields[entryID];
+                              name = field[window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName];
+                              dttype = field[window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.dty_Type];
                         }
 
-                        if( top.HEURIST4.util.isempty(allowedFieldTypes) || $.inArray(dttype, allowedFieldTypes) ){
-                            usage = 0; //  top.HEURIST4.detailtypes.rtUsage[entryID];
+                        if( window.hWin.HEURIST4.util.isempty(allowedFieldTypes) || $.inArray(dttype, allowedFieldTypes) ){
+                            usage = 0; //  window.hWin.HEURIST4.detailtypes.rtUsage[entryID];
                             is_selected =  this.options.selection.indexOf(entryID);
                             entries.push([entryID, name, usage, is_selected, dttype]);
                         }
@@ -316,15 +316,15 @@ $.widget( "heurist.fieldtype_manager", {
             
         }else{    //show by groups
             
-            var idx_dty_grpid = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_DetailTypeGroupID;
-            for (entryID in  top.HEURIST4.detailtypes.names)
+            var idx_dty_grpid = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_DetailTypeGroupID;
+            for (entryID in  window.hWin.HEURIST4.detailtypes.names)
             {
-                if( entryID && (this.options.current_GrpID==0 || this.options.current_GrpID==top.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_grpid]) ){
+                if( entryID && (this.options.current_GrpID==0 || this.options.current_GrpID==window.hWin.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_grpid]) ){
 
-                    name = top.HEURIST4.detailtypes.names[entryID];
-                    usage = 0; //  top.HEURIST4.detailtypes.rtUsage[entryID];
+                    name = window.hWin.HEURIST4.detailtypes.names[entryID];
+                    usage = 0; //  window.hWin.HEURIST4.detailtypes.rtUsage[entryID];
                     is_selected =  this.options.selection.indexOf(entryID);
-                    dttype = top.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_type];
+                    dttype = window.hWin.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_type];
 
                     entries.push([entryID, name, usage, is_selected, dttype]);
                 }
@@ -389,9 +389,9 @@ $.widget( "heurist.fieldtype_manager", {
 
             //record type icon
             $('<img>',{
-                src:  top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+                src:  window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'
             })
-            .css('background-image', 'url('+ top.HAPI4.iconBaseURL + entryID + '.png)')
+            .css('background-image', 'url('+ window.hWin.HAPI4.iconBaseURL + entryID + '.png)')
             .appendTo($iconsdiv);
             */
 

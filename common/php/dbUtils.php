@@ -885,4 +885,113 @@ function db_register($db_name, $dbID){
 }
 
 
+/**   TAKEN FROM utils_db.php
+* open database
+* 
+* @param mixed $dbname
+*/
+function mysql__usedatabase($mysqli, $dbname){
+    
+    if($dbname){
+
+        $success = $mysqli->select_db($dbname);
+        if(!$success){
+            return "Could not open database ".$dbname;
+        }
+
+        $mysqli->query('set character set "utf8"');
+        $mysqli->query('set names "utf8"');
+
+    }
+    return true;
+}
+
+/**      TAKEN FROM utils_db.php
+* insert or update record for given table
+*
+* returns record ID in case success or error message
+*
+* @param mixed $mysqli
+* @param mixed $table_name
+* @param mixed $table_prefix
+* @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
+*                          fields that don't have specified prefix are ignored
+*/
+function mysql__insertupdate($database, $table_name, $table_prefix, $record){
+
+    $mysqli = server_connect();
+    mysql__usedatabase($mysqli, $database);
+    
+    $ret = null;
+
+    if (substr($table_prefix, -1) !== '_') {
+        $table_prefix = $table_prefix.'_';
+    }
+
+    $rec_ID = intval(@$record[$table_prefix.'ID']);
+    $isinsert = ($rec_ID<1);
+
+    if($isinsert){
+        $query = "INSERT into $table_name (";
+        $query2 = ') VALUES (';
+    }else{
+        $query = "UPDATE $table_name set ";
+    }
+
+    $params = array();
+    $params[0] = '';
+
+    foreach($record as $fieldname => $value){
+
+        if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
+            //$fieldname = $table_prefix.$fieldname;
+            continue;
+        }
+
+        if($isinsert){
+            $query = $query.$fieldname.', ';
+            $query2 = $query2.'?, ';
+        }else{
+            if($fieldname==$table_prefix."ID"){
+                continue;
+            }
+            $query = $query.$fieldname.'=?, ';
+        }
+
+        $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
+        $params[0] = $params[0].$dtype;
+        if($dtype=='i' && $value==''){
+            $value = null;
+        }
+        array_push($params, $value);
+    }
+
+    $query = substr($query,0,strlen($query)-2);
+    if($isinsert){
+        $query2 = substr($query2,0,strlen($query2)-2).")";
+        $query = $query.$query2;
+    }else{
+        $query = $query." where ".$table_prefix."ID=".$rec_ID;
+    }
+    
+//error_log($query);        
+//error_log(print_r($params, true));
+
+    $stmt = $mysqli->prepare($query);
+    if($stmt){
+        call_user_func_array(array($stmt, 'bind_param'), refValues($params));
+        if(!$stmt->execute()){
+            $ret = $mysqli->error;
+        }else{
+            $ret = ($isinsert)?$stmt->insert_id:$rec_ID;
+        }
+        $stmt->close();
+    }else{
+        $ret = $mysqli->error;
+    }
+
+    return $ret;
+}
+
+
 ?>

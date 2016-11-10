@@ -273,6 +273,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MINIMUM_ZOOM' => array(3, 1085),
     'DT_MAXIMUM_ZOOM' => array(3, 1086),
     'DT_OPACITY' => array(3, 1090),
+    'DT_COLOR' => array(3, 1037),
     // Shape
     'DT_ZIP_FILE' => array(3, 1072),
     'DT_SHAPE_FILE' => array(3, 1069),

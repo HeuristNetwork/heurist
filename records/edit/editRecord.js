@@ -1183,11 +1183,19 @@ console.log('heurist not defined');
             if (fileInput.value == "") return;
             
             var filesize = fileInput.files[0].size;
-            var max_size = Math.min(HAPI_commonData.max_file_size,HAPI_commonData.max_post_size);
+            
+            if(window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.sysinfo){
+                max_file_size = window.hWin.HAPI4.sysinfo.max_file_size;
+                max_post_size = window.hWin.HAPI4.sysinfo.max_post_size;
+            }else if(!top.HEURIST.util.isnull(HAPI_commonData)){
+                max_file_size = HAPI_commonData.max_file_size;
+                max_post_size = HAPI_commonData.max_post_size;
+            }
+            var max_size = Math.min(max_file_size, max_post_size);
             if (filesize>max_size) {
                     top.HEURIST.util.showError(
 'Sorry, this file exceeds the upload '
-+ ((HAPI_commonData.max_file_size<HAPI_commonData.max_post_size)?'file':'(post data)')
++ ((max_file_size<max_post_size)?'file':'(post data)')
 + ' size limit set for this server ('
 + Math.round(max_size/1024/1024) 
 + ' MBytes). Please reduce the file size eg. by reducing resolution of images, or ask your system administrator to increase the upload limit. '
@@ -2883,7 +2891,7 @@ console.log('heurist not defined');
                 }
 
                 top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
-                    "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+Number(sAllTerms)+"&db="+db,
+                    "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+Number(sAllTerms)+"&db="+db,
                     {
                         "close-on-blur": false,
                         'no-close': true, //hide close button
@@ -4290,8 +4298,11 @@ console.log('heurist not defined');
 
         if(element.hiddenElt.value){
             var filedata = top.HEURIST.util.expandJsonStructure(element.hiddenElt.value);
-            var thumbURL = filedata.URL.replace('/records/files/downloadFile.php','/common/php/resizeImage.php');
-            element.thumbDiv.style.backgroundImage = "url("+thumbURL+")";       
+            //change to resizer
+            if(filedata.URL){
+                var thumbURL = filedata.URL.replace('/records/files/downloadFile.php','/common/php/resizeImage.php');
+                element.thumbDiv.style.backgroundImage = "url("+thumbURL+")";       
+            }
         }
         
         

@@ -48,14 +48,14 @@ getTermValue - Returns label and code for term by id
 getPlainTermsList
 */
 
-if (!top.HEURIST4){
-    top.HEURIST4 = {};
+if (!window.hWin.HEURIST4){
+    window.hWin.HEURIST4 = {};
 }
 //init only once
-if (!top.HEURIST4.ui) 
+if (!window.hWin.HEURIST4.ui) 
 {
 
-top.HEURIST4.ui = {
+window.hWin.HEURIST4.ui = {
 
     //
     // helper function to add option to select element
@@ -87,14 +87,14 @@ top.HEURIST4.ui = {
             $(selObj).empty();
         }
 
-        if(top.HEURIST4.util.isArray(topOptions)){
+        if(window.hWin.HEURIST4.util.isArray(topOptions)){
             var idx,key,title;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
                 {
                     if(idx){
-                        if(top.HEURIST4.util.isnull(topOptions[idx].key) && 
-                           top.HEURIST4.util.isnull(topOptions[idx].title))
+                        if(window.hWin.HEURIST4.util.isnull(topOptions[idx].key) && 
+                           window.hWin.HEURIST4.util.isnull(topOptions[idx].title))
                         {
                             key = topOptions[idx];
                             title = topOptions[idx];
@@ -102,23 +102,23 @@ top.HEURIST4.ui = {
                             key = topOptions[idx].key;
                             title = topOptions[idx].title;
                         }
-                        if(!top.HEURIST4.util.isnull(title))
+                        if(!window.hWin.HEURIST4.util.isnull(title))
                         {
-                            if(!top.HEURIST4.util.isnull(topOptions[idx].optgroup)){
+                            if(!window.hWin.HEURIST4.util.isnull(topOptions[idx].optgroup)){
                                 var grp = document.createElement("optgroup");
                                 grp.label =  title;
                                 selObj.appendChild(grp);
                             }else{
-                                top.HEURIST4.ui.addoption(selObj, key, title);
+                                window.hWin.HEURIST4.ui.addoption(selObj, key, title);
                             }
 
                         }
                     }
                 }
             }
-        }else if(!top.HEURIST4.util.isempty(topOptions) && topOptions!==false){
+        }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
             if(topOptions===true) topOptions ='';
-            top.HEURIST4.ui.addoption(selObj, '', topOptions);
+            window.hWin.HEURIST4.ui.addoption(selObj, '', topOptions);
         }
 
 
@@ -130,8 +130,8 @@ top.HEURIST4.ui = {
     //
     getTermValue: function(datatype, termID, withcode){
 
-        var terms = top.HEURIST4.terms;
-        if(!terms || top.HEURIST4.util.isempty(termID)) return '';
+        var terms = window.hWin.HEURIST4.terms;
+        if(!terms || window.hWin.HEURIST4.util.isempty(termID)) return '';
 
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
@@ -147,7 +147,7 @@ top.HEURIST4.ui = {
         if(termLookup[termID]){
             termName = termLookup[termID][terms.fieldNamesToIndex['trm_Label']];
             termCode = termLookup[termID][terms.fieldNamesToIndex['trm_Code']];
-            if(top.HEURIST4.util.isempty(termCode)){
+            if(window.hWin.HEURIST4.util.isempty(termCode)){
                 termCode = '';
             }else{
                 termCode = " ("+termCode+")";
@@ -163,7 +163,7 @@ top.HEURIST4.ui = {
     //
     getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         
-        var selObj = top.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
+        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
 
         var reslist = [];
 
@@ -184,7 +184,7 @@ top.HEURIST4.ui = {
     //
     getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
 
-        var termtree = top.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, null, null, true);
+        var termtree = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, null, null, true);
         /*
         function __setParents(parent, terms){
 
@@ -217,18 +217,18 @@ top.HEURIST4.ui = {
             return null; //not found in this level
         }
 
-        var root = {id:null, text:top.HR('all'), children:termtree};
+        var root = {id:null, text:window.hWin.HR('all'), children:termtree};
 
         //__setParents(root, termtree);
 
-        return top.HEURIST4.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
+        return window.hWin.HEURIST4.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
     },
 
     /**
     * create/fill SELECT for terms or returns JSON array 
     *
     * datatype enum|relation
-    * termIDTree - json string or object (tree) OR number - in this case this vocabulary ID, if not defined all terms are taken from top.HEURIST4.terms.treesByDomain
+    * termIDTree - json string or object (tree) OR number - in this case this vocabulary ID, if not defined all terms are taken from window.hWin.HEURIST4.terms.treesByDomain
     * headerTermIDsList - json string or array (disabled terms)
     * defaultTermID - term to be selected
     * topOptions - text or array for top most item(s)
@@ -236,7 +236,7 @@ top.HEURIST4.ui = {
     *
     */
     createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
-        return top.HEURIST4.ui.createTermSelectExt2(selObj,
+        return window.hWin.HEURIST4.ui.createTermSelectExt2(selObj,
             {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
              defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray});
     },
@@ -255,14 +255,14 @@ top.HEURIST4.ui = {
         if(needArray){
 
         }else{
-            selObj = top.HEURIST4.ui.createSelector(selObj, topOptions);
+            selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
         }
 
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
         }
 
-        var terms = top.HEURIST4.terms;
+        var terms = window.hWin.HEURIST4.terms;
         if(!(datatype=="enum" || datatype=="relation") || !terms ){
             return needArray ?[] :selObj;
         }
@@ -271,9 +271,9 @@ top.HEURIST4.ui = {
 
         //prepare header
         //
-        var temp = ( top.HEURIST4.util.isArray(headerTermIDsList)   //instanceof(Array)
+        var temp = ( window.hWin.HEURIST4.util.isArray(headerTermIDsList)   //instanceof(Array)
             ? headerTermIDsList
-            : (( typeof(headerTermIDsList) === "string" && !top.HEURIST4.util.isempty(headerTermIDsList) )
+            : (( typeof(headerTermIDsList) === "string" && !window.hWin.HEURIST4.util.isempty(headerTermIDsList) )
                 ? $.parseJSON(headerTermIDsList)  //headerTermIDsList.split(",")
                 : [] ));
 
@@ -301,14 +301,14 @@ top.HEURIST4.ui = {
                 if(localLookup[termID]){
                     termName = localLookup[termID][terms.fieldNamesToIndex['trm_Label']];
                     termCode = localLookup[termID][terms.fieldNamesToIndex['trm_Code']];
-                    if(supressTermCode || top.HEURIST4.util.isempty(termCode)){
+                    if(supressTermCode || window.hWin.HEURIST4.util.isempty(termCode)){
                         termCode = '';
                     }else{
                         termCode = " ("+termCode+")";
                     }
                 }
 
-                if(top.HEURIST4.util.isempty(termName)) continue;
+                if(window.hWin.HEURIST4.util.isempty(termName)) continue;
 
                 arrterm.push([termID, termName, termCode]);
             }
@@ -405,7 +405,7 @@ top.HEURIST4.ui = {
         //
         //
         var toparray = [];
-        if(top.HEURIST4.util.isArray(termIDTree)){
+        if(window.hWin.HEURIST4.util.isArray(termIDTree)){
             toparray = termIDTree;
         }else{
             toparray = [ termIDTree ];
@@ -421,7 +421,7 @@ top.HEURIST4.ui = {
             //
             //prepare tree
             //
-            if(top.HEURIST4.util.isNumber(termTree)){
+            if(window.hWin.HEURIST4.util.isNumber(termTree)){
                 //this is vocabulary id - show list of all terms for this vocab
                 var tree = terms.treesByDomain[datatype];
                 termTree = (termTree>0)?tree[termTree]:tree;
@@ -452,9 +452,9 @@ top.HEURIST4.ui = {
     //
     createRectypeGroupSelect: function(selObj, topOptions) {
 
-        top.HEURIST4.ui.createSelector(selObj, topOptions);
+        window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
-        var rectypes = top.HEURIST4.rectypes,
+        var rectypes = window.hWin.HEURIST4.rectypes,
         index;
 
         if(!rectypes) return selObj;
@@ -467,8 +467,8 @@ top.HEURIST4.ui = {
             }
 
             var name = rectypes.groups[index].name;
-            if(!top.HEURIST4.util.isnull(name)){
-                top.HEURIST4.ui.addoption(selObj, rectypes.groups[index].id, name);
+            if(!window.hWin.HEURIST4.util.isnull(name)){
+                window.hWin.HEURIST4.ui.addoption(selObj, rectypes.groups[index].id, name);
             }
         }
 
@@ -483,17 +483,17 @@ top.HEURIST4.ui = {
     //
     createRectypeSelect: function(selObj, rectypeList, topOptions) {
 
-        top.HEURIST4.ui.createSelector(selObj, topOptions);
+        window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
-        var rectypes = top.HEURIST4.rectypes,
+        var rectypes = window.hWin.HEURIST4.rectypes,
         index;
 
         if(!rectypes) return selObj;
 
 
-        if(!top.HEURIST4.util.isempty(rectypeList)){
+        if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
 
-            if(!top.HEURIST4.util.isArray(rectypeList)){
+            if(!window.hWin.HEURIST4.util.isArray(rectypeList)){
                 rectypeList = rectypeList.split(',');
             }
         }else{
@@ -506,9 +506,9 @@ top.HEURIST4.ui = {
                 if(idx){
                     var rectypeID = rectypeList[idx];
                     var name = rectypes.names[rectypeID];
-                    if(!top.HEURIST4.util.isnull(name))
+                    if(!window.hWin.HEURIST4.util.isnull(name))
                     {
-                        top.HEURIST4.ui.addoption(selObj, rectypeID, name);
+                        window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                     }
                 }
             }
@@ -541,8 +541,8 @@ top.HEURIST4.ui = {
                     var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
                     var name = rectypes.names[rectypeID];
 
-                    if(!top.HEURIST4.util.isnull(name)){
-                        var opt = top.HEURIST4.ui.addoption(selObj, rectypeID, name);
+                    if(!window.hWin.HEURIST4.util.isnull(name)){
+                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                     }
                 }
             }
@@ -565,7 +565,7 @@ top.HEURIST4.ui = {
         if(!indent) indent=0;
         
         if(indent==0){
-            top.HEURIST4.ui.createSelector(selObj, topOptions);
+            window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
             if($.isArray(rectypeTree) && rectypeTree.length>0){
                 rectypeTree = rectypeTree[0];
             }
@@ -575,10 +575,10 @@ top.HEURIST4.ui = {
         
         var index, rectypeName, is_used = false;
 
-        var rectypes = top.HEURIST4.rectypes;
+        var rectypes = window.hWin.HEURIST4.rectypes;
         if(!rectypes) return selObj;
         
-        var parent_Name = top.HEURIST4.util.trim_IanGt(rectypeTree.title);
+        var parent_Name = window.hWin.HEURIST4.util.trim_IanGt(rectypeTree.title);
                 
         if(rectypeTree.type=='rectype' ||  rectypeTree.constraint==1){
             
@@ -597,17 +597,17 @@ top.HEURIST4.ui = {
                 rectypeName = a.join('. ') + rectypeName;
             }
             
-            var opt = top.HEURIST4.ui.addoption(selObj, recTypeID, rectypeName); 
+            var opt = window.hWin.HEURIST4.ui.addoption(selObj, recTypeID, rectypeName); 
             opt.className = "depth" + (indent<7)?indent:7;
             opt.depth = indent;        
             is_used = true;
         }
         
-        if(top.HEURIST4.util.isArrayNotEmpty(rectypeTree.children))
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeTree.children))
         for (index=0;index<rectypeTree.children.length;index++){
                var child = rectypeTree.children[index];
                child.parent = parent_Name;
-               top.HEURIST4.ui.createRectypeTreeSelect(selObj, child, null, 
+               window.hWin.HEURIST4.ui.createRectypeTreeSelect(selObj, child, null, 
                     indent+(is_used?1:0) );
         }
 
@@ -622,7 +622,7 @@ top.HEURIST4.ui = {
     */
     createRectypeDetailSelect: function(selObj, rtyIDs, allowedlist, topOptions, options ) {
 
-        top.HEURIST4.ui.createSelector(selObj, topOptions);
+        window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
         
         var showDetailType = false;
         var addLatLongForGeo = false;
@@ -637,7 +637,7 @@ top.HEURIST4.ui = {
 
         var dtyID, details;
         
-        if(top.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length>1){
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length>1){
             //get fields for specified array of record types
             // if number of record types is less than 10 form structure
             // name of field as specified in detailtypes
@@ -646,28 +646,28 @@ top.HEURIST4.ui = {
             var rtys = {};
             var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
             
-            var fi_name = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 
-                fi_type = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
+            var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 
+                fi_type = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
             
             //for all rectypes find all fields as Detail names sorted
             for (i in rtyIDs) {
                 rty = rtyIDs[i];
-                rtyName = top.HEURIST4.rectypes.names[rty];
-                for (dty in top.HEURIST4.rectypes.typedefs[rty].dtFields) {
+                rtyName = window.hWin.HEURIST4.rectypes.names[rty];
+                for (dty in window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields) {
                     
                   if(allowedlist!=null && 
-                     allowedlist.indexOf(top.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type])<0){
+                     allowedlist.indexOf(window.hWin.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type])<0){
                       continue; //not allowed - skip
                   }  
                     
-                  dtyName = top.HEURIST4.detailtypes.names[dty];
+                  dtyName = window.hWin.HEURIST4.detailtypes.names[dty];
                   if (!dtys[dtyName]){
                     dtys[dtyName] = [];
                     dtyNameToID[dtyName] = dty;
                     dtyNameToRty[dty] = rty;
                     dtyNames.push(dtyName);
                   }
-                  fieldName = rtyName + "." + top.HEURIST4.rectypes.typedefs[rty].dtFields[dty][fi_name];
+                  fieldName = rtyName + "." + window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields[dty][fi_name];
                   dtys[dtyName].push(fieldName);
                 }
             }
@@ -678,38 +678,38 @@ top.HEURIST4.ui = {
                   dtyName = dtyNames[i];
                   var dtyID = dtyNameToID[dtyName];
                   
-                  top.HEURIST4.ui.addoption(selObj, dtyID, dtyName); //dtyNameToRty[dtyID]+'-'+
+                  window.hWin.HEURIST4.ui.addoption(selObj, dtyID, dtyName); //dtyNameToRty[dtyID]+'-'+
 
                   //sort RectypeName.FieldName
                   dtys[dtyName].sort();
                   for (j in dtys[dtyName]){
                     fieldName = dtys[dtyName][j];
                     
-                    opt = top.HEURIST4.ui.addoption(selObj, '',  '.  .'+fieldName);
+                    opt = window.hWin.HEURIST4.ui.addoption(selObj, '',  '.  .'+fieldName);
                     opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
                     opt.disabled = "disabled";
 
                   }
                 }
             }else{
-                top.HEURIST4.ui.addoption(selObj, '', top.HR('no suitable fields'));
+                window.hWin.HEURIST4.ui.addoption(selObj, '', window.hWin.HR('no suitable fields'));
             }
             
             
         }else 
-        if((top.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
+        if((window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
             //structure not defined
-            var rectype = Number((top.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
+            var rectype = Number((window.hWin.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
             
-            if(!(top.HEURIST4.rectypes && top.HEURIST4.rectypes.typedefs)) return selObj;
-            var rectypes = top.HEURIST4.rectypes.typedefs[rectype];
+            if(!(window.hWin.HEURIST4.rectypes && window.hWin.HEURIST4.rectypes.typedefs)) return selObj;
+            var rectypes = window.hWin.HEURIST4.rectypes.typedefs[rectype];
 
             if(!rectypes) return selObj;
             details = rectypes.dtFields;
 
-            var fi = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-            fit = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'],
-            fir = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType'];
+            var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
+            fit = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'],
+            fir = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType'];
 
             var arrterm = [];
 
@@ -721,10 +721,10 @@ top.HEURIST4.ui = {
                         var name = details[dtyID][fi];
                         
                         if(showDetailType){
-                            name = name + ' ['+top.HEURIST4.detailtypes.lookups[ details[dtyID][fit] ]+']';
+                            name = name + ' ['+window.hWin.HEURIST4.detailtypes.lookups[ details[dtyID][fit] ]+']';
                         }
 
-                        if(!top.HEURIST4.util.isnull(name)){
+                        if(!window.hWin.HEURIST4.util.isnull(name)){
                             arrterm.push([dtyID, name, (details[dtyID][fir]=="required") ]);
                         }
                         
@@ -742,7 +742,7 @@ top.HEURIST4.ui = {
             //add to select
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) {
-                var opt = top.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
+                var opt = window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
                 if(arrterm[i][2] && requriedHighlight){
                     opt.className = "required";
                 }
@@ -750,9 +750,9 @@ top.HEURIST4.ui = {
 
         }else{ //show all detail types
 
-            if(!top.HEURIST4.detailtypes) return selObj;
+            if(!window.hWin.HEURIST4.detailtypes) return selObj;
 
-            var detailtypes = top.HEURIST4.detailtypes;
+            var detailtypes = window.hWin.HEURIST4.detailtypes;
             var fit = detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
 
 
@@ -771,7 +771,7 @@ top.HEURIST4.ui = {
                     {
                         var name = detailtypes.names[detailID];
 
-                        if(!top.HEURIST4.util.isnull(name)){
+                        if(!window.hWin.HEURIST4.util.isnull(name)){
                             arrterm.push([detailID, name]);
                         }
                     }
@@ -786,7 +786,7 @@ top.HEURIST4.ui = {
                     //add to select
                     var i=0, cnt= arrterm.length;
                     for(;i<cnt;i++) {
-                        top.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
+                        window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
                     }
                 }
 
@@ -809,14 +809,14 @@ top.HEURIST4.ui = {
         $(selObj).empty();
 
         if(!groups){ //use groups of current user
-            groups = top.HAPI4.currentUser.usr_GroupsList;
+            groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
             if(!groups){
                 //looad detailed info about Workgroups
-                top.HAPI4.SystemMgr.mygroups(
+                window.hWin.HAPI4.SystemMgr.mygroups(
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
-                            groups = top.HAPI4.currentUser.usr_GroupsList = response.data;
-                            top.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            groups = window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
+                            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
                         }
                 });
                 return;
@@ -831,9 +831,9 @@ top.HEURIST4.ui = {
                 if(idx){
                     var key = topOptions[idx].key;
                     var title = topOptions[idx].title;
-                    if(!top.HEURIST4.util.isnull(title))
+                    if(!window.hWin.HEURIST4.util.isnull(title))
                     {
-                        top.HEURIST4.ui.addoption(selObj, key, title);
+                        window.hWin.HEURIST4.ui.addoption(selObj, key, title);
                         addedontop.push(key);
                     }
                 }
@@ -846,9 +846,9 @@ top.HEURIST4.ui = {
                 if(idx && addedontop.indexOf(idx)<0){
                     var groupID = idx;
                     var name = groups[idx][1];
-                    if(!top.HEURIST4.util.isnull(name))
+                    if(!window.hWin.HEURIST4.util.isnull(name))
                     {
-                        top.HEURIST4.ui.addoption(selObj, groupID, name);
+                        window.hWin.HEURIST4.ui.addoption(selObj, groupID, name);
                     }
                 }
             }
@@ -913,30 +913,30 @@ top.HEURIST4.ui = {
         
         
         
-        top.HAPI4.EntityMgr.doRequest(request,
+        window.hWin.HAPI4.EntityMgr.doRequest(request,
                     function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             
                             var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
                             
-                            if(!top.HEURIST4.util.isArray(topOptions)){
+                            if(!window.hWin.HEURIST4.util.isArray(topOptions)){
                                 if(topOptions==true){
-                                    topOptions = [{key:'',title:top.HR('select...')}];
-                                }else if(!top.HEURIST4.util.isempty(topOptions) && topOptions!==false){
+                                    topOptions = [{key:'',title:window.hWin.HR('select...')}];
+                                }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
                                     if(topOptions===true) topOptions ='';
                                     topOptions = [{key:'',title:topOptions}];
                                 }
                             }
-                            if(top.HEURIST4.util.isArray(topOptions) && top.HEURIST4.util.isArray(groups)){
+                            if(window.hWin.HEURIST4.util.isArray(topOptions) && window.hWin.HEURIST4.util.isArray(groups)){
                                 groups = topOptions.concat(groups);
-                            }else if(top.HEURIST4.util.isArray(topOptions)){
+                            }else if(window.hWin.HEURIST4.util.isArray(topOptions)){
                                 groups = topOptions;
                             }
 
-                            top.HEURIST4.ui.createSelector(selObj, groups);
+                            window.hWin.HEURIST4.ui.createSelector(selObj, groups);
                             
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                         
                         if($.isFunction(callback)){
@@ -959,7 +959,7 @@ top.HEURIST4.ui = {
                     .addClass('dialog-title-button')
                     .css({'right':'48px'})
                     .appendTo(titlebar)
-                    .on('click', top.HEURIST4.ui.switchHintState);
+                    .on('click', window.hWin.HEURIST4.ui.switchHintState);
         }
 
         if(helpcontent_url){                    
@@ -968,18 +968,18 @@ top.HEURIST4.ui = {
                     .css({'right':'26px'})
                     .appendTo(titlebar);
                     
-            top.HEURIST4.ui.initHelper($info_button, null, helpcontent_url);
+            window.hWin.HEURIST4.ui.initHelper($info_button, null, helpcontent_url);
         }
                     
     },
                         
     switchHintState: function switchState(event){
             
-            var ishelp_on = top.HAPI4.get_prefs('help_on');
+            var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
 
             if(event!=null){ //need to change
                 ishelp_on = (ishelp_on==1 || ishelp_on==true)?0:1;
-                top.HAPI4.save_pref('help_on',ishelp_on);
+                window.hWin.HAPI4.save_pref('help_on',ishelp_on);
             }
             
             if(ishelp_on){
@@ -999,14 +999,14 @@ top.HEURIST4.ui = {
 
         var $help_button = $(help_button);
         
-        var ishelp_on = top.HAPI4.get_prefs('help_on');
+        var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
         
         
         $help_button.button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
                     .attr('data-state', ishelp_on)
-                    .on('click', top.HEURIST4.ui.switchHintState);
+                    .on('click', window.hWin.HEURIST4.ui.switchHintState);
         
-        top.HEURIST4.ui.switchHintState(null);
+        window.hWin.HEURIST4.ui.switchHintState(null);
     },
     
     //
@@ -1027,7 +1027,7 @@ top.HEURIST4.ui = {
                             
                             $helper_div.dialog({
                                         autoOpen: false, 
-                                        title: top.HR(content_title),
+                                        title: window.hWin.HR(content_title),
                                         show: {
                                             effect: "slide",
                                             direction : 'right',

@@ -54,11 +54,11 @@ $.widget( "heurist.searchEntity", {
             var that = this;
             
             if(this._need_load_content && this.options.entity.searchFormContent){        
-                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/'+this.options.entity.searchFormContent+'?t'+top.HEURIST4.util.random(), 
+                this.element.load(window.hWin.HAPI4.basePathV4+'hclient/widgets/entity/'+this.options.entity.searchFormContent+'?t'+window.hWin.HEURIST4.util.random(), 
                 function(response, status, xhr){
                     that._need_load_content = false;
                     if ( status == "error" ) {
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }else{
                         that._initControls();
                     }
@@ -78,12 +78,12 @@ $.widget( "heurist.searchEntity", {
             //init buttons
             this.btn_search_start = this.element.find('#btn_search_start')
                 //.css({'width':'6em'})
-                .button({label: top.HR("Start search"), text:false, icons: {
+                .button({label: window.hWin.HR("Start search"), text:false, icons: {
                     secondary: "ui-icon-search"
                 }});
                         
             this.input_search = this.element.find('#input_search');
-            if(!top.HEURIST4.util.isempty(this.options.filter_title)) {
+            if(!window.hWin.HEURIST4.util.isempty(this.options.filter_title)) {
                 this.input_search.val(this.options.filter_title);    
             }
             
@@ -92,7 +92,7 @@ $.widget( "heurist.searchEntity", {
                 function(e){
                     var code = (e.keyCode ? e.keyCode : e.which);
                         if (code == 13) {
-                            top.HEURIST4.util.stopEvent(e);
+                            window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
                             this.startSearch();
                         }
@@ -106,7 +106,7 @@ $.widget( "heurist.searchEntity", {
             // summary button - to show various counts for entity 
             // number of group members, records by rectypes, tags usage
             this.btn_summary = this.element.find('#btn_summary')
-                .button({label: top.HR("Show/refresh counts"), text:false, icons: {
+                .button({label: window.hWin.HR("Show/refresh counts"), text:false, icons: {
                     secondary: "ui-icon-retweet"
                 }});
             if(this.btn_summary.length>0){
@@ -114,11 +114,11 @@ $.widget( "heurist.searchEntity", {
             }
                 
             // help buttons
-            top.HEURIST4.ui.initHintButton(this.element.find('#btn_help_hints'));
-            top.HEURIST4.ui.initHelper(this.element.find('#btn_help_content'),'Help',
-                top.HAPI4.basePathV4+'context_help/'+this.options.entity.helpContent+' #content');
+            window.hWin.HEURIST4.ui.initHintButton(this.element.find('#btn_help_hints'));
+            window.hWin.HEURIST4.ui.initHelper(this.element.find('#btn_help_content'),'Help',
+                window.hWin.HAPI4.basePathV4+'context_help/'+this.options.entity.helpContent+' #content');
             
-            var right_padding = top.HEURIST4.util.getScrollBarWidth()+4;
+            var right_padding = window.hWin.HEURIST4.util.getScrollBarWidth()+4;
             this.element.find('#div-table-right-padding').css('min-width',right_padding);
         
         
@@ -135,7 +135,7 @@ $.widget( "heurist.searchEntity", {
             this._trigger( "onstart" );
             
             var that = this;
-            top.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
+            window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
                 function(response){
                         that._trigger( "onresult", null, {recordset:response} );
             

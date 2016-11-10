@@ -31,7 +31,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
             // Callback function after initialization
             function onPageInit(success){
                 if(success){
-                    var importDefTerms = new hImportDefTerms(top.HEURIST4.util.getUrlParameter('trm_ID',window.location.search));
+                    var importDefTerms = new hImportDefTerms(window.hWin.HEURIST4.util.getUrlParameter('trm_ID',window.location.search));
                 }
             }
         

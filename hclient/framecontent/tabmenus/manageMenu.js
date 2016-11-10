@@ -22,8 +22,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hDatabaseAdmin() {
-    var _className = "DatabaseAdmin",
+function hmanageMenu() {
+    var _className = "manageMenu",
     _version   = "0.4";
 
     //
@@ -31,12 +31,12 @@ function hDatabaseAdmin() {
     //
     function _showDbSummary(){
 
-        var url = top.HAPI4.basePathV4+ "hclient/framecontent/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
+        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
 
         var body = $(top.document).find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
 
-        top.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );
+        window.hWin.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );
 
     }
     
@@ -45,27 +45,24 @@ function hDatabaseAdmin() {
     //
     function _init(){
 
-        //init buttons
-        /*$('#btnVisualizeStructure')
-        .button({label: top.HR("Visualize Structure")})
-        .click(function(e) {
-        _showDbSummary()
-        });
-        */                
-
         var parentdiv = $('.accordion_pnl').accordion({
             heightStyle: "content",
             collapsible: true, 
-            active: false
+            active: false,
+            icons:{"header": "ui-icon-carat-1-e", "activeHeader": "ui-icon-carat-1-s" }
         });
+        
+        parentdiv.find('h3').addClass('ui-heurist-header2-fade');
 
         parentdiv.find('div')
         .addClass('menu-list')
-        .css({'border-color':'white !important', 'background':'none'});   // ui-corner-all
+        .css('width','100%');
+        //.css({'background':'none'});   // ui-corner-all
+        
         $( parentdiv ).find('h3')
         .css({border:'none', 'background':'none'});
 
-        parentdiv.find('li').addClass('ui-menu-item');
+        parentdiv.find('li').addClass('ui-menu-item').css('background','#99ABBA !important');
 
         parentdiv.find('li').each(function(idx,item){
             $('<div class="svs-contextmenu ui-icon ui-icon-arrowthick-1-e"></div>').appendTo($(item));
@@ -74,7 +71,7 @@ function hDatabaseAdmin() {
 
         _initLinks(parentdiv);
 
-        //$('#frame_container').attr('src', top.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+top.HAPI4.database);           }
+        //$('#frame_container').attr('src', window.hWin.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+window.hWin.HAPI4.database);           }
         $(parentdiv[1]).accordion('option', 'active', 0); //STRUCTURE
         $('#linkEditRectypes').click();
     }
@@ -86,11 +83,11 @@ function hDatabaseAdmin() {
         menu.find('[name="auto-popup"]').each(function(){
             var ele = $(this);
             var href = ele.attr('href');
-            if(!top.HEURIST4.util.isempty(href)){
-                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + top.HAPI4.database;
+            if(!window.hWin.HEURIST4.util.isempty(href)){
+                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
 
                 if(ele.hasClass('h3link')){
-                    href = top.HAPI4.basePathV3 + href;
+                    href = window.hWin.HAPI4.basePathV3 + href;
                     //h3link class on menus implies location of older (vsn 3) code
                 }
                 
@@ -114,19 +111,20 @@ function hDatabaseAdmin() {
         
         $('#menulink-database-refresh').click(
             function(event){
-                top.HAPI4.SystemMgr.get_defs_all( true, top.document);
+                window.hWin.HAPI4.SystemMgr.get_defs_all( true, top.document);
                 event.preventDefault();
                 return false;
             }
         );
-
+/*
         $('#menulink-database-admin').click( //.attr('href', 
             function(event){
-                top.open(top.HAPI4.basePathV3+'admin/adminMenu.php?db='+top.HAPI4.database, '_self');
+                window.hWin.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank');
                 event.preventDefault();
                 return false;
             }
         );
+*/        
     }
     
     
@@ -142,16 +140,16 @@ function hDatabaseAdmin() {
         if(event.target && $(event.target).attr('data-nologin')!='1'){
             
             //check if login
-            top.HAPI4.SystemMgr.is_logged(function(){
-                //top.HEURIST4.msg.showDialog(url, options);
-                $('.accordion_pnl').find('a').removeClass('selected'); //was #menu_container
-                link.addClass('selected');
+            window.hWin.HAPI4.SystemMgr.is_logged(function(){
+                //window.hWin.HEURIST4.msg.showDialog(url, options);
+                $('.accordion_pnl').find('a').parent().removeClass('item-selected'); //was #menu_container
+                link.parent().addClass('item-selected');
                 $('#frame_container').attr('src', url); 
             });
         }else{
-            //top.HEURIST4.msg.showDialog(url, options);
-            $('.accordion_pnl').find('a').removeClass('selected');
-            link.addClass('selected');
+            //window.hWin.HEURIST4.msg.showDialog(url, options);
+            $('.accordion_pnl').find('a').parent().removeClass('item-selected');
+            link.parent().addClass('item-selected');
             $('#frame_container').attr('src', url); 
         }        
         

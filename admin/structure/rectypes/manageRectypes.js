@@ -379,7 +379,17 @@ function RectypeManager() {
                 { key: "id", label: "Code", sortable:true, minWidth:30, maxAutoWidth:30, width:30, className:'right',
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
-                        elLiner.innerHTML = '<a href="#search" title="Click to launch search for '+oRecord.getData("name")+' records">'+ rectypeID + '</a>';
+                        
+                        var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
+                        var rectype = top.HEURIST.rectypes.typedefs[rectypeID].commonFields;
+                        
+                        var sCcode = (Hul.isempty(rectype[fi.rty_ConceptID]))
+                                ?'':('Concept Code = '+rectype[fi.rty_ConceptID]+': ');
+                        
+                        elLiner.innerHTML = '<a href="#search" title="'
+                        + sCcode
+                        + 'Click to launch search for '
+                        + oRecord.getData("name")+' records">'+ rectypeID + '</a>';
                     },
                 },
                 // 8/10/12 Concept ID hidden by Ian to make space, shoudl show on rollover of local code

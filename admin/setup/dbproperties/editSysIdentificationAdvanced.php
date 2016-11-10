@@ -50,7 +50,9 @@ $body->global_vars['popup'] = (@$_REQUEST['popup']?$_REQUEST['popup']:'0');
 $body->verify();
 if (@$_REQUEST['_submit']) {
 	$body->input_check();
-	if ($body->satisfied) $body->execute();
+	if ($body->satisfied) {
+        $body->execute();    
+    }
 }
 
 $body->render();

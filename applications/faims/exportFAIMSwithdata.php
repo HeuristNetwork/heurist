@@ -1,6 +1,7 @@
 <!--
 /**
-* filename: explanation
+* exportFAIMSwithdata.php: stub functionality for later implementation if required 
+*                          would create faims config plus write data into SQLite database
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

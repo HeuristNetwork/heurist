@@ -27,7 +27,7 @@ $.widget( "heurist.tag_assign", {
         isdialog: false, //show in dialog or embedded
 
         current_UGrpID: null,
-        // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from window.hWin.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
 
         record_ids: null, //array of record ids the tag selection will be applied for
 
@@ -37,7 +37,7 @@ $.widget( "heurist.tag_assign", {
     // the constructor
     _create: function() {
 
-        top.HAPI4.currentUser.usr_Tags = {}; //clear all
+        window.hWin.HAPI4.currentUser.usr_Tags = {}; //clear all
 
         var that = this;
 
@@ -54,31 +54,31 @@ $.widget( "heurist.tag_assign", {
                 height: 620,
                 width: 400,
                 modal: true,
-                title: top.HR("Manage Tags"),
+                title: window.hWin.HR("Manage Tags"),
                 resizeStop: function( event, ui ) {
                     that.wcontainer.css('width','100%');
                 },
                 buttons: [
-                    {text:top.HR('Delete'),
-                        title: top.HR("Delete selected tags"),
+                    {text:window.hWin.HR('Delete'),
+                        title: window.hWin.HR("Delete selected tags"),
                         disabled: 'disabled',
                         class: 'tags-actions',
                         click: function() {
                             that._deleteTag();
                     }},
-                    {text:top.HR('Merge'),
-                        title: top.HR("Merge selected tags"),
+                    {text:window.hWin.HR('Merge'),
+                        title: window.hWin.HR("Merge selected tags"),
                         disabled: 'disabled',
                         class: 'tags-actions',
                         click: function() {
                             that._mergeTag();
                     }},
-                    {text:top.HR('Create'),
-                        title: top.HR("Create new tag"),
+                    {text:window.hWin.HR('Create'),
+                        title: window.hWin.HR("Create new tag"),
                         click: function() {
                             that._editTag();
                     }},
-                    {text:top.HR('Close'), click: function() {
+                    {text:window.hWin.HR('Close'), click: function() {
                         $( this ).dialog( "close" );
                     }}
                 ]
@@ -101,21 +101,21 @@ $.widget( "heurist.tag_assign", {
 
                 //var that = this;
 
-                if(top.HAPI4.currentUser.usr_Tags && top.HAPI4.currentUser.usr_Tags[val]){  //already found
+                if(window.hWin.HAPI4.currentUser.usr_Tags && window.hWin.HAPI4.currentUser.usr_Tags[val]){  //already found
                     this.options.current_UGrpID = val;
                     this._renderTags();
                 }else{
-                    top.HAPI4.RecordMgr.tag_get({UGrpID:val, recIDs:this.options.record_ids},
+                    window.hWin.HAPI4.RecordMgr.tag_get({UGrpID:val, recIDs:this.options.record_ids},
                         function(response) {
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                 that.options.current_UGrpID = val;
-                                if(!top.HAPI4.currentUser.usr_Tags){
-                                    top.HAPI4.currentUser.usr_Tags = {};
+                                if(!window.hWin.HAPI4.currentUser.usr_Tags){
+                                    window.hWin.HAPI4.currentUser.usr_Tags = {};
                                 }
-                                top.HAPI4.currentUser.usr_Tags[val] = response.data[val];
+                                window.hWin.HAPI4.currentUser.usr_Tags[val] = response.data[val];
                                 that._renderTags();
                             }else{
-                                top.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                     });
                 }
@@ -141,10 +141,10 @@ $.widget( "heurist.tag_assign", {
 
         //---------------------------------------- ORDER
         this.select_order = $( "<select><option value='0'>"+
-            top.HR("by name")+"</option><option value='3'>"+
-            top.HR("by usage")+"</option><option value='2'>"+
-            top.HR("by date")+"</option><option value='5'>"+
-            top.HR("marked")+"</option></select>", {'min-width':'46%', 'padding-left':'10px'} )
+            window.hWin.HR("by name")+"</option><option value='3'>"+
+            window.hWin.HR("by usage")+"</option><option value='2'>"+
+            window.hWin.HR("by date")+"</option><option value='5'>"+
+            window.hWin.HR("marked")+"</option></select>", {'min-width':'46%', 'padding-left':'10px'} )
 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.wcontainer );
@@ -177,8 +177,8 @@ $.widget( "heurist.tag_assign", {
             .appendTo( this.wcontainer );
 
             this.btn_add = $( "<button>", {
-                text: top.HR("Create"),
-                title: top.HR("Create new tag")
+                text: window.hWin.HR("Create"),
+                title: window.hWin.HR("Create new tag")
             })
             .appendTo( this.div_toolbar )
             .button();
@@ -187,8 +187,8 @@ $.widget( "heurist.tag_assign", {
 
             this.btn_manage = $( "<button>", {
                 id: 'manageTags',
-                text: top.HR("Manage"),
-                title: top.HR("Manage tags")
+                text: window.hWin.HR("Manage"),
+                title: window.hWin.HR("Manage tags")
             })
             .appendTo( this.div_toolbar )
             .button();
@@ -198,8 +198,8 @@ $.widget( "heurist.tag_assign", {
             this.btn_assign = $( "<button>", {
                 id: 'assignTags',
                 //disabled: 'disabled',
-                text: top.HR("Assign"),
-                title: top.HR("Assign selected tags")
+                text: window.hWin.HR("Assign"),
+                title: window.hWin.HR("Assign selected tags")
             })
             .appendTo( this.div_toolbar )
             .button();
@@ -210,10 +210,10 @@ $.widget( "heurist.tag_assign", {
 
         // list of groups for current user
         var selObj = this.select_ugrp.get(0);
-        top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-            [{key:top.HAPI4.currentUser.ugr_ID, title:top.HR('Personal Tags')}],
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+            [{key:window.hWin.HAPI4.currentUser.ugr_ID, title:window.hWin.HR('Personal Tags')}],
             function(){
-                that.select_ugrp.val(top.HAPI4.currentUser.ugr_ID);
+                that.select_ugrp.val(window.hWin.HAPI4.currentUser.ugr_ID);
                 that.select_ugrp.change();
         });
 
@@ -229,9 +229,9 @@ $.widget( "heurist.tag_assign", {
 
     _reloadTags: function(uGrpID){
         if(uGrpID){
-            top.HAPI4.currentUser.usr_Tags[uGrpID] = null;
+            window.hWin.HAPI4.currentUser.usr_Tags[uGrpID] = null;
         }else{
-            top.HAPI4.currentUser.usr_Tags = {}; //clear all
+            window.hWin.HAPI4.currentUser.usr_Tags = {}; //clear all
         }
         this.options.current_UGrpID = null;
         this.select_ugrp.change();
@@ -275,10 +275,10 @@ $.widget( "heurist.tag_assign", {
         btn.attr('disabled','disabled');       */
 
 
-        if(top.HAPI4.currentUser.usr_Tags && top.HAPI4.currentUser.usr_Tags[this.options.current_UGrpID])
+        if(window.hWin.HAPI4.currentUser.usr_Tags && window.hWin.HAPI4.currentUser.usr_Tags[this.options.current_UGrpID])
         {
             var that = this;
-            var tags2 = top.HAPI4.currentUser.usr_Tags[this.options.current_UGrpID];
+            var tags2 = window.hWin.HAPI4.currentUser.usr_Tags[this.options.current_UGrpID];
             var tagID;
             var tags = [];
             for(tagID in tags2) {
@@ -327,7 +327,7 @@ $.widget( "heurist.tag_assign", {
                 .css('margin','0.4em')
                 .click(function(event){
 
-                    top.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][$(this).attr('tagID')][5] = event.target.checked;
+                    window.hWin.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][$(this).attr('tagID')][5] = event.target.checked;
                     //event.target.keepmark = event.target.checked;
 
                     if(that.options.isdialog){  //tag management
@@ -387,12 +387,12 @@ $.widget( "heurist.tag_assign", {
                     .append( $('<div>')
                         .addClass('edit-delete-buttons')
                         .css('margin','0.4em 1.2em')
-                        .append( $('<div>', { tagID:tagID, title: top.HR('Edit tag') })
+                        .append( $('<div>', { tagID:tagID, title: window.hWin.HR('Edit tag') })
                             .button({icons: {primary: "ui-icon-pencil"}, text:false})
                             .click(function( event ) {
                                 that._editTag( $(this).attr('tagID') );
                         }) )
-                        .append($('<div>',{ tagID:tagID, title: top.HR('Delete tag') })
+                        .append($('<div>',{ tagID:tagID, title: window.hWin.HR('Delete tag') })
                             .button({icons: {primary: "ui-icon-close"}, text:false})
                             .click(function( event ) {
                                 that._deleteTag( $(this).attr('tagID') );
@@ -420,7 +420,7 @@ $.widget( "heurist.tag_assign", {
 
         var tagIDs = [];
         if(tagID){
-            var tag = top.HAPI4.currentUser.usr_Tags[this.options.current_UGrpID][tagID];
+            var tag = window.hWin.HAPI4.currentUser.usr_Tags[this.options.current_UGrpID][tagID];
             if(!tag) return;
             tagIDs.push(tagID);
         }else{
@@ -432,21 +432,21 @@ $.widget( "heurist.tag_assign", {
         var request = {ids: tagIDs.join(',')};
         var that = this;
 
-        top.HEURIST4.msg.showMsgDlg(top.HR("Delete? Please confirm"), function(){
+        window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Delete? Please confirm"), function(){
 
-            top.HAPI4.RecordMgr.tag_delete(request,
+            window.hWin.HAPI4.RecordMgr.tag_delete(request,
                 function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                         $.each(tagIDs, function(i,e){
                             //remove from UI
                             $('#tag-'+e).remove();
                             //remove from
-                            delete top.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][e];
+                            delete window.hWin.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][e];
                         });
 
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 }
 
@@ -485,7 +485,7 @@ $.widget( "heurist.tag_assign", {
             var isEdit = (parseInt(tagID)>0);
 
             if(isEdit){
-                var tag = top.HAPI4.currentUser.usr_Tags[this.options.current_UGrpID][tagID];
+                var tag = window.hWin.HAPI4.currentUser.usr_Tags[this.options.current_UGrpID][tagID];
                 tag_id.val(tagID);
                 tag_name.val(tag[0]);
                 tag_desc.val(tag[1]);
@@ -506,8 +506,8 @@ $.widget( "heurist.tag_assign", {
     */
     _editTag: function(tagID, tagIDs){
 
-        var sTitle = top.HR(top.HEURIST4.util.isnull(tagIDs)
-            ?(top.HEURIST4.util.isempty(tagID)?"Add Tag":"Edit Tag")
+        var sTitle = window.hWin.HR(window.hWin.HEURIST4.util.isnull(tagIDs)
+            ?(window.hWin.HEURIST4.util.isempty(tagID)?"Add Tag":"Edit Tag")
             :"Define new tag that replaces old ones");
 
         if(  this.edit_dialog==null )
@@ -516,11 +516,11 @@ $.widget( "heurist.tag_assign", {
             var $dlg = this.edit_dialog = $( "<div>" ).appendTo( this.element );
 
             //load edit dialogue
-            $dlg.load(top.HAPI4.basePathV4+"hclient/widgets/tag_edit2.html", function(){
+            $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/tag_edit2.html", function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
-                    $(this).html(top.HR($(this).html()));
+                    $(this).html(window.hWin.HR($(this).html()));
                 })
 
                 //-----------------
@@ -534,7 +534,7 @@ $.widget( "heurist.tag_assign", {
                     allFields.removeClass( "ui-state-error" );
 
                     var message = $dlg.find('.messages');
-                    var bValid = top.HEURIST4.msg.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
+                    var bValid = window.hWin.HEURIST4.msg.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
 
                     if(bValid){
 
@@ -554,34 +554,34 @@ $.widget( "heurist.tag_assign", {
                         }
 
                         //get hapi and save tag
-                        top.HAPI4.RecordMgr.tag_save(request,
+                        window.hWin.HAPI4.RecordMgr.tag_save(request,
                             function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                                     var tagID = response.data;
 
-                                    if(!top.HAPI4.currentUser.usr_Tags){
-                                        top.HAPI4.currentUser.usr_Tags = {};
+                                    if(!window.hWin.HAPI4.currentUser.usr_Tags){
+                                        window.hWin.HAPI4.currentUser.usr_Tags = {};
                                     }
-                                    if(!top.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID]){
-                                        top.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID] = {};
+                                    if(!window.hWin.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID]){
+                                        window.hWin.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID] = {};
                                     }
 
                                     if(isEdit){
-                                        var oldtag = top.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][tagID];
-                                        top.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
+                                        var oldtag = window.hWin.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][tagID];
+                                        window.hWin.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
                                     }else{
-                                        top.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
+                                        window.hWin.HAPI4.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
                                     }
 
-                                    if(!top.HEURIST4.util.isnull(tag_ids)){
+                                    if(!window.hWin.HEURIST4.util.isnull(tag_ids)){
                                         //send request to replace selected tags with new one
                                         var request = {ids: tag_ids,
                                             new_id: tagID,
                                             UGrpID: that.options.current_UGrpID};
 
-                                        top.HAPI4.RecordMgr.tag_replace(request, function(response){
-                                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                                        window.hWin.HAPI4.RecordMgr.tag_replace(request, function(response){
+                                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                 $dlg.dialog( "close" );
 
                                                 that._reloadTags(that.options.current_UGrpID);
@@ -625,8 +625,8 @@ $.widget( "heurist.tag_assign", {
                     resizable: false,
                     title: sTitle,
                     buttons: [
-                        {text:top.HR('Save'), click: __doSave},
-                        {text:top.HR('Cancel'), click: function() {
+                        {text:window.hWin.HR('Save'), click: __doSave},
+                        {text:window.hWin.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );
                         }}
                     ],
@@ -681,12 +681,12 @@ $.widget( "heurist.tag_assign", {
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
             var that = this;
 
-            top.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_UGrpID, recIDs:this.options.record_ids},
+            window.hWin.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_UGrpID, recIDs:this.options.record_ids},
                 function(response) {
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         that.element.hide();
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
             });
 

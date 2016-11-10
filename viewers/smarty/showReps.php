@@ -117,7 +117,7 @@ function executeSmartyTemplate($params){
 
             $limit_for_interface = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
             if (!$limit_for_interface || $limit_for_interface<1){
-                $limit_for_interface = 1000; //default limit in dispPreferences
+                $limit_for_interface = 50; //default limit in dispPreferences
             }
 
             $params["limit"] = $limit_for_interface; //force limit
@@ -220,9 +220,15 @@ function executeSmartyTemplate($params){
     //need to detect $heurist->getRecord - if it is not found this is old version - show error message
     if(strpos($content, '$heurist->getRecord(')===false){
             
-           $error = '<p>To improve performance we have made some small changes to the report template specifications (Vsn 3, July 2016). You will need to add {$r = $heurist->getRecord($r)}  for the main record loop and similar expressions for record pointer loops.<br>Example: {$r.f103 = $heurist->getRecord($r.f103)}</p>'
-
-           .'<p>Please generate a new report to obtain an example of the syntax, or simply send your report template to support at HeuristNetwork dot org and we will adjust the template for you.</p>';
+           $error = '<p>To improve performance we have made some small changes to the report template specifications (July 2016).</p>'. 
+                    '<p>You will need to add  {$r = $heurist->getRecord($r)}  immediately after the start of the main record loop, like this:<p/>'
+                    .'{*------------------------------------------------------------*}'
+                    .'<br/>{foreach $results as $r}'
+                    .'<br/><b>{$r = $heurist->getRecord($r)}</b>'
+                    .'<br/>{*------------------------------------------------------------*}'
+                    .'<p>and similar expressions for record pointer loops - example: {$r.f103 = $heurist->getRecord($r.f103)}</p>'
+                    .'<p>Please generate a new report to obtain an example of the syntax, or simply send your report template to '
+                    .'<br/>support at HeuristNetwork dot org and we will adjust the template for you.</p>';
            
            if($publishmode>0 && $outputfile!=null){
                 save_report_output2($error);

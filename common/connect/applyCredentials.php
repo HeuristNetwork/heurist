@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -179,13 +179,17 @@ function jump_sessions() {
         session_write_close();
     }
 
-    $tmp = array();
-    foreach ($copy_vars as $varname) $tmp[$varname] = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname];
+    $tmp = array(); //keep variables
+    foreach ($copy_vars as $varname) $tmp[$varname] = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname];
 
     session_id($alt_sessionid);
     session_start();
 
-    foreach ($copy_vars as $varname) $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname] = $tmp[$varname];
+    foreach ($copy_vars as $varname) {
+        if(@$tmp[$varname]){
+            $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname] = $tmp[$varname];
+        }
+    }
 }
 
 /**
@@ -283,14 +287,14 @@ function isForOwnerOnly($message="", $redirect=true){
         header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
     }
-    
+
     if(get_user_id()==2){
         return false;
     }else{
         outWarning('Database Owner', $message);
         return true;
     }
-    
+
 }
 
 function isForAdminOnly($message="", $redirect=true)
@@ -309,27 +313,51 @@ function isForAdminOnly($message="", $redirect=true)
     }
 }
 
+// TODO: Replace this ugly popup with a brief duration message
 function outWarning($role, $message){
-        ?>
-        <html>
-            <head>
-                <link rel=stylesheet href='../../../common/css/global.css'>
-                <meta http-equiv="content-type" content="text/html; charset=utf-8">
-            </head>
-            <body>
-                <div class=wrap>
-                    <div id=errorMsg>
-                        <span>You must be logged in as <?php echo $role.' '.$message; ?></span>
-                        <p>
-                            <a href="<?php echo HEURIST_BASE_URL;?>common/connect/login.php?logout=1&db=<?php echo HEURIST_DBNAME;?>" 
-                                target="_top">Log out / log in again</a>
-                        </p>
-                    </div>
+    ?>
+    <html>
+        <head>
+            <!--<link rel=stylesheet href='../../../common/css/global.css'> -->
+            <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+            <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+            <!-- not accessible  script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.js"></script -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.3/toastr.min.js"></script>
+            <script src="../../../hclient/framecontent/tabmenus/manageMenu.js"></script>
+            <script>
+
+                $(document ).ready(function() {
+                    $('#errorMsg').show(2000, function(){
+                        //Toast.defaults.displayDuration= 2000;
+                        toastr.options = {
+                            "timeOut" : 2000,
+                            "positionClass": "toast-top-full-width"
+                        };
+                        toastr.info("it appears you have insufficient access rights for this operation");
+
+                    });
+
+                });
+            </script>
+            <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+        </head>
+
+        <body>
+            <div class=wrap>
+                <div id=errorMsg>
+                    <!--  <span>You do not have the permission to perform this action</span>
+                    <p>
+                    <a href="<?php //echo HEURIST_BASE_URL; ?>common/connect/login.php?logout=1&db=<?php // echo HEURIST_DBNAME; ?>"
+                    target="_top">Log out / log in again</a>
+                    </p>-->
                 </div>
-            </body>
-        </html>
-        <?php
-        
+            </div>
+
+        </body>
+    </html>
+    <?php
+
 }
 
 function flush_buffers($start=true){
@@ -344,16 +372,16 @@ function flush_buffers($start=true){
 //
 function getDefaultOwnerAndibility($request){
 
-//in session we store CSV  string:  record_type, owner usergroup, nonowner visibility, personal tags, wg tags, setting visibility in ui
-    
-$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
-if ($addRecDefaults){
-    if(!is_array($addRecDefaults)) $addRecDefaults = explode(',',$addRecDefaults);
-}else{
-    $addRecDefaults = array();
-}
+    //in session we store CSV  string:  record_type, owner usergroup, nonowner visibility, personal tags, wg tags, setting visibility in ui
 
-//record type
+    $addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
+    if ($addRecDefaults){
+        if(!is_array($addRecDefaults)) $addRecDefaults = explode(',',$addRecDefaults);
+    }else{
+        $addRecDefaults = array();
+    }
+
+    //record type
     if (@$addRecDefaults[0]){
         $userDefaultRectype = intval($addRecDefaults[0]);
     }else{
@@ -381,8 +409,8 @@ if ($addRecDefaults){
     }else{
         $settings_visible = 1;
     }
-    
-    
+
+
     //values in current request have higher rank
     if($request!=null && is_array($request)){
         if(is_numeric(@$request['rec_owner']) && intval($request['rec_owner'])>=0){
@@ -407,7 +435,7 @@ if ($addRecDefaults){
     if(!in_array($userDefaultVisibility, array('viewable','hidden','public','pending'))){
         $userDefaultVisibility = 'viewable';
     }
-    
+
     $addRecDefaults = array($userDefaultRectype, $userDefaultOwnerGroupID, $userDefaultVisibility, $wgTags, $personalTags, $settings_visible);
     return $addRecDefaults;
 }

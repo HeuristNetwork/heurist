@@ -203,10 +203,6 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             }            
             
         </style>
-        <!--
-        <script type="text/javascript" src="../../hclient/core/utils.js"></script>
-        <script type="text/javascript" src="../../hclient/core/utils_msg.js"></script>
-         -->
     </head>
 
     <body class="popup">
@@ -1167,8 +1163,8 @@ if(is_array($imp_session)){
                 var uploadWidget = $('#upload_file');
                 
                 uploadWidget.fileupload({
-        url: top.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
-        formData: [ {name:'db', value: top.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
+        url: window.hWin.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
+        formData: [ {name:'db', value: window.hWin.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
                     {name:'max_file_size', value: max_size},
                     {name:'entity', value:'temp'}],  //just place file into scratch folder
         //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
@@ -1189,7 +1185,7 @@ if(is_array($imp_session)){
             $('#upload_form_div').show();
             pbar_div.hide();
             if(textStatus!='abort'){
-                top.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
+                window.hWin.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
             }
         },
         done: function (e, response) {
@@ -1197,18 +1193,18 @@ if(is_array($imp_session)){
                 $('#upload_form_div').show();                
                 pbar_div.hide();
                 response = response.result;
-                if(response.status==top.HAPI4.ResponseStatus.OK){
+                if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
                     var data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
-                            top.HEURIST4.msg.showMsgErr(file.error);
+                            window.hWin.HEURIST4.msg.showMsgErr(file.error);
                         }else{
                             $('#upload_file_name').val(file.name);
                             doUpload();
                         }
                     });
                 }else{
-                    top.HEURIST4.msg.showMsgErr(response.message);
+                    window.hWin.HEURIST4.msg.showMsgErr(response.message);
                 }
                  
                     /* var inpt = this;
@@ -1223,7 +1219,7 @@ if(is_array($imp_session)){
                     pbar.progressbar({value: progress});
                     if (data.total>max_size && uploadData) {
                             uploadData.abort();
-                            top.HEURIST4.msg.showMsgErr(
+                            window.hWin.HEURIST4.msg.showMsgErr(
                             'Sorry, this file exceeds the upload '
                             + ((max_file_size<max_post_size)?'file':'(post data)')
                             + ' size limit set for this server ('

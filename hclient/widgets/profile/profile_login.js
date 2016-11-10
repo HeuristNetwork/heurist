@@ -25,7 +25,7 @@ function doLogin(isforsed){
 
     function _setMessage(text){
         var message = login_dialog.find('.messages');
-        if(top.HEURIST4.util.isempty(text)){
+        if(window.hWin.HEURIST4.util.isempty(text)){
             message.empty();
             message.removeClass('ui-state-error');   
         }else{
@@ -43,11 +43,11 @@ function doLogin(isforsed){
         var $dlg = login_dialog;
 
         //load login dialogue
-        $dlg.load(top.HAPI4.basePathV4 + "hclient/widgets/profile/profile_login.html?t="+top.HEURIST4.util.random(), function(){ 
+        $dlg.load(window.hWin.HAPI4.basePathV4 + "hclient/widgets/profile/profile_login.html?t="+window.hWin.HEURIST4.util.random(), function(){ 
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){
-                $(this).html(top.HR($(this).html()));
+                $(this).html(window.hWin.HR($(this).html()));
             });
 
             if(false){
@@ -55,9 +55,9 @@ function doLogin(isforsed){
 
                 function __refreshCaptcha(){
                     var $dd = $dlg.find('#imgdiv');
-                    var id = top.HEURIST4.util.random();
+                    var id = window.hWin.HEURIST4.util.random();
                     if(true){
-                        $dd.load(top.HAPI4.basePathV4+'hserver/utilities/captcha.php?id='+id);
+                        $dd.load(window.hWin.HAPI4.basePathV4+'hserver/utilities/captcha.php?id='+id);
                     }else{
                         $dd.empty(); //find("#img").remove();
                         $('<img id="img" src="hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
@@ -85,13 +85,13 @@ function doLogin(isforsed){
 
                 if(isreset){
                     var rusername = $dlg.find('#reset_username');
-                    if(top.HEURIST4.msg.checkLength( rusername, "username", message, 1, 0 ))
+                    if(window.hWin.HEURIST4.msg.checkLength( rusername, "username", message, 1, 0 ))
                     {
-                        top.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
-                                top.HEURIST4.msg.showMsgDlg(top.HR('Password_Reset'), null, ""); // Title was an unhelpful and inelegant "Info"
+                        window.hWin.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Password_Reset'), null, ""); // Title was an unhelpful and inelegant "Info"
                             }else{
-                                top.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                         });
                     }
@@ -101,28 +101,28 @@ function doLogin(isforsed){
                     var password = $dlg.find('#password');
                     var session_type = $dlg.find('input[name="session_type"]');
 
-                    var bValid = top.HEURIST4.msg.checkLength( username, "username", message, 1 )
-                    && top.HEURIST4.msg.checkLength( password, "password", message, 1 );         //3,63
+                    var bValid = window.hWin.HEURIST4.msg.checkLength( username, "username", message, 1 )
+                    && window.hWin.HEURIST4.msg.checkLength( password, "password", message, 1 );         //3,63
 
                     if ( bValid ) {
 
                         //get hapi and perform login
-                        top.HAPI4.SystemMgr.login({username: username.val(), password:password.val(), session_type:session_type.val()},
+                        window.hWin.HAPI4.SystemMgr.login({username: username.val(), password:password.val(), session_type:session_type.val()},
                             function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
-                                    top.HAPI4.setCurrentUser(response.data.currentUser);
-                                    top.HAPI4.sysinfo = response.data.sysinfo;
+                                    window.hWin.HAPI4.setCurrentUser(response.data.currentUser);
+                                    window.hWin.HAPI4.sysinfo = response.data.sysinfo;
 
-                                    $(document).trigger(top.HAPI4.Event.LOGIN, [top.HAPI4.currentUser]);
+                                    $(document).trigger(window.hWin.HAPI4.Event.LOGIN, [window.hWin.HAPI4.currentUser]);
 
                                     $dlg.dialog( "close" );
                                     //that._refresh();
-                                }else if(response.status == top.HAPI4.ResponseStatus.REQUEST_DENIED){
+                                }else if(response.status == window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED){
                                     _setMessage(response.message);
                                     setTimeout(function(){ _setMessage(); }, 2000);
                                 }else {
-                                    top.HEURIST4.msg.showMsgErr(response);
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
                                 }
                             }
 
@@ -142,19 +142,19 @@ function doLogin(isforsed){
 
             $dlg.find("#link_restore").on("click", function(){
                 isreset = true;
-                $dlg.dialog("option","title",top.HR('Reset password'));
-                $("#btn_login2").button("option","label",top.HR('Reset password'));
-                //$dlg.find("#btn_login2").button("option","label",top.HR('Reset password'));
+                $dlg.dialog("option","title",window.hWin.HR('Reset password'));
+                $("#btn_login2").button("option","label",window.hWin.HR('Reset password'));
+                //$dlg.find("#btn_login2").button("option","label",window.hWin.HR('Reset password'));
                 $dlg.find("#fld_reset").show();
                 $dlg.find("#fld_login").hide();
                 _setMessage();
             });
 
-            var arr_buttons = [{text:'<b>'+top.HR('Login')+'</b>', click: __doLogin, id:'btn_login2'}];
-            if(isforsed && top.HAPI4.sysinfo.registration_allowed==1){
-                arr_buttons.push({text:top.HR('Register'), click: doRegister, id:'btn_register'});
+            var arr_buttons = [{text:'<b>'+window.hWin.HR('Login')+'</b>', click: __doLogin, id:'btn_login2'}];
+            if(isforsed && window.hWin.HAPI4.sysinfo.registration_allowed==1){
+                arr_buttons.push({text:window.hWin.HR('Register'), click: doRegister, id:'btn_register'});
             }
-            arr_buttons.push({text:top.HR('Cancel'), click: function() {    //isforsed?'Change database':
+            arr_buttons.push({text:window.hWin.HR('Cancel'), click: function() {    //isforsed?'Change database':
                 $( this ).dialog( "close" );
             }});
 
@@ -166,20 +166,20 @@ function doLogin(isforsed){
                 width: 450,
                 modal: true,
                 resizable: false,
-                title: top.HR('Login'),
+                title: window.hWin.HR('Login'),
                 buttons: arr_buttons,
                 close: function() {
                     allFields.val( "" ).removeClass( "ui-state-error" );
-                    if( isforsed && !top.HAPI4.is_logged() ){
+                    if( isforsed && !window.hWin.HAPI4.is_logged() ){
                         //redirect to select database
                         window.location  = window.HAPI4.basePathV4; //+ "hserver/utilities/list_databases.php";
                     }
                 },
                 open: function() {
                     isreset = false;
-                    $dlg.dialog("option","title",top.HR('Login'));
-                    $("#btn_login2").button("option","label",'<b>'+top.HR('Login')+'</b>');
-                    //$dlg.find("#btn_login2").button("option","label",top.HR('Login'));
+                    $dlg.dialog("option","title",window.hWin.HR('Login'));
+                    $("#btn_login2").button("option","label",'<b>'+window.hWin.HR('Login')+'</b>');
+                    //$dlg.find("#btn_login2").button("option","label",window.hWin.HR('Login'));
                     $dlg.find("#fld_reset").hide();
                     $dlg.find("#fld_login").show();
                     _setMessage();
@@ -192,7 +192,7 @@ function doLogin(isforsed){
             /*if(isforsed){
             var left_pane = $("div").css('float','left').appendTo( $dlg.find(".ui-dialog-buttonpane") );
             var btn_db = $( "<button>" ).appendTo( left_pane )
-            .button( {title: top.HR("Change database")} ).click( function() { $dlg.dialog( "close" ); } );
+            .button( {title: window.hWin.HR("Change database")} ).click( function() { $dlg.dialog( "close" ); } );
             }*/
 
         });//load html
@@ -211,14 +211,14 @@ function doRegister(){
         if(profile_edit_dialog.length<1){
             profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );
         }
-        profile_edit_dialog.profile_edit({'ugr_ID': top.HAPI4.currentUser.ugr_ID});
+        profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID});
 
     }else{
-        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
+        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
             if($.isFunction($('body').profile_edit)){
                 doRegister();
             }else{
-                top.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
+                window.hWin.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
             }
         });
     }

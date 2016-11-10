@@ -74,6 +74,9 @@ function getRecTypes() {
         opt.innerHTML = recTypes[i].getName();
         g_recTypeSelect.appendChild(opt);
     }
+    
+    g_recTypeSelect.selectedIndex  = 1;
+    g_recTypeSelect.onchange();
 }
 
 
@@ -200,6 +203,11 @@ function loadAllRecords(query, options, loader) {
 
 
 function getRecords() {
+    
+    if(top.HEURIST4 && top.HAPI4 && top.HEURIST4.util && !top.HEURIST4.util.isnull(top.HEURIST4.current_query_request)){
+        getRecordsByH4();
+        return;
+    }
 
     if(g_recType==null){
         alert("Please select a record type");
@@ -400,4 +408,134 @@ function csv_escape(str) {
         return '"' + str.replace(/"/g, '""') + '"';
     }
     return str;
+}
+
+//-------------------------
+function getRecordsByH4(){
+    
+    var request = top.HEURIST4.current_query_request;
+    if(!request.w) request.w = 'all';
+    if(!request.a) request.a = '1';
+    //request.detail = [] array of fields to download
+    
+    var len = g_exportMapNames.length,
+        details = [];
+    
+    for (var j = 0; j < len; j++) {
+        if (j>0) {
+            var hDty = g_detailTypes[g_exportMap[j-1]];
+            details.push( hDty.getID() );
+        }
+    }
+    request.detail = details;
+    
+    top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
+
+        if(recordset){
+            //alert("got: "+recordset.length());
+            _showRecordDataH4(recordset)
+        }
+
+    });    
+    
+}
+
+function _showRecordDataH4(recordset) {
+
+    g_delimiterSelect = document.getElementById('delimiterSelect');
+    var strDelim = g_delimiterSelect.value;
+
+    //g_quoteSelect = document.getElementById('quoteSelect');
+    //var quoteDelim = g_quoteSelect.value;
+
+    if(strDelim=='0') {
+        strDelim = '';
+    }
+    var strRowTerm = "\n";
+
+    var e = document.getElementById("records-p");
+    removeChildren(e);
+
+    var e = document.getElementById("records-p");
+
+    if(g_exportMapNames.length<1 && recordset.length()<1){
+        return;
+    }
+
+    //create output area
+    var recDisplay = e.appendChild(document.createElement("textarea"));
+    recDisplay.id = "csv-textarea";
+
+    var lines = "";
+    var dl;
+
+    // Generate header if required
+    if (document.getElementById("includeFieldNamesCheckbox").checked) {
+
+        var k = g_exportMapNames.length,
+        line = "";
+        for (var j = 0; j < k; j++) {
+            if (g_dtIDsCheckbox.checked && j>0) {
+                var hDty = g_detailTypes[g_exportMap[j-1]];
+                line += hDty.getID() + strDelim;
+            }
+            line += (g_exportMapNames[j]+strDelim);
+        }
+        lines = line.slice(0,-1) + strRowTerm;
+    }
+
+    // Generate rows of data
+    var len = recordset.length();
+    
+    var recs = recordset.getRecords();
+    var rec_order = recordset.getOrder();
+    var recID;
+    
+    for (var i = 0; i < len; ++i) {
+        recID = rec_order[i];
+        if(recID && recs[recID]){
+            
+            var line = recID + strDelim;
+            var record = recs[recID];
+            
+            var k = g_exportMap.length;
+            for (var j = 0; j < k; ++j) {
+                    var hDty = g_detailTypes[g_exportMap[j]];
+                    
+                    if (g_dtIDsCheckbox.checked) {
+                        line += hDty.getID() + strDelim;
+                    }
+                    var baseType = hDty.getVariety();
+            
+                    var val = record['d'][hDty.getID()];
+                    
+                    if(top.HEURIST4.util.isnull(val)){
+                        line += strDelim;
+                    }else{
+                        var field = '';
+                        if (baseType == HVariety.ENUMERATION || baseType == HVariety.RELATIONTYPE ){
+                            var domain = (baseType == HVariety.RELATIONTYPE)?'relation':'enum';
+                            if(top.HEURIST4.util.isArrayNotEmpty(val)){
+                                for (var m = 0; m < val.length; m++) {
+                                   var term = top.HEURIST4.terms.termsByDomainLookup[domain][val[m]];
+                                   if(term) val[m] = term[0];
+                                }
+                            }
+                        }
+                        
+                        if(top.HEURIST4.util.isArrayNotEmpty(val)){
+                            field = val.join('|');
+                        }else{
+                            field = val;
+                        }
+                        line += ((!top.HEURIST4.util.isempty(field))?dblquote_escape(field):'') + strDelim;
+                        
+                    }
+                    
+                    
+            }//for
+            lines += line.slice(0,-1) + strRowTerm;
+        }
+    }//for
+    recDisplay.value = lines; 
 }

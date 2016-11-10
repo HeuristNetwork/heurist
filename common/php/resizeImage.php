@@ -45,6 +45,7 @@ require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/dbMySqlWrappers.php');
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+require_once(dirname(__FILE__).'/../../common/php/utilsMail.php');
 
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
@@ -139,27 +140,90 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                     break;
             }
         }
-
-
+        
+        $is_image = false;
+        $too_large = false;
+        
+        //if img check memory to be allocated
         switch($mimeExt) {
             case 'image/jpeg':
             case 'jpeg':
             case 'jpg':
-                $img = imagecreatefromjpeg($filename);
-                break;
             case 'image/gif':
             case 'gif':
-                $img = imagecreatefromgif($filename);
-                break;
             case 'image/png':
             case 'png':
-                $img = imagecreatefrompng($filename);
+                $is_image = true;
+            
+                $mem_limit = ini_get ('memory_limit');
+                $mem_limit = _get_config_bytes($mem_limit);
+                
+                $imageInfo = getimagesize($filename); 
+                if(is_array($imageInfo)){
+                    if(array_key_exists('channels', $imageInfo) && array_key_exists('bits', $imageInfo)){
+                        $memoryNeeded = round(($imageInfo[0] * $imageInfo[1] * $imageInfo['bits'] * $imageInfo['channels'] / 8 + Pow(2,16)) * 1.65); 
+                    }else{
+                        $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);  
+                    } 
+                    $mem_usage = memory_get_usage();
+
+                    if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){ // $mem_limit - 10485760){ // min($mem_limit, 41943040)){ //40M
+                        $too_large = true;
+                        
+                        //database, record ID and name of bad image
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.DATABASE, 
+                        'File ID#'.$file['ulf_ID'].'  '.$filename.' requires '.$memoryNeeded.
+                        ' bytes to be resized.  Available '.$mem_limit.' bytes.', null);
+                    }                
+                }
                 break;
             default:
-                $desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
-                $img = make_file_image($desc); //from string
                 break;
+        }        
+
+        $img = null;
+
+        if(!$too_large){
+                
+            $errline_prev = 0;
+            
+            set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
+                global $errline_prev, $filename, $file;
+                
+                //error_log('Send email to admin - file is broken it cant be loaded to resize. '.$errstr.' line:'.$errline);
+                //it may report error several times with different messages - send for the first one
+                if($errline_prev!=$errline){
+                    
+                        $errline_prev=$errline;
+                        //database, record ID and name of bad image
+                        $res = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.DATABASE, 
+                        'File ID#'.$file['ulf_ID'].'  '.$filename.' is corrupted. System message: '.$errstr, null);
+                    
+                }
+                return false;
+            });//, E_WARNING);                
+            
+            switch($mimeExt) {
+                case 'image/jpeg':
+                case 'jpeg':
+                case 'jpg':
+                    $img = @imagecreatefromjpeg($filename);
+                    break;
+                case 'image/gif':
+                case 'gif':
+                    $img = @imagecreatefromgif($filename);
+                    break;
+                case 'image/png':
+                case 'png':
+                    $img = @imagecreatefrompng($filename);
+                    break;
+                default:
+                    $desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
+                    $img = make_file_image($desc); //from string
+                    break;
+            }
         }
+        restore_error_handler();
 
     }else if($file['ulf_ExternalFileReference']){
 
@@ -183,6 +247,7 @@ else if (array_key_exists('file_url', $_REQUEST))   //get thumbnail for any URL
 
 
 if (!$img) {
+    //return image placeholder
     header('Location: ../images/100x100-check.gif');
     return;
 }

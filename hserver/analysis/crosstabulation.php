@@ -55,23 +55,23 @@ if(! $system->init(@$_REQUEST['db'], true) ){
         <script type="text/javascript">
             <?php
             //@ todo - load this stuff in hEditing
-            print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
-            print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
+            print "window.hWin.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
+            print "window.hWin.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
             ?>
             var recordtype;
 
             //localization stub
-            top.HR = function(str){
+            window.hWin.HR = function(str){
                 return str;
             }
 
             $(document).ready(function() {
 
-                if(!top.HAPI4){
-                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>');
+                if(!window.hWin.HAPI4){
+                    window.hWin.HAPI4 = new hAPI('<?=$_REQUEST['db']?>');
                 }
 
-                top.HEURIST4.util.createRectypeSelect($('#cbRectypes').get(0), null, ' ');
+                window.hWin.HEURIST4.util.createRectypeSelect($('#cbRectypes').get(0), null, ' ');
 
                 $('.showintervals')
                 .button({icons: {primary: "ui-icon-triangle-1-s"}, text: false })
@@ -89,9 +89,9 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                 var allowedlist = ["enum", "integer", "float", "date", "freetext"]; //"resource",
 
-                top.HEURIST4.util.createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
-                top.HEURIST4.util.createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
-                top.HEURIST4.util.createRectypeDetailSelect($('#cbPages').get(0), recordtype, allowedlist, ' ');
+                window.hWin.HEURIST4.util.createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
+                window.hWin.HEURIST4.util.createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
+                window.hWin.HEURIST4.util.createRectypeDetailSelect($('#cbPages').get(0), recordtype, allowedlist, ' ');
 
                 clearIntervals('column');
                 clearIntervals('row');
@@ -164,16 +164,16 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 $container.empty();
                 fields3[name] = {field:0, type:'', values:[], intervals:[]};
 
-                if (!(top.HEURIST4.rectypes.typedefs[recordtype] &&
-                    top.HEURIST4.rectypes.typedefs[recordtype].dtFields[detailid]))
+                if (!(window.hWin.HEURIST4.rectypes.typedefs[recordtype] &&
+                    window.hWin.HEURIST4.rectypes.typedefs[recordtype].dtFields[detailid]))
                 {
                     $container.hide();
                     return;
                 }
 
                 //get detail type
-                var fi = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-                var details = top.HEURIST4.rectypes.typedefs[recordtype].dtFields[detailid];
+                var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+                var details = window.hWin.HEURIST4.rectypes.typedefs[recordtype].dtFields[detailid];
                 var detailtype = details[fi['dty_Type']];
 
                 if(detailtype=="enum") //false &&
@@ -182,7 +182,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     var allTerms = details[fi['rst_FilteredJsonTermIDTree']];
                     var headerTerms = details[fi['dty_TermIDTreeNonSelectableIDs']];
-                    var termlist = top.HEURIST4.util.getPlainTermsList(detailtype, allTerms, headerTerms);
+                    var termlist = window.hWin.HEURIST4.util.getPlainTermsList(detailtype, allTerms, headerTerms);
 
                     fields3[name] = {field:detailid, type:detailtype, values:termlist, intervals:[]}
 
@@ -196,9 +196,9 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     fields3[name] = {field:detailid, type:detailtype, values:[], intervals:[]}
 
-                    top.HAPI4.RecordMgr.minmax({ rt:recordtype , dt:detailid },
+                    window.hWin.HAPI4.RecordMgr.minmax({ rt:recordtype , dt:detailid },
                         function(response){
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                                 var val0 = parseFloat(response.data.min);
                                 var valmax = parseFloat(response.data.max);
@@ -463,10 +463,10 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                         modal: true,
                         resizable: false,
                         draggable: true,
-                        title: top.HR("Select terms"),
+                        title: window.hWin.HR("Select terms"),
                         buttons: [
-                            {text:top.HR('Apply'), click: __addeditInterval},
-                            {text:top.HR('Cancel'), click: function() {
+                            {text:window.hWin.HR('Apply'), click: __addeditInterval},
+                            {text:window.hWin.HR('Cancel'), click: function() {
                                 $( this ).dialog( "close" );
                             }}
                         ]
