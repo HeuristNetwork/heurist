@@ -1,0 +1,177 @@
+<!--
+
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* brief description of file
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @todo        CHECK USAGE!  editGroupTags.php - missed DB 
+*/
+
+-->
+
+
+<html>
+    <head>
+        <link rel=stylesheet href="../../common/css/global.css">
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+        <title>Workgroup tags</title>
+    </head>
+ <body class="popup" width=700 height=600>
+  <script src="../../common/js/utilsUI.js"></script>
+  <script src="../../common/js/utilsLoad.js"></script>
+  <script src="../../common/php/displayPreferences.php"></script>
+  <script src=usergroupTagEditorLibrary.js></script>
+
+    <table><tr>
+	 <td style="font-size: 150%; font-weight: bold; vertical-align: top;white-space:nowrap;">Workgroup tags &nbsp;&nbsp;</td>
+	 <td style="font-size: 11px;">
+      Tags are a controlled list of terms assigned by the workgroup adminstrators.
+      Only members of a workgroup can add or delete the tags for that workgroup.
+      Visit the workgroup home page (Workgroups menu on the Heurist search screen)
+      to email the workgroup adminstrators.
+     </td>
+    </tr></table>
+
+    <table border=0 cellspacing=0 cellpadding=0 style="margin: 10px 40px;">
+     <tr>
+      <td><b>Available</b></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+      <td><b>Selected</b></td>
+     </tr>
+
+     <tr>
+      <td>
+       <div class=wgtag-list><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
+      </td>
+      <td>
+       <div id=button-box>
+        <div><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
+        <div>&nbsp;&nbsp;</div>
+        <div><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
+       </div>
+      </td>
+      <td>
+       <div class=wgtag-list><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
+      </td>
+     </tr>
+
+     <tr class=help>
+      <td style="font-size: 11px;" >Double-click on a tag to select it</td>
+      <td>&nbsp;&nbsp;</td>
+      <td class=prompt>&nbsp;<!-- i have nothing sensible to say here --></td>
+     </tr>
+
+    <tr>
+     <td>
+      <a href="#" onclick="{editTags();return false;}">Modify Tag Definitions (admins only) </a>
+      <div style="font-size: 11px; ">Reload edit form to see new tags</div>
+     </td>
+     <td></td>
+     <td>
+      <input type=button onclick="saveKeywords(true)" value="Add">
+	  these tags to all selected records
+	  <br>
+	  <br>
+	  <hr>
+	  <br>
+      <input type=button onclick="saveKeywords(false)" value="Remove">
+	  these tags from all selected records
+     </td>
+    </tr>
+
+    </table>
+
+    <!-- not used in this form ... just for compatibility with the edit/workgroups tab ... safe to FIXME when we refactor -->
+    <form id=wgtag-form jsonAction="updateRecordTagLinks.php" action="updateRecordTagLinks.php"></form>
+
+<script>
+
+var removeButton = document.getElementById("remove-button");
+var addButton = document.getElementById("add-button");
+
+var currWgTagsElt = document.getElementById("current-workgroup-tags");
+var allWgTagsElt = document.getElementById("all-workgroup-tags");
+new HEURIST.wgTagEditor.WgTagEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
+
+
+function saveKeywords(add) {
+	// grab the IDs of the workgroup tags that we are adding, pass them back to the close function.
+	var ids = [];
+	for (var i=0; i < currWgTagsElt.childNodes.length; ++i) {
+		var id = parseInt(currWgTagsElt.childNodes[i].id);
+		ids.push(id);
+	}
+
+	if (! add  &&  ids.length > 0  &&  ! confirm("Are you sure you wish to remove these tags from the selected records?")) return;
+
+	window.close(add, ids);
+}
+
+function editTags(){
+
+	var url = "admin/ugrps/editGroupTags.php?popup=yes&db=";
+
+	var database = (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
+												: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:"");
+
+	var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
+
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + url + database,
+		{ callback:
+			function(tags) {
+
+				if (tags){
+
+					var _updateTags = function(context){
+
+							if(!top.HEURIST.util.isnull(context)) {
+
+								top.HEURIST.user.workgroupTags = context['workgroupTags'];
+								top.HEURIST.user.workgroupTagOrder = context['workgroupTagOrder'];
+
+								//recreate table
+								HEURIST.wgTagEditor.reloadTags();
+							}
+					}
+
+					var baseurl = top.HEURIST.baseURL_V3 + "records/tags/reloadUsergroupTags.php";
+					var callback = _updateTags;
+					var params = "db="+database;
+					top.HEURIST.util.getJsonData(baseurl, callback, params);
+				}
+			}
+		});
+
+	return false;
+}
+
+
+</script>
+
+ </body>
+</html>

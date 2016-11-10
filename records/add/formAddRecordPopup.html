@@ -1,0 +1,98 @@
+<!--
+
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* Popup lightweight wrapper for Shared Information tab to allow editing of nested records added from the edit record form. 
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  Records/Add
+*/
+
+-->
+
+<html>
+<head>
+  <title>Add new record</title>
+
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel=stylesheet href="../../common/css/global.css">
+  
+  <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+  <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
+  
+</head>
+
+<body width="760" height="560" style="overflow:hidden; background:#ffffff; padding:0px !important;">
+
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script src="../../common/js/temporalObjectLibrary.js"></script>
+        <script src="../../records/edit/relationshipsObjectLibrary.js"></script>
+        <script src="../../records/edit/digitizer/mapViewer.js"></script>
+<!--        
+        <script src="../../common/php/getMagicNumbers.php"></script>  xxx 
+        <script src="../../common/php/loadUserInfo.php"></script> xxx
+        <script src="../../common/php/loadCommonInfo.php"></script> xxx
+        <script src="../../common/php/displayPreferences.php"></script>
+-->        
+        <script src="../../records/edit/editRecord.js"></script>  
+        <script src="formAddRecordPopup.js"></script>  
+        
+        
+<div class="header"><b><span id=rectype-val></span></b><span id=title-val></span></div>
+<div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
+<div id="add_records_footer"><input type=button onClick="saveRecordAndClosePopup()" value="Save new record">
+<input type=button onClick="window.close();" value="Cancel"></div>
+
+<div id=notes-container></div>
+
+<div>
+
+    <div id="popup-saved" class="popup-message" style="display: none">
+        <b>Record saved</b>
+    </div>
+    <div id="popup-nothingchanged" class="popup-message" style="display: none">
+        <b>Nothing changed</b>
+    </div>
+
+</div>
+
+<script src="../disambig/similarRecordsPopup.js"></script>
+<script>
+function popupDisambiguation(matches) {
+	_popupDisambiguation(matches, function(choice) {
+		if (choice.value == -1) {
+			window.HEURIST.record.forceSave = true;
+			var editFrame = document.getElementById("edit-frame");
+			editFrame.contentWindow.document.forms[0].heuristSubmit();
+		}
+		else {
+			window.close(choice.details.title, [], choice.details.bibID);
+		}
+	});
+}
+</script>
+
+ </body>
+</html>

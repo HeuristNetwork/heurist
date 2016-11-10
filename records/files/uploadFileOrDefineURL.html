@@ -1,0 +1,168 @@
+<!--
+
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* Popup dialogue to define URLinclude field type in editRecord
+* URL is either to external resource or link file uploaded to heurist
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  File/Util
+*/
+
+
+-->
+<html>
+    <head>
+        <title>Upload file or define URL</title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <link rel="stylesheet" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css">
+        
+        <script type="text/javascript" src="../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
+        
+        <link rel=stylesheet href="../../common/css/global.css">
+        <link rel=stylesheet href="../../common/css/edit.css">
+
+        <script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
+        <!-- Toolabr extension -->
+        <script type="text/javascript" src="../../external/js/simple_js_viewer/script/extension/toolbar-ext.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../external/js/simple_js_viewer/script/extension/toolbar-ext.css" />
+
+        <style>
+            .input-header-cell {
+                vertical-align: middle;
+                width:50px;
+                height:30px;
+            }
+            .ui-progressbar {
+                position: relative;
+                width:100%;   
+                height: 18px;                
+            }
+            .progress-label {
+                position: absolute;
+                left: 50%;
+                top: 4px;
+                font-weight: bold;
+                text-shadow: 1px 1px 0 #fff;
+            }            
+        </style>
+    </head>
+    <body class="popup" style="overflow:hidden;" onresize="onResize()">
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script src="../../common/js/utilsUI.js"></script>
+        <script src="uploadFileOrDefineURL.js"></script>
+        <script src="imageAnnotation.js"></script>
+        <script src="initViewer.js"></script>
+        <script>
+            // width="640" height="480"
+            if (window == top) {
+                //top.HEURIST.loadScript(top.HEURIST.baseURL_V3 +"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
+            }
+            function onResize(){
+
+                var ele = $("#image_digitizer_container");
+                if(ele.length>0){
+                    var elep = $("#preview");
+                    if(this.innerWidth<590){
+                        if(ele.css('height')!='44px'){
+                            ele.css('height','44px');
+                            elep.css('bottom','44px');
+                        }
+                    }else{
+                        if(ele.css('height')!='22px'){
+                            ele.css('height','22px');
+                            elep.css('bottom','22px');
+                        }
+                    }
+                }
+            }
+        </script>
+
+        <div style="overflow:hidden;">
+            <div id="search" class="banner" style="top:0;height:85px;">
+                <div style="width: 100%;" id="div_fileupload">
+                </div>
+                <div style="width: 100%;" id="div_url"></div>
+                <div id="progressbar_div" style="width:99%;height:40px;padding:5px;text-align:center;display:none">
+                    <div id="progressbar">
+                        <div class="progress-label">Loading data...</div>
+                    </div>
+                    <div id="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+                </div>
+
+                
+                
+                <div style="position: absolute; top:3px; right: 0px; text-align: right;" id="div_type">
+                    <input id="cbSource" type="hidden" />
+                    <!--Source:
+                    <select id="cbSource">
+                    <option>generic</option>
+                    <option>heurist</option>
+                    <option>panoramio</option>
+                    <option>flickr</option>
+                    <option>locr</option>
+                    <option>youtube</option>
+                    <option>gdrive</option>
+                    </select>-->
+                    Type:
+                    <select id="cbType">
+                        <option>unknown</option>
+                        <option>image</option>
+                        <option>audio</option>
+                        <option>video</option>
+                        <option>text/html</option>
+                        <option>document</option>
+                        <option>flash</option>
+                        <option>xml</option>
+                    </select>
+                    <button onclick="onApply()">Save</button>
+                    <button onclick="onCancel()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="preview" style="position:absolute;top:86px;bottom:0px;left:0px;right:0px;">
+            <div class='wrap'>
+                <div id='errorMsg'>
+                    <span></span>
+                    <!-- TODO: was <span>Preview</span> but this looked like a button before the preview loaded
+                         TODO: Need to replace this with a lightweight messge 'Preview shows here' -->
+                </div>
+            </div>
+        </div>
+
+        <div id="image_digitizer_container" style="position:absolute;height:22px;bottom:0px;left:0px;right:0px;"></div>
+
+
+        <script language="JavaScript">
+            $( initPage );
+        </script>
+    </body>
+</html>

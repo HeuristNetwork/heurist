@@ -1,0 +1,139 @@
+<!--
+
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* brief description of file
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+-->
+
+
+<html>
+
+    <head>
+        <title>Edit record</title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel=stylesheet href="../../common/css/global.css">
+    </head>
+
+ <body class="popup" width=600 height=400>
+
+  <script src="../../common/js/utilsLoad.js"></script>
+  <script src="editRecord.js"></script>
+  <script src="../../common/php/displayPreferences.php"></script>
+
+<div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
+<div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save record"></div>
+  <script>
+			if (!window.HEURIST) window.HEURIST = {};
+			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+			window.HEURIST.loadScript(top.HEURIST.baseURL_V3 +'common/php/loadRecordData.php?recID='+window.HEURIST.parameters['recID']+
+											"&db="+top.HEURIST.database.name, true);
+
+			function showRecordProperties() {
+				if (! window.HEURIST.edit.record) {
+					// We only make it here if someone's screwing around ...
+					// It does give a flash of popup window, but it's a bit hard to work around that.
+					alert("Sorry - record not found");
+					setTimeout(function() { window.close(); }, 0);
+					return;
+				}
+				document.title = "Edit " + window.HEURIST.edit.record.rectype + " record: <i>"+ window.HEURIST.edit.record.title + "</i>";
+				// fill in the toolbar fields with the details for this record
+//				document.getElementById('rectype-val').innerHTML = '';
+//				document.getElementById('rectype-val').appendChild(document.createTextNode(window.HEURIST.edit.record.rectype));
+
+//				document.getElementById('title-val').innerHTML = '';
+//				document.getElementById('title-val').appendChild(document.createTextNode(window.HEURIST.edit.record.title));
+
+
+				loadPublicEditFrame();
+			}
+
+			function loadPublicEditFrame() {
+				var editFrame = document.getElementById("edit-frame");
+
+				var parameters = window.HEURIST.parameters;
+				if (parameters  &&  parameters.recID && parameters.db) {
+					editFrame.src = top.HEURIST.baseURL_V3 + "records/edit/tabs/publicInfoTab.html?recID=" + parameters.recID + "&db=" + parameters.db;
+
+					editFrame.style.display = "block";
+				}
+
+				var defaultClose = window.frameElement.close;
+				window.frameElement.close = function() {
+					defaultClose(window.HEURIST.edit.record.title, window.HEURIST.edit.record.bdValuesByType);
+				};
+			}
+
+
+window.HEURIST.edit = {
+
+	publicHasChanged: false,
+
+	userCanEdit: function() { return true;},
+	unchanged: function() {
+			window.HEURIST.edit.publicHasChanged = false;
+		},
+
+	changed: function() {
+			window.HEURIST.edit.publicHasChanged = true;
+		},
+
+	save: function() {
+		// Attempt to save the public tab
+
+		var editFrame = document.getElementById("edit-frame");
+		var contentWindow = editFrame.contentWindow;
+		if (contentWindow  &&  window.HEURIST.edit.publicHasChanged) {
+			var form = contentWindow.document.forms[0];
+			if (form.onsubmit  &&  ! form.onsubmit()) {
+				return;	// submit failed ... up to the individual form handlers to display messages
+			}
+
+			top.HEURIST.registerEvent(editFrame, "load", function() {
+				window.HEURIST.edit.unchanged("public");
+				window.HEURIST.edit.save();	// will continue where we left off
+			});
+
+			(form.heuristSubmit || form.submit)();
+			return;
+		}
+
+		// If we get here, there were no unsaved changes.
+		// Grab the biblio title from the saved document, and close the window.
+		window.close();
+	}
+};
+
+	top.HEURIST.registerEvent(window, "load", showRecordProperties);
+
+  </script>
+ </body>
+</html>

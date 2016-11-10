@@ -1,0 +1,334 @@
+<!--
+
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* editRecord.html
+* Main Heurist search page: this page is the effective home page for the Heurist application *
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+-->
+
+<html>
+
+    <head>
+        <title>Heurist Academic Knowledge Management System - &copy; 2016 University of Sydney</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <link rel=stylesheet href="../../common/css/global.css">
+        <link rel=stylesheet href="../../common/css/edit.css">
+
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
+
+        <script type="text/javascript" src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.js"></script>
+        <script type="text/javascript" src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
+        <script type="text/javascript" src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+
+    </head>
+    <body class="ui-heurist-header2">
+        <script>
+            //window.addEventListener = false;
+        </script>
+        
+
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script src="../../common/php/loadHAPI.php"></script>
+<!--
+        <script src='../../common/php/displayPreferences.php'></script>
+-->        
+        <script src='../../common/js/temporalObjectLibrary.js'></script>
+        <script src='../../records/edit/digitizer/mapViewer.js'></script>
+        <script src='relationshipsObjectLibrary.js'></script>
+        <script src="editRecord.js" type="text/javascript" ></script>
+        <script src="editRecordManager.js"></script>
+        
+<!--        
+        <script src='editRecord.js'></script>
+        <script src="../../common/js/temporalObjectLibrary.js"></script>
+        <script src="../../common/php/getMagicNumbers.php"></script>
+        <script src="relationshipsObjectLibrary.js" type="text/javascript" ></script>
+        <script src="../../common/php/loadUserInfo.php"></script>
+        <script src="../../records/edit/digitizer/mapViewer.js"></script>
+-->
+        <a id=home-link>
+            <div id=logo title="Click the logo to return to your Favourites"></div>
+        </a>
+        <div id=version style="color:white"></div>
+        <!-- database name -->
+        <a id=dbSearch-link>
+            <div id=dbname ></div>
+        </a>
+        <!-- message of the day TODO: FIX OR REMOVE, SEEMS THIS IS NOT DISPLAYED ALTHOUGH IT IS IN PAGE SOURCE-->
+        <div id="message"> Heurist : Open Source <a href="../help/index.html?ACL" target="_blank" title="Click for full information"><br><font style="font-size:11px">Credits</font></a> </div>
+        <!-- quicklinks -->
+        <div id="quicklinks" style="padding-top: 25px">
+                <!--<div id="logged-in" style="height:22px"></div>-->
+
+            <ul id=quicklink-cell style="display: inline-block;padding-left:15px;display:inline-block">
+                <!-- <li><a href="../../help/index.html" onClick="top.HEURIST.util.popupURL(window, href); return false;"><b>About</b></a></li> -->
+                <li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report to the Heurist developers"><b>Report bug</b></a></li>
+                <li><a id=contact-link href="mailto:info@HeuristNetwork.org"><b>Contact us</b></a></li>
+            </ul>
+        </div>
+        <!-- search outline bannerBG -->
+        <div id=search  class="roundedBoth ui-heurist-header1">
+            <!-- div class="tablecell" id="edit_record_title">EDIT RECORD</div -->
+
+            <div id=rectype-edit class=edit >
+                <!-- div style="display:inline-block;padding-right:2px;"><img id=rectype-img src="../../common/images/16x16.gif"></div -->
+                <div id="rectype-name" style="display:inline-block;"></div><img src="../../common/images/edit-pencil.png" id="rectype-change"
+                    onclick="{document.getElementById('rectype-name').style.display='none';document.getElementById('rectype-select').style.display='inline-block';}">
+            </div>
+            <div id=record-title>
+                <div id=title-val></div>
+            </div>
+            <div id="workgroup-div" class="edit-mode-depended">
+                <div id=workgroup-val-div title="Restrict access by workgroup" style="white-space:nowrap;">
+                    <b><span id=workgroup-val></span></b>
+                    <div id=workgroup-edit class="edit admin-only" onClick="openWorkgroupChanger();">
+                    <img id=wg-edit-img src="../../common/images/edit-pencil.png"></div>
+                </div>
+                <div id=workgroup-access title="Access for users not in this workgroup"></div>
+            </div>
+            <div id="close-button" class="save-record-buttons">
+                <input type=button name=save-button class="ui-heurist-btn-header1" value="Close" onClick="top.HEURIST.edit.closeEditWindow();">
+            </div>
+            <div id="save-record-buttons" class="save-record-buttons" style="display: none;">
+                <input type=button name=save-button class="ui-heurist-btn-header1" value="Cancel" onClick="top.HEURIST.edit.cancelSave(false);">
+                <input type=button name=save-button class="ui-heurist-btn-header1" value="Save" onClick="top.HEURIST.edit.save_record(false);">
+                <input type=button name=save-button class="ui-heurist-btn-header1" value="Save / close" title="Save and Close" onClick="top.HEURIST.edit.save_record(true);">
+            </div>
+        </div>
+
+        <!-- sidebar -->
+        <div id="sidebar" class="edit-mode-depended">
+            <div class="sidebar-link disabled" style="background-image: url(../../common/images/user_public.gif);" id=public-link
+                disabledDescription="No shared information available as this is marked as a private record"><img src="../../common/images/16x16.gif">
+                <b>Shared information</b>
+                <span id=desc>Standard data fields for the entity</span>
+            </div>
+
+            <div class="sidebar-link disabled" style="background-image: url(../../common/images/user_personal.gif);" id=personal-link
+                disabledTitle="Click here to add a bookmark for this record"
+                disabledDescription="Click here to bookmark this record"><img src="../../common/images/16x16.gif">
+                <b>Private information</b>
+                <span id=desc>Tags, passwords, ratings, notifications</span>
+            </div>
+
+            <div class="sidebar-link disabled" style="background-image: url(../../common/images/user_workgroup.gif);" id=workgroups-link
+                disabledDescription="You are not a member of any workgroup"><img src="../../common/images/16x16.gif">
+                <b>Workgroup tags</b>
+                <span id=desc>For the workgroups you belong to</span>
+            </div>
+
+            <div class="sidebar-link disabled" style="background-image: url(../../common/images/logo_wiki.gif);" id=annotation-link
+                disabledDescription="Not available"><img src="../../common/images/16x16.gif">
+                <b>Text</b>
+                <span id=desc>WYSIWYG extended text &amp; discussion</span>
+            </div>
+
+            <div class="sidebar-link disabled" style="background-image: url(../../common/images/relationships_icon.gif);" id=relationships-link
+                disabledDescription="Not available"><img src="../../common/images/16x16.gif">
+                <b>Relationships</b>
+                <span id=desc>Links between related records</span>
+            </div>
+
+            <div class="sidebar-nav ui-heurist-header1" style="text-align:right;">
+
+            <!-- TODO: Remove. This code is deprecated by new Save, Save-and-close methodology
+                <div style="padding: 3px 0;display:none;">
+                    <label for=act-stay >stay on page</label>
+                    <input type=radio name=act id=act-stay value="stay"
+                        title="Saves the record but keeps this form open for further editing"
+                        onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
+                </div>
+                <div style="padding: 3px 0;display:none;" id="close-window-option">
+                    <label for=act-close>close window</label>
+                    <input type=radio name=act id=act-close value="close"
+                        title="Saves the record and closes the tab or window containing this data entry form"
+                        onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
+                </div>                                                                               style="margin-top:46px;"
+                -->
+
+                <div id="close-button2"  style="text-align:right;">
+                    <input type=button name=save-button class="ui-heurist-btn-header1" value="Close"  onClick="top.HEURIST.edit.closeEditWindow();">
+                </div>
+                <div id="save-record-buttons2" style="text-align:right;display:none">
+                    <input type=button name="save-button" class="ui-heurist-btn-header1" style="font-size:0.8em;" value="Cancel" onClick="top.HEURIST.edit.cancelSave(false);">
+                    <input type=button name="save-button" class="ui-heurist-btn-header1" style="font-size:0.8em;" value="Save" onClick="top.HEURIST.edit.save_record(false);">
+                    <input type=button name=save-button  class="ui-heurist-btn-header1" style="font-size:0.8em;" value="Save / close" onClick="top.HEURIST.edit.save_record(true);">
+                </div>
+            </div>
+
+            <div id="search-nav" class="sidebar-nav ui-heurist-header1"></div>
+
+            <div id="dates-added-update-info" class="sidebar-nav ui-heurist-header1" style="text-align:right;">
+                <span id=adddate></span><br>
+                <span id=moddate></span>
+            </div>
+        </div>
+        <!-- end sidebar -->
+
+
+        <!-- page -->
+        <div id=page>
+            <!-- banner -->
+            <div class="banner ui-heurist-header1">
+                <div style="display:inline-block;margin:3px 10px;vertical-align: middle;">
+
+                    <label>
+                        <input type=radio id=ui-pref-simplemode name="vide-mode"
+                        onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'false' : 'true');setEditMode()" class=minimal>
+                    Simplified</label>
+                    <label>&nbsp;&nbsp;
+                        <input type=radio id=ui-pref-tabs name="vide-mode"
+                        onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'true' : 'false');setEditMode()" class=minimal>
+                    Full</label>
+                    <span style="min-width: 5em;display: inline-block;"></span>
+                    <label>
+                    <input type=checkbox id=ui-pref-showhelp onClick="top.HEURIST.util.helpToggler(this)" class=minimal>
+                    help</label>
+
+                    <label class=public-visible>&nbsp;&nbsp;
+                    <input type=checkbox id=ui-pref-optfields  class=public-visible
+                            onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
+                    optional fields</label>
+                </div>
+
+                <div id="admin_editrectype" style="float:right;width:230px;text-align:right;"></div> <!-- class="edit-mode-depended" -->
+                <span id="changed_marker" style="display:none;float:right;width:16px;height:16px;margin-top:4px;margin-right:4px;background-image: url('../../common/images/save-disk.gif')"></span>
+            </div>
+            <!-- main panel -->
+            <div id="page-inner" class="panel-main-div">
+                <div id=tab-holder >
+                </div>
+            </div>
+        </div>
+        <!-- end page -->
+
+
+        <!-- footer -->
+        <div id=footer>
+            <div id="rty_description" class="help"></div>
+        </div>
+        <!-- end footer -->
+
+
+        <div style="position: absolute;">
+            <div id="workgroup-editor" style="display: none;">
+                <div>
+                    <h2>Change record access:</h2>
+                </div>
+                <div class="detailRow"> <!-- pulldown list of potential owner workgroups -->
+                    <label for=new-workgroup-value>Record is editable by</label>
+                    <select id=new-workgroup-value class=in></select>
+                </div>
+                <div class="detailRow">
+                    <input type=radio name=new-non-workgroup value=hidden id=non-wg-hide>
+                    <label for=non-wg-hide>Only members of this group can view the record</label>
+                </div>
+                <div class="detailRow">
+                    <input type=radio name=new-non-workgroup value=viewable id=non-wg-view>
+                    <label for=non-wg-view>Any logged-in user can view the record</label>
+                </div>
+                <div class="detailRow">
+                    <input type=radio name=new-non-workgroup value=pending id=non-wg-pending>
+                    <label for=non-wg-pending>Flagged for external publication, any logged-in user</label>
+                    <div style="margin-left: 20px; font-style: italic;">No effect on existing external views - hml, html etc.</div>
+                    <div style="margin-left: 20px; font-style: italic;">Can be auto-set whenever a public record is edited.</div>
+                </div>
+                <div class="detailRow">
+                    <input type=radio name=new-non-workgroup value=public id=non-wg-public>
+                    <label for=non-wg-public>Published - written automatically to external views</label>
+                    <!-- TODO: this is implementation dependent. Check if this is implemented at deep enough level to make this statement unequivocally
+                    <div style="margin-left: 20px; font-style: italic;">except fields marked as restricted.</div> -->
+                </div>
+                <div class="detailRow" style="text-align:right; padding-top:15px">
+                    <input type=button value="Change" style="font-weight: bold;" onClick="closeWorkgroupChanger();">
+                    <input type=button value="Cancel" onClick="closeWorkgroupChanger(true);">
+                </div>
+            </div>
+        </div>
+
+        <div id="editRectype-message" style="display:none;">
+            <div id="editRectype-message-text" style="text-align:left;width:310px;color:black;font-weight:bold;margin:10px;"></div>
+        </div>
+
+        <div id=workgroup-message style="display: none;">
+            <div style="padding: 5px;">
+                <h2>Workgroup warning</h2>
+                <p>The link you followed attempts to add workgroup ownership and/or workgroup tags to the record you are creating.
+                    As you are not a member of the workgroup <span id=workgroup-message-wgname style="font-weight: bold;"></span>, the record will be
+                created as an open record without the workgroup information.</p>
+                <p>In this context, workgroup tags are generally used to publish records to specific lists.
+                    The absence of the workgroup tag probably means that your new record will not appear in the corresponding list(s).
+                If it needs to appear there, you will need to ask a member of the workgroup to add the tag(s) later.</p>
+
+                <input type="button" value="OK" onClick="top.HEURIST.util.closePopup(workgroupPopupID);">
+            </div>
+        </div>
+
+
+        <div id=notes-container></div>
+
+        <div>
+
+            <div id="popup-saved" class="popup-message" style="display: none">
+                <b>Record saved</b>
+            </div>
+            <div id="popup-nothingchanged" class="popup-message" style="display: none">
+                <b>Nothing changed</b>
+            </div>
+
+        </div>
+
+        <script src="../disambig/similarRecordsPopup.js"></script>
+        <script>
+            function popupDisambiguation(matches) {
+                _popupDisambiguation(matches, function(choice) {
+                    if (choice.value == -1) {
+                        top.HEURIST.edit.record.forceSave = true;
+                        var editFrame = top.HEURIST.edit.modules.public.frame;
+                        editFrame.contentWindow.document.forms[0].heuristSubmit();
+                    }
+                    else {
+                        var modules = top.HEURIST.edit.modules;
+                        for (var eachName in modules) {
+                            top.HEURIST.edit.unchanged(eachName);
+                        }
+
+                        top.location.replace(top.HEURIST.baseURL_V3+"records/edit/editRecord.html?db="+dbname+"&recID="+choice.details.id);
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,846 @@
+<?php
+
+/**
+* listDatabaseErrors.php: Lists structural errors and records with errors:
+* invalid term codes, field codes, record types in pointers
+* pointer fields point to non-existent records or records of the wrong type
+*   single value fields with multiple values
+*   required fields with no value
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.1.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
+require_once('valueVerification.php');
+?>
+
+<html>
+    <head>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+        <script type=text/javascript>
+
+            function open_selected_by_name(sname) {
+                var cbs = document.getElementsByName(sname);
+                if (!cbs  ||  ! cbs instanceof Array)
+                    return false;
+                var ids = '';
+                for (var i = 0; i < cbs.length; i++) {
+                    if (cbs[i].checked)
+                        ids = ids + cbs[i].value + ',';
+                }
+                //var link = document.getElementById('selected_link');
+                //if (link) return false;
+                window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
+                return false;
+            }
+        </script>
+
+        <script type=text/javascript>
+
+            var Hul = top.HEURIST.util;
+
+            function open_selected() {
+                var cbs = document.getElementsByName('bib_cb');
+                if (!cbs  ||  ! cbs instanceof Array)
+                    return false;
+                var ids = '';
+                for (var i = 0; i < cbs.length; i++) {
+                    if (cbs[i].checked)
+                        ids = ids + cbs[i].value + ',';
+                }
+                var link = document.getElementById('selected_link');
+                if (!link)
+                    return false;
+                link.href = '<?=HEURIST_BASE_URL?>?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids;
+                return true;
+            }
+
+            function onEditFieldType(dty_ID){
+
+                var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
+                if(dty_ID>0){
+                    url = url + "&detailTypeID="+dty_ID; //existing
+                }else{
+                    return;
+                }
+
+                top.HEURIST.util.popupURL(top, url,
+                    {   "close-on-blur": false,
+                        "no-resize": false,
+                        height: 680,
+                        width: 700,
+                        callback: function(context) {
+                        }
+                });
+            }
+        </script>
+
+        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <style type="text/css">
+            h3, h3 span {
+                display: inline-block;
+                padding:0 0 10px 0;
+            }
+            Table tr td {
+                line-height:2em;
+            }
+        </style>
+
+    </head>
+
+
+    <body class="popup">
+
+        <div class="banner">
+            <h2>Check for invalid definitions and data (invalid pointers, terms, missing required, excess values etc.)</h2>
+        </div>
+
+        <div><br/><br/>
+            These checks look for errors in the structure of the database and errors in the data within the database. These are generally not serious, but are best eliminated.
+            <br /> Click the hyperlinked record ID at the start of each row to open an edit form to change the data for that record.
+            <br />Look for red warning texts or pointer fields in the record which do not display data or which display a warning.
+            <p>
+        </div>
+        <hr>
+
+
+        <div id="page-inner">
+
+
+            <!-- CHECK FOR FIELD TYPE ERRORS -->
+
+            <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
+            <script type="text/javascript" src="../../common/php/loadCommonInfo.php"></script>
+
+
+            <?php
+            if (count(@$dtysWithInvalidTerms)>0 || count(@$dtysWithInvalidNonSelectableTerms)>0 || count(@$dtysWithInvalidRectypeConstraint)>0){
+                ?>
+                <script>
+                    function repairFieldTypes(){
+
+                        function _callback(context){
+                            if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
+                                top.HEURIST.util.showError(null);
+                            }else{
+                                alert(context['result']);
+                            }
+                        }
+
+                        var dt = [
+                            <?php
+                            $isfirst = true;
+                            foreach ($dtysWithInvalidTerms as $row) {
+                                print ($isfirst?"":",")."[".$row['dty_ID'].", 0, '".$row['validTermsString']."']";
+                                $isfirst = false;
+                            }
+                            foreach ($dtysWithInvalidNonSelectableTerms as $row) {
+                                print ($isfirst?"":",")."[".$row['dty_ID'].", 1, '".$row['validNonSelTermsString']."']";
+                                $isfirst = false;
+                            }
+                            foreach ($dtysWithInvalidRectypeConstraint as $row) {
+                                print ($isfirst?"":",")."[".$row['dty_ID'].", 2, '".$row['validRectypeConstraint']."']";
+                                $isfirst = false;
+                            }
+                        ?>];
+
+                        var str = JSON.stringify(dt);
+
+                        var baseurl = top.HEURIST.baseURL_V3 + "admin/verification/repairFieldTypes.php";
+                        var callback = _callback;
+                        var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
+                        top.HEURIST.util.getJsonData(baseurl, callback, params);
+                    }
+                </script>
+
+                <br/><p><br/></p><h3>Warning: Inconsistent field definitions</h3><br/>&nbsp;<br/>
+
+                The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please advise Heurist developers<br/><br/>
+                To fix the inconsistencies, please click here: <button onclick="repairFieldTypes()">Auto Repair</button>  <br/>&nbsp;<br/>
+                You can also look at the individual field definitions by clicking on the name in the list below<br />&nbsp;<br/>
+                <hr/>
+                <?php
+                foreach ($dtysWithInvalidTerms as $row) {
+                    ?>
+                    <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                        <?= count($row['invalidTermIDs'])?> invalid term ID<?=(count($row['invalidTermIDs'])>1?"s":"")?>
+                        (code: <?= join(",",$row['invalidTermIDs'])?>)
+                    </div>
+                    <?php
+                }//for
+                foreach ($dtysWithInvalidNonSelectableTerms as $row) {
+                    ?>
+                    <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                        <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?>
+                        (code: <?= join(",",$row['invalidNonSelectableTermIDs'])?>)
+                    </div>
+                    <?php
+                }
+                foreach ($dtysWithInvalidRectypeConstraint as $row) {
+                    ?>
+                    <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                        <?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?>
+                        (code: <?= join(",",$row['invalidRectypeConstraint'])?>)
+                    </div>
+                    <?php
+                }
+
+            }else{
+                print "<br/><p><br/></p><h3>All field type definitions are valid</h3>";
+            }
+            ?>
+
+
+
+
+            <!-- CHECK DATA CONSISTENCY -->
+
+            <?php
+
+            mysql_connection_select(DATABASE);
+
+            $res = mysql_query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name
+                from defDetailTypes
+                left join recDetails on dty_ID = dtl_DetailTypeID
+                left join Records on rec_ID = dtl_Value
+                left join defRecTypes on rty_ID = rec_RecTypeID
+                where dty_Type = "resource"
+                and dty_PtrTargetRectypeIDs > 0
+            and (INSTR(concat(dty_PtrTargetRectypeIDs,\',\'), concat(rec_RecTypeID,\',\')) = 0)');
+            // it does not work and rec_RecTypeID not in (dty_PtrTargetRectypeIDs)');
+            $bibs = array();
+            while ($row = mysql_fetch_assoc($res))
+                $bibs[$row['dtl_RecID']] = $row;
+            ?>
+
+
+            <hr />
+
+
+            <!-- Record pointers which point to non-existant records -->
+
+            <?php
+
+            $wasdeleted = 0;
+            if(@$_REQUEST['fixpointers']=="1"){
+
+                $query = 'delete d from recDetails d
+                left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
+                left join Records b on b.rec_ID = d.dtl_Value
+                where dt.dty_Type = "resource"
+                and b.rec_ID is null';
+                $res = mysql_query( $query );
+                if(! $res )
+                {
+                    print "<div class='error'>Cannot delete invalid pointers from Records.</div>";
+                }else{
+                    $wasdeleted = mysql_affected_rows();
+                }
+            }
+
+            $res = mysql_query('select dtl_RecID, dty_Name, a.rec_Title
+                from recDetails
+                left join defDetailTypes on dty_ID = dtl_DetailTypeID
+                left join Records a on a.rec_ID = dtl_RecID
+                left join Records b on b.rec_ID = dtl_Value
+                where dty_Type = "resource"
+                and a.rec_ID is not null
+            and b.rec_ID is null');
+            $bibs = array();
+            $ids = array();
+            while ($row = mysql_fetch_assoc($res)) {
+                array_push($bibs, $row);
+                $ids[$row['dtl_RecID']] = 1;
+            }
+
+            if(count($bibs)==0){
+                print "<div><h3>All record pointers point to a valid record</h3></div>";
+                if($wasdeleted>1){
+                    print "<div>$wasdeleted invalid pointer(s) were removed from database</div>";
+                }
+            }
+            else
+            {
+                ?>
+
+                <div>
+                    <h3>Records with record pointers to non-existent records</h3>
+                    <span>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB');">(show selected as search)</a>
+                    </span>
+                    <div>To fix the inconsistencies, please click here:
+                        <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixpointers=1','_self')">
+                            Delete ALL faulty pointers</button>
+                    </div>
+                </div>
+                <table>
+                    <?php
+                    foreach ($bibs as $row) {
+                        ?>
+                        <tr>
+                            <td><input type=checkbox name="recCB" value=<?= $row['dtl_RecID'] ?>></td>
+                            <td><a target=_new
+                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    <?= $row['dtl_RecID'] ?>
+                                </a></td>
+                            <td><?= $row['rec_Title'] ?></td>
+                            <td><?= $row['dty_Name'] ?></td>
+                        </tr>
+                        <?php
+                    }
+                    print "</table>\n";
+                    ?>
+                </table>
+                [end of list]
+                <?php
+            }
+            ?>
+
+            <hr/>
+
+
+
+            <!-- Record pointers which point to the wrong type of record  -->
+
+            <div>
+                <?php
+                if (count($bibs == 0)) {
+                    print "<h3>All record pointers point to the correct record type</h3>";
+                }
+                else
+                {
+                    ?>
+                    <h3>Records with record pointers to the wrong record type</h3>
+                    <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                        (show results as search)</a></span>
+                    <table>
+                        <?php
+                        foreach ($bibs as $row) {
+                            ?>
+                            <tr>
+                                <td><a target=_new
+                                        href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=
+                                        <?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
+                                    </a></td>
+                                <td><?= $row['dty_Name'] ?></td>
+                                <td>points to</td>
+                                <td><?= $row['rec_ID'] ?> (<?= $row['rty_Name'] ?>) - <?= substr($row['rec_Title'], 0, 50) ?></td>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+                    </table>
+                    <?php
+                }
+                ?>
+            </div>
+
+            <hr />
+
+            <?php
+            // ----- Fields of type "Date" with  wrong values -------------------
+
+            //find all fields with faulty dates
+            $res = mysql_query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title
+                from recDetails, defDetailTypes, Records a
+                where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID)
+            and (dty_Type = "date") and (dtl_Value is not null)');
+
+            $wascorrected = 0;
+            $bibs = array();
+            $ids  = array();
+            $dtl_ids = array();
+            while ($row = mysql_fetch_assoc($res)){
+
+                //parse and validate value
+                $row['new_value'] = validateAndConvertToISO($row['dtl_Value']);
+                if($row['new_value']=='Temporal'){
+                    continue;
+                }else if($row['new_value']==trim($row['dtl_Value'])){
+                    continue;
+                }
+
+                //remove wrong term IDs
+                if(@$_REQUEST['fixdates']=="1"){
+
+                    if($row['new_value']){
+                        mysql_query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
+                    }else{
+                        mysql_query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
+                    }
+
+                    $wascorrected++;
+                }else{
+                    array_push($bibs, $row);
+                    $ids[$row['dtl_RecID']] = 1;
+                    array_push($dtl_ids, $row['dtl_ID']);
+                }
+            }
+
+
+            if(count($bibs)==0){
+                print '<div><h3>All records have recognisable Date values</h3></div>';
+                if($wascorrected>1){
+                    print "<div>$wascorrected Date fields were corrected</div>";
+                }
+            }
+            else
+            {
+                ?>
+
+                <div>
+                    <h3>Records with wrong Date fields</h3>
+                    <span>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
+                    </span>
+                    <div>To fix faulty date values as suggested, please click here:
+                        <button
+                            onclick="{document.getElementById('page-inner').style.display = 'none';
+                                window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1','_self')}">
+                            Correct</button>
+                    </div>
+                </div>
+
+                <table>
+                <?php
+                foreach ($bibs as $row) {
+                    ?>
+                    <tr>
+                        <td><input type=checkbox name="recCB5" value=<?= $row['dtl_RecID'] ?>></td>
+                        <td><a target=_new
+                                href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                <?= $row['dtl_RecID'] ?>
+                            </a></td>
+                        <td><?= substr($row['rec_Title'],0,50) ?></td>
+                        <td><?= $row['dtl_Value'] ?></td>
+                        <td><?= $row['new_value'] ?></td>
+                    </tr>
+                    <?php
+                }
+                print '</table>';
+            }
+            ?>
+
+            <hr />
+
+
+
+            <?php
+            //  Records with term field values which do not exist in the database
+            $wasdeleted = 0;
+
+            //remove wrong term IDs
+            if(@$_REQUEST['fixterms']=="1"){
+                $query = 'delete d from recDetails d
+                left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
+                left join defTerms b on b.trm_ID = d.dtl_Value
+                where dt.dty_Type = "enum" or  dt.dty_Type = "relationtype"
+                and b.trm_ID is null';
+                $res = mysql_query( $query );
+                if(! $res )
+                {
+                    print "<div class='error'>Cannot delete invalid term values from Records. SQL error: ".mysql_error()."</div>";
+                }else{
+                    $wasdeleted = mysql_affected_rows();
+                }
+            }
+
+            //find non existing term values
+            $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, a.rec_Title
+                from recDetails
+                left join defDetailTypes on dty_ID = dtl_DetailTypeID
+                left join Records a on a.rec_ID = dtl_RecID
+                left join defTerms b on b.trm_ID = dtl_Value
+                where (dty_Type = "enum" or dty_Type = "relationtype") and dtl_Value is not null
+                and a.rec_ID is not null
+            and b.trm_ID is null');
+            $bibs = array();
+            $ids  = array();
+            $dtl_ids = array();
+            while ($row = mysql_fetch_assoc($res)){
+                array_push($bibs, $row);
+                $ids[$row['dtl_RecID']] = 1;
+                array_push($dtl_ids, $row['dtl_ID']);
+            }
+
+            if(count($bibs)==0){
+                print "<div><h3>All records have recognisable term values</h3></div>";
+                if($wasdeleted>1){
+                    print "<div>$wasdeleted invalid term value(s) were removed from database</div>";
+                }
+            }
+            else
+            {
+                ?>
+
+                <div>
+                    <h3>Records with non-existent term values</h3>
+                    <span>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB1');">(show selected as search)</a>
+                    </span>
+                    <div>To fix the inconsistencies, please click here:
+                        <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixterms=1','_self')">
+                            Delete ALL faulty term values</button>
+                    </div>
+                </div>
+
+                <table>
+                <?php
+                foreach ($bibs as $row) {
+                    ?>
+                    <tr>
+                        <td><input type=checkbox name="recCB1" value=<?= $row['dtl_RecID'] ?>></td>
+                        <td><a target=_new
+                                href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                <?= $row['dtl_RecID'] ?>
+                            </a></td>
+                        <td><?= substr($row['rec_Title'],0,50) ?></td>
+                        <td><?= $row['dty_Name'] ?></td>
+                    </tr>
+                    <?php
+                }
+                print '</table>';
+            }
+            ?>
+
+            <hr/>
+
+
+
+            <!--  Records containing fields with terms not in the list of terms specified for the field   -->
+
+            <?php
+
+            $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title
+                from Records, recDetails, defDetailTypes
+                where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relationtype")
+                and dtl_Value is not null
+            order by dtl_DetailTypeID');
+            /*
+            'select dtl_RecID, dty_Name, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, dtl_Value, dty_ID
+            from defDetailTypes
+            left join recDetails on dty_ID = dtl_DetailTypeID
+            left join Records on rec_ID = dtl_RecID
+            where dty_Type = "enum" or  dty_Type = "relationtype"
+            order by dtl_DetailTypeID'*/
+            $bibs = array();
+            $ids = array();
+            while ($row = mysql_fetch_assoc($res)){
+                //verify value
+                if(  !in_array($row['dtl_ID'], $dtl_ids) &&
+                trim($row['dtl_Value'])!="" &&
+                isInvalidTerm($row['dty_JsonTermIDTree'], $row['dty_TermIDTreeNonSelectableIDs'], $row['dtl_Value'], $row['dty_ID'] ))
+                {
+                    array_push($bibs, $row);
+                    $ids[$row['dtl_RecID']] = 1;
+                }
+
+            }
+            ?>
+
+            <div>
+
+                <?php
+                if (count($bibs == 0)) {
+                    print "<h3>All records have valid terms (terms are as specified for each field)</h3>";
+                }
+                else
+                {
+                    ?>
+                    <h3>Records with terms not in the list of terms specified for the field</h3>
+                    <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        (show results as search)</a></span>
+
+                    <table>
+                    <tr>
+                        <th style="width: 30px;">Record</th>
+                        <th style="width: 60px;">Field</th>
+                        <th style="width: 60px;">Terms</th>
+                        <th>Record title</th>
+                    </tr>
+
+                    <?php
+                    foreach ($bibs as $row) {
+                        ?>
+                        <tr>
+                            <td style="width:50px; padding-left: 25px;">
+                                <a target=_new
+                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=
+                                    <?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
+                                </a>
+                            </td>
+                            <td style="width: 60px;padding-left: 25px;"><?= $row['dty_Name'] ?></td>
+                            <!-- >Artem TODO: Need to render the value as the term label, not the numeric value -->
+                            <td style="width: 60px;padding-left: 25px;"><?= $row['dtl_Value'] ?></td>
+                            <td style="padding-left: 25px;"><?= substr($row['rec_Title'], 0, 500) ?></td>
+                        </tr>
+                        <?php
+                    }
+                    echo '</table>\n';
+                }
+                ?>
+            </div>
+
+
+
+            <hr />
+
+
+
+            <!--  single value fields containing excess values  -->
+
+
+            <?php
+
+            $res = mysql_query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
+                from recDetails, Records, defRecStructure
+                where rec_ID = dtl_RecID and rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
+                and rst_MaxValues=1
+                GROUP BY dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
+            HAVING COUNT(*) > 1');
+
+            $bibs = array();
+            $ids = array();
+            while ($row = mysql_fetch_assoc($res)){
+                array_push($bibs, $row);
+                $ids[$row['dtl_RecID']] = 1;
+            }
+
+            if(count($bibs)==0){
+                print "<h3>No single value fields exceed 1 value</h3>";
+            }
+            else
+            {
+                ?>
+
+                <div>
+                    <h3>Single value fields with multiple values</h3>
+                    <span>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link2 onClick="return open_selected_by_name('recCB2');">(show selected as search)</a>
+                    </span>
+                </div>
+
+                <table>
+                    <?php
+                    $rec_id = null;
+                    foreach ($bibs as $row) {
+                        if($rec_id!=$row['dtl_RecID']) {
+                            ?>
+                            <tr>
+                                <td>
+                                    <input type=checkbox name="recCB2" value=<?= $row['dtl_RecID'] ?>>
+                                </td>
+                                <td>
+                                    <a target=_blank href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    <?= $row['dtl_RecID'] ?></a>
+                                </td>
+                                <td><?= $row['rec_Title'] ?>
+                                </td>
+                                <?php
+                                $rec_id = $row['dtl_RecID'];
+                            }else{
+                                print '<tr><td colspan="3"></td>';
+                            }
+                            ?>
+                            <td><?= $row['rst_DisplayName'] ?>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    print "</table>";
+                    ?>
+                </table>
+
+                <?php
+            }
+            ?>
+
+            <hr/>
+
+
+
+            <!--  records with missing required values  -->
+
+            <?php
+
+            $res = mysql_query("select rec_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type
+                from Records
+                left join defRecStructure on rst_RecTypeID = rec_RecTypeID
+                left join recDetails on rec_ID = dtl_RecID and rst_DetailTypeID = dtl_DetailTypeID
+                left join defDetailTypes on dty_ID = rst_DetailTypeID
+                where rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
+                and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator'
+            order by rec_ID");
+
+            $bibs = array();
+            $ids = array();
+            while ($row = mysql_fetch_assoc($res)){
+                array_push($bibs, $row);
+                $ids[$row['rec_ID']] = $row;
+            }
+
+            if(count($bibs)==0){
+                print "<div><h3>No required fields with missing or empty values</h3></div>";
+            }
+            else
+            {
+                ?>
+
+                <div>
+                    <h3>Records with missing or empty required values</h3>
+                    <span>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= join(',', array_keys($ids)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link3 onClick="return open_selected_by_name('recCB3');">(show selected as search)</a>
+                    </span>
+                </div>
+
+                <table>
+                    <?php
+                    $rec_id = null;
+                    foreach ($bibs as $row) {
+                        if($rec_id!=$row['rec_ID']) {
+                            ?>
+                            <tr>
+                                <td>
+                                    <input type=checkbox name="recCB3" value=<?= $row['rec_ID'] ?>>
+                                </td>
+                                <td>
+                                    <a target=_new
+                                        href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                        <?= $row['rec_ID'] ?>
+                                    </a>
+                                </td>
+                                <td>
+                                <?= $row['rec_Title'] ?></td>
+                                <?php
+                                $rec_id = $row['rec_ID'];
+                            }else{
+                                print '<tr><td colspan="3"></td>';
+                            }
+                            ?>
+                            <td><?= $row['rst_DisplayName'] ?></td>
+                        </tr>
+                        <?php
+                    }
+                    print "</table>";
+                    ?>
+                </table>
+                <?php
+            }
+            ?>
+
+
+            <hr/>
+
+
+
+            <!--  Records with non-standard fields (not listed in recstructure)  -->
+
+            <?php
+
+            $res = mysql_query("select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
+                from Records
+                left join recDetails on rec_ID = dtl_RecID
+                left join defDetailTypes on dty_ID = dtl_DetailTypeID
+                left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
+                where rst_ID is null
+            ");
+
+            $bibs = array();
+            $ids = array();
+            while ($row = mysql_fetch_assoc($res)){
+                array_push($bibs, $row);
+                $ids[$row['rec_ID']] = $row;
+            }
+
+            ?>
+
+            <div>
+                <?php
+                if (count($bibs == 0)) {
+                    print "<h3>No extraneous fields (fields not defined in the list for the record type)</h3>";
+                }
+                else
+                {
+                    ?>
+                    <h3>Records with extraneous fields (not defined in the list of fields for the record type)</h3>
+                    <span>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search)</a>
+                    </span>
+                    <table>
+                        <?php
+                        $rec_id = null;
+                        foreach ($bibs as $row) {
+                            if($rec_id==null || $rec_id!=$row['rec_ID']) {
+                                ?>
+                                <tr>
+                                    <td><input type=checkbox name="recCB4" value=<?= $row['rec_ID'] ?>>
+                                    </td>
+                                    <td>
+                                        <a target=_new
+                                            href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                            <?= $row['rec_ID'] ?>
+                                        </a>
+                                    </td>
+                                    <!-- td><?= $row['rec_RecTypeID'] ?></td -->
+                                    <td width="400px"><?= substr($row['rec_Title'],0,100)?>
+                                    </td>
+                                    <?php
+                                    $rec_id = $row['rec_ID'];
+                                }else{
+                                    print '<tr><td colspan="3"></td>';
+                                }
+                                ?>
+
+                                <td><?= $row['dty_ID'] ?></td>
+                                <td><?= $row['dty_Name'] ?></td>
+                                <td><?= $row['dtl_Value'] ?></td>
+                            </tr>
+                            <?php
+                        }
+                        print "</table>";
+                        ?>
+                    </table>
+                    <?php
+                }
+                ?>
+            </div>
+
+            <hr/>
+
+        </div>
+    </body>
+</html>

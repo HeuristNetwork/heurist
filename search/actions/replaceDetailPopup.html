@@ -1,0 +1,375 @@
+<!--
+
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* This function finds all occurrences of one or more terms and replaces these occurrences with a new term.
+*
+* @author      Stephen White   
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  Search
+*/
+
+-->
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" href="../../common/css/global.css">
+        <link rel="stylesheet" href="../../common/css/edit.css">
+        <link rel="stylesheet" href="../../common/css/printview.css">
+        <link rel="stylesheet" type="text/css" href="../../common/css/calendar.css" />
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+        <title>Replace a value in each record</title>
+
+        <style type="text/css">
+            #record-count {
+                font-weight: bold;
+            }
+        </style>
+  <script>
+    $(function() {
+        init();
+    });  
+  </script>
+    </head>
+
+    <body class="popup" width=600 height=500>
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script src="../../common/js/hintDiv.js"></script>
+        <script src="../../common/js/calendarViewer.js"></script>
+        <script src="../../common/js/calendar.js"></script>
+        <script src="../../records/edit/editRecord.js"></script>
+        <script src="../../records/edit/inputUrlInclude.js"></script>
+        <script src="../../common/php/getMagicNumbers.php"></script>
+
+        <script>
+
+            var recIDs, rtyID, dtyID, sValue, rValue, sFileID, rFileID, sWkt, rWkt;
+            var scopeSelect,fieldSelect,inputDiv,statusDiv;
+            var resultSetIDs, selectedResultSetIDs, allSelectedIDs, resultSetTypes, rtyIDs = [];
+            var hBase = window.location.protocol + "//" + window.location.host +
+            (top && top.HEURIST && top.HEURIST.baseURL_V3? top.HEURIST.baseURL_V3 : window.location.pathname.match(/^\/[^\/]+\//));
+            var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
+
+            function init () {
+                top.HEURIST.edit.calendarViewer = calendarViewer;
+
+                if(top.HEURIST.search){
+                    resultSetIDs = top.HEURIST.search.results.infoByDepth[0].recIDs; //all records
+                    selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get(); //selected in zero level
+                    allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get(); //slected from all levels
+                    resultSetTypes = top.HEURIST.search.results.infoByDepth[0].rectypes;
+                }else{ // fake for H4
+                    resultSetIDs = top.HEURIST.search4.recids_all;
+                    selectedResultSetIDs = top.HEURIST.search4.recids_sel;
+                    allSelectedIDs = top.HEURIST.search4.recids_sel;
+                    resultSetTypes = top.HEURIST.search4.rectypes;
+                }
+
+                inputDiv = document.getElementById("inputDiv");
+                statusDiv = document.getElementById("statusDiv");
+                scopeSelect = document.getElementById("scope-select");
+                fieldSelect = document.getElementById("field-select");// fill scope select and default to resultset
+                fillScope();
+                //fill Field select  - formated with rectypename.filedname sorted
+                fillFields();
+                //bind onchange to add/replace field entry input depending on type selected and asynch call to check change validity
+                createInputElement();
+            }
+
+            function fillScope(){
+                //add result count option default
+                var opt = new Option("Current results set N = " + resultSetIDs.length, "resultSet");
+                scopeSelect.appendChild(opt);
+                //selected count option
+                if ( selectedResultSetIDs.length > 0) {
+                    opt = new Option("Selected results set N = " + selectedResultSetIDs.length, "selectedResultSet");
+                    scopeSelect.appendChild(opt);
+                    if ( allSelectedIDs.length > selectedResultSetIDs.length) {
+                        opt = new Option("All selected N = " + allSelectedIDs.length, "allSelected");
+                        scopeSelect.appendChild(opt);
+                    }
+                }
+                //find all types for result and add option for each with counts.
+                if(top.HEURIST.util.isArray(resultSetTypes)){
+                    for (var rty in resultSetTypes){
+                        if(rty>=0){
+                            rty = resultSetTypes[rty];
+                            rtyIDs.push(rty);
+                            opt = new Option("All "+top.HEURIST.rectypes.pluralNames[rty]+" N = "+top.HEURIST.rectypes.usageCount[rty],rty);
+                            scopeSelect.appendChild(opt);
+                        }
+                    }
+                }else{
+                    for (var rty in top.HEURIST.search.results.infoByDepth[0].rectypes){
+                        rtyIDs.push(rty);
+                        opt = new Option("All "+top.HEURIST.rectypes.pluralNames[rty]+" N = "+top.HEURIST.rectypes.usageCount[rty],rty);
+                        scopeSelect.appendChild(opt);
+                    }
+                }
+                // add onchange handler to fill fieldSelect
+                scopeSelect.onchange = fillFields;
+            }
+
+            function getRecType(recID){
+                if(top.HEURIST.search){
+                    return top.HEURIST.search.results.recSet[recID].record[4];
+                }else{
+                    var record = top.HAPI4.currentRecordset.getById(recID) ;
+                    return top.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
+                }
+            }
+
+
+            function fillFields(){
+                var dtys = {}, dtyNames = [],dtyNameToID = {};
+                var rtys = {};
+                var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
+                //remove all options
+                while (fieldSelect.options.length){
+                    fieldSelect.removeChild(fieldSelect.options[0]);
+                }
+                //for selected scope find all types
+                switch(scopeSelect.value){
+                    case "resultSet":
+                        rtyIDs = [];
+                        for(i in resultSetIDs){
+                            recID = resultSetIDs[i];
+                            rty = getRecType(recID);
+                            if (!rtys[rty]){
+                                rtys[rty] = 1;
+                                rtyIDs.push(rty);
+                            }
+                        }
+                        break;
+                    case "selectedResultSet":
+                        rtyIDs = [];
+                        for(i in selectedResultSetIDs){
+                            recID = selectedResultSetIDs[i];
+                            rty = getRecType(recID);
+                            if (!rtys[rty]){
+                                rtys[rty] = 1;
+                                rtyIDs.push(rty);
+                            }
+                        }
+                        break;
+                    case "allSelected":
+                        rtyIDs = [];
+                        for(i in allSelectedIDs){
+                            recID = allSelectedIDs[i];
+                            rty = getRecType(recID);
+                            if (!rtys[rty]){
+                                rtys[rty] = 1;
+                                rtyIDs.push(rty);
+                            }
+                        }
+                        break;
+                    default:
+                        rtyIDs = [scopeSelect.value];
+                }
+                //for all rectypes find all fields as Detail names sorted
+                for (i in rtyIDs) {
+                    rty = rtyIDs[i];
+                    rtyName = top.HEURIST.rectypes.names[rty];
+                    for (dty in top.HEURIST.rectypes.typedefs[rty].dtFields) {
+                        if(top.HEURIST.detailTypes.typedefs[dty].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_Type']] in {"separator":1,"relmarker":1,"file":1,"calculated":1,"geo":1}){
+                            continue;
+                        }
+                        dtyName = top.HEURIST.detailTypes.names[dty];
+                        if (!dtys[dtyName]){
+                            dtys[dtyName] = [];
+                            dtyNameToID[dtyName] = dty;
+                            dtyNames.push(dtyName);
+                        }
+                        fieldName = rtyName + "." + top.HEURIST.rectypes.typedefs[rty].dtFields[dty][0];
+                        dtys[dtyName].push(fieldName);
+                    }
+                }
+                if (dtyNames.length >0) {
+                    dtyNames.sort();
+                    //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
+                    for (i in dtyNames) {
+                        dtyName = dtyNames[i];
+                        opt = new Option(dtyName, dtyNameToID[dtyName]);
+                        fieldSelect.appendChild(opt);
+                        //sort RectypeName.FieldName
+                        dtys[dtyName].sort();
+                        for (j in dtys[dtyName]){
+                            fieldName = dtys[dtyName][j];
+                            opt = new Option(".  ."+fieldName, "");
+                            opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
+                            opt.disabled = "disabled";
+                            fieldSelect.appendChild(opt);
+                        }
+                    }
+                }else{
+                    opt = new Option("no suitable fields", "");
+                    fieldSelect.appendChild(opt);
+                }
+                fieldSelect.onchange = createInputElement;
+                //createInputElement();
+            }
+
+            function createInputElement(){
+                inputDiv.innerHTML = "";
+                top.HEURIST.edit.allInputs = [];
+                top.HEURIST.edit.createSeparator("Value to search",inputDiv);
+                top.HEURIST.edit.createInput("searchValue",fieldSelect.value,null,[],inputDiv,null);
+                top.HEURIST.edit.createSeparator("Value for replace",inputDiv);
+                top.HEURIST.edit.createInput("replaceValue",fieldSelect.value,null,[],inputDiv,null);
+            }
+
+            function cbSave(results){
+                var html = "",i;
+                if(top.HEURIST.util.isnull(results)){
+                    alert("Failed to return results from replace detail (value) action!");
+                    return
+                }
+                if (results.none){
+                    html += "<p>"+results.none+"</p>";
+                }else if (results.problem){
+                    html += "<p style=\"color: red;\">"+results.problem+"</p>";
+                }
+                if (results.count && (results.count.rtyRecs || results.count.passed)){
+                    if (results.count.processed > 0 && top.HEURIST.search) {
+                        html += '<br><input type=\"button\" value=\"Requery\"'+
+                        ' title=\"Click to force requery in order to show updated results\"'+
+                        ' onclick="top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);">';
+                    }
+                    html += "<div style=\"color: #DC8501; padding-top:5px\"> Results : </div><ul>";
+                    if (results.count.passed > 0) {
+                        html += "<li> Records passed to process ............ "+results.count.passed+"</li>";
+                    }
+                    if (results.count.rtyRecs > 0) {
+                        html += "<li> Records of correct type ........ "+results.count.rtyRecs+"</li>";
+                    }
+                    if (results.count.noAccess > 0) {
+                        html += "<li> Inaccessible records (restricted access) ... "+results.count.noAccess+"</li>";
+                    }
+                    if (results.count.processed > 0) {
+                        html += "<li><strong> Records processed ..... "+results.count.processed+"</strong>"+
+                        "...<a target=_new title=\" View replaced results -tagged "+ results.replaced.tagResults +"\""+
+                        " href=\""+encodeURI(hBase+ "?db="+database+"&q="+results.replaced.queryString)+"\">view records processed</a></li>";
+                    }
+                    if (results.count.noMatch > 0) {
+                        html += "<li> Records with no matching value ... "+results.count.noMatch+
+                        "...<a target=_new title=\" View no match results -tagged "+ results.nonMatching.tagResults +"\""+
+                        " href=\""+encodeURI(hBase+ "?db="+database+"&q="+results.nonMatching.queryString)+"\">view non-matching value records</a></li>";
+                    }
+                    if (results.count.error > 0) {
+                        html += "<li> Records for which value could not be updated ... "+results.count.error+
+                        "...<a target=_new title=\" View error results -tagged "+ results.errors.tagResults +"\""+
+                        " href=\""+encodeURI(hBase+ "?db="+database+"&q="+ results.errors.queryString)+"\">view non-updatable records</a></li>";
+                        if (results.errors.byRecID) {
+                            html += "<ul>";
+                            for ( i in results.errors.byRecID) {
+                                html += "<li>" + results.errors.byRecID[i] + "</li>";
+                            }
+                            html += "</ul>";
+                        }
+                    }
+                    html += "</ul>";
+                }
+                statusDiv.innerHTML = html;
+            }
+
+            function save() {
+                var _data = {};
+                //need to extract the value for the input and return all appropriate values
+                if (scopeSelect.value == "allSelected") {
+                    recIDs = allSelectedIDs;
+                }else if (scopeSelect.value == "resultSet") {
+                    recIDs = resultSetIDs;
+                }else if (scopeSelect.value == "selectedResultSet") {
+                    recIDs = selectedResultSetIDs;
+                }else {
+                    rtyID = scopeSelect.value;
+                }
+                var allInputs = top.HEURIST.edit.allInputs;
+                var searchInput, replaceInput,i, inputID;
+                for (i=0; i<allInputs.length; i++){
+                    inputID = allInputs[i].recID;
+                    if (inputID == "searchValue") {
+                        searchInput = allInputs[i].inputs[0];
+                    };
+                    if (inputID == "replaceValue") {
+                        replaceInput = allInputs[i].inputs[0];
+                    };
+                }
+                if (!searchInput) {
+                    alert("no valid search input element found, unable to proceed with replace");
+                    return;
+                }
+                if (!replaceInput) {
+                    alert("no valid replace input element found, unable to proceed with replace");
+                    return;
+                }
+                sValue = (searchInput.value || searchInput.input.value ||
+                    (searchInput.hiddenElt ? searchInput.hiddenElt.value:false) ||
+                    (searchInput.textElt ? searchInput.textElt.strTemporal:false));
+                rValue = (replaceInput.value || replaceInput.input.value ||
+                    (replaceInput.hiddenElt ? replaceInput.hiddenElt.value:false) ||
+                    (replaceInput.textElt ? replaceInput.textElt.strTemporal:false));
+                if (!sValue){
+                    alert("No search value found, please enter a field value to search for.");
+                    return;
+                }
+                if (!rValue){
+                    alert("No replacement value found, please enter a field value for replacement.");
+                    return;
+                }
+                _data.recIDs = recIDs;
+                _data.dtyID =  fieldSelect.value;
+                _data.dtyName = fieldSelect.options[fieldSelect.selectedIndex].label;
+                if (rtyID) _data.rtyID = rtyID;
+                if (sValue) _data.sVal = sValue;
+                if (rValue) _data.rVal = rValue;
+                statusDiv.innerHTML = "<div id=\"loading\"/>";
+                if(top.HEURIST.search){
+                    top.HEURIST.search.executeAction( "replace_detail", _data, cbSave );
+                }else{
+                    top.HEURIST.search4.executeAction( "replace_detail", _data, cbSave );
+                }
+
+
+                //alert("the search value is "+ sValue +  "\r\n search fileID = " + sFileID  + " search wkt = " + sWkt);
+
+            }
+
+
+        </script>
+        <p>This function finds all occurrences of one or more terms and replaces these occurrences with a new term. If you wish simply to change the label associated with a term eg. correction of a typo or systematic renaming, this can be done in Database &gt; Manage terms / Relation types</p>
+
+        <div id="uiControls">
+            <div style="padding-top: 5px;"><label for="scope-select">Replace value in: </label><select id="scope-select"></select></div>
+            <div style="padding-top: 5px; padding-left: 26px;"><label for="field-select">Select Field: </label><select id="field-select"></select></div>
+            <div id="inputDiv"></div>
+        </div>
+        <div style="float: right; margin-right: 30px;">
+            <input type="button" value="Replace field values" onclick="save();">
+            &nbsp;&nbsp;&nbsp;
+            <input type="button" value="Close" onclick="window.close();">
+        </div>
+        <div id="statusDiv"></div>
+
+    </body>
+</html>

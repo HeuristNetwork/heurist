@@ -1,0 +1,138 @@
+<!--
+
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* brief description of file
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+-->
+<!--
+
+/**
+
+// AO: NOT USED, TO REMOVE ???
+
+	used in search/usergroupHomepage.html
+			search/actions/sendNotificationsPopup.php
+			search/actions/emailToDatabasePopup.php
+
+ **/
+
+-->
+<html>
+    <head>
+        <title>Group members</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel=stylesheet href="../../common/css/heurist.css">
+
+        <style>
+            #wg-title { font-size: 120% }
+            #wg-name { font-weight: bold; }
+            td { padding-right: 20px; }
+        </style>
+    </head>
+
+     <body width=600 height=400>
+        <script src="utilsLoad.js"></script>
+        <script>
+            window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+
+            function showMembers() {
+	            var wg = top.HEURIST.workgroups[window.HEURIST.parameters["wg_id"]];
+	            if (! wg) {
+		            // We only make it here if someone's screwing around ...
+		            // It does give a flash of popup window, but it's a bit hard to work around that.
+		            alert("Sorry - no group members visible");
+		            setTimeout(function() { window.close(); }, 0);
+		            return;
+	            }
+
+	            var dateString;
+	            if (top.HEURIST.is_wgAdmin(wg)) {
+		            var now = new Date();
+		            var y = now.getFullYear();
+		            var m = now.getMonth() + 1;
+		            var d = now.getDate();
+		            dateString = y + "-" +
+						            (m < 10 ? "0" : "") + m + "-" +
+						            (d < 10 ? "0" : "") + d;
+	            }
+
+	            document.getElementById("wg-name").appendChild(document.createTextNode(wg.name));
+
+	            var table = document.getElementById("members-table");
+	            var tbody =table.appendChild(document.createElement("tbody"));
+	            for (var i=0; i < wg.members.length; ++i) {
+		            var tr = tbody.appendChild(document.createElement("tr"));
+
+		            var td = tr.appendChild(document.createElement("td"));
+		            td.appendChild(document.createTextNode(wg.members[i].name));
+
+		            td = tr.appendChild(document.createElement("td"));
+		            var link = td.appendChild(document.createElement("a"));
+		            link.href = "mailto:"+wg.members[i].email;
+		            link.appendChild(document.createTextNode("email"));
+
+		            if (top.HEURIST.database.name == "") {
+			            td = tr.appendChild(document.createElement("td"));
+			            link = td.appendChild(document.createElement("a"));
+			            link.target = "_blank";
+			            link.href = "../../viewers/blog/index.html?u="+wg.members[i].id;//saw TODO: instance awareness
+			            link.appendChild(document.createTextNode("blog"));
+		            }
+
+		            if (top.HEURIST.is_wgAdmin(wg)) {
+			            td = tr.appendChild(document.createElement("td"));
+			            var a = td.appendChild(document.createElement("a"));
+				            a.target = "_blank";
+				            a.href = "../../viewers/blog/reportForUGrpBlog.php?u=" + wg.members[i].id + "&d=" + dateString;//saw TODO: instance awareness
+				            a.appendChild(document.createTextNode("blog report"));
+		            }
+	            }
+
+	            if (top.HEURIST.is_wgAdmin(wg)) {
+		            var div = document.createElement("div");
+			            div.style.cssFloat = div.style.styleFloat = "right";
+		            var a = div.appendChild(document.createElement("a"));
+			            a.target = "_blank";
+			            a.href = "../../viewers/blog/reportForUGrpBlog.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;//saw TODO: instance awareness
+			            a.appendChild(document.createTextNode("group blog report"));
+		            table.parentNode.insertBefore(div, table);
+	            }
+            }
+
+            top.HEURIST.registerEvent(window, "load", function() {
+	            top.HEURIST.util.loadWorkgroupDetails(window.HEURIST.parameters["wg_id"], showMembers);
+            });
+          </script>
+
+          <h2 id=wg-title>Members of workgroup <span id=wg-name></span></h2>
+          <table id=members-table></table>
+     </body>
+</html>
+

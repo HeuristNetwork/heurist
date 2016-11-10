@@ -1,314 +1,229 @@
 <?php
 
-    /**
-    *  Main script
-    *
-    *  1) System init on server side (see System.php) - connects to database , if db parameter is missed redirects to database selecion page
-    *  2) System init on client side (see hapi.js) - init hAPI object
-    *  3) Load localization, theme and basic database structure definition
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2015 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* Main script initializing Heurist layout and performing initial search of parameter q is defined
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+define('IS_INDEX_PAGE',true);
+define('PDIR','');
 
+require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
 
-    //ini_set('include_path', ini_get('include_path').PATH_SEPARATOR,'/var/www/h4/');
-    //ini_set('include_path', ini_get('include_path').PATH_SEPARATOR.'c:/xampp/htdocs/h4/');  //dirname(__FILE__));
-
-    require_once(dirname(__FILE__)."/php/System.php");
-    //require_once ('/common/db_structure.php');
-
-    // either init system or redirect to database selection
-    $system = new System();
-    if(@$_REQUEST['db']){
-        // connrect to given database
-        if(! $system->init(@$_REQUEST['db']) ){
-            //can not connect to given database
-            $err = $system->getError();
-            $msg = @$err['message'];
-            header('Location: php/databases.php?msg='.rawurlencode($msg));
-            //echo "FATAL ERROR!!!! ".print_r($arr, $system->getError());
-            exit();
-        }
-    }else{
-        //db parameter is missed redirects to database selecion page
-        header('Location: php/databases.php');
-        exit();
-    }
-
+if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+        print '<script type="text/javascript" src="ext/fancytree/jquery.fancytree-all.min.js"></script>';
+}else{
+        print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
+}   
 ?>
-<html>
-    <head>
-        <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-        <link rel=icon href="favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-
+        <!-- it is needed in preference dialog -->
         <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
-        <link rel="stylesheet" type="text/css" href="ext/font-awesome/css/font-awesome.min.css" />
-        <!-- <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" /> -->
-
-        <script type="text/javascript" src="ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
-<!-- does not work properly
-        <script type="text/javascript" src="ext/js/jquery.resize.js"></script>
--->
+        <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
+        number of widgets. Currently it is commented out of the code in layout_default.js -->
 
-<!--
+        <!-- for gridster layout, development version - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
         <script type="text/javascript" src="ext/gridster/utils.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.collision.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.coords.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.draggable.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.gridster.js"></script>
--->
-<!-- for gridster layout - remove comments to use
+        -->
+        <!-- for gridster layout, production (minimised) version - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.all.css" />
         <script type="text/javascript" src="ext/gridster/jquery.gridster.all.js"></script>
--->
-
-
-
-
-        <!-- jquery-contextmenu (https://github.com/mar10/jquery-ui-contextmenu/)
-             src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
         -->
+
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
+        <!-- script type="text/javascript" src="ext/js/moment.min.js"></script -->
+        <script type="text/javascript" src="ext/js/date.format.js"></script>
 
-        <script type="text/javascript" src="localization.js"></script>
-        <script type="text/javascript" src="js/utils.js"></script>
-        <!-- script type="text/javascript" src="js/utils_ajax.js"></script -->
-        <script type="text/javascript" src="js/recordset.js"></script>
-        <script type="text/javascript" src="js/hapi.js"></script>
-        <script type="text/javascript" src="js/layout.js"></script>
-        <script type="text/javascript" src="apps/others/help_tips.js"></script>
+        <!-- init layout and loads all apps.widgets -->
+        <script type="text/javascript" src="hclient/core/layout.js"></script>
+        <!-- array of possible layouts -->
+        <script type="text/javascript" src="layout_default.js"></script>
 
-        <script type="text/javascript" src="h3/common/js/temporalObjectLibrary.js"></script>
+        <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
 
-        <!-- this scripts are loaded explicitely - for debug purposes -->
-        <script type="text/javascript" src="apps/file_manager.js"></script>
-        <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>
-        <script type="text/javascript" src="apps/svs_manager.js"></script>
-        <script type="text/javascript" src="apps/search/search_faceted2.js"></script>
-        <script type="text/javascript" src="apps/search/search_faceted_wiz.js"></script>
-        <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
-        <script type="text/javascript" src="apps/search/search.js"></script>
-        <script type="text/javascript" src="apps/others/mainMenu.js"></script>
-        <script type="text/javascript" src="apps/search/svs_edit.js"></script>
-        <script type="text/javascript" src="apps/search/svs_list.js"></script>
-        <script type="text/javascript" src="apps/viewers/resultList.js"></script>
+        <script type="text/javascript" src="hclient/widgets/topmenu/help_tips.js"></script>
 
-        <script type="text/javascript" src="apps/digital_harlem/dh_search.js"></script>
-        <script type="text/javascript" src="apps/digital_harlem/dh_maps.js"></script>
+        <script type="text/javascript" src="common/js/temporalObjectLibrary.js"></script>
 
-        <!--
-        <script type="text/javascript" src="apps/profile/profile.js"></script>
-        <script type="text/javascript" src="apps/viewers/connections.js"></script>
-        <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
-        <script type="text/javascript" src="apps/others/mainMenu.js"></script>
-         script type="text/javascript" src="apps/search.js"></script>
-        <script type="text/javascript" src="apps/rec_list.js"></script>
-        <script type="text/javascript" src="apps/profile_edit.js"></script>
-        <script type="text/javascript" src="apps/pagination.js"></script>
-        <script type="text/javascript" src="apps/rec_list.js"></script>
+        <!-- DOCUMENTATION TODO: explain this -->
+        <!-- these scripts are loaded explicitely - for debug purposes -->
+        <script type="text/javascript" src="hclient/widgets/viewers/recordListExt.js"></script>
+        <script type="text/javascript" src="hclient/widgets/search/search_faceted.js"></script>
+        <script type="text/javascript" src="hclient/widgets/search/search_faceted_wiz.js"></script>
+        <script type="text/javascript" src="hclient/widgets/viewers/app_timemap.js"></script>
+        <script type="text/javascript" src="hclient/widgets/search/search.js"></script>
+        <script type="text/javascript" src="hclient/widgets/topmenu/mainMenu.js"></script>
+        <script type="text/javascript" src="hclient/widgets/search/svs_edit.js"></script>
+        <script type="text/javascript" src="hclient/widgets/search/svs_list.js"></script>
+        <script type="text/javascript" src="hclient/widgets/viewers/resultList.js"></script>
+
+        <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
+        
+        <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_search.js"></script>
+        <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_maps.js"></script>
+        <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
+
+        <!-- DEBUG -->
+
+        <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
+        <script type="text/javascript" src="hclient/widgets/viewers/resultListMenu.js"></script>
+        <script type="text/javascript" src="hclient/widgets/editing/editing_input.js"></script> <!-- move to common js???? -->
+        <!-- todo: load dynamically
+        <script type="text/javascript" src="hclient/widgets/editing/rec_search.js"></script>
+        <script type="text/javascript" src="hclient/widgets/editing/rec_relation.js"></script>
         -->
-        <!-- DEBUG
-        -->
-
-        <script type="text/javascript" src="apps/profile/profile_login.js"></script>
-        <script type="text/javascript" src="apps/viewers/resultListMenu.js"></script>
-        <script type="text/javascript" src="apps/rec_actions.js"></script>
-        <script type="text/javascript" src="apps/rec_search.js"></script>
-        <script type="text/javascript" src="apps/rec_relation.js"></script>
-        <script type="text/javascript" src="js/editing_input.js"></script>
-        <script type="text/javascript" src="js/editing.js"></script>
 
         <!-- move to profile.js dynamic load -->
         <script type="text/javascript" src="ext/js/themeswitchertool.js"></script>
+
+        <!--  media viewer - however it is not used at the moment 
         <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
+        -->
 
-        <!-- to do -->
-        <script type="text/javascript" src="layout_default.js"></script>
-
+        <!-- os, browser detector -->
+        <script type="text/javascript" src="ext/js/platform.js"></script>
+        
         <script type="text/javascript">
 
-            $(function() {
+           function onPageInit(success){
 
-                //overwrite the standard show method
-                var orgShow = $.fn.show;
-                $.fn.show = function()
-                {
-                    orgShow.apply( this, arguments );
-                    $(this).trigger( 'myOnShowEvent' );
-                    return this;
-                };
+                if(!success) return;
+                
+                // OLD H3 stuff
+                window.HEURIST.baseURL_V3  = window.HAPI4.basePathV3;
+                window.HEURIST.loadScript(window.HAPI4.basePathV3+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
+                window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
+                window.HEURIST.database = {  name: window.HAPI4.database };
+                
+                //
+                // cfg_widgets and cfg_layouts are defined in layout_default.js
+                //
+                top.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
 
-                /*overwrite the standard empty method
-                var _empty = $.fn.empty;
-                $.fn.empty = function () {
-                return this.each(function() {
-                $( "*", this ).each(function() {
-                $( this ).triggerHandler( "remove" );
-                });
-                return _empty.call( $(this) );
-                });
-                };
-                */
-
-                //Performs hAPI initialization for given database
-                window.HAPI4 = new hAPI('<?=$_REQUEST['db']?>',
-                    function(success) //callback function of hAPI initialization
-                    {
-                        if(success)  //system is inited
-                        {
-                            var prefs = window.HAPI4.get_prefs();
-
-                            //loads localization
-                            window.HR = window.HAPI4.setLocale(prefs['layout_language']);
-
-                            //loads theme (style for layout) - as we are using H3 functions always use default theme
-                            if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
-                                cssLink = $('<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'+
-                                    prefs['layout_theme']+'/jquery-ui.css" />');
-                            }else{
-                                //default BASE theme
-                                cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
-                            }
-
-                            //add theme link to html header
-                            $("head").append(cssLink);
-                            $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">'));
-
-                            //top.HAPI4.database+'. HEURIST_TITLE
-                            window.document.title = window.document.title+' V'+top.HAPI4.sysinfo.version;
-
-                            // OLD H3 stuff
-                            window.HEURIST.baseURL  = window.HAPI4.basePathOld;
-                            window.HEURIST.basePath = window.HAPI4.basePathOld;
-                            window.HEURIST.loadScript(window.HAPI4.basePathOld+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
-                            window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
-                            window.HEURIST.database = {  name: window.HAPI4.database };
-
-                            /*$.getScript(window.HAPI4.basePathOld+'common/js/utilsLoad.js', function(){
-                                $.getScript(window.HAPI4.basePathOld+'common/php/displayPreferences.php', function(){
-
-                                });
-                            } );*/
-
-
-
-
-                            //load database structure (record types, field types, terms) definitions
-                            window.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
-                                    top.HEURIST4.rectypes = response.data.rectypes;
-                                    top.HEURIST4.terms = response.data.terms;
-                                    top.HEURIST4.detailtypes = response.data.detailtypes;
-
-                                    //in layout.js - load layout #101
-
-                                    var layoutid = '<?=@$_REQUEST['ll']?>';
-                                    if(top.HEURIST4.util.isempty(layoutid)){
-                                        layoutid = top.HAPI4.get_prefs('layout_id');
-                                        if(top.HEURIST4.util.isempty(layoutid)){
-                                            layoutid = "L01";
-                                        }
-                                    }
-                                    top.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
-
-                                    if(layoutid=='L06'){ //digital harlem - @todo move style to layout
-                                        $("head").append($('<link rel="stylesheet" type="text/css" href="apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
-                                    }
-
-                                    appInitAll(layoutid, "#layout_panes");
-
-                                    /*
-                                    //get all terms and rectypes   terms:0,
-                                    window.HAPI4.SystemMgr.get_defs({terms:'all'}, function(response){
-                                    if(response.status == top.HAPI4.ResponseStatus.OK){
-                                    top.HEURIST4.terms = response.data.terms;
-
-                                    //in layout.js
-                                    appInitAll("l01", "#layout_panes");
-
-                                    }else{
-                                    top.HEURIST4.util.redirectToError(response.message);
-                                    }
-                                    });
-                                    */
-
-                                    //perform search in the case that parameter "q" is defined
-                                    var qsearch = '<?=@$_REQUEST['q']?>';
-                                    if(!top.HEURIST4.util.isempty(qsearch)){
-                                        var qdomain = '<?=@$_REQUEST['w']?>';
-                                        if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
-                                        var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
-                                        //top.HEURIST4.query_request = request;
-                                        setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
-                                    }else{
-                                        var init_search = top.HEURIST.displayPreferences['defaultSearch'];
-                                        if(!top.HEURIST4.util.isempty(init_search)){
-                                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
-                                            setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
-                                        }
-                                    }
-
-                                    if(!(top.HAPI4.sysinfo.db_total_records>0)){
-                                            showTipOfTheDay(false);
-                                    }
-
-                                    $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
-
-                                }else{  // failed to load database structure
-
-                                    top.HEURIST4.util.redirectToError(response.message);
-                                }
-                            });
-
-
-
-                        }else{  // Failed to initialise system
-
-                            //top.HEURIST4.util.redirectToError
-                            alert("Cannot initialize system, please consult Heurist developers");
-                        }
-                });
-
-                //definition of ABOUT dialog
+                
+                $( "#heurist-about" ).dialog("close");
+                
+                //
+                // init layout
+                //
+                top.HAPI4.LayoutMgr.appInitAll( top.HAPI4.sysinfo['layout'], "#layout_panes");
+                
+//console.log('ipage layout '+(new Date().getTime() / 1000 - _time_debug));
+_time_debug = new Date().getTime() / 1000;
+                
+                onInitCompleted_PerformSearch();
+           }
+           
+           //
+           // init about dialog
+           //
+           function onAboutInit(){
+                //definition of ABOUT dialog, called from Help > About, see content below
                 $( "#heurist-about" ).dialog(
                     {
-                        autoOpen: false,
-                        height: 400,
+                        autoOpen: true,
+                        height: 180,
                         width: 450,
                         modal: true,
                         resizable: false,
                         draggable: false,
-                        hide: {
+                        create:function(){
+                            $(this).parent().find('.ui-dialog-titlebar').addClass('fullmode').hide();
+                        }
+                        /*hide: {
                             effect: "puff",
                             duration: 500
-                        }
+                        }*/
                     }
                 );
+                
+           }
 
+           //
+           // Performs inital search: parameters from request or from user preferences
+           //
+           function onInitCompleted_PerformSearch(){
+               
+<?php
+     $db_total_records = mysql__select_value($system->get_mysqli(), 'select count(*) from Records');
+     echo 'var db_total_records='.($db_total_records>0?$db_total_records:0).';';  
+?>
+               
+               
+                if(top.HAPI4.sysinfo['layout']=='H4Default'){
+                    //switch to FAP tab if q parameter is defined
+                    if(db_total_records<1){
+                        showTipOfTheDay(false);   
+                    }else{
+                        top.HAPI4.LayoutMgr.putAppOnTopById('FAP');
+                    }
+                }else if(db_total_records<1){
+                    showTipOfTheDay(false);
+                }
+                //perform search in the case that parameter "q" is defined
+                var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
+                if(db_total_records>0 && !top.HEURIST4.util.isempty(qsearch)){
+                    var qdomain = '<?=@$_REQUEST['w']?>';
+                    var rules = '<?=@$_REQUEST['rules']?>';
+                    if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
+                    var request = {q: qsearch, w: qdomain, f: 'map', rules: rules, source:'init' };
+                    //top.HEURIST4.query_request = request;
+                    setTimeout(function(){
+                            top.HAPI4.SearchMgr.doSearch(document, request);
+                    }, 3000);
+                }else if(!(top.HAPI4.sysinfo['layout']=='DigitalHarlem' || top.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
+                    var init_search = top.HEURIST.displayPreferences['defaultSearch'];
+                    if(!top.HEURIST4.util.isempty(init_search)){
+                        var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                        setTimeout(function(){
+                            top.HAPI4.SearchMgr.doSearch(document, request);
+                        }, 3000);
+                    }else{
+                        //trigger search finish to init some widgets
+                        $(document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
+                    }
+                }
 
+                //if database is empty show welcome screen
+                //if(!(top.HAPI4.sysinfo.db_total_records>0)){
+                //    showTipOfTheDay(false);
+                //}
+ 
+var fin_time = new Date().getTime() / 1000;
+//console.log('ipage finished '+( fin_time - _time_debug)+ '  total: '+(fin_time-_time_start));
 
-            });
+                $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
+
+                var os = platform?platform.os.family.toLowerCase():'';
+                if(os.indexOf('android')>=0 || os.indexOf('ios')>=0){ //test || os.indexOf('win')>=0
+                    top.HEURIST4.msg.showElementAsDialog(
+                        {element:document.getElementById('heurist-platform-warning'),
+                         width:480, height:220,
+                         title: 'Welcome',
+                        buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  }
+
+            }
 
         </script>
 
@@ -317,40 +232,43 @@
 
 
         <!-- These are old H3 stuff - needed to support existing features in popups -->
-        <script>top.installDirFromH4="<?=HEURIST_BASE_URL_OLD?>";</script>
-        <script src="<?=HEURIST_BASE_URL_OLD?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL_OLD?>common/php/displayPreferences.php"></script>
+        <script>top.installDirFromH4="<?=HEURIST_BASE_URL?>";</script>
+        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
+        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
 
-        <!--
-        <script src="../../common/php/getMagicNumbers.php"></script>
-        These are old H3 stuff - needed to support existing features in popups -->
 
         <div id="layout_panes" style="height:100%">
             &nbsp;
         </div>
 
-        <div id="heurist-about" title="About" style="width:300px">
+        <div id="heurist-about" style="width:300px;display:none;">
             <div class='logo'></div>
-            <h4>Heurist academic knowledge management system</h4>
-            <p style="margin-top: 1em;">version     <?=HEURIST_VERSION?></p>
-            <p style="margin-top: 1em;">
+            <h4>Heurist Academic Knowledge Management System</h4>
+            <p style="margin-top:1em;">version <?=HEURIST_VERSION?></p>
+            <p style="margin-top:1em; display:none;" class="fullmode">
                 author: Dr Ian Johnson<br/>
                 programmers: Artem Osmakov, Tom Murtagh, Kim Jackson, Stephen White and others...</p>
 
-            <p style="margin-top: 1em;">Copyright (C) 2005-2015 <a href="http://sydney.edu.au/arts/" target="_blank">University of Sydney</a></p>
+            <p style="margin-top: 1em;">Copyright (C) 2005-2016 <a href="http://sydney.edu.au/arts/" target="_blank">University of Sydney</a></p>
 
-            <p style="font-size: x-small;margin-top: 1em;">
+            <p style="font-size: x-small; margin-top:1em; display:none;" class="fullmode">
                 Licensed under the GNU General Public License Version 3.0 (the "License"); you may not use this file except
                 in compliance with the License. You may obtain a copy of the License at
                 <a href="http://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
 
-            <p style="font-size: x-small;margin-top: 1em;">
+            <p style="font-size: x-small; margin-top:1em; display:none;" class="fullmode">
                 Unless required by applicable law or agreed to in writing, software distributed under the License
                 is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
                 or implied. See the License for the specific language governing permissions and limitations under
                 the License.
             </p>
         </div>
+        
+        <div id="heurist-platform-warning" style="display:none;">
+            <p style="padding:10px">Heurist is designed primarily for use with a keyboard and mouse. Tablets are not fully supported at this time, except for data collection on Android (see FAIMS in the Help system).</p>
+
+            <p style="padding:10px">Please contact the Heurist developers (info at HeuristNetwork dot org) for further information or to express an interest in a tablet version</p>
+        </div> 
 
         <div id="heurist-dialog">
         </div>

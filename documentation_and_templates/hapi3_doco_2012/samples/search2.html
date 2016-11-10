@@ -1,0 +1,67 @@
+<html>
+ <head>
+  <title>HAPI Search sample application</title>
+
+  <script src=http://hapi.Heurist.sydney.edu.au/load?v=02&key=ce1c992c139cfd5a6fdc77c5c71444925f229942></script>
+
+  <script>
+
+function loadAllRecords(query, options, loader) {
+	var records = [];
+	var baseSearch = new HSearch(query, options);
+	var bulkLoader = new HLoader(
+		function(s, r) {	// onload
+			records.push.apply(records, r);
+			if (r.length < 100) {
+				// we've loaded all the records: invoke the loader's onload
+				loader.onload(baseSearch, records);
+			}
+			else {
+				document.getElementById('results').innerHTML = '<b>Loaded ' + records.length + ' records so far ...</b>';
+
+				// might be more records to load: do a search with an offset specified
+				var search = new HSearch(query + " offset:"+records.length, options);
+				HeuristScholarDB.loadRecords(search, bulkLoader);
+			}
+		},
+		loader.onerror
+	);
+	HeuristScholarDB.loadRecords(baseSearch, bulkLoader);
+}
+
+
+	function doSearch() {
+		var mysearch = document.getElementById("search-string").value;
+
+		var loader = new HLoader(	
+			function(s,r) {
+				displayResults(r);
+			},
+			function(s,e) {
+				alert("load failed: " + e);
+			});
+		// HeuristScholarDB.loadRecords(mysearch, loader);
+		loadAllRecords(mysearch, null, loader);
+	}
+
+	function displayResults(r) {
+		var div = document.getElementById("results");
+		div.innerHTML = "";
+		for (var i = 0; i < r.length; i++) {
+			div.innerHTML += "<a href=\"http://Heurist.sydney.edu.au/resource/" + r[i].getID() + "\">" + r[i].getTitle() + "</a><br/>";
+	   }
+	}
+  </script>
+ </head>
+
+ <body>
+  <h3>Search Heurist database</h3>
+  <form onsubmit="doSearch(); return false;">
+  <input type="text" id="search-string"></input>
+  <input type="submit" value="search"></input>
+  </form>
+  <div id="results"></div>
+
+ </body>
+
+</html>

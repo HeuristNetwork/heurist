@@ -1,0 +1,207 @@
+<!--
+/**
+*
+* visualize.html: draw a network diagram of the current resultset
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Jan-Jaap de Groot
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<!-- Network diagram HTML -->
+
+<div class="ent_header" style="height:12em;border:none">
+    
+            <div id="visualisation-settingsX">
+                <!-- LINE SETTINGS -->
+                <div class="settings space" id="lineSettings">
+                    <b>Network&nbsp;</b>
+                    <!-- Line type -->
+                    <div id="linetypeContainer">
+                        <select class="middle" id="linetype">
+                            <option value="straight">straight</option>
+                            <option value="curved">curved</option>
+                        </select>
+                    </div>
+
+                    <!-- Line length -->
+                    <div id="linelengthContainer">
+                        &nbsp;&nbsp;Length
+                        <input id="linelength" class="number-input medium" type="number" min="1" step="25" />
+                    </div>
+
+                    <!-- Line width -->
+                    <div id="linewidthContainer">
+                        &nbsp;&nbsp;Thickness
+                        <input id="linewidth" class="number-input small" type="number" min="1" step="5" />
+                    </div>
+
+                    <!-- Line color -->
+                    <div id="linecolorContainer">
+                        &nbsp;&nbsp;Colour
+                        <div id="linecolor" class="colorblock"></div>
+                    </div>
+
+                    <!-- Arrow color -->
+                    <div id="markercolorContainer">
+                        &nbsp;&nbsp;Arrow
+                        <div id="markercolor" class="colorblock"></div>
+                    </div>
+                </div>
+
+                <!-- Entity settings -->
+                <div class="settings space" id="entitySettings">
+                    <b>Entity&nbsp;</b>
+
+                    <div id="entityradiusContainer">
+                        &nbsp;&nbsp;Radius
+                        <input id="entityradius" class="number-input small" type="number" min="1" step="5" />
+                    </div>
+
+                    <!-- Entity circle color -->
+                    <div id="entitycolorContainer">
+                        &nbsp;&nbsp;Colour
+                        <div id="entitycolor" class="colorblock"></div>
+                    </div>
+                    
+                    <div id="formulaContainer">
+                        &nbsp;&nbsp;Scaling
+                        <!-- Formula -->
+                        <select class="middle" id="formula">
+                            <option value="linear">linear</option>
+                            <option value="logarithmic">logarithmic</option>
+                            <option value="unweighted">unweighted</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Fish eye setting -->
+                    <!--TODO: Fisheye on connections diagram does not currently work - commented out-->
+                    <div id="fisheyeContainer" style="display: none;">
+                        &nbsp;&nbsp;Fisheye
+                        <input id="fisheye" type="checkbox" name="fisheye">
+                    </div>
+                    
+                    
+                </div>
+
+
+                <!-- Text settings -->
+                <div class="settings space" id="textSettings">
+                    <b>Labels&nbsp;</b>
+                    <input id="labelCheckBox" type="checkbox" name="labelCheckBox" checked="checked">
+
+                    <!-- Text size -->
+                    <div id="fontsizeContainer">
+                        &nbsp;&nbsp;Size
+                        <input id="fontsize" class="number-input small" type="number" min="5" step="1" />
+                    </div>
+
+                    <!-- Text length -->
+                    <div id="textlengthContainer">
+                        &nbsp;&nbsp;Length
+                        <input id="textlength" class="number-input small" type="number" min="5" step="5" />
+                    </div>
+
+                    <!-- Text color -->
+                    <div id="textcolorContainer">
+                        &nbsp;&nbsp;Colour
+                        <div id="textcolor" class="colorblock"></div>
+                    </div>
+                </div>
+
+
+                <!-- GRAVITY SETTINGS -->
+                <div class="settings space" id="gravitySettings">
+                    <!-- Gravity setting -->
+                    <div id="gravityContainer">
+                        <b>Gravity&nbsp;</b>
+                        <select class="middle" id="gravity">
+                            <option value="off">off</option>
+                            <option value="touch">gentle</option>
+                            <option value="aggressive">aggressive</option>
+                        </select>
+                    </div>
+
+                    <!-- Attraction strength -->
+                    <div id="attractionContainer">
+                        &nbsp;&nbsp;Repulsion
+                        <input id="attraction" class="number-input medium" type="number" step="100" />
+                    </div>
+
+                    <div>
+                        <i class="explanation">&nbsp;&nbsp;Start with Aggressive, then change to Gentle or Off.</i>
+                    </div>
+
+
+                </div>
+
+                <!-- MOUSE SETTINGS -->
+                <div class="settings space" id="mouseSettings">
+                    <div id="mouseContainer">
+                        <b>Mouse&nbsp;</b>
+                    </div>
+
+                    <!-- Drag -->
+                    <div id="dragContainer">
+                        <img id="drag" class="mouse-icon selected"
+                            title="Select and drag nodes" src="visualize/drag.png">
+                    </div>
+
+                    <!-- Selection -->
+                    <div id="selectionContainer">
+                        <img id="selection" class="mouse-icon" title="Select multiple nodes" src="visualize/selection.png">
+                    </div>
+
+                    <!-- Overlay -->
+                    <div id="overlayContainer">
+                        <img id="overlay" class="mouse-icon" title="Retrieve information on click" src="visualize/overlay.png">
+                    </div>
+
+                    <div>
+                        <i class="explanation">&nbsp;&nbsp;Click to select, drag to reposition, mouse wheel zooms. Note: Shows constrained relationships only. </i>
+                    </div>
+                </div>
+
+                <!-- HELP INFO -->
+
+            </div>
+
+
+
+            <!-- Menu -->
+            <div id="visualisation-menu">
+                <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI export</button>
+                <!-- For future use with more items
+                <ul class="menu-items level1">
+                <li class="menu-button">
+                MENU
+                <ul class="menu-items level2">
+                <li class="menu-item"><a href="diagramUrl.html" class="popup-link">Get URL for diagram</a></li>
+                <li class="menu-item"><a href="diagramCode.html" class="popup-link">Embed diagram code</a></li>
+                <li class="menu-item"><a href="gephiFormat.html" class="popup-link">Output in Gephi format</a></li>
+                </ul>
+                </li>
+                </ul>
+                -->
+            </div>
+</div>
+<div class="ent_content_full" style="top:12em;">
+            <!-- SVG -->
+            <svg id="d3svg" class="fullscreen">
+                <text x="25" y="25" fill="black">Processing...</text>
+            </svg>  
+</div>

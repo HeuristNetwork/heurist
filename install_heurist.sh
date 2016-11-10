@@ -1,11 +1,11 @@
 #! /bin/sh
 
-# install_heurist.sh: installation script for Heurist on ny flavour of Linux
+# install_heurist.sh: installation script for Heurist on any flavour of Linux
 # Note: run install_prerequisities_ubuntu.sh first to install php packages, MySQL, SpatialLite etc.
 
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
-# @copyright   (C) 2005-2015 University of Sydney
+# @copyright   (C) 2005-2016 University of Sydney
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 # @version     4.0
@@ -26,11 +26,11 @@ echo
 if [ -z $1 ]
    then
       echo -e "\n\n"
-      echo "Please supply version eg. h4.x.x-alpha or h4-alpha, h4-beta (this MUST exist as a tar.bz2 file "
+      echo "Please supply version eg. h4.x.x.alpha (this MUST exist as a tar.bz2 file "
       echo "on Heurist.sydney.edu.au/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
       echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
       echo
-      echo "       ./install_heurist.sh h4.0.0-beta sudo"
+      echo "       ./install_heurist.sh h4.0.0.beta sudo"
       exit
    fi
 
@@ -43,7 +43,7 @@ if [ $rc -ne 0 ]
         echo -e "\n\n"
         echo "The version parameter you supplied does not point to a Heurist installation package"
         echo "Please check for the latest version at http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION"
-        echo "The parameter should be eg. h4.0.0-beta as given - DO NOT include the url path or .tar.bz2"
+        echo "The parameter should be eg. h4.2.1.beta as given - DO NOT include the url path or .tar.bz2"
         exit
      fi
 
@@ -58,8 +58,6 @@ echo
 
 echo "Changing to /var/www/html and creating html (if required) and HEURIST directory"
 
-# apache on Ubuntu used to install at /var/www, now it installs at /var/www/html
-
 # ensure html directory exists - if this is not apache web root, Heurist will be installed but
 # not accessible at the web root address so we make simlinks.
 
@@ -72,85 +70,75 @@ cd /var/www/html
 $2 mkdir HEURIST
 $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
 
+# download source to temp directory
+cd /var/www/html/HEURIST
+$2 mkdir temp
+cd /var/www/html/HEURIST/temp
 echo -e "Fetching Heurist code from Heurist.sydney.edu.au"
-$2 wget http://heurist.sydney.edu.au/html/HEURIST/DISTRIBUTION/$1.tar.bz2
+$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
-$2 rm $1.tar.bz2
-# this will fail if h4 already exists, use update script in this case
-$2 mkdir /var/www/html/HEURIST/h4
-$2 cp -R $1/* /var/www/html/HEURIST/h4/
+$2 rm -f $1.tar.bz2
+
+# this will fail if h4.x.x.xxx already exists, use update script in this case
+$2 mkdir /var/www/html/HEURIST/$1
+$2 cp -R $1/* /var/www/html/HEURIST/$1/
 $2 rm -rf $1
 
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
 $2 tar -xjf external.tar.bz2
-$2 rm external.tar.bz2
+$2 rm -f external.tar.bz2
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
 $2 tar -xjf external_h4.tar.bz2
-$2 rm external_h4.tar.bz2
+$2 rm -f external_h4.tar.bz2
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
-$2 rm help.tar.bz2
+$2 rm -f help.tar.bz2
 
-$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
-$2 tar -xjf exemplars.tar.bz2
-$2 rm exemplars.tar.bz2
-
-cd /var/www/html/HEURIST/h4
+cd /var/www/html/HEURIST/$1
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
-
-# h3 directory within h4 contains h3 functions not yet converted to h4
-cd h3
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
+
+# simlink in web root to this version of h4
+cd /var/www/html
+$2 ln -s /var/www/html/HEURIST/$1 $1
 
 echo "Heurist unpacked"
 
 echo -e "\n\n"
-echo "Creating directories, sandpit database and setting permissions"
+echo "Creating directories and setting permissions"
 
+# set up the filestore, copy .htaccess to block direct web access to contents (overridden for rectype icons/thumbs)
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
-
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-
-$2 cp -r /var/www/html/HEURIST/h3/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-$2 cp -r /var/www/html/HEURIST/h3/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-$2 cp -r /var/www/html/HEURIST/h3/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-$2 cp -r /var/www/html/HEURIST/h3/admin/setup/settings/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/filethumbs
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/generated-reports
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/hml-output
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/html-output
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/scratch
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
+$2 cp /var/www/html/HEURIST/$1/admin/setup/.htaccess_for_filestore /var/www/html/HEURIST/HEURIST_FILESTORE/.htaccess
 
 # set up override configIni files
-$2 mv /var/www/html/HEURIST/h4/parentDirectory_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
-$2 mv /var/www/html/HEURIST/h4/parentDirectory_index.html /var/www/html/HEURIST/index.html
+$2 mv /var/www/html/HEURIST/$1/move_to_parent_as_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
+$2 mv /var/www/html/HEURIST/$1/move_to_parent_as_index.html /var/www/html/HEURIST/index.html
 
 # one or other of these will fail harmlessly
-echo Trying both www-data and apache as owner:group for data directories, one will succeed
+# on a two tier system you may need to map apache to nobody
+echo "Trying both www-data (Debian) and apache (Redhat) as owner and group for data directories, one will succeed"
 $2 chown -R apache:apache /var/www/html/HEURIST/
 $2 chown -R www-data:www-data /var/www/html/HEURIST/
 
 $2 chmod -R 775  /var/www/html/HEURIST/
 $2 chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
 
-# Simlink Heurist root as heurist and codebase as h4 from the root web directory
-# do both /var/www and /var/www/html for good measure
-cd /var/www
-$2 ln -s /var/www/html/HEURIST/h4/ h4
-$2 ln -s /var/www/html/HEURIST/ heurist
+# Simlink codebase as both heurist and h4 from the root web directory
+# h4 goes to index.php, heurist goes to the index.html switchboard
 cd /var/www/html
-$2 ln -s /var/www/html/HEURIST/h4/ h4
-$2 ln -s /var/www/html/HEURIST/ heurist
+$2 rm h4
+$2 rm heurist
+$2 ln -s /var/www/html/HEURIST/$1 h4
+$2 ln -s /var/www/html/HEURIST/index.html heurist
 
-# TODO: NEED TO ADD .htaccess file to the filestore
+cd /var/www/html/HEURIST
+$2 ln -s /var/www/html/HEURIST/$1 h4
 
 # ------------------------------------------------------------------------------------------
 
@@ -158,11 +146,12 @@ echo -e "\n\n\n\n\n\n"
 
 echo "---- Heurist Vsn 4 installed in /var/www/html/HEURIST/h4 -------------------------------------------"
 echo
-echo "NOTE:"
-echo
 echo "There is normally limited space on /var/www, so you may wish to move HEURIST_FILESTORE from"
 echo "its current location - /var/www/html/HEURIST/HEURIST_FILESTORE - to a location with plenty "
 echo "of space allocated, such as /srv or /data, and add a simlink to this location in /var/www/html/HEURIST "
+echo
+echo "Heurist switchboard will be accessible at http://serveraddress/heurist or http://serveraddress/HEURIST/index.html"
+echo "Heurist Vsn 4 will be accessible at http://serveraddress/h4 or http://serveraddress/HEURIST/h4"
 echo
 echo "CONFIGURATION:"
 echo
@@ -172,5 +161,5 @@ echo "You can do this by pasting the following at the command line - you may nee
 echo
 echo "           sudo nano /var/www/html/HEURIST/heuristConfigIni.php"
 echo
-echo "Then run Heurist by navigating to heurist on your web site eg. myserver.com/heurist"
+echo "Then run Heurist by navigating to Heurist on your web site at http://serveraddress/heurist for switchboard or http://serveraddress/heurist for direct access to databases"
 echo
