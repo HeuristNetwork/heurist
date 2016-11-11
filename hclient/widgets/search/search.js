@@ -82,7 +82,7 @@ $.widget( "heurist.search", {
 
             // database summary, login and register buttons in navigation panel
             var div_left  = $('<div>')
-            .css({'height':'2em','width':'200px', 'padding':'1.8em','float':'left'})
+            .css({'height':'2em','width':0, 'padding':'1.8em','float':'left'})
             .appendTo( this.element );
 
             if(!this.options.isloginforced){
@@ -111,6 +111,8 @@ $.widget( "heurist.search", {
                     .button()
                     .click( function(){ that._doRegister(); });
                 } // register button
+                
+                div_left.css('width','200px');
 
             } // not bypassing login
 
@@ -150,7 +152,8 @@ $.widget( "heurist.search", {
 
         
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 'max-width':sz_input, 
+        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 
+            'max-width':sz_input, 'padding':'0.4em', 
             'min-width':'10em', 'width':sz_input, 'padding-right':'18px' }) 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
@@ -275,7 +278,7 @@ $.widget( "heurist.search", {
         if(window.hWin.HAPI4.sysinfo['layout']=='original'){
             div_save_filter.appendTo( this.div_search );
         }else{
-            div_save_filter.css({'min-width': '200px'});
+            div_save_filter.css({'min-width': '245px'});
             div_save_filter.insertBefore( this.div_search_header );
         }
         
