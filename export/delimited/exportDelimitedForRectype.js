@@ -497,6 +497,11 @@ function _showRecordDataH4(recordset) {
             
             var line = recID + strDelim;
             var record = recs[recID];
+            if(!record['d']){
+                console.log('no detials for recid '+recID+' line:'+i);
+                continue;
+            }
+                    
             
             var k = g_exportMap.length;
             for (var j = 0; j < k; ++j) {
