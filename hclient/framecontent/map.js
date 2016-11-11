@@ -57,7 +57,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
             "color": "#0000FF",  //for lines and polygones
             "lineColor": "#0000FF",
             //"icon": "assets/star-red.png",
-            "iconSize": [25,25],
+            "iconSize": [24,24], //[25,25],
             "iconShadow": null,
             "iconAnchor":[9,17]
     });
@@ -225,7 +225,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
                 for (var i=0; i<mapdata.options.items.length; i++){
                     mapdata.options.items[i].options.icon =
-                        window.hWin.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId + 'm.png&color='+encodeURIComponent(new_color);
+                        window.hWin.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId 
+                        + 'm.png&color='+encodeURIComponent(new_color);
 
                     mapdata.options.items[i].options.color = new_color;
                     mapdata.options.items[i].options.lineColor = new_color;

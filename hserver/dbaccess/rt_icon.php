@@ -151,12 +151,12 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
     $alpha = 0;
 
     
-    if(substr($rectype_id,-5,5) == "m.png") {
+    if(substr($rectype_id,-5,5) == "m.png") { //for mapping
         $rectype_id = substr($rectype_id, 0, -5);
         $bg_color = array(200,200,200);   //gray
         $filename2 = $path . $rectype_id . "m.png";
         $alpha = 127; //0-127
-    }else if(substr($rectype_id,-5,5) == "s.png") {
+    }else if(substr($rectype_id,-5,5) == "s.png") { //for selection
         $rectype_id = substr($rectype_id, 0, -5);
         $bg_color = array(190,228,248);  //#bee4f8
         $filename2 = $path . $rectype_id . "s.png";
@@ -229,10 +229,12 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
             imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); //keep bg of icon - transparent hole
         }*/
         // merge icon
-        imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
-        //imagecopymerge_alpha($img, $img_icon, 0, 0, 0, 0, 24, 24, 70);  //mix background to dark
-        
-
+        $imageInfo = getimagesize($filename); 
+        if(is_array($imageInfo) && $imageInfo[0]==24  && $imageInfo[1]==24){
+            imagecopymerge_alpha($img, $img_icon, 0, 0, 0, 0, 24, 24, 70);  //mix background to dark
+        }else{
+            imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
+        }
         
         /*$bg = imagecolorallocate($img_icon, 255, 255, 255);
         // make the background transparent

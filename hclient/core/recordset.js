@@ -917,7 +917,7 @@ function hRecordSet(initdata) {
         },
         
         removeRecord:function(recID){
-            delete records[recID];           //@todo check how it affect selet_multi
+            delete records[recID];           //@todo check how it affect select_multi
             var idx = order.indexOf(recID);
             if(idx>=0){
                 order.splice(idx,1);
