@@ -225,7 +225,8 @@ function hSearchMinimalDigitalHarlem() {
     TERM_PATH = 4537;
 
 
-    var DH_RECORDTYPE = 13, //special record type to display links on map
+    var DH_RECORDTYPE = 99913, //special record type to display DH entities on map
+        DH_RECORDTYPE_SECONDARY = 99914, //special record type to display secondary events and residential addresses
     DH_LINKS = 9999999;  //special record type
 
 
@@ -271,7 +272,7 @@ function hSearchMinimalDigitalHarlem() {
                     if(rels.length<1){ // no relations
                         //this is just address
                         recordset.setFld(record, 'rec_Icon', 'term4326' );
-                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
+                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //special record type to distiguish 
                         recordset.setFld(record, 'rec_Info',
                             window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database+"&recID="+recID);
 
@@ -315,9 +316,12 @@ function hSearchMinimalDigitalHarlem() {
                                     if ((relation_type==TERM_MAIN_CRIME_LOCATION  ||
                                         relation_type==TERM_EVENT_PRIME_LOCATION)
                                         && (links[ eventID ].primary.length<1) ){  //4533 4536
+                                        
                                         links[ eventID ].primary.push( recID );
+                                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE);
                                     }else{
                                         links[ eventID ].secondary.push( recID );
+                                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE_SECONDARY);
                                     }
 
                                     if(order>0){ //if order is defined current address is node of path
@@ -353,7 +357,6 @@ function hSearchMinimalDigitalHarlem() {
 
                                 var relation_type = recordset.fld(relrec, DT_RELATION_TYPE);
 
-                                recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
                                 recordset.setFld(record, 'rec_Icon',     'term'+relation_type );   //role at this address: resident (primary)
 
                                 var recInfoUrl = window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database+"&recID="+
@@ -372,8 +375,10 @@ function hSearchMinimalDigitalHarlem() {
                                 //verify: is it residence
                                 if(relation_type==TERM_ROLE_RESIDENT){  //4527
                                     links[ personID ].primary.push( recID );
+                                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE_SECONDARY);
                                 }else{
                                     links[ personID ].secondary.push( recID );
+                                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE);
                                 }
 
                             }
@@ -526,6 +531,7 @@ function hSearchMinimalDigitalHarlem() {
                 
                 // to avoid clutering on map 
                 // hide person's residence icon if there are links from it 
+                /* now it can be shown/hid by checkbox
                 if(!is_event){
                     for(i=0; i<links[recID].primary.length; i++){
                         mainAddr = res_records[ links[recID].primary[i] ]; //record id
@@ -535,6 +541,7 @@ function hSearchMinimalDigitalHarlem() {
                         }
                     }
                 }
+                */
                 
             }
         }
@@ -545,7 +552,7 @@ function hSearchMinimalDigitalHarlem() {
             count: res_orders.length,
             offset:0,
             fields: recordset.getFields(),
-            rectypes: [DH_RECORDTYPE],
+            rectypes: [DH_RECORDTYPE, DH_RECORDTYPE_SECONDARY],
             records: res_records,
             order: res_orders,
             mapenabled: true
