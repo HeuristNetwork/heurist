@@ -1071,7 +1071,13 @@ background: #8ea9b9
     padding-left:35px;
 }
     
-.ui-icon-filter { background-image: url(hclient/assets/filter_icon.png) !important; }
+.ui-icon-filter { 
+    background-image: url(hclient/assets/filter_icon24.png) !important; 
+    width: 24;
+    height: 24;
+    margin-top: -0.8em !important;
+    margin-left: -0.3em;
+}
 
 .ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon.png) !important; }
 
