@@ -346,6 +346,18 @@ function hRecordSet(initdata) {
     
     }
     
+    //to be implemented
+    /*
+    function _getRelationRecordByID(forRecID, relRecID){
+
+            var i, rels = _getRelationRecords(forRecID, null);
+            for(i=0; i<rels.length; i++){
+                var recID = rels[i]['related'];
+                return relationships[rels[i]['relation']]
+            }        
+    }
+    */
+    
     /**
     * Returns field value by fieldname
     * @todo - obtain fieldtype codes from server side
@@ -907,6 +919,11 @@ function hRecordSet(initdata) {
         getRelationRecords: function(forRecID, forRecTypeID){
             return _getRelationRecords(forRecID, forRecTypeID);
         },
+
+        /*to be implemented
+        getRelationRecordByID: function(forRecID, relRecID){
+            return _getRelationRecordByID(forRecID, relRecID);
+        },*/
         
         getRelationship: function(){
             return relationship;

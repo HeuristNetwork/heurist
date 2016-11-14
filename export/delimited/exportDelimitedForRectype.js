@@ -416,6 +416,7 @@ function getRecordsByH4(){
     var request = top.HEURIST4.current_query_request;
     if(!request.w) request.w = 'all';
     if(!request.a) request.a = '1';
+    
     //request.detail = [] array of fields to download
     
     var len = g_exportMapNames.length,
@@ -430,17 +431,83 @@ function getRecordsByH4(){
     request.detail = details;
     
     top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
-
         if(recordset){
             //alert("got: "+recordset.length());
-            _showRecordDataH4(recordset)
+            _getPointerIDs(recordset)
         }
 
     });    
     
 }
 
-function _showRecordDataH4(recordset) {
+//
+//detect all pointer fields and gather ids
+//
+function _getPointerIDs(recordset) {
+          
+    if(recordset.length()>0){
+        
+        var refFields = [];
+        var j, k = g_exportMap.length;
+        for (j = 0; j < k; ++j) {
+                var hDty = g_detailTypes[g_exportMap[j]];
+                var baseType = hDty.getVariety();
+                if (baseType == HVariety.REFERENCE){
+                     refFields.push(hDty.getID());
+                }
+        }
+        
+        if(refFields.length>0){  //there are pointer fields
+            var len = recordset.length();
+            var recs = recordset.getRecords();
+            var rec_order = recordset.getOrder();
+            
+            var i, recID, refRecIDs = [];
+                k = refFields.length;
+            
+            for (i = 0; i < len; ++i) {
+                recID = rec_order[i];
+                if(recID && recs[recID] && recs[recID]['d']){
+                    for (j = 0; j < k; ++j) {
+                        var dtID = refFields[j];
+                        var val = recs[recID]['d'][dtID];
+                        
+                        if(top.HEURIST4.util.isArrayNotEmpty(val)){
+                             //refRecIDs = refRecIDs.concat(val);
+                             //jQuery.merge( refRecIDs, val );
+                             //refRecIDs = jQuery.unique( refRecIDs );
+                             for (m = 0; m < val.length; m++) {
+                                 if(refRecIDs.indexOf(val[m])<0 )
+                                        refRecIDs.push(val[m]);
+                             }
+                        }else if(val) {
+                                 if(refRecIDs.indexOf(val)<0 )
+                                        refRecIDs.push(val);
+                        }
+                    }
+                }                            
+            } 
+            if(refRecIDs.length>0){
+               
+                var request = {w:'all',a:1,q:'ids:'+refRecIDs.join(','),detail:'header'};
+                
+                top.HAPI4.SearchMgr.doSearchWithCallback( request, function( reference_recordset, original_recordset ){
+                    if(recordset){
+                        //alert("got: "+reference_recordset.length());
+                        _showRecordDataH4(recordset, reference_recordset)
+                    }
+
+                });    
+                
+                return;    
+            }   
+        }
+    }
+    _showRecordDataH4(recordset);
+    
+}
+
+function _showRecordDataH4(recordset, reference_recordset) {
 
     g_delimiterSelect = document.getElementById('delimiterSelect');
     var strDelim = g_delimiterSelect.value;
@@ -475,23 +542,36 @@ function _showRecordDataH4(recordset) {
         var k = g_exportMapNames.length,
         line = "";
         for (var j = 0; j < k; j++) {
+            
             if (g_dtIDsCheckbox.checked && j>0) {
                 var hDty = g_detailTypes[g_exportMap[j-1]];
                 line += hDty.getID() + strDelim;
             }
+            if(j>0){
+                var hDty = g_detailTypes[g_exportMap[j-1]];
+                var baseType = hDty.getVariety();
+                if (baseType == HVariety.REFERENCE){
+                    line += g_exportMapNames[j] + ' ID ' + strDelim;
+                }
+            }
+
             line += (g_exportMapNames[j]+strDelim);
         }
         lines = line.slice(0,-1) + strRowTerm;
     }
+    
+    
 
     // Generate rows of data
     var len = recordset.length();
     
     var recs = recordset.getRecords();
     var rec_order = recordset.getOrder();
-    var recID;
     
-    for (var i = 0; i < len; ++i) {
+    var recID, i, j;
+    var k = g_exportMap.length;
+    
+    for (i = 0; i < len; ++i) {
         recID = rec_order[i];
         if(recID && recs[recID]){
             
@@ -501,10 +581,8 @@ function _showRecordDataH4(recordset) {
                 console.log('no detials for recid '+recID+' line:'+i);
                 continue;
             }
-                    
             
-            var k = g_exportMap.length;
-            for (var j = 0; j < k; ++j) {
+            for (j = 0; j < k; ++j) {
                     var hDty = g_detailTypes[g_exportMap[j]];
                     
                     if (g_dtIDsCheckbox.checked) {
@@ -526,6 +604,33 @@ function _showRecordDataH4(recordset) {
                                    if(term) val[m] = term[0];
                                 }
                             }
+                        }else if (baseType == HVariety.REFERENCE){
+                            //take record title
+                            if(reference_recordset && reference_recordset.length()>0){
+                                
+                                var val_ids = [];
+                                
+                                if(top.HEURIST4.util.isArrayNotEmpty(val)){
+                                    for (var m = 0; m < val.length; ++m) {
+                                        var refrec = reference_recordset.getById(Number(val[m]));        
+                                        if(refrec){
+                                            val_ids.push(val[m]);
+                                            val[m] = reference_recordset.fld(refrec, 'rec_Title');
+                                        }
+                                    }
+                                }else{
+                                    var refrec = reference_recordset.getById(Number(val));        
+                                    if(refrec){
+                                        val_ids.push(val);
+                                        val = reference_recordset.fld(refrec, 'rec_Title');
+                                    }
+                                }
+                                
+                                if(top.HEURIST4.util.isArrayNotEmpty(val_ids)){
+                                    field = val_ids.join('|');
+                                }
+                                line += ((!top.HEURIST4.util.isempty(field))?field:'') + strDelim;
+                            }
                         }
                         
                         if(top.HEURIST4.util.isArrayNotEmpty(val)){
@@ -543,4 +648,5 @@ function _showRecordDataH4(recordset) {
         }
     }//for
     recDisplay.value = lines; 
+    
 }
