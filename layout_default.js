@@ -145,11 +145,11 @@ var cfg_layouts = [
      },
       
     {id:'original', name:'Heurist Def Original', theme:'heurist', type:'cardinal',
-        north:{size:'14em', resizable:false, overflow:'hidden',
+        north:{size:'13em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'6em',right:0, border:'none', 'background':'none', 'min-width':'75em'} },    //top panel
                 {appid:'h4_search', hasheader:false, 
-                    css:{position:'absolute', top:'6em', left:0, height:'8em', right:0, 
+                    css:{position:'absolute', top:'6em', left:0, height:'7em', right:0, 
                      'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
@@ -168,7 +168,7 @@ var cfg_layouts = [
 
 
     {id:'SearchAnalyze', name:'Search Analyze Publish', theme:'heurist', type:'cardinal',
-        north:{size:'8em', resizable:false, overflow:'hidden',
+        north:{size:'7em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_search', hasheader:false, 
                 css:{position:'absolute', top:0, left:0, right:0,

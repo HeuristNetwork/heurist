@@ -60,7 +60,7 @@ $.widget( "heurist.search", {
         $.getScript(window.hWin.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'7.8em', 'min-width':'1100px', 'border-bottom':'2px solid lightgray'});
+        this.element.css({'height':'6.88em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
         if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
             this.element.addClass('ui-heurist-header1');
         }else{
@@ -125,13 +125,14 @@ $.widget( "heurist.search", {
 
         // Search functions container
         //'height':'100%', 'float':'left'   , 'min-width':sz_search
-        this.div_search   = $('<div>').css({ 'float':'left', 'padding-left':sz_search_padding}).appendTo( this.element );
+        this.div_search   = $('<div>').css({ 'float':'left', 
+                                'padding-left':sz_search_padding}).appendTo( this.element );
 
                
         
         //header-label
         this.div_search_header = $('<div>')
-        .css({'width':'0','text-align':'right'}) //was width:110px
+        .css({'width':'0','text-align':'right', 'height':'6.88em'}) //was width:110px
         .addClass('div-table-cell')
         .appendTo( this.div_search );
 /* hidden on 2016-11-11        
@@ -152,7 +153,7 @@ $.widget( "heurist.search", {
 
         
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 
+        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
             'max-width':sz_input, 'padding':'0.4em', 
             'min-width':'10em', 'width':sz_input, 'padding-right':'18px' }) 
         .addClass("text ui-widget-content ui-corner-all")
@@ -519,7 +520,7 @@ $.widget( "heurist.search", {
             }
         }
 
-        $(this.element).find('.div-table-cell').height( $(this.element).height() );
+//ART        $(this.element).find('.div-table-cell').height( $(this.element).height() );
 
         this.btn_search_as_user.button( "option", "label", window.hWin.HR(this._getSearchDomainLabel(this.options.search_domain)));
 
