@@ -439,7 +439,8 @@ function parse_step2($encoded_filename, $original_filename, $limit){
         }
 
         if(count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
-            array_push($err_encoding, array("no"=>$line_no, "line"=>htmlspecialchars(substr($line,0,2000))));
+            $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8');
+            array_push($err_encoding, array("no"=>$line_no, "line"=>htmlspecialchars($line)));
             //if(count($err_encoding)>100) break;
         }
 

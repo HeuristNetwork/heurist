@@ -294,7 +294,6 @@ function hSearchMinimalDigitalHarlem() {
                                 recordset.setFld(record, DT_ENDDATE,   recordset.fld(rel_event, DT_ENDDATE) );
 
                                 //find persons that relates to this event
-
                                 var rels2 = recordset.getRelationRecords(eventID, RT_PERSON);
                                 if(rels2.length<1){ //no related person - event related to address directly
                                     //3a. this is event->address
