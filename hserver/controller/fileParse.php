@@ -346,6 +346,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     $err_colnums = array();
     $err_encoding = array();
     $err_keyfields = array();
+    $err_encoding_count = 0;
     
     $int_fields = array(); // array of fields with integer values
     $num_fields = array(); // array of fields with numeric values
@@ -438,9 +439,12 @@ function parse_step2($encoded_filename, $original_filename, $limit){
             $line = stream_get_line($handle, 1000000, $lb);
         }
 
-        if(count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
-            $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8');
-            array_push($err_encoding, array("no"=>$line_no, "line"=>htmlspecialchars($line)));
+        if(!mb_detect_encoding($line, 'UTF-8', true)){
+            $err_encoding_count++;
+            if(count($err_encoding)<100){
+                $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8'); //to send back to client
+                array_push($err_encoding, array("no"=>($line_no+2), "line"=>htmlspecialchars($line)));
+            }
             //if(count($err_encoding)>100) break;
         }
 
@@ -590,35 +594,37 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     if($limit>0){
         // returns encoded filename
         return array( 
-                "encoded_filename"=>$encoded_filename,   //full path
-                "original_filename"=>$original_filename, //filename only
-                "step"=>1, "col_count"=>$len, 
-                "err_colnums"=>$err_colnums, 
-                "err_encoding"=>$err_encoding, 
+                'encoded_filename'=>$encoded_filename,   //full path
+                'original_filename'=>$original_filename, //filename only
+                'step'=>1, 'col_count'=>$len, 
+                'err_colnums'=>$err_colnums, 
+                'err_encoding'=>$err_encoding,
+                'err_encoding_count'=>$err_encoding_count, 
                 
-                "int_fields"=>$int_fields, 
-                "empty_fields"=>$empty_fields, 
-                "num_fields"=>$num_fields,
-                "empty75_fields"=>$empty75, 
+                'int_fields'=>$int_fields, 
+                'empty_fields'=>$empty_fields, 
+                'num_fields'=>$num_fields,
+                'empty75_fields'=>$empty75, 
                 
-                "fields"=>$header, "values"=>$values );    
+                'fields'=>$header, 'values'=>$values );    
     }else{
       
         if( count($err_colnums)>0 || count($err_encoding)>0 || count($err_keyfields)>0){
             //we have errors - delete prepared file
             unlink($prepared_filename);
             
-            return array( "step"=>2, "col_count"=>$len, 
-                "err_colnums"=>$err_colnums, 
-                "err_encoding"=>$err_encoding, 
-                "err_keyfields"=>$err_keyfields, 
+            return array( 'step'=>2, 'col_count'=>$len, 
+                'err_colnums'=>$err_colnums, 
+                'err_encoding'=>$err_encoding, 
+                'err_keyfields'=>$err_keyfields, 
+                'err_encoding_count'=>$err_encoding_count, 
                 
-                "int_fields"=>$int_fields, 
-                "num_fields"=>$num_fields,
-                "empty_fields"=>$empty_fields, 
-                "empty75_fields"=>$empty75, 
+                'int_fields'=>$int_fields, 
+                'num_fields'=>$num_fields,
+                'empty_fields'=>$empty_fields, 
+                'empty75_fields'=>$empty75, 
                 
-                "memos"=>$memos, "multivals"=>$multivals, "fields"=>$header );    
+                'memos'=>$memos, 'multivals'=>$multivals, 'fields'=>$header );    
         }else{
             //everything ok - proceed to save into db
             

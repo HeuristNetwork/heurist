@@ -351,7 +351,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 window.hWin.HEURIST4.msg.showMsgDlg('Import session was cleared');
                             }else{
                                 $('#selImportId').empty();
-                                window.hWin.HEURIST4.msg.showMsgDlg('Import sessions were cleared');
+                                //IJ asked 2016-11-15 window.hWin.HEURIST4.msg.showMsgDlg('Import sessions were cleared');
                             }
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -455,24 +455,31 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                     //find names of identification fields
                     var ele = treeElement.find('.id_fieldname[data-res-rt="'+field_key+'"][data-mode="0"]');
-                    for(j=0;j<ele.length;j++){
-                        var isfound = false;
-                        for(k=0;k<sequence.length;k++){
-                            if(sequence[k].field == $(ele[j]).text()){
-                                isfound = true;
-                                break;
+                    if(ele.length>0){
+                        for(j=0;j<ele.length;j++){
+                            var isfound = false;
+                            for(k=0;k<sequence.length;k++){
+                                if(sequence[k].field == $(ele[j]).text()){
+                                    isfound = true;
+                                    break;
+                                }
+                            }
+                            if(!isfound){
+                                sequence.push({field:$(ele[j]).text(), rectype:recTypeID, 
+                                    hierarchy:$(rectypes[i]).attr('data-tree') });    
                             }
                         }
-                        if(!isfound){
-                            sequence.push({field:$(ele[j]).text(), rectype:recTypeID, 
+                    }else{
+                        var fname = _getColumnNameForPresetIndex(recTypeID);
+                        sequence.push({field: fname, rectype:recTypeID, 
                                 hierarchy:$(rectypes[i]).attr('data-tree') });    
-                        }
                     }
+                    
                 }
                 if(sequence.length==0){ //no dependencies - add main rectype only
                     recTypeID = imp_session['primary_rectype'];
                     var fname = _getColumnNameForPresetIndex(recTypeID);
-                    sequence.push({field:fname, rectype:recTypeID});    
+                    sequence.push({field:fname, rectype:recTypeID, hierarchy:recTypeID});    
                 }
                          
                 //comapre  current and new sequences
@@ -823,7 +830,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             +  '" data-rt="'+field_key+'" '
                             +  ' data-lvl="'+depth+'" data-tree="' 
                             + (hierarchy.join(','))+ '" '
-                            + (depth==0?'checked="checked" disabled="disabled"':'')
+                            + (depth==0?'checked="checked" disabled="disabled"':'')  //ART!!!! 
                             + '>';
 
                             //get field name that refers to this recordtype
@@ -935,7 +942,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             + '&nbsp;<input type="checkbox" class="rt_select" data-mode="2" data-rectype="'+field['rt_id']
                             +  '" data-rt="'+field_key+'" '
-                            +  ' data-lvl="'+depth+'" checked="checked" disabled="disabled">'
+                            +  ' data-lvl="'+depth+'" checked="checked" disabled="disabled">'  //ART!!! 
                             +  '</span></div>';
                             $(sRectypeItem).appendTo(treeList);                            
 
@@ -1078,6 +1085,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     
                     //always disable primary key
                     var cb = treeElement.find('.rt_select[data-rt="'+primary_rt+'"]');
+//ART!!!!
                     window.hWin.HEURIST4.util.setDisabled(cb, true);
                     
                 }//end  __rt_checkbox_click                           
@@ -1091,6 +1099,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 var cb = treeElement.find('.rt_select[data-rt="'+primary_rt+'"]');
                 cb.prop('checked',true);
                 __rt_checkbox_click( cb, '' );
+//ART!!!
                 window.hWin.HEURIST4.util.setDisabled(cb, true);
                 cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
 
@@ -1690,8 +1699,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
             $('#mrr_big').html('Existing: ' +counts[0]+'&nbsp;&nbsp;&nbsp;New: '+counts[2]);                                 
             
-            $('#mrr_cnt_update').text(counts[0]);                                 
-            $('#mrr_cnt_insert').text(counts[2]);                                 
+            $('#mrr_cnt_update').text('');//counts[0]);                                 
+            $('#mrr_cnt_insert').text('');//counts[2]);                                 
             if(counts[1]>0){
                 $('#mrr_cnt_update_rows').text(counts[1]);                                     
                 $('.mrr_update').show();                                     
@@ -2016,9 +2025,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         }
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(response.data['err_encoding'])){
 
-                            var msg = ' Wrong encoding detected in import file. At least '
-                                        +response.data['err_encoding'].length
-                                        +'lines have such issue';
+                            var msg = 'Your file can\'t be converted to UTF-8. '
+                            +'Please open it in an advanced text editor and save with UTF-8 text encoding.<br>'
+                            +response.data['err_encoding_count']+' lines have such issue';
                                 
                             $( window.hWin.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
 
@@ -2607,7 +2616,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             +' These could include unrecognised terms, invalid dates, unknown record pointers (no record with given ID), '
                             +' missing required values and so forth.<br><br>'
                             + 'It is better to fix these in the source file and then process it again, as uploading faulty data generally leads to major fix-up work.'
-                            + 'Click "Show errors" button  for a list of errors');                            
+                            + 'Click "Show" button  for a list of errors');                            
                     
                             $('.step3 > .normal').hide();
                             $('.step3 > .skip_step').hide();
@@ -3138,7 +3147,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 for(i=0;i<records.length;i++){
 
                     var row = records[i];
-                    s = s + '<tr><td class="truncate">'+row[0]+'</td>'; //line#
+                    s = s + '<tr><td class="truncate">'+(row[0]+1)+'</td>'; //line#
                     if(is_missed){
                         s = s + "<td style='color:red'>&lt;missing&gt;</td>";
                     } else if(ismultivalue){
