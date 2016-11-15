@@ -450,9 +450,9 @@ function EditRecStructure() {
                         '</div></div>'+
 
                         // Required/recommended optional
-                        '<div class="input-row"><div class="input-header-cell">Requirement:</div>'+
+                        '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Requirement:</div>'+
                         '<div class="input-cell" title="Determines whether the field must be filled in, should generally be filled in, or is optional">'+
-                        '<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:0px">'+
+                        '<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:0px;vertical-align: top;">'+
                         '<option value="required">required</option>'+
                         '<option value="recommended">recommended</option>'+
                         '<option value="optional">optional</option>'+
@@ -474,17 +474,20 @@ function EditRecStructure() {
                         '<input type="radio" id="incValue_'+rst_ID+'_2" name="incValue_'+rst_ID+'" value="1"  title="'+incrementTip+'" onchange="onIncrementModeChange('+rst_ID+')">'+
                         '<label  style="min-width: 120px;width: 120px;" for="incValue_'+rst_ID+'_2" title="'+incrementTip+'">Increament value by 1</label>'+
                         '</span>'
-                        :'<span style="padding-left:50px">'+
+                        :'<div style="padding-left:50px;display:inline-block">'+
                         '<label class="input-header-cell" for="ed'+rst_ID+'_rst_DefaultValue">Default&nbsp;Value:</label>'+
-                        '<div id="termsDefault_'+rst_ID+'" style="display:inline-block;"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/></div>'+
-                        '</span>')+
+                        '<div id="termsDefault_'+rst_ID+'" style="display:inline-block;"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/>'+
+                        ((fieldType=='date')?'<br><span class="prompt">yesterday, today, tomorrow, now, specific date</span>':'')+
+                        '</div>'+
+                        '</div>')+
 
                         // Minimum values
                         '<span id="ed'+rst_ID+'_spanMinValue" style="display:none;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
                         '<input id="ed'+rst_ID+
                         '_rst_MinValues" title="Minimum number of values which are required in data entry" style="width:20px" size="2" '+
-                        'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
-
+                        'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span>'+
+                        '</div></div>'+
+                        
                         // Repeatability
                         '<div class="input-row" id="divRepeatability'+rst_ID+'">'+
                         '<div class="input-header-cell">Repeatability :</div>'+
