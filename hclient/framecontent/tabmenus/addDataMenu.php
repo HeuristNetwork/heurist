@@ -50,6 +50,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     <li class="list-menu-only">
                         <a href="records/add/addRecordPopup.php" id="menulink-add-record" name="auto-popup" class="h3link"
+                            data-action="addRec"
                             title="Add new record of specified record type">
                             Add record</a>
                     </li>
@@ -76,12 +77,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     <li id="menu-import-csv">
                         <a href="#"
+                            data-action="impDelim"
                             title="Import data from delimited text file. Supports matching, record creation, record update.">
                             Delimited text (csv, tsv)</a>
                     </li>
 
                     <li>
                         <a href="import/biblio/syncZotero.php" name="auto-popup"  class="fixed h3link embed"
+                            data-action="syncZotero"
                             onClick="{return false;}"
                             title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
                             Zotero synchronisation</a>
@@ -89,30 +92,35 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     <li class="admin-only">
                         <a href="import/fieldhelper/synchroniseWithFieldHelper.php" name="auto-popup" class="fixed h3link embed"
+                            data-action="impMultimedia"
                             onClick="{return false;}" target="_blank"
                             title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
                             Index multimedia</a>
                     </li>
 
                     <li><a href="import/email/emailProcessingSetup.php" name="auto-popup" class="fixed h3link embed"
+                        data-action="impEmails"
                         onClick="{return false;}"
                         title="Harvest email from a designated IMAP email server (set in database administrtion > Databsae > Advanced Properties)">
                         Harvest emails</a>
                     </li>
 
                     <li><a href="import/hyperlinks/importHyperlinks.php" name="auto-popup" class="h3link embed"
+                            data-action="impHyperlinks"
                         onClick="{return false;}"
                         title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
                         Import hyperlinks</a>
                     </li>
 
                     <li><a href="import/importerFramework.php?format=GEO" name="auto-popup" class="fixed h3link embed"
+                            data-action="impKML"
                         onClick="{return false;}"
                         title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
                         Import KML</a>
                     </li>
                     
                     <li><a href="applications/faims/syncFAIMS.php" name="auto-popup" class="fixed h3link embed"
+                            data-action="syncFAIMS"
                         onClick="{return false;}"
                         title="Import structure and data into the current Heurist database from a FAIMS module tarball or direct from FAIMS server database">
                         FAIMS tablet data</a>
@@ -129,6 +137,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 <ul>
 
                     <li class="admin-only"><a href="import/utilities/manageFilesUpload.php" name="auto-popup" 
+                            data-action="uplMultifile"
                         class="large h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">

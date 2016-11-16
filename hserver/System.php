@@ -430,10 +430,11 @@ class System {
         if($status==HEURIST_REQUEST_DENIED){
             $sysmsg = $this->get_user_id();
         }else if($status==HEURIST_DB_ERROR){
-            error_log($message.' '.$sysmsg);
-            if(!$this->is_dbowner()){ //reset to null if not database owner
-                $sysmsg = 'reported in the server\'s PHP error log';
-            }
+            error_log('DATABASE ERROR :'.HEURIST_DBNAME.'  '.$message.($sysmsg?'. System message:'.$sysmsg:''));
+            $message = 'Heurist was unable to process. '.$message;
+            $sysmsg = 'reported in the server\'s PHP error log';
+            //if(!$this->is_dbowner()){ //reset to null if not database owner
+            //}
         }
 
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
@@ -864,6 +865,17 @@ class System {
         return $res;
     }
 
+    //
+    //
+    //    
+    public function user_LogActivity($action, $suplementary = ''){
+        
+         $now = new DateTime();
+         $info =  array($this->get_user_id(), $action, $now->format('Y-m-d H:i:s'), $suplementary);
+        
+         file_put_contents ( HEURIST_FILESTORE_DIR.'userInteraction.log' , implode(',', $info)."\n", FILE_APPEND );
+        
+    }
 
 
     /**

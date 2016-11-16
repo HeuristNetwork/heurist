@@ -41,7 +41,12 @@
 
         //get error and response
         //$response = $system->getError();
-
+        
+    }else if($action=='usr_log'){
+        
+        $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary']);
+        $res = true;
+        
     }else{
 
         $mysqli = $system->get_mysqli();
@@ -76,11 +81,15 @@
 
             } else if ($action=="reset_password") {
 
+                $system->user_LogActivity('ResetPassword');
+                
                 if(user_ResetPassword($system, @$_REQUEST['username'])){
                     $res = true;
                 }
 
             } else if ($action=="logout") {
+                
+                $system->user_LogActivity('Logout');
 
                 if($system->logout()){
                     $res = true;
