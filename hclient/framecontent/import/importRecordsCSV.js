@@ -2948,13 +2948,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             s = '<div>The following rows match with multiple records. This may be due to the existence of duplicate '
             +'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
             +'the incoming rows against existing data records.</div><br/><br/>'
-            +'<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>Count</th><th>Records in Heurist</th></tr>';
+            +'<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>Source</th><th>Count</th><th>Records in Heurist</th></tr>';
 
             
             var buttons = {};
-            buttons[window.hWin.HR('Confirm and cotinue to assign IDs')]  = function() {
+            buttons[window.hWin.HR('Confirm and continue to assign IDs')]  = function() {
                     
                     var keyvalues = Object.keys(res['disambiguation']);
+
                     var disamb_resolv = [];  //recid=>keyvalue
                     $dlg.find('.sel_disamb').each(function(idx, item){
                          disamb_resolv.push({recid:$(item).val(),key:keyvalues[$(item).attr('data-key')]});
@@ -2984,14 +2985,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                 //list of heurist records
                 var disamb = res['disambiguation'][keyvalues[i]];
+                var disambig_imp_id = res['disambiguation_lines'][keyvalues[i]];
+
                 var recIds = Object.keys(disamb);
                         
-                s = s + '<tr><td>'+keyvalue+'</td><td>'+recIds.length+'</td><td>'+
+                s = s + '<tr><td>'+keyvalue+'</td><td>'
+                + '<a href="#" onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">view</a>'
+                +'</td><td>'+recIds.length+'</td><td>'+
                         '<select class="sel_disamb" data-key="'+i+'">';                
 
                 for(j=0;j<recIds.length;j++){
                     s = s +  '<option value="'+recIds[j]+'">[rec# '+recIds[j]+'] '+disamb[recIds[j]]+'</option>';
                 }
+                s = s + '<option value="-1">[create new record] None of these</option>';
                 s = s + '</select>&nbsp;'
                 + '<a href="#" onclick="{window.open(\''+window.hWin.HAPI4.basePathV4+'?db='+window.hWin.HAPI4.database
                 + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records</a></td></tr>';
@@ -3224,6 +3230,74 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     } 
 
     //
+    // get import line on server and show it on popup
+    //
+    function _showImportLineInPopup(imp_ID){
+        
+            if(!imp_session) return;
+            var currentTable = imp_session['import_table']; 
+        
+            var request = { action: 'records',
+                            imp_ID: imp_ID,
+                            table:currentTable,
+                            id: window.hWin.HEURIST4.util.random()
+                               };
+            
+            window.hWin.HAPI4.parseCSV(request, function(response){
+                
+                //that.loadanimation(false);
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    
+                    var i, response = response.data, res = '<table>';
+                    
+                        for(i=1; i<response.length;i++){
+                            if(window.hWin.HEURIST4.util.isnull(response[i])){
+                                sval = "&nbsp;";
+                            }else{
+
+                                var idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
+                                
+                                var isIndex =  (idx_id_fieldname==(i-1)) || !window.hWin.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
+                                
+                                var sval = response[i].substr(0,100);
+
+                                if(isIndex && response[i]<0){
+                                    sval = "&lt;New Record&gt;";
+                                }else if(sval==""){
+                                    sval = "&nbsp;";
+                                }else if(response[i].length>100){ //add ... 
+                                    sval = sval + '&#8230;';
+                                }
+                            }
+                            
+                            res = res + '<tr><td>'+imp_session['columns'][i-1]+'</td><td>'+sval+'</td></tr>';
+                        }
+                    res = res + '</table>';     
+
+                    var $dlg2, buttons={};
+                    buttons[window.hWin.HR('Close')]  = function() {
+                            $dlg2.dialog( "close" );
+                    };
+                    
+                    var container = $('#divPopupPreview2');
+                    container.html(res);
+                    
+                    var dlg_options = {
+                        title:'Import source',
+                        buttons: buttons,
+                        element:container.get(0)
+                        };
+            
+                    $dlg2 = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
+                
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+
+            });        
+    
+    }
+    //
     //
     //
     function _onUpdateModeSet(){
@@ -3315,6 +3389,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
         showRecords: function (mode) {_showRecords(mode)},
         showRecords2: function (mode, is_download) {_showRecords2(mode, is_download)},
+
+        showImportLineInPopup: function (imp_ID) {_showImportLineInPopup(imp_ID)},
         
         onUpdateModeSet:function (event){
             _onUpdateModeSet();

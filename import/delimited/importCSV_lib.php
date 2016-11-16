@@ -734,6 +734,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
     $imp_session['validation']['count_update_rows'] = $cnt_update_rows;
     $imp_session['validation']['count_insert_rows'] = $cnt_insert_rows;
     $imp_session['validation']['disambiguation'] = $disambiguation;
+    $imp_session['validation']['disambiguation_lines'] = '';
     $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
 
     //MAIN RESULT - ids to be assigned to each record in import table

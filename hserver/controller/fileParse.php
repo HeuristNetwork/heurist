@@ -937,7 +937,7 @@ function parse_content(){
     return $response;
 }
 
-function _findDisambResoltion($keyvalue, $disamb_resolv){
+function _findDisambResolution($keyvalue, $disamb_resolv){
     
     foreach($disamb_resolv as $idx => $disamb_pair){
         if($keyvalue==$disamb_pair['key']){
@@ -1070,6 +1070,7 @@ function findRecordIds($imp_session, $params){
     $pairs = array(); //to avoid search    $keyvalue=>recID
     $records = array();
     $disambiguation = array();
+    $disambiguation_lines = array();
     $tmp_idx_insert = array(); //to keep indexes
     $tmp_idx_update = array(); //to keep indexes
 
@@ -1126,12 +1127,12 @@ function findRecordIds($imp_session, $params){
                     }
                     
                     if(count($disamb)>1){
-                        $resolved_recid = _findDisambResoltion($keyvalue, $disamb_resolv);
+                        $resolved_recid = _findDisambResolution($keyvalue, $disamb_resolv);
                     }else{
                         $resolved_recid = null;
                     }
 
-                    if(count($disamb)==0){ //nothing found - insert
+                    if(count($disamb)==0  || $resolved_recid<0){ //nothing found - insert
                         $new_id = $ind;
                         $ind--;
                         $rec = $row;
@@ -1156,6 +1157,7 @@ function findRecordIds($imp_session, $params){
                     }else{
                         $new_id= 'Found:'.count($disamb); //Disambiguation!
                         $disambiguation[$keyvalue] = $disamb;
+                        $disambiguation_lines[$keyvalue] = $imp_id;
                     }
                     $pairs[$keyvalue] = $new_id;
                     array_push($ids, $new_id);
@@ -1195,6 +1197,7 @@ function findRecordIds($imp_session, $params){
     $imp_session['validation']['count_update_rows'] = $cnt_update_rows;
     $imp_session['validation']['count_insert_rows'] = $cnt_insert_rows;
     $imp_session['validation']['disambiguation'] = $disambiguation;
+    $imp_session['validation']['disambiguation_lines'] = $disambiguation_lines;
     $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
 
     //MAIN RESULT - ids to be assigned to each record in import table

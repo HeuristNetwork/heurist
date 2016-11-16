@@ -591,8 +591,8 @@ If you have missing data for Required fields, you may find it convenient to set 
 
 </div>
 
-<div id="divPopupPreview" style="display:none">
-</div>
+<div id="divPopupPreview" style="display:none"></div>
+<div id="divPopupPreview2" style="display:none"></div>
 
 <div id="divSelectPrimaryRecType" style="display:none;height:100%;" class="">
         <fieldset>
