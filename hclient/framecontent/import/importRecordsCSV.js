@@ -830,7 +830,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             +  '" data-rt="'+field_key+'" '
                             +  ' data-lvl="'+depth+'" data-tree="' 
                             + (hierarchy.join(','))+ '" '
-                            + (depth==0?'checked="checked" disabled="disabled"':'')  //ART!!!! 
+                            + (depth==0?'checked="checked" disabled="disabled"':'')
                             + '>';
 
                             //get field name that refers to this recordtype
@@ -942,7 +942,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             + '&nbsp;<input type="checkbox" class="rt_select" data-mode="2" data-rectype="'+field['rt_id']
                             +  '" data-rt="'+field_key+'" '
-                            +  ' data-lvl="'+depth+'" checked="checked" disabled="disabled">'  //ART!!! 
+                            +  ' data-lvl="'+depth+'" checked="checked" disabled="disabled">'  
                             +  '</span></div>';
                             $(sRectypeItem).appendTo(treeList);                            
 
@@ -1085,7 +1085,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     
                     //always disable primary key
                     var cb = treeElement.find('.rt_select[data-rt="'+primary_rt+'"]');
-//ART!!!!
                     window.hWin.HEURIST4.util.setDisabled(cb, true);
                     
                 }//end  __rt_checkbox_click                           
@@ -1099,7 +1098,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 var cb = treeElement.find('.rt_select[data-rt="'+primary_rt+'"]');
                 cb.prop('checked',true);
                 __rt_checkbox_click( cb, '' );
-//ART!!!
                 window.hWin.HEURIST4.util.setDisabled(cb, true);
                 cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
 

@@ -1368,14 +1368,18 @@ console.log('tileloaded 2');
             var ed_html =  '';
             var popupURL = null;
 
-            if(!window.hWin.HEURIST4.util.isnull(item.opts.info)){
+            if(true){ //Since 2016-11-17 use common renderRecordData !window.hWin.HEURIST4.util.isnull(item.opts.info)){
 
-                if(!item.opts.info){
-                    return;   //supress popup
-                }else if(item.opts.info.indexOf('http://')==0){
+                //if(!item.opts.info){
+                //    return;   //supress popup
+                //}else 
+                if(item.opts.info && item.opts.info.indexOf('http://')==0){
                     popupURL =  item.opts.info; //load content from url
                 }else{
-                    html =  bubble_header + item.opts.info + '</div>'; //predefined content
+                    popupURL = window.hWin.HAPI4.basePathV4 + 'records/view/renderRecordData.php?mapPopup=1&recID='
+                            +item.opts.recid+'&db='+window.hWin.HAPI4.database;
+                    
+                    //html =  bubble_header + item.opts.info + '</div>'; //predefined content
                 }
 
             }else{
@@ -1674,3 +1678,28 @@ ed_html +
     _init(_mapdiv_id, _timeline, _basePath, _mylayout);
     return that;  //returns object
 }
+
+//
+// function to open link from record viewer
+//
+function link_open(link) {
+    try{
+    if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
+        link.href = link.href+'&reloadPopup=1';
+        top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500 });
+        return false;
+    }
+    else return true;
+    }catch(e){
+    }
+}
+function sane_link_opener(link) {
+    if (window.frameElement  &&  window.frameElement.name == 'viewer') {
+        top.location.href = link.href;
+        return false;
+    }
+}
+//stub
+function showPlayer(obj, id, url) {
+}
+
