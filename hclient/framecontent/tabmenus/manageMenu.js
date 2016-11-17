@@ -135,8 +135,8 @@ function hmanageMenu() {
         var url = link.attr('href');
         
 //console.log($(event.target).attr('id'));        
-        if(link && link.attr('data-action')){
-            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-action'));
+        if(link && link.attr('data-logaction')){
+            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
         }
         
         if(action=='menulink-database-summary'){

@@ -392,7 +392,7 @@ $.widget( "heurist.mainMenu", {
                 .appendTo( that.document.find('body') )
                 //.addClass('ui-menu-divider-heurist')
                 .menu({select: function(event, ui){ 
-                        that._menuActionHandler(event, ui.item.attr('id'), ui.item.attr('data-action'));
+                        that._menuActionHandler(event, ui.item.attr('id'), ui.item.attr('data-logaction'));
                         return false; 
                 }});
 
@@ -472,8 +472,8 @@ $.widget( "heurist.mainMenu", {
         }
 
         
-        if(link && link.attr('data-action')){
-            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-action'));
+        if(link && link.attr('data-logaction')){
+            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
         }
         
         if(link && link.attr('data-nologin')!='1'){
