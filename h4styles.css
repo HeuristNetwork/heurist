@@ -1088,7 +1088,7 @@ background: #8ea9b9
     float: right;
 }
 .detailType {
-    width: 90px;
+    width: 80px;
     display: table-cell;
     color: #999999;
     vertical-align: top;
@@ -1099,16 +1099,22 @@ background: #8ea9b9
 .detail a, .detail {
     text-wrap: normal;
     word-wrap: break-word;
-    white-space: normal;
-    word-break: break-all;
+    white-space: nowrap;
+    word-break: break-word;
+    min-width: 300px;
+    max-width: 300px;
+/*
+    overflow: hidden;
+    text-overflow: ellipsis;
+*/    
 }
 .detail {
     display: table-cell;
-    padding-right: 15px;
+    padding-right: 5px;
     text-transform: none;
     color: #333;
 }
 .thumbnail{
-        margin-left: 90px;
+    margin-left: 80px;
 }
 /*end for map popup*/

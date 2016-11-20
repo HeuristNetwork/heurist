@@ -322,18 +322,21 @@ function print_header_line($bib) {
     if(is_logged_in()){
         ?>
 
-        <div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><span class="link"><a id=edit-link class="normal"
+        <div id=recID>ID:<?= htmlspecialchars($rec_id) ?><span class="link"><a id=edit-link class="normal"
             onClick="return sane_link_opener(this);"
             target=_new href="<?php echo ($is_map_popup)?'../../records/':'../'?>edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span>
         </div>
 
         <?php
     }else{
-        print "<div id=recID>Record ID:".htmlspecialchars($rec_id)."</div>";
+        print "<div id=recID>ID:".htmlspecialchars($rec_id)."</div>";
     }
     ?>
 
-    <div class=HeaderRow style="margin-bottom:<?=((@$url)?'20px;':'0px;min-height:0px;')?>"><h2 style="text-transform:none; line-height:16px"><?= $bib['rec_Title'] ?></h2>
+    <div class=HeaderRow style="margin-bottom:<?=((@$url)?'20px;':'0px;min-height:0px;')?>">
+            <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
+                <?= $bib['rec_Title'] ?>
+            </h2>
     <div id=footer>
     <?php if(!$is_map_popup){ ?>
         <h3>
@@ -349,7 +352,9 @@ function print_header_line($bib) {
                 <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
             </span>
             <?php } ?>
-    <?php } 
+    <?php }else{
+        print '&nbsp;';
+    } 
     print '</div>'; //footer
 
 }
@@ -623,18 +628,22 @@ if($is_map_popup){
                 <?php
                 foreach ($thumbs as $thumb) {
                     print '<div class=thumb_image>';
-                    if($thumb['player']){
+                    if($thumb['player'] && !$is_map_popup){
                         print '<img id="img'.$thumb['id'].'" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player']) .'\')">';
                         print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
                     }else{  //for usual image
                         print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
                     }
                     print '<br/><div class="download_link">';
-                    if($thumb['player']){
+                    if($thumb['player'] && !$is_map_popup){
                         print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
                     }
                     print '<a href="' . htmlspecialchars($thumb['url']) . '" target=_surf class="image_tool">DOWNLOAD</a></div>';
                     print '</div>';
+                    if($is_map_popup){
+                        print '<br>';
+                        break; //in map popup show the only thumbnail
+                    }
                 };
                 ?>
             </div>
@@ -647,10 +656,11 @@ if($is_map_popup){
             
             $prevLbl = null;
             foreach ($bds as $bd) {
-                print '<div class=detailRow style="width:100%;border:none 1px #00ff00;'
+                print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;'
                     .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
                     .'"><div class=detailType>'.($prevLbl==$bd['name']?"":htmlspecialchars($bd['name']))
-                    .'</div><div class=detail>'.$bd['val'].'</div></div>';
+                    .'</div><div class="detail'
+                    .($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'.$bd['val'].'</div></div>';
                 $prevLbl = $bd['name'];
             }
             ?>
@@ -659,7 +669,7 @@ if($is_map_popup){
                     <div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div>
             </div>
             <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-                    <div class=detailType>Cite as</div><div class=detail><a target=_blank class="external-link"
+                    <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>"><a target=_blank class="external-link"
                 href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">
                 <?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?></a></div>
             </div>
@@ -668,7 +678,8 @@ if($is_map_popup){
         <?php
         // </div>  
             if($is_map_popup){
-                echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more...</a></div></div>';
+                echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more ...</a></div></div>';
+                echo '<div class=detailRow>&nbsp;</div>';
             }
             
 echo '</div>';            
@@ -802,7 +813,7 @@ function print_linked_details($bib) {
     ?>
         <div class=detailRow>
             <div class=detailType>Referencing records</div>
-            <div class=detail><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkto:<?=$bib['rec_ID']?>" onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
+            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkto:<?=$bib['rec_ID']?>" onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
                 <!--  <br> <i>Search = linkto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->
             </div>
         </div>
@@ -817,7 +828,7 @@ function print_linked_details($bib) {
 
             print '<div class=detailRow>';
             print '<div class=detailType>'.$lbl.'</div>';
-            print '<div class=detail>';
+            print '<div class="detail'.($is_map_popup?' truncate':'').'">';
             print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
             print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
             print '</div></div>';
