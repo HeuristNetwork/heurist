@@ -34,6 +34,7 @@ function hRecordSet(initdata) {
     offset = 0,
     //limit = 1000, use length()
     fields = [],       //array of field names
+    fields_detail = [], //array of fieldtypes ids in details - filled if search was with field ids in parameter detail
     records = null,      //list of records objects {recID:[], ....}
     order = [], //array of record IDs in specified order
     mainset = null, //array of record IDs that belong to main result set (without applied rules)
@@ -69,6 +70,8 @@ function hRecordSet(initdata) {
                 records = response.records;  //$.isArray(records)
                 order = response.order;
                 relationship = response.relationship;
+                
+                fields_detail = response.fields_detail;
                 
                 _isMapEnabled = response.mapenabled;
                 //@todo - merging
@@ -127,6 +130,36 @@ function hRecordSet(initdata) {
         dataset_name = dataset_name || "main";
         iconColor = iconColor || 'rgb(255, 0, 0)'; //'#f00';
          
+
+        var geofields = [], timefields = [], dty_ids = null;
+
+        if(fields_detail){
+              dty_ids = fields_detail;
+        }else{
+            if(order.length>0){     
+                var rec = records[order[0]];
+                if(!isnull(rec) && rec['d']){
+                    dty_ids = Object.keys(d);
+                }
+            }
+        }
+        
+        if(!isnull(dty_ids) && window.hWin.HEURIST4){
+
+            //detect geo and time fields from recordset        
+            var dtype_idx = window.hWin.HEURIST4.detailtypes.typedefs['fieldNamesToIndex']['dty_Type'];
+            
+            for (var i=0; i<dty_ids.length; i++) {
+                var dtype = window.hWin.HEURIST4.detailtypes.typedefs[dty_ids[i]]['commonFields'][dtype_idx];
+                if(dtype=='date' || dtype=='year'){
+                    timefields.push(dty_ids[i]);
+                }else if(dtype=='geo'){
+                    geofields.push(dty_ids[i]);
+                }
+            }
+        }
+         
+         
         var tot = 0;
         
         for(idx in records){
@@ -144,10 +177,8 @@ function hRecordSet(initdata) {
                 startDate   = _getFieldValue(record, 'dtl_StartDate'),
                 endDate     = _getFieldValue(record, 'dtl_EndDate'),
                 description = _getFieldValue(record, 'dtl_Description'),
-                type        = _getFieldValue(record, 'dtl_GeoType'),  //take first part of dtl_Geo field - "p wkt"
-                wkt         = _getFieldValue(record, 'dtl_Geo'),  
                 recThumb    = _getFieldValue(record, 'rec_ThumbnailURL'),
-                recShape    = _getFieldValue(record, 'rec_Shape'),  //additional shapes
+                recShape    = _getFieldValue(record, 'rec_Shape'),  //additional shapes - special field created on client side
                 
                 
                 iconId      = _getFieldValue(record, 'rec_Icon');  //used if icon differ from rectype icon
@@ -158,15 +189,38 @@ function hRecordSet(initdata) {
                     html_thumb = '<img src="'+recThumb+'" style="float:left;padding-bottom:5px;padding-right:5px;">'; 
                     //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
                 }
-
-                //need to verify date and convert from                        
-                 var dres = window.hWin.HEURIST4.util.parseDates(startDate, endDate);
-                 if(dres){
+                
+                var k, m, dates = [], startDate, endDate, dres;
+                for(k=0; k<timefields.length; k++){
+                    var datetime = _getFieldValues(record, timefields[k]);
+                    if(!isnull(datetime)){   
+                        var m, res = [];
+                        for(m=0; m<datetime.length; m++){
+                            if(timefields[k]==DT_START_DATE){
+                                startDate = datetime[m][0];
+                            }else if(timefields[k]==DT_END_DATE){
+                                endDate  = datetime[m][0]; 
+                            }
+                            dres = window.hWin.HEURIST4.util.parseDates(datetime[m]);
+                            if(dres){
+                                dates.push(dres);
+                            }
+                        }
+                    }
+                }
+                //need to verify date and convert from Temporal
+                dres = window.hWin.HEURIST4.util.parseDates(startDate, endDate);
+                if(dres){
+                    dates.push(dres);
+                }
+                for(k=0; k<dates.length; k++){
                         
                         if(timeenabled<MAXITEMS){
                      
+                            dres = dates[k];
+                            
                             titem = {
-                                id: dataset_name+'-'+recID, //unique id
+                                id: dataset_name+'-'+recID+'-'+k, //unique id
                                 group: dataset_name,
                                 content: 
                                 '<img src="'+window.hWin.HAPI4.iconBaseURL + iconId + 
@@ -184,18 +238,26 @@ function hRecordSet(initdata) {
                             titems.push(titem);
                         
                         }
-                    
                         timeenabled++;
-                        
-                    //}
                 }
                 
                 var shapes = (recShape && geoType!=1)?recShape:[];
                 
                 if(geoType!=2){
-                    var main_shape = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
-                    if(main_shape){ //main shape
-                        shapes.push(main_shape);
+                    
+                    var k, m;
+                    for(k=0; k<geofields.length; k++){
+                        
+                        var geodata = _getFieldGeoValue(record, geofields[k]);
+                        if(geodata){
+                            for(m=0; m<geodata.length; m++){
+                                var shape = window.hWin.HEURIST4.util.parseCoordinates(geodata[m].geotype, geodata[m].wkt, 0);
+                                if(shape){ //main shape
+                                    shapes.push(shape);
+                                }
+                            }
+                        }
+                        
                     }
                 }else{
                     recID = recID + "_link";
@@ -281,6 +343,7 @@ function hRecordSet(initdata) {
         DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'], //6
         DT_PRIMARY_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_PRIMARY_RESOURCE'], //7
         DT_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATE'],     //9
+        //DT_YEAR = window.hWin.HAPI4.sysinfo['dbconst']['DT_YEAR'],     //73
         DT_START_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_START_DATE'], //10
         DT_END_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_END_DATE'], //11
         DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'], //3
@@ -357,6 +420,34 @@ function hRecordSet(initdata) {
             }        
     }
     */
+
+    //
+    //
+    //
+    function _getFieldGeoValue(record, fldname){
+
+        var geodata = _getFieldValues(record, fldname);
+        if(!isnull(geodata)){   
+             var m, res = [];
+             for(m=0; m<geodata.length; m++){
+                var g = geodata[m].split(' ');
+                var gt = g[0];
+                g.shift();
+                var wkt = g.join(' ');           
+                res.push({geotype:gt, wkt:wkt});
+             }
+             return res;
+        }else{
+            return null;
+        }
+    }
+    
+    function _getFieldValues(record, fldname){
+        if(!isnull(record) && record['d'] && record['d'][fldname]){   
+            return record['d'][fldname]
+        }
+    }
+
     
     /**
     * Returns field value by fieldname

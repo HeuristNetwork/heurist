@@ -580,10 +580,11 @@
     * @uses      getCachedData()
     * @uses      setCachedData()
     *
-    * $dettypeids null means all, otherwise comma separated list of ids
+    * $dettypeids null means all, otherwise comma separated list of ids  or list of field types (numeric,blocktext etc)
     * $imode  0 - only names and groupnames
     *         1 - only structure
     *         2 - full, both headers and structures
+    *         3 - ids only
     */
     function dbs_GetDetailTypes($system, $dettypeids=null, $imode){
 
@@ -618,14 +619,42 @@
             $dtStructs['usageCount']   = getDetailTypeUsageCount($mysqli);
         }
 
-        $query = "select dtg_ID, dtg_Name, " . join(",", getDetailTypeColNames());
-        $query = preg_replace("/dty_ConceptID/", "", $query);
-        if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
-            $query.= " if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(dty_ID as char(5)))) as dty_ConceptID";
-        } else {
-            $query.= " if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), '') as dty_ConceptID";
+        $where_exp = null;        
+        if($dettypeids!=null){
+            if(!is_array($dettypeids)){
+                $dettypeids = array($dettypeids);
+            }
+            //detect ID or TYPE
+            if(is_int($dettypeids[0])){
+                $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';        
+            }else{
+                $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';        
+            }
         }
-        $query.= " from defDetailTypes left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID" . " order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
+        
+        if($imode==3){ //ids only
+            //$query = "select dty_ID from defDetailTypes";
+            if($where_exp==null){
+                $where_exp = '';
+            }
+            $res = mysql__select_list($mysqli, 'defDetailTypes', 'dty_ID', $where_exp);
+            return $res;
+        }else{
+
+            $query = "select dtg_ID, dtg_Name, " . join(",", getDetailTypeColNames());
+            $query = preg_replace("/dty_ConceptID/", "", $query);
+    
+            if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
+                $query.= " if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(dty_ID as char(5)))) as dty_ConceptID";
+            } else {
+                $query.= " if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), '') as dty_ConceptID";
+            }
+            $query.= " from defDetailTypes left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID";
+            if($where_exp!=null){
+                $query = $query.' where '.$where_exp;    
+            }
+            $query = $query . " order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
+        }
         $res = $mysqli->query($query);
         //ARTEM    $dtStructs['sortedNames'] = mysql__select_assoc('defDetailTypes', 'dty_Name', 'dty_ID', '1 order by dty_Name');
         try{
@@ -665,7 +694,7 @@
     }
 
     /**
-    * return record structure for give id and update $recstructures array
+    * return record structure for given id and update $recstructures array
     */
     function getDetailType($system, &$detailtypes, $dtyID)
     {
