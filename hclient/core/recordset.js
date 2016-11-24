@@ -197,13 +197,14 @@ function hRecordSet(initdata) {
                         var m, res = [];
                         for(m=0; m<datetime.length; m++){
                             if(timefields[k]==DT_START_DATE){
-                                startDate = datetime[m][0];
+                                startDate = datetime[m];
                             }else if(timefields[k]==DT_END_DATE){
-                                endDate  = datetime[m][0]; 
-                            }
-                            dres = window.hWin.HEURIST4.util.parseDates(datetime[m]);
-                            if(dres){
-                                dates.push(dres);
+                                endDate  = datetime[m]; 
+                            }else{
+                                dres = window.hWin.HEURIST4.util.parseDates(datetime[m]);
+                                if(dres){
+                                    dates.push(dres);
+                                }     
                             }
                         }
                     }
