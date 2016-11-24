@@ -294,12 +294,26 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                     
                 });
                 
+                
+                var forceZoom = false;
+                if(minLat<-40 && maxLat>70 && minLng<-120 && maxLng>120){
+                    minLat = -40;
+                    maxLat = 70;
+                    minLng = -120;
+                    maxLng = 120;
+                    forceZoom = true;
+                }
+                
                 var southWest = new google.maps.LatLng(minLat, minLng);
                 var northEast = new google.maps.LatLng(maxLat, maxLng);
                 mapdata.geoextent = new google.maps.LatLngBounds(southWest, northEast);
 
                 dataset.hide();
                 dataset.show();
+                
+                if(forceZoom){
+                    setTimeout( function(){ _zoomDataset( dataset_id );}, 500 );
+                }
     }
 
     //

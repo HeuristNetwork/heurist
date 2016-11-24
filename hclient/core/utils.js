@@ -411,7 +411,7 @@ window.hWin.HEURIST4.util = {
                 
                     var x0 = parseFloat(matches[1]);
                     var y0 = parseFloat(matches[2]);
-
+                    
                     if(format==0){
                         shape = { point:{lat: y0, lon:x0 } };
                     }else{

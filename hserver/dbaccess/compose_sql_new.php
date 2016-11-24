@@ -948,21 +948,30 @@ class HPredicate {
 
     function isDateTime() {
 
+        $timestamp0 = null;
+        $timestamp1 = null;
+        
         if (strpos($this->value,"<>")>0) {
             $vals = explode("<>", $this->value);
 
             if(is_numeric($vals[0]) || is_numeric($vals[1])) return false;
 
-            $timestamp0 = strtotime($vals[0]);
-            $timestamp1 = strtotime($vals[1]);
+             try{   
+                $timestamp0 = new DateTime($vals[0]);
+                $timestamp1 = new DateTime($vals[1]);
+             } catch (Exception  $e){
+             }                            
         }else{
 
             if(is_numeric($this->value)) return false;
 
-            $timestamp0 = strtotime($this->value);
-            $timestamp1 = 1;
+             try{   
+                $timestamp0 = new DateTime($this->value);
+                $timestamp1 = 1;
+             } catch (Exception  $e){
+             }                            
         }
-        return ($timestamp0  &&  $timestamp0 != -1 && $timestamp1  &&  $timestamp1 != -1);
+        return ($timestamp0  &&  $timestamp1);
     }
 
     function    makeDateClause() {

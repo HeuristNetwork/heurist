@@ -477,7 +477,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     
                 }
                 if(sequence.length==0){ //no dependencies - add main rectype only
-                    recTypeID = imp_session['primary_rectype'];
+                    recTypeID = $('#sa_primary_rectype').val()>0?
+                                        $('#sa_primary_rectype').val()
+                                        :imp_session['primary_rectype'];
                     var fname = _getColumnNameForPresetIndex(recTypeID);
                     sequence.push({field:fname, rectype:recTypeID, hierarchy:recTypeID});    
                 }
@@ -1966,7 +1968,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     ele = $.find("input[id^='d_field_']");
                     $.each(ele, function(idx,item){
                             if($(item).is(':checked')){
-                                request['datefield'].push(item.value )   
+                                request['datefield'][item.value] = 1;
                             }
                     }); 
                 }               
@@ -2714,7 +2716,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                           +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated']
                           +'</td></tr></table>';
                         
-                        window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Import of '+window.hWin.HEURIST4.rectypes.names[rtyID]+' complete.');
+                        window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
+                                'Import of '+window.hWin.HEURIST4.rectypes.names[rtyID]+' complete.');
                         
                         //if everything is added - skip to next step
                         var counts = _getInsertUpdateCounts( currentSeqIndex );

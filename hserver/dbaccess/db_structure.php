@@ -659,7 +659,7 @@
         //ARTEM    $dtStructs['sortedNames'] = mysql__select_assoc('defDetailTypes', 'dty_Name', 'dty_ID', '1 order by dty_Name');
         try{
             if(!$res){
-                error_log('FAILED QUERY: '.$query);
+                error_log('FAILED QUERY: '.$mysqli->error);//$query);
                 error_log('Database: '.HEURIST_DBNAME);
             }else{
                 while ($row = $res->fetch_row()) {

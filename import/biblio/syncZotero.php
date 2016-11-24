@@ -832,8 +832,12 @@ function createResourceRecord($record_type, $recdetails){
             }
         }else{
             $value = $recdata;
-            if($dt_id==9){
-                $value = date('Y-m-d', strtotime($value));
+            if($dt_id==DT_DATE){
+                try{
+                    $t2 = new DateTime($value);
+                    $value = $t2->format('Y-m-d H:i:s');
+                } catch (Exception  $e){
+                }
             }
         }
 

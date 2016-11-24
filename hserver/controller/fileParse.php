@@ -500,16 +500,27 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                         $field = trim(preg_replace('/([\s])\1+/', ' ', $field)); 
                     }
 
-                    //Convert dates to standardised format.
-                    if($check_datefield && @$datefields['field_'.$k]!=null && $field!=""){
+                    //Convert dates to standardised format.  //'field_'.
+                    if($check_datefield && @$datefields[$k]!=null && $field!=""){
                         if(is_numeric($field) && abs($field)<99999){ //year????
 
                         }else{
                             if($csv_dateformat==1){
                                 $field = str_replace("/","-",$field);
                             }
-                            $field = strtotime($field);
-                            $field = date('Y-m-d H:i:s', $field);
+                            
+                             try{   
+                                $t2 = new DateTime($field);
+                                $t3 = $t2->format('Y-m-d H:i:s');
+                                $field = $t3;
+                             } catch (Exception  $e){
+                                //print $field.' => NOT SUPPORTED<br>';                            
+                             }                            
+                            /* strtotime works for dates after 1901 ONLY!
+                            $field2 = strtotime($field);
+                            $field3 = date('Y-m-d H:i:s', $field2);
+                            $field = $field3;
+                            */
                         }
                     }
                     

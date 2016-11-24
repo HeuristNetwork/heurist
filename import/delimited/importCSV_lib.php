@@ -1250,7 +1250,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if($ignore_insert){
             $only_for_specified_id = " (".$id_field." > 0) AND ";
         }else{
-            $only_for_specified_id = " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+            $only_for_specified_id = "";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
         }
     }else{
         $only_for_specified_id = "";
@@ -1402,7 +1402,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             return $wrong_records;
         }
     }
-
+    
     //6. Verify datetime fields
     $k=0;
     foreach ($query_date as $field){
@@ -1726,8 +1726,16 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
                         array_push($newvalue, $r_value);
                     }else{
 
+                         try{   
+                            $t2 = new DateTime($r_value);
+                            $value = $t2->format('Y-m-d H:i:s');
+                            array_push($newvalue, $value);
+                         } catch (Exception  $e){
+                            $is_error = true;
+                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                         }                            
+                        /* OLD VERSION - strtotime doesn't work for dates prior 1901
                         $date = date_parse($r_value);
-
                         if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
                         {
                             $value = strtotime($r_value);
@@ -1737,6 +1745,7 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
                             $is_error = true;
                             array_push($newvalue, "<font color='red'>".$r_value."</font>");
                         }
+                        */
 
                     }
                 }
