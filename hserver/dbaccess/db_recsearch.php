@@ -428,9 +428,15 @@ if(@$params['debug']) echo $query."<br>";
         
         $fieldtypes_ids = null;
         if($istimemap_request){
-                $fieldtypes_ids = '9,10,11,28';
+             //get date,year and geo fields from structure
+             $fieldtypes_ids = dbs_GetDetailTypes($system, array('date','year','geo'), 3);
+             if($fieldtypes_ids==null || count($fieldtypes_ids)==0){
+                $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE); //9,10,11,28';    
+             }
+             $fieldtypes_ids = implode(',', $fieldtypes_ids);
+             
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
-
+            //specific set of detail fields
             if(is_array($params['detail'])){
                 $fieldtypes_ids = $params['detail'];
             } else {
@@ -859,6 +865,7 @@ if(@$params['debug']) echo $query."<br>";
 
                             }
 
+                          
                             // @todo - we may use getAllRecordDetails
                             $res_det = $mysqli->query( $detail_query );
 
@@ -943,7 +950,9 @@ if(@$params['debug']) echo $query."<br>";
                                 'order'=>$order,
                                 'rectypes'=>$rectypes,
                                 'structures'=>$rectype_structures));
-
+                        if($fieldtypes_ids){
+                              $response['data']['fields_detail'] =  explode(',', $fieldtypes_ids);
+                        }
 
                 }//$is_ids_only
 

@@ -952,18 +952,28 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 }
 
                 var lt = window.hWin.HAPI4.sysinfo['layout'];
-                if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
+                if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 3 dataset - points, secondary points and links
 
                     if(colors_idx>=myColors.length) colors_idx = -1;
                     colors_idx++;
                     source.color = myColors[colors_idx];
 
-                    //points
-                    mapdata = recset.toTimemap(source.id, null, source.color, 1); //main geo only
+                    //points  DH_RECORDTYPE
+                    mapdata = recset.toTimemap(source.id, 99913, source.color, 1); //main geo only
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
 
                     mapdata.depends = [];
+
+                    //secondary points  DH_RECORDTYPE_SECONDARY
+                    var mapdata3 = recset.toTimemap(source.id, 99914, source.color, 1); //records with type "secondary"
+                    mapdata3.id = "link_"+window.hWin.HEURIST4.util.random();
+                    mapdata3.title = 'Secondary events/Residences';
+                    //mapdata3.timeenabled = 0;
+                    //mapdata3.timeline = {items:[]};
+                    if(mapdata3.mapenabled>0){
+                        mapdata.depends.push(mapdata3);
+                    }
 
                     //links
                     var mapdata2 = recset.toTimemap(source.id, null, source.color, 2); //rec_Shape only

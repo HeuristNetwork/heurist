@@ -392,7 +392,7 @@ $.widget( "heurist.mainMenu", {
                 .appendTo( that.document.find('body') )
                 //.addClass('ui-menu-divider-heurist')
                 .menu({select: function(event, ui){ 
-                        that._menuActionHandler(event, ui.item.attr('id'));
+                        that._menuActionHandler(event, ui.item.attr('id'), ui.item.attr('data-logaction'));
                         return false; 
                 }});
 
@@ -472,7 +472,11 @@ $.widget( "heurist.mainMenu", {
         }
 
         
-        if(event.target && $(event.target).attr('data-nologin')!='1'){
+        if(link && link.attr('data-logaction')){
+            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
+        }
+        
+        if(link && link.attr('data-nologin')!='1'){
             //check if login
             window.hWin.HAPI4.SystemMgr.is_logged(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
         }else{
@@ -532,9 +536,13 @@ $.widget( "heurist.mainMenu", {
 
     },
 
-    _menuActionHandler: function(event, action){
+    _menuActionHandler: function(event, action, action_log){
         
         var that = this;
+        
+        if(action_log){
+            window.hWin.HAPI4.SystemMgr.user_log(action_log);
+        }
         
         var p = false;
         if(action == "menu-profile-preferences"){

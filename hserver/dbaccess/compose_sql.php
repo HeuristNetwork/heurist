@@ -946,16 +946,25 @@ class Predicate {
     }
 
     function isDateTime() {
-
+        
+        $timestamp0 = null;
+        $timestamp1 = null;
         if (strpos($this->value,"<>")>0) {
             $vals = explode("<>", $this->value);
-            $timestamp0 = strtotime($vals[0]);
-            $timestamp1 = strtotime($vals[1]);
+            
+             try{   
+                $timestamp0 = new DateTime($vals[0]);
+                $timestamp1 = new DateTime($vals[1]);
+             } catch (Exception  $e){
+             }                            
         }else{
-            $timestamp0 = strtotime($this->value);
-            $timestamp1 = 1;
+             try{   
+                $timestamp0 = new DateTime($this->value);
+                $timestamp1 = 1;
+             } catch (Exception  $e){
+             }                            
         }
-        return ($timestamp0  &&  $timestamp0 != -1 && $timestamp1  &&  $timestamp1 != -1);
+        return ($timestamp0  &&  $timestamp1);
     }
 
     function makeDateClause() {
@@ -2288,12 +2297,18 @@ class RelationsForPredicate extends Predicate {
 
 class AfterPredicate extends Predicate {
     function makeSQL() {
-        $timestamp = strtotime($this->value);
-        if ($timestamp  &&  $timestamp != -1) {
+        
+         try{   
+            $timestamp = new DateTime($this->value);
+            
             $not = ($this->parent->negate)? 'not' : '';
-            $datestamp = date('Y-m-d H:i:s', $timestamp);
+            $datestamp = $timestamp->format('Y-m-d H:i:s');
+            
             return "$not TOPBIBLIO.rec_Modified >= '$datestamp'";
-        }
+            
+         } catch (Exception  $e){
+            //print $this->value.' => NOT SUPPORTED<br>';                            
+         }                            
         return '1';
     }
 }
@@ -2301,12 +2316,17 @@ class AfterPredicate extends Predicate {
 
 class BeforePredicate extends Predicate {
     function makeSQL() {
-        $timestamp = strtotime($this->value);
-        if ($timestamp  &&  $timestamp != -1) {
+         try{   
+            $timestamp = new DateTime($this->value);
+            
             $not = ($this->parent->negate)? 'not' : '';
-            $datestamp = date('Y-m-d H:i:s', $timestamp);
+            $datestamp = $timestamp->format('Y-m-d H:i:s');
+            
             return "$not TOPBIBLIO.rec_Modified <= '$datestamp'";
-        }
+            
+         } catch (Exception  $e){
+            //print $this->value.' => NOT SUPPORTED<br>';                            
+         }                            
         return '1';
     }
 }

@@ -65,7 +65,7 @@ function hexportMenu() {
                     function(event){
                         var action = $(event.target).attr('data-action');
                         if(action){
-                            _menuActionHandler(event, action);
+                            _menuActionHandler(event, action, $(event.target).attr('data-logaction'));
                             return false;
                         }else{
                             _onPopupLink(event);
@@ -109,7 +109,7 @@ function hexportMenu() {
                 action = $(event.target).parent().attr('id')
             }
             if(action){
-               _menuActionHandler(event, action);
+               _menuActionHandler(event, action, $(event.target).attr('data-logaction'));
                return false;
             }
       });
@@ -169,6 +169,9 @@ function hexportMenu() {
                options['afterclose'] = this._refreshLists;
         }
 
+        if(link && link.attr('data-logaction')){
+            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
+        }
 
         if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
@@ -185,8 +188,12 @@ function hexportMenu() {
     //
     //
     //
-    function _menuActionHandler(event, action){
+    function _menuActionHandler(event, action, action_log){
 
+        if(action_log){
+            window.hWin.HAPI4.SystemMgr.user_log(action_log);
+        }
+        
         if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
             window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,false)}); // isAll, includeRelated, multifile = separate files
         }else if(action == "menu-export-hml-selected"){ // Currently selected records only

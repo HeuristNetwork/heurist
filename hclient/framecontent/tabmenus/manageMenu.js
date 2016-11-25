@@ -134,10 +134,15 @@ function hmanageMenu() {
         var link = $(event.target);
         var url = link.attr('href');
         
-        if(event.target && $(event.target).attr('id')=='menulink-database-summary'){
+//console.log($(event.target).attr('id'));        
+        if(link && link.attr('data-logaction')){
+            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
+        }
+        
+        if(action=='menulink-database-summary'){
             _showDbSummary();
         }else
-        if(event.target && $(event.target).attr('data-nologin')!='1'){
+        if(link && link.attr('data-nologin')!='1'){
             
             //check if login
             window.hWin.HAPI4.SystemMgr.is_logged(function(){

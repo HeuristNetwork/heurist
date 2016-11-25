@@ -145,9 +145,14 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
             $need_day = false;
         }
         
-        $timestamp = strtotime($value);
-        $datestamp = date('Y-m-d H:i:s', $timestamp);
-        $date = date_parse($datestamp);
+         try{   
+            $t2 = new DateTime($value);
+            $datestamp = $t2->format('Y-m-d H:i:s');
+            $date = date_parse($datestamp);
+         } catch (Exception  $e){
+             $date = null;
+            //print $value.' => NOT SUPPORTED<br>';                            
+         }                            
     }
 
 	if($date){

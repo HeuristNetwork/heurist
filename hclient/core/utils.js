@@ -411,7 +411,7 @@ window.hWin.HEURIST4.util = {
                 
                     var x0 = parseFloat(matches[1]);
                     var y0 = parseFloat(matches[2]);
-
+                    
                     if(format==0){
                         shape = { point:{lat: y0, lon:x0 } };
                     }else{
@@ -699,6 +699,20 @@ window.hWin.HEURIST4.util = {
     random: function(){
         //Math.round(new Date().getTime() + (Math.random() * 100));
         return Math.floor((Math.random() * 10000) + 1);
+    },
+    
+    //scan all frames of current window and return object by name
+    findObjInFrame: function(name){
+      
+      var i, frames;
+      frames = document.getElementsByTagName("iframe");
+      for (i = 0; i < frames.length; ++i)
+      {  
+         if( !window.hWin.HEURIST4.util.isnull(frames[i]['contentWindow'][name])){
+             return frames[i]['contentWindow'][name];
+         }
+      }
+      return null;
     }
 
 }//end util

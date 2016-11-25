@@ -347,7 +347,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                                 <td style="width:50px;text-align:center">Date</td>
                                 <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></table>
                 </div>
-                <div class="ent_content" id="divFieldRoles" style="top:7em;padding: 0.2em 0.5em 4em;">
+                <div class="ent_content" id="divFieldRoles" style="top:7em;bottom:5em;padding: 0.2em 0.5em">
                     list of field roles
                 </div>
                 <div  class="ent_footer">
@@ -515,10 +515,10 @@ If you have missing data for Required fields, you may find it convenient to set 
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
-                                        <td rowspan="2">
+                                        <td rowspan="2" width="250">
                                             <h2 id="mrr_big">Existing: 586  New: 100</h2>
                                         </td>
-                                        <td width="130" align=right>Existing:</td>
+                                        <td width="50" align=left style="padding-left:30px">Existing:</td>
                                         <td width="50" id="mrr_cnt_update"></td>
                                         <td width="50" class="mrr_update">rows:</td>
                                         <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
@@ -532,7 +532,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr><td align=right>New:</td>
+                                    <tr><td align=left style="padding-left:30px">New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
                                         <td width="50" class="mrr_insert">rows:</td>
                                         <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>
@@ -591,8 +591,8 @@ If you have missing data for Required fields, you may find it convenient to set 
 
 </div>
 
-<div id="divPopupPreview" style="display:none">
-</div>
+<div id="divPopupPreview" style="display:none"></div>
+<div id="divPopupPreview2" style="display:none"></div>
 
 <div id="divSelectPrimaryRecType" style="display:none;height:100%;" class="">
         <fieldset>

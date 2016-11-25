@@ -571,7 +571,15 @@ function hLayout(args) {
 
                 //init all tabs on current pane
                 var containment_sel = '.ui-layout-'+pos+' > .ui-layout-content';
-                var $tabs = $( containment_sel+' > .tab_ctrl' ).tabs();
+                var $tabs = $( containment_sel+' > .tab_ctrl' ).tabs({
+                    activate: function(event ,ui){                 
+                        var action_id = $(ui.newTab[0]).attr('data-logaction');
+                        if(action_id && window.hWin && window.hWin.HAPI4){
+                            window.hWin.HAPI4.SystemMgr.user_log(action_id);
+                        }
+                        //console.log(ui.newTab.index());
+                    }}
+                );
                 
                 appInitFeatures(containment_sel);
                 
@@ -838,6 +846,7 @@ function hLayout(args) {
             $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
         }
 
+        //every app is new tab
         $.each(apps, function(idx, _app){
             //_app - reference to widget in layout tab list
 
@@ -851,8 +860,15 @@ function hLayout(args) {
                     app_counter++;
                     content_id = app.id+'_'+app_counter;
                 }
+                
+                //to log user activity
+                var action_id = '';
+                if(_app.options && _app.options['data-logaction']){
+                    action_id = ' data-logaction="'+_app.options['data-logaction']+'"';
+                }
 
-                $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (window.hWin.HR(_app.name || app.name)) +'</a></li>')
+                $ul.append('<li'+action_id+'><a class="header'+content_id+'" href="#'+content_id+'">'
+                        + (window.hWin.HR(_app.name || app.name)) +'</a></li>')
                 
                 if(!_app.content_id){ //already exists
                     appAddContent($tab_ctrl, app, _app);

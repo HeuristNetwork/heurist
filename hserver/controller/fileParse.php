@@ -346,6 +346,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     $err_colnums = array();
     $err_encoding = array();
     $err_keyfields = array();
+    $err_encoding_count = 0;
     
     $int_fields = array(); // array of fields with integer values
     $num_fields = array(); // array of fields with numeric values
@@ -438,8 +439,12 @@ function parse_step2($encoded_filename, $original_filename, $limit){
             $line = stream_get_line($handle, 1000000, $lb);
         }
 
-        if(count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
-            array_push($err_encoding, array("no"=>$line_no, "line"=>htmlspecialchars(substr($line,0,2000))));
+        if(!mb_detect_encoding($line, 'UTF-8', true)){
+            $err_encoding_count++;
+            if(count($err_encoding)<100){
+                $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8'); //to send back to client
+                array_push($err_encoding, array("no"=>($line_no+2), "line"=>htmlspecialchars($line)));
+            }
             //if(count($err_encoding)>100) break;
         }
 
@@ -495,16 +500,27 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                         $field = trim(preg_replace('/([\s])\1+/', ' ', $field)); 
                     }
 
-                    //Convert dates to standardised format.
-                    if($check_datefield && @$datefields['field_'.$k]!=null && $field!=""){
+                    //Convert dates to standardised format.  //'field_'.
+                    if($check_datefield && @$datefields[$k]!=null && $field!=""){
                         if(is_numeric($field) && abs($field)<99999){ //year????
 
                         }else{
                             if($csv_dateformat==1){
                                 $field = str_replace("/","-",$field);
                             }
-                            $field = strtotime($field);
-                            $field = date('Y-m-d H:i:s', $field);
+                            
+                             try{   
+                                $t2 = new DateTime($field);
+                                $t3 = $t2->format('Y-m-d H:i:s');
+                                $field = $t3;
+                             } catch (Exception  $e){
+                                //print $field.' => NOT SUPPORTED<br>';                            
+                             }                            
+                            /* strtotime works for dates after 1901 ONLY!
+                            $field2 = strtotime($field);
+                            $field3 = date('Y-m-d H:i:s', $field2);
+                            $field = $field3;
+                            */
                         }
                     }
                     
@@ -589,35 +605,37 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     if($limit>0){
         // returns encoded filename
         return array( 
-                "encoded_filename"=>$encoded_filename,   //full path
-                "original_filename"=>$original_filename, //filename only
-                "step"=>1, "col_count"=>$len, 
-                "err_colnums"=>$err_colnums, 
-                "err_encoding"=>$err_encoding, 
+                'encoded_filename'=>$encoded_filename,   //full path
+                'original_filename'=>$original_filename, //filename only
+                'step'=>1, 'col_count'=>$len, 
+                'err_colnums'=>$err_colnums, 
+                'err_encoding'=>$err_encoding,
+                'err_encoding_count'=>$err_encoding_count, 
                 
-                "int_fields"=>$int_fields, 
-                "empty_fields"=>$empty_fields, 
-                "num_fields"=>$num_fields,
-                "empty75_fields"=>$empty75, 
+                'int_fields'=>$int_fields, 
+                'empty_fields'=>$empty_fields, 
+                'num_fields'=>$num_fields,
+                'empty75_fields'=>$empty75, 
                 
-                "fields"=>$header, "values"=>$values );    
+                'fields'=>$header, 'values'=>$values );    
     }else{
       
         if( count($err_colnums)>0 || count($err_encoding)>0 || count($err_keyfields)>0){
             //we have errors - delete prepared file
             unlink($prepared_filename);
             
-            return array( "step"=>2, "col_count"=>$len, 
-                "err_colnums"=>$err_colnums, 
-                "err_encoding"=>$err_encoding, 
-                "err_keyfields"=>$err_keyfields, 
+            return array( 'step'=>2, 'col_count'=>$len, 
+                'err_colnums'=>$err_colnums, 
+                'err_encoding'=>$err_encoding, 
+                'err_keyfields'=>$err_keyfields, 
+                'err_encoding_count'=>$err_encoding_count, 
                 
-                "int_fields"=>$int_fields, 
-                "num_fields"=>$num_fields,
-                "empty_fields"=>$empty_fields, 
-                "empty75_fields"=>$empty75, 
+                'int_fields'=>$int_fields, 
+                'num_fields'=>$num_fields,
+                'empty_fields'=>$empty_fields, 
+                'empty75_fields'=>$empty75, 
                 
-                "memos"=>$memos, "multivals"=>$multivals, "fields"=>$header );    
+                'memos'=>$memos, 'multivals'=>$multivals, 'fields'=>$header );    
         }else{
             //everything ok - proceed to save into db
             
@@ -930,7 +948,7 @@ function parse_content(){
     return $response;
 }
 
-function _findDisambResoltion($keyvalue, $disamb_resolv){
+function _findDisambResolution($keyvalue, $disamb_resolv){
     
     foreach($disamb_resolv as $idx => $disamb_pair){
         if($keyvalue==$disamb_pair['key']){
@@ -1063,6 +1081,7 @@ function findRecordIds($imp_session, $params){
     $pairs = array(); //to avoid search    $keyvalue=>recID
     $records = array();
     $disambiguation = array();
+    $disambiguation_lines = array();
     $tmp_idx_insert = array(); //to keep indexes
     $tmp_idx_update = array(); //to keep indexes
 
@@ -1119,12 +1138,12 @@ function findRecordIds($imp_session, $params){
                     }
                     
                     if(count($disamb)>1){
-                        $resolved_recid = _findDisambResoltion($keyvalue, $disamb_resolv);
+                        $resolved_recid = _findDisambResolution($keyvalue, $disamb_resolv);
                     }else{
                         $resolved_recid = null;
                     }
 
-                    if(count($disamb)==0){ //nothing found - insert
+                    if(count($disamb)==0  || $resolved_recid<0){ //nothing found - insert
                         $new_id = $ind;
                         $ind--;
                         $rec = $row;
@@ -1149,6 +1168,7 @@ function findRecordIds($imp_session, $params){
                     }else{
                         $new_id= 'Found:'.count($disamb); //Disambiguation!
                         $disambiguation[$keyvalue] = $disamb;
+                        $disambiguation_lines[$keyvalue] = $imp_id;
                     }
                     $pairs[$keyvalue] = $new_id;
                     array_push($ids, $new_id);
@@ -1188,6 +1208,7 @@ function findRecordIds($imp_session, $params){
     $imp_session['validation']['count_update_rows'] = $cnt_update_rows;
     $imp_session['validation']['count_insert_rows'] = $cnt_insert_rows;
     $imp_session['validation']['disambiguation'] = $disambiguation;
+    $imp_session['validation']['disambiguation_lines'] = $disambiguation_lines;
     $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
 
     //MAIN RESULT - ids to be assigned to each record in import table

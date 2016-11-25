@@ -301,6 +301,11 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('usr_info', request, callback);
             }
 
+            ,user_log: function(activity, suplementary){
+                var request = {a:'usr_log', activity:activity, suplementary:suplementary};
+                _callserver('usr_info', request);
+            }
+            
             /**
             * Save user personal info/register new user
             * @param request - object - user info
