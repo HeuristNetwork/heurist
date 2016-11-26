@@ -282,6 +282,7 @@ class ReportRecord {
                             $res_cid = "";
                             $res_code = "";
                             $res_label = "";
+                            $res_label_full = '';
                             $res = array();
 
 
@@ -295,14 +296,14 @@ class ReportRecord {
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
                                     $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
-                                    $res_label_full = $this->_add_term_val($res_label, $term_full);
+                                    $res_label_full = $this->_add_term_val($res_label_full, $term_full);
                                     $res_label = $this->_add_term_val($res_label, $term[ $fi['trm_Label'] ]);
 
                                     //NOTE id and label are for backward
                                     array_push($res, array("id"=>$value, "internalid"=>$value, 
                                         "code"=>$term[ $fi['trm_Code'] ], 
                                         "label"=>$term[ $fi['trm_Label'] ], 
-                                        "term"=>$res_label_full, 
+                                        "term"=>$term_full, 
                                         "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
                                 }
                             }
