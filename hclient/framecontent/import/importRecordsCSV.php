@@ -108,7 +108,13 @@ function get_config_bytes($val) {
                 cursor: pointer;
                 display: inline-block;
                 padding:0.2em;
-                margin-bottom:0.2em;
+                margin-bottom:1em;
+            }
+            .select_rectype_seq > .hid_temp, .select_rectype_seq > .rt_arrow{
+                display:none;    
+            }
+            .select_rectype_seq:hover > .hid_temp, .select_rectype_seq:hover > .rt_arrow{
+                display:inline-block;    
             }
         </style>
     </head>
@@ -396,13 +402,16 @@ If you have missing data for Required fields, you may find it convenient to set 
     
         </div>
 
-        <fieldset style="padding-top:1.5em;padding-bottom:1.5em">
+        <fieldset style="padding-top:1.5em;padding-bottom:0.2em">
         <div>
-            <div class="header optional" style="min-width: 60px; width: 60px;"><label style="vertical-align: top;">Importing:</label></div>
+            <div class="header optional" style="min-width: 80px; width: 80px;">
+                <label style="vertical-align: top;">Importing:</label><br>
+                <label style="vertical-align: bottom;font-size:0.8em">(rollover for details)</label>
+            </div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
-                    <div id="sa_rectype_sequence"></div>
+                    <div id="sa_rectype_sequence" style="min-height:4em;height:6em"></div>
                 </div>
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure

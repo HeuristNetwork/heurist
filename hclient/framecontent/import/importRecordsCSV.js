@@ -580,13 +580,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
                 var s_count = _getInsertUpdateCountsForSequence( i ); //todo change to field                                    
                 
-                if(s!=''){
-                    s = '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="vertical-align:super"></span>'+s;
+                var sArr = '';
+                if(i<sequence.length-1){
+                    sArr = '<div style="display:inline-block;min-height:2em"><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="vertical-align:super"></span>';
                 }       
+                
+                
 
-                sid_fields =  
-                          '<div style="border:1px solid black;-size:0.9em" '
-                          +'class="select_rectype_seq" data-seq-order="' + i + '">';
+                sid_fields =  sArr 
+                          + '<div style="border:1px solid black;-size:0.9em" '
+                          + 'class="select_rectype_seq" data-seq-order="' + i + '">';
                 
                 var fields = hierarchy;
                 if(!$.isArray(hierarchy) && !window.hWin.HEURIST4.util.isempty(hierarchy)){
@@ -609,10 +612,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                var rt_title = window.hWin.HEURIST4.rectypes.names[rt_id];                               
                                prev_rt = rt_id;
                                
-                                sid_fields =  sid_fields + ((j<fields.length-2)?'<br>':'')
-                                        + '<i>' +field_title + '</i>'
-                                        + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="padding:0"></span>'
-                                        + '<b>' + rt_title + '</b>';
+                                sid_fields =  sid_fields + ((j<fields.length-2)?'<br class="hid_temp">':'')   // class="hid_temp"
+                                        + '<span class="hid_temp"><i>' + field_title + '</i></span>'
+                                        + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow'                                                                      + '" style="padding:0"></span>'
+                                        + '<b'+(j>0?' class="hid_temp"':'') +'>' + rt_title + '</b>';
                         }else if(fields.length==1){
                             sid_fields = sid_fields + '<b>' + title + '</b>'; 
                             
@@ -624,7 +627,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                 s =  sid_fields +  '<span data-cnt="1" id="rt_count_'
                         + i + '">' + s_count + '</span><br><span data-cnt="1" class="id_fieldname" data-mode="0" style="padding-left:0em">'
-                        +fieldname+'</span></div>'+s;
+                        +fieldname+'</span></div>'+(sArr!=''?'</div>':'')+s;
                 
                 
                 /*
@@ -839,8 +842,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             if(depth!=0){
 
                                 if(field){
+                                    
+                                    var is_required = false;
+                                    if(hierarchy.length>1){
+                                        var field_id = _getFt_ID(field_key)
+                                        var parent_field_key = hierarchy[1];
+                                        var parent_rt = _getRt_ID(parent_field_key);
+                                        var recStruc = window.hWin.HEURIST4.rectypes['typedefs'][parent_rt]['dtFields'];
+                                        is_required = (recStruc[field_id][idx_reqtype]=='required');
+                                    }
+                                    
                                     sRectypeItem = sRectypeItem + '<div style="display:inline-block">'
-                                    + '<i>'  + field['title'] + '</i>'
+                                    + '<i'+(is_required?' style="color:red"':'')+'>'  + field['title'] + '</i>'
                                     + '</div>'                                     
                                     + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'; 
                                 }
@@ -868,7 +881,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                             //resorce fields
                             var rt_fields = field['depend'], sid_fields = '', prev_field='';
-
+ 
                             if(rt_fields && rt_fields.length>0){
                                 for (j=0;j<rt_fields.length;j++){
 
@@ -926,7 +939,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }else{
 
                     var rt_added = [];
-                    var treeList = $('<div id="tree_list">').appendTo(treeElement);
+                    var treeList = $('<div id="tree_list">').appendTo(treeElement).hide();
                     
                 //Treview==========================================================
                 function __renderTree(field_key, depth){
@@ -1033,62 +1046,32 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     });
 
 
-                    window.hWin.HEURIST4.util.setDisabled( treeElement.find('.rt_select'), false);
+                    window.hWin.HEURIST4.util.setDisabled( treeElement.find('.rt_select[data-rt!="'+primary_rt+'"]'), false);
 
                     // find all dependent rectypes to be marked and disabled
-                    fields_affected = _getCrossDependencies(rtOrder, f_key_selected_all, []);
+                    if(recTypeID==primary_rt){
+                        fields_affected = _getCrossDependencies(rtOrder, f_key_selected_all, []);    
+                    }else{
+                        fields_affected = _getCrossDependencies(rtOrder, [recTypeID], []);    
+                    }
+                    
 
-                    /*                                     
-                    if(!rt_checkbox.is(':checked')){
-
-                        //disable if marked rt has marked parent 
-                        for(i=0;i<rt_depend_all.length;i++){
-
-                            var recTypeID = rt_depend_all[i];
-
-                            var depth = rtOrder['levels'][recTypeID],
-                            need_disable = false;
-
-                            if(depth==0){ 
-                                need_disable = true;
-                            }else{
-                                //find previous level
-                                // rt_ids = Object.keys(rtOrder['levels'])
-                                for(j=0;j<rt_depend_all.length;j++){
-                                    if(i!=j  //not itself
-                                        && (rtOrder['levels'][rt_depend_all[j]]==depth-1)    //from prev level
-                                        &&  rtOrder['depend'][rt_depend_all[j]]
-                                        && (rtOrder['depend'][rt_depend_all[j]].indexOf(recTypeID)>=0))
-                                    {
-                                        need_disable = true;
-                                        break;    
-                                    }
-                                }
-                            }
-
-                            if(need_disable && disable_dependent){
-                                var cb = treeElement.find('.rt_select[data-rt="'+recTypeID+'"]');
-                                window.hWin.HEURIST4.util.setDisabled(cb, true);
-                                cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
-                            }
-
-                        }                                         
-                    }*/
-
-                    //mark and disable all of them
+                    //mark all of them
                     for(i=0;i<fields_affected.length;i++){
                         var cb = treeElement.find('.rt_select[data-rt="'+fields_affected[i]+'"]');
                         cb.prop('checked',true);
                         if(keep_field_key!=fields_affected[i]){ //do not disable itself
-                            window.hWin.HEURIST4.util.setDisabled(cb, true);
-                            cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
+                            //NO MORE DISABLITY since 2016-11-29
+                            //window.hWin.HEURIST4.util.setDisabled(cb, true);
+                            //cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                         }
                     }
                     
                     //always disable primary key
                     var cb = treeElement.find('.rt_select[data-rt="'+primary_rt+'"]');
+                    cb.prop('checked',true);
                     window.hWin.HEURIST4.util.setDisabled(cb, true);
-                    
+                    cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                 }//end  __rt_checkbox_click                           
 
                 treeElement.find('.rt_select').click(
@@ -1164,6 +1147,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     function _getFt_ID(field_key){
         return field_key.substr(0, field_key.indexOf('.'));
+    }
+    //
+    //
+    //
+    function _getRt_ID(field_key){
+        var k = field_key.indexOf('.');
+        if(k<0){
+            return field_key;
+        }else{
+            return field_key.substr(k+1);
+        }
+        
     }
     
     //
