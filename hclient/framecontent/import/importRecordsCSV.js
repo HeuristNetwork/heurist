@@ -3213,6 +3213,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         }
         
         if(s!=''){
+            dlg_options['window'] = window;  //current frame
             dlg_options['element'] = container.get(0);
             container.html(s);
             
