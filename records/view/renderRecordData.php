@@ -1010,7 +1010,10 @@ function orderComments($cmts) {
 function output_chunker($val) {
     // chunk up the value so that it will be able to line-break if necessary
     $val = htmlspecialchars($val);
+    return $val;
+    /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
+    */
 }
 
 ?>
