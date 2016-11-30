@@ -864,6 +864,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
 
     $conceptID = getRecTypeConceptID($record['rec_RecTypeID']);
 
+    makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.HEURIST_DBNAME);
     makeTag('id', null, $record['rec_ID']);
     makeTag('type', array('id' => $record['rec_RecTypeID'],
         'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);

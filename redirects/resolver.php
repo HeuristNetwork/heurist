@@ -87,7 +87,7 @@ if($database_url!=null){ //redirect to resolver for another database
 }else if($format=='html'){
     $redirect = HEURIST_BASE_URL.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$recid;
 }else{
-    $redirect = HEURIST_BASE_URL.'export/xml/flathml.php?db='.HEURIST_DBNAME.'&depth=5&w=a&q=ids:'.$recid;
+    $redirect = HEURIST_BASE_URL.'export/xml/flathml.php?db='.HEURIST_DBNAME.'&depth=1&w=a&q=ids:'.$recid;
 }
 
 header('Location: '.$redirect);
