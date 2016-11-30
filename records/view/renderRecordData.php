@@ -230,7 +230,7 @@ if(!$is_map_popup){
                 ?>    
                 try{
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
-                    top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500 });
+                    top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500, modal:false });
                     return false;
                 }
                 else return true;
@@ -749,6 +749,9 @@ echo '</div>';
         }
         print '<div class=detail>';
         if (@$bd['RelatedRecID']) {
+            if(true || $is_map_popup){  
+                print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
+            }
             print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
         } else {
             print htmlspecialchars($bd['Title']);
@@ -777,6 +780,9 @@ echo '</div>';
         }
         print '<div class=detail>';
         if (@$bd['RelatedRecID']) {
+            if(true || $is_map_popup){  
+                print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
+            }
             print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
         } else {
             print htmlspecialchars($bd['Title']);

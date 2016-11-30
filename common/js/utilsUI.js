@@ -468,7 +468,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             return top.HEURIST.util.popupWindow(parentWindow, options);
             
         }else{
-            window.hWin.HEURIST4.msg.showDialog(url, options);
+            return window.hWin.HEURIST4.msg.showDialog(url, options);
         }
     },
 

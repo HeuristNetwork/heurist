@@ -1693,17 +1693,28 @@ ed_html +
     return that;  //returns object
 }
 
+
+var recordPopupFrame = null;
 //
 // function to open link from record viewer
 //
 function link_open(link) {
+    link.href = link.href+'&reloadPopup=1';
     try{
-    if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
-        link.href = link.href+'&reloadPopup=1';
-        top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500 });
-        return false;
+        if(recordPopupFrame && recordPopupFrame.is(':visible')){
+            recordPopupFrame.attr('src', link.href);
+            return false;
+        }
+    }catch(e){
     }
-    else return true;
+ 
+    try{
+        if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
+        
+            recordPopupFrame = top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500, modal:false });
+            return false;
+        }
+        else return true;
     }catch(e){
     }
 }
