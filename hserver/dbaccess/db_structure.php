@@ -146,16 +146,20 @@
             $query .=  $querywhere." order by rst_RecTypeID, rst_DisplayOrder, rst_ID";
             $res = $mysqli->query($query);
 
-            while ($row = $res->fetch_row()) {
-                if (!array_key_exists($row[0], $rtStructs['typedefs'])) {
-                    $rtStructs['typedefs'][$row[0]] = array('dtFields' => array($row[1] => array_slice($row, 2)));
-                    $rtStructs['dtDisplayOrder'][$row[0]] = array();
-                } else {
-                    $rtStructs['typedefs'][$row[0]]['dtFields'][$row[1]] = array_slice($row, 2);
+            if($res){
+                while ($row = $res->fetch_row()) {
+                    if (!array_key_exists($row[0], $rtStructs['typedefs'])) {
+                        $rtStructs['typedefs'][$row[0]] = array('dtFields' => array($row[1] => array_slice($row, 2)));
+                        $rtStructs['dtDisplayOrder'][$row[0]] = array();
+                    } else {
+                        $rtStructs['typedefs'][$row[0]]['dtFields'][$row[1]] = array_slice($row, 2);
+                    }
+                    array_push($rtStructs['dtDisplayOrder'][$row[0]], $row[1]);
                 }
-                array_push($rtStructs['dtDisplayOrder'][$row[0]], $row[1]);
+                $res->close();
+            }else{
+                error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving rectype structure '.$mysqli->error);
             }
-            $res->close();
 
         }
 
@@ -303,7 +307,7 @@
             }
             $res->close();
         }else{
-            error_log('error retrieving terms '.$mysqli->error);
+            error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array('relation' => __getTermTree($mysqli, "relation", "prefix"), 'enum' => __getTermTree($mysqli, "enum", "prefix"));
         //ARTEM setCachedData($cacheKey, $terms);
