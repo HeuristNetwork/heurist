@@ -51,6 +51,7 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
+$rectypesStructure = getAllRectypeStructures();
 
 $terms = getTerms();
 
@@ -301,6 +302,7 @@ function print_details($bib) {
         print_other_tags($bib);
         print_text_details($bib);
     }
+    
     print_relation_details($bib);
     print_linked_details($bib);
 }
@@ -703,7 +705,7 @@ echo '</div>';
 
     function print_relation_details($bib) {
 
-        global $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup;
+        global $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
 
         $from_res = mysql_query('select recDetails.*
             from recDetails
@@ -796,7 +798,8 @@ echo '</div>';
 
 
 function print_linked_details($bib) {
-    global $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup;
+    global $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
+    
     $query = 'select * '.
     'from recDetails '.
     'left join defDetailTypes on dty_ID = dtl_DetailTypeID '.
@@ -826,8 +829,6 @@ function print_linked_details($bib) {
     <?php
         }
         
-        $rectypesStructure = getAllRectypeStructures();
-
         $lbl = 'Linked from';
 
         while ($row = mysql_fetch_assoc($res)) {
