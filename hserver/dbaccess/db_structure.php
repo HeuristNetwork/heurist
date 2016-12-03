@@ -624,15 +624,17 @@
         }
 
         $where_exp = null;        
-        if($dettypeids!=null){
+        if($dettypeids!=null || $dettypeids!='all'){
             if(!is_array($dettypeids)){
                 $dettypeids = array($dettypeids);
             }
-            //detect ID or TYPE
-            if(is_int($dettypeids[0])){
-                $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';        
-            }else{
-                $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';        
+            if($dettypeids[0]!='all'){
+                //detect ID or TYPE
+                if(is_int($dettypeids[0])){
+                    $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';        
+                }else{
+                    $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';        
+                }
             }
         }
         
