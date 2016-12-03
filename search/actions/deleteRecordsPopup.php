@@ -111,7 +111,11 @@ mysql_connection_overwrite(DATABASE);
 		$rels_count = 0;
 		$errors = array();
 
-		$total_cnt = count($_REQUEST['bib']);
+        if(is_array(@$_REQUEST['bib'])){
+		    $total_cnt = count($_REQUEST['bib']);
+        }else{
+            $total_cnt = 0;
+        }
 		$processed_count = 0;
 ?>
 <script type="text/javascript">
@@ -138,6 +142,7 @@ print '<div><span id=errors>0</span> errors</div>';
 
         $needDeleteFile = (@$_REQUEST['delfile']=="1");
 
+        if($total_cnt>0)
 		foreach ($_REQUEST['bib'] as $rec_id) {
 
 			mysql_query("start transaction");

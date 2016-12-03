@@ -161,7 +161,8 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     
 
     //get the list of details from record structure
-    if($recTypeId && @$rtStructs['typedefs'][$recTypeId]){
+    if($recTypeId && @$rtStructs['typedefs'][$recTypeId] && @$rtStructs['typedefs'][$recTypeId]['dtFields'])
+    {
         $details =  $rtStructs['typedefs'][$recTypeId]['dtFields'];
 
         foreach ($details as $dtKey => $dtValue){
