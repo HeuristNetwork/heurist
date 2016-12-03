@@ -70,7 +70,7 @@ if (is_logged_in()) {
 // if we get a record id then see if there is a personal bookmark for it.
 if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
     $res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
-    if (mysql_num_rows($res)>0) {
+    if ($res && mysql_num_rows($res)>0) {
         $row = mysql_fetch_assoc($res);
         $_REQUEST['bkmk_id'] = $row['bkm_ID'];
     }
@@ -317,8 +317,14 @@ function print_header_line($bib) {
     if ($url  &&  ! preg_match('!^[^\\/]+:!', $url))
         $url = 'http://' . $url;
 
-    $webIcon = @mysql_fetch_row(mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347"));  //MAGIC NUMBER
-    $webIcon = @$webIcon[0];
+    $res = mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347");  //MAGIC NUMBER!!   
+    
+    if($res){
+        $webIcon = @mysql_fetch_row($res);  
+        $webIcon = @$webIcon[0];
+    }else{
+        $webIcon = null;
+    }
     //
 
     if(is_logged_in()){
@@ -368,14 +374,17 @@ function print_private_details($bib) {
     $res = mysql_query('select grp.ugr_Name,grp.ugr_Type,concat(grp.ugr_FirstName," ",grp.ugr_LastName) from Records, '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$bib['rec_ID']);
     $workgroup_name = NULL;
     // check to see if this record is owned by a workgroup
-    if (mysql_num_rows($res) > 0) {
+    if ($res && mysql_num_rows($res) > 0) {
         $row = mysql_fetch_row($res);
         $workgroup_name = $row[1] == 'user'? $row[2] : $row[0];
     }
     // check for workgroup tags
     $res = mysql_query('select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '.USERS_DATABASE.'.sysUGrps grp on tag_UGrpID=grp.ugr_ID left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='.get_user_id().' where rtl_RecID='.$bib['rec_ID'].' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order');
     $kwds = array();
-    while ($row = mysql_fetch_row($res)) array_push($kwds, $row);
+    if($res){
+        while ($row = mysql_fetch_row($res)) array_push($kwds, $row);    
+    }
+    
     if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
         ?>
         <div class=detailRowHeader>Private
@@ -440,7 +449,7 @@ function print_private_details($bib) {
                     <?php
                 }
             }
-            if (array_key_exists('bkm_ID',$bib)) {
+            if (is_array($bib) && array_key_exists('bkm_ID',$bib)) {
                 print_personal_details($bib);
             }
         }
@@ -503,6 +512,7 @@ function print_private_details($bib) {
             $bds = array();
             $thumbs = array();
 
+            if($bds_res)
             while ($bd = mysql_fetch_assoc($bds_res)) {
 
                 if ($bd['dty_ID'] == 603) { //DT_FULL_IMAG_URL

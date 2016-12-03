@@ -61,6 +61,8 @@ if(strpos($recid, '-')>0){
     list($database_id, $recid) = explode('-', $recid, 2);
 }else if (is_int(@$_REQUEST['db'])){
     $database_id = $_REQUEST['db'];
+}else{
+    $database_id = 0;
 }
 
 $database_url = null;    

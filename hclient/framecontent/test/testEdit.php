@@ -21,7 +21,9 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once(dirname(__FILE__)."/initPage.php");
+define('PDIR','../../../');    
+    
+require_once(dirname(__FILE__)."/../initPage.php");
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
 
