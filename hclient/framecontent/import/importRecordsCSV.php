@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('LOGIN_REQUIRED',1);
+define('MANAGER_REQUIRED',1);
 define('PDIR','../../../');    
 
 require_once(dirname(__FILE__)."/../initPage.php");

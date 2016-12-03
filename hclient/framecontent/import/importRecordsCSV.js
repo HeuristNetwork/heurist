@@ -67,7 +67,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Upload File'), icons:{secondary: "ui-icon-circle-arrow-n"}})
                     .click(function(e) {
-                            uploadWidget.click();
+                            if( window.hWin.HAPI4.is_admin() ){
+                                uploadWidget.click();    
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    status:window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED,
+                                    message:'Administrator permissions are required'});    
+                            }
                         });
                 
                 
@@ -330,6 +336,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     // Remove all sessions
     //
     function _doClearSession(is_current){
+        
+        if( !window.hWin.HAPI4.is_admin() ){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                status:window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED,
+                message:'Administrator permissions are required'});    
+            return;
+        }
+
         
         if(is_current==true){
              recID = imp_ID;
