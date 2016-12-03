@@ -183,10 +183,10 @@ function executeSmartyTemplate($params){
             $error = add_javascript_wrap4($error, null);
         }
 
-        echo $error;
-
         if($publishmode>0 && $outputfile!=null){ //save empty output into file
-            save_report_output2("<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
+            save_report_output2($error."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
+        }else{
+            echo $error;    
         }
 
         exit();
@@ -496,7 +496,7 @@ function save_report_output2($tpl_source){
     }else if ($publishmode==1){
 
         header("Content-type: text/html");
-
+            
         if($errors!=null){
             echo $errors;
         }else{
