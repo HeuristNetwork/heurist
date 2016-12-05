@@ -210,14 +210,15 @@ if($mode=='2' && file_exists($folder.".zip") ){
             if(@$_REQUEST['allrecs']!="1"){
                 $userid = get_user_id();
                 $q = "owner:$userid"; //user:$userid OR
+                $_REQUEST['depth'] = '5';
             }else{
                 $q = "sortby:-m";
+                $_REQUEST['depth'] = '0';
             }
 
 
             $_REQUEST['w'] = 'all';
             $_REQUEST['a'] = '1';
-            $_REQUEST['depth'] = '5';
             $_REQUEST['q'] = $q;
             $_REQUEST['rev'] = 'no'; //do not include reverse pointers
             $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";

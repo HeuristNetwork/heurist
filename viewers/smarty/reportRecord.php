@@ -192,6 +192,7 @@ class ReportRecord {
             }
             
             if(count($this->loaded_recs)>2500){
+                unset($this->loaded_recs);
                 $this->loaded_recs = array(); //reset to avoid memory overflow
             }
             
