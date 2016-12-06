@@ -285,10 +285,13 @@ $.widget( "heurist.connections", {
                     var source = relations[i].recID;
                     var target = relations[i].targetID;
                     var dtID = relations[i].dtID;
-                    var type = "Floating relationship";
+                    var trmID = relations[i].trmID;
+                    var relationName = "Floating relationship";
                     if(dtID > 0) {
                         //type = window.hWin.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
-                        type = window.hWin.HEURIST4.detailtypes.names[dtID];
+                        relationName = window.hWin.HEURIST4.detailtypes.names[dtID];
+                    }else if(trmID > 0) {
+                        relationName = window.hWin.HEURIST4.terms.termsByDomainLookup['relation'][trmID][0];
                     }
 
                     // Link check
@@ -297,7 +300,8 @@ $.widget( "heurist.connections", {
                         var link = {source: nodes[source],
                                     target: nodes[target],
                                     targetcount: 1,
-                                    relation: {name: type}  //window.hWin.HEURIST4.detailtypes.typedefs[id].commonfields[1]
+                                    relation: {id: dtID>0?dtID:trmID, 
+                                               name: relationName} 
                                    };
                         links.push(link); 
                     }      
@@ -306,6 +310,7 @@ $.widget( "heurist.connections", {
                 return links;
             }
                     
+                   
             
             // Links
             links = links.concat( __getLinks(nodes, relations.direct)  ); // Direct links
