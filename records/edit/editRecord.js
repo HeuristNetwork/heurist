@@ -1805,13 +1805,18 @@ console.log('heurist not defined');
             function disableCtrls (value) {
                 dateBox.disabled = value;
                 dateBox.disabledStrictly = value;
-                if(dateBox.dateButton){
+                if(value){
+                    $(dateBox).parent().find('.calendars-trigger').hide()    
+                }else{
+                    $(dateBox).parent().find('.calendars-trigger').show();
+                }
+                if(dateBox.dateButton){ //to remove
                     dateBox.dateButton.disabled = value;
                     dateBox.dateButton.disabledStrictly = value;
                     dateBox.dateButton.style.visibility = value ?"hidden":"visible";
                 }
             }
-
+            
             /* Artem Osmakov 2013? : moved function decodeValue to temporalObjectLibrary.js */
 
             dateBox.initVal = dateBox.value;
@@ -1857,6 +1862,7 @@ console.log('heurist not defined');
             var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
             buttonElt.onclick = function() {
                 var buttonPos = top.HEURIST.getPosition(buttonElt, true);
+                /* wrong position 2016-12-06
                 popupOptions.x = buttonPos.x + 8 - 380;
                 if(popupOptions.x<0){
                     popupOptions.x = 0;
@@ -1864,7 +1870,7 @@ console.log('heurist not defined');
                 popupOptions.y = buttonPos.y + 8 - 380;
                 if(popupOptions.y<0){
                     popupOptions.y = 0;
-                }
+                }*/
 
                 top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + "common/html/editTemporalObject.html?"
                     + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
@@ -2340,10 +2346,21 @@ console.log('heurist not defined');
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
 
-        if(!isTemporal(textElt.value)){
-            textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);    
-        }
+        //add calendar widget         
+        textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);    
+        /*if(!isTemporal(textElt.value)){
+                textElt.disabled = true;
+                textElt.disabledStrictly = true;
+                textElt.find('.calendars-trigger').hide()    
+        }*/
+        
         top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
+        
+        var removeImg = newDiv.appendChild(this.document.createElement("img"));
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
+        removeImg.className = "delete-resource";
+        removeImg.title = "Clear this date";
+        
         
         top.HEURIST.registerEvent(textElt, "change", function() {
             textElt.strTemporal = null;
@@ -2353,6 +2370,16 @@ console.log('heurist not defined');
             textElt.strTemporal = null;
             if (windowRef.changed) windowRef.changed();
         }); // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
+        top.HEURIST.registerEvent(removeImg, "click", function() {
+            if (! newDiv.readOnly) {
+                textElt.strTemporal = null;
+                textElt.value = '';
+                textElt.disabled = false;
+                textElt.disabledStrictly = false;
+                $(textElt).parent().find('.calendars-trigger').show();
+                if (windowRef.changed) windowRef.changed();
+            }
+        });
         
         return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
