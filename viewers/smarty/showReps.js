@@ -737,7 +737,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
                 function __onOperEnd(context){
                     
-                    //infoMessageBox.hide();
+                    $('*').css('cursor', 'default');
 
                     if(!Hul.isnull(context))
                     {
@@ -768,6 +768,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     }
                 }
                 
+                $('*').css('cursor', 'progress');
                 infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
                 infoMessageBox.show();
                 
