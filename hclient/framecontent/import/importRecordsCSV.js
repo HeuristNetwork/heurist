@@ -2722,8 +2722,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                           +'</td></tr><tr><td>Processed:</td><td>'+ imp_result['processed']
                           +'</td></tr><tr><td>Skipped:</td><td>'+ imp_result['skipped']
                           +'</td></tr><tr><td>Records added:</td><td>'+ imp_result['inserted']
-                          +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated']
-                          +'</td></tr></table>';
+                          +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated'];
+                          
+                        if (imp_result['permission']>0){
+                            msg = msg 
+                            +'</td></tr><tr><td colspan="2" style="color:red"><br>' + imp_result['permission'] 
+                            +' records could not be updated as you do not have adequate rights to modify them '
+                            +'(workgroup administrator rights required)';
+                        }   
+                          
+                        msg = msg +'</td></tr></table>';
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
                                 'Import of '+window.hWin.HEURIST4.rectypes.names[rtyID]+' complete.');

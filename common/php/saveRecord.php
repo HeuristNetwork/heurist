@@ -46,7 +46,7 @@ function errSaveRec($msg){
     if (!@$msgInfoSaveRec['error']){
         $msgInfoSaveRec['error'] = array($msg);
     }else{
-        array_push($msgInfoSaveRec['error'],$msg);
+        array_push($msgInfoSaveRec['error'], $msg);
     }
     mysql_query("rollback");
 }
@@ -59,13 +59,34 @@ function warnSaveRec($msg){
         array_push($msgInfoSaveRec['warning'],$msg);
     }
 }
+
+//
+// Is it possible to change ownership or update given record
+//
+function checkPermission($recordID, $wg){
+    
+    $res = mysql_query("select * from Records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID and ugl_UserID=".get_user_id()." where rec_ID=$recordID");
+    $record = mysql_fetch_assoc($res);
+    if ($wg != $record["rec_OwnerUGrpID"] && $record["rec_OwnerUGrpID"] != get_user_id() ) {
+        
+        $saction = ($wg != $record["rec_OwnerUGrpID"])?'change ownership':'update record';
+        
+        if ($record["rec_OwnerUGrpID"] > 0  &&  $record["ugl_Role"] != "admin") {
+            // user is trying to change the workgroup when they are not an admin
+            return 'Unable to complete action - user must be Admin for workgroup '.$record['rec_OwnerUGrpID'];
+        } else if (!is_admin()) {
+            // you must be an database admin to change a public record into a workgroup record
+            return 'Current user does not have sufficient authority to change public record to workgroup record';
+        }
+    }
+    return true;
+}
+
 // NOTE  tags are a complete replacement list of personal tags for this record and are only used if personalised is true
 // $modeImport    0 - no import, 1 - import and check structure, 2 - import as is (without check record type structure
 function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null, $modeImport=0) {
     global $msgInfoSaveRec;
     $msgInfoSaveRec = array(); // reset the message array
-
-
 
 
     mysql_query("start transaction");
@@ -85,7 +106,6 @@ function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised,
             return $msgInfoSaveRec;
         }
     }
-    $wg = intval($wg);
 
     $rectype = intval($rectype);
     if ($recordID  &&  ! $rectype) {
@@ -138,26 +158,19 @@ function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised,
 
         mysql__insert("Records", $recheader);
         if (mysql_error()) {
-            errSaveRec("database record insert error - " . mysql_error()."  ".print_r($recheader, true));
+            errSaveRec("Database record insert error - " . mysql_error()."  ".print_r($recheader, true));
             return $msgInfoSaveRec;
         }
         $recordID = mysql_insert_id();
 
     }else{
-        $res = mysql_query("select * from Records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID and ugl_UserID=".get_user_id()." where rec_ID=$recordID");
-        $record = mysql_fetch_assoc($res);
-        if ($wg != $record["rec_OwnerUGrpID"] && $record["rec_OwnerUGrpID"] != get_user_id() ) {
-            if ($record["rec_OwnerUGrpID"] > 0  &&  $record["ugl_Role"] != "admin") {
-                // user is trying to change the workgroup when they are not an admin
-                errSaveRec("user is not a workgroup admin");
-                return $msgInfoSaveRec;
-            } else if (! is_admin()) {
-                // you must be an database admin to change a public record into a workgroup record
-                errSaveRec("user does not have sufficient authority to change public record to workgroup record");
-                return $msgInfoSaveRec;
-            }
+        
+        $res = checkPermission($recordID, $wg);
+        if($res!==true){
+            errSaveRec( $res );
+            return $msgInfoSaveRec;
         }
-
+        
         //		$log .= "- updating record ";
         mysql__update("Records", "rec_ID=$recordID", array(
             "rec_RecTypeID" => $rectype,
