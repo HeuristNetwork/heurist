@@ -277,7 +277,7 @@ function ShowReps() {
         if(squery!=null){
 
             //infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
-            infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
+            infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
             infoMessageBox.show();
 
             lastQuery = squery;
@@ -736,6 +736,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 var alwin;
 
                 function __onOperEnd(context){
+                    
+                    //infoMessageBox.hide();
 
                     if(!Hul.isnull(context))
                     {
@@ -765,7 +767,10 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                         }
                     }
                 }
-
+                
+                infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
+                infoMessageBox.show();
+                
                 Hul.getJsonData(baseurl, __onOperEnd, squery);
             }
         }
@@ -864,7 +869,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
 
-            infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
+            infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
             infoMessageBox.show();
             
             _showProgress();
