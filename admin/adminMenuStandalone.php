@@ -180,6 +180,8 @@ if (array_key_exists('mode', $_REQUEST)) {
                         */
                         
                         if (is_admin()) {
+                        menuEntry('---','Clone database','setup/dboperations/cloneDatabase.php?db='.HEURIST_DBNAME,
+                            'Clones an identical database from the currrent database with all data, users, attached files, templates etc.');
                             menuEntry('','Delete entire database','setup/dboperations/deleteCurrentDB.php?db='.HEURIST_DBNAME,
                                 'Delete the current database completely - cannot be undone, although data is copied '.
                                 'to a backup which could be reloaded by a system administrator');

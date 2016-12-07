@@ -225,11 +225,11 @@ function db_clone($db_source, $db_target, $verbose=true){
             $tables = $mysqli->query("SHOW TABLES");
             if($tables){
 
-                $mysqli->query("SET foreign_key_checks = 0");
+                $mysqli->query("SET foreign_key_checks = 0"); //disable
                 $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
                 echo ("<b>Adding records to tables: </b>");
-                while ($table = $tables->fetch_row()) {
+                while ($table = $tables->fetch_row()) { //loop for all tables
                     $table = $table[0];
                     $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
                     $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
@@ -253,7 +253,7 @@ function db_clone($db_source, $db_target, $verbose=true){
                     $mysqli->query("ALTER TABLE `".$table."` ENABLE KEYS");
                 }
 
-                $mysqli->query("SET foreign_key_checks = 1");
+                $mysqli->query("SET foreign_key_checks = 1"); //restore/enable foreign indexes verification
 
             }else{
                 $res = false;
