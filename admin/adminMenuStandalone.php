@@ -332,9 +332,9 @@ if (array_key_exists('mode', $_REQUEST)) {
                         // DATA QUALITY
                         
                         /* Deprecated 27/10/16, now in main search page menus
+                        */
                         menuEntry('---','Verify structure and data consistency','verification/listDatabaseErrors.php?db='.HEURIST_DBNAME,
                             'Find errors in database structure (invalid record type, field and term codes) and records with wrong structure and inconsistent values (invalid pointer, missed data etc)');
-                        */
                         
                         menuEntry('','Verify wysiwyg texts','verification/checkXHTML.php?db='.HEURIST_DBNAME.'',
                             'Check the wysiwyg text fields in records/blog entries for structural errors');

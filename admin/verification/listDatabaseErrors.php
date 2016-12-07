@@ -221,18 +221,6 @@ require_once('valueVerification.php');
 
             mysql_connection_select(DATABASE);
 
-            $res = mysql_query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name
-                from defDetailTypes
-                left join recDetails on dty_ID = dtl_DetailTypeID
-                left join Records on rec_ID = dtl_Value
-                left join defRecTypes on rty_ID = rec_RecTypeID
-                where dty_Type = "resource"
-                and dty_PtrTargetRectypeIDs > 0
-            and (INSTR(concat(dty_PtrTargetRectypeIDs,\',\'), concat(rec_RecTypeID,\',\')) = 0)');
-            // it does not work and rec_RecTypeID not in (dty_PtrTargetRectypeIDs)');
-            $bibs = array();
-            while ($row = mysql_fetch_assoc($res))
-                $bibs[$row['dtl_RecID']] = $row;
             ?>
 
 
@@ -318,14 +306,29 @@ require_once('valueVerification.php');
                 [end of list]
                 <?php
             }
+            
+            //Record pointers which point to the wrong type of record
+            $res = mysql_query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name
+                from defDetailTypes
+                left join recDetails on dty_ID = dtl_DetailTypeID
+                left join Records on rec_ID = dtl_Value
+                left join defRecTypes on rty_ID = rec_RecTypeID
+                where dty_Type = "resource"
+                and dty_PtrTargetRectypeIDs > 0
+            and (INSTR(concat(dty_PtrTargetRectypeIDs,\',\'), concat(rec_RecTypeID,\',\')) = 0)');
+            // it does not work and rec_RecTypeID not in (dty_PtrTargetRectypeIDs)');
+            $bibs = array();
+            while ($row = mysql_fetch_assoc($res)){
+                $bibs[$row['dtl_RecID']] = $row;
+            }
+            
             ?>
 
             <hr/>
 
-
-
             <!-- Record pointers which point to the wrong type of record  -->
 
+            
             <div>
                 <?php
                 if (count($bibs == 0)) {
@@ -532,7 +535,7 @@ require_once('valueVerification.php');
             ?>
 
             <hr/>
-
+            <div>
 
 
             <!--  Records containing fields with terms not in the list of terms specified for the field   -->
@@ -553,32 +556,18 @@ require_once('valueVerification.php');
             order by dtl_DetailTypeID'*/
             $bibs = array();
             $ids = array();
-            while ($row = mysql_fetch_assoc($res)){
+            $is_first = true;
+            while ($row = mysql_fetch_assoc($res)){ 
                 //verify value
-                if(  !in_array($row['dtl_ID'], $dtl_ids) &&
+                if(  !in_array($row['dtl_ID'], $dtl_ids) &&  //already non existant
                 trim($row['dtl_Value'])!="" &&
                 isInvalidTerm($row['dty_JsonTermIDTree'], $row['dty_TermIDTreeNonSelectableIDs'], $row['dtl_Value'], $row['dty_ID'] ))
                 {
-                    array_push($bibs, $row);
-                    $ids[$row['dtl_RecID']] = 1;
-                }
-
-            }
-            ?>
-
-            <div>
-
-                <?php
-                if (count($bibs == 0)) {
-                    print "<h3>All records have valid terms (terms are as specified for each field)</h3>";
-                }
-                else
-                {
+                    if($is_first){
+                        $is_first = false;
                     ?>
                     <h3>Records with terms not in the list of terms specified for the field</h3>
-                    <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
-                        (show results as search)</a></span>
-
+                    <span><a target=_new href='#' onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
                     <table>
                     <tr>
                         <th style="width: 30px;">Record</th>
@@ -588,8 +577,8 @@ require_once('valueVerification.php');
                     </tr>
 
                     <?php
-                    foreach ($bibs as $row) {
-                        ?>
+                    }
+                    ?>
                         <tr>
                             <td style="width:50px; padding-left: 25px;">
                                 <a target=_new
@@ -602,9 +591,21 @@ require_once('valueVerification.php');
                             <td style="width: 60px;padding-left: 25px;"><?= $row['dtl_Value'] ?></td>
                             <td style="padding-left: 25px;"><?= substr($row['rec_Title'], 0, 500) ?></td>
                         </tr>
-                        <?php
-                    }
-                    echo '</table>\n';
+                    <?php
+                    //array_push($bibs, $row);    // MEMORY EXHAUSTION happens here
+                    $ids[$row['dtl_RecID']] = 1;  
+                }
+
+            }
+            ?>
+
+                <?php
+                if (count($ids) == 0) {
+                    print "<h3>All records have valid terms (terms are as specified for each field)</h3>";
+                }else{
+                    echo '</table><br>';   
+                    echo '<span><a target=_new id="link_wrongterms" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
+                            .'&w=all&q=ids:'.join(',', array_keys($ids)).'>(show results as search)</a></span>';
                 }
                 ?>
             </div>
