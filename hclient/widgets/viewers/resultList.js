@@ -42,7 +42,7 @@ $.widget( "heurist.resultList", {
         //searchsource: null,
 
         empty_remark:'',
-        pagesize: 100,
+        pagesize: -1,
 
         renderer: null,    // renderer function to draw item
         rendererHeader: null,    // renderer function to draw header for list view-mode
@@ -76,6 +76,10 @@ $.widget( "heurist.resultList", {
         //that.hintDiv = new HintDiv('resultList_thumbnail_rollover', 160, 160, '<div id="thumbnail_rollover_img" style="width:100%;height:100%;"></div>');
 
         //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
+        
+        if(this.options.pagesize<50 || this.options.pagesize>5000){
+            this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
+        }
 
         var right_padding = window.hWin.HEURIST4.util.getScrollBarWidth()+1;
 
