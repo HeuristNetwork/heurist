@@ -67,7 +67,7 @@
             } else {
                 // It's too risky to delete data with "rm -Rf .$uploadPath", could end up trashing stuff needed elsewhere, so we move it
                 $uploadPath = HEURIST_UPLOAD_ROOT.$dbname; // individual deletio nto avoid risk of unintended disaster with -Rf
-                $cmdline = "mv ".$uploadPath." ".HEURIST_UPLOAD_ROOT."deleted_databases";
+                $cmdline = "mv ".$uploadPath." ".HEURIST_UPLOAD_ROOT."DELETED_DATABASES";
                 $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                 if ($res2 != 0 ) {
                     echo ("<h2>Warning:</h2> Unable to move <b>$uploadPath</b> to the deleted files folder, perhaps a permissions problem or previously deleted.");
@@ -89,7 +89,7 @@
                     deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes
 ?>
                     <h2>Database <b><?=$dbname?></b> has been deleted</h2>
-                    <p>Associated files stored in upload subdirectories <b><?=$uploadPath?></b> <br/> have ben moved to <?=HEURIST_UPLOAD_ROOT?>deleted_databases.</p>
+                    <p>Associated files stored in upload subdirectories <b><?=$uploadPath?></b> <br/> have ben moved to <?=HEURIST_UPLOAD_ROOT?>DELETED_DATABASES.</p>
                     <p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>
                     <p><a href='#' onclick='{top.location.href="<?=HEURIST_BASE_URL?>index.php" }' >Return to Heurist</a></p>
 <?php

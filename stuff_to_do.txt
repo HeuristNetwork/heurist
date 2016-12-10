@@ -1,0 +1,44 @@
+
+
+Eliminate references to adminMenuStandalone.php
+Check operation of Manage, Add data and Export menus, as well as standalone admin
+Check springDiagram
+Check formatting of header for Huni and FAIMS entries
+
+Structure > Verification : Verify title masks - add any broken titlemasks, link to show all
+
+Rebuild record titles
+Find duplicate records
+
+ADVANCED
+
+Delete entire database
+Delete all records
+
+Manage base field types
+Simple fields schema
+Relationships schema
+Combined schema
+Structure (SQL)
+Structure (XML)
+Define mime types
+
+???? where?  Workgroup tags
+(DELETE Quit workgroup temporarily)
+
+Rebuild record links cache
+
+Verify wysiwyg texts
+Verify characters in texts
+Fix invalid characters
+
+Verify uploaded files
+Bookmarks w/o tags
+Broken URLs
+Records without links
+
+Verify installation
+Clear database locks
+Database usage statistics (slow)
+File linking errors (slow)
+Inter-database transfer
