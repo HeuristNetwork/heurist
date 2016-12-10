@@ -776,9 +776,9 @@ function hLayout(args) {
 
                    widget = $content.search( options );
 
-            }else if(app.widgetname=='staticPage'){
+            }else if(app.widgetname=='connections'){
 
-                   widget = $content.staticPage( options );
+                   widget = $content.connections( options );
                    
             }else if(app.widgetname=='dh_search'){
 

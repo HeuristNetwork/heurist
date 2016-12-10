@@ -125,6 +125,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.basePathV4+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 
@@ -899,7 +900,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //preferences by default
                 that.currentUser['ugr_Preferences'] = {layout_language:'en',
                                          layout_theme: 'heurist',
-                                'search_detail_limit': 2000, 'help_on':'0', 'userCompetencyLevel': 'beginner'};
+                search_result_pagesize:100,
+                search_detail_limit: 2000, 'help_on':'0', 
+                userCompetencyLevel: 'beginner'};
             }
             if(window.hWin.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];
@@ -913,7 +916,10 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 // TODO: redundancy: this duplicates same in System.php
                 if('search_detail_limit'==name){
-                    if(!res && res<500 ) res = 500
+                    if(window.hWin.HEURIST4.util.isempty(res) || res<500 ) res = 500
+                    else if(res>5000 ) res = 5000;
+                }else if('search_result_pagesize'==name){
+                    if(window.hWin.HEURIST4.util.isempty(res) || res<50 ) res = 100
                     else if(res>5000 ) res = 5000;
                 }
                 return res;

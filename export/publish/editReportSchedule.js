@@ -93,7 +93,7 @@ function ReportScheduleEditor() {
         if(Hul.isnull(_entity)){
             _recID =  -1;
             //"rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes"
-            _entity = [-1,typeID,qlabel,'','','',hquery,templatefile,1440];
+            _entity = [-1,typeID,qlabel,'','','',hquery,templatefile,1440]; //interval 1 day
         }
         
         Dom.get('rps_Title').onchange = function(event){
@@ -156,7 +156,6 @@ function ReportScheduleEditor() {
             var fname = fnames[i];
             el = Dom.get(fname);
             if(!Hul.isnull(el)){
-
                 el.value = _entity[i];
             }
         }
@@ -169,6 +168,11 @@ function ReportScheduleEditor() {
             document.title = "Report Schedule #: " + _recID+" '"+_entity[2]+"'";
 
             Dom.get("statusMsg").innerHTML = "";
+        }
+        //set interval to 1440 (1 day) in case not defined
+        var interval = Dom.get("rps_IntervalMinutes").value;
+        if(Hul.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<1){
+            Dom.get("rps_IntervalMinutes").value = 1440;            
         }
 
     }
@@ -192,6 +196,11 @@ function ReportScheduleEditor() {
         _updatedFields = [];
         _updatedDetails = [];
 
+        var interval = Dom.get("rps_IntervalMinutes").value;
+        if(Hul.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<1){
+            Dom.get("rps_IntervalMinutes").value = 1440;            
+        }
+        
         var i,
             fnames = top.HEURIST.reports.fieldNames;
 

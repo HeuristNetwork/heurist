@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('LOGIN_REQUIRED',1);
+define('MANAGER_REQUIRED',1);
 define('PDIR','../../../');    
 
 require_once(dirname(__FILE__)."/../initPage.php");
@@ -107,8 +107,14 @@ function get_config_bytes($val) {
             .select_rectype_seq{
                 cursor: pointer;
                 display: inline-block;
-                /*font-weight:bold !important;*/
                 padding:0.2em;
+                margin-bottom:1em;
+            }
+            .select_rectype_seq > .hid_temp, .select_rectype_seq > .rt_arrow{
+                display:none;    
+            }
+            .select_rectype_seq:hover > .hid_temp, .select_rectype_seq:hover > .rt_arrow{
+                display:inline-block;    
             }
         </style>
     </head>
@@ -396,13 +402,16 @@ If you have missing data for Required fields, you may find it convenient to set 
     
         </div>
 
-        <fieldset style="padding-top:1.5em;padding-bottom:1.5em">
+        <fieldset style="padding-top:1.5em;padding-bottom:0.2em">
         <div>
-            <div class="header optional" style="min-width: 60px; width: 60px;"><label style="vertical-align: top;">Importing:</label></div>
+            <div class="header optional" style="min-width: 80px; width: 80px;">
+                <label style="vertical-align: top;">Importing:</label><br>
+                <label style="vertical-align: bottom;font-size:0.8em">(rollover for details)</label>
+            </div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
-                    <div id="sa_rectype_sequence"></div>
+                    <div id="sa_rectype_sequence" style="min-height:4em;height:6em"></div>
                 </div>
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
@@ -610,7 +619,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <div class="heurist-helper1" style="display: block;padding-top:0.5em">
                     The creation of the primary record type from rows in the input file depends on the prior identification of other entities which will be connected via pointer fields or relationships. The tree below shows the dependencies of the primary record type determined from its pointer and relationship marker fields. Where an input entity matches an existing record, its ID value will be recorded in an ID field which can be used subsequently as a pointer field value; where no existing record is matched a new record is created and the new ID recorded<br><br>
                     Check record types to be imported. <span style="color:red">Red</span> indicates required pointer field
-                    <div style="float:right">View Mode:
+                    <div style="display:none;float:right;/*hidden 2016-11-26*/">View Mode:
                     <input type="radio" name="mode_view" value="0" id="mode_view0" checked><label for="mode_view0">Dependency list</label>
                     &nbsp;&nbsp;
                     <input type="radio" name="mode_view" value="1" id="mode_view1"><label for="mode_view1">Treeview</label>

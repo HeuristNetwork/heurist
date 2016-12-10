@@ -48,8 +48,13 @@ function getGephiFormat() {
                                                              
     // META
     var gexf = '<?xml version="1.0" encoding="UTF-8"?>';
-    gexf +=      '<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">';
-    gexf +=        '<meta lastmodifieddate="2014-10-10">';
+    
+    gexf += '<gexf xmlns="http://www.gexf.net/1.2draft"';
+gexf += ' xmlns:xsi="http://www.w3.org/2001/XMLSchema−instance"';
+gexf += ' xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd"';
+gexf += ' version="1.2">';
+//    gexf +=      '<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">';
+    gexf +=        '<meta lastmodifieddate="'+ (new Date()).toISOString().split('T')[0] +'">';
     gexf +=          '<creator>HeuristNetwork.org</creator>';
     gexf +=          '<description>Visualisation export</description>';
     gexf +=        '</meta>' ;
@@ -114,8 +119,8 @@ function getGephiFormat() {
     gexf +=         '</graph>';
     gexf +=       '</gexf>';
     
-    // DOWNLOAD
-    //window.hWin.HEURIST4.util.downloadData(getDatabaseName()+".gexf", gexf);
+    // DOWNLOAD 
+    //that's duplication of  window.hWin.HEURIST4.util.downloadData(getDatabaseName()+".gexf", gexf);
     var filename = getDatabaseName()+".gexf";
     var mimeType = 'text/plain';
     var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(gexf);

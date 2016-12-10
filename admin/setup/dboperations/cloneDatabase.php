@@ -67,6 +67,9 @@ if(mysql_error()) {
     <body class="popup">
 
         <script type="text/javascript">
+            //
+            // allow only alphanum chars for database name
+            //
             function onKeyPress(event){
 
                 event = event || window.event;
@@ -197,7 +200,14 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
         return false;
     }
 
-    cloneDatabase($targetdbname);
+    $res = cloneDatabase($targetdbname);
+    
+    if(!$res){
+        echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
+        .'Please contact your system administrator or the Heurist developers (support at HeuristNetwork dot org) for assistance with cloning of your database.');
+    }
+        
+
 
     print "</div></body></html>";
 }
@@ -216,7 +226,7 @@ function cloneDatabase($targetdbname) {
 
     $newname = HEURIST_DB_PREFIX.$targetdbname;
 
-    //create new database
+    //create new empty database
     if(!db_create($newname)){
         return false;
     }
@@ -229,7 +239,7 @@ function cloneDatabase($targetdbname) {
         return false;
     }
 
-    // Remove chatac
+    // Remove initial values from empty database
     mysql_connection_insert($newname);
     mysql_query('delete from sysIdentification where 1');
     mysql_query('delete from sysTableLastUpdated where 1');
@@ -244,16 +254,42 @@ function cloneDatabase($targetdbname) {
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         db_drop($newname);
+        
         return false;
     }
 
-    //TODO: need to check for successful addition of constraints
+    //cleanup database to avoid issues with addition of constraints
+    
+    //1. cleanup missed trm_InverseTermId
     mysql_query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
         set t1.trm_InverseTermId=null
     where t1.trm_ID>0 and t2.trm_ID is NULL');
+    
+    //2. remove missed recent records
     mysql_query('delete FROM usrRecentRecords
-        where rre_RecID>0
+        where rre_RecID is not null
     and rre_RecID not in (select rec_ID from Records)');
+    
+    //3. remove missed rrc_SourceRecID and rrc_TargetRecID
+    mysql_query('delete FROM recRelationshipsCache
+        where rrc_SourceRecID is not null
+    and rrc_SourceRecID not in (select rec_ID from Records)');
+
+    mysql_query('delete FROM recRelationshipsCache
+        where rrc_TargetRecID is not null
+    and rrc_TargetRecID not in (select rec_ID from Records)');
+    
+    //4. cleanup orphaned details
+    mysql_query('delete FROM recDetails
+        where dtl_RecID is not null
+    and dtl_RecID not in (select rec_ID from Records)');
+    
+    //5. cleanup missed references to uploaded files
+    mysql_query('delete FROM recDetails
+        where dtl_UploadedFileID is not null
+    and dtl_UploadedFileID not in (select ulf_ID from recUploadedFiles)');
+    
+    
 
     $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues contact the Heurist developers at info heuristnetwork dot org</p>";
     
@@ -319,5 +355,7 @@ function cloneDatabase($targetdbname) {
     echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
     print "<p>Please access your new database through this link: <a href='".HEURIST_BASE_URL."?db=".$targetdbname.
     "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
+    
+    return true;
 } // straightCopyNewDatabase
 ?>

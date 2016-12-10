@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.2.13"; // sets current program version number, determined by Heurist development lead
+$version = "4.2.14"; // sets current program version number, determined by Heurist development lead
 
+// Vsn 4.2.14 10 Dec 2016  Fixes - Gephi export, exporter, new map record popup, resolver, better structure verify, memory problems etc, 
 // Vsn 4.2.13 31 Nov 2016  Lots of small fixes on new layout
 // Vsn 4.2.11 4 Nov 2016  New layout of search interfacve using tabs with menus for major function groups
 // Vsn 4.2.10 22 Aug 2016  Update distribution on Heurist server
@@ -78,10 +79,7 @@ $version = "4.2.13"; // sets current program version number, determined by Heuri
 // Vsn 4.2.1 05 Feb 2016 Further testing and fixes
 // Vsn 4.2.0 17 Jan 2016 Testing for beta release
 // Vsn 4.1.4 17 Dec 2015 Restructure, move H3 code back to codebase level
-// Vsn 4.1.3 16 Dec 2015 Distribution as ...alpha  16/12/15
-// Vsn 4.1.2 15 Nov 2015
-// Vsn 4.1.1 02 Nov 2015
-// Vsn 4.1.0 15 sep 2015
+// Vsn 4.1.3 16 Dec 2015 Distribution as ...alpha
 
 // 3.2.0 alpha 8th July 2014, beta 21st July 2014
 // 3.3.0 beta 11th Nov 2014

@@ -90,18 +90,14 @@ if(isForAdminOnly("to modify database structure")){
         <div id="divBanner" class="banner">
             <h2>Manage terms for term list fields and relationship type</h2>
         </div>
-        <div><br/></div>
-        <div style="margin-left:10px; padding-top:15px;">
+        <div style="margin-left:10px; padding-top:35px;">
             <input id="btnAddChild" type="button"
                 value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
             <span style="margin-top:5px; margin-left:10px;"> Adds a new root to the tree</span>
         </div>
 
 
-        <div id="page-inner">
-            <div><br/><br/><br/></div>
-            <div>&nbsp;&nbsp;&nbsp;&#129155;</div>
-            <div><br/></div>
+        <div id="page-inner" style="top:75px">
             <div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
                 <!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
@@ -139,7 +135,7 @@ if(isForAdminOnly("to modify database structure")){
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" style="display:none;width:600px;">
+                <div id="formEditor" style="display:none;width:600px;margin-top:-35px;">
                     <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block"><br/><br/>Edit selected term / vocabulary</h3>
                     <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
                         <b>term saved</b>

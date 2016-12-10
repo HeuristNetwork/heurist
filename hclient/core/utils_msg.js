@@ -599,7 +599,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 autoOpen: true,
                                 width : options.width,
                                 height: options.height,
-                                modal: true,
+                                modal: (options['modal']!==false),
                                 resizable: (options['no-resize']!=true),
                                 //draggable: false,
                                 title: options["title"],
@@ -621,6 +621,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         
                         //start content loading
                         $dosframe.attr('src', url);
+                        
+                        return $dosframe;
 
     },
     

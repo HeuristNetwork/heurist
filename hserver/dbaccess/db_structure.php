@@ -146,16 +146,20 @@
             $query .=  $querywhere." order by rst_RecTypeID, rst_DisplayOrder, rst_ID";
             $res = $mysqli->query($query);
 
-            while ($row = $res->fetch_row()) {
-                if (!array_key_exists($row[0], $rtStructs['typedefs'])) {
-                    $rtStructs['typedefs'][$row[0]] = array('dtFields' => array($row[1] => array_slice($row, 2)));
-                    $rtStructs['dtDisplayOrder'][$row[0]] = array();
-                } else {
-                    $rtStructs['typedefs'][$row[0]]['dtFields'][$row[1]] = array_slice($row, 2);
+            if($res){
+                while ($row = $res->fetch_row()) {
+                    if (!array_key_exists($row[0], $rtStructs['typedefs'])) {
+                        $rtStructs['typedefs'][$row[0]] = array('dtFields' => array($row[1] => array_slice($row, 2)));
+                        $rtStructs['dtDisplayOrder'][$row[0]] = array();
+                    } else {
+                        $rtStructs['typedefs'][$row[0]]['dtFields'][$row[1]] = array_slice($row, 2);
+                    }
+                    array_push($rtStructs['dtDisplayOrder'][$row[0]], $row[1]);
                 }
-                array_push($rtStructs['dtDisplayOrder'][$row[0]], $row[1]);
+                $res->close();
+            }else{
+                error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving rectype structure '.$mysqli->error);
             }
-            $res->close();
 
         }
 
@@ -303,7 +307,7 @@
             }
             $res->close();
         }else{
-            error_log('error retrieving terms '.$mysqli->error);
+            error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array('relation' => __getTermTree($mysqli, "relation", "prefix"), 'enum' => __getTermTree($mysqli, "enum", "prefix"));
         //ARTEM setCachedData($cacheKey, $terms);
@@ -620,15 +624,17 @@
         }
 
         $where_exp = null;        
-        if($dettypeids!=null){
+        if($dettypeids!=null || $dettypeids!='' && $dettypeids!='all'){
             if(!is_array($dettypeids)){
                 $dettypeids = array($dettypeids);
             }
-            //detect ID or TYPE
-            if(is_int($dettypeids[0])){
-                $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';        
-            }else{
-                $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';        
+            if($dettypeids[0]!='all'){
+                //detect ID or TYPE
+                if(is_int($dettypeids[0])){
+                    $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';        
+                }else{
+                    $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';        
+                }
             }
         }
         
@@ -657,6 +663,7 @@
         }
         $res = $mysqli->query($query);
         //ARTEM    $dtStructs['sortedNames'] = mysql__select_assoc('defDetailTypes', 'dty_Name', 'dty_ID', '1 order by dty_Name');
+
         try{
             if(!$res){
                 error_log('FAILED QUERY: '.$mysqli->error);//$query);

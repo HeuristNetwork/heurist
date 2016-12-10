@@ -136,6 +136,10 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
 
 }
 
+//
+// Is given termid in list of allowed terms or in vocab
+// NOT - it is quite similar to isValidTerm 
+//
 function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
     global $dtyIDDefs;
 
@@ -158,9 +162,9 @@ function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
         }
     }
     if(!@$dtyIDDefs[$dtyID]){
-        return false; //terms not found
+        return true; //terms not found
     }
-    return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);
+    return !($dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]));
 }
 
 //

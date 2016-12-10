@@ -152,45 +152,47 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
         //@todo all this stuff should be implemented on client side since header is not static content anymore  
         
         // Put record types & counts in the table
-        $res = $system->get_mysqli()->query($query);
-        $stats = array();
-        while($row = $res->fetch_assoc()) { // each loop is a complete table row
-            if($row["ord"]>0){
-                if($appcode>0){
-                    //detect app
-                    $list = mysql__select_list($system->get_mysqli(), 'recDetails', 'dtl_Value', 
-                        'dtl_recID='.$row["id"].' and dtl_DetailTypeID=154'); //145
-                    $classes = '';    
-                    $isNotFound = true;
-                    if(is_array($list))
-                    foreach($list as $val){
-                        if($val==$appcode){
-                            $isNotFound = false;
-                            break;
+        if($system->is_inted()){
+            $res = $system->get_mysqli()->query($query);
+            $stats = array();
+            while($row = $res->fetch_assoc()) { // each loop is a complete table row
+                if($row["ord"]>0){
+                    if($appcode>0){
+                        //detect app
+                        $list = mysql__select_list($system->get_mysqli(), 'recDetails', 'dtl_Value', 
+                            'dtl_recID='.$row["id"].' and dtl_DetailTypeID=154'); //145
+                        $classes = '';    
+                        $isNotFound = true;
+                        if(is_array($list))
+                        foreach($list as $val){
+                            if($val==$appcode){
+                                $isNotFound = false;
+                                break;
+                            }
                         }
+                        if($isNotFound) continue;
                     }
-                    if($isNotFound) continue;
+                    print '<div class="menubutton">';
+                    print '<a class="menuitem" href="javascript:void(0) onClick="{ 
+                        window.hWin.HEURIST4.msg.showMsgDlg(\'#webcontent'.$row["id"].'\', null,\''.$row["title"].'\');}">'
+                        .$row["title"].'</a></div>';
+                }else{
+                    ?>
+                    <script>
+                        window.hWin.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');
+                    </script>
+                    <?php
                 }
-                print '<div class="menubutton">';
-                print '<a class="menuitem" href="javascript:void(0) onClick="{ 
-                    window.hWin.HEURIST4.msg.showMsgDlg(\'#webcontent'.$row["id"].'\', null,\''.$row["title"].'\');}">'
-                    .$row["title"].'</a></div>';
-            }else{
                 ?>
-                <script>
-                    window.hWin.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');
-                </script>
+                <div style="display:none;" id="webcontent<?=$row["id"]?>">
+                    <?php
+                    print $row["content"];
+                    ?>
+                </div>
+
                 <?php
             }
-            ?>
-            <div style="display:none;" id="webcontent<?=$row["id"]?>">
-                <?php
-                print $row["content"];
-                ?>
-            </div>
-
-            <?php
-        }
+            }
         }
         ?>
         <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{ window.open('http://digitalharlemblog.wordpress.com/', 'DHBlog'); }">BLOG</a></div>

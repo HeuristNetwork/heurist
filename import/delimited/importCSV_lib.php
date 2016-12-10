@@ -28,6 +28,7 @@ $rep_processed = 0;
 $rep_added = 0;
 $rep_updated = 0;
 $rep_skipped = 0;
+$rep_permission = 0;
 
 $wg_id = 1;  //database owners
 $rec_visibility = 'viewable';
@@ -826,6 +827,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
     $rep_added   = 0;
     $rep_updated = 0;
     $rep_skipped = 0;
+    $rep_permission = 0;
 
     //update values in import table - replace negative to new one
     foreach($records as $imp_id => $ids){
@@ -1787,7 +1789,7 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
 */
 function doImport($mysqli, $imp_session, $params, $mode_output){
 
-    global $rep_processed,$rep_added,$rep_updated,$rep_skipped,$wg_id,$rec_visibility;
+    global $rep_processed,$rep_added,$rep_updated,$rep_skipped,$rep_permission,$wg_id,$rec_visibility;
 
     $addRecDefaults = getDefaultOwnerAndibility(null);
     
@@ -1924,6 +1926,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
         $rep_added = 0;
         $rep_updated = 0;
         $rep_skipped = 0;
+        $rep_permission = 0;
         $tot_count = $imp_session['reccount'];
         $first_time = true;
         $step = ceil($tot_count/10);
@@ -1974,7 +1977,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
                             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                             //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
-                            doInsertUpdateRecord($recordId, $params, $details, $id_field);
+                            doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
                         }
                         $previos_recordId = $recordId_in_import;
 
@@ -2192,7 +2195,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                 if(  ($id_field_not_defined || $recordId==null) && count($details)>0 ){ //id field not defined - insert for each line
 
                     if(!$ignore_insert){
-                        $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field);
+                        $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
                         $details = array();
                     }
                     
@@ -2201,7 +2204,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                     //THIS SECTION IS NOT USED
                     //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                     if(count($details)>1){
-                        $new_id = doInsertUpdateRecord($recordId, $params, $details, null);
+                        $new_id = doInsertUpdateRecord($recordId, $params, $details, null, $mode_output);
                         if($new_id!=null && intval($new_id)>0) array_push($new_record_ids, $new_id);
                         $previos_recordId = null;
 
@@ -2239,7 +2242,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
         if($id_field && count($details)>0 && !$is_mulivalue_index && $recordId!=null){ //action for last record
             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
-            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field);
+            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
         }
         if(!$id_field){
             array_push($imp_session['uniqcnt'], $rep_added);
@@ -2250,7 +2253,8 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
               'inserted'=>$rep_added,
               'updated'=>$rep_updated,
               'total'=>$tot_count,
-              'skipped'=>$rep_skipped
+              'skipped'=>$rep_skipped,
+              'permission'=>$rep_permission
             );   
 
         //update counts array                
@@ -2418,15 +2422,27 @@ function findOriginalRecord($recordId){
 //
 //
 //
-function doInsertUpdateRecord($recordId, $params, $details, $id_field){
+function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output){
 
-    global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated, $rep_skipped,
+    global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated, $rep_skipped, $rep_permission,
             $wg_id,$rec_visibility;
 
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
     //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
 
+    //check permission beforehand
+    if($recordId>0){
+        $res = checkPermission($recordId, $wg_id);            
+        if($res!==true){
+            // error message: $res;
+            $rep_permission++;
+            return null;
+        }
+    }
+
+    
+    
     //add-update Heurist record
     $out = saveRecord($recordId, $recordType,
         @$details["recordURL"],
@@ -2451,7 +2467,6 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
 
     if (@$out['error']) {
 
-
         //special formatting
         foreach($out["error"] as $idx=>$value){
             $value = str_replace(". You may need to make fields optional. Missing data","",$value);
@@ -2463,14 +2478,16 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
             }
             $out["error"][$idx] = $value;
         }
-        foreach($details['imp_id'] as $imp_id){
-            print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$out["error"]);
-            $res = get_import_value($imp_id, $import_table);
-            if(is_array($res)){
-                $s = htmlspecialchars(implode(", ", $res));
-                print "<div style='padding-left:40px'>".$s."</div>";
+        if ($mode_output!='array'){
+            foreach($details['imp_id'] as $imp_id){
+                print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$out["error"]);
+                $res = get_import_value($imp_id, $import_table);
+                if(is_array($res)){
+                    $s = htmlspecialchars(implode(", ", $res));
+                    print "<div style='padding-left:40px'>".$s."AAAA</div>";
+                }
+                print "</div>";
             }
-            print "</div>";
         }
 
         $rep_skipped++;
@@ -2484,7 +2501,7 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
                 ." SET ".$id_field."=".$out["bibID"]
                 ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
 
-                if(!$mysqli->query($updquery)){
+                if(!$mysqli->query($updquery) && $mode_output!='array'){
                     print "<div style='color:red'>Cannot update import table (set record id ".$out["bibID"].") for lines:".
                     implode(",",$details['imp_id'])."</div>";
                 }
@@ -2495,7 +2512,7 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
             $rep_updated++;
         }
 
-        if (@$out['warning']) {
+        if (@$out['warning'] && $mode_output!='array') {
             print "<div style=\"color:#ff8844\">Warning: ".implode("; ",$out["warning"])."</div>";
         }
 

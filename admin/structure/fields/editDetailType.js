@@ -275,7 +275,7 @@ function DetailTypeEditor() {
 
         Hul.addoption(el_sel, 0, 'Individual selection (advanced)');
         if(sel_index<0) {
-            sel_index = (Dom.get("dty_JsonTermIDTree").value!="" && vocabId==0)?el_sel.length-1:0;
+            sel_index = (Dom.get("dty_JsonTermIDTree").value!='' && vocabId==0)?el_sel.length-1:0;
         }
         el_sel.selectedIndex = sel_index;
 
@@ -628,6 +628,7 @@ function DetailTypeEditor() {
         }
 
         //to trigger setting visibilty for div with terms tree and record pointer
+        that.keepType = Dom.get("dty_Type").value;
         _onChangeType(null);
 
         // create preview for Terms Tree and record pointer

@@ -180,6 +180,8 @@ if (array_key_exists('mode', $_REQUEST)) {
                         */
                         
                         if (is_admin()) {
+                        menuEntry('---','Clone database','setup/dboperations/cloneDatabase.php?db='.HEURIST_DBNAME,
+                            'Clones an identical database from the currrent database with all data, users, attached files, templates etc.');
                             menuEntry('','Delete entire database','setup/dboperations/deleteCurrentDB.php?db='.HEURIST_DBNAME,
                                 'Delete the current database completely - cannot be undone, although data is copied '.
                                 'to a backup which could be reloaded by a system administrator');
@@ -330,9 +332,9 @@ if (array_key_exists('mode', $_REQUEST)) {
                         // DATA QUALITY
                         
                         /* Deprecated 27/10/16, now in main search page menus
+                        */
                         menuEntry('---','Verify structure and data consistency','verification/listDatabaseErrors.php?db='.HEURIST_DBNAME,
                             'Find errors in database structure (invalid record type, field and term codes) and records with wrong structure and inconsistent values (invalid pointer, missed data etc)');
-                        */
                         
                         menuEntry('','Verify wysiwyg texts','verification/checkXHTML.php?db='.HEURIST_DBNAME.'',
                             'Check the wysiwyg text fields in records/blog entries for structural errors');

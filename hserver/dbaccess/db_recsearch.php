@@ -277,7 +277,7 @@ if(@$params['debug']) echo $query."<br>";
         
         
         //find all target related records
-        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
+        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
             .'where rl_SourceID in ('.$ids.') order by rl_SourceID';
 
         $res = $mysqli->query($query);
@@ -290,13 +290,14 @@ if(@$params['debug']) echo $query."<br>";
                     $relation->targetID = intval($row[1]);
                     $relation->trmID = intval($row[2]);
                     $relation->dtID  = intval($row[3]);
+                    $relation->relationID  = intval($row[4]);
                     array_push($direct, $relation);
                 }
                 $res->close();
         }
 
         //find all reverse related records
-        $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
+        $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
             .'where rl_TargetID in ('.$ids.') order by rl_TargetID';
 
 
@@ -310,6 +311,7 @@ if(@$params['debug']) echo $query."<br>";
                     $relation->sourceID = intval($row[1]);
                     $relation->trmID = intval($row[2]);
                     $relation->dtID  = intval($row[3]);
+                    $relation->relationID  = intval($row[4]);
                     array_push($reverse, $relation);
                 }
                 $res->close();

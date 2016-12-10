@@ -51,6 +51,7 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
+$rectypesStructure = getAllRectypeStructures();
 
 $terms = getTerms();
 
@@ -69,7 +70,7 @@ if (is_logged_in()) {
 // if we get a record id then see if there is a personal bookmark for it.
 if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
     $res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
-    if (mysql_num_rows($res)>0) {
+    if ($res && mysql_num_rows($res)>0) {
         $row = mysql_fetch_assoc($res);
         $_REQUEST['bkmk_id'] = $row['bkm_ID'];
     }
@@ -230,7 +231,7 @@ if(!$is_map_popup){
                 ?>    
                 try{
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
-                    top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500 });
+                    top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500, modal:false });
                     return false;
                 }
                 else return true;
@@ -301,6 +302,7 @@ function print_details($bib) {
         print_other_tags($bib);
         print_text_details($bib);
     }
+    
     print_relation_details($bib);
     print_linked_details($bib);
 }
@@ -315,8 +317,14 @@ function print_header_line($bib) {
     if ($url  &&  ! preg_match('!^[^\\/]+:!', $url))
         $url = 'http://' . $url;
 
-    $webIcon = @mysql_fetch_row(mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347"));  //MAGIC NUMBER
-    $webIcon = @$webIcon[0];
+    $res = mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347");  //MAGIC NUMBER!!   
+    
+    if($res){
+        $webIcon = @mysql_fetch_row($res);  
+        $webIcon = @$webIcon[0];
+    }else{
+        $webIcon = null;
+    }
     //
 
     if(is_logged_in()){
@@ -366,14 +374,17 @@ function print_private_details($bib) {
     $res = mysql_query('select grp.ugr_Name,grp.ugr_Type,concat(grp.ugr_FirstName," ",grp.ugr_LastName) from Records, '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$bib['rec_ID']);
     $workgroup_name = NULL;
     // check to see if this record is owned by a workgroup
-    if (mysql_num_rows($res) > 0) {
+    if ($res && mysql_num_rows($res) > 0) {
         $row = mysql_fetch_row($res);
         $workgroup_name = $row[1] == 'user'? $row[2] : $row[0];
     }
     // check for workgroup tags
     $res = mysql_query('select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '.USERS_DATABASE.'.sysUGrps grp on tag_UGrpID=grp.ugr_ID left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='.get_user_id().' where rtl_RecID='.$bib['rec_ID'].' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order');
     $kwds = array();
-    while ($row = mysql_fetch_row($res)) array_push($kwds, $row);
+    if($res){
+        while ($row = mysql_fetch_row($res)) array_push($kwds, $row);    
+    }
+    
     if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
         ?>
         <div class=detailRowHeader>Private
@@ -438,7 +449,7 @@ function print_private_details($bib) {
                     <?php
                 }
             }
-            if (array_key_exists('bkm_ID',$bib)) {
+            if (is_array($bib) && array_key_exists('bkm_ID',$bib)) {
                 print_personal_details($bib);
             }
         }
@@ -501,6 +512,7 @@ function print_private_details($bib) {
             $bds = array();
             $thumbs = array();
 
+            if($bds_res)
             while ($bd = mysql_fetch_assoc($bds_res)) {
 
                 if ($bd['dty_ID'] == 603) { //DT_FULL_IMAG_URL
@@ -703,7 +715,7 @@ echo '</div>';
 
     function print_relation_details($bib) {
 
-        global $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup;
+        global $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
 
         $from_res = mysql_query('select recDetails.*
             from recDetails
@@ -749,6 +761,9 @@ echo '</div>';
         }
         print '<div class=detail>';
         if (@$bd['RelatedRecID']) {
+            if(true || $is_map_popup){  
+                print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
+            }
             print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
         } else {
             print htmlspecialchars($bd['Title']);
@@ -777,6 +792,9 @@ echo '</div>';
         }
         print '<div class=detail>';
         if (@$bd['RelatedRecID']) {
+            if(true || $is_map_popup){  
+                print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
+            }
             print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
         } else {
             print htmlspecialchars($bd['Title']);
@@ -790,7 +808,8 @@ echo '</div>';
 
 
 function print_linked_details($bib) {
-    global $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup;
+    global $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
+    
     $query = 'select * '.
     'from recDetails '.
     'left join defDetailTypes on dty_ID = dtl_DetailTypeID '.
@@ -820,8 +839,6 @@ function print_linked_details($bib) {
     <?php
         }
         
-        $rectypesStructure = getAllRectypeStructures();
-
         $lbl = 'Linked from';
 
         while ($row = mysql_fetch_assoc($res)) {
@@ -1010,7 +1027,10 @@ function orderComments($cmts) {
 function output_chunker($val) {
     // chunk up the value so that it will be able to line-break if necessary
     $val = htmlspecialchars($val);
+    return $val;
+    /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
+    */
 }
 
 ?>

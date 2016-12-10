@@ -1,7 +1,8 @@
 <?php                                                
 
 /**
-* filename: explanation
+* deleteDB.php: delete multiple databases. Called by dbStatistics.php (for system admin only)
+*               note that deletion of current database is handled separately by deleteCurrentDB.php which calls dbUtils.php
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -20,49 +21,49 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../configIni.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
-    
-    /** Db check */
-    if(!is_systemadmin) {
-        echo "You must be logged in as a system administrator to delete databases";
-        exit();
-    }
-    
-    /** Password check */
-    if(isset($_POST['password'])) {
-        $pw = $_POST['password'];
-        
-        // Password in configIni.php must be at least 6 characters
-        if(strlen($passwordForDatabaseDeletion) > 6) {
-            $comparison = strcmp($pw, $passwordForDatabaseDeletion);  // Check password
-            if($comparison == 0) {
-                // Correct password, check if db is set
-                if(isset($_POST['database'])) {
-                    // "Delete" database
-                    $db = $_POST['database']; 
-                    db_delete($db); // dbUtils.php
-                    
-                }else{
-                    // Authorization call
-                    header('HTTP/1.0 200 OK');
-                    echo "Correct password";    
-                }    
-                 
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../../configIni.php');
+require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
+
+/** Db check */
+if(!is_systemadmin) {
+    echo "You must be logged in as a system administrator to delete databases";
+    exit();
+}
+
+/** Password check */
+if(isset($_POST['password'])) {
+    $pw = $_POST['password'];
+
+    // Password in configIni.php must be at least 6 characters
+    if(strlen($passwordForDatabaseDeletion) > 6) {
+        $comparison = strcmp($pw, $passwordForDatabaseDeletion);  // Check password
+        if($comparison == 0) {
+            // Correct password, check if db is set
+            if(isset($_POST['database'])) {
+                // "Delete" database
+                $db = $_POST['database']; 
+                db_delete($db); // dbUtils.php
+
             }else{
-                // Invalid password
-                header('HTTP/1.0 401 Unauthorized');
-                echo "Invalid password";
+                // Authorization call
+                header('HTTP/1.0 200 OK');
+                echo "Correct password";    
             }    
-            
+
         }else{
-            header('HTTP/1.0 406 Not Acceptable');
-            echo "Password in configIni.php must be at least 6 characters";  
-        }
-        
-        exit(); 
+            // Invalid password
+            header('HTTP/1.0 401 Unauthorized');
+            echo "Invalid password";
+        }    
+
+    }else{
+        header('HTTP/1.0 406 Not Acceptable');
+        echo "Password in configIni.php must be at least 6 characters";  
     }
-    
-    echo "Invalid request";
+
+    exit(); 
+}
+
+echo "Invalid request";
 ?>

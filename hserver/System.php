@@ -54,6 +54,8 @@ class System {
 
     private $errors = array();
 
+    private $is_inited = false;
+    
     //???
     //private $guest_User = array('ugr_ID'=>0,'ugr_FullName'=>'Guest');
     private $current_User = null;
@@ -127,6 +129,7 @@ class System {
                 //consts
                 $this->defineConstants();    //@todo - we do not need to init all constans for every system init - call it as separate method
             }
+            $this->is_inited = true;
             return true;
         }
 
@@ -628,7 +631,12 @@ class System {
         }
     }
 
-
+    /**
+    * Returns true if system is inited ccorretly and db connection is established
+    */
+    public function is_inted(){
+        return $this->is_inited;
+    }
 
     /**
     * Get database connection object

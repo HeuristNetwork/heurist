@@ -50,7 +50,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <div class="admin-only" style="padding-left:5px;">
             <button class="export-button">CSV</button>
-            <a href="export/delimited/exportDelimitedForRectype.html" name="auto-popup" class="fixed h3link"
+            <a href="export/delimited/exportDelimitedForRectype.html" class="fixed"
                 data-logaction="expCSV"
                 title="Export records as delimited text (comma/tab), applying record type and additional Heurist search filter as required">
                 Comma or tab-separated text file</a>
@@ -91,7 +91,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <li>EXPORT RESULTS SET</li>
 
         <li class="admin-only" style="padding-left:5px;">
-        <a href="export/delimited/exportDelimitedForRectype.html" name="auto-popup" class="fixed h3link"
+        <a href="export/delimited/exportDelimitedForRectype.html" name="auto-popup" class="fixed"
         title="Export records as delimited text (comma/tab), applying record type and additional Heurist search filter as required">
         CSV</a>
         </li>
@@ -148,6 +148,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         </ul>
         -->
+        
+        <div class="heurist-prompt" style="padding:6px">
+            Allow popup window in your browser preferences
+        </div>
     </div>
 </body>
 </html>

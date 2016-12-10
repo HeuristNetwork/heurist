@@ -966,8 +966,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     mapdata.depends = [];
 
                     //secondary points  DH_RECORDTYPE_SECONDARY
-                    var mapdata3 = recset.toTimemap(source.id, 99914, source.color, 1); //records with type "secondary"
-                    mapdata3.id = "link_"+window.hWin.HEURIST4.util.random();
+                    var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
+                    var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, source.color, 1); //records with type "secondary"
+                    mapdata3.id = random_name_for_secondary;
                     mapdata3.title = 'Secondary events/Residences';
                     //mapdata3.timeenabled = 0;
                     //mapdata3.timeline = {items:[]};

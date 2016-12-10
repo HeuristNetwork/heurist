@@ -139,7 +139,7 @@ function hRecordSet(initdata) {
             if(order.length>0){     
                 var rec = records[order[0]];
                 if(!isnull(rec) && rec['d']){
-                    dty_ids = Object.keys(d);
+                    dty_ids = Object.keys(rec['d']);
                 }
             }
         }
