@@ -2530,11 +2530,11 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_out
 */
 function saveSession($mysqli, $imp_session){
 
-    $imp_id = mysql__insertupdate($mysqli, "sysImportSessions", "imp",
-        array("imp_ID"=>@$imp_session["import_id"],
-            "ugr_id"=>get_user_id(),
-            "imp_table"=>$imp_session["import_name"],
-            "imp_session"=>json_encode($imp_session) ));
+    $imp_id = mysql__insertupdate($mysqli, "sysImportFiles", "sif",
+        array("sif_ID"=>@$imp_session["import_id"],
+            "sif_UGrpID"=>get_user_id(),
+            "sif_TempDataTable"=>$imp_session["import_name"],
+            "sif_Session"=>json_encode($imp_session) ));
 
     if(intval($imp_id)<1){
         return "Cannot save session. SQL error:".$imp_id;
@@ -2617,14 +2617,14 @@ function download_import_session($session_id, $idfield=null, $mode=1){
     $ret = "";
     $where = "";
     if(is_numeric($session_id)){
-        $where = " where imp_id=".$session_id;
+        $where = " where sif_ID=".$session_id;
     }else{
         print "session id is not defined";
         return;
     }
 
     $res = mysql__select_array2($mysqli,
-        "select imp_session from sysImportSessions".$where);
+        "select sif_Session from sysImportFiles".$where);
 
     //get field names and original filename
     $session = json_decode($res[0], true);
@@ -2682,11 +2682,11 @@ function clear_import_session($session_id){
     $ret = "";
     $where = "";
     if(is_numeric($session_id)){
-        $where = " where imp_id=".$session_id;
+        $where = " where sif_ID=".$session_id;
     }
 
     $res = mysql__select_array3($mysqli,
-        "select imp_id, imp_session from sysImportSessions".$where);
+        "select sif_ID, sif_Session from sysImportFiles".$where);
 
     if(!$res){
         $ret = "cannot get list of imported files";
@@ -2705,10 +2705,10 @@ function clear_import_session($session_id){
 
         if($ret==""){
             if($where==""){
-                $where = " where imp_id>0";
+                $where = " where sif_ID>0";
             }
 
-            if (!$mysqli->query("delete from sysImportSessions ".$where)) {
+            if (!$mysqli->query("delete from sysImportFiles ".$where)) {
                 $ret = "cannot delete data from list of imported files: " . $mysqli->error;
             }else{
                 $ret = "ok";
@@ -2732,7 +2732,7 @@ function get_import_session($mysqli, $import_id){
     if($import_id && is_numeric($import_id)){
 
         $res = mysql__select_array2($mysqli,
-            "select imp_session, imp_table from sysImportSessions where imp_id=".$import_id);
+            "select sif_Session, sif_TempDataTable from sysImportFiles where sif_ID=".$import_id);
 
         $session = json_decode($res[0], true);
         $session["import_id"] = $import_id;
@@ -2754,18 +2754,30 @@ function get_list_import_sessions(){
 
     global $mysqli;
 
-    $query = "CREATE TABLE IF NOT EXISTS `sysImportSessions` (
+    /*
+    $query = "CREATE TABLE IF NOT EXISTS `sysImportFiles` (
     `imp_ID` int(11) unsigned NOT NULL auto_increment,
     `ugr_ID` int(11) unsigned NOT NULL default 0,
     `imp_table` varchar(255) NOT NULL default '',
     `imp_session` text,
     PRIMARY KEY  (`imp_ID`))";
+    */
+    
+    $query = "CREATE TABLE IF NOT EXISTS `sysImportFiles` (
+    `sif_ID` int(11) unsigned NOT NULL auto_increment
+    COMMENT 'Sequentially generated ID for delimited text or other files imported into temporary tables ready for processing',
+    `sif_FileType` enum('delimited') NOT NULL Default 'delimited' COMMENT 'The type of file which has been read into a temporary table for this import',   
+    `sif_UGrpID` int(11) unsigned NOT NULL default 0 COMMENT 'The user ID of the user who imported the file',   
+    `sif_TempDataTable` varchar(255) NOT NULL default '' COMMENT 'The name of the temporary data table created by the import',
+    `sif_Session` text  COMMENT 'Import session data',
+    PRIMARY KEY  (`sif_ID`))";    
+    
     if (!$mysqli->query($query)) {
         return "SQL error: cannot create imported files table: " . $mysqli->error;
     }
 
     $ret = '<option value="0">select uploaded file ...</option>';
-    $query = "select imp_ID, imp_table from sysImportSessions"; //" where ugr_ID=".get_user_id();
+    $query = "select sif_ID, sif_TempDataTable from sysImportFiles"; //" where sif_UGrpID=".get_user_id();
     $res = $mysqli->query($query);
     if ($res){
         while ($row = $res->fetch_row()){

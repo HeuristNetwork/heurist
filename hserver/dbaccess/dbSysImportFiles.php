@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * db access to sysImportSessions table
+    * db access to sysImportFiles table
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -25,7 +25,7 @@ require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
-class DbSysImportSessions extends DbEntityBase
+class DbSysImportFiles extends DbEntityBase
 {
     private $is_table_exists = true;  
     
@@ -34,13 +34,20 @@ class DbSysImportSessions extends DbEntityBase
         
         $mysqli = $this->system->get_mysqli();
     
-        $query = "CREATE TABLE IF NOT EXISTS `sysImportSessions` (
-        `imp_ID` int(11) unsigned NOT NULL auto_increment,
-        `ugr_ID` int(11) unsigned NOT NULL default 0,
-        `imp_table` varchar(255) NOT NULL default '',
-        `imp_session` text,
-        PRIMARY KEY  (`imp_ID`))";
+
+
+    $query = "CREATE TABLE IF NOT EXISTS `sysImportFiles` (
+    `sif_ID` int(11) unsigned NOT NULL auto_increment
+    COMMENT 'Sequentially generated ID for delimited text or other files imported into temporary tables ready for processing',
+    `sif_FileType` enum('delimited') NOT NULL Default 'delimited' COMMENT 'The type of file which has been read into a temporary table for this import',   
+    `sif_UGrpID` int(11) unsigned NOT NULL default 0 COMMENT 'The user ID of the user who imported the file',   
+    `sif_TempDataTable` varchar(255) NOT NULL default '' COMMENT 'The name of the temporary data table created by the import',
+    `sif_Session` text  COMMENT 'Import session data',
+    PRIMARY KEY  (`sif_ID`))";    
+    
+    
         if (!$mysqli->query($query)) {
+            error_log($mysqli->error);
             $this->is_table_exists = false;
         }
         
@@ -101,24 +108,24 @@ class DbSysImportSessions extends DbEntityBase
         //compose WHERE 
         $where = array();    
         
-        $pred = $this->searchMgr->getPredicate('imp_ID');
+        $pred = $this->searchMgr->getPredicate('sif_ID');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('ugr_ID');
+        $pred = $this->searchMgr->getPredicate('sif_UGrpID');
         if($pred!=null) array_push($where, $pred);
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
-            $this->data['details'] = 'imp_ID';
+            $this->data['details'] = 'sif_ID';
             
         }else if(@$this->data['details']=='name'){
 
-            $this->data['details'] = 'imp_ID,imp_table';
+            $this->data['details'] = 'sif_ID,sif_TempDataTable';
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'imp_ID,imp_table,imp_session';
+            $this->data['details'] = 'sif_ID,sif_TempDataTable,sif_Session';
             
         }else if(@$this->data['details']=='full'){
 
@@ -138,18 +145,18 @@ class DbSysImportSessions extends DbEntityBase
         }
 
         //ID field is mandatory and MUST be first in the list
-        $idx = array_search('imp_ID', $this->data['details']);
+        $idx = array_search('sif_ID', $this->data['details']);
         if($idx>0){
             unset($this->data['details'][$idx]);
             $idx = false;
         }
         if($idx===false){
-            array_unshift($this->data['details'], 'imp_ID');
+            array_unshift($this->data['details'], 'sif_ID');
         }
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM sysImportSessions';
+        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM sysImportFiles';
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
@@ -159,7 +166,7 @@ class DbSysImportSessions extends DbEntityBase
         
 //error_log($query);     
 
-        $res = $this->searchMgr->execute($query, $is_ids_only, 'sysImportSessions');
+        $res = $this->searchMgr->execute($query, $is_ids_only, 'sysImportFiles');
         return $res;
 
     }
@@ -201,15 +208,15 @@ class DbSysImportSessions extends DbEntityBase
         $rec_ID = $this->data['recID'];
         $rec_ID = intval(@$rec_ID);
         if($rec_ID>0){        
-            $where = " where imp_id=".$rec_ID;
+            $where = " where sif_ID=".$rec_ID;
         }else{
-            $where = " where imp_id>0";
+            $where = " where sif_ID>0";
         }
         
         $mysqli = $this->system->get_mysqli();
 
         $res = mysql__select_all($mysqli,
-                "select imp_id, imp_session from sysImportSessions".$where, 1);
+                "select sif_ID, sif_Session from sysImportFiles".$where, 1);
 
         if(!$res){
             $this->system->addError(HEURIST_NOT_FOUND, 
@@ -232,7 +239,7 @@ class DbSysImportSessions extends DbEntityBase
         }
         }
 
-        if (!$mysqli->query("delete from sysImportSessions ".$where)) {
+        if (!$mysqli->query("delete from sysImportFiles ".$where)) {
                 $this->system->addError(HEURIST_DB_ERROR, 
                         'Cannot delete data from list of imported files', $mysqli->error);
               return false;

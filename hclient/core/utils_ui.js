@@ -905,9 +905,9 @@ window.hWin.HEURIST4.ui = {
             request['entity'] = 'defDetailTypes';
             request['dty_DetailTypeGroupID'] = configMode.filter_group;
             
-        }else if(configMode.entity=='SysImportSessions'){
+        }else if(configMode.entity=='SysImportFiles'){
             fieldTitle = 'imp_table';
-            request['entity'] = 'sysImportSessions';
+            request['entity'] = 'sysImportFiles';
             request['ugr_ID'] = configMode.filter_group;
         }
         

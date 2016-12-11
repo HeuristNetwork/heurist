@@ -1,10 +1,10 @@
 {
-        "entityName": "sysImportSessions",
+        "entityName": "sysImportFiles",
 
-        "tableName": "sysImportSessions",
-        "tablePrefix": "imp",
+        "tableName": "sysImportFiles",
+        "tablePrefix": "sif",
         
-        "helpContent": "sysImportSessions.html",
+        "helpContent": "sysImportFiles.html",
         
         "searchFormContent": "",
         
@@ -20,7 +20,7 @@
         
         "fields": [
                 {
-                    "dtID": "imp_ID",
+                    "dtID": "sif_ID",
                     "keyField": true,
                     "dtFields":{
                         "dty_Type":"integer",
@@ -30,7 +30,7 @@
                     }
                 },
                 {
-                    "dtID": "ugr_ID",
+                    "dtID": "sif_UGrpID",
                     "dtFields":{
                         "dty_Type":"resource",
                         "rst_DisplayName":"User:",
@@ -39,7 +39,7 @@
                     }
                 },
                 {
-                    "dtID": "imp_table",
+                    "dtID": "sif_TempDataTable",
                     "titleField": true,
                     "dtFields":{
                         "dty_Type":"freetext",
@@ -51,7 +51,7 @@
                     }
                 },
                 {
-                    "dtID": "imp_session",
+                    "dtID": "sif_Session",
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":255,
