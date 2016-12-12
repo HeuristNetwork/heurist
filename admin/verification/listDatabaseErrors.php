@@ -463,7 +463,7 @@ require_once('valueVerification.php');
                 $query = 'delete d from recDetails d
                 left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
                 left join defTerms b on b.trm_ID = d.dtl_Value
-                where dt.dty_Type = "enum" or  dt.dty_Type = "relationtype"
+                where dt.dty_Type = "enum" or  dt.dty_Type = "relmarker"
                 and b.trm_ID is null';
                 $res = mysql_query( $query );
                 if(! $res )
@@ -480,7 +480,7 @@ require_once('valueVerification.php');
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join Records a on a.rec_ID = dtl_RecID
                 left join defTerms b on b.trm_ID = dtl_Value
-                where (dty_Type = "enum" or dty_Type = "relationtype") and dtl_Value is not null
+                where (dty_Type = "enum" or dty_Type = "relmarker") and dtl_Value is not null
                 and a.rec_ID is not null
             and b.trm_ID is null');
             $bibs = array();
@@ -552,7 +552,7 @@ require_once('valueVerification.php');
             from defDetailTypes
             left join recDetails on dty_ID = dtl_DetailTypeID
             left join Records on rec_ID = dtl_RecID
-            where dty_Type = "enum" or  dty_Type = "relationtype"
+            where dty_Type = "enum" or  dty_Type = "relmarker"
             order by dtl_DetailTypeID'*/
             $bibs = array();
             $ids = array();
