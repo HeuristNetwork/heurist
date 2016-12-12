@@ -803,7 +803,7 @@ function saveSession($imp_session){
         array("sif_ID"=>@$imp_session["import_id"],
             "sif_UGrpID"=>$system->get_user_id(),
             "sif_TempDataTable"=>$imp_session["import_name"],
-            "sif_Session"=>json_encode($imp_session) ));
+            "sif_ProcessingInfo "=>json_encode($imp_session) ));
 
     if(intval($imp_id)<1){
         return "Cannot save session. SQL error:".$imp_id;
@@ -824,7 +824,7 @@ function getImportSession($imp_ID){
     if($imp_ID && is_numeric($imp_ID)){
 
         $res = mysql__select_array($system->get_mysqli(),
-            "select sif_Session, sif_TempDataTable from sysImportFiles where sif_ID=".$imp_ID);
+            "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".$imp_ID);
 
         $session = json_decode($res[0], true);
         $session["import_id"] = $imp_ID;

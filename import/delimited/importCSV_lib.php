@@ -2534,7 +2534,7 @@ function saveSession($mysqli, $imp_session){
         array("sif_ID"=>@$imp_session["import_id"],
             "sif_UGrpID"=>get_user_id(),
             "sif_TempDataTable"=>$imp_session["import_name"],
-            "sif_Session"=>json_encode($imp_session) ));
+            "sif_ProcessingInfo "=>json_encode($imp_session) ));
 
     if(intval($imp_id)<1){
         return "Cannot save session. SQL error:".$imp_id;
@@ -2624,7 +2624,7 @@ function download_import_session($session_id, $idfield=null, $mode=1){
     }
 
     $res = mysql__select_array2($mysqli,
-        "select sif_Session from sysImportFiles".$where);
+        "select sif_ProcessingInfo  from sysImportFiles".$where);
 
     //get field names and original filename
     $session = json_decode($res[0], true);
@@ -2686,7 +2686,7 @@ function clear_import_session($session_id){
     }
 
     $res = mysql__select_array3($mysqli,
-        "select sif_ID, sif_Session from sysImportFiles".$where);
+        "select sif_ID, sif_ProcessingInfo  from sysImportFiles".$where);
 
     if(!$res){
         $ret = "cannot get list of imported files";
@@ -2732,7 +2732,7 @@ function get_import_session($mysqli, $import_id){
     if($import_id && is_numeric($import_id)){
 
         $res = mysql__select_array2($mysqli,
-            "select sif_Session, sif_TempDataTable from sysImportFiles where sif_ID=".$import_id);
+            "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".$import_id);
 
         $session = json_decode($res[0], true);
         $session["import_id"] = $import_id;
@@ -2769,7 +2769,7 @@ function get_list_import_sessions(){
     `sif_FileType` enum('delimited') NOT NULL Default 'delimited' COMMENT 'The type of file which has been read into a temporary table for this import',   
     `sif_UGrpID` int(11) unsigned NOT NULL default 0 COMMENT 'The user ID of the user who imported the file',   
     `sif_TempDataTable` varchar(255) NOT NULL default '' COMMENT 'The name of the temporary data table created by the import',
-    `sif_Session` text  COMMENT 'Import session data',
+    `sif_ProcessingInfo ` text  COMMENT 'Primary record type, field matching selections, dependency list etc. created while processing the temporary data table',
     PRIMARY KEY  (`sif_ID`))";    
     
     if (!$mysqli->query($query)) {

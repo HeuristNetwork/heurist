@@ -402,7 +402,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             var resp = new hRecordSet( response.data );
                             var record = resp.getFirstRecord();
-                            var ses = resp.fld(record, 'sif_Session');
+                            var ses = resp.fld(record, 'sif_ProcessingInfo ');
                             //DEBUG $('#divFieldMapping2').html( ses );
                             
                             imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;

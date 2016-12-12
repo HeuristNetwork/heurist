@@ -42,7 +42,7 @@ class DbSysImportFiles extends DbEntityBase
     `sif_FileType` enum('delimited') NOT NULL Default 'delimited' COMMENT 'The type of file which has been read into a temporary table for this import',   
     `sif_UGrpID` int(11) unsigned NOT NULL default 0 COMMENT 'The user ID of the user who imported the file',   
     `sif_TempDataTable` varchar(255) NOT NULL default '' COMMENT 'The name of the temporary data table created by the import',
-    `sif_Session` text  COMMENT 'Import session data',
+    `sif_ProcessingInfo ` text  COMMENT 'Primary record type, field matching selections, dependency list etc. created while processing the temporary data table',
     PRIMARY KEY  (`sif_ID`))";    
     
     
@@ -125,7 +125,7 @@ class DbSysImportFiles extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'sif_ID,sif_TempDataTable,sif_Session';
+            $this->data['details'] = 'sif_ID,sif_TempDataTable,sif_ProcessingInfo ';
             
         }else if(@$this->data['details']=='full'){
 
@@ -216,7 +216,7 @@ class DbSysImportFiles extends DbEntityBase
         $mysqli = $this->system->get_mysqli();
 
         $res = mysql__select_all($mysqli,
-                "select sif_ID, sif_Session from sysImportFiles".$where, 1);
+                "select sif_ID, sif_ProcessingInfo  from sysImportFiles".$where, 1);
 
         if(!$res){
             $this->system->addError(HEURIST_NOT_FOUND, 
