@@ -544,7 +544,7 @@ require_once('valueVerification.php');
 
             $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, rec_RecTypeID, rty_Name, trm_Label
                 from Records, recDetails left join defTerms on dtl_Value=trm_ID, defDetailTypes, defRecTypes
-                where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relationtype")
+                where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relmarker")
                 and dtl_Value is not null and rec_RecTypeID=rty_ID and rec_FlagTemporary!=1
             order by dtl_DetailTypeID');
             /*
