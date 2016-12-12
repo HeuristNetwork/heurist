@@ -174,8 +174,8 @@ function hRecordSet(initdata) {
                 recID       = _getFieldValue(record, 'rec_ID'),
                 recName     = _getFieldValue(record, 'rec_Title'),
 
-                startDate   = _getFieldValue(record, 'dtl_StartDate'),
-                endDate     = _getFieldValue(record, 'dtl_EndDate'),
+                //startDate   = _getFieldValue(record, 'dtl_StartDate'),
+                //endDate     = _getFieldValue(record, 'dtl_EndDate'),
                 description = _getFieldValue(record, 'dtl_Description'),
                 recThumb    = _getFieldValue(record, 'rec_ThumbnailURL'),
                 recShape    = _getFieldValue(record, 'rec_Shape'),  //additional shapes - special field created on client side
