@@ -700,7 +700,7 @@ function deleteFolder($dir) {
 * @param mixed $dst
 * @param array $folders - zero level folders to copy
 */
-function recurse_copy($src, $dst, $folders=null, $file_to_copy=null) {
+function recurse_copy($src, $dst, $folders=null, $file_to_copy=null, $copy_files_in_root=true) {
     $res = false;
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
@@ -720,13 +720,13 @@ function recurse_copy($src, $dst, $folders=null, $file_to_copy=null) {
                         {
                             if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
                             {
-                                $res = recurse_copy($src.$file, $dst . '/' . $file, null, $file_to_copy);
+                                $res = recurse_copy($src.$file, $dst . '/' . $file, null, $file_to_copy, true);
                                 if(!$res) break;
                             }
                         }
 
                     }
-                    else if($file_to_copy==null || $src.$file==$file_to_copy){
+                    else if($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
                         copy($src.$file,  $dst . '/' . $file);
                         if($file_to_copy!=null) return false;
                     }

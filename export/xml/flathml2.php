@@ -1144,8 +1144,9 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $par
                         $fpath = realpath($file['fullpath']);
                         $fpath = str_replace('\\','/',$fpath);
 
-                        recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'/', null, 
-                            $fpath);
+                        //ARTEM 2016-12-13 This recurse_copy - since ti copy everything in backup recursively!!!!
+                        //moreover it is already done in exportMyDataPopup
+                        //recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'/', array('no copy folders'), $fpath);
 
                         $file['URL'] = @$file['ulf_FilePath'].@$file['ulf_FileName']; //relative path to db root    
 

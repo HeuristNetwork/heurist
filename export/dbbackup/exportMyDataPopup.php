@@ -158,7 +158,10 @@ if($mode=='2' && file_exists($folder.".zip") ){
             
             set_time_limit(0); //no limit
 
+            
+            
             if(file_exists($folder)){
+                echo_flush("<br>Clear folder ".$folder."<br>");
                 //clean folder
                 $res = delFolderTree($folder, true);
                 if(!$res){
@@ -180,7 +183,6 @@ if($mode=='2' && file_exists($folder.".zip") ){
             
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
-                
                 $system_folders = array(
                     HEURIST_ICON_DIR,
                     HEURIST_FILESTORE_DIR.'documentation_and_templates/',
@@ -194,12 +196,26 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 //if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
                 //if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
 
-                echo_flush("Exporting system folder<br>");
-                //print HEURIST_FILESTORE_DIR.' to '.$folder.'<br>';             
+                echo_flush("<br><br>Exporting system folders<br>");
+                //echo_flush('<br>'.HEURIST_FILESTORE_DIR.' to '.$folder.'<br>');             
                 
-                recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders);
+                //recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders);
+            }else{
+                $system_folders = array('no copy folders');
+            }
+            
+            if(@$_REQUEST['includeresources']=='1'){
+                $copy_files_in_root = true; //copy all files within database folder
+            }else{
+                $copy_files_in_root = false;
+            }
                 
-                // 2016-10-25  
+           if(@$_REQUEST['include_docs']=='1' || @$_REQUEST['includeresources']=='1'){     
+               recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders, null, $copy_files_in_root);
+           }
+            
+            if(@$_REQUEST['include_docs']=='1'){// 2016-10-25  
+                echo_flush('Copy context_help folder<br>');                
                 recurse_copy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
             }
             

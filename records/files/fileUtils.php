@@ -315,7 +315,8 @@ function delFolderTree($dir, $rmdir) {
     }
 
     if($rmdir){
-        return rmdir($dir);
+        $res =rmdir($dir);
+        return $res;
     }else{
         return true;
     }
