@@ -20,7 +20,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/initPage.php");
+if(!defined('PDIR')) define('PDIR','../../../');
+require_once(dirname(__FILE__)."/../initPage.php");
 ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
         <style>
@@ -176,7 +177,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                             // Image
                             $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                            $img = "<img src='../assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                            $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
                             // Type
@@ -220,7 +221,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                             // Image
                             $title = $row["title"];
                             $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                            $img = "<img src='../assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                            $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
                             // Type
@@ -248,7 +249,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                     </div>
                 </div>
                 <div class="ent_wrapper" style="left:350px">
-                    <?php include "visualize/visualize.html";?>
+                    <?php include PDIR."hclient/framecontent/visualize/visualize.html";?>
                 </div>
         </div>    
 
@@ -262,7 +263,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 //$("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL  @todo - use abs path from HAPI4.basePathV4
-                var url = "../../hserver/controller/rectype_relations.php" + window.location.search;
+                var url = window.hWin.HAPI4.basePathV4+"hserver/controller/rectype_relations.php" + window.location.search;
 //DEBUG                console.log("Loading data from: " + url);
                 d3.json(url, function(error, json_data) {
                     // Error check

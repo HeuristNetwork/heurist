@@ -31,7 +31,7 @@ function hmanageMenu() {
     //
     function _showDbSummary(){
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
 
         var body = $(top.document).find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};

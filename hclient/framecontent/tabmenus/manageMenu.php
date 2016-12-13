@@ -133,7 +133,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
 
                     <li>
-                        <a href="hclient/framecontent/databaseSummary.php" name="auto-popup" class="large h3link"
+                        <a href="hclient/framecontent/visualize/databaseSummary.php" name="auto-popup" class="large h3link"
                             data-logaction="stVis"
                             onClick="{return false;}"  xid="menulink-database-summary"
                             title="Take a look at the internal connections between record types in this database">

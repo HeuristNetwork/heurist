@@ -1581,7 +1581,7 @@ $.widget( "heurist.svs_list", {
 
     , _showDbSummary: function(){
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
 
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
