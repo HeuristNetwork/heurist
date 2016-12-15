@@ -1449,16 +1449,16 @@ class FieldPredicate extends Predicate {
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
             . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
             . 'left join Records link on rd.dtl_Value=link.rec_ID '
-            //. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
+//. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
             . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
             . ' and if(rdt.dty_Type = "resource" AND '.($isnumericvalue?'0':'1').', '
             .'link.rec_Title ' . $match_pred . ', '
-            .'if(rdt.dty_Type in ("enum","relationtype"), rd.dtl_Value '.$match_pred_for_term.', '
+//see 1377            .'if(rdt.dty_Type in ("enum","relationtype"), rd.dtl_Value '.$match_pred_for_term.', '
             . ($timestamp ? 'if(rdt.dty_Type = "date", '
                 .'getTemporalDateString(rd.dtl_Value) ' . $date_match_pred . ', '
                 //.'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
                 .'rd.dtl_Value ' . $match_pred . ')'
-                : 'rd.dtl_Value ' . $match_pred ) . '))'
+                : 'rd.dtl_Value ' . $match_pred ) . ')'
             . $rd_type_clause . ')';
         }
 

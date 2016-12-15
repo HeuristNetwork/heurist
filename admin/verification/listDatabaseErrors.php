@@ -236,7 +236,7 @@ require_once('valueVerification.php');
 
                 $query = 'delete d from recDetails d
                 left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
-                left join Records b on b.rec_ID = d.dtl_Value and rec_FlagTemporary!=1
+                left join Records b on b.rec_ID = d.dtl_Value and b.rec_FlagTemporary!=1
                 where dt.dty_Type = "resource"
                 and b.rec_ID is null';
                 $res = mysql_query( $query );
@@ -251,8 +251,8 @@ require_once('valueVerification.php');
             $res = mysql_query('select dtl_RecID, dty_Name, a.rec_Title
                 from recDetails
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
-                left join Records a on a.rec_ID = dtl_RecID
-                left join Records b on b.rec_ID = dtl_Value and rec_FlagTemporary!=1
+                left join Records a on a.rec_ID = dtl_RecID and a.rec_FlagTemporary!=1
+                left join Records b on b.rec_ID = dtl_Value and b.rec_FlagTemporary!=1
                 where dty_Type = "resource"
                 and a.rec_ID is not null
             and b.rec_ID is null');
@@ -370,7 +370,7 @@ require_once('valueVerification.php');
             //find all fields with faulty dates
             $res = mysql_query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title
                 from recDetails, defDetailTypes, Records a
-                where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (rec_FlagTemporary!=1)
+                where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type = "date") and (dtl_Value is not null)');
 
             $wascorrected = 0;
