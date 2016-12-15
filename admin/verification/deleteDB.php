@@ -22,11 +22,12 @@
 */
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../../configIni.php');
 require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
 
 /** Db check */
-if(!is_systemadmin) {
+
+if(!is_systemadmin()) {
+    header('HTTP/1.0 401 Unauthorized');
     echo "You must be logged in as a system administrator to delete databases";
     exit();
 }

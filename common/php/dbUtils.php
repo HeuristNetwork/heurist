@@ -425,7 +425,7 @@ function zip($source, $folders, $destination, $verbose=true) {
 
             //ignore files that are not in list of specifiede folders
             $is_filtered = true;
-            if( $folders ){
+            if( is_array($folders) ){
 
                 $is_filtered = false;
                 foreach ($folders as $folder) {
@@ -507,7 +507,8 @@ function db_delete($db, $verbose=true) {
         // Zip $source to $file
         $source = HEURIST_UPLOAD_ROOT.$db;
         $destination = $folder.$db."_".time().".zip";
-        if(zip($source, $destination)) {
+                
+        if(zip($source, null, $destination)) {
             // Delete $source folder
             deleteFolder($source);
             if($verbose) echo "<br/>Folder ".$source." has been deleted";
@@ -681,7 +682,8 @@ function deleteFolder($dir) {
         foreach ($objects as $object) {
             if ($object != "." && $object != "..") {
                 if (filetype($dir."/".$object) == "dir") {
-                    rmdir($dir."/".$object);
+                    deleteFolder($dir."/".$object); //delte files
+                    rmdir($dir."/".$object); //delete folder itself
                 } else {
                     unlink($dir."/".$object);
                 }
