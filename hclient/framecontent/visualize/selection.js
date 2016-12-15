@@ -96,7 +96,19 @@ function onRecordNodeClick(event, data, node) {
         
         // Update circles and show overlay
         updateCircles(node, selectionColor, selectionColor);
-        createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
+        //was shown on mouse click event.offsetX, event.offsetY, now in center of node
+        //was createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
+        
+        var nodePos = $(node).offset();
+        
+        var r = getEntityRadius(data.count);
+        
+        var dx = event.x - event.offsetX; 
+        var dy = event.y - event.offsetY; 
+                    
+        createOverlay(Math.round(nodePos.left-dx+r), Math.round(nodePos.top-dy+r), "record", "id"+recID, getRecordOverlayData(data)); 
+        
+        
     }
     
     // Trigger selection
