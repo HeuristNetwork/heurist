@@ -509,15 +509,16 @@ function db_delete($db, $verbose=true) {
         $destination = $folder.$db."_".time().".zip";
                 
         if(zip($source, null, $destination)) {
-            // Delete $source folder
-            deleteFolder($source);
-            if($verbose) echo "<br/>Folder ".$source." has been deleted";
-
             // Delete from MySQL
             $mysqli = server_connect();
             $mysqli->query("DROP DATABASE hdb_".$db);
             $mysqli->close();
             if($verbose) echo "<br/>Database ".$db." has been dropped";
+            
+            // Delete $source folder
+            deleteFolder($source);
+            if($verbose) echo "<br/>Folder ".$source." has been deleted";
+            
             return true;
         }else{
             if($verbose) echo "<br/>Failed to zip ".$source." to ".$destination;
@@ -683,14 +684,13 @@ function deleteFolder($dir) {
             if ($object != "." && $object != "..") {
                 if (filetype($dir."/".$object) == "dir") {
                     deleteFolder($dir."/".$object); //delte files
-                    rmdir($dir."/".$object); //delete folder itself
                 } else {
                     unlink($dir."/".$object);
                 }
             }
         }
         reset($objects);
-        rmdir($dir);
+        rmdir($dir); //delete folder itself
     }
 }
 
