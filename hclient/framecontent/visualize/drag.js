@@ -57,6 +57,8 @@ function addNodes() {
             }
         }
         
+        createOverlay(0, 0, "record", "id"+d.id, getRecordOverlayData(d));                  
+        
         // Attributes
         d3.select(this)
           .attr("class", "node id"+d.id)
@@ -75,9 +77,10 @@ function addNodes() {
          .on("click", function(d) {
               // Check if it's not a click after dragging
               if(!d3.event.defaultPrevented) {
-                  // Remove all overlays and create a record overlay
-                  removeOverlays();
-                  onRecordNodeClick(d3.event, d, ".node.id"+d.id);
+                  // Remove all overlays and create a record overlay for selected node
+                  //tempXXX
+                  //removeOverlays();
+                  //onRecordNodeClick(d3.event, d, ".node.id"+d.id);
               }
          })
          .call(drag);
@@ -150,8 +153,6 @@ function dragmove(d, i) {
     // Update nodes & lines
     tick();                                                          
 
-    // Update overlay
-    updateOverlays(); 
 }
 
 /** Called when a dragging event ends */

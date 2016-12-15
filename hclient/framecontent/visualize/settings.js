@@ -106,6 +106,9 @@ function checkStoredSettings() {
 * This function sets the settings in the UI
 */
 function handleSettingsInUI() {
+    
+    handleViewMode();
+    
     // LINE SETTINGS
     if(settings.showLineSettings) {
         handleLineType();
@@ -398,6 +401,16 @@ function handleFisheye() {
     }else{
         $("#fisheyeContainer").remove();
     }
+}
+
+/**
+* change view mode icons or info boxes
+* 
+*/
+function handleViewMode() {
+    $("#btnSwitchViewMode").click(function() {
+        changeViewMode();
+    });
 }
 
 /** GRAVITY SETTING */

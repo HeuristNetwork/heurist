@@ -42,7 +42,9 @@ function getRecordOverlayData(record) {
     var array = [];
     
     // Header
-    var header = {text: truncateText(record.name, maxLength), size: "11px", style: "bold", height: 15,
+    var header = {text: truncateText(record.name, maxLength), 
+                  count: record.count,  
+                  size: "11px", style: "bold", height: 15,
                                  enter: true, image:record.image}; 
     if(settings.showCounts) {
         header.text += ", n=" + record.count;  
@@ -99,7 +101,7 @@ function getRecordOverlayData(record) {
                 }
             }
         }
-        console.log("Record overlay data", map);
+        //console.log("Record overlay data", map);
 
         // Convert map to array
         for(key in map) {                                   
@@ -115,7 +117,7 @@ function getRecordOverlayData(record) {
 
 /** Finds all relationships between the source and target */
 function getRelationOverlayData(line) {
-    console.log(line);
+    //console.log(line);
     var array = [];
     var maxLength = getSetting(setting_textlength);
     
@@ -157,28 +159,33 @@ function getRelationOverlayData(line) {
         }
     }
     
-    console.log("Line overlay data", array);
+    //console.log("Line overlay data", array);
     return array;
 }
 
 /**
-* Creates an overlay on the location that the user has clicked on.
+* Creates an overlay over the node / on the location that the user has clicked on.
+* 
+*  type - record   icon and info box over node
+*  type - relation
+* 
 * @param x Coord-x
 * @param y Coord-y
 * @param record Record info
 */
 function createOverlay(x, y, type, selector, info) {
-    svg.select(".overlay."+selector).remove();
+    
+    //tempXXX svg.select(".overlay."+selector).remove();
 
     var iconSize = 16;
     
     // Show overlays?
     var showOverlay = $("#overlay").hasClass("selected");
-     if(showOverlay) {
+    if(true || showOverlay) {
         // Add overlay container            
         var overlay = svg.append("g")
                          .attr("class", "overlay "+type+ " " + selector)      
-                         .attr("transform", "translate(" +(x-iconSize/2)+ "," +(y-iconSize/2)+ ")"); //was shifted  +5
+                         .attr("transform", "translate(" +(x-iconSize/2-3)+ "," +(y-iconSize/2-3)+ ")"); //was shifted  +5
         var rty_ID = '';                 
         // Title
         var rollover = info[0].text;
@@ -188,11 +195,37 @@ function createOverlay(x, y, type, selector, info) {
             
             var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
             rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
+            
+            
+            /* add icon overlay
+            var circles = d3.selectAll(".node")
+                    .append("circle")
+                    .attr("r", circleSize)
+                    .attr("class", "foreground")
+                    .style("fill", "#fff")
+                    .style("stroke", "#ddd")
+                    .style("stroke-opacity", function(d) {
+                        if(d.selected == true) {
+                            return 1;
+                        }
+                        return .25;
+                    });
+            var icon = overlay
+                  .append("svg:image")
+                  .attr("class", "icon") // icon-mode
+                  .attr("xlink:href", info[0].image)
+                  .attr("x", 0)
+                  .attr("y", 0)
+                  .attr("height", iconSize)
+                  .attr("width", iconSize)
+                  .style('display', 'none');  
+             */       
         }
+        
     
         // Draw a semi transparant rectangle       
         var rect = overlay.append("rect")
-                          .attr("class", "semi-transparant")              
+                          .attr("class", "semi-transparant info-mode")              
                           .attr("x", 0)
                           .attr("y", 0)
                           .attr("rx", 6)
@@ -202,12 +235,12 @@ function createOverlay(x, y, type, selector, info) {
                           .style("filter", "url(#drop-shadow)")
                           .on("drag", overlayDrag);
                                     
-        rect.append("title").text(rollover);                    
+        //rect.append("title").text(rollover);                    
                                          
         //Adding icon
-        var icons = overlay
+        var icon = overlay
                   .append("svg:image")
-                  .attr("class", "icon")
+                  .attr("class", "icon")  // info-mode
                   .attr("xlink:href", function(d) {
                         if(info[0].image){
                             return info[0].image;
@@ -218,8 +251,9 @@ function createOverlay(x, y, type, selector, info) {
                   .attr("x", 3)  //iconSize/-2
                   .attr("y", 3)  //iconSize/-2
                   .attr("height", iconSize)
-                  .attr("width", iconSize);  
-                
+                  .attr("width", iconSize);
+                    
+        icon.append("title").text(rollover);         
         
         // Adding text 
         var offset = 26;  
@@ -231,6 +265,9 @@ function createOverlay(x, y, type, selector, info) {
                           .append("text")
                           .text(function(d) {
                               return d.text;
+                          })
+                          .attr("class", function(d, i) {
+                             return i>0?"info-mode":'';
                           })
                           .attr("x", function(d, i) {
                               // Indent check
@@ -275,8 +312,8 @@ function createOverlay(x, y, type, selector, info) {
                 maxHeight = y;
             }
         }
-        maxWidth  += offset*3.5;
-        maxHeight += offset*2; 
+        maxWidth  += offset*2.5;//*3.5;
+        maxHeight += offset;//*2; 
         
         // Set optimal width & height
         rect.attr("width", maxWidth)
@@ -286,11 +323,11 @@ function createOverlay(x, y, type, selector, info) {
         //edit button
         var btnEdit = overlay
                   .append("svg:image")
-                  .attr("class", "icon")
+                  .attr("class", "icon info-mode")
                   .attr("xlink:href", function(d) {
                         return window.hWin.HAPI4.basePathV4+'hclient/assets/edit-pencil.png';
                   })
-                  .attr("transform", "translate("+(maxWidth-iconSize-50)+","+(maxHeight-iconSize-3)+")")
+                  .attr("transform", "translate("+offset+","+(maxHeight-iconSize-3)+")")
                   /*.attr("x", 2)
                   .attr("y", 2) */
                   .attr("height", iconSize)
@@ -298,13 +335,18 @@ function createOverlay(x, y, type, selector, info) {
                   .on("mouseup", function(d) {
                       event.preventDefault();
                       _editRecStructure(rty_ID);
-                  });;  
+                  });  
+                  
+        btnEdit.append("title")
+                   .text(function(d) {
+                        return 'Click to edit the entity / record type structure';
+                   });
       
         //link button      
         var btnAddLink = overlay
                   .append("g")
-                  .attr("class", "addlink")
-                  .attr("transform", "translate("+(maxWidth-50)+","+(maxHeight-iconSize-3)+")")
+                  .attr("class", "addlink info-mode")
+                  .attr("transform", "translate("+(offset+iconSize+5)+","+(maxHeight-iconSize-3)+")")
                   .attr("height", iconSize)
                   .attr("width", 30)
                   .on("mouseup", function(d) {
@@ -346,6 +388,7 @@ function createOverlay(x, y, type, selector, info) {
         /** Handles dragging events on overlay */
         function overlayDrag(d) {
             overlay.attr("transform", "translate("+d.x+","+d.y+")");
+            //"translate(" +(d.x-iconSize/2)+ "," +(d.y-iconSize/2)+ ")");
         }          
      }       
 }
@@ -385,7 +428,7 @@ function updateOverlays() {
         // Select element to align to
         var bbox;
         if(type == "record") {
-            bbox = $(".node."+id + " .icon")[0].getBoundingClientRect();
+            bbox = $(".node."+id + " .foreground")[0].getBoundingClientRect(); //was icon
         }else{
             bbox = $(".link."+id)[0].getBoundingClientRect();
         }
@@ -393,9 +436,13 @@ function updateOverlays() {
         
         // Update position 
         var svgPos = $("svg").position();
-        x = bbox.left + bbox.width/2 - svgPos.left
+        x = bbox.left + bbox.width/2 - svgPos.left;
         y = bbox.top + bbox.height/2 - svgPos.top;  
-        $(this).attr("transform", "translate("+x+","+y+")");
+        //var iconSize = 16;
+        $(this).attr("transform", "translate("+(x - iconSize/2 -3)+","+(y-iconSize/2 -3)+")");
+        //$(this).attr("transform", "translate("+(x)+","+(y)+")");
+        
+        
     });
     
     /*

@@ -106,10 +106,7 @@ function onRecordNodeClick(event, data, node) {
         var dx = event.x - event.offsetX; 
         var dy = event.y - event.offsetY; 
                     
-        createOverlay(Math.round(nodePos.left-dx+r), Math.round(nodePos.top-dy+r), "record", "id"+recID, getRecordOverlayData(data)); 
-        
-        
-    }
+        createOverlay(Math.round(nodePos.left-dx+r), Math.round(nodePos.top-dy+r), "record", "id"+recID, getRecordOverlayData(data));    }
     
     // Trigger selection
     settings.triggerSelection.call(this, settings.selectedNodeIds);

@@ -181,7 +181,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                                 $grp_name = $row['grp'];
                                 ?>
                         <tr class="row">
-                            <td colspan="6"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
+                            <td colspan="6" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
                         </tr>
                                 <?php
                             }

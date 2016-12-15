@@ -197,22 +197,22 @@ var defs = svg.append("defs");
 // height=130% so that the shadow is not clipped
 var filter = defs.append("filter")
     .attr("id", "drop-shadow")
-    .attr("height", "130%");
+    .attr("height", "120%");
 
 // SourceAlpha refers to opacity of graphic that this filter will be applied to
 // convolve that with a Gaussian with standard deviation 3 and store result
 // in blur
 filter.append("feGaussianBlur")
     .attr("in", "SourceAlpha")
-    .attr("stdDeviation", 5)
+    .attr("stdDeviation", 3)
     .attr("result", "blur");
 
 // translate output of Gaussian blur to the right and downwards with 2px
 // store result in offsetBlur
 filter.append("feOffset")
     .attr("in", "blur")
-    .attr("dx", 5)
-    .attr("dy", 5)
+    .attr("dx", 3)
+    .attr("dy", 3)
     .attr("result", "offsetBlur");
 
 // overlay original SourceGraphic over translated blurred opacity by using
@@ -270,6 +270,8 @@ function getMarkerWidth(count) {
 /** Calculates the entity raadius that should be used */
 var iconSize = 16; // The icon size
 var circleSize = iconSize * 0.75; // Circle around icon size
+var currentMode = 'infoboxes'; //or 'icons';
+
 function getEntityRadius(count) {
     var maxRadius = getSetting(setting_entityradius);
     return circleSize + executeFormula(count, maxRadius) - 1;
@@ -286,6 +288,16 @@ function visualizeData() {
     addSelectionBox();
     //define shadow filter
     _addDropShadowFilter();
+    
+    
+    /*Set up tooltip
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function (d) {
+        return  d.name + "";
+    })
+    svg.call(tip);*/
     
     // SVG data  
     this.data = settings.getData.call(this, settings.data);
@@ -304,17 +316,17 @@ function visualizeData() {
 
     // Nodes
     addNodes();
-    addTitles();
+    //addTitles();
     
     // Circles
-    addBackgroundCircles();
+    //addBackgroundCircles();
     addForegroundCircles();
-    addIcons();
+    //addIcons();
     
     // Labels
     if(getSetting(setting_labels) == "true") {
-        addLabels("shadow", "#000");
-        addLabels("namelabel", getSetting(setting_textcolor));
+    // addLabels("shadow", "#000");
+    // addLabels("namelabel", getSetting(setting_textcolor));
     }
     //DEBUG console.log("EVERYTHING HAS BEEN ADDED");
 
@@ -330,6 +342,19 @@ function visualizeData() {
 } //end visualizeData
 
 
+function changeViewMode(){
+    
+        if(currentMode=='icons'){
+            currentMode = 'infoboxes';
+            d3.selectAll(".icon-mode").style('display', 'none');
+            d3.selectAll(".info-mode").style('display', 'initial');
+        }else{
+            currentMode = 'icons';
+            d3.selectAll(".icon-mode").style('display', 'initial');
+            d3.selectAll(".info-mode").style('display', 'none');
+        }
+       
+}
 
 
 /****************************************** CONTAINER **************************************/
@@ -374,7 +399,7 @@ function addContainer() {
 * Called after a zoom-event takes place.
 */
 function zoomed() { 
-    // Translate   
+    //keep current setting Translate   
     if(d3.event.translate !== undefined) {
         if(!isNaN(d3.event.translate[0])) {           
             putSetting(setting_translatex, d3.event.translate[0]); 
@@ -384,15 +409,19 @@ function zoomed() {
         }
     }
     
-    // Scale
+    //keep current setting Scale
     if(!isNaN(d3.event.scale)) {
         putSetting(setting_scale, d3.event.scale);
     }   
     
     // Transform  
-    var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
+    var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")"; 
     d3.select("#container").attr("transform", transform);
     
+    //d3.selectAll(".node").attr('transform',"translate("+d3.event.translate+")scale(1)");
+    //d3.selectAll("path").attr("transform", transform); //"scale("+d3.event.scale+")");
+    //updateNodes();
+
     updateOverlays();
 }  
 
@@ -506,9 +535,11 @@ function addLines(name, color, thickness) {
          })
          .on("click", function(d) {
              // Close all overlays and create a line overlay
+             /* 2016-12-15 it works, however we do not need info for links anymore
              removeOverlays();
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
+             */
          });
          
     return lines;
@@ -530,6 +561,9 @@ function tick() {
         updateStraightLines(topLines);
         updateStraightLines(bottomLines);   
     }
+    
+    // Update overlay
+    updateOverlays(); 
 }
 
 /**
@@ -639,6 +673,7 @@ function addIcons() {
                   .attr("y", iconSize/-2)
                   .attr("height", iconSize)
                   .attr("width", iconSize);  
+                  
     return icons;
 }
 
