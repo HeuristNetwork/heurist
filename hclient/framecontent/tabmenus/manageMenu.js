@@ -27,7 +27,7 @@ function hmanageMenu() {
     _version   = "0.4";
 
     //
-    //
+    // show db structure visualization in popup dialog
     //
     function _showDbSummary(){
 
@@ -73,7 +73,7 @@ function hmanageMenu() {
 
         //$('#frame_container').attr('src', window.hWin.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+window.hWin.HAPI4.database);           }
         $(parentdiv[1]).accordion('option', 'active', 0); //STRUCTURE
-        $('#linkEditRectypes').click();
+        $('#linkDatabaseSummary').click();
     }
     
     
@@ -139,9 +139,6 @@ function hmanageMenu() {
             window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
         }
         
-        if(action=='menulink-database-summary'){
-            _showDbSummary();
-        }else
         if(link && link.attr('data-nologin')!='1'){
             
             //check if login

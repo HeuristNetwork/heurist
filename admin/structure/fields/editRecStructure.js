@@ -98,6 +98,12 @@ function EditRecStructure() {
     * Reads GET parameters, creates TabView and triggers init of first tab
     */
     function _init() {
+        
+        if(!top.HEURIST.rectypes && window.hWin && window.hWin.HEURIST4){
+            top.HEURIST.rectypes = window.hWin.HEURIST4.rectypes;
+            top.HEURIST.detailTypes = window.hWin.HEURIST4.detailtypes;
+            top.HEURIST.terms = window.hWin.HEURIST4.terms;
+        }
 
         db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));

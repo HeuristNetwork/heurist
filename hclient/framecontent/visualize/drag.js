@@ -31,6 +31,23 @@ function addNodes() {
                   .data(data.nodes)
                   .enter()
                   .append("g");
+                  
+   /*Append circles                  
+   d3.selectAll(".node")
+            .append("circle")
+            .attr("r", 40) //circleSize)
+            .attr("class", 'foreground') //"foreground")
+                    //.attr("fill", 'red') //entitycolor was .style("fill", "#fff")
+                    .style("stroke", "#ddd")
+                    .style("stroke-opacity", function(d) {
+                        if(d.selected == true) {
+                            return 1;
+                        }
+                        return .25;
+                    });
+     */   
+                  
+                  
     // Dragging
     var drag = d3.behavior.drag()
                  .on("dragstart", dragstart)
@@ -56,11 +73,32 @@ function addNodes() {
                 d.py = obj.py;
             }
         }
+
+        var  node = d3.select(this);
         
-        createOverlay(0, 0, "record", "id"+d.id, getRecordOverlayData(d));                  
+        //add circle
+        node.append("circle")
+            .attr("r", function(d) {
+                        return getEntityRadius(d.count);
+            })
+            //.attr("r", 40) //circleSize)
+            .attr("class", 'foreground') //"foreground")
+                    //.attr("fill", 'red') //entitycolor was .style("fill", "#fff")
+                    .style("stroke", "#ddd")
+                    .style("stroke-opacity", function(d) {
+                        if(d.selected == true) {
+                            return 1;
+                        }
+                        return .25;
+                    });
+        
+        
+        
+        //add infobox
+        createOverlay(0, 0, "record", "id"+d.id, d, node);                  
         
         // Attributes
-        d3.select(this)
+        node  //d3.select(this)
           .attr("class", "node id"+d.id)
           .attr("transform", "translate(10, 10)")
           .attr("x", d.x) 
@@ -84,6 +122,7 @@ function addNodes() {
               }
          })
          .call(drag);
+
      });            
      return nodes;
 }
@@ -104,6 +143,7 @@ function updateNodes() {
 
 /** Called when a dragging event starts */
 function dragstart(d, i) {
+    
     d3.event.sourceEvent.stopPropagation();
     force.stop();
 
@@ -159,7 +199,7 @@ function dragmove(d, i) {
 function dragend(d, i) {
     // Update nodes & lines
     d.fixed = (getSetting(setting_gravity) !== "aggressive");
-    console.log("Fixed: ", d.fixed);
+//console.log("Fixed: ", d.fixed);
     tick();
     
     // Check if force may resume

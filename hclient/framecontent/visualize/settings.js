@@ -107,7 +107,52 @@ function checkStoredSettings() {
 */
 function handleSettingsInUI() {
     
-    handleViewMode();
+    //add elements on toolbar
+    var tBar = $('#toolbar');
+    
+    $('#btnMultipleSelect').button({icons: { primary: 'ui-icon-select' }, text:false})
+        .click( function(){ that._doLogin(); });
+        
+    $('#btnViewModeIcon').button({icons: { primary: 'ui-icon-circle' }, text:false})
+        .click( function(){changeViewMode('icons');} );
+    $('#btnViewModeInfo').button({icons: { primary: 'ui-icon-circle-b-info' }, text:false})
+        .click( function(){changeViewMode('infoboxes');} );
+    $( "#setViewMode" ).buttonset();    
+
+    //
+    $("#gravityMode option[value='" +getSetting(setting_gravity)+ "']").attr("checked", true);
+    
+    $('#gravityMode0').button({icons: { primary: 'ui-icon-gravity0' }, text:false})
+        .click( function(){ setGravity('off') });
+    $('#gravityMode1').button({icons: { primary: 'ui-icon-gravity1' }, text:false})
+        .click( function(){ setGravity('touch') });
+    $('#gravityMode2').button({icons: { primary: 'ui-icon-gravity2' }, text:false})
+        .click( function(){ setGravity('aggressive') });
+    $( "#setGravityMode" ).buttonset();    
+    
+    //
+    $("#nodesMode option[value='" +getSetting(setting_formula)+ "']").attr("checked", true);
+    $('#nodesRadius').val(getSetting(setting_entityradius));
+    
+    $('#nodesMode0').button().css('width','20px')
+        .click( function(){ setNodeMode('linear'); });
+    $('#nodesMode1').button().css('width','20px')
+        .click( function(){ setNodeMode('logarithmic'); }); 
+    $('#nodesMode2').button().css('width','20px')
+        .click( function(){ setNodeMode('unweighted'); });
+    $( "#setNodesMode" ).buttonset();    
+    
+
+
+    $('#linksMode0').button({icons: { primary: 'ui-icon-arrow-1-ne' }, text:false})
+        .click( function(){ });
+    $('#linksMode1').button({icons: { primary: 'ui-icon-arrowreturn-1-e' }, text:false})
+        .click( function(){ });
+    $( "#setLinksMode" ).buttonset();    
+
+    $('#gephi-export').button();
+    
+    tBar.show();
     
     // LINE SETTINGS
     if(settings.showLineSettings) {
@@ -119,6 +164,7 @@ function handleSettingsInUI() {
     }else{
         $("#lineSettings").remove();
     }
+    $("#lineSettings").hide();
     
     // ENTITY SETTINGS
     if(settings.showEntitySettings) {
@@ -153,7 +199,37 @@ function handleSettingsInUI() {
     }else{
         $("#gravitySettings").remove();
     }
+
 }
+
+//
+//
+//
+function setGravity(gravity) {
+    
+    putSetting(setting_gravity,  gravity);
+    
+    // Update gravity impact on nodes
+    svg.selectAll(".node").attr("fixed", function(d, i) {
+        if(gravity == "aggressive") {
+            d.fixed = false;
+            return false;
+        }else{
+            d.fixed = true;
+            return true;
+        }
+    });
+    
+    visualizeData();    
+}
+//
+//
+//
+function setNodeMode(formula) {
+    putSetting(setting_formula, formula);
+    visualizeData();
+}
+
 
 /** LINE TYPE SETTING */
 function handleLineType() {
@@ -403,15 +479,7 @@ function handleFisheye() {
     }
 }
 
-/**
-* change view mode icons or info boxes
-* 
-*/
-function handleViewMode() {
-    $("#btnSwitchViewMode").click(function() {
-        changeViewMode();
-    });
-}
+
 
 /** GRAVITY SETTING */
 function handleGravity() {

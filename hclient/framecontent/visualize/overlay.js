@@ -173,19 +173,38 @@ function getRelationOverlayData(line) {
 * @param y Coord-y
 * @param record Record info
 */
-function createOverlay(x, y, type, selector, info) {
+function createOverlay(x, y, type, selector, node_obj, parent_node) {
     
     //tempXXX svg.select(".overlay."+selector).remove();
 
+    if(type=='record'){
+        info = getRecordOverlayData(node_obj);
+    }else{
+        info = node_obj;
+    }
+    
     var iconSize = 16;
     
     // Show overlays?
+    var overlay = null;
     var showOverlay = $("#overlay").hasClass("selected");
     if(true || showOverlay) {
+
         // Add overlay container            
-        var overlay = svg.append("g")
+        
+        if(parent_node){
+            overlay  = parent_node.append("g")
+                     //.attr("class", "overlay "+type+ " " + selector)      
+                     .attr("transform", "translate(" +(x-iconSize/2-3)+ "," +(y-iconSize/2-3)+ ")");
+                      //.attr("x", 0)
+                      //.attr("y", 0);
+        }else{
+        
+            overlay = svg.append("g")
+                         //.attr('id', selector)
                          .attr("class", "overlay "+type+ " " + selector)      
                          .attr("transform", "translate(" +(x-iconSize/2-3)+ "," +(y-iconSize/2-3)+ ")"); //was shifted  +5
+        }
         var rty_ID = '';                 
         // Title
         var rollover = info[0].text;
@@ -195,31 +214,7 @@ function createOverlay(x, y, type, selector, info) {
             
             var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
             rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
-            
-            
-            /* add icon overlay
-            var circles = d3.selectAll(".node")
-                    .append("circle")
-                    .attr("r", circleSize)
-                    .attr("class", "foreground")
-                    .style("fill", "#fff")
-                    .style("stroke", "#ddd")
-                    .style("stroke-opacity", function(d) {
-                        if(d.selected == true) {
-                            return 1;
-                        }
-                        return .25;
-                    });
-            var icon = overlay
-                  .append("svg:image")
-                  .attr("class", "icon") // icon-mode
-                  .attr("xlink:href", info[0].image)
-                  .attr("x", 0)
-                  .attr("y", 0)
-                  .attr("height", iconSize)
-                  .attr("width", iconSize)
-                  .style('display', 'none');  
-             */       
+   
         }
         
     
@@ -232,8 +227,8 @@ function createOverlay(x, y, type, selector, info) {
                           .attr("ry", 6)
                           .style('stroke','#ff0000')
                           .style("stroke-width", 0.5)
-                          .style("filter", "url(#drop-shadow)")
-                          .on("drag", overlayDrag);
+                          .style("filter", "url(#drop-shadow)");
+                          //.on("drag", overlayDrag);
                                     
         //rect.append("title").text(rollover);                    
                                          
@@ -387,10 +382,14 @@ function createOverlay(x, y, type, selector, info) {
              
         /** Handles dragging events on overlay */
         function overlayDrag(d) {
+console.log('overlay drag '+d);            
             overlay.attr("transform", "translate("+d.x+","+d.y+")");
             //"translate(" +(d.x-iconSize/2)+ "," +(d.y-iconSize/2)+ ")");
-        }          
-     }       
+        }
+        
+        
+     }  
+     return overlay;     
 }
 
 
@@ -428,7 +427,7 @@ function updateOverlays() {
         // Select element to align to
         var bbox;
         if(type == "record") {
-            bbox = $(".node."+id + " .foreground")[0].getBoundingClientRect(); //was icon
+            bbox = $(".node."+id + " .foreground")[0].getBoundingClientRect(); //was icon  
         }else{
             bbox = $(".link."+id)[0].getBoundingClientRect();
         }

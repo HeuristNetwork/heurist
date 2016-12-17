@@ -24,9 +24,89 @@
 
 <!-- Network diagram HTML -->
 
-<div class="ent_header" style="height:12em;border:none;padding-top: 10px;">
+<div class="ent_header" style="height:5em;border:none;padding-top: 10px;">
     
-            <div id="visualisation-settingsX">
+<div id="toolbar" style="height:4em;display:none">
+      
+      <div id="setSelectMode" class="toolbar-section">
+        <label>&nbsp;</label><br>
+        <button id="btnMultipleSelect">Select multiple nodes</button>
+      </div>
+
+      <div id="setViewMode" class="toolbar-section">
+        <label>&nbsp;</label><br>
+        <input type="radio" id="btnViewModeIcon" name="videMode">
+        <label for="btnViewModeIcon">Icons</label>
+ 
+        <input type="radio" id="btnViewModeInfo" name="videMode" checked="checked">
+        <label for="btnViewModeInfo">Info</label>
+      </div>
+
+      <div id="setDivGravity" class="toolbar-section">
+          <label>Gravity</label>
+          <div id="setGravityMode">
+            <input type="radio" id="gravityMode0" name="gravityMode" value="none">
+            <label for="gravityMode0">None</label>
+     
+            <input type="radio" id="gravityMode1" name="gravityMode" value="touch" checked="checked">
+            <label for="gravityMode1">Gentle</label>
+            
+            <input type="radio" id="gravityMode2" name="gravityMode" value="aggressive">
+            <label for="gravityMode2">Strong</label>
+          </div>
+      </div>
+
+      <!-- -->
+      <div id="setDivNodes" class="toolbar-section">
+          <label>Nodes</label><br>
+          <div id="entitycolor" class="colorblock"></div>
+          <div id="setNodesMode" style="display:inline-block">
+            <input type="radio" id="nodesMode0" name="nodesMode" value="linear" 
+                        title="radius of nodes changes linearly">
+            <label for="nodesMode0">lin</label>
+     
+            <input type="radio" id="nodesMode1" name="nodesMode" value="logarithmic"
+                        title="radius of nodes changes logarithmically">
+            <label for="nodesMode1">log</label>
+            
+            <input type="radio" id="nodesMode2" name="nodesMode" value="unweighted" checked="checked" 
+                    title="radius of nodes has fixed size">
+            <label for="nodesMode2">fix</label>
+          </div>
+          <input id="nodesRadius" class="number-input small" type="number" min="18" step="1" />
+      </div>
+
+      <!-- -->
+      <div id="setDivLinks" class="toolbar-section">
+          <label>Links</label><br>
+          
+          <div id="link_pathcolor" class="colorblock"></div>
+          <div id="link_markercolor" class="colorblock"></div>
+          
+          <div id="setLinksMode" style="display:inline-block">
+            <input type="radio" id="linksMode0" name="linksMode" value="0" 
+                        title="link shape is straight">
+            <label for="linksMode0">straight</label>
+     
+            <input type="radio" id="linksMode1" name="linksMode" value="1" checked="checked" 
+                        title="link shape is curved">
+            <label for="linksMode1">curved</label>
+          </div>
+          
+          <input id="linksLength" class="number-input medium" type="number" min="1" step="25" />
+          <input id="linksWidth" class="number-input small" type="number" min="1" step="5" />
+      </div>
+      
+      <div id="setDivExport" class="toolbar-section">
+          <label>&nbsp;</label><br>
+          <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI export</button>
+      </div>
+ 
+</div> <!-- end of toolbar -->
+
+<br><br>
+            <div id="visualisation-settingsX" style="display:none">
+            
                 <!-- LINE SETTINGS -->
                 <div class="settings space" id="lineSettings">
                     <b>Network&nbsp;</b>
@@ -61,6 +141,8 @@
                         &nbsp;&nbsp;Arrow
                         <div id="markercolor" class="colorblock"></div>
                     </div>
+                    
+                    
                 </div>
 
                 <!-- Entity settings -->
@@ -145,8 +227,6 @@
                     <div>
                         <i class="explanation">&nbsp;&nbsp;Start with Aggressive, then change to Gentle or Off.</i>
                     </div>
-
-
                 </div>
 
                 <!-- MOUSE SETTINGS -->
@@ -155,16 +235,16 @@
                         <b>Mouse&nbsp;</b>
                     </div>
 
-                    <!-- Drag -->
-                    <div id="dragContainer">
-                        <img id="drag" class="mouse-icon selected"
-                            title="Select and drag nodes" src="drag.png">
-                    </div>
-
-                    <!-- Selection -->
-                    <div id="selectionContainer">
-                        <img id="selection" class="mouse-icon" title="Select multiple nodes" src="selection.png">
-                    </div>
+        <!-- Drag -->
+        <div id="dragContainer">
+            <img id="drag" class="mouse-icon selected"
+                title="Select and drag nodes" src="drag.png">
+        </div>
+        <!-- Selection -->
+        <div id="selectionContainer">
+            <img id="selection" class="mouse-icon" title="Select multiple nodes" src="selection.png">
+        </div>
+                  
 
                     <!-- Overlay -->
                     <div id="overlayContainer">
@@ -173,7 +253,6 @@
 
                     <div>
                         <i class="explanation">&nbsp;&nbsp;Click to select, drag to reposition, mouse wheel zooms. Note: Shows constrained relationships only. </i>
-                        <button id="btnSwitchViewMode">Icons or Infos</button>
                     </div>
                 </div>
 
@@ -185,7 +264,7 @@
 
             <!-- Menu -->
             <div id="visualisation-menu">
-                <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI export</button>
+                
                 <!-- For future use with more items
                 <ul class="menu-items level1">
                 <li class="menu-button">
@@ -200,7 +279,7 @@
                 -->
             </div>
 </div>
-<div class="ent_content_full" style="top:12em;">
+<div class="ent_content_full" style="top:5em;">
             <!-- SVG -->
             <svg id="d3svg" class="fullscreen">
                 <text x="25" y="25" fill="black">Processing...</text>

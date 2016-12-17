@@ -22,7 +22,7 @@
 // Functions to select nodes in the visualisation
 
 /*************************************** NODE SELECTION ******************************/
-var foregroundColor = "#fff";
+var foregroundColor = 'red';//"#fff";
 var selectionColor = "#bee4f8";
 
 /**
@@ -63,7 +63,7 @@ function updateCircles(selector, fgColor, bgColor) {
 * @param node  Clicked node
 */
 function onRecordNodeClick(event, data, node) {
-    console.log("On record selection click");
+//console.log("On record selection click");
     var needSelect = true;
     var recID = ""+data.id;
     
@@ -146,7 +146,7 @@ function preventMenu(event) {
 * 
 */
 function onMouseDown() {
-    console.log("Mouse down");
+//console.log("Mouse down");
     rightClicked = $("#selection").hasClass("selected");
     if(rightClicked) {
         d3.event.preventDefault();
@@ -173,7 +173,7 @@ function onMouseDown() {
 * 
 */
 function onMouseMove() {
-    //console.log("Mouse moved");
+//console.log("Mouse moved");
     if(rightClicked) {
         // X-positions
         positions.x2 = d3.event.offsetX;
@@ -207,7 +207,7 @@ function onMouseMove() {
 * Selects the circles inside the selectionBox
 */
 function onMouseUp() {
-    console.log("Mouse up, rightClicked="+rightClicked);
+//console.log("Mouse up, rightClicked="+rightClicked);
     if(rightClicked) {
         rightClicked = false;
         selectionBox.style("display", "none"); 

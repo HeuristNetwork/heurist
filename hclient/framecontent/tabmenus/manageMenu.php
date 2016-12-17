@@ -84,6 +84,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <!-- database name is appended automatically by auto-popup -->
 
                     <li>
+                        <a href="hclient/framecontent/visualize/databaseSummary.php" name="auto-popup" class="large h3link"
+                            data-logaction="stVis"
+                            onClick="{return false;}"  id="linkDatabaseSummary"
+                            title="Take a look at the internal connections between record types in this database">
+                            Visualise structure</a>
+                    </li>
+                    
+                    <li>
                         <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
                             onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
                             title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
@@ -130,14 +138,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             data-logaction="stRelations"
                             title="Browse and edit the relationship types"  onclick= "{return false;}">
                             Manage relation types</a>
-                    </li>
-
-                    <li>
-                        <a href="hclient/framecontent/visualize/databaseSummary.php" name="auto-popup" class="large h3link"
-                            data-logaction="stVis"
-                            onClick="{return false;}"  xid="menulink-database-summary"
-                            title="Take a look at the internal connections between record types in this database">
-                            Visualise structure</a>
                     </li>
 
                     <li>

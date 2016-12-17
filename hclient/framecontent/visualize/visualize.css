@@ -158,7 +158,7 @@ circle.around {
 }
 
 circle.foreground {
-    fill: #fff;
+    fill: red; /*#fff;*/
 }
 
 circle.selected {
@@ -217,4 +217,37 @@ text.shadow {
     stroke: #000;
     stroke-dasharray: 5,5;
     stroke-width: 1.5;
+}
+
+
+.toolbar-section{
+    border-right: solid 1px gray;
+    padding:0 4px;
+}
+.toolbar-section > label{
+    font-size:0.8em;
+}
+#toolbar{
+    line-height: 10px;    
+    display:table-row;
+    border: solid 1px gray;
+}
+#toolbar > div{
+    display:table-cell;
+}
+
+.ui-icon-gravity0{
+    background-image: url(gravity_0.png) !important; 
+    width: 18;
+    height: 18;
+}
+.ui-icon-gravity1{
+    background-image: url(gravity_1.png) !important; 
+    width: 18;
+    height: 18;
+}
+.ui-icon-gravity2{
+    background-image: url(gravity_2.png) !important; 
+    width: 18;
+    height: 18;
 }

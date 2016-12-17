@@ -273,8 +273,12 @@ var circleSize = iconSize * 0.75; // Circle around icon size
 var currentMode = 'infoboxes'; //or 'icons';
 
 function getEntityRadius(count) {
-    var maxRadius = getSetting(setting_entityradius);
-    return circleSize + executeFormula(count, maxRadius) - 1;
+    if(setting_formula=='unweighted'){
+        return getSetting(setting_entityradius);
+    }else{
+        var maxRadius = 40;
+        return circleSize + executeFormula(count, maxRadius) - 1;
+    }
 }
 
 /***********************************START OF VISUALISATION FUNCIONS***********************************/
@@ -310,7 +314,7 @@ function visualizeData() {
     force = addForce();
 
     // Lines 
-    addMarkerDefinitions();
+    addMarkerDefinitions(); //markers/arrows on lines
     addLines("bottom", getSetting(setting_linecolor), 0.5);
     addLines("top", "rgba(255, 255, 255, 0.0)", 8.5);
 
@@ -320,7 +324,7 @@ function visualizeData() {
     
     // Circles
     //addBackgroundCircles();
-    addForegroundCircles();
+    //addForegroundCircles();
     //addIcons();
     
     // Labels
@@ -342,9 +346,10 @@ function visualizeData() {
 } //end visualizeData
 
 
-function changeViewMode(){
+function changeViewMode(mode){
     
-        if(currentMode=='icons'){
+    if(mode!=currentMode){
+        if(mode=='infoboxes'){ // && currentMode=='icons'
             currentMode = 'infoboxes';
             d3.selectAll(".icon-mode").style('display', 'none');
             d3.selectAll(".info-mode").style('display', 'initial');
@@ -353,6 +358,7 @@ function changeViewMode(){
             d3.selectAll(".icon-mode").style('display', 'initial');
             d3.selectAll(".info-mode").style('display', 'none');
         }
+    }
        
 }
 
@@ -389,7 +395,7 @@ function addContainer() {
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
-                           .scaleExtent([0.05, 10])
+                           .scaleExtent([0.75,1.5]) //was [0.05, 10])
                            .on("zoom", zoomed);
                       
     return container;
@@ -483,7 +489,7 @@ function addMarkerDefinitions() {
                     .attr("viewBox", "0 -5 10 10")
                     .attr("markerUnits", "userSpaceOnUse")
                     .attr("orient", "auto")
-                    .attr("fill", markercolor) // Using the markercolor setting
+                    .attr("fill", markercolor) // color of arrows on links (Using the markercolor setting)
                     .attr("opacity", "0.6")
                     .append("path")                                                      
                     .attr("d", "M0,-5L10,0L0,5");
@@ -645,9 +651,9 @@ function addForegroundCircles() {
     //var circleSize = getSetting(setting_circlesize);
     var circles = d3.selectAll(".node")
                     .append("circle")
-                    .attr("r", circleSize)
-                    .attr("class", "foreground")
-                    .style("fill", "#fff")
+                    .attr("r", 40) //circleSize)
+                    .attr("class", 'foreground') //"foreground")
+                    //.attr("fill", 'red') //entitycolor was .style("fill", "#fff")
                     .style("stroke", "#ddd")
                     .style("stroke-opacity", function(d) {
                         if(d.selected == true) {

@@ -1334,7 +1334,7 @@ function createOverlay(x, y, type, selector, info) {
                      .attr("class", "overlay "+type+ " " + selector)      
                      .attr("transform", "translate(" +(x+5)+ "," +(y+5)+ ")");
                      
-    // Draw a semi transparant rectangle       
+    // Draw a semi transparant rectangle    
     var rect = overlay.append("rect")
                       .attr("class", "semi-transparant")              
                       .attr("x", 0)
