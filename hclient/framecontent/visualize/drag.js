@@ -85,7 +85,9 @@ function addNodes() {
         
         
         //add infobox
+        if(true || settings.isDatabaseStructure){
         createOverlay(0, 0, "record", "id"+d.id, d, node);                  
+        }
         
         // Attributes
         node  //d3.select(this)

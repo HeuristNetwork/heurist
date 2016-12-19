@@ -356,7 +356,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         }
       
       }else{
-        // Close button
+        /* Close button
         var buttonSize = 15;
         var close = overlay.append("g")
                            .attr("class", "close")
@@ -377,7 +377,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
              .text("X")
              .attr("x", buttonSize/4)
              .attr("y", buttonSize*0.75);
-             
+       */      
       }
              
         /** Handles dragging events on overlay */
