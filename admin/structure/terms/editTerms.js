@@ -1,3 +1,4 @@
+
 /**
 * editTerms.js: Support file for editTerms.php
 *
@@ -67,7 +68,7 @@ function EditTerms() {
 
 
     /**
-    *	Initialization of tabview with 2 tabs with treeviews
+    *    Initialization of tabview with 2 tabs with treeviews
     */
     function _init (){
 
@@ -78,14 +79,14 @@ function EditTerms() {
         _isWindowMode = !Hul.isnull(top.HEURIST.parameters.popup);
 
         _vocabulary_toselect = top.HEURIST.parameters.vocabid;
-        
+
         treetype = top.HEURIST.parameters.treetype;
         if (!top.HEURIST.util.isempty(treetype)){
             treetype = (treetype == 'enum')?'terms':'relationships';
         }
 
         var initdomain = 0;
-        
+
         if(top.HEURIST.parameters.domain=='relation' && top.HEURIST.util.isempty(treetype)) {
             if(top.HEURIST.util.isempty(treetype)) initdomain  = 1;
         }
@@ -100,7 +101,12 @@ function EditTerms() {
                     id: 'enum',
                     label: 'Terms',
                     content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
-                }));}
+
+
+                }));
+
+                $(".banner h2").text("Manage terms for list fields");
+            }
 
             if (treetype == "relationships")
             {
@@ -109,7 +115,9 @@ function EditTerms() {
                     label: 'Relationship types',
                     content: '<div style="height:90%; max-width:300; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
 
-                }));}
+                }));
+                $(".banner h2").html("Manage terms for relationship types");
+            }
         }
 
         else
@@ -165,7 +173,8 @@ function EditTerms() {
                     if(Hul.isnull(_termTree1)){
                         _termTree1 = new YAHOO.widget.TreeView("termTree1");
                         //fill treeview with content
-                        _fillTreeView(_termTree1);
+                        // _fillTreeView(_termTree1);
+                        _defineContentTreeView();
                     }
                     _currTreeView = _termTree1;
 
@@ -175,7 +184,8 @@ function EditTerms() {
                     if(Hul.isnull(_termTree2)){
                         _termTree2 = new YAHOO.widget.TreeView("termTree2");
                         //fill treeview with content
-                        _fillTreeView(_termTree2);
+                        //_fillTreeView(_termTree2);
+                        _defineContentTreeView();
                     }
                     _currTreeView = _termTree2;
                 }
@@ -210,7 +220,7 @@ function EditTerms() {
 
 
     /**
-    *	Fills the given treeview with the appropriate content
+    *    Fills the given treeview with the appropriate content
     */
     function _fillTreeView (tv) {
 
@@ -318,27 +328,10 @@ function EditTerms() {
                 }, 1000);
             //_onNodeClick(node);
         }
-        //Add_dragAndDrop();
-    }
-
-    function Add_dragAndDrop()
-    {
-    // $("#termTree1").hide();
-
-    //alert('drag-n-drop extension for tree not loaded');
-    $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js').done(function() {
-    });
-
-      /*  if(!$.ui.fancytree._extensions["dnd"]){
-            alert('drag-n-drop extension for tree not loaded');
-            return;
-        } */
-
-
-
-        // $("#termTree1").fancytree({});
 
     }
+
+
 
     //
     // find node(s) by name in current treeview
@@ -419,6 +412,7 @@ function EditTerms() {
             ele.removeProp('disabled');
             ele.css('color','black');
         }else{
+            alert("hey");
             ele.prop('disabled', 'disabled');
             ele.css('color','lightgray');
         }
@@ -446,10 +440,10 @@ function EditTerms() {
         {
             if(!Hul.isnull(_currentNode)){
                 _keepCurrentParent = null;
-                _doSave(true, false);
+                //_doSave(true, false);
             }
             _currentNode = node;
-
+            // alert(_currentNode.data.label);
             var disable_status = false,
             disable_fields = false,
             add_reserved = false,
@@ -466,12 +460,12 @@ function EditTerms() {
                 }
 
 
-                //	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
+                //    alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
                 Dom.get('edId').value = node.data.id;
                 Dom.get('edParentId').value = node.data.parent_id;
                 var edName = Dom.get('edName');
-                edName.value = node.label;
-                if(node.label==="new term"){
+                edName.value = node.data.label;
+                if(node.data.label==="new term"){
                     //highlight all text
                     edName.selectionStart = 0;
                     edName.selectionEnd = 8;
@@ -570,11 +564,11 @@ function EditTerms() {
             Dom.get('formMessage').style.display = "block";
         }
 
-        if(node){ //obj && obj.event){
-            var ind = _tabView.get("activeIndex");
-            var tv = (ind===0)?_termTree1:_termTree2;
-            tv.onEventToggleHighlight(node);
-        }
+        /* if(node){ //obj && obj.event){
+        var ind = _tabView.get("activeIndex");
+        var tv = (ind===0)?_termTree1:_termTree2;
+        tv.onEventToggleHighlight(node);
+        } */
 
         _isNodeChanged();
     }
@@ -634,8 +628,105 @@ function EditTerms() {
     }
 
     function _setOrclearInverseTermId2(){
-        Dom.get('formInverse').style.display = "block";
-        Dom.get('edInverseTerm').value = "";
+        // Dom.get('formInverse').style.display = "block";
+        //Dom.get('edInverseTerm').value = "";
+
+        function _doSearch(event){
+
+            var el = event.target;
+
+            var sel = $(top.document).find("#resSearchInverse").get(0); //(el.id === 'edSearch')? $(top.document).get('resSearch'):$
+            //var sel = (el.id === 'edSearch')?Dom.get('resSearch'):Dom.get('resSearchInverse');
+
+            //remove all
+            while (sel.length>0){
+                sel.remove(0);
+            }
+
+
+            //el = Dom.get('edSeartch');
+            if(el.value && el.value.length>2){
+
+                //fill selection element with found nodes
+                var nodes = editTerms.findNodes(el.value),
+                ind;
+                for (ind in nodes)
+                {
+                    if(!Hul.isnull(ind)){
+                        var node = nodes[ind];
+
+                        var option = Hul.addoption(sel, node.data.id, getParentLabel(node));
+                        option.title = option.text;
+                    }
+                }//for
+
+            }
+        }
+
+
+        function _SelectInverse(){
+            var sel = $(top.document).find('#resSearchInverse').get(0);
+            if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
+
+                var nodeid = sel.options[sel.selectedIndex].value;
+                var node = _findNodeById(nodeid, false);
+                if(false && _currentNode.data.id===nodeid){
+                    alert("Not possible to inverse on itself");
+                }
+                else if(_currentNode === _findTopLevelForId(_currentNode.data.id))
+                {
+                    alert("you can't set inverse on top level vocabulary");
+
+                }
+                else if( node === _findTopLevelForId(nodeid) ){
+                    alert("you can't make top level vocabulary an inverse");
+                }else{
+
+                    Dom.get('edInverseTerm').value = sel.options[sel.selectedIndex].text;
+                    Dom.get('edInverseTermId').value = nodeid;
+                    Dom.get('btnInverseSetClear').value = 'clear';
+                    //Dom.get('formInverse').style.display = "none";
+                    _doSave(true, false);
+
+                }
+            }
+
+
+        }
+
+
+
+
+
+
+
+
+        var $_dialogbox = "";
+        var ele = document.getElementById('formInverse');
+        //var _originalParentNode ;
+
+
+
+        $("#edSearchInverse").keyup(function(event){_doSearch(event)});
+        $("#btnSelect2").click(function(){
+            _SelectInverse();$_dialogbox.dialog($_dialogbox ).dialog('close');
+
+            //ele.style.display = "none";
+            //_originalParentNode.appendChild(ele)
+
+        });
+        //$("#resSearchInverse").dblclick(_SelectInverse());
+        //show confirmation dialog
+        $_dialogbox = Hul.popupElement(top, ele,
+            {
+                "close-on-blur": false,
+                "no-resize": true,
+                title: 'Set As Inverse',
+                height: 310,
+                width: 560
+        });
+
+        // _originalParentNode  = ele.parentNode;
     }
 
     /**
@@ -644,19 +735,26 @@ function EditTerms() {
     function _setOrclearInverseTermId(){
         if(Dom.get('btnInverseSetClear').value==='cancel'){
             Dom.get('btnInverseSetClear').value = (Dom.get('edInverseTermId').value!=="0")?'clear':'set';
-            Dom.get('formInverse').style.display = "block";
+            //Dom.get('formInverse').style.display = "block"; Popup is being used instead rather than displaying in the current Html page
+            Dom.get('formInverse').style.display = "none";
+            _setOrclearInverseTermId2()
         }else if(Dom.get('edInverseTermId').value==="0"){
             //show inverse div
             Dom.get('btnInverseSetClear').value = 'cancel';
-            Dom.get('formInverse').style.display = "block";
+            //Dom.get('formInverse').style.display = "block";
+            Dom.get('formInverse').style.display = "none";
+
             //clear search result - since some terms may be removed/renamed
             Dom.get('resSearchInverse').innerHTML = "";
+            _setOrclearInverseTermId2()
 
         }else{
             Dom.get('btnInverseSetClear').value = 'set';
-            Dom.get('formInverse').style.display = "block";
+            //Dom.get('formInverse').style.display = "block";
+            Dom.get('formInverse').style.display = "none";
             Dom.get('edInverseTerm').value = "";
             Dom.get('edInverseTermId').value = "0";
+            _setOrclearInverseTermId2()
         }
     }
 
@@ -706,6 +804,7 @@ function EditTerms() {
                 setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);*/
 
                 var ind = _tabView.get("activeIndex");
+                // _fillTreeView((ind===0)?_termTree1:_termTree2); FillTreeView only called for Yui tree
                 _fillTreeView((ind===0)?_termTree1:_termTree2);
             }
         };
@@ -757,8 +856,8 @@ function EditTerms() {
         $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
 
         $('#lblMergeLabel1').text(arTerm2[fi.trm_Label]);
-        
-        
+
+
         /*  if(Hul.isempty(arTerm[fi.trm_Label])){
         $('#mergeLabel2').hide();
         }else{
@@ -773,7 +872,7 @@ function EditTerms() {
         if "Both" - Select the first one and the other
 
         ***/
-        if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  && 
+        if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
             (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
             $('#mergeCode1').show();
             $('#mergeCode2').show();
@@ -805,41 +904,41 @@ function EditTerms() {
             $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
             $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
         }
-        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code])) 
-                && (!Hul.isempty(arTerm2[fi.trm_Description])))
-        {
-            $('#mergeCode1').show();
-            $('#mergeCode2').show();
-            $('#mergeDescr1').show();
-            $('#mergeDescr2').show();
-            $('#rbMergeCode2').attr('disabled', 'disabled');
-            $("rbMergeCode1").attr('checked', 'checked');
-            $('#rbMergeDescr2').attr('disabled', 'disabled');
-            $("#rbMergeDescr1").attr('checked', 'checked');
-            $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-            $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
-            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-            $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
-        }
-        else
-        {
-            $('#mergeCode1').show();
-            $('#mergeCode2').show();
-            $('#mergeDescr1').show();
-            $('#mergeDescr2').show();
-            $('input[name ="rbMergeCode"]').removeAttr( "disabled" );
-            $('input[name ="rbMergeCode"]').attr('checked', 'checked');
-            $('input[name ="rbMergeDescr"]').removeAttr( "disabled" );
-            $('input[name ="rbMergeDescr"]').attr('checked', 'checked');
-            $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-            $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
-            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
-            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-            $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
-            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-            $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
-        }
+        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code]))
+            && (!Hul.isempty(arTerm2[fi.trm_Description])))
+            {
+                $('#mergeCode1').show();
+                $('#mergeCode2').show();
+                $('#mergeDescr1').show();
+                $('#mergeDescr2').show();
+                $('#rbMergeCode2').attr('disabled', 'disabled');
+                $("rbMergeCode1").attr('checked', 'checked');
+                $('#rbMergeDescr2').attr('disabled', 'disabled');
+                $("#rbMergeDescr1").attr('checked', 'checked');
+                $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+                $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+                $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+                $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+            }
+            else
+            {
+                $('#mergeCode1').show();
+                $('#mergeCode2').show();
+                $('#mergeDescr1').show();
+                $('#mergeDescr2').show();
+                $('input[name ="rbMergeCode"]').removeAttr( "disabled" );
+                $('input[name ="rbMergeCode"]').attr('checked', 'checked');
+                $('input[name ="rbMergeDescr"]').removeAttr( "disabled" );
+                $('input[name ="rbMergeDescr"]').attr('checked', 'checked');
+                $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+                $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+                $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+                $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+                $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+                $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+                $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+                $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
+            }
 
 
         /*if((Hul.isempty(arTerm[fi.trm_Description]))){
@@ -951,7 +1050,7 @@ function EditTerms() {
         }
 
         //( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
-        //	Number(_currentNode.data.inverseid) !== iInverseId));
+        //    Number(_currentNode.data.inverseid) !== iInverseId));
 
         if(wasChanged || !isExistingNode(_currentNode) ){
 
@@ -987,7 +1086,7 @@ function EditTerms() {
 
                 var needReload = (_currentNode.data.parent_id != iParentId || _currentNode.data.inverseid != iInverseId);
 
-                _currentNode.label = sName;
+                _currentNode.data.label = sName;
                 _currentNode.data.description = sDesc;
                 _currentNode.data.termcode = sCode;
                 _currentNode.data.status = sStatus;
@@ -998,7 +1097,7 @@ function EditTerms() {
                 _currentNode.data.parent_id = iParentId;
 
                 _currTreeView.render();
-
+                _defineContentTreeView();
                 _updateTermsOnServer(_currentNode, needReload);
                 //alert("TODO SAVE ON SERVER");
             }
@@ -1010,7 +1109,8 @@ function EditTerms() {
     */
     function _validateDups(node, new_name, new_code){
 
-        var sibs = node.getSiblings();
+        // var sibs = node.getSiblings(); //getSiblings is a function for YuI, we updated the tree to fancyTree
+        var sibs = node.getChildren();
         var ind;
         for (ind in sibs){
             if(!Hul.isnull(ind)){
@@ -1075,7 +1175,9 @@ function EditTerms() {
             colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'],
             defs: {}
         }};
-        oTerms.terms.defs[term.id] = [node.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
+
+        //PLEASE NOTE use "node.label' for YUI TREE INSTEAD OF 'term.label'
+        oTerms.terms.defs[term.id] = [term.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
 
         var str = YAHOO.lang.JSON.stringify(oTerms);
 
@@ -1147,14 +1249,28 @@ function EditTerms() {
                         _isSomethingChanged = true;
                         Dom.get('div_btnAddChild').style.display = "inline-block";
                         Dom.get('btnDelete').value = "Delete";
+
+                        var $_dialogbox;
+                        var ele = document.getElementById('div_SaveMessage');
+                        $_dialogbox = Hul.popupElement(top, ele,
+                            {
+                                "close-on-blur": false,
+                                "no-resize": true,
+                                title: '',
+                                height: 100,
+                                width: 200
+                        });
+
+
+                        //Dom.get('div_SaveMessage').style.display = "inline-block";
+                        setTimeout(function(){ $_dialogbox.dialog($_dialogbox).dialog('close');}, 2000);
                         Dom.get('btnSave').value = "Save";
-                        Dom.get('div_SaveMessage').style.display = "inline-block";
-                        setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);
-                        //alert("Term was succesfully saved");
 
                         if(needReload){
                             var ind = _tabView.get("activeIndex");
-                            _fillTreeView((ind===0)?_termTree1:_termTree2);
+                            //_fillTreeView((ind===0)?_termTree1:_termTree2);//; calll fillTreview for only YuI tree
+                            _defineContentTreeView();
+
                         }
                     }
                 }
@@ -1169,7 +1285,7 @@ function EditTerms() {
     }
 
     /**
-    * new of existing node
+    * new of existing nodeF
     */
     function isExistingNode(node){
         return ((typeof node.data.id === "number") || node.data.id.indexOf("-")<0);
@@ -1242,7 +1358,7 @@ function EditTerms() {
         if(_currentNode===null) return;
         if (_currentNode === _findTopLevelForId(_currentNode.data.id))
         {
-            alert("You can't move top vocabulary");
+            alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms).Vocabularies cannot be moved or merged");
             return;
         }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1274,6 +1390,7 @@ function EditTerms() {
                         }
                         _doSave(false, true);
 
+
                         keep_target_newparent_id = newparent_id;
 
                         /*//reselct the edited node
@@ -1303,7 +1420,7 @@ function EditTerms() {
         if(_currentNode===null) return;
         if (_currentNode === _findTopLevelForId(_currentNode.data.id))
         {
-            alert("you can't merge top vocabulary");
+            alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms).Vocabularies cannot be moved or merged.");
             return;
         }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1416,7 +1533,7 @@ function EditTerms() {
             }
         }
     }
-    function _doSelectInverse(){
+    function _doSelectInverse(){ // This Function may not be necessary as internal function (_Select inverse) has been defined in _setOrclearInverseTermId2 for PopUp
         var sel = Dom.get('resSearchInverse');
         if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
 
@@ -1824,6 +1941,232 @@ function EditTerms() {
 
     }
 
+
+
+    function verifyLibrariesLoaded()
+    {
+        //verify that all required libraries have been loaded
+        if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
+            $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js');
+            return;
+        }
+        else if(!$.ui.fancytree._extensions["dnd"]){
+            alert('drag-n-drop extension for tree not loaded')
+            return;
+        }
+        return;
+    }
+
+    //
+    //Method to define the content of fancyTreeView
+    function  _defineContentTreeView(){
+        //
+
+        verifyLibrariesLoaded();
+
+        var  treedata = [];
+        var termid,
+        first_node,
+        treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
+        termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+        fi = top.HEURIST.terms.fieldNamesToIndex;
+
+        //first level terms
+        for (termid in treesByDomain)
+        {
+
+            if(!Hul.isnull(termid)){
+
+                //var nodeIndex = tv.getNodeCount()+1;
+
+                var arTerm = termsByDomainLookup[termid];
+
+                var term = {};//new Object();
+                term.id = termid;
+                term.parent_id = null;
+                term.conceptid = arTerm[fi.trm_ConceptID];
+                term.domain = _currentDomain;
+                term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
+                term.description = arTerm[fi.trm_Description];
+                term.termcode  = arTerm[fi.trm_Code];
+                term.inverseid = arTerm[fi.trm_InverseTermID];
+                term.status = arTerm[fi.trm_Status];
+                term.original_db = arTerm[fi.trm_OriginatingDBID];
+
+
+                function __createChildren(parentNode, parent_id) { // Recursively get all children
+                    var _term,
+                    childNode,
+                    nodeIndex,
+                    child;
+                    var children  = []
+
+                    for(child in parentNode)
+                    {
+                        if(!Hul.isnull(child)){
+                            var _arTerm = termsByDomainLookup[child];
+
+                            if(!Hul.isnull(_arTerm)){
+
+                                _term = {};
+
+                                _term.id = child;
+                                _term.parent_id = parent_id;
+                                _term.conceptid = _arTerm[fi.trm_ConceptID];
+                                _term.domain = _currentDomain;
+                                _term.label = Hul.isempty(_arTerm[fi.trm_Label])?'ERROR N/A':_arTerm[fi.trm_Label];
+                                _term.description =_arTerm[fi.trm_Description];
+                                _term.termcode  =  _arTerm[fi.trm_Code];
+                                _term.inverseid = _arTerm[fi.trm_InverseTermID];
+                                _term.status = _arTerm[fi.trm_Status];
+                                _term.original_db = _arTerm[fi.trm_OriginatingDBID];
+
+
+                                // childNode = parentEntry.addNode(term);
+
+                                children.push({id:child,parent_id:parent_id,conceptid:_arTerm[fi.trm_ConceptID],domain:_currentDomain, label:_term.label, description:_arTerm[fi.trm_Description],termcode:_arTerm[fi.trm_Code],inverseid:_arTerm[fi.trm_InverseTermID],status:_arTerm[fi.trm_Status],original_db:_arTerm[fi.trm_OriginatingDBID], title:_term.label,folder:true,children: __createChildren(parentNode[child], _term.id)});
+
+
+                                //__createChildren(parentNode[child], _term.id)//treedata.nodes.children)createChildren() again for every child found
+
+                            }
+                        }
+                    }
+
+                    return children;
+                }
+
+                //var topLayerParent = new FancytreeNode(parent,term); // Create the node
+
+                //if(!first_node) { first_node = topLayerParent;}
+
+                var parentNode = treesByDomain[termid];
+                //all: { title: window.hWin.HR('My Searches'), folder: true,
+                treedata.push({id:termid,parent_id:term.parent_id,conceptid:term.conceptid,domain:term.domain, label:term.label, description:term.description,termcode:term.termcode,inverseid:term.inverseid,status:term.status,original_db:term.original_db,title:term.label,folder:true,children:__createChildren(parentNode, termid)});
+
+
+
+                // Look for children of the node
+
+            }
+        }
+        var $top_ele;
+        if (treetype == "terms"){
+            top_ele = document.getElementById("termTree1");
+        }
+        else if (treetype ="relationships"){
+            top_ele = document.getElementById("termTree2");
+        }
+        var $treediv = $('<div>').attr('id','term_tree').css({"width":"100%","height":"100%"}).appendTo(top_ele);
+
+        $treediv.fancytree(
+            {
+                activeVisible:true,
+                checkbox: false,
+                //titlesTabbable: false,     // Add all node titles to TAB chain
+                selectMode: 1,
+                source:treedata,
+                activate: function(event, data){
+                    // A node was activated: display its details
+                    _onNodeClick(data);
+                },
+                extensions:['dnd','themeroller'],
+                dnd: {
+                    //autoExpandMS: 400,
+                    //focusOnClick: true,
+                    preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
+                    preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
+                    dragStart: function(node, data) {
+                        /*if(node.getLevel()===1){
+                        return false;
+                        }*/
+
+                        return true;
+                    },
+                    dragEnter: function(node, data) {
+
+
+                        return "over";
+                    },
+                    dragDrop: function(node, data) {
+                        //_currentNode =node;
+
+
+                        if(data.otherNode.getLevel()===1){
+                            if(node.getLevel()!=1)
+                                return false;
+                            else{
+                                var childNode = node.addChildren(data.otherNode.getChildren());
+                                childNode.moveTo(node, data.hitMode);
+                                data.otherNode.remove();
+                            }
+
+                        }else if((data.otherNode.hasChildren()) && (data.otherNode.getLevel()!=1))
+                        {
+                            var ele = document.getElementById('move_mergeTerms');
+
+                            $("#mergeBtn").click(function(){
+                                var childNode = node.addChildren(data.otherNode.getChildren());
+                                childNode.moveTo(node, data.hitMode);
+                                data.otherNode.remove();
+                                $_dialogbox.dialog($_dialogbox).dialog("close");
+                                _updateTermsOnServer(_currentNode,false);
+                            });
+                            $("#moveBtn").click(function(){
+                                data.otherNode.moveTo(node,data.hitMode);
+                                $_dialogbox.dialog($_dialogbox).dialog("close");
+                                _updateTermsOnServer(_currentNode,false);
+                            });
+
+
+
+                            //show confirmation dialog
+                            $_dialogbox = Hul.popupElement(top, ele,
+                                {
+                                    "close-on-blur": false,
+                                    "no-resize": true,
+                                    title: '',
+                                    height: 100,
+                                    width: 200
+
+                            });
+                            $_dialogbox.dialog($_dialogbox).position({
+                                my: "left top",
+                                at: "left top",
+                                of: $(top.document).find('#tabContainer').get(0)
+
+                            });
+
+                        }
+                        else{
+                            data.otherNode.moveTo(node,data.hitMode);
+                            _updateTermsOnServer(_currentNode,false);
+                        }
+
+
+
+                    }
+
+                },
+                themeroller: {
+                    activeClass: "ui-state-active"
+                }
+        }).on("mouseenter,mouseleave", "span.fancytree-title", function(event){
+            // Add a hover handler to all node titles (using event delegation)
+            var node = $.ui.fancytree.getNode(event);
+            node.info(event.type);
+        });;
+
+    }
+
+
+
+
+
+
+
+
+
     //
     //public members
     //
@@ -1901,9 +2244,11 @@ function EditTerms() {
 /**
 *
 */
-function doSearch(event){
+function doSearch(event){ // This Function may not be necessary as an internal function _doSearch has been defined  in _setOrclearInverseTermId2 for popup.
 
     var el = event.target;
+
+    // var sel = (el.id === 'edSearch')? $(top.document).find('#resSearch'):$(top.document).find('#resSearchInverse');
     var sel = (el.id === 'edSearch')?Dom.get('resSearch'):Dom.get('resSearchInverse');
 
     //remove all
@@ -1929,3 +2274,32 @@ function doSearch(event){
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
