@@ -67,6 +67,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 text-decoration: none;
                 cursor: pointer;
             }
+            
+            #list_rectypes{
+                background: white;
+                z-index: 9999;
+                top: 5em !important;                
+            }
 
             #visualisation {
                 width: 100%;
@@ -141,12 +147,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
     <body class="popup">
     
         <div class="ent_wrapper">
-                <div class="ent_wrapper" style="width:350px">
-                    <div class="ent_header">
+                <div id="list_rectypes" class="ent_wrapper" style="width:350px;display:none">
+                    <div class="ent_header" style="display:none">
                         <h3 id="table-header">Record types (entities)</h3>
                         <button id="expand">Expand &#10142;</button>
                     </div>
-                    <div class="ent_content_full" style="padding-left:10px">
+                    <div class="ent_content_full" style="padding-left:10px; top:0">
     
                     <table id="records" class="records" cellpadding="4" cellspacing="1">
 
@@ -308,7 +314,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                        
                     </div>
                 </div>
-                <div class="ent_wrapper" style="left:350px">
+                <div class="ent_wrapper" style="left:0px">
                     <?php include PDIR."hclient/framecontent/visualize/visualize.html";?>
                 </div>
         </div>    

@@ -225,6 +225,12 @@ feMerge.append("feMergeNode")
     .attr("in", "SourceGraphic");
 }
 
+var iconSize = 16; // The icon size
+var circleSize = 19; //iconSize * 0.75; // Circle around icon size
+var currentMode = 'infoboxes'; //or 'icons';
+var maxEntityRadius = 40;
+var maxLinkWidth = 25;
+
 
 /** Executes the chosen formula with a chosen count & max size */
 
@@ -258,8 +264,15 @@ function getLineLength(record) {
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
-    var maxWidth = getSetting(setting_linewidth);                                                                     
-    return 1.5 + (executeFormula(count, maxWidth) / 2);
+    //old way var maxWidth = getSetting(setting_linewidth);                                                                     
+    //old way return 1.5 + (executeFormula(count, maxWidth) / 2);
+
+    if(getSetting(setting_formula)=='unweighted'){
+        return getSetting(setting_linewidth);
+    }else{
+        return (count==0?0:executeFormula(count, maxLinkWidth)) + 1;
+    }
+    
 }            
 
 /** Calculates the marker width that should be used */
@@ -268,16 +281,11 @@ function getMarkerWidth(count) {
 }
 
 /** Calculates the entity raadius that should be used */
-var iconSize = 16; // The icon size
-var circleSize = iconSize * 0.75; // Circle around icon size
-var currentMode = 'infoboxes'; //or 'icons';
-
 function getEntityRadius(count) {
-    if(setting_formula=='unweighted'){
+    if(getSetting(setting_formula)=='unweighted'){
         return getSetting(setting_entityradius);
     }else{
-        var maxRadius = 40;
-        return circleSize + executeFormula(count, maxRadius) - 1;
+        return count==0?0:(circleSize + executeFormula(count, maxEntityRadius) - 1);
     }
 }
 
@@ -315,8 +323,8 @@ function visualizeData() {
 
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
-    addLines("bottom", getSetting(setting_linecolor), 0.5);
-    addLines("top", "rgba(255, 255, 255, 0.0)", 8.5);
+    addLines("bottom-lines", getSetting(setting_linecolor), 0.5);
+    //addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5);
 
     // Nodes
     addNodes();
@@ -343,24 +351,23 @@ function visualizeData() {
         force.stop();
     }
     
-} //end visualizeData
-
-
-function changeViewMode(mode){
-    
-    if(mode!=currentMode){
-        if(mode=='infoboxes'){ // && currentMode=='icons'
-            currentMode = 'infoboxes';
-            d3.selectAll(".icon-mode").style('display', 'none');
-            d3.selectAll(".info-mode").style('display', 'initial');
+    if(settings.isDatabaseStructure){
+        
+        var cnt_vis = data.nodes?data.nodes.length:0;
+        var cnt_tot = (settings.data && settings.data.nodes)?settings.data.nodes.length:0;
+        
+        if(cnt_vis==0){
+            sText = 'Select record types to show';
         }else{
-            currentMode = 'icons';
-            d3.selectAll(".icon-mode").style('display', 'initial');
-            d3.selectAll(".info-mode").style('display', 'none');
+            sText = 'Showing '+cnt_vis+' of '+cnt_tot;
         }
+        
+        $('#showRectypeSelector').button({label:sText, icons:{secondary:'ui-icon-carat-1-'
+            +($('#list_rectypes').is(':visible')?'n':'s')   }});
     }
-       
-}
+    
+    
+} //end visualizeData
 
 
 /****************************************** CONTAINER **************************************/
@@ -463,6 +470,7 @@ function addMarkerDefinitions() {
     var linelength = getSetting(setting_linelength);
     var markercolor = getSetting(setting_markercolor);
     
+    
     var markers = d3.select("#container")
                     .append("defs")
                     .selectAll("marker")
@@ -522,7 +530,9 @@ function addLines(name, color, thickness) {
                   .enter()
                   .append("svg:polyline");
     }    
-     
+
+    var thickness = parseInt(getSetting(setting_linewidth))+1;
+
     // Adding shared attributes
     lines.attr("class", function(d) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
@@ -536,9 +546,9 @@ function addLines(name, color, thickness) {
                 return "3, 3"; 
              } 
          })) 
-         .style("stroke-width", function(d) { 
-            return thickness + getLineWidth(d.targetcount);
-         })
+         
+         
+         .style("stroke-width", thickness) //function(d) { return thickness + getLineWidth(d.targetcount); })
          .on("click", function(d) {
              // Close all overlays and create a line overlay
              /* 2016-12-15 it works, however we do not need info for links anymore
@@ -555,16 +565,16 @@ function addLines(name, color, thickness) {
 * Updates the correct lines based on the linetype setting 
 */
 function tick() {
-    //console.log("tick");
-    var topLines = d3.selectAll(".top");
-    var bottomLines = d3.selectAll(".bottom");
+    
+    //not used anymore var topLines = d3.selectAll(".top-lines"); 
+    var bottomLines = d3.selectAll(".bottom-lines");
     
     var linetype = getSetting(setting_linetype);
     if(linetype == "curved") {
-        updateCurvedLines(topLines);
+        //updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);     
     }else{
-        updateStraightLines(topLines);
+        //updateStraightLines(topLines);
         updateStraightLines(bottomLines);   
     }
     
@@ -651,9 +661,8 @@ function addForegroundCircles() {
     //var circleSize = getSetting(setting_circlesize);
     var circles = d3.selectAll(".node")
                     .append("circle")
-                    .attr("r", 40) //circleSize)
-                    .attr("class", 'foreground') //"foreground")
-                    //.attr("fill", 'red') //entitycolor was .style("fill", "#fff")
+                    .attr("r", circleSize)
+                    .attr("class", 'foreground')
                     .style("stroke", "#ddd")
                     .style("stroke-opacity", function(d) {
                         if(d.selected == true) {

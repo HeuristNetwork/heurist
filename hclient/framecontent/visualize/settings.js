@@ -9,6 +9,7 @@
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
+* @todo change storage of settings to user session (instead of current usage of localStorage)
 */
 
 /*
@@ -110,8 +111,11 @@ function handleSettingsInUI() {
     //add elements on toolbar
     var tBar = $('#toolbar');
     
+    $('#btnSingleSelect').button({icons: { primary: 'ui-icon-cursor' }, text:false})
+        .click( function(){ selectionMode = 'single'; $("#d3svg").css("cursor", "default");});
     $('#btnMultipleSelect').button({icons: { primary: 'ui-icon-select' }, text:false})
-        .click( function(){ that._doLogin(); });
+        .click( function(){ selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair");});
+    $('#selectMode').buttonset();
         
     $('#btnViewModeIcon').button({icons: { primary: 'ui-icon-circle' }, text:false})
         .click( function(){changeViewMode('icons');} );
@@ -120,7 +124,7 @@ function handleSettingsInUI() {
     $( "#setViewMode" ).buttonset();    
 
     //
-    $("#gravityMode option[value='" +getSetting(setting_gravity)+ "']").attr("checked", true);
+    $("input[name='gravityMode'][value='" +getSetting(setting_gravity)+ "']").attr("checked", true);
     
     $('#gravityMode0').button({icons: { primary: 'ui-icon-gravity0' }, text:false})
         .click( function(){ setGravity('off') });
@@ -130,9 +134,19 @@ function handleSettingsInUI() {
         .click( function(){ setGravity('aggressive') });
     $( "#setGravityMode" ).buttonset();    
     
-    //
-    $("#nodesMode option[value='" +getSetting(setting_formula)+ "']").attr("checked", true);
-    $('#nodesRadius').val(getSetting(setting_entityradius));
+    //------------ NODES ----------
+    
+    var radius = getSetting(setting_entityradius);
+    if(radius<circleSize) radius = circleSize  //min
+    else if(radius>maxEntityRadius) radius = maxEntityRadius;
+    $('#nodesRadius').val(radius).change(function(){
+        putSetting(setting_entityradius, $(event.target).val());
+        //visualizeData();
+        d3.selectAll(".node > .background").attr("r", function(d) {
+                        return getEntityRadius(d.count);
+                    })
+    });
+    $("input[name='nodesMode'][value='" +getSetting(setting_formula)+ "']").attr("checked", true);
     
     $('#nodesMode0').button().css('width','20px')
         .click( function(){ setNodeMode('linear'); });
@@ -142,18 +156,102 @@ function handleSettingsInUI() {
         .click( function(){ setNodeMode('unweighted'); });
     $( "#setNodesMode" ).buttonset();    
     
+    $("#entityColor").css("background-color", getSetting(setting_entitycolor)).colpick({
+            layout: 'hex',
+            onSubmit: function(hsb, hex, rgb, el) {
+                var color = "#"+hex; 
+                
+                putSetting(setting_entitycolor, color);
+                $(".background").attr("fill", color);
+                
+                $(el).css('background-color', color);
+                $(el).colpickHide();
+            }});
+    
+    //------------ LINKS ----------
 
-
+    $("input[name='linksMode'][value='" +getSetting(setting_linetype)+ "']").attr("checked", true);
     $('#linksMode0').button({icons: { primary: 'ui-icon-arrow-1-ne' }, text:false})
-        .click( function(){ });
+        .click( setLinkMode );
     $('#linksMode1').button({icons: { primary: 'ui-icon-arrowreturn-1-e' }, text:false})
-        .click( function(){ });
+        .click( setLinkMode );
     $( "#setLinksMode" ).buttonset();    
+    
+
+    var linksLength = getSetting(setting_linelength);    
+    $('#linksLength').val(linksLength).change(function(){
+        var newval = $(event.target).val();
+        putSetting(setting_linelength, newval);
+        visualizeData();
+    });
+    
+    var linksWidth = getSetting(setting_linewidth);    
+    if(linksWidth<1) linksWidth = 1  //min
+    else if(linksWidth>maxLinkWidth) linksWidth = maxLinkWidth;
+    
+    $('#linksWidth').val(linksWidth).change(
+    function(){
+        var newval = $(event.target).val();
+        putSetting(setting_linewidth, newval);
+        
+        var thickness = parseInt(newval)+1;
+ /*    
+        d3.selectAll("path").style("stroke-width", function(d) { 
+            return thickness + getLineWidth(d.targetcount);
+         });
+        d3.selectAll("polyline.link").style("stroke-width", function(d) { 
+            return thickness + getLineWidth(d.targetcount);
+         });
+*/
+        d3.selectAll(".bottom-lines").style("stroke-width", thickness);
+    
+        d3.selectAll("marker").attr("markerWidth", function(d) {    
+                        return getMarkerWidth(d.targetcount);             
+                    })
+                    .attr("markerHeight", function(d) {
+                       return getMarkerWidth(d.targetcount);
+                    });
+
+    
+    
+    });
+    
+    $("#linksPathColor").css("background-color", getSetting(setting_linecolor)).colpick({
+            layout: 'hex',
+            onSubmit: function(hsb, hex, rgb, el) {
+                var color = "#"+hex; 
+                
+                putSetting(setting_linecolor, color);
+                //d3.selectAll("path").attr("stroke", color);
+                //d3.selectAll("polyline.link").attr("stroke", color);
+                $(".bottom-lines.link").attr("stroke", color);
+                
+                $(el).css('background-color', color);
+                $(el).colpickHide();
+            }});
+    $("#linksMarkerColor").css("background-color", getSetting(setting_markercolor)).colpick({
+            layout: 'hex',
+            onSubmit: function(hsb, hex, rgb, el) {
+                var color = "#"+hex; 
+                
+                putSetting(setting_markercolor, color);
+                //d3.selectAll("marker").attr("fill", color);
+                $("marker").attr("fill", color);
+                
+                $(el).css('background-color', color);
+                $(el).colpickHide();
+            }});
+    
+    
+    if(settings.isDatabaseStructure){
+        initRecTypeSelector();    
+    }
+    
 
     $('#gephi-export').button();
     
     tBar.show();
-    
+ /*   OLD JJ CODE
     // LINE SETTINGS
     if(settings.showLineSettings) {
         handleLineType();
@@ -168,8 +266,8 @@ function handleSettingsInUI() {
     
     // ENTITY SETTINGS
     if(settings.showEntitySettings) {
-        handleEntityRadius();
-        handleEntityColor();
+        //handleEntityRadius();
+        //handleEntityColor();
     }else{
         $("#entitySettings").remove();
     }
@@ -199,7 +297,42 @@ function handleSettingsInUI() {
     }else{
         $("#gravitySettings").remove();
     }
+*/
+}
 
+function initRecTypeSelector(){
+    
+    $('#showRectypeSelector').button(
+        {icons:{secondary:'ui-icon-carat-1-s'}}   //triangle-1-s
+    ).click(
+        function(){
+            var ele = $('#list_rectypes');
+            if(ele.is(':visible')){
+                ele.hide();     
+                $(this).button({icons:{secondary:'ui-icon-carat-1-s'}});
+            }else{
+                ele.show();     
+                $(this).button({icons:{secondary:'ui-icon-carat-1-n'}});
+            }
+        }
+    );
+    
+    $('#rectypeSelector').css('display','table-cell');     
+}
+
+function changeViewMode(mode){
+    
+    if(mode!=currentMode){
+        if(mode=='infoboxes'){ // && currentMode=='icons'
+            currentMode = 'infoboxes';
+            //d3.selectAll(".icon-mode").style('display', 'none');
+            d3.selectAll(".info-mode").style('display', 'initial');
+        }else{
+            currentMode = 'icons';
+            //d3.selectAll(".icon-mode").style('display', 'initial');
+            d3.selectAll(".info-mode").style('display', 'none');
+        }
+    }
 }
 
 //
@@ -227,11 +360,25 @@ function setGravity(gravity) {
 //
 function setNodeMode(formula) {
     putSetting(setting_formula, formula);
+    //visualizeData();
+    d3.selectAll(".node > .background").attr("r", function(d) {
+                        return getEntityRadius(d.count);
+                    })
+    
+}
+
+//
+// straight or curverd links type
+//
+function setLinkMode() {
+    var formula = $(event.target).val();
+    putSetting(setting_linetype, formula);
     visualizeData();
 }
 
+//-----------------------
 
-/** LINE TYPE SETTING */
+/* OLD JJ CODE
 function handleLineType() {
     if(settings.showLineType) {
         // Set line type setting in UI
@@ -247,7 +394,6 @@ function handleLineType() {
     }
 }
 
-/** LINE LENGTH SETTING */
 function handleLineLength() {
     if(settings.showLineLength) {
         // Set line length setting in UI
@@ -263,7 +409,6 @@ function handleLineLength() {
     }
 }
         
-/** LINE WIDTH SETTING */
 function handleLineWidth() {
     if(settings.showLineWidth) {
         // Set line width setting in UI
@@ -279,7 +424,6 @@ function handleLineWidth() {
     }
 }
 
-/** LINE COLOR SETTING */
 function handleLineColor() {
     if(settings.showLineColor) {
         // Set line color setting in UI
@@ -292,7 +436,7 @@ function handleLineColor() {
                 var color = "#"+hex; 
                 
                 putSetting(setting_linecolor, color);
-                $(".bottom.link").attr("stroke", color);
+                $(".bottom-lines.link").attr("stroke", color);
         
                 $(el).css('background-color', color);
                 $(el).colpickHide();
@@ -303,7 +447,6 @@ function handleLineColor() {
     }
 }
         
-/** MARKER COLOR SETTING */
 function handleMarkerColor() {
     if(settings.showMarkerColor) {
         // Set marker color in UI
@@ -327,7 +470,6 @@ function handleMarkerColor() {
     }
 }
 
-/**  ENTITY RADIUS SETTING */
 function handleEntityRadius() {
     if(settings.showEntityRadius) {
         // Set entity radius setting in UI
@@ -343,7 +485,6 @@ function handleEntityRadius() {
     }
 }
 
-/** ENTITY COLOR SETTING */
 function handleEntityColor() {
     if(settings.showEntityColor) {
         // Set count color in UI
@@ -367,7 +508,6 @@ function handleEntityColor() {
     }
 }
 
-/** LABEL VISIBLITY SETTING */
 function handleLabels() {
     if(settings.showLabels) {
         // Set checkbox value
@@ -385,7 +525,6 @@ function handleLabels() {
     }   
 }
 
-/** TEXT FONT SIZE SETTING */
 function handleTextSize() {
     if(settings.showFontSize) {
         // Set font size setting in UI
@@ -405,7 +544,6 @@ function handleTextSize() {
     }
 }
 
-/** TEXT LENGTH SETTING */
 function handleTextLength() {
     if(settings.showTextLength) {
         // Set text length in UI
@@ -421,7 +559,6 @@ function handleTextLength() {
     }
 }
 
-/** TEXT COLOR SETTING */
 function handleTextColor() {
     if(settings.showTextColor) {
         // Set text color in UI
@@ -445,7 +582,6 @@ function handleTextColor() {
     }
 }
 
-/** FORMULA SETTING */
 function handleFormula() {
     if(settings.showFormula) {
         // Set formula setting in UI
@@ -461,7 +597,6 @@ function handleFormula() {
     }
 }
 
-/** FISH EYE */
 function handleFisheye() {
     if(settings.showFishEye) {
         // Set fish eye setting in UI
@@ -480,8 +615,6 @@ function handleFisheye() {
 }
 
 
-
-/** GRAVITY SETTING */
 function handleGravity() {
     if(settings.showGravity) {
         // Set gravity setting in UI
@@ -510,7 +643,6 @@ function handleGravity() {
     }
 }
         
-/** ATTRACTION SETTING */
 function handleAttraction() {
     if(settings.showAttraction) {
         // Set attraction setting in UI
@@ -525,3 +657,4 @@ function handleAttraction() {
         $("#attractionContainer").remove();
     }
 }
+*/

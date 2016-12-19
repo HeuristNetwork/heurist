@@ -194,14 +194,10 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         
         if(parent_node){
             overlay  = parent_node.append("g")
-                     //.attr("class", "overlay "+type+ " " + selector)      
                      .attr("transform", "translate(" +(x-iconSize/2-3)+ "," +(y-iconSize/2-3)+ ")");
-                      //.attr("x", 0)
-                      //.attr("y", 0);
         }else{
         
             overlay = svg.append("g")
-                         //.attr('id', selector)
                          .attr("class", "overlay "+type+ " " + selector)      
                          .attr("transform", "translate(" +(x-iconSize/2-3)+ "," +(y-iconSize/2-3)+ ")"); //was shifted  +5
         }
@@ -235,7 +231,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         //Adding icon
         var icon = overlay
                   .append("svg:image")
-                  .attr("class", "icon")  // info-mode
+                  .attr("class", "icon") 
                   .attr("xlink:href", function(d) {
                         if(info[0].image){
                             return info[0].image;
@@ -354,6 +350,10 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
              .text("add link")
              .attr("x", 2)
              .attr("y", iconSize*0.75);
+      
+        if(currentMode=='icons'){
+            overlay.selectAll('.info-mode').style('display', 'none');
+        }
       
       }else{
         // Close button

@@ -158,7 +158,7 @@ circle.around {
 }
 
 circle.foreground {
-    fill: red; /*#fff;*/
+    fill: #fff;
 }
 
 circle.selected {
@@ -236,18 +236,23 @@ text.shadow {
     display:table-cell;
 }
 
+.ui-icon-cursor{
+    background-image: url(cursor.png) !important; 
+    width: 16;
+    height: 16;
+}
 .ui-icon-gravity0{
     background-image: url(gravity_0.png) !important; 
-    width: 18;
-    height: 18;
+    width: 16;
+    height: 16;
 }
 .ui-icon-gravity1{
     background-image: url(gravity_1.png) !important; 
-    width: 18;
-    height: 18;
+    width: 16;
+    height: 16;
 }
 .ui-icon-gravity2{
     background-image: url(gravity_2.png) !important; 
-    width: 18;
-    height: 18;
+    width: 16;
+    height: 16;
 }

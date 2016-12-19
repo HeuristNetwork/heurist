@@ -32,30 +32,16 @@ function addNodes() {
                   .enter()
                   .append("g");
                   
-   /*Append circles                  
-   d3.selectAll(".node")
-            .append("circle")
-            .attr("r", 40) //circleSize)
-            .attr("class", 'foreground') //"foreground")
-                    //.attr("fill", 'red') //entitycolor was .style("fill", "#fff")
-                    .style("stroke", "#ddd")
-                    .style("stroke-opacity", function(d) {
-                        if(d.selected == true) {
-                            return 1;
-                        }
-                        return .25;
-                    });
-     */   
-                  
-                  
     // Dragging
     var drag = d3.behavior.drag()
                  .on("dragstart", dragstart)
                  .on("drag", dragmove)
                  .on("dragend", dragend);
+     
+   var entitycolor = getSetting(setting_entitycolor);
       
-     // Details for each node            
-     nodes.each(function(d, i) {
+   // Details for each node            
+   nodes.each(function(d, i) {
         // Restore location data
         var record = getSetting(d.id);
         if(record) {
@@ -76,14 +62,18 @@ function addNodes() {
 
         var  node = d3.select(this);
         
-        //add circle
+        //add outer circle
         node.append("circle")
-            .attr("r", function(d) {
+                    .attr("r", function(d) {
                         return getEntityRadius(d.count);
-            })
-            //.attr("r", 40) //circleSize)
-            .attr("class", 'foreground') //"foreground")
-                    //.attr("fill", 'red') //entitycolor was .style("fill", "#fff")
+                    })
+                    .attr("class", "background")
+                    .attr("fill", entitycolor);        
+        
+        //add internal circle
+        node.append("circle")
+            .attr("r", circleSize)
+            .attr("class", 'foreground')
                     .style("stroke", "#ddd")
                     .style("stroke-opacity", function(d) {
                         if(d.selected == true) {

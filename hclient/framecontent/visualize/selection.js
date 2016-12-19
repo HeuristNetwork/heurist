@@ -22,7 +22,7 @@
 // Functions to select nodes in the visualisation
 
 /*************************************** NODE SELECTION ******************************/
-var foregroundColor = 'red';//"#fff";
+var foregroundColor = '#fff';
 var selectionColor = "#bee4f8";
 
 /**
@@ -134,6 +134,7 @@ function visualizeSelection(selectedNodeIds) {
 var rightClicked = false;
 var selectionBox = {};
 var positions = {};
+var selectionMode = 'single';
 
 /** Prevents the context menu from showing on right click */
 function preventMenu(event) {
@@ -147,7 +148,7 @@ function preventMenu(event) {
 */
 function onMouseDown() {
 //console.log("Mouse down");
-    rightClicked = $("#selection").hasClass("selected");
+    rightClicked = (selectionMode=='multi');
     if(rightClicked) {
         d3.event.preventDefault();
         svg.on(".zoom", null);
@@ -249,6 +250,7 @@ function onMouseUp() {
 
 
 // Handle cursor changes
+/* JJ CODE
 $(document).ready(function(e) {
     // Cursor
     $(".mouse-icon").click(function(e) {
@@ -267,3 +269,4 @@ $(document).ready(function(e) {
         }
     });    
 });
+*/
