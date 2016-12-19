@@ -61,6 +61,11 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
 
+        <link rel="stylesheet" type="text/css" href="../../../ext/fancytree/skin-themeroller/ui.fancytree.css" />
+        <script type="text/javascript" src="../../../ext/fancytree/jquery.fancytree-all.min.js"></script>
+        <!-- <script type="text/javascript" src="https://github.com/mar10/fancytree/src/jquery.fancytree.wide.js"></script> -->
+
+
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <!--<link rel=stylesheet href="../../common/css/admin.css">-->
@@ -76,6 +81,11 @@ if(isForAdminOnly("to modify database structure")){
                 text-align: right;
                 padding-right: 3px;
             }
+
+            span.fancytree-title:hover, .fancytree-title-hovered{ background-color: #E6F8FD; border-color: #B8D6FB; }
+            span.fancytree-title:selected, .fancytree-title-selected{ background-color: #E6F8FD; border-color: #B8D6FB; }
+            .ui-state-active{ background-color: #E6F8FD; }
+
         </style>
     </head>
 
@@ -88,16 +98,20 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="editTerms.js"></script>
 
         <div id="divBanner" class="banner">
-            <h2>Manage terms for term list fields and relationship type</h2>
+            <h2>$nbsp</h2>
         </div>
-        <div style="margin-left:10px; padding-top:35px;">
+        <div><br/></div>
+        <div style=" padding-top:15px;">
             <input id="btnAddChild" type="button"
                 value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
             <span style="margin-top:5px; margin-left:10px;"> Adds a new root to the tree</span>
         </div>
 
 
-        <div id="page-inner" style="top:75px">
+        <div id="page-inner">
+            <div><br/><br/><br/></div>
+            <!--<div>&nbsp;&nbsp;&nbsp;&#129155;</div>-->
+            <div><br/></div>
             <div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
                 <!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
@@ -119,7 +133,7 @@ if(isForAdminOnly("to modify database structure")){
             </div>
 
             <div id="formContainer" style="position:absolute;left:303px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
-                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Rollover items in the tree to show available actions<br/>Drag terms to reposition, merge or set as inverse of one another<br/> Select term to edit label and description</h3>
+                <!-- <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Rollover items in the tree to show available actions<br/>Drag terms to reposition, merge or set as inverse of one another<br/> Select term to edit label and description</h3> -->
                 <h3 id="formMessage" style="margin-left:10px; border-style:none;display:none;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
                 </h3>
@@ -135,10 +149,10 @@ if(isForAdminOnly("to modify database structure")){
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" style="display:none;width:600px;margin-top:-35px;">
+                <div id="formEditor" style="display:none;width:600px;">
                     <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block"><br/><br/>Edit selected term / vocabulary</h3>
                     <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-                        <b>term saved</b>
+                        <b>term saved successfully!</b>
                     </div>
 
                     <div style="margin-left:10px; border: black; border-style: solid; border-width:thin; padding:10px;">
@@ -223,12 +237,12 @@ if(isForAdminOnly("to modify database structure")){
                             <div style="float:left;">
                                 <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">Image (~400x400):</label>
                             </div>
-                            <div style="vertical-align: middle;display:inline-block;">
+                            <div style="vertical-align: middle;display:inline-block; padding-left:3px">
                                 <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
                                 </div>
                             </div>
 
-                            <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top;"
+                            <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top; padding-left:5px"
                                 onClick="{editTerms.clearImage(); return false;}">
                                 <img src="../../../common/images/cross-grey.png" style="vertical-align:top;width:12px;height:12px">Clear image</a>
                             <!--
@@ -326,12 +340,12 @@ if(isForAdminOnly("to modify database structure")){
 
                         <div style="display:inline-block;vertical-align: top; width:130px;">
                             <label class="dtyLabel" style="width:30px;">Find:</label>
-                            <input id="edSearchInverse" style="width:70px" onkeyup="{doSearch(event)}"/><br/>
+                            <input id="edSearchInverse" style="width:70px" /><br/> <!--onkeyup="{doSearch(event)}" Better to add in js file to allow events recognise other ja funnctions-->
                             type 3 or more letters<br/><br/>select inverse from list
-                            <input id="btnSelect2" type="button" value="and Set As Inversed" onClick="{editTerms.doSelectInverse()}" />
+                            <input id="btnSelect2" type="button" value="and Set As Inversed" /> <!-- "onClick="{editTerms.doSelectInverse()}" -->
                         </div>
                         <div style="display:inline-block;">
-                            <select id="resSearchInverse" size="5" style="width:320px" ondblclick="{editTerms.doSelectInverse()}"></select>
+                            <select id="resSearchInverse" size="5" style="width:320px" ></select><!--ondblclick="{editTerms.doSelectInverse()}"-->
                         </div>
                     </div>
 
@@ -469,6 +483,11 @@ if(isForAdminOnly("to modify database structure")){
             </div>
         </div>
 
+        <div id=move_mergeTerms style="display:none ">
+            <div style="font-weight:bold;">Merge or Move term?</div>
+            <input id="mergeBtn" type="button" value="Merge" title="" style="width:70px"/>
+            <input id="moveBtn" type="button" value="Move" title="" style="width:70px; margin:2px"/>
+        </div>
         <input type="file" id="new_term_image" style="display:none"/>
 
         <script  type="text/javascript">
