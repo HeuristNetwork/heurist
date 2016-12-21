@@ -56,9 +56,10 @@
 .colorblock {
     cursor: pointer;
     display: inline-block;
-    width: 10px;
-    height: 10px;
-    border: 1px solid black; 
+    width: 18px;
+    height: 18px;
+    border: none; /*1px solid black; */
+    vertical-align: middle;
 }
 
 .settings select:hover {
@@ -221,7 +222,6 @@ text.shadow {
 
 
 .toolbar-section{
-    border-right: solid 1px gray;
     padding:0 4px;
 }
 .toolbar-section > label{

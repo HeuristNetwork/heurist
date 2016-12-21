@@ -112,7 +112,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
     var mapping, menu_datasets, btn_datasets;
     
-    // Callback function on map initialization
+    // Callback function on page initialization - see initPage.php
     function onPageInit(success){
 
         if(!success) return;

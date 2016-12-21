@@ -122,7 +122,7 @@ var svg;        // The SVG where the visualisation will be executed on
             // UI default settings
             linetype: "straight",
             linelength: 100,
-            linewidth: 15,
+            linewidth: 3,
             linecolor: "#22a",
             markercolor: "#000",
             
@@ -137,7 +137,7 @@ var svg;        // The SVG where the visualisation will be executed on
             formula: "linear",
             fisheye: false,
             
-            gravity: "off",
+            gravity: "touch",
             attraction: -3000,
             
             translatex: 0,
@@ -226,7 +226,7 @@ feMerge.append("feMergeNode")
 }
 
 var iconSize = 16; // The icon size
-var circleSize = 19; //iconSize * 0.75; // Circle around icon size
+var circleSize = 8; //iconSize * 0.75; // Circle around icon size
 var currentMode = 'infoboxes'; //or 'icons';
 var maxEntityRadius = 40;
 var maxLinkWidth = 25;
@@ -270,7 +270,9 @@ function getLineWidth(count) {
     if(getSetting(setting_formula)=='unweighted'){
         return getSetting(setting_linewidth);
     }else{
-        return (count==0?0:executeFormula(count, maxLinkWidth)) + 1;
+        var val = (count==0)?0:executeFormula(count, maxLinkWidth);
+        if(val<1) val = 1;
+        return val;
     }
     
 }            
@@ -285,7 +287,13 @@ function getEntityRadius(count) {
     if(getSetting(setting_formula)=='unweighted'){
         return getSetting(setting_entityradius);
     }else{
-        return count==0?0:(circleSize + executeFormula(count, maxEntityRadius) - 1);
+        if(count==0){
+            return 0; //no records - no circle
+        }else{
+            var val = circleSize + executeFormula(count, maxEntityRadius);
+            if(val<circleSize) val = circleSize;
+            return val;
+        }
     }
 }
 
@@ -548,7 +556,7 @@ function addLines(name, color, thickness) {
          })) 
          
          
-         .style("stroke-width", thickness) //function(d) { return thickness + getLineWidth(d.targetcount); })
+         .style("stroke-width", function(d) { return getLineWidth(d.targetcount); })
          .on("click", function(d) {
              // Close all overlays and create a line overlay
              /* 2016-12-15 it works, however we do not need info for links anymore
@@ -587,11 +595,23 @@ function tick() {
 * @param lines Object holding curved lines
 */
 function updateCurvedLines(lines) {
+    
+    var pairs = {};
+    
     // Calculate the curved segments
     lines.attr("d", function(d) {
+        
+       var key = d.source.id+'_'+d.target.id; 
+       if(!pairs[key]){
+           pairs[key] = 1.5;
+       }else{
+           pairs[key] = pairs[key]+0.25;
+       } 
+       var k = pairs[d.source.id+'_'+d.target.id];
+        
         var dx = d.target.x - d.source.x,
             dy = d.target.y - d.source.y,
-            dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+            dr = Math.sqrt(dx * dx + dy * dy)/k,
             mx = d.source.x + dx,
             my = d.source.y + dy;
             
@@ -611,11 +631,23 @@ function updateCurvedLines(lines) {
 * @param lines Object holding straight lines
 */
 function updateStraightLines(lines) {
+    
+    var pairs = {};
+    
     // Calculate the straight points
     lines.attr("points", function(d) {
+        
+       var key = d.source.id+'_'+d.target.id; 
+       if(!pairs[key]){
+           pairs[key] = 1;
+       }else{
+           pairs[key] = pairs[key]+30;
+       } 
+       var k = pairs[d.source.id+'_'+d.target.id];
+        
        return d.source.x + "," + d.source.y + " " +
-              (d.source.x +(d.target.x-d.source.x)/2) + "," + 
-              (d.source.y +(d.target.y-d.source.y)/2) + " " +  
+              (d.source.x + (d.target.x-d.source.x)/2+k) + "," + 
+              (d.source.y + (d.target.y-d.source.y)/2-k) + " " +  
               d.target.x + "," + d.target.y;
     });
     

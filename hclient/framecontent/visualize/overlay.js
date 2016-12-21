@@ -287,7 +287,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                       
         // Calculate optimal rectangle size
         var maxWidth = 1;
-        var maxHeight = 1;                              
+        var maxHeight = 10;                              
         for(var i = 0; i < text[0].length; i++) {
             var bbox = text[0][i].getBBox();
 
@@ -344,7 +344,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                       event.preventDefault();
                       _editRecStructure(rty_ID);
                   });;  
-        // Close text        
+        // add link text        
         btnAddLink.append("text")
              .attr("class", "addlink-text")
              .text("add link")

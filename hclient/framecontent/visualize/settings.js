@@ -55,8 +55,13 @@ function getURL() {
  * Returns a setting from the localStorage
  * @param setting The setting to retrieve
  */
-function getSetting(setting) {
-    return localStorage.getItem(getURL()+setting);
+function getSetting(key, defvalue) {
+    var value = localStorage.getItem(getURL()+key);
+    if(window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue)){
+        value = defvalue;
+        putSetting(key, value);
+    }
+    return value;
 }
 
 /**
@@ -67,40 +72,28 @@ function putSetting(key, value) {
 }
 
 /**
-* Checks if a setting has been set, if not it sets the default value
-* @param key    Localstorage key
-* @param value  The default value
-*/
-function checkSetting(key, value) {
-    var obj = getSetting(key);
-    if(obj === null) {
-        putSetting(key, value);
-    }
-}
-
-/**
  * This function makes sure the default settings are stored in the localStorage.
  * @param settings The plugin settings object
  */
 function checkStoredSettings() {
-    checkSetting(   setting_linetype,      settings.linetype    );
-    checkSetting(   setting_linelength,    settings.linelength  );
-    checkSetting(   setting_linewidth,     settings.linewidth   );
-    checkSetting(   setting_linecolor,     settings.linecolor   );
-    checkSetting(   setting_markercolor,   settings.markercolor );
-    checkSetting(   setting_entityradius,  settings.entityradius);
-    checkSetting(   setting_entitycolor,   settings.entitycolor );
-    checkSetting(   setting_labels,        settings.labels      );
-    checkSetting(   setting_fontsize,      settings.fontsize    );
-    checkSetting(   setting_textlength,    settings.textlength  );
-    checkSetting(   setting_textcolor,     settings.textcolor   );
-    checkSetting(   setting_formula,       settings.formula     );
-    checkSetting(   setting_gravity,       settings.gravity     );
-    checkSetting(   setting_attraction,    settings.attraction  );
-    checkSetting(   setting_fisheye,       settings.fisheye     );
-    checkSetting(   setting_translatex,    settings.translatex  );
-    checkSetting(   setting_translatey,    settings.translatey  );
-    checkSetting(   setting_scale,         settings.scale       );
+    getSetting(   setting_linetype,      settings.linetype    );
+    getSetting(   setting_linelength,    settings.linelength  );
+    getSetting(   setting_linewidth,     settings.linewidth   );
+    getSetting(   setting_linecolor,     settings.linecolor   );
+    getSetting(   setting_markercolor,   settings.markercolor );
+    getSetting(   setting_entityradius,  settings.entityradius);
+    getSetting(   setting_entitycolor,   settings.entitycolor );
+    getSetting(   setting_labels,        settings.labels      );
+    getSetting(   setting_fontsize,      settings.fontsize    );
+    getSetting(   setting_textlength,    settings.textlength  );
+    getSetting(   setting_textcolor,     settings.textcolor   );
+    getSetting(   setting_formula,       settings.formula     );
+    getSetting(   setting_gravity,       settings.gravity     );
+    getSetting(   setting_attraction,    settings.attraction  );
+    getSetting(   setting_fisheye,       settings.fisheye     );
+    getSetting(   setting_translatex,    settings.translatex  );
+    getSetting(   setting_translatey,    settings.translatey  );
+    getSetting(   setting_scale,         settings.scale       );
 }
 
 /**
@@ -149,14 +142,17 @@ function handleSettingsInUI() {
     $("input[name='nodesMode'][value='" +getSetting(setting_formula)+ "']").attr("checked", true);
     
     $('#nodesMode0').button().css('width','20px')
-        .click( function(){ setNodeMode('linear'); });
+        .click( function(){ setFormulaMode('linear'); });
     $('#nodesMode1').button().css('width','20px')
-        .click( function(){ setNodeMode('logarithmic'); }); 
+        .click( function(){ setFormulaMode('logarithmic'); }); 
     $('#nodesMode2').button().css('width','20px')
-        .click( function(){ setNodeMode('unweighted'); });
+        .click( function(){ setFormulaMode('unweighted'); });
     $( "#setNodesMode" ).buttonset();    
     
-    $("#entityColor").css("background-color", getSetting(setting_entitycolor)).colpick({
+    $("#entityColor")
+        .addClass('ui-icon ui-icon-bullet')
+        .css({'font-size':'3.5em','color':getSetting(setting_entitycolor)})
+        .colpick({
             layout: 'hex',
             onSubmit: function(hsb, hex, rgb, el) {
                 var color = "#"+hex; 
@@ -164,7 +160,7 @@ function handleSettingsInUI() {
                 putSetting(setting_entitycolor, color);
                 $(".background").attr("fill", color);
                 
-                $(el).css('background-color', color);
+                $(el).css('color', color);
                 $(el).colpickHide();
             }});
     
@@ -178,7 +174,7 @@ function handleSettingsInUI() {
     $( "#setLinksMode" ).buttonset();    
     
 
-    var linksLength = getSetting(setting_linelength);    
+    var linksLength = getSetting(setting_linelength, 200);    
     $('#linksLength').val(linksLength).change(function(){
         var newval = $(event.target).val();
         putSetting(setting_linelength, newval);
@@ -194,29 +190,14 @@ function handleSettingsInUI() {
         var newval = $(event.target).val();
         putSetting(setting_linewidth, newval);
         
-        var thickness = parseInt(newval)+1;
- /*    
-        d3.selectAll("path").style("stroke-width", function(d) { 
-            return thickness + getLineWidth(d.targetcount);
-         });
-        d3.selectAll("polyline.link").style("stroke-width", function(d) { 
-            return thickness + getLineWidth(d.targetcount);
-         });
-*/
-        d3.selectAll(".bottom-lines").style("stroke-width", thickness);
-    
-        d3.selectAll("marker").attr("markerWidth", function(d) {    
-                        return getMarkerWidth(d.targetcount);             
-                    })
-                    .attr("markerHeight", function(d) {
-                       return getMarkerWidth(d.targetcount);
-                    });
-
-    
+        refreshLinesWidth();
     
     });
     
-    $("#linksPathColor").css("background-color", getSetting(setting_linecolor)).colpick({
+    $("#linksPathColor")
+        .addClass('ui-icon ui-icon-loading-status-circle')
+        .css({'color':getSetting(setting_linecolor)})
+        .colpick({
             layout: 'hex',
             onSubmit: function(hsb, hex, rgb, el) {
                 var color = "#"+hex; 
@@ -226,10 +207,13 @@ function handleSettingsInUI() {
                 //d3.selectAll("polyline.link").attr("stroke", color);
                 $(".bottom-lines.link").attr("stroke", color);
                 
-                $(el).css('background-color', color);
+                $(el).css('color', color);
                 $(el).colpickHide();
             }});
-    $("#linksMarkerColor").css("background-color", getSetting(setting_markercolor)).colpick({
+    $("#linksMarkerColor")
+        .addClass('ui-icon ui-icon-triangle-1-ne')
+        .css({'color':getSetting(setting_markercolor)})
+        .colpick({
             layout: 'hex',
             onSubmit: function(hsb, hex, rgb, el) {
                 var color = "#"+hex; 
@@ -238,7 +222,7 @@ function handleSettingsInUI() {
                 //d3.selectAll("marker").attr("fill", color);
                 $("marker").attr("fill", color);
                 
-                $(el).css('background-color', color);
+                $(el).css('color', color);
                 $(el).colpickHide();
             }});
     
@@ -358,14 +342,39 @@ function setGravity(gravity) {
 //
 //
 //
-function setNodeMode(formula) {
+function setFormulaMode(formula) {
     putSetting(setting_formula, formula);
     //visualizeData();
     d3.selectAll(".node > .background").attr("r", function(d) {
                         return getEntityRadius(d.count);
                     })
+    refreshLinesWidth();
+}
+
+//
+//
+//
+function refreshLinesWidth(){
+    
+        /*d3.selectAll("path").style("stroke-width", function(d) { 
+            return getLineWidth(d.targetcount);
+         });
+        d3.selectAll("polyline.link").style("stroke-width", function(d) { 
+            return getLineWidth(d.targetcount);
+         });*/
+
+        d3.selectAll(".bottom-lines").style("stroke-width", //thickness);
+             function(d) { return getLineWidth(d.targetcount); });
+    
+        d3.selectAll("marker").attr("markerWidth", function(d) {    
+                        return getMarkerWidth(d.targetcount);             
+                    })
+                    .attr("markerHeight", function(d) {
+                       return getMarkerWidth(d.targetcount);
+                    });
     
 }
+
 
 //
 // straight or curverd links type

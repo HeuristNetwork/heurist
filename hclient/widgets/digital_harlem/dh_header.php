@@ -175,7 +175,7 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
                     print '<div class="menubutton">';
                     print '<a class="menuitem" href="javascript:void(0) onClick="{ 
                         window.hWin.HEURIST4.msg.showMsgDlg(\'#webcontent'.$row["id"].'\', null,\''.$row["title"].'\');}">'
-                        .$row["title"].'</a></div>';
+                        .$row["title"].'AAAA</a></div>';
                 }else{
                     ?>
                     <script>

@@ -137,10 +137,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     return false;
                 }
             }
-            
-            $(document).ready(function() {
-                setTimeout(function(){$("#expand").click();},1000);
-            });
+           
+           function onPageInit(success){
+                   if(!success) return;
+                   $("#expand").click();
+            }
         </script>
     </head>
 
@@ -461,6 +462,11 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         });
                     }
 
+                    //reset settings for empty database
+                    if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
+                        localStorage.clear();    
+                    }
+                    
                     visualizeData();
 
                 });
