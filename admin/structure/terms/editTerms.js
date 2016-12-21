@@ -63,8 +63,10 @@ function EditTerms() {
     _isWindowMode=false,
     _isSomethingChanged=false,
     _affectedVocabs = [],
-    keep_target_newparent_id = null;
-    tab_view = 0;// variable to selct vwhich tab to fill with treeview
+    keep_target_newparent_id = null,
+    $top_ele,
+    $treediv;
+
 
 
     /**
@@ -1096,8 +1098,11 @@ function EditTerms() {
 
                 _currentNode.data.parent_id = iParentId;
 
-                _currTreeView.render();
-                _defineContentTreeView();
+                //_currTreeView.render
+                //var tree = $treediv.fancytree("getTree");
+                //tree.reload();
+                // _currentNode.load();
+                //_defineContentTreeView();
                 _updateTermsOnServer(_currentNode, needReload);
                 //alert("TODO SAVE ON SERVER");
             }
@@ -1266,10 +1271,19 @@ function EditTerms() {
                         setTimeout(function(){ $_dialogbox.dialog($_dialogbox).dialog('close');}, 2000);
                         Dom.get('btnSave').value = "Save";
 
+
+                        /*FancyTree needs to be reinitialised manually when terms are modified*/
+
+                        $treediv.remove();
+                        _defineContentTreeView();
+
+
                         if(needReload){
-                            var ind = _tabView.get("activeIndex");
+                           // var ind = _tabView.get("activeIndex");
                             //_fillTreeView((ind===0)?_termTree1:_termTree2);//; calll fillTreview for only YuI tree
+                           //
                             _defineContentTreeView();
+
 
                         }
                     }
@@ -2050,14 +2064,14 @@ function EditTerms() {
 
             }
         }
-        var $top_ele;
+
         if (treetype == "terms"){
             top_ele = document.getElementById("termTree1");
         }
         else if (treetype ="relationships"){
             top_ele = document.getElementById("termTree2");
         }
-        var $treediv = $('<div>').attr('id','term_tree').css({"width":"100%","height":"100%"}).appendTo(top_ele);
+        $treediv = $('<div>').attr('id','term_tree').css({"width":"100%","height":"100%"}).appendTo(top_ele);
 
         $treediv.fancytree(
             {
