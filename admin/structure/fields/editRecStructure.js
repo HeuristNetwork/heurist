@@ -595,7 +595,10 @@ function EditRecStructure() {
             //
             _myDataTable.subscribe('linkClickEvent', function(oArgs){
 
-                if(!Hul.isnull(popupSelect) || _isServerOperationInProgress) { return; }
+                if(!Hul.isnull(popupSelect) || _isServerOperationInProgress) { 
+                    console.log('popup or action-in-progress');
+                    return; 
+                }
 
                 YAHOO.util.Event.stopEvent(oArgs.event);
 
@@ -731,7 +734,10 @@ function EditRecStructure() {
                     if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
                         (!Hul.isnull(column) && 
                             (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
-                        { return; }
+                        { 
+                            if (!Hul.isnull(popupSelect) || _isServerOperationInProgress) console.log('popup or action-in-progress');
+                            return; 
+                        }
 
 
 
@@ -1700,6 +1706,9 @@ function EditRecStructure() {
                     if(!is_onexit && newvalue){
                         document.getElementById('rty_TitleMask').value = newvalue;    
                     }
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
     }
@@ -2183,6 +2192,9 @@ function onAddNewDetail(index_toinsert){
                         editStructure.addDetails(detailTypesToBeAdded, index_toinsert);
                     }
                     popupSelect = null;
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
 
@@ -2229,6 +2241,9 @@ function onDefineNewType(index_toinsert){
                     }
 
                     popupSelect =  null;
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
     }
@@ -2589,7 +2604,11 @@ function _onAddEditFieldType(dty_ID, rty_ID){
                     _removeTable(grpID_old, true);
                     }*/
                 }
+            },
+            afterclose: function(){
+                popupSelect = null;
             }
+            
     });
 }
 
@@ -2621,6 +2640,9 @@ function onEditRecordType(){
                 }
                 //refresh icon, title, mask
                 editStructure.refreshTitleAndIcon();
+            },
+            afterclose: function(){
+                popupSelect = null;
             }
         });
         
