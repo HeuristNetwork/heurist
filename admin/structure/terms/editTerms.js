@@ -402,7 +402,7 @@ function EditTerms() {
         if(_currentNode!=null){
 
             ischanged =
-            Dom.get('edName').value.trim() != _currentNode.label ||
+            Dom.get('edName').value.trim() != _currentNode.data.label ||
             Dom.get('edDescription').value.trim() != _currentNode.data.description ||
             Dom.get('edCode').value.trim() != _currentNode.data.termcode ||
             Dom.get("trm_Status").value != _currentNode.data.status ||
@@ -1038,7 +1038,7 @@ function EditTerms() {
         var iParentId_prev = Number(_currentNode.data.parent_id);
         iParentId_prev = (iParentId_prev>0)?iParentId_prev:null;
 
-        var wasChanged = ((_currentNode.label !== sName) ||
+        var wasChanged = ((_currentNode.data.label !== sName) ||
             (_currentNode.data.description !== sDesc) ||
             (_currentNode.data.termcode !== sCode) ||
             (_currentNode.data.status !== sStatus) ||
@@ -1094,7 +1094,7 @@ function EditTerms() {
                 _currentNode.data.status = sStatus;
 
                 _currentNode.data.inverseid = iInverseId;
-                _currentNode.title = _currentNode.data.description;
+                _currentNode.data.title = _currentNode.data.description;
 
                 _currentNode.data.parent_id = iParentId;
 
@@ -1175,7 +1175,6 @@ function EditTerms() {
 
 
         var needReload = _needReload;
-
         var oTerms = {terms:{
             colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'],
             defs: {}
@@ -1274,14 +1273,15 @@ function EditTerms() {
 
                         /*FancyTree needs to be reinitialised manually when terms are modified*/
 
+
                         $treediv.remove();
                         _defineContentTreeView();
 
-
                         if(needReload){
-                           // var ind = _tabView.get("activeIndex");
+                            // var ind = _tabView.get("activeIndex");
                             //_fillTreeView((ind===0)?_termTree1:_termTree2);//; calll fillTreview for only YuI tree
-                           //
+
+                            alert("hey");
                             _defineContentTreeView();
 
 
@@ -1314,7 +1314,7 @@ function EditTerms() {
         sMessage = "";
 
         if(isExistingTerm){
-            sMessage = "Delete term '"+_currentNode.label+"'?";
+            sMessage = "Delete term '"+_currentNode.data.label+"'?";
             if(_currentNode.children.length>0){
                 sMessage = sMessage + "\nWarning: All child terms will be deleted as well";
             }
@@ -1603,7 +1603,7 @@ function EditTerms() {
         if(isRoot || !Hul.isnull(_currentNode)){
 
             var term_id = (isRoot)?0:_currentNode.data.id;
-            var term_label = (isRoot)?'root vocabulary':_currentNode.label;
+            var term_label = (isRoot)?'root vocabulary':_currentNode.data.label;
 
             /* old way
             var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/editTermsImport.php?db="+ _db +
@@ -2124,12 +2124,12 @@ function EditTerms() {
                                 childNode.moveTo(node, data.hitMode);
                                 data.otherNode.remove();
                                 $_dialogbox.dialog($_dialogbox).dialog("close");
-                                _updateTermsOnServer(_currentNode,false);
+                                //_updateTermsOnServer(_currentNode,false);
                             });
                             $("#moveBtn").click(function(){
                                 data.otherNode.moveTo(node,data.hitMode);
                                 $_dialogbox.dialog($_dialogbox).dialog("close");
-                                _updateTermsOnServer(_currentNode,false);
+                              // _updateTermsOnServer(_currentNode,false);
                             });
 
 
@@ -2154,7 +2154,7 @@ function EditTerms() {
                         }
                         else{
                             data.otherNode.moveTo(node,data.hitMode);
-                            _updateTermsOnServer(_currentNode,false);
+                          //  _updateTermsOnServer(_currentNode,false);
                         }
 
 
