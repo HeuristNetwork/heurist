@@ -62,6 +62,7 @@ function DetailTypeEditor() {
     var _className = "DetailTypeEditor",
     _detailType, //field type to edit
     _dtyID,     // its ID
+    _dty_Type,  // from parameters
     _updatedFields = [], //field names which values were changed to be sent to server
     _updatedDetails = [], //field values
     _keepStatus,// Keeps current status for rollback if user decided to keep it
@@ -76,7 +77,7 @@ function DetailTypeEditor() {
     */
     function _init() {
 
-        var dtgID;
+        var dtgID, _dty_PtrTargetRectypeIDs;
 
         // reads parameters from GET request
         if (location.search.length > 1) {
@@ -84,6 +85,9 @@ function DetailTypeEditor() {
             _dtyID = top.HEURIST.parameters.detailTypeID;
             dtgID = top.HEURIST.parameters.groupID;
 
+            _dty_Type = top.HEURIST.parameters.dty_Type;
+            _dty_PtrTargetRectypeIDs = top.HEURIST.parameters.dty_PtrTargetRectypeIDs;
+            
             if(_dtyID){
                 var dt = top.HEURIST.detailTypes.typedefs[_dtyID];
                 if(!Hul.isnull(dt)){
@@ -140,31 +144,26 @@ function DetailTypeEditor() {
             _detailType[fi.dty_PtrTargetRectypeIDs] = null;
             _detailType[fi.dty_NonOwnerVisibility] = 'viewable';
 
-            Dom.get("dty_Type").disabled = false;
+            
+            //take type from parameters
+            if(_dty_Type && top.HEURIST.detailTypes.lookups[_dty_Type]){ //valid type
+                _detailType[fi.dty_Type] = _dty_Type;
+            }else{
+                Dom.get("dty_Type").disabled = false;    
+            }
+            //
+            if(_dty_PtrTargetRectypeIDs){  
+                _detailType[fi.dty_PtrTargetRectypeIDs] = _dty_PtrTargetRectypeIDs;
+            }
 
+            
             $("#topdiv_closebtn").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
         }else{
         
             //var el = Dom.get("dty_Type");
             //el.val(top.HEURIST.detailTypes.lookups[value]);
+            _dty_Type = _detailType[fi.dty_Type];
             
-            var el = Dom.get("dty_Type"),
-            ftype = _detailType[fi.dty_Type];
-
-            Hul.addoption(el, ftype, top.HEURIST.detailTypes.lookups[ftype]);
-            el.disabled = false;
-
-            if(ftype=='float' || ftype=='date'){
-                Hul.addoption(el, 'freetext', top.HEURIST.detailTypes.lookups['freetext']);
-            }else if(ftype=='freetext'){
-                Hul.addoption(el, 'blocktext', top.HEURIST.detailTypes.lookups['blocktext']);
-            }else if(ftype=='blocktext'){
-                Hul.addoption(el, 'freetext', top.HEURIST.detailTypes.lookups['freetext']);
-            }else{
-                el.disabled = true;
-            }
-
-
             if(_detailType[fi.dty_Status]==='reserved'){ //if reserved - it means original dbid<1001
 
                 disable_status = (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001);
@@ -175,6 +174,26 @@ function DetailTypeEditor() {
                 disable_fields = true;
             }
         }
+        
+        if(_dty_Type && top.HEURIST.detailTypes.lookups[_dty_Type]){ //valid type            
+            
+            var el = Dom.get("dty_Type");
+
+            Hul.addoption(el, _dty_Type, top.HEURIST.detailTypes.lookups[_dty_Type]);
+            el.disabled = false;
+
+            if(_dty_Type=='float' || _dty_Type=='date'){
+                Hul.addoption(el, 'freetext', top.HEURIST.detailTypes.lookups['freetext']);
+            }else if(_dty_Type=='freetext'){
+                Hul.addoption(el, 'blocktext', top.HEURIST.detailTypes.lookups['blocktext']);
+            }else if(_dty_Type=='blocktext'){
+                Hul.addoption(el, 'freetext', top.HEURIST.detailTypes.lookups['freetext']);
+            }else{
+                el.disabled = true;
+            }
+        }
+                
+        
 
         //disable if reserved
         _toggleAll(disable_status || disable_fields, disable_status);
@@ -644,16 +663,11 @@ function DetailTypeEditor() {
                 ?_detailType[fi.dty_FieldSetRectypeID]:_detailType[fi.dty_PtrTargetRectypeIDs]) );
 
         if (_dtyID<0){
-            $("#typeValue").show();
-            $("#dty_Type").hide();
             Dom.get("dty_ID").innerHTML = '<span style="color:#999">will be automatically assigned</span>';
             document.title = "Create new base field type";
         }else{
-            $("#typeValue").hide();
-            $("#dty_Type").show();
             Dom.get("dty_ID").innerHTML =  _dtyID;
             document.title = "Field Type # " + _dtyID+" '"+_detailType[fi.dty_Name]+"'";
-
             var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
             var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
             var warningImg = "<img src='" + top.HEURIST.baseURL_V3 + "common/images/url_warning.png'>";
@@ -664,6 +678,14 @@ function DetailTypeEditor() {
                 Dom.get("statusMsg").innerHTML = warningImg + "WARNING: Changes to this field type will affect all record types (" + iusage + ") in which it is used";
 
             }
+        }
+                
+        if (Hul.isempty(_dty_Type)){
+            $("#typeValue").show();
+            $("#dty_Type").hide();
+        }else{
+            $("#typeValue").hide();
+            $("#dty_Type").show();
         }
     }
 

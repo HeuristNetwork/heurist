@@ -1,5 +1,3 @@
-<!--
-
 /*
 * Copyright (C) 2005-2016 University of Sydney
 *
@@ -15,7 +13,7 @@
 */
 
 /**
-* selectFieldType.html
+* selectFieldType.js
 * select type for Heurist field
 *
 * @author      Tom Murtagh
@@ -30,8 +28,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
--->
 $.getMultiScripts = function(arr, path) {
     var _arr = $.map(arr, function(scr) {
         return $.getScript( (path||"") + scr );

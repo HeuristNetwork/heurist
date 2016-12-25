@@ -45,6 +45,7 @@ function addNodes() {
         // Restore location data
         var record = getSetting(d.id);
         if(record) {
+//console.log('restore id '+d.id+'   '+record);            
             var obj = JSON.parse(record);
             if("x" in obj) {
                 d.x = obj.x;
@@ -62,11 +63,18 @@ function addNodes() {
 
         var  node = d3.select(this);
         
+        
+        //add infobox
+        if(true || settings.isDatabaseStructure){
+            createOverlay(0, 0, "record", "id"+d.id, d, node);                  
+        }
+        
         //add outer circle
         node.append("circle")
                     .attr("r", function(d) {
                         return getEntityRadius(d.count);
                     })
+                    .style('fill-opacity','0.5')
                     .attr("class", "background")
                     .attr("fill", entitycolor);        
         
@@ -81,13 +89,25 @@ function addNodes() {
                         }
                         return .25;
                     });
-        
-        
-        
-        //add infobox
-        if(true || settings.isDatabaseStructure){
-            createOverlay(0, 0, "record", "id"+d.id, d, node);                  
-        }
+
+        //add icon
+        node.append("svg:image")
+                  .attr("class", "icon") 
+                  .attr("xlink:href", function(d) {
+                        if(d.image){
+                            return d.image;
+                        }else{
+                            return '';
+                        }
+                  })
+                  .attr("x", -iconSize/2)
+                  .attr("y", -iconSize/2)
+                  .attr("height", iconSize)
+                  .attr("width", iconSize);
+
+
+                           
+        var gravity = getSetting(setting_gravity);
         
         // Attributes
         node  //d3.select(this)
@@ -163,6 +183,40 @@ function dragmove(d, i) {
             d.x += d3.event.dx;
             d.y += d3.event.dy;
             
+            /* Update the location in localstorage
+            var record = getSetting(d.id); 
+            //console.log("Record", record);
+            var obj;
+            if(record === null) {
+                obj = {}; 
+            }else{
+                obj = JSON.parse(record);
+            }  
+            
+            // Set attributes 'x' and 'y' and store object
+            obj.px = d.px;
+            obj.py = d.py;
+            obj.x = d.x;
+            obj.y = d.y;
+            putSetting(d.id, JSON.stringify(obj));
+            */
+        }   
+    });
+
+    // Update nodes & lines
+    tick();                                                          
+
+}
+
+/** Called when a dragging event ends */
+function dragend(d, i) {
+    // Update nodes & lines
+    var gravity = getSetting(setting_gravity);
+    d.fixed = ( gravity !== "aggressive");
+//console.log("Fixed: ", d.fixed);
+    tick();
+    
+    
             // Update the location in localstorage
             var record = getSetting(d.id); 
             //console.log("Record", record);
@@ -179,20 +233,8 @@ function dragmove(d, i) {
             obj.x = d.x;
             obj.y = d.y;
             putSetting(d.id, JSON.stringify(obj));
-        }   
-    });
-
-    // Update nodes & lines
-    tick();                                                          
-
-}
-
-/** Called when a dragging event ends */
-function dragend(d, i) {
-    // Update nodes & lines
-    d.fixed = (getSetting(setting_gravity) !== "aggressive");
-//console.log("Fixed: ", d.fixed);
-    tick();
+    
+//console.log("save pos "+d.id+'  '+JSON.stringify(obj));    
     
     // Check if force may resume
     if(gravity !== "off") {

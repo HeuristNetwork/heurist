@@ -60,11 +60,14 @@ window.hWin.HEURIST4.ui = {
     //
     // helper function to add option to select element
     //
-    addoption: function(sel, value, text)
+    addoption: function(sel, value, text, disabled)
     {
         var option = document.createElement("option");
         option.text = text;
         option.value = value;
+        if(disabled===true){
+            option.disabled = true;
+        }
         try {
             // for IE earlier than version 8
             sel.add(option, sel.options[null]);
@@ -88,7 +91,7 @@ window.hWin.HEURIST4.ui = {
         }
 
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
-            var idx,key,title;
+            var idx,key,title,disabled;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
                 {
@@ -98,9 +101,11 @@ window.hWin.HEURIST4.ui = {
                         {
                             key = topOptions[idx];
                             title = topOptions[idx];
+                            disabled = false;
                         }else{
                             key = topOptions[idx].key;
                             title = topOptions[idx].title;
+                            disabled = (topOptions[idx].disabled===true);
                         }
                         if(!window.hWin.HEURIST4.util.isnull(title))
                         {
@@ -109,7 +114,7 @@ window.hWin.HEURIST4.ui = {
                                 grp.label =  title;
                                 selObj.appendChild(grp);
                             }else{
-                                window.hWin.HEURIST4.ui.addoption(selObj, key, title);
+                                window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled);
                             }
 
                         }

@@ -464,7 +464,16 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
 
                     //reset settings for empty database
                     if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
-                        localStorage.clear();    
+                        //localStorage.clear();    
+                    }
+                    var dbkey = 'db'+window.hWin.HAPI4.database;
+                    if(getSetting(dbkey)==null){
+                        putSetting(dbkey, '1');7
+                        $('#divSvg').css('top','7em');
+                        $('#divHint').show();
+                    }else{
+                        $('#divSvg').css('top','5em');
+                        $('#divHint').hide();
                     }
                     
                     visualizeData();

@@ -256,3 +256,13 @@ text.shadow {
     width: 16;
     height: 16;
 }
+.ui-icon-link-streight{
+    background-image: url(link_streight.png) !important; 
+    width: 16;
+    height: 16;
+}
+.ui-icon-link-curved{
+    background-image: url(link_curved.png) !important; 
+    width: 16;
+    height: 16;
+}

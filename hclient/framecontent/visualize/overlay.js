@@ -194,7 +194,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         
         if(parent_node){
             overlay  = parent_node.append("g")
-                     .attr("transform", "translate(" +(x-iconSize/2-3)+ "," +(y-iconSize/2-3)+ ")");
+                     .attr("transform", "translate(" +(x-iconSize/2-6)+ "," +(y-iconSize/2-6)+ ")");
         }else{
         
             overlay = svg.append("g")
@@ -212,7 +212,6 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
    
         }
-        
     
         // Draw a semi transparant rectangle       
         var rect = overlay.append("rect")
@@ -227,8 +226,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           //.on("drag", overlayDrag);
                                     
         //rect.append("title").text(rollover);                    
-                                         
-        //Adding icon
+                            
+        
+        /*Adding icon
         var icon = overlay
                   .append("svg:image")
                   .attr("class", "icon") 
@@ -245,7 +245,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("width", iconSize);
                     
         icon.append("title").text(rollover);         
-        
+        */
         // Adding text 
         var offset = 26;  
         var indent = 5;
@@ -342,7 +342,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("width", 30)
                   .on("mouseup", function(d) {
                       event.preventDefault();
-                      _editRecStructure(rty_ID);
+                      //_editRecStructure(rty_ID);
+                      
+                      _addNewLinkField(rty_ID);
                   });;  
         // add link text        
         btnAddLink.append("text")
@@ -469,4 +471,33 @@ function removeOverlays() {
             $(this).remove();
         })
     });
+}
+
+function _addNewLinkField(rty_ID, target_ID){
+    
+            var body = $(this.document).find('body');
+            var dim = { h:400, w:500 };//Math.max(900, body.innerWidth()-10) };                
+            
+            var target_ID = 10;
+            
+            var url = window.hWin.HAPI4.basePathV3 +
+                "admin/structure/fields/selectLinkField.html?&db="+window.hWin.HAPI4.database
+                   +'&rty_ID='+rty_ID;
+                   //+'&target_ID='+target_ID;
+                
+            window.hWin.HEURIST4.msg.showDialog(url, 
+                {
+                    "close-on-blur": false,
+                    //"no-resize": true,
+                    //"no-close": true, //hide close button
+                    title: 'Select or Create new link field type',
+                    height: dim.h,
+                    width: dim.w,
+                    callback: function(context) {
+                        if(context!="" && context!=undefined) {
+                            
+                        }
+                    }
+              });
+                
 }

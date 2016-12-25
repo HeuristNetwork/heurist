@@ -576,10 +576,11 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     //console.log(zoom);
 
                     var bound = Math.pow(2, zoom);
-                    var url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
+                    var tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
                     + (source.mimeType.label == "image/png" ? ".png" : ".gif");
-                    //console.log("URL: " + url);
-                    return url;
+                    //console.log("URL: " + tile_url);
+               
+                    return tile_url;
                 };
 
             }

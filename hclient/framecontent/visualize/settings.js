@@ -119,11 +119,11 @@ function handleSettingsInUI() {
     //
     $("input[name='gravityMode'][value='" +getSetting(setting_gravity)+ "']").attr("checked", true);
     
-    $('#gravityMode0').button({icons: { primary: 'ui-icon-gravity0' }, text:false})
+    $('#gravityMode0').button() //{icons: { primary: 'ui-icon-gravity0' }, text:false})
         .click( function(){ setGravity('off') });
-    $('#gravityMode1').button({icons: { primary: 'ui-icon-gravity1' }, text:false})
+    $('#gravityMode1').button() //{icons: { primary: 'ui-icon-gravity1' }, text:false})
         .click( function(){ setGravity('touch') });
-    $('#gravityMode2').button({icons: { primary: 'ui-icon-gravity2' }, text:false})
+    $('#gravityMode2').button() //{icons: { primary: 'ui-icon-gravity2' }, text:false})
         .click( function(){ setGravity('aggressive') });
     $( "#setGravityMode" ).buttonset();    
     
@@ -167,9 +167,9 @@ function handleSettingsInUI() {
     //------------ LINKS ----------
 
     $("input[name='linksMode'][value='" +getSetting(setting_linetype)+ "']").attr("checked", true);
-    $('#linksMode0').button({icons: { primary: 'ui-icon-arrow-1-ne' }, text:false})
+    $('#linksMode0').button({icons: { primary: 'ui-icon-link-streight' }, text:false})
         .click( setLinkMode );
-    $('#linksMode1').button({icons: { primary: 'ui-icon-arrowreturn-1-e' }, text:false})
+    $('#linksMode1').button({icons: { primary: 'ui-icon-link-curved' }, text:false})
         .click( setLinkMode );
     $( "#setLinksMode" ).buttonset();    
     
@@ -178,7 +178,9 @@ function handleSettingsInUI() {
     $('#linksLength').val(linksLength).change(function(){
         var newval = $(event.target).val();
         putSetting(setting_linelength, newval);
-        visualizeData();
+        if(getSetting(setting_gravity) != "off"){
+            visualizeData();    
+        }
     });
     
     var linksWidth = getSetting(setting_linewidth);    
@@ -195,8 +197,8 @@ function handleSettingsInUI() {
     });
     
     $("#linksPathColor")
-        .addClass('ui-icon ui-icon-loading-status-circle')
-        .css({'color':getSetting(setting_linecolor)})
+        //.addClass('ui-icon ui-icon-loading-status-circle')
+        .css({'font-size':'1.8em','font-weight':'bold','color':getSetting(setting_linecolor)})
         .colpick({
             layout: 'hex',
             onSubmit: function(hsb, hex, rgb, el) {
@@ -211,7 +213,7 @@ function handleSettingsInUI() {
                 $(el).colpickHide();
             }});
     $("#linksMarkerColor")
-        .addClass('ui-icon ui-icon-triangle-1-ne')
+        .addClass('ui-icon ui-icon-triangle-1-e')
         .css({'color':getSetting(setting_markercolor)})
         .colpick({
             layout: 'hex',

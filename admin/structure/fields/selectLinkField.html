@@ -1,0 +1,133 @@
+<!--
+
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* selectLinkField.html
+* select link field type (pointer or relationship maker) and add it recordtype structure
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+-->
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Select or Create new link field type</title>
+
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+
+        <style>
+        	.ft_col{
+				display:inline-block;
+				width:80%;
+				vertical-align:top;
+				padding-left:10px;
+				min-width:280px;
+        	}
+        	.ft_col > h2{
+        		padding-bottom:1em;
+        	}
+        	.ft_col > label{
+				color: black; 
+                /*#6A7C99;*/
+				font-weight:bold;
+    			font-size: 13px;
+    			line-height: 25px;
+				padding-top:1em;
+    			padding-left:0.5em;
+        	}
+        	.ft_notes{
+				padding-left:2em;
+				padding-bottom:1em;
+        	}               
+        	.ft_preview{
+				font-size:0.7em;
+				background-color: #ECF1fB !important;
+				margin-bottom:2em;
+                max-width:240px;
+                margin-left:5ex;
+                margin-right:5px;
+        	}
+        </style>
+    </head>
+
+    <body class="popup" style="overflow:none">
+        
+        <script src='../../../admin/structure/fields/selectLinkField.js'></script>
+        
+		<div style="width:100%;height:90%;padding:10px 10px 10px 0;overflow:none">
+
+			<div class="ft_col">
+
+                <div class="ft_preview">
+                    <label>Target Record Type</label><select id="sel_target_rectype_id"></select>
+                </div>
+
+            			
+			    <input type="radio" name="ft_type" id="t_resourse" value="resource">
+			 	<label for="t_resourse">Record pointer</label>                                                         
+			    <div class="ft_notes">
+			    	A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
+                    <a id="hint_more_info1" class="ft_notes">more...</a>
+			    </div>
+                <div id="div_more_info1" style="display:none; padding:5px">which will pop up the text about about using record pointers</div>
+                
+                <div class="ft_preview">
+                    <select id="sel_resource_fields"></select>
+                </div>
+                
+
+			    <input type="radio" name="ft_type" id="t_relmaker" value="relmarker">
+			 	<label for="t_relmaker">Relationship maker</label>                                                         
+			    <div class="ft_notes">
+			    	A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
+                    <a id="hint_more_info2" class="ft_notes">more...</a>
+			    </div>
+                <div id="div_more_info2" style="display:none; padding:5px">which will pop up the text about about using relationship markers</div>
+
+                <div class="ft_preview">
+                    <select id="sel_relmarker_fields"></select>
+                </div>
+                
+			
+		        <div style="text-align:center;width:100%;padding-top:2em;">
+		            <button type="button" id="btnSelect" disabled="disabled"
+		            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
+		            role="button" aria-disabled="false" style="color:lightgray;padding:4px 10px;font-size: 1.4em;">
+		            <span class="ui-button-text">Select</span>
+		            </button>
+		        </div>
+			</div>
+
+
+        </div>
+
+    </body>
+</html>

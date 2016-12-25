@@ -1375,7 +1375,7 @@ function EditRecStructure() {
             var dty_ID = arrDty_ID[k];
             if(Hul.isnull(recDetTypes[dty_ID])){ //not added
                 var arrs = detTypes[dty_ID].commonFields;
-                //add new detail type
+                // add new detail type
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
                 var def_width = 80;  // default width, used by single line text fields
                 var dt_type = arrs[fi.dty_Type];

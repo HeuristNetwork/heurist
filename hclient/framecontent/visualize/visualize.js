@@ -226,7 +226,7 @@ feMerge.append("feMergeNode")
 }
 
 var iconSize = 16; // The icon size
-var circleSize = 8; //iconSize * 0.75; // Circle around icon size
+var circleSize = 12; //iconSize * 0.75; // Circle around icon size
 var currentMode = 'infoboxes'; //or 'icons';
 var maxEntityRadius = 40;
 var maxLinkWidth = 25;
@@ -258,7 +258,7 @@ function executeFormula(count, maxSize) {
 
 /** Returns the line length */
 function getLineLength(record) {
-    console.log("Default line length function");
+//console.log("Default line length function");
     return getSetting(setting_linelength);
 }
 
@@ -349,15 +349,30 @@ function visualizeData() {
     // addLabels("namelabel", getSetting(setting_textcolor));
     }
     //DEBUG console.log("EVERYTHING HAS BEEN ADDED");
-
+    /*
     // Get everything into positon when gravity is off.
     if(getSetting(setting_gravity) == "off") {
+        force.stop();
+        
         for(var i=0; i<10; i++) {
             force.tick();
         }
+        
+        force.tick();
         d3.selectAll(".node").attr("fixed", true);
-        force.stop();
+        
+    }else{
+        force.start();
     }
+    */
+    
+    /*var gravity = getSetting(setting_gravity);
+    svg.selectAll(".node")
+       .attr("fixed", function(d, i) {
+            d.fixed = (gravity == "off");
+            return d.fixed;
+       }); 
+    d.fixed = true;*/
     
     if(settings.isDatabaseStructure){
         
@@ -460,11 +475,13 @@ function addForce() {
                   .links(data.links)
                   .charge(attraction)        // Using the attraction setting
                   .linkDistance(function(d) {         
-                     return settings.getLineLength.call(this, d.target);
+                     var linkDist = settings.getLineLength.call(this, d.target);
+                     return linkDist;//linkDist;
                   })  // Using the linelength setting 
                   .on("tick", tick)
                   .size([width, height])
                   .start();
+                  
     return force;
 }  
 
