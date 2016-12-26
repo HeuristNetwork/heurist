@@ -1,5 +1,5 @@
 /**
-* H4 connections between records
+* Widget for network diagram of a result set. Calls visualize.js
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

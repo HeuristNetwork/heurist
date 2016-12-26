@@ -75,7 +75,7 @@ var svg;        // The SVG where the visualisation will be executed on
         // Select and clear SVG.
         svg = d3.select("#d3svg");
         svg.selectAll("*").remove();
-        svg.append("text").text("Processing...").attr("x", "25").attr("y", "25");   
+        svg.append("text").text("Building graph ...").attr("x", "25").attr("y", "25");   
         
         
         // Default plugin settings
