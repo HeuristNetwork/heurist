@@ -694,7 +694,9 @@ $.widget( "heurist.search_faceted", {
                             detail: 'ids', 
                             source:this.element.attr('id'), 
                             qname: this.options.query_name,
-                            rules: this.options.params.rules
+                            rules: this.options.params.rules,
+                            //to keep info what is primary record type in final recordset
+                            primary_rt: this.options.params.rectypes[0] 
                             }; //, facets: facets
             
             //perform search

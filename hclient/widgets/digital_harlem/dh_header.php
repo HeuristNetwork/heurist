@@ -132,10 +132,14 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
         <?php
         if(true){
         // Building query
-        $query = "SELECT rec_ID id, rec_Title as title, d1.dtl_Value as content, d2.dtl_Value as ord"
-        ." FROM Records left join recDetails d2 on rec_ID=d2.dtl_recID and d2.dtl_DetailTypeID=94, recDetails d1 "
-        ." WHERE rec_ID=d1.dtl_recID and rec_RecTypeID=25 and d1.dtl_DetailTypeID=4 "
-        ." ORDER BY d2.dtl_Value";
+        $query = 'SELECT rec_ID id, rec_Title as title, d1.dtl_Value as content, d2.dtl_Value as ord, '
+        .' d3.dtl_Value as btn_title'
+        .' FROM Records '
+        .' left join recDetails d2 on rec_ID=d2.dtl_recID and d2.dtl_DetailTypeID=94 '  //order 
+        .' , recDetails d1, recDetails d3 '   
+        .' WHERE rec_ID=d1.dtl_recID and rec_RecTypeID=25 and d1.dtl_DetailTypeID=4 and ' //content
+        .' rec_ID=d3.dtl_recID and d3.dtl_DetailTypeID=1 '   //title
+        .' ORDER BY d2.dtl_Value';
 
         
         //find Web Content (25) for header buttons ---------------------------------------
@@ -156,8 +160,9 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
             $res = $system->get_mysqli()->query($query);
             $stats = array();
             while($row = $res->fetch_assoc()) { // each loop is a complete table row
-                if($row["ord"]>0){
-                    if($appcode>0){
+             
+
+                if($appcode>0){
                         //detect app
                         $list = mysql__select_list($system->get_mysqli(), 'recDetails', 'dtl_Value', 
                             'dtl_recID='.$row["id"].' and dtl_DetailTypeID=154'); //145
@@ -165,21 +170,26 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
                         $isNotFound = true;
                         if(is_array($list))
                         foreach($list as $val){
-                            if($val==$appcode){
+                            if($val==$appcode ){
                                 $isNotFound = false;
                                 break;
                             }
                         }
                         if($isNotFound) continue;
-                    }
+                }
+            
+                $btn_title = $row['btn_title']?$row['btn_title']:$row['title'];
+                
+                if($row["ord"]>0){
                     print '<div class="menubutton">';
-                    print '<a class="menuitem" href="javascript:void(0) onClick="{ 
-                        window.hWin.HEURIST4.msg.showMsgDlg(\'#webcontent'.$row["id"].'\', null,\''.$row["title"].'\');}">'
-                        .$row["title"].'AAAA</a></div>';
+                    print '<a class="menuitem" href="javascript:void(0)" onClick="{ 
+                        window.hWin.HEURIST4.msg.showMsgDlg(\'#webcontent'.$row["id"].'\', null,\''.$btn_title.'\');}">'
+                        .$btn_title.'</a></div>';
                 }else{
+                    //not ordered - means should be auto opened
                     ?>
                     <script>
-                        window.hWin.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');
+                        window.hWin.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$btn_title?>');
                     </script>
                     <?php
                 }
@@ -191,7 +201,7 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
                 </div>
 
                 <?php
-            }
+            }//while
             }
         }
         ?>

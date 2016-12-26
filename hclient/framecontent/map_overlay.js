@@ -808,6 +808,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         // Query
         if(source.query !== undefined) {
             //console.log("Query: " + source.query);
+            
+            
 
             var request = null;
             try{
@@ -815,7 +817,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 if(query && query['q']){
                     request = { q: query['q'], 
                         rules: query['rules'],
-                        w: query['w']?query['w']:'all'}; 
+                        w: query['w']?query['w']:'all',
+                        //keep primary rt in case faceted search (need for DH) to distinguish what info to show in map popup
+                        primary_rt:query['primary_rt']}; 
                 }
             }catch(err){
             }

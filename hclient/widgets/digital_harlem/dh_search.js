@@ -85,9 +85,9 @@ $.widget( "heurist.dh_search", {
         var query;
         // "Featured Individuals"
         if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
-            query = {"t":"19","f:144":"4749"};
+            query = {"t":"19","f:144":"4749,4819"};
         }else{
-            query = {"t":"19","f:144":"532,4749"};
+            query = {"t":"19","f:144":"4801,4819"};
         }
         
         var request = { q: query,

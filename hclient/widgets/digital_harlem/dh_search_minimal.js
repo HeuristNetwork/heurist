@@ -62,8 +62,9 @@ function hSearchMinimalDigitalHarlem() {
 //console.log('get result '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug ) );
                 window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
+                var primary_rt = request.primary_rt;
                 var original_recordset = new hRecordSet(response.data);
-                var final_recordset = _prepareResultSet( original_recordset );
+                var final_recordset = _prepareResultSet( original_recordset, primary_rt );
 
 //console.log('prepared '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
                 window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
@@ -242,7 +243,7 @@ function hSearchMinimalDigitalHarlem() {
     // 8. for person - find address that is residence and add link to other addresses within the same timeframe
     //                 if residence timeframe not defined we assume  it covers all the time
     //
-    function _prepareResultSet( recordset ){
+    function _prepareResultSet( recordset, primary_rt ){
 
         var res_records = {}, res_orders = [];
 
@@ -274,7 +275,8 @@ function hSearchMinimalDigitalHarlem() {
                         recordset.setFld(record, 'rec_Icon', 'term4326' );
                         recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //special record type to distiguish 
                         recordset.setFld(record, 'rec_Info',
-                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database+"&recID="+recID);
+                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                +window.hWin.HAPI4.database+"&recID="+recID);
 
                     }else{
 
@@ -294,11 +296,14 @@ function hSearchMinimalDigitalHarlem() {
                                 recordset.setFld(record, DT_ENDDATE,   recordset.fld(rel_event, DT_ENDDATE) );
 
                                 //find persons that relates to this event
-                                var rels2 = recordset.getRelationRecords(eventID, RT_PERSON);
+                                //do not find person in case this is event search
+                                var rels2 = primary_rt==RT_EVENT?[]:recordset.getRelationRecords(eventID, RT_PERSON);
+                                
                                 if(rels2.length<1){ //no related person - event related to address directly
                                     //3a. this is event->address
                                     recordset.setFld(record, 'rec_Info',
-                                        window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database
+                                        window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                        +window.hWin.HAPI4.database
                                         +"&recID="+eventID+"&addrID="+recID);
 
                                     //add links for this event
