@@ -1374,10 +1374,33 @@ console.log('tileloaded 2');
             var item = this,
                 html = item.getInfoHtml(),
                 ds = item.dataset,
-                placemark = item.placemark,
+                placemark, placemark_type,
                 show_bubble_on_map = false;
                                                               //text-align:right;
-            show_bubble_on_map = (item.getType() != "" && placemark.api!=null);
+            if($.isArray(item.placemark)){
+                for(var i=0;i<item.placemark.length;i++){
+                    if(item.placemark[i] instanceof mxn.Marker){
+                        placemark = item.placemark[i];
+                        placemark_type = "marker";
+                        break;
+                    }
+                }
+                if(!placemark){
+                    placemark = item.placemark[0];
+                    if(placemark instanceof mxn.Marker){
+                        placemark_type = "marker";
+                    }else{
+                        placemark_type = "objecct";    
+                    }
+                    
+                }
+            }else{
+                placemark = item.placemark;
+                placemark_type = item.getType();
+            }                
+                                                              
+                                                              
+            show_bubble_on_map = (placemark_type != "" && placemark.api!=null);
             var bubble_header = '<div style="width:99%;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'
             var ed_html =  '';
             var popupURL = null;
@@ -1456,7 +1479,7 @@ ed_html +
             if (show_bubble_on_map)
             {
 
-                if (item.getType() == "marker") {
+                if (placemark_type == "marker") {
 
                     if(popupURL){
                         $.get(popupURL, function(responseTxt, statusTxt, xhr){

@@ -227,8 +227,9 @@ function hSearchMinimalDigitalHarlem() {
 
 
     var DH_RECORDTYPE = 99913, //special record type to display DH entities on map
-        DH_RECORDTYPE_SECONDARY = 99914, //special record type to display secondary events and residential addresses
-    DH_LINKS = 9999999;  //special record type
+        DH_RECORDTYPE_SECONDARY = 99914, //special record type to display secondary events (FOR EVENTS search ONLY)
+        DH_RECORDTYPE_RESIDENCES = 99915, //special record type to display residential addresses (FOR EVENTS search ONLY)
+        DH_LINKS = 9999999;  //special record type
 
 
 
@@ -245,6 +246,8 @@ function hSearchMinimalDigitalHarlem() {
     //
     function _prepareResultSet( recordset, primary_rt ){
 
+console.log('primary '+primary_rt);
+        
         var res_records = {}, res_orders = [];
 
         //1. find address records
@@ -279,7 +282,183 @@ function hSearchMinimalDigitalHarlem() {
                                 +window.hWin.HAPI4.database+"&recID="+recID);
 
                     }else{
+                        
+                        if(primary_rt==RT_EVENT){
 
+                            //apprently we may need 2 loops: separately for events and then for persons
+                            for(i=0; i<rels.length; i++){ //all records related to addresses
+                                //3. if event try to find related persons
+                                if(rels[i]['relrt'] == RT_EVENT){
+
+                                    var eventID = rels[i]['related'];
+                                    //var relrec = relationships[rels[i]['relation']];
+                                    var rel_event = records[ eventID ];
+
+                                    //assign to address record values from event record (rel_event) and change its rectype
+                                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //change record type 
+                                    recordset.setFld(record, 'rec_Icon',   'term'+recordset.fld(rel_event, DT_EVENT_TYPE) );
+                                    recordset.setFld(record, 'rec_Title',  recordset.fld(rel_event, 'rec_Title') );
+                                    recordset.setFld(record, DT_STARTDATE, recordset.fld(rel_event, 'dtl_StartDate' ) );
+                                    recordset.setFld(record, DT_ENDDATE,   recordset.fld(rel_event, DT_ENDDATE) );
+                                    recordset.setFld(record, 'rec_Info',
+                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                            +window.hWin.HAPI4.database
+                                            +"&recID="+eventID+"&addrID="+recID);
+
+                                    //add empty links for this event
+                                    if(!links[ eventID ]){
+                                        links[ eventID ] = {primary:[], secondary:[], residence:[], is_event:true, path:[] };
+                                    }
+                                            
+                                    //verify: is it main crime location?
+                                    var relrec = relationships[rels[i]['relation']];
+                                    var relation_type = recordset.fld(relrec, DT_RELATION_TYPE);
+                                    var order = Number(recordset.fld(relrec, DT_EVENT_ORDER));
+
+                                    //Happened Entirely at 4533
+                                    //Happened Primarily at 4536
+                                    if ((relation_type==TERM_MAIN_CRIME_LOCATION  ||
+                                        relation_type==TERM_EVENT_PRIME_LOCATION)
+                                        && (links[ eventID ].primary.length<1) ){  //4533 4536
+
+                                        links[ eventID ].primary.push( recID );
+                                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); 
+                                    }else{
+                                        links[ eventID ].secondary.push( recID );
+                                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE_SECONDARY);
+                                    }
+
+                                    if(order>0){ //if order is defined current address is node of path
+                                        links[ eventID ].path.push({order:order, recID:recID});
+                                    }
+
+                                    //find persons that relates to this event
+                                    //do not find person in case this is event search
+                                    /*
+                                    var rels2 = recordset.getRelationRecords(eventID, RT_PERSON);
+
+                                    if(rels2.length>0){ //we have involved related person
+                                        //3b. this is address->event->person
+                                        for(j=0; j<rels2.length; j++){
+                                            var personID = rels2[j]['related'];
+                                            if(links[ eventID ].residence.indexOf(personID)<0){
+                                                links[ eventID ].residence.push( personID );
+                                            }
+                                        }//for persons
+                                    }
+                                    */
+                                }else if(rels[i]['relrt']==RT_PERSON) {
+                                    //change address to residence of this person
+                                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE_RESIDENCES); //change record type 
+                                    
+                                                    
+                                    var relrec = relationships[rels[i]['relation']];
+                                    var personID = rels[i]['related'];
+                                    var rel_person = records[ personID ];
+                                    var relation_type = recordset.fld(relrec, DT_RELATION_TYPE);
+
+                                    //role at this address: resident (primary)
+                                    recordset.setFld(record, 'rec_Icon',     'term'+relation_type );   
+
+                                    var recInfoUrl = window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                                    +window.hWin.HAPI4.database+"&recID="+
+                                                    personID+"&addrID="+recID; //+"&eventID="+eventID
+
+                                    recordset.setFld(record, 'rec_Info', recInfoUrl);
+                                    recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');
+
+                                    recordset.setFld(record, 'rec_Title',  recordset.fld(relrec, 'rec_Title') );
+                                    recordset.setFld(record, DT_STARTDATE, recordset.fld(relrec, 'dtl_StartDate' ) );
+                                    recordset.setFld(record, DT_ENDDATE,   recordset.fld(relrec, DT_ENDDATE) );
+
+                                    var rels2 = recordset.getRelationRecords(personID, RT_EVENT);
+                                    if(rels2.length>0){ //events this person is involded into
+                                        //3b. this is address->event->person
+                                        for(j=0; j<rels2.length; j++){
+                                            var eventID = rels2[j]['related'];
+                                            if(!links[ eventID ]){
+                                                links[ eventID ] = {primary:[], secondary:[], residence:[], is_event:true, path:[] };
+                                            }
+                                            if(links[ eventID ].residence.indexOf(recID)<0){
+                                                links[ eventID ].residence.push( recID );
+                                            }
+                                        }//for events
+                                    }
+                                    
+                                }
+                            }//for all records related to address
+
+
+                        } else if(primary_rt==RT_PERSON) {
+
+                            for(i=0; i<rels.length; i++){ //all records related to addresses
+                                if(rels[i]['relrt']==RT_PERSON){
+                                    var relrec = relationships[rels[i]['relation']];
+                                    var personID = rels[i]['related'];
+                                    var rel_person = records[ personID ];
+
+                                    var relation_type = recordset.fld(relrec, DT_RELATION_TYPE);
+
+                                    recordset.setFld(record, 'rec_Icon', 'term'+relation_type );   //role at this address: resident (primary)
+
+                                    var recInfoUrl = window.hWin.HAPI4.basePathV4 
+                                        + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database
+                                        +"&recID="+recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
+                                        
+                                    recordset.setFld(record, 'rec_Info', recInfoUrl);
+                                    recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');
+
+                                    recordset.setFld(record, 'rec_Title',  recordset.fld(relrec, 'rec_Title') );
+                                    recordset.setFld(record, DT_STARTDATE, recordset.fld(relrec, 'dtl_StartDate' ) );
+                                    recordset.setFld(record, DT_ENDDATE,   recordset.fld(relrec, DT_ENDDATE) );
+
+                                    //add links for this person
+                                    if(!links[ personID ]){
+                                        links[ personID ] = {primary:[], secondary:[]};
+                                    }
+                                    //verify: is it residence
+                                    if(relation_type==TERM_ROLE_RESIDENT){  //4527
+                                        links[ personID ].primary.push( recID );
+                                    }else{
+                                        links[ personID ].secondary.push( recID );
+                                    }
+                                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE);
+                                
+                                }else {
+                                    
+                                    var eventID = rels[i]['related'];
+                                    //var relrec = relationships[rels[i]['relation']];
+                                    var rel_event = records[ eventID ];
+
+                                    //assign to address record values from event record (rel_event) and change its rectype
+                                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //change record type 
+                                    recordset.setFld(record, 'rec_Icon',   'term'+recordset.fld(rel_event, DT_EVENT_TYPE) );
+                                    recordset.setFld(record, 'rec_Title',  recordset.fld(rel_event, 'rec_Title') );
+                                    recordset.setFld(record, DT_STARTDATE, recordset.fld(rel_event, 'dtl_StartDate' ) );
+                                    recordset.setFld(record, DT_ENDDATE,   recordset.fld(rel_event, DT_ENDDATE) );
+                                    recordset.setFld(record, 'rec_Info',
+                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                            +window.hWin.HAPI4.database
+                                            +"&recID="+eventID+"&addrID="+recID);
+
+                                    var rels2 = recordset.getRelationRecords(eventID, RT_PERSON);
+                                    if(rels2.length>0){
+                                        for(j=0; j<rels2.length; j++){
+                                            var personID = rels2[j]['related'];
+                                            if(!links[ personID ]){
+                                                links[ personID ] = {primary:[], secondary:[]};
+                                            }
+                                            if(links[ personID ].secondary.indexOf(recID)<0){
+                                                links[ personID ].secondary.push( recID );
+                                            }
+                                        }
+                                    }
+                                    
+                                    
+                                }
+                            }//for
+                        }
+/* old version 
                         for(i=0; i<rels.length; i++){
                             //3. if event try to find related persons
                             if(rels[i]['relrt'] == RT_EVENT){
@@ -297,9 +476,9 @@ function hSearchMinimalDigitalHarlem() {
 
                                 //find persons that relates to this event
                                 //do not find person in case this is event search
-                                var rels2 = primary_rt==RT_EVENT?[]:recordset.getRelationRecords(eventID, RT_PERSON);
+                                var rels2 = recordset.getRelationRecords(eventID, RT_PERSON);
                                 
-                                if(rels2.length<1){ //no related person - event related to address directly
+                                if(primary_rt==RT_EVENT || rels2.length<1){ //no related person - event related to address directly
                                     //3a. this is event->address
                                     recordset.setFld(record, 'rec_Info',
                                         window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
@@ -322,7 +501,8 @@ function hSearchMinimalDigitalHarlem() {
                                         && (links[ eventID ].primary.length<1) ){  //4533 4536
                                         
                                         links[ eventID ].primary.push( recID );
-                                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE);
+                                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); 
+                                        //(primary_rt==RT_EVENT)?DH_RECORDTYPE:DH_RECORDTYPE_SECONDARY);
                                     }else{
                                         links[ eventID ].secondary.push( recID );
                                         recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE_SECONDARY);
@@ -330,6 +510,21 @@ function hSearchMinimalDigitalHarlem() {
 
                                     if(order>0){ //if order is defined current address is node of path
                                         links[ eventID ].path.push({order:order, recID:recID});
+                                    }
+                                    
+                                    if(rels2.length>0){
+                                        //link residences of persons involved to event
+                                        for(j=0; j<rels2.length; j++){
+                                            var personID = rels2[j]['related'];
+                                            var rel_person = records[ personID ];
+                                            //add links for this person
+                                            if(!links[ personID ]){
+                                                links[ personID ] = {primary:[], secondary:[]};
+                                            }
+                                            //events are always secondary for person links (primary is residency)
+                                            links[ personID ].secondary.push( recID );
+                                        }//for persons
+                                        
                                     }
 
 
@@ -379,15 +574,15 @@ function hSearchMinimalDigitalHarlem() {
                                 //verify: is it residence
                                 if(relation_type==TERM_ROLE_RESIDENT){  //4527
                                     links[ personID ].primary.push( recID );
-                                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE_SECONDARY);
+                                    recordset.setFld(record, 'rec_RecTypeID', (primary_rt==RT_EVENT)?DH_RECORDTYPE_SECONDARY:DH_RECORDTYPE);
                                 }else{
                                     links[ personID ].secondary.push( recID );
                                     recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE);
                                 }
-
-                            }
+                                
+                            }//if person
                         }
-
+*/
                     }
                     
                     res_records[recID] = record;
@@ -464,7 +659,7 @@ function hSearchMinimalDigitalHarlem() {
                 }
                 
 
-                var already_linked_secondary = [];
+                var already_linked_secondary = [], already_linked_residence = [];
                 var link_all_orphans = false;
                 do{
                                 
@@ -479,9 +674,35 @@ function hSearchMinimalDigitalHarlem() {
 
                     if(pnt1==null) continue;  //no geo data - skip
 
-                    var shapes = [];
-                    
+                    //var shapes = [];
 
+                    if(links[recID].residence){
+                    for(j=0; j<links[recID].residence.length; j++){
+
+                        if(already_linked_residence.indexOf(links[recID].residence[j])>-1) continue;
+                        
+                        residenceAddr = res_records[ links[recID].residence[j] ]; //record id
+                        var d_start2 = recordset.fld(residenceAddr, 'dtl_StartDate' );
+                        var d_end2   = recordset.fld(residenceAddr, DT_ENDDATE);
+
+                        if(link_all_orphans || __isIntersects(d_start1, d_end1, d_start2, d_end2)){
+                            type     = recordset.fld(residenceAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
+                            wkt      = recordset.fld(residenceAddr, 'dtl_Geo');
+                            var pnt2     = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                            if(pnt2!=null){
+                                var shapes = recordset.fld(residenceAddr, 'rec_Shape');
+                                if(!shapes) shapes=[];
+                                shapes.push( {polyline:[ pnt1.point, pnt2.point ]} );
+                                recordset.setFld(residenceAddr, 'rec_Shape', shapes );
+                            }
+                            already_linked_residence.push( links[recID].residence[j] );
+                        }
+                    
+                    }
+                    }
+
+                    //For events: link primary event to secondary envent
+                    //For persons: link residence to his other addresses and events
                     for(j=0; j<links[recID].secondary.length; j++){
 
                         if(already_linked_secondary.indexOf(links[recID].secondary[j])>-1) continue;
@@ -503,7 +724,7 @@ function hSearchMinimalDigitalHarlem() {
                                     // do not draw secondary if it has the same coordinates as primary - to avoid clutering on map
                                     
                                 }else{
-                                    shapes.push( {polyline:[ pnt1.point, pnt2.point ]} );
+                                    recordset.setFld(secAddr, 'rec_Shape', [{polyline:[ pnt1.point, pnt2.point ]}] );
                                 }
 
                                 /* old way  add new record to result set
@@ -517,8 +738,8 @@ function hSearchMinimalDigitalHarlem() {
                         }
                     }
 
-                    if(shapes.length>0)
-                        recordset.setFld(mainAddr, 'rec_Shape', shapes );
+                    //now shape is added to secondary or residence 
+                    //if(shapes.length>0) recordset.setFld(mainAddr, 'rec_Shape', shapes );
                    
                     if(link_all_orphans) break; //link orphans for first primary location     
                 }//for primary

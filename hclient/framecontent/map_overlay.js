@@ -957,14 +957,18 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 }
 
                 var lt = window.hWin.HAPI4.sysinfo['layout'];
-                if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 3 dataset - points, secondary points and links
+                if(lt && lt.indexOf('DigitalHarlem')==0){ 
+                    //for DigitalHarlem we adds 3 dataset 
+                    // For events search: primary events, secondary events+links, residences+links
+                    // For persons search: everything on one layer
 
                     if(colors_idx>=myColors.length) colors_idx = -1;
                     colors_idx++;
                     source.color = myColors[colors_idx];
 
                     //points  DH_RECORDTYPE
-                    mapdata = recset.toTimemap(source.id, 99913, source.color, 1); //main geo only
+                    //change last parameter to 1 - to treat links separately
+                    mapdata = recset.toTimemap(source.id, 99913, source.color, 0); //main geo only
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
 
@@ -972,15 +976,28 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
                     //secondary points  DH_RECORDTYPE_SECONDARY
                     var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
-                    var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, source.color, 1); //records with type "secondary"
+                    //change last parameter to 1 - to treat links separately
+                    var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, source.color, 0); //records with type "secondary"
                     mapdata3.id = random_name_for_secondary;
-                    mapdata3.title = 'Secondary events/Residences';
+                    mapdata3.title = 'Secondary events';
                     //mapdata3.timeenabled = 0;
                     //mapdata3.timeline = {items:[]};
                     if(mapdata3.mapenabled>0){
                         mapdata.depends.push(mapdata3);
                     }
 
+                    //residences  DH_RECORDTYPE_RESIDENCES
+                    var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
+                    //change last parameter to 1 - to treat links separately
+                    var mapdata4 = recset.toTimemap(random_name_for_secondary, 99915, source.color, 0); //records with type "secondary"
+                    mapdata4.id = random_name_for_secondary;
+                    mapdata4.title = 'Residences';
+                    if(mapdata4.mapenabled>0){
+                        mapdata.depends.push(mapdata4);
+                    }
+                    
+                    
+                    /* if we wish show links as separate layer need to unremark it
                     //links
                     var mapdata2 = recset.toTimemap(source.id, null, source.color, 2); //rec_Shape only
                     mapdata2.id = "link_"+window.hWin.HEURIST4.util.random();
@@ -990,6 +1007,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     if(mapdata2.mapenabled>0){
                         mapdata.depends.push(mapdata2);
                     }
+                    */
 
                 }else{
 
