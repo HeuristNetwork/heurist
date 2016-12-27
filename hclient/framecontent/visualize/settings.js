@@ -162,6 +162,8 @@ function handleSettingsInUI() {
                 
                 $(el).css('color', color);
                 $(el).colpickHide();
+                
+                tick();
             }});
     
     //------------ LINKS ----------
@@ -339,7 +341,11 @@ function setGravity(gravity) {
         }
     });
     
-    visualizeData();    
+    //visualizeData();
+
+    if(gravity !== "off") {
+        force.resume(); 
+    }     
 }
 //
 //

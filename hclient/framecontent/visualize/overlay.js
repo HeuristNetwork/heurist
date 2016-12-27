@@ -353,9 +353,6 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
              .attr("x", 2)
              .attr("y", iconSize*0.75);
       
-        if(currentMode=='icons'){
-            overlay.selectAll('.info-mode').style('display', 'none');
-        }
       
       }else{
         /* Close button
@@ -381,9 +378,15 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
              .attr("y", buttonSize*0.75);
        */      
       }
+      
+      if(type=='record'){
+        if(currentMode=='icons'){
+            overlay.selectAll('.info-mode').style('display', 'none');
+        }
+      }
              
         /** Handles dragging events on overlay */
-        function overlayDrag(d) {
+        function overlayDrag(d) { //NOT USED
 console.log('overlay drag '+d);            
             overlay.attr("transform", "translate("+d.x+","+d.y+")");
             //"translate(" +(d.x-iconSize/2)+ "," +(d.y-iconSize/2)+ ")");

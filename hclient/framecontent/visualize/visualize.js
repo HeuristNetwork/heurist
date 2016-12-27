@@ -247,12 +247,12 @@ function executeFormula(count, maxSize) {
     //console.log("Count: " + count + ", max count: " + maxCount + ", max Size: " + maxSize);
     var formula = getSetting(setting_formula);
     if(formula == "logarithmic") { // Log                                                           
-        return Math.log(count) / Math.log(maxCount) * maxSize;
+        return maxCount>1?(Math.log(count) / Math.log(maxCount)*maxSize):1;
     }
     else if(formula == "unweighted") { // Unweighted
         return 2;                                          
     }else {  // Linear
-        return (count/maxCount) * maxSize; 
+        return (maxCount>0)?((count/maxCount)* maxSize):1 ; 
     }       
 }
 
@@ -279,6 +279,7 @@ function getLineWidth(count) {
 
 /** Calculates the marker width that should be used */
 function getMarkerWidth(count) {
+    if(isNaN(count)) count = 0;
     return 4 + getLineWidth(count)*2;
 }
 
