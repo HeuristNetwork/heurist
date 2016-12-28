@@ -90,6 +90,8 @@ var svg;        // The SVG where the visualisation will be executed on
             isDatabaseStructure: false,
             
             showCounts: true,
+            
+            // Limits tha maximum results whichg can be plotted to avoid overloading the browser - user will get warning message
             limit: 2000,
             
             // UI setting controls
@@ -152,7 +154,7 @@ var svg;        // The SVG where the visualisation will be executed on
         // Check visualisation limit
         var amount = Object.keys(settings.data.nodes).length;
         if(amount > settings.limit) {
-             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set at ' +settings.limit+ ' records, you are trying to visualize ' +amount+ ' records. Please refine your filter.</text>');  
+             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set to ' +settings.limit+ ' records to avoid overloading the browser. You are trying to visualize ' +amount+ ' records. Please refine your filter to reduce the number of results.</text>');  
              return; 
         }else{
             visualizeData();    

@@ -1,5 +1,5 @@
 /**
-* Widget for network diagram of a result set. Calls visualize.js
+* Widget for network diagram of a result set. Calls hclient/visualize/springDiagram.php
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
