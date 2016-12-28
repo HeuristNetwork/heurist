@@ -83,8 +83,8 @@ if(isForAdminOnly("to modify database structure")){
             }
 
             span.fancytree-title:hover, .fancytree-title-hovered{ background-color: #E6F8FD; border-color: #B8D6FB; }
-            span.fancytree-title:selected, .fancytree-title-selected{ background-color: #E6F8FD; border-color: #B8D6FB; }
             .ui-state-active{ background-color: #E6F8FD; }
+
 
         </style>
     </head>
@@ -133,7 +133,7 @@ if(isForAdminOnly("to modify database structure")){
             </div>
 
             <div id="formContainer" style="position:absolute;left:303px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
-                <!-- <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Rollover items in the tree to show available actions<br/>Drag terms to reposition, merge or set as inverse of one another<br/> Select term to edit label and description</h3> -->
+                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Drag terms to reposition or merge <br/> Select term to edit label and description</h3>
                 <h3 id="formMessage" style="margin-left:10px; border-style:none;display:none;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
                 </h3>
@@ -269,12 +269,13 @@ if(isForAdminOnly("to modify database structure")){
                             <input id="btnExport" type="button" value="Export"
                                 title="Print vocabulary as a list"
                                 onClick="{editTerms.doExport(false)}"/>
-                            <input id="btnSetParent" type="button" value="Move"
-                                style="margin-left:20px;"
-                                title="Change the parent" onClick="{editTerms.selectParent()}"/>
+                            <!-- <input id="btnSetParent" type="button" value="Move"
+                            style="display:none;margin-left:20px;"
+                            title="Change the parent" onClick="{editTerms.selectParent()}"/>
                             <input id="btnMerge" type="button" value="Merge"
-                                title="Merge this term with another term and update all records to reference the new term"
-                                onClick="{editTerms.mergeTerms()}"/>
+                            style="display:none;"
+                            title="Merge this term with another term and update all records to reference the new term"
+                            onClick="{editTerms.mergeTerms()}"/> -->
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
@@ -484,9 +485,9 @@ if(isForAdminOnly("to modify database structure")){
         </div>
 
         <div id=move_mergeTerms style="display:none ">
-            <div style="font-weight:bold;">Merge or Move term?</div>
+            <div id="mergeText" style="font-weight:bold;">Are you sure you want to Merge terms?</div>
             <input id="mergeBtn" type="button" value="Merge" title="" style="width:70px"/>
-            <input id="moveBtn" type="button" value="Move" title="" style="width:70px; margin:2px"/>
+            <input id="cancelBtn" type="button" value="Cancel" title="" style="width:70px; margin:2px"/>
         </div>
         <input type="file" id="new_term_image" style="display:none"/>
 

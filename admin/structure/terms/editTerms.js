@@ -453,7 +453,9 @@ function EditTerms() {
 
             if(!Hul.isnull(node)){
                 Dom.get('formMessage').style.display = "none";
+                 $("#btnMerge").css("display", "none");
                 Dom.get('formEditor').style.display = "block";
+
 
                 if (Hul.isempty( node.data.conceptid)){
                     Dom.get('div_ConceptID').innerHTML = '';
@@ -2086,7 +2088,7 @@ function EditTerms() {
                 },
                 extensions:['dnd','themeroller'],
                 dnd: {
-                    //autoExpandMS: 400,
+                    autoExpandMS: 400,
                     //focusOnClick: true,
                     preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
                     preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
@@ -2098,9 +2100,22 @@ function EditTerms() {
                         return true;
                     },
                     dragEnter: function(node, data) {
+                        if (data.otherNode.getLevel()===1){
+                            if(node.getLevel()>1)
+                                return false;
+
+                            return "over";
+                        }
 
 
-                        return "over";
+                        if (data.otherNode.getLevel()>1 && node.getLevel()===1){
+                            node.setExpanded(true);
+                            return false;
+                        }
+
+
+                        return true;
+
                     },
                     dragDrop: function(node, data) {
                         //_currentNode =node;
@@ -2117,44 +2132,69 @@ function EditTerms() {
 
                         }else if((data.otherNode.hasChildren()) && (data.otherNode.getLevel()!=1))
                         {
-                            var ele = document.getElementById('move_mergeTerms');
 
-                            $("#mergeBtn").click(function(){
-                                var childNode = node.addChildren(data.otherNode.getChildren());
-                                childNode.moveTo(node, data.hitMode);
-                                data.otherNode.remove();
-                                $_dialogbox.dialog($_dialogbox).dialog("close");
-                                //_updateTermsOnServer(_currentNode,false);
-                            });
-                            $("#moveBtn").click(function(){
+                            if(data.hitMode==='over'){
+                                $("#mergeText").text("merge "+ data.otherNode.data.label+ " into " +node.data.label+"?");
+                                var ele = document.getElementById('move_mergeTerms');
+                                $("#mergeBtn").click(function(){
+                                    var childNode = node.addChildren(data.otherNode.getChildren());
+                                    childNode.moveTo(node, data.hitMode);
+                                    data.otherNode.remove();
+                                    $_dialogbox.dialog($_dialogbox).dialog("close");
+                                    //_updateTermsOnServer(_currentNode,false);
+
+                                });
+                                $("#cancelBtn").click(function(){
+                                    $_dialogbox.dialog($_dialogbox).dialog("close");
+                                });
+
+                                $_dialogbox = Hul.popupElement(top, ele,
+                                    {
+                                        "close-on-blur": false,
+                                        "no-resize": true,
+                                        title: '',
+                                        height: 120,
+                                        width: 200
+
+                                });
+
+
+
+                            }
+
+
+                            // $("#moveBtn").click(function(){
+                            else if (data.hitMode==='before' || data.hitMode==='after'){
                                 data.otherNode.moveTo(node,data.hitMode);
-                                $_dialogbox.dialog($_dialogbox).dialog("close");
-                              // _updateTermsOnServer(_currentNode,false);
-                            });
+                                //$_dialogbox.dialog($_dialogbox).dialog("close");
+                                // _updateTermsOnServer(_currentNode,false);
+                            }
+                            // });
 
 
 
                             //show confirmation dialog
-                            $_dialogbox = Hul.popupElement(top, ele,
-                                {
-                                    "close-on-blur": false,
-                                    "no-resize": true,
-                                    title: '',
-                                    height: 100,
-                                    width: 200
+                            /*  $_dialogbox = Hul.popupElement(top, ele,
+                            {
+                            "close-on-blur": false,
+                            "no-resize": true,
+                            title: '',
+                            height: 100,
+                            width: 200
 
                             });
                             $_dialogbox.dialog($_dialogbox).position({
-                                my: "left top",
-                                at: "left top",
-                                of: $(top.document).find('#tabContainer').get(0)
+                            my: "left top",
+                            at: "left top",
+                            of: $(top.document).find('#tabContainer').get(0)
 
-                            });
+                            }); */
 
                         }
                         else{
+
                             data.otherNode.moveTo(node,data.hitMode);
-                          //  _updateTermsOnServer(_currentNode,false);
+                            //  _updateTermsOnServer(_currentNode,false);
                         }
 
 
