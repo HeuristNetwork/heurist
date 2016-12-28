@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * springDiagram.php: Renders search resultset as a network diagram
+    * springDiagram.php: Renders search resultset as a network diagram. Uses hclient/visualize/visualize.js
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -56,7 +56,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <!-- Call from parent iframe -->
         <script>
             /** Shows data visually */
-            var limit = 2000;
+            var limit = 2000; // TO DO : remove. this does not appear to be used, there is a limit variable in visualize.js which IS used
 
             function showSelection( selectedRecordsIds ){
                  visualizeSelection( selectedRecordsIds );
@@ -66,7 +66,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 // Processing...
                 if(data && data.nodes && data.links)
                 console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
-                $("#d3svg").html('<text x="25" y="25" fill="black">Processing...</text>');
+                $("#d3svg").html('<text x="25" y="25" fill="black">Buiding graph ...</text>');
 
                 // Custom data parsing
                 function getData(data) {

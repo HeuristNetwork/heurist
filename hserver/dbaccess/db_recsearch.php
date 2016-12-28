@@ -54,7 +54,7 @@
 
             $res = $mysqli->query($query);
             if (!$res){
-                $response = $system->addError(HEURIST_DB_ERROR, "Search query error. Query ".$query, $mysqli->error);
+                $response = $system->addError(HEURIST_DB_ERROR, "Search query error on min/max. Query ".$query, $mysqli->error);
             }else{
                 $row = $res->fetch_assoc();
                 if($row){
@@ -267,7 +267,7 @@ if(@$params['debug']) echo $query."<br>";
         $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records where rec_ID in ('.$ids.')';
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error. Query ".$query, $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on search related. Query ".$query, $mysqli->error);
         }else{
                 while ($row = $res->fetch_row()) {
                     $headers[$row[0]] = array($row[1], $row[2]);   
@@ -282,7 +282,7 @@ if(@$params['debug']) echo $query."<br>";
 
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error. Query ".$query, $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on related records. Query ".$query, $mysqli->error);
         }else{
                 while ($row = $res->fetch_row()) {
                     $relation = new stdClass();
@@ -303,7 +303,7 @@ if(@$params['debug']) echo $query."<br>";
 
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error. Query ".$query, $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on reverse related records. Query ".$query, $mysqli->error);
         }else{
                 while ($row = $res->fetch_row()) {
                     $relation = new stdClass();
@@ -337,7 +337,7 @@ if(@$params['debug']) echo $query."<br>";
             .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
         $res = $mysqli->query($query);
         if (!$res){
-            return null;// $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            return null;// $system->addError(HEURIST_DB_ERROR, "Search query error on get relationship type", $mysqli->error);
         }else{
             if($row = $res->fetch_row()) {
                 return $row[0];
@@ -361,7 +361,7 @@ if(@$params['debug']) echo $query."<br>";
 
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error. Query ".$query, $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on relationship records for source-target. Query ".$query, $mysqli->error);
         }else{
                 $ids = array();
                 while ($row = $res->fetch_row()) {
@@ -756,13 +756,7 @@ if(@$params['debug']) echo $query."<br>";
             }
 
             $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
-
-//error_log($is_mode_json.' '.$query);
-/* DEBUG
-            if($params['q']=='doerror'){ //force error
-                $query ='abracadabra'; 
-            }
-*/            
+         
             
         }
         
@@ -770,7 +764,7 @@ if(@$params['debug']) echo $query."<br>";
 
         $res = $mysqli->query($query);
         if (!$res){
-            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error. Query '.$query, $mysqli->error);
+            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.' Search query error on saved search. Query '.$query, $mysqli->error);
         }else{
 
             $fres = $mysqli->query('select found_rows()');

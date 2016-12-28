@@ -104,6 +104,7 @@ options - parameters to init application
 var cfg_layouts = [
 
     // Default layout - the standard Heurist interface, used if no parameter provided
+    // TODO: change the id and name to jsut HeuristDefault and Heurist Default - h4 and h3 are hangovers from old versions
     {id:'H4Default', name:'Heurist Def v3', theme:'heurist', type:'free',
         north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'6em',right:0, 

@@ -1,7 +1,7 @@
 <!--
 /**
 *
-* visualize.html: draw a network diagram of the current resultset
+* visualize.html: Toolbar for the network diagram of database structure or current resultset
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -79,7 +79,7 @@
 
                 <input type="radio" id="nodesMode2" name="nodesMode" value="unweighted" checked="checked" 
                     title="radius of nodes has fixed size">
-                <label for="nodesMode2">fix</label>
+                <label for="nodesMode2">fixed</label>
             </div>
             <input id="nodesRadius" class="number-input small" type="number" min="12" max="45" step="1" />
         </div>
@@ -113,12 +113,12 @@
 
     </div> <!-- end of toolbar -->
 
-    <div id="divHint" style="display:none;color:darkgreen;font-weight:bold;padding:4px">Entities can be dragged to position them. The positions are remembered across sessions</div>
+    <div id="divHint" style="display:none;color:darkgreen;font-weight:bold;padding:4px">Entities can be dragged to position them. The positions are remembered across sessions if gravity is OFF.</div>
 </div>
 
 <div id="divSvg" class="ent_content_full" style="top:7em;">
             <!-- SVG -->
             <svg id="d3svg" class="fullscreen">
-                <text x="25" y="25" fill="black">Processing...</text>
+                <text x="25" y="25" fill="black">Building graph ...</text>
             </svg>  
 </div>
