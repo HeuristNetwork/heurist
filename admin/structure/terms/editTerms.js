@@ -453,7 +453,7 @@ function EditTerms() {
 
             if(!Hul.isnull(node)){
                 Dom.get('formMessage').style.display = "none";
-                 $("#btnMerge").css("display", "none");
+                $("#btnMerge").css("display", "none");
                 Dom.get('formEditor').style.display = "block";
 
 
@@ -2118,83 +2118,20 @@ function EditTerms() {
 
                     },
                     dragDrop: function(node, data) {
-                        //_currentNode =node;
-
-
                         if(data.otherNode.getLevel()===1){
                             if(node.getLevel()!=1)
                                 return false;
                             else{
-                                var childNode = node.addChildren(data.otherNode.getChildren());
-                                childNode.moveTo(node, data.hitMode);
-                                data.otherNode.remove();
+                                showMergePopUp(node,data);
                             }
 
-                        }else if((data.otherNode.hasChildren()) && (data.otherNode.getLevel()!=1))
-                        {
+                        }else if((data.otherNode.hasChildren()) && (data.otherNode.getLevel()!=1)){
 
-                            if(data.hitMode==='over'){
-                                $("#mergeText").text("merge "+ data.otherNode.data.label+ " into " +node.data.label+"?");
-                                var ele = document.getElementById('move_mergeTerms');
-                                $("#mergeBtn").click(function(){
-                                    var childNode = node.addChildren(data.otherNode.getChildren());
-                                    childNode.moveTo(node, data.hitMode);
-                                    data.otherNode.remove();
-                                    $_dialogbox.dialog($_dialogbox).dialog("close");
-                                    //_updateTermsOnServer(_currentNode,false);
-
-                                });
-                                $("#cancelBtn").click(function(){
-                                    $_dialogbox.dialog($_dialogbox).dialog("close");
-                                });
-
-                                $_dialogbox = Hul.popupElement(top, ele,
-                                    {
-                                        "close-on-blur": false,
-                                        "no-resize": true,
-                                        title: '',
-                                        height: 120,
-                                        width: 200
-
-                                });
-
-
-
-                            }
-
-
-                            // $("#moveBtn").click(function(){
-                            else if (data.hitMode==='before' || data.hitMode==='after'){
-                                data.otherNode.moveTo(node,data.hitMode);
-                                //$_dialogbox.dialog($_dialogbox).dialog("close");
-                                // _updateTermsOnServer(_currentNode,false);
-                            }
-                            // });
-
-
-
-                            //show confirmation dialog
-                            /*  $_dialogbox = Hul.popupElement(top, ele,
-                            {
-                            "close-on-blur": false,
-                            "no-resize": true,
-                            title: '',
-                            height: 100,
-                            width: 200
-
-                            });
-                            $_dialogbox.dialog($_dialogbox).position({
-                            my: "left top",
-                            at: "left top",
-                            of: $(top.document).find('#tabContainer').get(0)
-
-                            }); */
-
+                            showMergePopUp(node,data);
                         }
                         else{
 
-                            data.otherNode.moveTo(node,data.hitMode);
-                            //  _updateTermsOnServer(_currentNode,false);
+                             showMergePopUp(node,data);
                         }
 
 
@@ -2209,7 +2146,51 @@ function EditTerms() {
             // Add a hover handler to all node titles (using event delegation)
             var node = $.ui.fancytree.getNode(event);
             node.info(event.type);
-        });;
+        });
+
+        function showMergePopUp(node,data)
+        {
+
+            if(data.hitMode==='over'){
+                $("#mergeText").text("Merge "+ data.otherNode.data.label+ " into " +node.data.label+"?");
+                var ele = document.getElementById('move_mergeTerms');
+                $("#mergeBtn").click(function(){
+                    var childNode = node.addChildren(data.otherNode.getChildren());
+                    childNode.moveTo(node, data.hitMode);
+                    data.otherNode.remove();
+                    $_dialogbox.dialog($_dialogbox).dialog("close");
+                    //_updateTermsOnServer(_currentNode,false);
+
+                });
+                $("#cancelBtn").click(function(){
+                    $_dialogbox.dialog($_dialogbox).dialog("close");
+                });
+
+                $_dialogbox = Hul.popupElement(top, ele,
+                    {
+                        "close-on-blur": false,
+                        "no-resize": true,
+                        title: '',
+                        height: 120,
+                        width: 200
+
+                });
+
+
+
+            }
+
+
+            // $("#moveBtn").click(function(){
+            else if (data.hitMode==='before' || data.hitMode==='after'){
+                data.otherNode.moveTo(node,data.hitMode);
+                //$_dialogbox.dialog($_dialogbox).dialog("close");
+                // _updateTermsOnServer(_currentNode,false);
+            }
+            // });
+
+
+        }
 
     }
 
