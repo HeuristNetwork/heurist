@@ -51,7 +51,7 @@
                     }
                 },
                 {
-                    "dtID": "sif_Session",
+                    "dtID": "sif_ProcessingInfo",
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":255,
