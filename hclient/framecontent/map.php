@@ -121,7 +121,11 @@ require_once(dirname(__FILE__)."/initPage.php");
         var layout_opts =  {
             applyDefaultStyles: true,
             togglerContent_open:    '<div class="ui-icon"></div>',
-            togglerContent_closed:  '<div class="ui-icon"></div>'
+            togglerContent_closed:  '<div class="ui-icon"></div>',
+            onresize_end: function(){
+                //global console.log('resize end');
+            }
+            
         };
 
         // Setting layout
@@ -135,8 +139,9 @@ require_once(dirname(__FILE__)."/initPage.php");
         layout_opts.south__spacing_closed = 7;
         layout_opts.south__onresize_end = function() {
             if(mapping) mapping.setTimelineMinheight();
+            //console.log('timeline resize end');
+            _adjustLegendHeight();
         };
-
 
         <?php if(@$_REQUEST['notimeline']){ ?>
             layout_opts.south__size = 0;
@@ -345,6 +350,37 @@ require_once(dirname(__FILE__)."/initPage.php");
 
 
     }
+    
+    function _adjustLegendHeight() {
+
+        setTimeout(function(){
+            var legend = document.getElementById('map_legend');
+            var ch = $("#map_legend .content").height()+70;
+
+            var nt = parseInt($(legend).css('bottom'), 10);
+            var mh = $('#map').height();
+            
+            var is_collapsed = ($(legend).find('#collapse').text() == "+");
+            
+            if(is_collapsed===true){
+                $(legend).css('top', mh-nt-60);   
+            }else{
+            
+            if(mh-nt-ch < 70){
+                $(legend).css('top', 60);
+            }else{
+                $(legend).css('top', mh-nt-ch);        
+            }
+        
+            }
+            
+//console.log('lh='+(mh-nt-ch)+'  mh='+mh+'  ch='+ch);            
+            
+            $(legend).css('bottom', nt);
+            
+        },500);
+    }
+    
 
     function showEmbedDialog(){
 

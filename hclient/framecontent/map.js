@@ -1390,7 +1390,7 @@ console.log('tileloaded 2');
                     if(placemark instanceof mxn.Marker){
                         placemark_type = "marker";
                     }else{
-                        placemark_type = "objecct";    
+                        placemark_type = "object";    
                     }
                     
                 }
