@@ -911,7 +911,7 @@ window.hWin.HEURIST4.ui = {
             request['dty_DetailTypeGroupID'] = configMode.filter_group;
             
         }else if(configMode.entity=='SysImportFiles'){
-            fieldTitle = 'imp_table';
+            fieldTitle = 'sif_TempDataTable';//'imp_table';
             request['entity'] = 'sysImportFiles';
             request['ugr_ID'] = configMode.filter_group;
         }

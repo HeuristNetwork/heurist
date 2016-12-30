@@ -968,7 +968,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
                     //points  DH_RECORDTYPE
                     //change last parameter to 1 - to treat links separately
-                    mapdata = recset.toTimemap(source.id, 99913, source.color, 0); //main geo only
+                    mapdata = recset.toTimemap(source.id, 99913, source.color, 0); //set to 1 to show main geo only (no links)
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
 
@@ -979,7 +979,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     //change last parameter to 1 - to treat links separately
                     var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, source.color, 0); //records with type "secondary"
                     mapdata3.id = random_name_for_secondary;
-                    mapdata3.title = 'Secondary events';
+                    mapdata3.title = 'Secondary';
                     //mapdata3.timeenabled = 0;
                     //mapdata3.timeline = {items:[]};
                     if(mapdata3.mapenabled>0){
@@ -989,7 +989,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     //residences  DH_RECORDTYPE_RESIDENCES
                     var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
                     //change last parameter to 1 - to treat links separately
-                    var mapdata4 = recset.toTimemap(random_name_for_secondary, 99915, source.color, 0); //records with type "secondary"
+                    var mapdata4 = recset.toTimemap(random_name_for_secondary, 99915, source.color, 0); //records with type "residence"
                     mapdata4.id = random_name_for_secondary;
                     mapdata4.title = 'Residences';
                     if(mapdata4.mapenabled>0){
@@ -1449,26 +1449,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //end custom overlay
 
     
-    function _adjustLegendHeight(tocollapse) {
-        
-            var legend = document.getElementById('map_legend');
-            var ch = $("#map_legend .content").height();
-            var nt = parseInt($(legend).css('bottom'), 10);
-            var mh = $('#map').height();
-            
-            if(tocollapse===true){
-                $(legend).css('top', mh-nt-60);   
-            }else{
-            
-            if(ch > mh-nt-70){
-                $(legend).css('top', 60);
-            }else{
-                $(legend).css('top', mh-nt-ch-70);        
-            }
-        
-            }
-    }
-
     /**
     * Initialization
     */
@@ -1488,7 +1468,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
             $("#map_legend .content").toggle();//(400);
             
-            _adjustLegendHeight(tocollapse);
+            _adjustLegendHeight();
             
         });
 

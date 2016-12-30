@@ -104,14 +104,30 @@ $(document).ready(function() {
         top.HEURIST4.ui.createRectypeSelect(rt_selector[0],null,'Select target record type');
         rt_selector.change(
                 function(){
+                    var sDialogTitle = 'Creating link from '+ top.HEURIST4.rectypes.names[rty_ID];
                     target_ID = $(this).val();
-                    _getLinkFields();
+                    if(!target_ID){
+                        top.HEURIST4.util.setDisabled($('.ft_selfield'), true);                        
+                        $('.ft_selfield').css('color','lightgray');
+                        
+                    }else{
+                        
+                        //change title in parent dialog
+                        sDialogTitle = sDialogTitle + ' to '+  top.HEURIST4.rectypes.names[target_ID];                                             
+                        top.HEURIST4.util.setDisabled($('.ft_selfield'), false);                        
+                        $('.ft_selfield').css('color', $('#sel_target_rectype_id').css('color'));
+                        _getLinkFields();
+                        $('#sel_resource_fields').val('');
+                        $('#sel_relmarker_fields').val('');
+                        $('#t_resourse').attr('checked', true);
+                    }
+                    $(window.frameElement).parents('.ui-dialog').find('.ui-dialog-title').text(sDialogTitle);
                 }
             );
         if(target_ID){
           rt_selector.val(target_ID);  
-          rt_selector.change();
         } 
+        rt_selector.change();
         
         if(!top.HEURIST4.rectypes.typedefs[rty_ID]){
             top.HEURIST4.msg.showMsgErr('Parameter for record type are not defined or invalid');
@@ -135,7 +151,7 @@ $(document).ready(function() {
         var idx_NameInRecType = top.HEURIST4.rectypes.typedefs['dtFieldNamesToIndex']['rst_DisplayName'];
         
         var aPointers = [{key:0, title:'New Resource Field'}], 
-            aRelMarkers = [{key:0, title:'New Relmarker Field'}], 
+            aRelMarkers = [{key:0, title:'New Relationship marker Field'}], 
             cnt_ptrs = 0, cnt_relmarkers = 0;
         
         for(dty_ID in detailTypes){

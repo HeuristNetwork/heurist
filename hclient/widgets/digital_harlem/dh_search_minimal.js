@@ -198,8 +198,6 @@ function hSearchMinimalDigitalHarlem() {
 
     }
 
-
-
     //@todo - obtain codes from magic numbers server side
     var RT_ADDRESS = 12,
     RT_EVENT = 14,
@@ -220,16 +218,16 @@ function hSearchMinimalDigitalHarlem() {
     DT_EVENT_TIME_END = 76,
     DT_EVENT_ORDER = 94; //Order of addresses within a serial event, eg. a march or multi-stage crime
 
+    //constants for relation types
     var TERM_MAIN_CRIME_LOCATION = 4536, //primary event location
     TERM_EVENT_PRIME_LOCATION = 4533, //happened entirely at
     TERM_ROLE_RESIDENT = 4527,
     TERM_PATH = 4537;
 
-
+    //constants for special DH record types - to display them in different layers
     var DH_RECORDTYPE = 99913, //special record type to display DH entities on map
         DH_RECORDTYPE_SECONDARY = 99914, //special record type to display secondary events (FOR EVENTS search ONLY)
-        DH_RECORDTYPE_RESIDENCES = 99915, //special record type to display residential addresses (FOR EVENTS search ONLY)
-        DH_LINKS = 9999999;  //special record type
+        DH_RECORDTYPE_RESIDENCES = 99915; //special record type to display residential addresses (FOR EVENTS search ONLY)
 
 
 
@@ -246,8 +244,6 @@ function hSearchMinimalDigitalHarlem() {
     //
     function _prepareResultSet( recordset, primary_rt ){
 
-console.log('primary '+primary_rt);
-        
         var res_records = {}, res_orders = [];
 
         //1. find address records
@@ -259,13 +255,21 @@ console.log('primary '+primary_rt);
         var links = {}; //   PersonID:{ primary: pnt   secondary: [pnt,pnt,....]}
         var linkID = 1000000000;
 
+        if(!primary_rt){
+            //take primary type from first record
+            var rec = recordset.getFirstRecord();
+            primary_rt = Number(recordset.fld(rec, 'rec_RecTypeID'));
+        } 
+console.log('primary '+primary_rt);
+        
+        
         for(idx in records){
             if(idx)
             {
                 var record = records[idx];
-
                 var recID = recordset.fld(record, 'rec_ID');
                 var recTypeID   = Number(recordset.fld(record, 'rec_RecTypeID'));
+                
                 if(recTypeID == RT_ADDRESS){
 
                     var shtml = '';
@@ -424,7 +428,7 @@ console.log('primary '+primary_rt);
                                     }
                                     recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE);
                                 
-                                }else {
+                                }else { //this is event
                                     
                                     var eventID = rels[i]['related'];
                                     //var relrec = relationships[rels[i]['relation']];
@@ -441,7 +445,8 @@ console.log('primary '+primary_rt);
                                             +window.hWin.HAPI4.database
                                             +"&recID="+eventID+"&addrID="+recID);
 
-                                    var rels2 = recordset.getRelationRecords(eventID, RT_PERSON);
+                                    //find persons involved into this event
+                                    var rels2 = recordset.getRelationRecords(eventID, RT_PERSON); 
                                     if(rels2.length>0){
                                         for(j=0; j<rels2.length; j++){
                                             var personID = rels2[j]['related'];
@@ -458,131 +463,7 @@ console.log('primary '+primary_rt);
                                 }
                             }//for
                         }
-/* old version 
-                        for(i=0; i<rels.length; i++){
-                            //3. if event try to find related persons
-                            if(rels[i]['relrt'] == RT_EVENT){
 
-                                var eventID = rels[i]['related'];
-                                //var relrec = relationships[rels[i]['relation']];
-                                var rel_event = records[ eventID ];
-                                //var rec_ID_event = recordset.fld(rel_event, 'rec_ID')
-
-                                recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //change record type 
-                                recordset.setFld(record, 'rec_Icon',   'term'+recordset.fld(rel_event, DT_EVENT_TYPE) );
-                                recordset.setFld(record, 'rec_Title',  recordset.fld(rel_event, 'rec_Title') );
-                                recordset.setFld(record, DT_STARTDATE, recordset.fld(rel_event, 'dtl_StartDate' ) );
-                                recordset.setFld(record, DT_ENDDATE,   recordset.fld(rel_event, DT_ENDDATE) );
-
-                                //find persons that relates to this event
-                                //do not find person in case this is event search
-                                var rels2 = recordset.getRelationRecords(eventID, RT_PERSON);
-                                
-                                if(primary_rt==RT_EVENT || rels2.length<1){ //no related person - event related to address directly
-                                    //3a. this is event->address
-                                    recordset.setFld(record, 'rec_Info',
-                                        window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
-                                        +window.hWin.HAPI4.database
-                                        +"&recID="+eventID+"&addrID="+recID);
-
-                                    //add links for this event
-                                    if(!links[ eventID ]){
-                                        links[ eventID ] = {primary:[], secondary:[], is_event:true, path:[] };
-                                    }
-                                    //verify: is it main crime location
-                                    var relrec = relationships[rels[i]['relation']];
-                                    var relation_type = recordset.fld(relrec, DT_RELATION_TYPE);
-                                    var order = Number(recordset.fld(relrec, DT_EVENT_ORDER));
-
-                                    //Happened Entirely at 4533
-                                    //Happened Primarily at 4536
-                                    if ((relation_type==TERM_MAIN_CRIME_LOCATION  ||
-                                        relation_type==TERM_EVENT_PRIME_LOCATION)
-                                        && (links[ eventID ].primary.length<1) ){  //4533 4536
-                                        
-                                        links[ eventID ].primary.push( recID );
-                                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); 
-                                        //(primary_rt==RT_EVENT)?DH_RECORDTYPE:DH_RECORDTYPE_SECONDARY);
-                                    }else{
-                                        links[ eventID ].secondary.push( recID );
-                                        recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE_SECONDARY);
-                                    }
-
-                                    if(order>0){ //if order is defined current address is node of path
-                                        links[ eventID ].path.push({order:order, recID:recID});
-                                    }
-                                    
-                                    if(rels2.length>0){
-                                        //link residences of persons involved to event
-                                        for(j=0; j<rels2.length; j++){
-                                            var personID = rels2[j]['related'];
-                                            var rel_person = records[ personID ];
-                                            //add links for this person
-                                            if(!links[ personID ]){
-                                                links[ personID ] = {primary:[], secondary:[]};
-                                            }
-                                            //events are always secondary for person links (primary is residency)
-                                            links[ personID ].secondary.push( recID );
-                                        }//for persons
-                                        
-                                    }
-
-
-                                }else{
-                                    //3b. this is address->event->person
-                                    for(j=0; j<rels2.length; j++){
-                                        var personID = rels2[j]['related'];
-                                        var rel_person = records[ personID ];
-
-                                        recordset.setFld(record, 'rec_Info',
-                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
-                                                    +window.hWin.HAPI4.database+"&recID="+
-                                                    personID+"&addrID="+recID+"&eventID="+eventID );
-
-                                        //add links for this person
-                                        if(!links[ personID ]){
-                                            links[ personID ] = {primary:[], secondary:[]};
-                                        }
-                                        //events are always secondary for person links (primary is residency)
-                                        links[ personID ].secondary.push( recID );
-                                    }//for persons
-                                }
-
-                            }else if(rels[i]['relrt'] == RT_PERSON){
-                                //3c. this is person->address
-                                var relrec = relationships[rels[i]['relation']];
-                                var personID = rels[i]['related'];
-                                var rel_person = records[ personID ];
-
-                                var relation_type = recordset.fld(relrec, DT_RELATION_TYPE);
-
-                                recordset.setFld(record, 'rec_Icon',     'term'+relation_type );   //role at this address: resident (primary)
-
-                                var recInfoUrl = window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database+"&recID="+
-                                recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
-                                recordset.setFld(record, 'rec_Info', recInfoUrl);
-                                recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');
-
-                                recordset.setFld(record, 'rec_Title',  recordset.fld(relrec, 'rec_Title') );
-                                recordset.setFld(record, DT_STARTDATE, recordset.fld(relrec, 'dtl_StartDate' ) );
-                                recordset.setFld(record, DT_ENDDATE,   recordset.fld(relrec, DT_ENDDATE) );
-
-                                //add links for this person
-                                if(!links[ personID ]){
-                                    links[ personID ] = {primary:[], secondary:[]};
-                                }
-                                //verify: is it residence
-                                if(relation_type==TERM_ROLE_RESIDENT){  //4527
-                                    links[ personID ].primary.push( recID );
-                                    recordset.setFld(record, 'rec_RecTypeID', (primary_rt==RT_EVENT)?DH_RECORDTYPE_SECONDARY:DH_RECORDTYPE);
-                                }else{
-                                    links[ personID ].secondary.push( recID );
-                                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE);
-                                }
-                                
-                            }//if person
-                        }
-*/
                     }
                     
                     res_records[recID] = record;
@@ -679,7 +560,9 @@ console.log('primary '+primary_rt);
                     if(links[recID].residence){
                     for(j=0; j<links[recID].residence.length; j++){
 
-                        if(already_linked_residence.indexOf(links[recID].residence[j])>-1) continue;
+                        if(link_all_orphans && already_linked_residence.indexOf(links[recID].residence[j])>-1) {
+                            continue;   
+                        }
                         
                         residenceAddr = res_records[ links[recID].residence[j] ]; //record id
                         var d_start2 = recordset.fld(residenceAddr, 'dtl_StartDate' );
@@ -705,7 +588,9 @@ console.log('primary '+primary_rt);
                     //For persons: link residence to his other addresses and events
                     for(j=0; j<links[recID].secondary.length; j++){
 
-                        if(already_linked_secondary.indexOf(links[recID].secondary[j])>-1) continue;
+                        if(link_all_orphans && already_linked_secondary.indexOf(links[recID].secondary[j])>-1) {
+                            continue;   
+                        }
                         
                         secAddr = res_records[ links[recID].secondary[j] ]; //record id
                         var d_start2 = recordset.fld(secAddr, 'dtl_StartDate' );
@@ -722,17 +607,14 @@ console.log('primary '+primary_rt);
                             if(pnt2!=null){
                                 if((pnt1.point.lat == pnt2.point.lat && pnt1.point.lon == pnt2.point.lon)){
                                     // do not draw secondary if it has the same coordinates as primary - to avoid clutering on map
-                                    
                                 }else{
-                                    recordset.setFld(secAddr, 'rec_Shape', [{polyline:[ pnt1.point, pnt2.point ]}] );
+                                    var shapes = recordset.fld(secAddr, 'rec_Shape');
+                                    if(!shapes) shapes=[];
+                                    shapes.push( {polyline:[ pnt1.point, pnt2.point ]} );
+                                    recordset.setFld(secAddr, 'rec_Shape', shapes );                                    
+                                    //recordset.setFld(secAddr, 'rec_Shape', [{polyline:[ pnt1.point, pnt2.point ]}] );
                                 }
 
-                                /* old way  add new record to result set
-                                var newrec = {"2":linkID, "4":DH_LINKS, "rec_Info":false, "rec_Shape":{polyline:[ pnt1.point, pnt2.point ]} };
-                                res_records[linkID] = newrec;
-                                res_orders.push(linkID);
-                                linkID++;
-                                */
                             }
                             already_linked_secondary.push( links[recID].secondary[j] );
                         }

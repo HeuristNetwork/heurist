@@ -803,7 +803,7 @@ function saveSession($imp_session){
         array("sif_ID"=>@$imp_session["import_id"],
             "sif_UGrpID"=>$system->get_user_id(),
             "sif_TempDataTable"=>$imp_session["import_name"],
-            "sif_ProcessingInfo "=>json_encode($imp_session) ));
+            "sif_ProcessingInfo"=>json_encode($imp_session) ));
 
     if(intval($imp_id)<1){
         return "Cannot save session. SQL error:".$imp_id;
