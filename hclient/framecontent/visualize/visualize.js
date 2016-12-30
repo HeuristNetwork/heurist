@@ -1,4 +1,3 @@
-
 /**
 * filename: explanation
 *
@@ -419,6 +418,8 @@ function addContainer() {
         s = s + "scale("+scale+")";
     }
     
+    //s = "translate(1,1)scale(1)";    
+    
     // Append zoomable container       
     var container = svg.append("g")
                        .attr("id", "container")
@@ -428,7 +429,7 @@ function addContainer() {
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
-                           .scaleExtent(settings.isDatabaseStructure?[0.75,1.5]:[0.05, 10]) 
+                           .scaleExtent(settings.isDatabaseStructure?[0.75,1.5]:[0.05, 10])
                            .on("zoom", zoomed);
                       
     return container;
@@ -453,11 +454,30 @@ function zoomed() {
         putSetting(setting_scale, d3.event.scale);
     }   
     
+    
+//console.log( 'trans='+d3.event.translate );
+//console.log( 'scale='+d3.event.scale );
+    
     // Transform  
-    var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")"; 
+    var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
     d3.select("#container").attr("transform", transform);
     
-    //d3.selectAll(".node").attr('transform',"translate("+d3.event.translate+")scale(1)");
+    //d3.selectAll(".node").select(".icon").attr('transform',"scale("+(1/d3.event.scale)+")");
+    d3.selectAll(".node").attr('transform',
+    function(d) { 
+        //keep zoomed position 
+        var tr = "translate(" + d.x + "," + d.y + ")";
+        //however restore scale
+        tr = tr+"scale("+(1/d3.event.scale)+")";
+        
+        return tr; 
+    });
+    
+    d3.selectAll("path").style("stroke-width", function(d) { return getLineWidth(d.targetcount); });
+    
+    //.attr("d", d3.svg.symbol().type(function (d) { return d.Shape; }).size(1/d3.event.scale));
+    
+    //d3.selectAll(".node").attr('transform',"translate(0,0)scale("+(1/d3.event.scale)+")"); //translate("+d3.event.translate+")
     //d3.selectAll("path").attr("transform", transform); //"scale("+d3.event.scale+")");
     //updateNodes();
 
