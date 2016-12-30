@@ -15,7 +15,7 @@
 
 /**
 * selectLinkField.js
-* select link field type (pointer or relationship maker) and add it recordtype structure
+* select link field type (pointer or relationship marker) and add it recordtype structure
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson

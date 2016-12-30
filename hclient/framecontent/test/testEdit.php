@@ -358,10 +358,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 -->
                 </div>
 
-                <div style="padding:5px; xborder-bottom:1px solid lightgrey" class="relmaker"> <!-- RELATION MAKER -->
-                   RELMAKER
-                   <label>Reltype vocabulary<input type="text" name="relmaker_vocab"></label>
-                   <label>Allowed Record types<input type="text" name="relmaker_rt"></label>
+                <div style="padding:5px; xborder-bottom:1px solid lightgrey" class="relmarker"> <!-- RELATIONSHIP MARKER -->
+                   RELATIONSHIP MARKER
+                   <label>Relationship type vocabulary<input type="text" name="relmarker_vocab"></label>
+                   <label>Allowed Record types<input type="text" name="relmarker_rt"></label>
                 </div>
                 
                 </div>
