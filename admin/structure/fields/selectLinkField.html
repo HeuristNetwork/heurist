@@ -69,7 +69,6 @@
         	}               
         	.ft_preview{
 				font-size:0.7em;
-				background-color: #ECF1fB !important;
 				margin-bottom:2em;
                 max-width:240px;
                 margin-left:5ex;
@@ -90,33 +89,31 @@
                     <label>Target Record Type</label><select id="sel_target_rectype_id"></select>
                 </div>
 
-            			
-			    <input type="radio" name="ft_type" id="t_resourse" value="resource">
-			 	<label for="t_resourse">Record pointer</label>                                                         
-			    <div class="ft_notes">
+			    <input type="radio" name="ft_type" id="t_resourse" value="resource" class="ft_selfield">
+			 	<label class="ft_selfield" for="t_resourse">Record pointer</label>                                                   
+			    <div class="ft_notes ft_selfield">
 			    	A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
                     <a id="hint_more_info1" class="ft_notes">more...</a>
 			    </div>
                 <div id="div_more_info1" style="display:none; padding:5px">which will pop up the text about about using record pointers</div>
                 
                 <div class="ft_preview">
-                    <select id="sel_resource_fields"></select>
+                    <select id="sel_resource_fields" class="ft_selfield"></select>
                 </div>
                 
 
-			    <input type="radio" name="ft_type" id="t_relmaker" value="relmarker">
-			 	<label for="t_relmaker">Relationship maker</label>                                                         
-			    <div class="ft_notes">
+			    <input type="radio" name="ft_type" id="t_relmaker" value="relmarker" class="ft_selfield">
+			 	<label class="ft_selfield" for="t_relmaker">Relationship marker</label>                                              
+			    <div class="ft_notes ft_selfield">
 			    	A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
                     <a id="hint_more_info2" class="ft_notes">more...</a>
 			    </div>
                 <div id="div_more_info2" style="display:none; padding:5px">which will pop up the text about about using relationship markers</div>
 
                 <div class="ft_preview">
-                    <select id="sel_relmarker_fields"></select>
+                    <select id="sel_relmarker_fields" class="ft_selfield"></select>
                 </div>
                 
-			
 		        <div style="text-align:center;width:100%;padding-top:2em;">
 		            <button type="button" id="btnSelect" disabled="disabled"
 		            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
