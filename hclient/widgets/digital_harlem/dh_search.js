@@ -27,7 +27,7 @@ $.widget( "heurist.dh_search", {
 
     // default options
     options: {
-        UGrpID: 1007 // 1915-1930 user group for 'original' Digital Harlem map. 1008 is Year of the Riot (1935) only
+        UGrpID: 1007 // 1915-1930 user group for 'original' Digital Harlem map. 1010 is Year of the Riot (1935) only
     },
 
     _currenttype:null,  //obsolete
