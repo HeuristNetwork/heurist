@@ -998,8 +998,8 @@ function EditTerms() {
         //fill elements of con
         var ele = document.getElementById('divTermMergeConfirm');
 
-        $("#btnMergeCancel").click(function(){$_dialogbox.remove();});//if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);});
-        $("#btnMergeOK").click(function(){_updateOnServer; $_dialogbox.remove(); });
+        //$("#btnMergeCancel").click(function(){$_dialogbox.remove();});//if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);});
+        //$("#btnMergeOK").click(function(){_updateOnServer; $_dialogbox.remove(); });
 
 
 
@@ -2118,20 +2118,115 @@ function EditTerms() {
 
                     },
                     dragDrop: function(node, data) {
+                        //_currentNode =node;
+
+
                         if(data.otherNode.getLevel()===1){
                             if(node.getLevel()!=1)
                                 return false;
                             else{
+                                // var childNode = node.addChildren(data.otherNode.getChildren());
+                                // childNode.moveTo(node, data.hitMode);
+                                //data.otherNode.remove();
                                 showMergePopUp(node,data);
                             }
 
-                        }else if((data.otherNode.hasChildren()) && (data.otherNode.getLevel()!=1)){
+                        }else if((data.otherNode.hasChildren()) && (data.otherNode.getLevel()!=1))
+                        {
 
                             showMergePopUp(node,data);
+                            /*  if(data.hitMode==='over'){
+                            $("#mergeText").text("merge "+ data.otherNode.data.label+ " into " +node.data.label+"?");
+                            var ele = document.getElementById('move_mergeTerms');
+                            $("#mergeBtn").click(function(){
+
+                            var childNode = node.addChildren(data.otherNode.getChildren());
+                            childNode.moveTo(node, data.hitMode);
+                            data.otherNode.remove();
+                            $_dialogbox.dialog($_dialogbox).dialog("close");
+                            //_updateTermsOnServer(_currentNode,false);
+
+                            });
+                            $("#cancelBtn").click(function(){
+                            $_dialogbox.dialog($_dialogbox).dialog("close");
+                            });
+
+                            $_dialogbox = Hul.popupElement(top, ele,
+                            {
+                            "close-on-blur": false,
+                            "no-resize": true,
+                            title: '',
+                            height: 120,
+                            width: 200
+
+                            });
+
+
+
+                            }
+
+
+                            // $("#moveBtn").click(function(){
+                            else if (data.hitMode==='before' || data.hitMode==='after'){
+                            data.otherNode.moveTo(node,data.hitMode);
+                            //$_dialogbox.dialog($_dialogbox).dialog("close");
+                            // _updateTermsOnServer(_currentNode,false);
+                            }
+                            // });
+
+
+
+                            //show confirmation dialog
+                            /*  $_dialogbox = Hul.popupElement(top, ele,
+                            {
+                            "close-on-blur": false,
+                            "no-resize": true,
+                            title: '',
+                            height: 100,
+                            width: 200
+
+                            });
+                            $_dialogbox.dialog($_dialogbox).position({
+                            my: "left top",
+                            at: "left top",
+                            of: $(top.document).find('#tabContainer').get(0)
+
+                            });  */
+
                         }
                         else{
+                            showMergePopUp(node,data);
 
-                             showMergePopUp(node,data);
+                            /*  if(data.hitMode==='over'){
+                            $("#mergeText").text("merge "+ data.otherNode.data.label+ " into " +node.data.label+"?");
+                            var ele = document.getElementById('move_mergeTerms');
+                            $("#mergeBtn").click(function(){
+                            data.otherNode.moveTo(node,data.hitMode);
+                            $_dialogbox.dialog($_dialogbox).dialog("close");
+                            //_updateTermsOnServer(_currentNode,false);
+
+                            });
+                            $("#cancelBtn").click(function(){
+                            $_dialogbox.dialog($_dialogbox).dialog("close");
+                            });
+
+                            $_dialogbox = Hul.popupElement(top, ele,
+                            {
+                            "close-on-blur": false,
+                            "no-resize": true,
+                            title: '',
+                            height: 120,
+                            width: 200
+
+                            });
+
+
+                            //data.otherNode.moveTo(node,data.hitMode);
+                            //  _updateTermsOnServer(_currentNode,false);
+                            }
+                            else{
+                            data.otherNode.moveTo(node,data.hitMode);
+                            } */
                         }
 
 
@@ -2152,42 +2247,164 @@ function EditTerms() {
         {
 
             if(data.hitMode==='over'){
-                $("#mergeText").text("Merge "+ data.otherNode.data.label+ " into " +node.data.label+"?");
-                var ele = document.getElementById('move_mergeTerms');
-                $("#mergeBtn").click(function(){
-                    var childNode = node.addChildren(data.otherNode.getChildren());
-                    childNode.moveTo(node, data.hitMode);
-                    data.otherNode.remove();
-                    $_dialogbox.dialog($_dialogbox).dialog("close");
-                    //_updateTermsOnServer(_currentNode,false);
+                //$("#mergeText").text("merge "+ data.otherNode.data.label+ " into " +node.data.label+"?");
+                //var ele = document.getElementById('move_mergeTerms');
+                if(!data.otherNode.hasChildren()){
 
-                });
-                $("#cancelBtn").click(function(){
-                    $_dialogbox.dialog($_dialogbox).dialog("close");
-                });
+                    $("#btnMergeOK").click(function(){
+                        data.otherNode.moveTo(node,data.hitMode);
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                        //_updateTermsOnServer(_currentNode,false);
 
+                    });
+
+                }
+                else{
+
+
+
+
+                    $("#btnMergeOK").click(function(){
+                        while(data.otherNode.hasChildren())
+                        {
+                            data.otherNode.getFirstChild().moveTo(node, data.hitMode);
+                            $_dialogbox.dialog($_dialogbox).dialog("close");
+                            //_updateTermsOnServer(_currentNode,false);
+                        }
+                        $(data.otherNode.span).hide();
+                    });//if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);});
+
+
+
+
+
+                }
+
+
+                var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+                fi = top.HEURIST.terms.fieldNamesToIndex;
+
+                var merge_node = data.otherNode.data;
+                var retain_node = node.data;
+
+                //var arTerm = termsByDomainLookup[data.otherNode.data.id];
+                //$('#lblTerm_toMerge').html(merge_node.label+' ['.fontsize(1)+merge_node.conceptid.fontsize(1) +']'.fontsize(1));
+
+                //var arTerm2 = termsByDomainLookup[node.data.id];
+                //$('#lblTerm_toRetain').html(retain_node.label+' ['.fontsize(1)+retain_node.conceptid.fontsize(1) +']'.fontsize(1));
+
+                var arTerm = termsByDomainLookup[merge_node.id];
+                $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['.fontsize(1)+arTerm[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+
+                var arTerm2 = termsByDomainLookup[retain_node.id];
+                $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+
+                $('#lblMergeLabel1').text(arTerm2[fi.trm_Label]);
+
+
+                /*  if(Hul.isempty(arTerm[fi.trm_Label])){
+                $('#mergeLabel2').hide();
+                }else{
+                $('#mergeLabel2').show();
+                $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
+                $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
+                } */
+
+
+                /***  Check and Description Buttons-- if "Neither" - disable both buttons and show <none> in both
+                if "One" - select the one and disable the other and show <none> in the empty one
+                if "Both" - Select the first one and the other
+
+                ***/
+                if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
+                    (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
+                    $('#mergeCode1').show();
+                    $('#mergeCode2').show();
+                    $('#mergeDescr1').show();
+                    $('#mergeDescr2').show();
+                    $('input[name ="rbMergeCode"]').attr('disabled', 'disabled');
+                    $('input[name ="rbMergeDescr"]').attr('disabled', 'disabled' );
+                    $('#lblMergeCode2').html('&#60;none&#62;');
+                    $('#rbMergeCode2').val('&#60;none&#62;');
+                    $('#lblMergeCode1').html('&#60;none&#62;');
+                    $('#rbMergeCode1').val('&#60;none&#62;');
+                    $('#lblMergeDescr1').html('&#60;none&#62;');
+                    $('#rbMergeDescr1').val('&#60;none&#62;');
+                    $('#lblMergeDescr2').html('&#60;none&#62;');
+                    $('#rbMergeDescr2').val('&#60;none&#62;');
+                }
+                else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Code])))
+                {
+                    $('#mergeCode1').show();
+                    $('#mergeCode2').show();
+                    $('#mergeDescr1').show();
+                    $('#mergeDescr2').show();
+                    $('#rbMergeCode1').attr('disabled', 'disabled');
+                    $("#rbMergeCode2").attr('checked', 'checked');
+                    $('#rbMergeDescr1').attr('disabled', 'disabled');
+                    $("#rbMergeDescr2").attr('checked', 'checked');
+                    $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+                    $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+                    $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+                    $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
+                }
+                else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code]))
+                    && (!Hul.isempty(arTerm2[fi.trm_Description])))
+                    {
+                        $('#mergeCode1').show();
+                        $('#mergeCode2').show();
+                        $('#mergeDescr1').show();
+                        $('#mergeDescr2').show();
+                        $('#rbMergeCode2').attr('disabled', 'disabled');
+                        $("rbMergeCode1").attr('checked', 'checked');
+                        $('#rbMergeDescr2').attr('disabled', 'disabled');
+                        $("#rbMergeDescr1").attr('checked', 'checked');
+                        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+                        $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+                        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+                        $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+                    }
+                    else
+                    {
+                        $('#mergeCode1').show();
+                        $('#mergeCode2').show();
+                        $('#mergeDescr1').show();
+                        $('#mergeDescr2').show();
+                        $('input[name ="rbMergeCode"]').removeAttr( "disabled" );
+                        $('input[name ="rbMergeCode"]').attr('checked', 'checked');
+                        $('input[name ="rbMergeDescr"]').removeAttr( "disabled" );
+                        $('input[name ="rbMergeDescr"]').attr('checked', 'checked');
+                        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+                        $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+                        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+                        $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+                        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+                        $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+                        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+                        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
+                    }
+
+
+                var ele = document.getElementById('divTermMergeConfirm');
+                $("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
+                //show confirmation dialog
                 $_dialogbox = Hul.popupElement(top, ele,
                     {
                         "close-on-blur": false,
                         "no-resize": true,
-                        title: '',
-                        height: 120,
-                        width: 200
-
+                        title: 'Select values to be retained',
+                        height: 400,
+                        width: 600
                 });
 
 
-
             }
 
 
-            // $("#moveBtn").click(function(){
             else if (data.hitMode==='before' || data.hitMode==='after'){
                 data.otherNode.moveTo(node,data.hitMode);
-                //$_dialogbox.dialog($_dialogbox).dialog("close");
-                // _updateTermsOnServer(_currentNode,false);
             }
-            // });
+
 
 
         }
