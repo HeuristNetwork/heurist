@@ -404,6 +404,7 @@ if(@$params['debug']) echo $query."<br>";
     *       publiconly (=1) - ignore current user and returns only public records
     *
     *       detail (former 'f') - ids       - only record ids
+    *                             count     - only count of records  
     *                             header    - record header
     *                             timemap   - record header + timemap details
     *                             detail    - record header + all details
@@ -454,6 +455,7 @@ if(@$params['debug']) echo $query."<br>";
 
         }
 
+        $is_count_only = ('count'==$params['detail']);
         $is_ids_only = ('ids'==$params['detail']);
         $return_h3_format = (@$params['vo']=='h3' &&  $is_ids_only);
 
@@ -476,8 +478,11 @@ if(@$params['debug']) echo $query."<br>";
             $params['w'] = 'all'; //does not allow to search bookmarks if not logged in
         }
 
+        if($is_count_only){
 
-        if($is_ids_only){
+            $select_clause = 'select count(rec_ID) ';
+
+        }else if($is_ids_only){
 
             $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT rec_ID ';
 
@@ -743,7 +748,7 @@ if(@$params['debug']) echo $query."<br>";
                 $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL OR compose_sql_query at once
             }
 
-            if($is_ids_only && @$params['needall']){
+            if($is_count_only || ($is_ids_only && @$params['needall'])){
                 $chunk_size = PHP_INT_MAX;
                 $aquery["limit"] = '';
             }else{
@@ -765,7 +770,19 @@ if(@$params['debug']) echo $query."<br>";
         $res = $mysqli->query($query);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.' Search query error on saved search. Query '.$query, $mysqli->error);
+        }else if($is_count_only){
+        
+                $total_count_rows = $res->fetch_row();
+                $total_count_rows = (int)$row[0];
+                $res->close();
+                
+                $response = array('status'=>HEURIST_OK,
+                            'data'=> array(
+                                'queryid'=>@$params['id'],  //query unqiue id
+                                'count'=>$total_count_rows));
+                
         }else{
+            
 
             $fres = $mysqli->query('select found_rows()');
             if (!$fres)     {
