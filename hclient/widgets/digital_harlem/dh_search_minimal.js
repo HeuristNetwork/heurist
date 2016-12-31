@@ -260,7 +260,12 @@ function hSearchMinimalDigitalHarlem() {
             var rec = recordset.getFirstRecord();
             primary_rt = Number(recordset.fld(rec, 'rec_RecTypeID'));
         } 
-console.log('primary '+primary_rt);
+//console.log('primary '+primary_rt);
+
+        var is_Riot = '';
+        if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
+            is_Riot = '&riot=1';
+        }
         
         
         for(idx in records){
@@ -283,13 +288,14 @@ console.log('primary '+primary_rt);
                         recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //special record type to distiguish 
                         recordset.setFld(record, 'rec_Info',
                             window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
-                                +window.hWin.HAPI4.database+"&recID="+recID);
+                                +window.hWin.HAPI4.database+"&recID="+recID+is_Riot);
 
                     }else{
                         
                         if(primary_rt==RT_EVENT){
 
-                            //apprently we may need 2 loops: separately for events and then for persons
+                            var events_per_address = [];    
+                            
                             for(i=0; i<rels.length; i++){ //all records related to addresses
                                 //3. if event try to find related persons
                                 if(rels[i]['relrt'] == RT_EVENT){
@@ -304,11 +310,9 @@ console.log('primary '+primary_rt);
                                     recordset.setFld(record, 'rec_Title',  recordset.fld(rel_event, 'rec_Title') );
                                     recordset.setFld(record, DT_STARTDATE, recordset.fld(rel_event, 'dtl_StartDate' ) );
                                     recordset.setFld(record, DT_ENDDATE,   recordset.fld(rel_event, DT_ENDDATE) );
-                                    recordset.setFld(record, 'rec_Info',
-                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
-                                            +window.hWin.HAPI4.database
-                                            +"&recID="+eventID+"&addrID="+recID);
-
+                                    
+                                    events_per_address.push(eventID);
+                                    
                                     //add empty links for this event
                                     if(!links[ eventID ]){
                                         links[ eventID ] = {primary:[], secondary:[], residence:[], is_event:true, path:[] };
@@ -369,7 +373,7 @@ console.log('primary '+primary_rt);
                                                     personID+"&addrID="+recID; //+"&eventID="+eventID
 
                                     recordset.setFld(record, 'rec_Info', recInfoUrl);
-                                    recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');
+                                    recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1'+is_Riot);
 
                                     recordset.setFld(record, 'rec_Title',  recordset.fld(relrec, 'rec_Title') );
                                     recordset.setFld(record, DT_STARTDATE, recordset.fld(relrec, 'dtl_StartDate' ) );
@@ -393,6 +397,14 @@ console.log('primary '+primary_rt);
                             }//for all records related to address
 
 
+                            //there can be more than ove event per address
+                            recordset.setFld(record, 'rec_Info',
+                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                            +window.hWin.HAPI4.database
+                                            +"&recID="+events_per_address.join(',')+"&addrID="+recID+is_Riot);
+
+                            
+                            
                         } else if(primary_rt==RT_PERSON) {
 
                             for(i=0; i<rels.length; i++){ //all records related to addresses
@@ -410,7 +422,7 @@ console.log('primary '+primary_rt);
                                         +"&recID="+recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
                                         
                                     recordset.setFld(record, 'rec_Info', recInfoUrl);
-                                    recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');
+                                    recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1'+is_Riot);
 
                                     recordset.setFld(record, 'rec_Title',  recordset.fld(relrec, 'rec_Title') );
                                     recordset.setFld(record, DT_STARTDATE, recordset.fld(relrec, 'dtl_StartDate' ) );
@@ -443,7 +455,7 @@ console.log('primary '+primary_rt);
                                     recordset.setFld(record, 'rec_Info',
                                             window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
                                             +window.hWin.HAPI4.database
-                                            +"&recID="+eventID+"&addrID="+recID);
+                                            +"&recID="+eventID+"&addrID="+recID+is_Riot);
 
                                     //find persons involved into this event
                                     var rels2 = recordset.getRelationRecords(eventID, RT_PERSON); 
@@ -532,6 +544,7 @@ console.log('primary '+primary_rt);
                 
 
                 //change secondary events icon to dot
+                //!IMPORTANT this address may be used by other event! - to CORRECT!!!!!
                 if(is_event && links[recID].primary.length>0){
                     for(j=0; j<links[recID].secondary.length; j++){
                         secAddr = res_records[ links[recID].secondary[j] ]; //record id

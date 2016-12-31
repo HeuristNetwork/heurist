@@ -26,6 +26,9 @@
     require_once (dirname(__FILE__).'/../../../hserver/dbaccess/db_structure.php');
     require_once (dirname(__FILE__).'/../../../hserver/dbaccess/utils_db.php');
 
+    require_once ( dirname(__FILE__).'/../../../common/php/Temporal.php');
+    
+    
     $response = array();
 
     $system = new System();
@@ -41,9 +44,15 @@
     //echo '>1>'.@$_REQUEST['recID'];
 
     $recID = $_REQUEST['recID'];
-    $ids = $recID;
-    $need_cnt = 1;
-
+    $ids = explode(',',$recID);
+    $need_cnt = count($ids);
+    
+    $entities_per_address = $need_cnt;
+    if($entities_per_address>1){
+        $recID = end($ids);
+    }
+    
+    
     $eventID = @$_REQUEST['eventID'];
     if($eventID) { $ids = $ids.','.$eventID; $need_cnt++;}
     $addrID = @$_REQUEST['addrID'];
@@ -98,7 +107,7 @@
     $moredetailLink =  '<p><a href="javascript:void(0)" class="moredetail" '.
         'onClick="window.hWin.HEURIST4.msg.showDialog(\''.$_SERVER['REQUEST_URI'].'&full=1\');">More Detail</a></p>';
 
-
+        
     if($recTypeID==RT_ADDRESS){
 
         if( @$_REQUEST['full']==1 ){
@@ -207,7 +216,12 @@
         if( @$_REQUEST['full']==1 ){
             require ('dh_popup_event.php');
         }
-
+        
+        if($entities_per_address>0){
+            $moredetailLink =  $moredetailLink.'<p><a href="javascript:void(0)" class="moredetail" '.
+            'onClick="window.hWin.HEURIST4.msg.showDialog(\'dh_popup_place.php?recID='.$addrID.'&full=1\');">'.
+            ($entities_per_address-1).' more event'.($entities_per_address>2?'s':'').' at this address</a></p>';
+        }
 
              //get relationship record for related address
              $relation2 = recordGetRealtionship_2($system, $recID, $addrID, 'address for event' );
@@ -290,11 +304,39 @@ function getFieldValue($records, $recID, $fieldID, $needall=false){
 }
 
 
+//
+//
+//
+function isDateInRange( $records, $recID, $min, $max) {
 
+    $date_start = getFieldValue($records, $recID, DT_START_DATE);
+     
+    if($date_start){
+         try{
+            $date_start = new DateTime($date_start);
+            return $date_start>$min && $date_start<$max;
+
+         } catch (Exception  $e){
+             return false;
+         }
+     
+    }else{ //date not defined - allow
+        return true;
+    }
+}
+
+//
+//
+//
 function composeDates( $records, $recID, $prefix='') {
      $date_out = '';
      $date_start = getFieldValue($records, $recID, DT_START_DATE);
      if($date_start){
+         
+        if(strpos($date_start,"|")!==false){  
+          return $prefix.temporalToHumanReadableString($date_start);
+        }
+        
         $date_out = $prefix.$date_start;
 
         $date_end = getFieldValue($records, $recID, DT_END_DATE);
@@ -305,8 +347,9 @@ function composeDates( $records, $recID, $prefix='') {
      return $date_out;
 }
 
-
-
+//
+//
+//
 function composeTime( $records, $recID, $prefix='') {
 
              if(!($recID>0)){

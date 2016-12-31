@@ -21,7 +21,7 @@
 */
 
 require_once(dirname(__FILE__)."/../../../hserver/System.php");
-//require_once(dirname(__FILE__)."/../../../hserver/dbaccess/db_recsearch.php");
+require_once(dirname(__FILE__)."/../../../hserver/dbaccess/db_recsearch.php");
 
 $statistics = "";
 $system = new System();
@@ -31,23 +31,48 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
     $appcode = @$_REQUEST['app'];
     if($appcode=='DigitalHarlem1935'){
         $appcode = 4800; //4751;
+        $date_filter = '1934-12-31T23:59:59.999Z<>1936-01-01';
+        $explanation = '1935';
+    }else if($appcode=='DigitalHarlem'){
+        $appcode = 4799; //4750
+        $date_filter = '1914-12-31T23:59:59.999Z<>1931-01-01';
+        $explanation = '1915-1930';
+    }  
+        
         
         $stats = array();
         
-        // Building query
-        $query = "SELECT count(*) as count FROM Records, recDetails WHERE rec_RecTypeID=14 and 
-          dtl_RecID = rec_ID and   
-          dtl_DetailTypeID=10 and dtl_Value between '1934-12-31' and '1936-01-01'";
-        $res = $system->get_mysqli()->query($query);
-        if($res){
-            $row = $res->fetch_assoc();
-            $stats['14']= $row["count"];
+        //search for PERSONS INVOLVED INTO EVENTS
+        $records = recordSearch($system, array(
+            'q'=>'[{"t":"10"},{"relatedfrom:14":[{"t":"14"},{"f:10":"'.$date_filter.'"}]}]',
+            'detail'=>'count'));
+            //"1914-12-31T23:59:59.999Z<>1931-01-01"
+
+        if(@$records['status']!='ok'){
+            $stats['10'] = 'XXX';
+        }else{
+            $stats['10'] = $records['data']['count'];
         }
+        
+        
+        //EVENTS
+        $records = recordSearch($system, array(
+            'q'=>'[{"t":"14"},{"f:10":"'.$date_filter.'"}]',
+            'detail'=>'count'));
+
+        if(@$records['status']!='ok'){
+            $stats['14'] = 'XXX';
+        }else{
+            $stats['14'] = $records['data']['count'];
+        }
+        
+        
+        list($dmin, $dmax) = explode('<>',$date_filter);
         
         $query = "SELECT count(distinct d2.dtl_Value) as count 
 FROM Records, recDetails d1, recDetails d2 WHERE rec_RecTypeID=16 and 
           d1.dtl_RecID = rec_ID and d2.dtl_RecID = rec_ID and     
-          d1.dtl_DetailTypeID=10 and d1.dtl_Value between '1934-12-31' and '1936-01-01' and
+          d1.dtl_DetailTypeID=10 and d1.dtl_Value between '$dmin' and '$dmax' and
           d2.dtl_DetailTypeID=90 ";
  
 /* alternative query          
@@ -60,28 +85,30 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
         $res = $system->get_mysqli()->query($query);
         if($res){
             $row = $res->fetch_assoc();
-            $stats['16']= $row["count"];
+            $stats['16']= $row["count"];   //USED ADDRESSES (PLACE FUNCTIONS)
         }
 
 
+        //DOCUMENTS
+        $records = recordSearch($system, array(
+            'q'=>'[{"t":"15"},{"f:9":"'.$date_filter.'"}]',
+            'detail'=>'count'));
 
-        $query = "SELECT rec_RecTypeID as id, count(*) as count FROM Records, recDetails WHERE rec_RecTypeID=15 and 
-          dtl_RecID = rec_ID and   
-          dtl_DetailTypeID=9 and dtl_Value between '1934-12-31' and '1936-01-01'
-          GROUP BY id";
-        $res = $system->get_mysqli()->query($query);
-        if($res){
-            $row = $res->fetch_assoc();
-            $stats[$row["id"]]= $row["count"];
+        if(@$records['status']!='ok'){
+            $stats['15'] = 'XXX';
+        }else{
+            $stats['15'] = $records['data']['count'];
         }
 
-        $statistics = '<p>Currently presenting '
-        .'<b title="Number of events">'.@$stats[14]
+        $statistics = '<p>Currently presenting <b title="Number of people">'.@$stats[10]
+        .'</b> people, <b title="Number of events">'.@$stats[14]
         .'</b> events, <b title="Number of addresses">'.@$stats[16]
         .'</b> addresses and <b title="Number of documents">'.@$stats[15]
-        .'</b> documentary sources related to Harlem, 1935</p>';
+        .'</b> documentary sources related to Harlem, '.$explanation.'</p>';
         
-    }else if($appcode=='DigitalHarlem'){
+        
+     /*  
+    if($appcode=='DigitalHarlem'){ //OLD WAY
         $appcode = 4799; //4750; 
         
         // Building query
@@ -99,8 +126,7 @@ FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and
         .'</b> events, <b title="Number of addresses">'.@$stats[12]
         .'</b> addresses and <b title="Number of documents">'.@$stats[15]
         .'</b> documentary sources related to Harlem, 1915-1930</p>';
-
-    }
+    }*/
 
     
 }
