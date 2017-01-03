@@ -935,6 +935,8 @@ function DetailTypeEditor() {
                     if(hasH4()){
                         $("#topdiv_closebtn").hide();
                     }
+                    $("#field_types_context_help").load(top.HEURIST.baseURL_V3+'context_help/field_data_types.html #content_body');
+                    
                     _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
                 }
             }
