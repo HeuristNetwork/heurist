@@ -1056,6 +1056,7 @@ function EditTerms() {
         //( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
         //    Number(_currentNode.data.inverseid) !== iInverseId));
 
+
         if(wasChanged || !isExistingNode(_currentNode) ){
 
             var swarn = "";
@@ -1106,6 +1107,7 @@ function EditTerms() {
                 // _currentNode.load();
                 //_defineContentTreeView();
                 _updateTermsOnServer(_currentNode, needReload);
+
                 //alert("TODO SAVE ON SERVER");
             }
         }
@@ -1492,10 +1494,13 @@ function EditTerms() {
 
         if(isRoot){
 
-            var rootNode = _currTreeView.getRoot();
+            //var rootNode = _currTreeView.getRoot(); YUI tree
+            var rootNode =   $treediv.fancytree("getRootNode");
+            var tree = $treediv.fancytree("getTree");
 
             term = {}; //new Object();
-            term.id = (value.id)?value.id:"0-" + (rootNode.getNodeCount()); //correct
+            //term.id = (value.id)?value.id:"0-" + (rootNodet.getNodeCount()); //correct
+            term.id = (value.id)?value.id:"0-" + (tree.count());
             term.parent_id = null;
             term.conceptid = null;
             term.domain = _currentDomain;
@@ -1503,11 +1508,17 @@ function EditTerms() {
             term.description = value.description;
             term.termcode = value.termcode;
             term.inverseid = null;
+            term.folder = true;
+            term.title=  value.label;
 
-            rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node
-            _currTreeView.render();
 
-            rootNode.focus(); //expand
+
+
+            //rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node
+            //  _currTreeView.render();
+
+            //rootNode.focus(); //expand
+            rootNode.addChildren(term);
 
             _onNodeClick(rootNode);
 
@@ -1524,7 +1535,7 @@ function EditTerms() {
             term.inverseid = null;
 
             var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
-            _currTreeView.render();
+            // _currTreeView.render();
 
             var _temp = _currentNode;
 
@@ -2147,8 +2158,16 @@ function EditTerms() {
 
                     $("#btnMergeOK").click(function(){
                         data.otherNode.moveTo(node,data.hitMode);
+
+                        alert(node.data.id);
+                        if(node.data.id === "root") {
+                            Dom.get('edParentId').value = "";
+                        }else{
+                            Dom.get('edParentId').value = node.data.id;
+                        }
+                        _doSave(false, true);
                         $_dialogbox.dialog($_dialogbox).dialog("close");
-                        _updateTermsOnServer(_currentNode,false);
+                       // _updateTermsOnServer(_currentNode,false);
 
                     });
 
@@ -2160,7 +2179,7 @@ function EditTerms() {
                         {
                             data.otherNode.getFirstChild().moveTo(node, data.hitMode);
                             $_dialogbox.dialog($_dialogbox).dialog("close");
-                            _updateTermsOnServer(_currentNode,false);
+                           // _updateTermsOnServer(_currentNode,false);
                         }
                         $(data.otherNode.span).hide();
                     });
@@ -2187,7 +2206,7 @@ function EditTerms() {
                 ***/
                 if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
                     (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
-                         displayPopUpContents(false,false,false,false);
+                    displayPopUpContents(false,false,false,false);
                 }
                 else if((!Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
                     && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
@@ -2277,7 +2296,7 @@ function EditTerms() {
                                                 $('#lblMergeCode2').html((arTerm[fi.trm_Code]));
                                             }
                                             else{
-                                                   $('#rbMergeCode1').attr('disabled', 'disabled');
+                                                $('#rbMergeCode1').attr('disabled', 'disabled');
                                                 $('#lblMergeCode1').html('&#60;none&#62;');
                                                 $('#rbMergeDescr1').attr('checked', 'checked');
                                                 $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
@@ -2286,42 +2305,42 @@ function EditTerms() {
                                                 $("#rbMergeCode2").attr('checked', 'checked');
                                                 $('#lblMergeCode2').html((arTerm[fi.trm_Code]));
                                             }
-                        function displayPopUpContents(cbCode1,cbCode2,cbDescr1,cbDescr2){
-                            if(cbCode1){
-                                $('#rbMergeCode1').attr('checked', 'checked');
-                                 $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-                            }
-                            else{
-                                $('#rbMergeCode1').attr('disabled', 'disabled');
-                               $('#lblMergeCode1').html('&#60;none&#62;');
-                            }
-                             if(cbCode2){
-                                $("#rbMergeCode2").attr('checked', 'checked');
-                                $('#lblMergeCode2').html((arTerm[fi.trm_Code]));
-                             }
-                             else{
-                                  $("#rbMergeCode2").attr('disabled', 'disabled');
-                                $('#lblMergeCode2').html('&#60;none&#62;');
-                             }
-                             if(cbDescr1)
-                             {
-                                  $('#rbMergeDescr1').attr('checked', 'checked');
-                                  $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-                             }
-                             else{
-                                 $('#rbMergeDescr1').attr('disabled', 'disabled');
-                                  $('#lblMergeDescr1').html('&#60;none&#62;');
-                             }
-                             if(cbDescr2){
-                                   $("#rbMergeDescr2").attr('checked', 'checked');
-                                   $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-                             }
-                             else{
-                                  $("#rbMergeDescr2").attr('disabled', 'disabled');
-                                   $('#lblMergeDescr2').html('&#60;none&#62;');
-                             }
+                function displayPopUpContents(cbCode1,cbCode2,cbDescr1,cbDescr2){
+                    if(cbCode1){
+                        $('#rbMergeCode1').attr('checked', 'checked');
+                        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+                    }
+                    else{
+                        $('#rbMergeCode1').attr('disabled', 'disabled');
+                        $('#lblMergeCode1').html('&#60;none&#62;');
+                    }
+                    if(cbCode2){
+                        $("#rbMergeCode2").attr('checked', 'checked');
+                        $('#lblMergeCode2').html((arTerm[fi.trm_Code]));
+                    }
+                    else{
+                        $("#rbMergeCode2").attr('disabled', 'disabled');
+                        $('#lblMergeCode2').html('&#60;none&#62;');
+                    }
+                    if(cbDescr1)
+                    {
+                        $('#rbMergeDescr1').attr('checked', 'checked');
+                        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+                    }
+                    else{
+                        $('#rbMergeDescr1').attr('disabled', 'disabled');
+                        $('#lblMergeDescr1').html('&#60;none&#62;');
+                    }
+                    if(cbDescr2){
+                        $("#rbMergeDescr2").attr('checked', 'checked');
+                        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+                    }
+                    else{
+                        $("#rbMergeDescr2").attr('disabled', 'disabled');
+                        $('#lblMergeDescr2').html('&#60;none&#62;');
+                    }
 
-                        }
+                }
 
                 var ele = document.getElementById('divTermMergeConfirm');
                 $("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
@@ -2339,10 +2358,8 @@ function EditTerms() {
             }
             else if (data.hitMode==='before' || data.hitMode==='after'){
                 data.otherNode.moveTo(node,data.hitMode);
-                _updateTermsOnServer(_currentNode,false);
+
             }
-
-
 
         }
 
