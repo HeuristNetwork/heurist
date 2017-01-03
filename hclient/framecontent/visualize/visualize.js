@@ -305,6 +305,32 @@ var data; // Currently visualised dataset
 var zoomBehaviour;
 var force;
 
+
+function getDataFromServer(){
+
+    var url = window.hWin.HAPI4.basePathV4+"hserver/controller/rectype_relations.php" + window.location.search;
+    d3.json(url, function(error, json_data) {
+        // Error check
+        if(error) {
+            return alert("Error loading JSON data: " + error.message);
+        }
+        $(".show-record").each(function() {
+            var name = $(this).attr("name");
+            var record = localStorage.getItem(name);
+            if(record) {
+                // Update checked attribute
+                var obj = JSON.parse(record);
+                if("checked" in obj) {
+                    $(this).prop("checked", obj.checked);
+                }
+            }
+        });    
+        
+        visualizeData();
+    });
+    
+}
+
 function visualizeData() {
     svg.selectAll("*").remove();
     addSelectionBox();

@@ -338,8 +338,11 @@
                             function(obj) {
                                 var rty_ID = obj.data.getData('rtyID');
                                 var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";
-                                info += '<table><tr><th><b>Field name</b></th><th><b>Field type</b></th><th><b>Data type</b></th>';
-                                info += '<th class=\"status\"><b>Status</b></th></tr>';
+                                info += '<table style="text-align: left;"><tr>';
+                                info += '<th  style="padding-left:10px;" class=\"status\"><b>Already in DB?</b></th>';
+                                info += '<th style="padding-left:10px;"><b>Field name (used for this record type)</b></th>';
+                                info += '<th style="padding-left:10px;"><b>Base field name (shared across record types)</b></th>';
+                                info += '<th style="width:100px; padding-left:10px;"><b>Field data type</b></th></tr>';
 
                                 // 0 = rst_DisplayName
                                 // 1 = dty_Name
@@ -355,10 +358,12 @@
                                         dtyStatus = rectypeStructures[rty_ID][i][3];
                                     };
                                     info += "<tr"+ (rectypeStructures[rty_ID][i][5] == 1? ' style="background-color:#CCCCCC;"' : "") +
-                                    "><td>" + (rectypeStructures[rty_ID][i][5] == 1? "(imported) " : "") + rectypeStructures[rty_ID][i][0] +
-                                    "</td><td>" + rectypeStructures[rty_ID][i][1] +
-                                    "</td><td>" + dtlookups[rectypeStructures[rty_ID][i][2]] +
-                                    "</td><td class=\"status\">" + dtyStatus + "</td></tr>";
+                                    "</td><td style='padding-left:20px;'>" + (rectypeStructures[rty_ID][i][5] == 1? "exists" : "NEW") +
+                                    "<td style='padding-left:10px; font-weight:bold'>" + rectypeStructures[rty_ID][i][0] +
+                                    "</td><td style='padding-left:10px;'>" + rectypeStructures[rty_ID][i][1] +
+                                    "</td><td style='padding-left:10px;'>" + dtlookups[rectypeStructures[rty_ID][i][2]] +
+                                    // unecessary detail: "</td><td class=\"status\">" + dtyStatus +
+                                    "</td></tr>";
                                 }
                                 info += "</table><br />";
                                 obj.liner_element.innerHTML += info;

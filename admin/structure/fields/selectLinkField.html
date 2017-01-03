@@ -86,9 +86,10 @@
 			<div class="ft_col">
 
                 <div class="ft_preview">
-                    <label>Target Record Type</label><select id="sel_target_rectype_id"></select>
+                    <label>To:</label><select id="sel_target_rectype_id" style="margin-left: 20px;"></select>
                 </div>
-
+            
+                <!-- redundancy note: this functionality is repeated in selectFieldType.html/js -->
             			
 			    <input type="radio" name="ft_type" id="t_resourse" value="resource" class="ft_selfield">
 			 	<label  class="ft_selfield" for="t_resourse">Record pointer</label>                                                  
@@ -97,8 +98,8 @@
                     <a id="hint_more_info1" class="ft_notes">more...</a>
 			    </div>
                 
-                <div class="ft_preview">
-                    <select id="sel_resource_fields" class="ft_selfield"></select>
+                <div class="ft_preview" style="font-size: smaller;">
+                    Available base fields: <select id="sel_resource_fields" class="ft_selfield"></select>
                 </div>
                 
 
@@ -108,8 +109,8 @@
                     <a id="hint_more_info2" class="ft_notes">more...</a>
 			    </div>
 
-                <div class="ft_preview">
-                    <select id="sel_relmarker_fields" class="ft_selfield"></select>
+                <div class="ft_preview" style="font-size: smaller;">
+                    Available base fields: <select id="sel_relmarker_fields" class="ft_selfield"></select>
                 </div>
                 
 			
@@ -117,7 +118,7 @@
 		            <button type="button" id="btnSelect" disabled="disabled"
 		            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
 		            role="button" aria-disabled="false" style="color:lightgray;padding:4px 10px;font-size: 1.4em;">
-		            <span class="ui-button-text">Select</span>
+		            <span class="ui-button-text">Create link</span>
 		            </button>
 		        </div>
 			</div>
