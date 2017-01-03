@@ -98,6 +98,9 @@ $mysqli = null;
 $wg_ids = null;
 $publicOnly = false;
 
+//keep params for debug only!
+$params_global;
+
 /*
 
 [{"t":14},{"f:74":"X0"},
@@ -117,7 +120,9 @@ $publicOnly = false;
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
-    global $mysqli, $wg_ids, $publicOnly;
+    global $mysqli, $wg_ids, $publicOnly, $params_global;
+    
+    $params_global = $params;
 
     $mysqli = $db;
 
@@ -1024,9 +1029,14 @@ class HPredicate {
     */
     function getFieldValue(  ){
 
-        global $mysqli;
+        global $mysqli, $params_global;
 
         //@todo between , datetime, terms
+        if(is_array($this->value)){
+            error_log('value expected string - array given');
+            error_log(print_r($params_global,true));
+            $this->value = reset($this->value);
+        }
 
         //
         if (strpos($this->value,"<>")===false) {
