@@ -502,6 +502,7 @@ $.widget( "heurist.search_faceted", {
                        };
                    }
 
+console.log('inpt added '+"fv_"+field['var']);                   
                      
                     var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
                             ed_options
@@ -518,17 +519,34 @@ $.widget( "heurist.search_faceted", {
                     //assign event listener
                     //var $inputs = inpt.editing_input('getInputs');
                     that._on( inpt.find('input'), {
-                        keypress:
-                        function(e){
-                        var code = (e.keyCode ? e.keyCode : e.which);
-                            if (code == 13) {
-                                window.hWin.HEURIST4.util.stopEvent(e);
-                                e.preventDefault();
-                                that.doSearch();
+                            keypress:
+                            function(e){
+                                var code = (e.keyCode ? e.keyCode : e.which);
+                                if (code == 13) {
+                                    window.hWin.HEURIST4.util.stopEvent(e);
+                                    e.preventDefault();
+                                    that.doSearch();
+                                }
+                            },
+                            keyup: function(e){
+                                    var btn_reset = inpt.find('.resetbutton');
+                                    if($(e.target).val()==''){
+                                        btn_reset.css('visibility','hidden');   
+                                    }else{
+                                        btn_reset.css('visibility','visible');   
+                                    }
                             }
-                    }});
+                    });
                     that._on( inpt.find('select'), {
-                        change: "doSearch"});                   
+                        change: function(e){
+                                var btn_reset = inpt.find('.resetbutton');
+                                if($(e.target).val()==''){
+                                    btn_reset.css('visibility','hidden');   
+                                }else{
+                                    btn_reset.css('visibility','visible');   
+                                }
+                                that.doSearch();
+                        }});//"doSearch"});                   
                     
                     inpt.find('input').removeClass('text').css({'width':'150px'});
                     inpt.find('select').removeClass('text').css({'width':'150px'});
@@ -542,11 +560,12 @@ $.widget( "heurist.search_faceted", {
 
                     var btn_clear = $( "<span>")
                     .insertBefore( inpt.find('.input-cell .input-div') )
-                    .addClass("ui-icon ui-icon-arrowreturnthick-1-w")
-                    .css({'display':'inline-block', 'font-size':'0.9em', 'vertical-align':'middle'});
+                    .addClass("ui-icon ui-icon-arrowreturnthick-1-w resetbutton")
+                    .css({'display':'inline-block', 'visibility':'hidden', 'font-size':'0.9em', 'vertical-align':'middle'})
                     that._on( btn_clear, { click: function(){
                         inpt.find('input').val('');
                         inpt.find('select').val('');
+                        inpt.find('.resetbutton').css('visibility','hidden');
                         that.doSearch();
                     } });
 
