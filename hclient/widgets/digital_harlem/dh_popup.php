@@ -54,16 +54,16 @@
     
     
     $eventID = @$_REQUEST['eventID'];
-    if($eventID) { $ids = $ids.','.$eventID; $need_cnt++;}
+    if($eventID) { array_push($ids, $eventID); $need_cnt++;}
     $addrID = @$_REQUEST['addrID'];
-    if($addrID) { $ids = $ids.','.$addrID;  $need_cnt++;}
+    if($addrID) { array_push($ids, $addrID);  $need_cnt++;}
 
     //find record and details
 
-    $records = recordSearch_2('ids:'.$ids);
+    $records = recordSearch_2('ids:'.implode(',',$ids));
 
     if(count(@$records['records'])<$need_cnt){
-        echo 'Some records not found '.$ids.'  '.print_r($records,true);
+        echo 'Some records not found '.implode(',',$ids).'  '.print_r($records,true);
         return;
     }
 
@@ -124,13 +124,39 @@
 </div>
 
 <?php
-    }else{
+    }else{ 
 
         if(!isset($terms)){   //global
             $terms = dbs_GetTerms($system);
         }
 
-    if($recTypeID==RT_PERSON){
+    if($recTypeID==RT_PLACE_ROLE){
+
+            if( @$_REQUEST['full']==1 ){
+                require ('dh_popup_place.php');
+            }
+
+            $comment = getFieldValue($relation2, 0, DT_EXTENDED_DESCRIPTION);
+            //date
+            $date_out = composeDates( $records, $recID, '<b>Date: </b>');
+?>
+
+<div class="infowindow infowindow-map">
+    <h3><?php echo getFieldValue($records, $recID, DT_NAME) ?></h3>
+        <p><b><?php echo getTermById(getFieldValue($records, $recID, DT_PLACE_USAGE_TYPE)) ?> </b></p>
+
+        <?php echo getFieldValue($records, $addrID, 'rec_Title'); ?></p>
+        <p><?php echo $comment; ?></p>
+
+        <p>
+            <?php echo $date_out; ?>&nbsp;
+        </p>
+        <?php echo $moredetailLink; ?>
+</div>
+
+<?php
+        
+    }else if($recTypeID==RT_PERSON){
 
         if( @$_REQUEST['full']==1 ){
             require ('dh_popup_person.php');
@@ -217,9 +243,9 @@
             require ('dh_popup_event.php');
         }
         
-        if($entities_per_address>0){
+        if($entities_per_address>1){
             $moredetailLink =  $moredetailLink.'<p><a href="javascript:void(0)" class="moredetail" '.
-            'onClick="window.hWin.HEURIST4.msg.showDialog(\'dh_popup_place.php?recID='.$addrID.'&full=1\');">'.
+            'onClick="window.hWin.HEURIST4.msg.showDialog(\''.$_SERVER['SCRIPT_NAME'].'?recID='.$addrID.'&full=1\');">'.
             ($entities_per_address-1).' more event'.($entities_per_address>2?'s':'').' at this address</a></p>';
         }
 

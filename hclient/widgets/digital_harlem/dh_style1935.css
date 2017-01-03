@@ -261,3 +261,12 @@ div.infowindow a:hover {
 .loading{
     background: rgba(255, 255, 255, 1)  url('../../assets/loading-animation-white.gif') no-repeat center center !important;
 }
+
+.thumbs2 .recordDiv .recordTitle{
+    color: white;
+    text-shadow: 1px 1px #000;
+    font-size: 1.05em !important;
+    bottom: -15;
+    left: 2px;
+    height: 50px;
+}
