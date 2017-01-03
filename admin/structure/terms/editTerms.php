@@ -398,14 +398,14 @@ if(isForAdminOnly("to modify database structure")){
                 <tr>
                     <td><br/>Standard Code:</td>
                     <td><br/>
-                        <input id="rbMergeCode1" type="radio" name="rbMergeCode"/> <!-- initially was checked="checked"-->
+                        <input id="rbMergeCode1" type="checkbox" name="rbMergeCode"/> <!-- initially was checked="checked"-->
                         <label for="rbMergeCode1" id="lblMergeCode1"></label>
                     </td>
                 </tr>
                 <tr id="mergeCode2">
                     <td>&nbsp;</td>
                     <td>
-                        <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
+                        <input id="rbMergeCode2" type="checkbox" name="rbMergeCode"/>
                         <label for="rbMergeCode2" id="lblMergeCode2" ></label>
                     </td>
                 </tr>
@@ -413,14 +413,14 @@ if(isForAdminOnly("to modify database structure")){
                 <tr>
                     <td><br/>Description:</td>
                     <td><br/>
-                        <input id="rbMergeDescr1" type="radio" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
+                        <input id="rbMergeDescr1" type="checkbox" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
                         <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
                     </td>
                 </tr>
                 <tr id="mergeDescr2">
                     <td>&nbsp;</td>
                     <td>
-                        <input id="rbMergeDescr2" type="radio" name="rbMergeDescr"/>
+                        <input id="rbMergeDescr2" type="checkbox" name="rbMergeDescr"/>
                         <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
                     </td>
                 </tr>
