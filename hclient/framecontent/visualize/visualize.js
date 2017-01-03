@@ -71,6 +71,7 @@ var svg;        // The SVG where the visualisation will be executed on
 (function ( $ ) {
     // jQuery extension
     $.fn.visualize = function( options ) {
+        
         // Select and clear SVG.
         svg = d3.select("#d3svg");
         svg.selectAll("*").remove();
@@ -314,21 +315,49 @@ function getDataFromServer(){
         if(error) {
             return alert("Error loading JSON data: " + error.message);
         }
+        
+        settings.data = json_data; //all data
+        filterData(json_data);
+        
+    });
+    
+}
+
+function filterData(json_data) {
+    
+        if(!json_data) json_data = settings.data; 
+    
+        var names = [];
         $(".show-record").each(function() {
             var name = $(this).attr("name");
-            var record = localStorage.getItem(name);
-            if(record) {
-                // Update checked attribute
-                var obj = JSON.parse(record);
-                if("checked" in obj) {
-                    $(this).prop("checked", obj.checked);
-                }
+            if(!$(this).is(':checked')){ //to exclude
+                names.push(name);
             }
         });    
         
+        // Filter nodes
+        var map = {};
+        var size = 0;
+        var nodes = json_data.nodes.filter(function(d, i) {
+            if($.inArray(d.name, names) == -1) {
+                map[i] = d;
+                return true;
+            }
+            return false;
+        });
+
+        // Filter links
+        var links = [];
+        json_data.links.filter(function(d) {
+            if(map.hasOwnProperty(d.source) && map.hasOwnProperty(d.target)) {
+                var link = {source: map[d.source], target: map[d.target], relation: d.relation, targetcount: d.targetcount};
+                links.push(link);
+            }
+        })
+
+        var data_visible = {nodes: nodes, links: links};
+        settings.getData = function(all_data) { return data_visible; }; 
         visualizeData();
-    });
-    
 }
 
 function visualizeData() {

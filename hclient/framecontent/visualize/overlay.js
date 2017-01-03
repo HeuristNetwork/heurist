@@ -500,15 +500,8 @@ function _addNewLinkField(rty_ID, target_ID){
                     width: dim.w,
                     callback: function(context) {
                         if(context!="" && context!=undefined) {
-                            
-                            settings.data.links.push(
-                                {relation:{count:0, id: dty_ID, ids:'PtrConsntr', name:'', type:'resource'},  //relmarker
-                                source: node_id1,
-                                target: node_id2,
-                                targetcount:0
-                                }
-                            );
-                            
+                            top.HEURIST4.msg.showMsgFlash("Link created...", 2000);
+                            getDataFromServer();
                         }
                     }
               });

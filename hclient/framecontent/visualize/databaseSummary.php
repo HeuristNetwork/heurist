@@ -381,7 +381,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         localStorage.setItem(name, JSON.stringify(obj));
 
                         // Update visualisation
-                        visualizeData();
+                        filterData();
                     });
 
                     // Listen to the 'show-all' checkbox
@@ -406,7 +406,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                             localStorage.setItem(name, JSON.stringify(obj));
                         });
 
-                        visualizeData();
+                        filterData();
                     });
 
 
@@ -447,10 +447,11 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         return {nodes: nodes, links: links}
                     }
 
-                    // Visualizes the data
-                    function visualizeData() {
+                    // Visualizes the data 
+                    function initVisualizeData() {
                         // Call plugin
-                        //DEBUG console.log("Calling plugin!");
+                        //DEBUG 
+                        console.log("Calling plugin!");
                         var data_to_vis = getData(json_data);
                         
                         $("#visualisation").visualize({
@@ -476,7 +477,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         $('#divHint').hide();
                     }
                     
-                    visualizeData();
+                    initVisualizeData();
 
                 });
             });
