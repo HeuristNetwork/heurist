@@ -140,10 +140,14 @@ $(document).ready(function() {
 	$(container).find('[name="savebutton"]').css('color','lightgray').prop('disabled','disabled');
     
 
-    $('#hint_more_info1').click(function(){ top.HEURIST.util.popupElement(window, document.getElementById('div_more_info1'), 
-                {'title':'More info', 'close-on-blur':true}); });
-    $('#hint_more_info2').click(function(){ top.HEURIST.util.popupElement(window, document.getElementById('div_more_info2'),
-                {'title':'More info', 'close-on-blur':true}); });
+        top.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
+                            'Field data type: Record pointer', 
+                            top.HAPI4.basePathV3+'context_help/field_data_types.html #resource',
+                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
+        top.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
+                            'Field data type: Relationship marker', 
+                            top.HAPI4.basePathV3+'context_help/field_data_types.html #relmarker',
+                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
 	
 	$('.input-cell > .prompt').hide(); //hide help text
 	$('.input-header-cell').css({'width':'0','min-width':'15ex','font-size':'0.8em'});

@@ -1019,12 +1019,15 @@ window.hWin.HEURIST4.ui = {
     // 
     // position top|button- @todo auto detect position
     //
-    initHelper: function(help_button, content_title, content_url, position){
+    initHelper: function(help_button, content_title, content_url, position, nobutton){
 
         var $help_button = $(help_button);
 
-        $help_button.button({icons: { primary: "ui-icon-circle-b-info" }, label:'Show context help', text:false})
-                    .on('click', function(){
+        if(nobutton!==true){
+            $help_button.button({icons: { primary: "ui-icon-circle-b-info" }, label:'Show context help', text:false});
+        }
+        
+        $help_button.on('click', function(){
                         var $helper_div = $(document.body).find('#helper');
                         
                         if($helper_div.length==0){
@@ -1053,18 +1056,22 @@ window.hWin.HEURIST4.ui = {
                             //var div_height = Math.min(500, (document.body).height()-$help_button.top());
                             //var div_width  = Math.min(600, (document.body).width() *0.8);
                             divpos = null;
-                            if(position=='top'){ //show div aboe button
+                            if($.isPlainObject(position)){
+                                divpos = position;
+                                //divpos['of'] = $help_button;
+                            }else if(position=='top'){ //show div above button
                                 divpos = { my: "right bottom", at: "right top", of: $help_button }
                             }else{
                                 divpos = { my: "right top", at: "right bottom", of: $help_button };
                             }
 
+                           
                             $helper_div.load(content_url, function(){
 
                                 var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
                                 var div_width  = Math.min(700, $(document.body).width() *0.8);
-                                
-                                var title = 'Heurist context help';
+                               
+                                var title = (content_title)?content_title:'Heurist context help';
                                 var head = $helper_div.find('#content>h2');
                                 if(head.length==1){
                                     title = head.text();

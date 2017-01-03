@@ -75,24 +75,14 @@ $(document).ready(function() {
 	
 	function onScriptsReady(){
 
-        $('#hint_more_info1').click(function(){ 
-                top.HEURIST4.msg.showElementAsDialog(
-                    {elements: document.getElementById('div_more_info1'), title:'More info', 'close-on-blur':true}); 
-        });
-        $('#hint_more_info2').click(function(){ 
-                top.HEURIST4.msg.showElementAsDialog(
-                    {elements: document.getElementById('div_more_info2'), title:'More info', 'close-on-blur':true}); 
-        });
-
-        $('input[name="ft_type"]').change(function(){
-            if(!target_ID){
-                top.HEURIST4.msg.showMsgDlg('Select target record type first');   
-            }else{
-                $('#btnSelect').removeProp('disabled');
-                $('#btnSelect').css('color','black');
-            }
-        });
-        
+        top.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
+                            'Field data type: Record pointer', 
+                            top.HAPI4.basePathV3+'context_help/field_data_types.html #resource',
+                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
+        top.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
+                            'Field data type: Relationship marker', 
+                            top.HAPI4.basePathV3+'context_help/field_data_types.html #relmarker',
+                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
 	    $('#btnSelect').click( editDetailType );
     
         //rectype new field to be added to
@@ -108,6 +98,8 @@ $(document).ready(function() {
                     target_ID = $(this).val();
                     if(!target_ID){
                         top.HEURIST4.util.setDisabled($('.ft_selfield'), true);                        
+                        top.HEURIST4.util.setDisabled($('#btnSelect'), true);
+                        $('#btnSelect').css('color','lightgray');
                         $('.ft_selfield').css('color','lightgray');
                         
                     }else{
@@ -120,6 +112,9 @@ $(document).ready(function() {
                         $('#sel_resource_fields').val('');
                         $('#sel_relmarker_fields').val('');
                         $('#t_resourse').attr('checked', true);
+
+                        top.HEURIST4.util.setDisabled($('#btnSelect'), false);
+                        $('#btnSelect').css('color','black');
                     }
                     $(window.frameElement).parents('.ui-dialog').find('.ui-dialog-title').text(sDialogTitle);
                 }
