@@ -84,17 +84,25 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <!-- database name is appended automatically by auto-popup -->
 
                     <li>
+                        <a href="hclient/framecontent/visualize/databaseSummary.php" name="auto-popup" class="large h3link"
+                            data-logaction="stVis"
+                            onClick="{return false;}"  id="linkDatabaseSummary"
+                            title="Visualise the internal connections between record types in the database and add connections (record pointers and relationshi markers) between them">
+                            Visualise</a>
+                    </li>
+                    
+                    <li>
                         <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
                             onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
-                            title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
-                            Manage record types / fields</a>
+                            title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
+                            Record types / fields</a>
                     </li>
 
                     <li>
                         <a href="admin/structure/import/selectDBForImport.php" name="auto-popup" class="verylarge h3link refresh_structure"
                             onClick="{return false;}" data-logaction="stAcquire"
                             title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
-                            Acquire from databases</a>
+                            Templates</a>
                     </li>
 
                     <!-- Remarked temporarely 2016-05-11
@@ -121,7 +129,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             name="auto-popup" class="verylarge h3link refresh_structure info_link"
 
                             title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
-                            Manage terms</a>
+                            Vocabularies / terms</a>
                     </li>
 
                     <!-- Adding Manage relation types menu -->
@@ -129,15 +137,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a  href="admin/structure/terms/editTerms.php?treetype=relation" name="auto-popup" class="verylarge h3link refresh_structure info_link"
                             data-logaction="stRelations"
                             title="Browse and edit the relationship types"  onclick= "{return false;}">
-                            Manage relation types</a>
-                    </li>
-
-                    <li>
-                        <a href="hclient/framecontent/databaseSummary.php" name="auto-popup" class="large h3link"
-                            data-logaction="stVis"
-                            onClick="{return false;}"  xid="menulink-database-summary"
-                            title="Take a look at the internal connections between record types in this database">
-                            Visualise structure</a>
+                            Relationship types</a>
                     </li>
 
                     <li>
@@ -145,7 +145,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             data-logaction="stVerify"
                             onClick="{return false;}"
                             title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
-                            Verify structure and data</a>
+                            Verify</a>
                     </li>
 
                     <li id="menu-database-refresh">
@@ -161,7 +161,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             data-logaction="stFAIMS"
                             onClick="{return false;}"
                             title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
-                            Tablet configuration</a>
+                            Tablet app</a>
                     </li>
 
                     <!--

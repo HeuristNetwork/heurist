@@ -98,6 +98,12 @@ function EditRecStructure() {
     * Reads GET parameters, creates TabView and triggers init of first tab
     */
     function _init() {
+        
+        if(!top.HEURIST.rectypes && window.hWin && window.hWin.HEURIST4){
+            top.HEURIST.rectypes = window.hWin.HEURIST4.rectypes;
+            top.HEURIST.detailTypes = window.hWin.HEURIST4.detailtypes;
+            top.HEURIST.terms = window.hWin.HEURIST4.terms;
+        }
 
         db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -589,7 +595,10 @@ function EditRecStructure() {
             //
             _myDataTable.subscribe('linkClickEvent', function(oArgs){
 
-                if(!Hul.isnull(popupSelect) || _isServerOperationInProgress) { return; }
+                if(!Hul.isnull(popupSelect) || _isServerOperationInProgress) { 
+                    console.log('popup or action-in-progress');
+                    return; 
+                }
 
                 YAHOO.util.Event.stopEvent(oArgs.event);
 
@@ -725,7 +734,10 @@ function EditRecStructure() {
                     if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
                         (!Hul.isnull(column) && 
                             (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
-                        { return; }
+                        { 
+                            if (!Hul.isnull(popupSelect) || _isServerOperationInProgress) console.log('popup or action-in-progress');
+                            return; 
+                        }
 
 
 
@@ -1363,7 +1375,7 @@ function EditRecStructure() {
             var dty_ID = arrDty_ID[k];
             if(Hul.isnull(recDetTypes[dty_ID])){ //not added
                 var arrs = detTypes[dty_ID].commonFields;
-                //add new detail type
+                // add new detail type
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
                 var def_width = 80;  // default width, used by single line text fields
                 var dt_type = arrs[fi.dty_Type];
@@ -1694,6 +1706,9 @@ function EditRecStructure() {
                     if(!is_onexit && newvalue){
                         document.getElementById('rty_TitleMask').value = newvalue;    
                     }
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
     }
@@ -2177,6 +2192,9 @@ function onAddNewDetail(index_toinsert){
                         editStructure.addDetails(detailTypesToBeAdded, index_toinsert);
                     }
                     popupSelect = null;
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
 
@@ -2223,6 +2241,9 @@ function onDefineNewType(index_toinsert){
                     }
 
                     popupSelect =  null;
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
     }
@@ -2583,7 +2604,11 @@ function _onAddEditFieldType(dty_ID, rty_ID){
                     _removeTable(grpID_old, true);
                     }*/
                 }
+            },
+            afterclose: function(){
+                popupSelect = null;
             }
+            
     });
 }
 
@@ -2615,6 +2640,9 @@ function onEditRecordType(){
                 }
                 //refresh icon, title, mask
                 editStructure.refreshTitleAndIcon();
+            },
+            afterclose: function(){
+                popupSelect = null;
             }
         });
         

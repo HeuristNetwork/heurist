@@ -27,7 +27,7 @@ $.widget( "heurist.dh_search", {
 
     // default options
     options: {
-        UGrpID: 1007 // 1915-1930 user group for 'original' Digital Harlem map. 1008 is Year of the Riot (1935) only
+        UGrpID: 1007 // 1915-1930 user group for 'original' Digital Harlem map. 1010 is Year of the Riot (1935) only
     },
 
     _currenttype:null,  //obsolete
@@ -85,9 +85,9 @@ $.widget( "heurist.dh_search", {
         var query;
         // "Featured Individuals"
         if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
-            query = {"t":"19","f:144":"4749"};
+            query = {"t":"19","f:144":"4749,4819"};
         }else{
-            query = {"t":"19","f:144":"532,4749"};
+            query = {"t":"19","f:144":"4801,4819"};
         }
         
         var request = { q: query,

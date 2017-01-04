@@ -56,9 +56,10 @@
 .colorblock {
     cursor: pointer;
     display: inline-block;
-    width: 10px;
-    height: 10px;
-    border: 1px solid black; 
+    width: 18px;
+    height: 18px;
+    border: none; /*1px solid black; */
+    vertical-align: middle;
 }
 
 .settings select:hover {
@@ -217,4 +218,51 @@ text.shadow {
     stroke: #000;
     stroke-dasharray: 5,5;
     stroke-width: 1.5;
+}
+
+
+.toolbar-section{
+    padding:0 4px;
+}
+.toolbar-section > label{
+    font-size:0.8em;
+}
+#toolbar{
+    line-height: 10px;    
+    display:table-row;
+    border: solid 1px gray;
+}
+#toolbar > div{
+    display:table-cell;
+}
+
+.ui-icon-cursor{
+    background-image: url(cursor.png) !important; 
+    width: 16;
+    height: 16;
+}
+.ui-icon-gravity0{
+    background-image: url(gravity_0.png) !important; 
+    width: 16;
+    height: 16;
+}
+.ui-icon-gravity1{
+    background-image: url(gravity_1.png) !important; 
+    width: 16;
+    height: 16;
+}
+.ui-icon-gravity2{
+    background-image: url(gravity_2.png) !important; 
+    width: 16;
+    height: 16;
+}
+.ui-icon-link-streight{
+    background-image: url(link_streight.png) !important; 
+    width: 16;
+    height: 16;
+}
+.ui-icon-link-curved{
+    background-image: url(link_curved.png) !important; 
+    width: 16;
+    height: 16;
 }

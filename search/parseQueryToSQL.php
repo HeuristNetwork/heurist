@@ -840,7 +840,7 @@ class FieldPredicate extends Predicate {
         }else{
             $match_pred_for_term = " = trm.trm_ID";
         }
-
+        
          try{   
             $timestamp0 = new DateTime($this->value);
             if($timestamp0) $date_match_pred = $this->makeDateClause();
@@ -869,7 +869,7 @@ class FieldPredicate extends Predicate {
 		                                      .'link.rec_Title ' . $match_pred . ', '
 		                                      .'if(rdt.dty_Type in ("enum","relationtype"), '
 		                                      .'rd.dtl_Value '.$match_pred_for_term.', '
-		                       . ($timestamp ? 'if(rdt.dty_Type = "date", '
+		                       . (isset($timestamp0) ? 'if(rdt.dty_Type = "date", '
 		                                         .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
 		                                         .'rd.dtl_Value ' . $match_pred . ')'
 		                                     : 'rd.dtl_Value ' . $match_pred ) . '))'

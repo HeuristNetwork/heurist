@@ -174,8 +174,8 @@ function hRecordSet(initdata) {
                 recID       = _getFieldValue(record, 'rec_ID'),
                 recName     = _getFieldValue(record, 'rec_Title'),
 
-                startDate   = _getFieldValue(record, 'dtl_StartDate'),
-                endDate     = _getFieldValue(record, 'dtl_EndDate'),
+                //startDate   = _getFieldValue(record, 'dtl_StartDate'),
+                //endDate     = _getFieldValue(record, 'dtl_EndDate'),
                 description = _getFieldValue(record, 'dtl_Description'),
                 recThumb    = _getFieldValue(record, 'rec_ThumbnailURL'),
                 recShape    = _getFieldValue(record, 'rec_Shape'),  //additional shapes - special field created on client side
@@ -488,9 +488,9 @@ function hRecordSet(initdata) {
 
                     if(fldname=="dtl_Geo"){
                         g.shift()
-                        return g.join(' ');
+                        return g.join(' '); //return coordinates only
                     }else{
-                        return g[0];  ////take first part of dtl_Geo field - "p wkt"
+                        return g[0];  //return geotype - first part of dtl_Geo field - "p wkt"
                     }
                 }
                 
@@ -542,14 +542,27 @@ function hRecordSet(initdata) {
         /**
         * Returns field value by fieldname for given record
         */
-        fld: function(record, fldname){
-            return _getFieldValue(record, fldname);
+        fld: function(record, fldName){
+            return _getFieldValue(record, fldName);
         },
         
-        setFld: function(record, fldname, value){
-            _setFieldValue(record, fldname, value);  
+        setFld: function(record, fldName, value){
+            _setFieldValue(record, fldName, value);  
         },
 
+        // assign value of field from one record to another
+        //
+        transFld: function(recordTo, recordFrom, fldName, isNoNull){
+            
+            var value = _getFieldValue(recordFrom, fldName);
+            if( window.hWin.HEURIST4.util.isempty(value) && isNoNull) {
+                return false
+            }else{
+                _setFieldValue(recordTo, fldName, value);  
+                return true;
+            }
+        },
+        
         /**
         * returns record by id
         * 

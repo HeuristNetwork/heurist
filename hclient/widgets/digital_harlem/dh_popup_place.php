@@ -27,10 +27,16 @@ if(!isset($terms)){   //global
 if($recTypeID==RT_ADDRESS){
 
     //find linked place roles  RT_PLACE_ROLE
+    
+    $isRiot = (@$_REQUEST['riot']==1);
+    $riotMinDate = new DateTime('1934-12-31T23:59:59');
+    $riotMaxDate = new DateTime('1936-01-01');
 
-    // place roles for address related event for person
-    $records_placeroles = recordSearch_2('[{"t":"16"},{"linked_to:12:90":"'. $recID .'" }]');
-
+    $date_filter = $isRiot?'{"f:'.DT_START_DATE.'":"1934-12-31T23:59:59.999Z<>1936-01-01"},':''; //for start date
+    $date_filter2 = $isRiot?'{"f:'.DT_DATE.'":"1934-12-31T23:59:59.999Z<>1936-01-01"},':''; //for single date
+    // place roles for address related event or person
+    $records_placeroles = recordSearch_2('[{"t":"16"},'.$date_filter.'{"linked_to:12:90":"'. $recID .'" }]');
+    
     ?>
 
 
@@ -52,7 +58,6 @@ if($recTypeID==RT_ADDRESS){
 
                 <p>
                     <b>Type of Building or Location: </b>
-
                     <ul>
 
                         <?php
@@ -86,7 +91,7 @@ if($recTypeID==RT_ADDRESS){
 
                         <?php
                         // find related events
-                        $records_events = recordSearch_2('[{"t":"14"},{"related_to:12":"'. $recID .'"} ]');
+                        $records_events = recordSearch_2('[{"t":"14"},'.$date_filter.'{"related_to:12":"'. $recID .'"} ]');
 
                         if(@$records_events['reccount']>0){
                             foreach($records_events['order'] as $eventID){
@@ -177,8 +182,34 @@ if($recTypeID==RT_ADDRESS){
                         $records_persons = recordSearch_2('[{"t":"10"},{"related_to:12":"'. $recID .'"} ]');
 
                         if(@$records_persons['reccount']>0){
+                            
+                            $isSomeoneRelated = false;
+                            
                             foreach($records_persons['order'] as $personID){
 
+                                //find how person was related to this address
+                                $records_address = recordSearch_2('[{"t":"12"},{"relatedfrom:10":"'. $personID .'"} ]');
+                                $sRealtionOfPersonToAddress = '';
+                                foreach($records_address['order'] as $addrID){
+                                    $relation1 = recordGetRealtionship_2($system, $personID , $addrID, 'address for person');
+                                    
+                                    //allows 1935 year only
+                                    if($isRiot && !isDateInRange($relation1, 0, $riotMinDate, $riotMaxDate) ){ 
+                                        continue;
+                                    }
+
+                                    $sRealtionOfPersonToAddress = $sRealtionOfPersonToAddress.
+                                    '<li>'.getTermById_2( getFieldValue($relation1, 0, DT_RELATION_TYPE))
+                                    .' at <a href="dh_popup.php?db='.HEURIST_DBNAME.'&full=1&recID='.$addrID.'">'
+                                    .getFieldValue($records_address, $addrID, 'rec_Title')
+                                    .'</a> on '.composeDates( $relation1, 0)
+                                    .'</li>';
+                                }
+                                
+                                if($sRealtionOfPersonToAddress=='') continue;
+                            
+                                $isSomeoneRelated = true;    
+                                
                                 //role on address
                                 $person_role = getTermById_2( recordGetRealtionshipType( $system, $personID, $recID ) );
 
@@ -210,20 +241,16 @@ if($recTypeID==RT_ADDRESS){
                                         }
                                     }
                                 }
-                                $records_address = recordSearch_2('[{"t":"12"},{"relatedfrom:10":"'. $personID .'"} ]');
-                                foreach($records_address['order'] as $addrID){
-                                    $relation1 = recordGetRealtionship_2($system, $personID , $addrID, 'address for person');
-
-                                    print '<li>'.getTermById_2( getFieldValue($relation1, 0, DT_RELATION_TYPE))
-                                    .' at <a href="dh_popup.php?db='.HEURIST_DBNAME.'&full=1&recID='.$addrID.'">'
-                                    .getFieldValue($records_address, $addrID, 'rec_Title')
-                                    .'</a> on '.composeDates( $relation1, 0)
-                                    .'</li>';
-                                }
+                                
+                                //print how person was related to this address
+                                print $sRealtionOfPersonToAddress;
 
                                 print '</ul></li>';
 
                             }//for persons
+                            if(!$isSomeoneRelated){
+                                echo '<li>Nobody recorded '.($isRiot?' in year 1935':'').'</li>';
+                            }
                         }else{
                             echo '<li>Nobody recorded</li>';
                         }
@@ -240,12 +267,12 @@ if($recTypeID==RT_ADDRESS){
                     <ul>
 
                         <?php
-                        // find Reports related to Events realted to this address
-                        $records_eventreports = recordSearch_2('[{"t":"15"},{"relatedfrom:14":[{"t":"14"},{"related_to:12":"'. $recID .'"} ] }]');
+                        // find Reports related to Events related to this address
+                        $records_eventreports = recordSearch_2('[{"t":"15"},'.$date_filter2.'{"relatedfrom:14":[{"t":"14"},{"related_to:12":"'. $recID .'"} ] }]');
 
                         // Report (15)  -> DA Report (13) <- Place Role (16) -> Address
                         $records_eventreports2 = recordSearch_2(
-                            '[{"t":"15"},{"linked_to:13:78":[{"t":"13"},{"linkedfrom:16:78":[{"t":"16"},{"linked_to:12:90":"'. $recID .'"} ] }]  }] ');
+                            '[{"t":"15"},'.$date_filter2.'{"linked_to:13:78":[{"t":"13"},{"linkedfrom:16:78":[{"t":"16"},{"linked_to:12:90":"'. $recID .'"} ] }]  }] ');
 
                         if(count($records_eventreports2['records'])>0){
 

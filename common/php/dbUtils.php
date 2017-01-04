@@ -425,7 +425,7 @@ function zip($source, $folders, $destination, $verbose=true) {
 
             //ignore files that are not in list of specifiede folders
             $is_filtered = true;
-            if( $folders ){
+            if( is_array($folders) ){
 
                 $is_filtered = false;
                 foreach ($folders as $folder) {
@@ -507,16 +507,18 @@ function db_delete($db, $verbose=true) {
         // Zip $source to $file
         $source = HEURIST_UPLOAD_ROOT.$db;
         $destination = $folder.$db."_".time().".zip";
-        if(zip($source, $destination)) {
-            // Delete $source folder
-            deleteFolder($source);
-            if($verbose) echo "<br/>Folder ".$source." has been deleted";
-
+                
+        if(zip($source, null, $destination)) {
             // Delete from MySQL
             $mysqli = server_connect();
             $mysqli->query("DROP DATABASE hdb_".$db);
             $mysqli->close();
             if($verbose) echo "<br/>Database ".$db." has been dropped";
+            
+            // Delete $source folder
+            deleteFolder($source);
+            if($verbose) echo "<br/>Folder ".$source." has been deleted";
+            
             return true;
         }else{
             if($verbose) echo "<br/>Failed to zip ".$source." to ".$destination;
@@ -681,14 +683,14 @@ function deleteFolder($dir) {
         foreach ($objects as $object) {
             if ($object != "." && $object != "..") {
                 if (filetype($dir."/".$object) == "dir") {
-                    rmdir($dir."/".$object);
+                    deleteFolder($dir."/".$object); //delte files
                 } else {
                     unlink($dir."/".$object);
                 }
             }
         }
         reset($objects);
-        rmdir($dir);
+        rmdir($dir); //delete folder itself
     }
 }
 
@@ -700,7 +702,7 @@ function deleteFolder($dir) {
 * @param mixed $dst
 * @param array $folders - zero level folders to copy
 */
-function recurse_copy($src, $dst, $folders=null, $file_to_copy=null) {
+function recurse_copy($src, $dst, $folders=null, $file_to_copy=null, $copy_files_in_root=true) {
     $res = false;
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
@@ -720,13 +722,13 @@ function recurse_copy($src, $dst, $folders=null, $file_to_copy=null) {
                         {
                             if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
                             {
-                                $res = recurse_copy($src.$file, $dst . '/' . $file, null, $file_to_copy);
+                                $res = recurse_copy($src.$file, $dst . '/' . $file, null, $file_to_copy, true);
                                 if(!$res) break;
                             }
                         }
 
                     }
-                    else if($file_to_copy==null || $src.$file==$file_to_copy){
+                    else if($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
                         copy($src.$file,  $dst . '/' . $file);
                         if($file_to_copy!=null) return false;
                     }

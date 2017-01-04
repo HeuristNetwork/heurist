@@ -56,9 +56,9 @@ $.widget( "heurist.dh_maps", {
             //LOAD MAP DOCUMENTS
             var query = {"t":"19"};
             if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
-                query["f:144"] = "4802";
+                query["f:144"] = "4802,4818";
             }else{
-                query["f:144"] = "531,4802,4803";
+                query["f:144"] = "4803,4818";  //532
                 //query = {"t":"19","f:144":"-532,4749"};
             }
 

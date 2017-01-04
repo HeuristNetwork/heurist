@@ -60,11 +60,14 @@ window.hWin.HEURIST4.ui = {
     //
     // helper function to add option to select element
     //
-    addoption: function(sel, value, text)
+    addoption: function(sel, value, text, disabled)
     {
         var option = document.createElement("option");
         option.text = text;
         option.value = value;
+        if(disabled===true){
+            option.disabled = true;
+        }
         try {
             // for IE earlier than version 8
             sel.add(option, sel.options[null]);
@@ -88,7 +91,7 @@ window.hWin.HEURIST4.ui = {
         }
 
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
-            var idx,key,title;
+            var idx,key,title,disabled;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
                 {
@@ -98,9 +101,11 @@ window.hWin.HEURIST4.ui = {
                         {
                             key = topOptions[idx];
                             title = topOptions[idx];
+                            disabled = false;
                         }else{
                             key = topOptions[idx].key;
                             title = topOptions[idx].title;
+                            disabled = (topOptions[idx].disabled===true);
                         }
                         if(!window.hWin.HEURIST4.util.isnull(title))
                         {
@@ -109,7 +114,7 @@ window.hWin.HEURIST4.ui = {
                                 grp.label =  title;
                                 selObj.appendChild(grp);
                             }else{
-                                window.hWin.HEURIST4.ui.addoption(selObj, key, title);
+                                window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled);
                             }
 
                         }
@@ -905,9 +910,9 @@ window.hWin.HEURIST4.ui = {
             request['entity'] = 'defDetailTypes';
             request['dty_DetailTypeGroupID'] = configMode.filter_group;
             
-        }else if(configMode.entity=='SysImportSessions'){
-            fieldTitle = 'imp_table';
-            request['entity'] = 'sysImportSessions';
+        }else if(configMode.entity=='SysImportFiles'){
+            fieldTitle = 'sif_TempDataTable';//'imp_table';
+            request['entity'] = 'sysImportFiles';
             request['ugr_ID'] = configMode.filter_group;
         }
         
@@ -1014,12 +1019,15 @@ window.hWin.HEURIST4.ui = {
     // 
     // position top|button- @todo auto detect position
     //
-    initHelper: function(help_button, content_title, content_url, position){
+    initHelper: function(help_button, content_title, content_url, position, nobutton){
 
         var $help_button = $(help_button);
 
-        $help_button.button({icons: { primary: "ui-icon-circle-b-info" }, label:'Show context help', text:false})
-                    .on('click', function(){
+        if(nobutton!==true){
+            $help_button.button({icons: { primary: "ui-icon-circle-b-info" }, label:'Show context help', text:false});
+        }
+        
+        $help_button.on('click', function(){
                         var $helper_div = $(document.body).find('#helper');
                         
                         if($helper_div.length==0){
@@ -1048,18 +1056,22 @@ window.hWin.HEURIST4.ui = {
                             //var div_height = Math.min(500, (document.body).height()-$help_button.top());
                             //var div_width  = Math.min(600, (document.body).width() *0.8);
                             divpos = null;
-                            if(position=='top'){ //show div aboe button
+                            if($.isPlainObject(position)){
+                                divpos = position;
+                                //divpos['of'] = $help_button;
+                            }else if(position=='top'){ //show div above button
                                 divpos = { my: "right bottom", at: "right top", of: $help_button }
                             }else{
                                 divpos = { my: "right top", at: "right bottom", of: $help_button };
                             }
 
+                           
                             $helper_div.load(content_url, function(){
 
                                 var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
                                 var div_width  = Math.min(700, $(document.body).width() *0.8);
-                                
-                                var title = 'Heurist context help';
+                               
+                                var title = (content_title)?content_title:'Heurist context help';
                                 var head = $helper_div.find('#content>h2');
                                 if(head.length==1){
                                     title = head.text();

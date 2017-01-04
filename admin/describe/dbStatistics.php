@@ -20,7 +20,7 @@
 */
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../configIni.php');
+//require_once(dirname(__FILE__).'/../../configIni.php');
 
 if(isForAdminOnly("to get information on all databases on this server")){
     return;
@@ -30,8 +30,16 @@ set_time_limit(0); //no limit
 
 mysql_connection_select();
 $dbs = mysql__getdatabases(true);
-$sysadmin = is_systemadmin();
+
+$usrEmail = mysql__select_val('select ugr_eMail from sysUGrps where ugr_ID = '.get_user_id());
+$sysadmin = (defined('HEURIST_MAIL_TO_ADMIN') && ($usrEmail==HEURIST_MAIL_TO_ADMIN));
+//$sysadmin = is_systemadmin();
 //$sysadmin = true; // Force system admin rights
+if($sysadmin){
+    startMySession();
+    $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin'] = '1';
+    session_write_close();
+}
 
 /**
 * Selects the value after a query
@@ -124,7 +132,9 @@ function dirsize($dir)
             <div id="tabContainer"></div>
         </div>
 
-        <?php if($sysadmin) { ?>
+        <?php
+         if($sysadmin) { 
+         ?>
             <!-- Database verification dialog -->
             <div id="db-verification" title="Verification" style="display: none">
                 <div>
@@ -179,9 +189,9 @@ function dirsize($dir)
                     /*
                     mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
                     ." FROM information_schema.tables where table_schema='".$db."'").",".
-                    round( (dirsize(HEURIST_UPLOAD_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",'".
+                    round( (dirsize(HEURIST_UPLOAD_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
                     */
-                    mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
+                    "'".mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
                     mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."','".
                     $owner."','".
                     $sysadmin."']";
@@ -195,9 +205,11 @@ function dirsize($dir)
             var myDataSource = new YAHOO.util.LocalDataSource(arr, {
                 responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
                 responseSchema : {
-                    fields: ["dbname","db_regid","cnt_recs", "cnt_vals", "cnt_rectype",
-                        "cnt_fields", "cnt_terms", "cnt_groups", "cnt_users", "db_version",
-                        "size_db", "size_file", "date_mod", "date_login","owner","deleteable"]
+                    fields: ["dbname","db_regid","cnt_recs", "cnt_vals", 
+//removed by Ian                    "cnt_rectype","cnt_fields", "cnt_terms", "cnt_groups", "cnt_users", 
+                    "db_version",
+//removed by Ian                    "size_db", "size_file", 
+                    "date_mod", "date_login","owner","deleteable"]
             }});
 
             var myColumnDefs = [
@@ -215,10 +227,10 @@ function dirsize($dir)
                 { key: "cnt_users", label: "Users", sortable:true, className:'right'},
                 */
                 { key: "db_version", label: "DB Vsn", sortable:true, className:'right'},
-                /*
+                /* removed by Ian
                 { key: "size_db", label: "DB (MB)", sortable:true, className:'right'},
-                */
                 { key: "size_file", label: "Files (MB)", sortable:true, className:'right'},
+                */
                 { key: "date_mod", label: "Modified", sortable:true},
                 { key: "date_login", label: "Access", sortable:true},
                 { key: "owner", label: "Owner", formatter: function(elLiner, oRecord, oColumn, oData){
@@ -299,8 +311,10 @@ function dirsize($dir)
                 function deleteDatabases() {
                     // Determine selected databases
                     getSelectedDatabases();
-                    console.log("Databases to delete", databases);
-                    if(databases.length == 0) {
+                    if(this.databases.length>10){
+                        alert("You selected "+this.databases.length+" databases to be deleted. Max 10 allowed per once");
+                        return false;
+                    }else if(this.databases.length == 0) {
                         alert("Select at least one database to delete");
                         return false;
                     }
@@ -325,7 +339,8 @@ function dirsize($dir)
 
                     // Authenticate user
                     this.password = document.getElementById("db-password").value;
-                    $.post("deleteDB.php", {password: password}, function(response) {
+                    $.post( '<?php echo HEURIST_BASE_URL; ?>admin/verification/deleteDB.php',
+                         {password: password}, function(response) {
                         // Succesful, post requests to delete databases
                         submit.parentNode.removeChild(submit);
                         $("#authorized").slideDown(500);
@@ -344,7 +359,7 @@ function dirsize($dir)
                 function postDeleteRequest(i) {
                     if(i < databases.length) {
                         // Delete database
-                        $.post("deleteDB.php", {password: password, database: databases[i]}, function(response) {
+                        $.post("<?php echo HEURIST_BASE_URL; ?>admin/verification/deleteDB.php", {password: password, database: databases[i]}, function(response) {
                             //alert(response);
                             $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
                             postDeleteRequest(i+1);

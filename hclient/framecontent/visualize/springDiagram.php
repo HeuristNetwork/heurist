@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * springDiagram.php: Renders search resultset as a network diagram
+    * springDiagram.php: Renders search resultset as a network diagram. Uses hclient/visualize/visualize.js
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -19,47 +19,34 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../../../hserver/System.php');
-
-    $system = new System();
-    if(!$system->init(@$_REQUEST['db']) ){
-        echo $system->getError();
-    }
+if(!defined('PDIR')) define('PDIR','../../../');
+require_once(dirname(__FILE__)."/../initPage.php");
 
 ?>
-
-<html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Spring Diagram - Heurist results set</title>
-
-        <!-- Css4 -->
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
         <style>
             body, html {
                 background-color: #fff;
             }
         </style>
 
-         <!-- jQuery -->
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-
         <!-- D3 -->
-        <script type="text/javascript" src="../../../ext/d3/d3.js"></script>
-        <script type="text/javascript" src="../../../ext/d3/fisheye.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/d3/d3.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/d3/fisheye.js"></script>
 
         <!-- Colpick -->
-        <script type="text/javascript" src="../../../ext/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../../ext/colpick/colpick.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/colpick/colpick.css">
 
         <!-- Visualize plugin -->
-        <script type="text/javascript" src="settings.js"></script>
-        <script type="text/javascript" src="overlay.js"></script>
-        <script type="text/javascript" src="selection.js"></script>
-        <script type="text/javascript" src="gephi.js"></script>
-        <script type="text/javascript" src="drag.js"></script>
-        <script type="text/javascript" src="visualize.js"></script>
-        <link rel="stylesheet" type="text/css" href="visualize.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/settings.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/overlay.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/selection.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/gephi.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/drag.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/visualize.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>hclient/framecontent/visualize/visualize.css">
     </head>
 
     <body>
@@ -69,7 +56,7 @@
         <!-- Call from parent iframe -->
         <script>
             /** Shows data visually */
-            var limit = 2000;
+            var limit = 2000; // TO DO : remove. this does not appear to be used, there is a limit variable in visualize.js which IS used
 
             function showSelection( selectedRecordsIds ){
                  visualizeSelection( selectedRecordsIds );
@@ -79,11 +66,11 @@
                 // Processing...
                 if(data && data.nodes && data.links)
                 console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
-                $("#d3svg").html('<text x="25" y="25" fill="black">Processing...</text>');
+                $("#d3svg").html('<text x="25" y="25" fill="black">Buiding graph ...</text>');
 
                 // Custom data parsing
                 function getData(data) {
-                    console.log("Custom getData() call");
+                    //console.log("Custom getData() call");
                     return data;
                 }
 

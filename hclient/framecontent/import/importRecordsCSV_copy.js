@@ -194,7 +194,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
            }
         });
         window.hWin.HEURIST4.ui.createEntitySelector( selImportID.get(0), 
-                    {entity:'SysImportSessions', filter_group:'0,'+window.hWin.HAPI4.currentUser['ugr_ID']}, 
+                    {entity:'SysImportFiles', filter_group:'0,'+window.hWin.HAPI4.currentUser['ugr_ID']}, 
                     window.hWin.HR('select uploaded file...'),
                     function(){
                         window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), selImportID.find('option').length<2 );
@@ -335,7 +335,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         }
         
         window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), true);
-        window.hWin.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportSessions', recID:recID},
+        window.hWin.HAPI4.EntityMgr.doRequest({a:'delete', entity:'SysImportFiles', recID:recID},
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             if(is_current==true){
@@ -366,9 +366,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             var request = {
                     'a'          : 'search',
-                    'entity'     : 'sysImportSessions',
+                    'entity'     : 'SysImportFiles',
                     'details'    : 'list',
-                    'imp_ID'     : imp_ID
+                    'sif_ID'     : imp_ID
             };
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 

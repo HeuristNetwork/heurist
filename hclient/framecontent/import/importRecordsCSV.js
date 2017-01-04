@@ -203,7 +203,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
            }
         });
         window.hWin.HEURIST4.ui.createEntitySelector( selImportID.get(0), 
-                    {entity:'SysImportSessions', filter_group:'0,'+window.hWin.HAPI4.currentUser['ugr_ID']}, 
+                    {entity:'SysImportFiles', filter_group:'0,'+window.hWin.HAPI4.currentUser['ugr_ID']}, 
                     window.hWin.HR('select uploaded file...'),
                     function(){
                         window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), selImportID.find('option').length<2 );
@@ -352,7 +352,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         }
         
         window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), true);
-        window.hWin.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportSessions', recID:recID},
+        window.hWin.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportFiles', recID:recID},
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             if(is_current==true){
@@ -383,9 +383,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             var request = {
                     'a'          : 'search',
-                    'entity'     : 'sysImportSessions',
+                    'entity'     : 'sysImportFiles',
                     'details'    : 'list',
-                    'imp_ID'     : imp_ID
+                    'sif_ID'     : imp_ID
             };
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -402,7 +402,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             var resp = new hRecordSet( response.data );
                             var record = resp.getFirstRecord();
-                            var ses = resp.fld(record, 'imp_session');
+                            var ses = resp.fld(record, 'sif_ProcessingInfo');
                             //DEBUG $('#divFieldMapping2').html( ses );
                             
                             imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
@@ -1989,9 +1989,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     _showStep(2);                    
                     //that.loadanimation(false);
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+
+                        //something went wrong - index fields have wrong values, problem with encoding or column number mismatch
+                        var container3 = container.find('#error_messages');
+                        if(container3.length==0){
+                            container3 = $('<div>',{id:'error_messages'}).appendTo(container);
+                        }else{
+                            container3.empty();
+                        }
                        
                         if(jQuery.type(response.data) === "string"){
-                            $( window.hWin.HEURIST4.msg.createAlertDiv(response.data)).appendTo(container);
+                            $( window.hWin.HEURIST4.msg.createAlertDiv(response.data)).appendTo(container3);
                             return;
                         }
                         
@@ -2002,14 +2011,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         var tbl,i,j,
                             haveErrors = false;
 
-                        
-                        //something went wrong - index fields have wrong values, problem with encoding or column number mismatch
-                        var container3 = container.find('#error_messages');
-                        if(container3.length==0){
-                            container3 = $('<div>',{id:'error_messages'}).appendTo(container);
-                        }else{
-                            container3.empty();
-                        }
 
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(response.data['err_colnums'])){
 

@@ -675,6 +675,10 @@ $.widget( "heurist.ruleBuilder", {
                 linktype = (fld && fld.isreverse)?3:4; //relatiom to/from
             }
         }
+        
+        if(window.hWin.HEURIST4.util.isempty(rel_term_id) || rel_term_id<1){
+            rel_term_id = '';
+        }
 
         return [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype];
     },
@@ -735,7 +739,18 @@ $.widget( "heurist.ruleBuilder", {
                 this.select_fields.val(dt_ID);
                 this._onSelectFieldtype();
 
-                this.select_reltype.val(window.hWin.HEURIST4.util.isempty(rel_type)?'pointer':rel_type);
+                if(isNaN(linktype) || linktype<0 || linktype>4){
+                    linktype = 0;
+                }    
+                if(window.hWin.HEURIST4.util.isempty(rel_type)){
+                    if(linktype==1 || linktype==2){
+                        rel_type = 'pointer';
+                    }else{
+                        rel_type = '';
+                    }
+                }
+                
+                this.select_reltype.val(rel_type);
                 this.select_target_rectype.val(rt_target);
                 this.additional_filter.val(filter);
 

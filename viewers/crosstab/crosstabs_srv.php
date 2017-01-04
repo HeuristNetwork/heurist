@@ -75,7 +75,7 @@ function recordSearchMinMax($mysqli, $params){
         $res = $mysqli->query($query);
         if (!$res){
             $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
-            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error on min/max for crosstabs", $mysqli->error);
         }else{
             $row = $res->fetch_assoc();
             if($row){
@@ -152,7 +152,7 @@ function recordSearchDistictPointers($mysqli, $params){
         $res = $mysqli->query($query);
         if (!$res){
             $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
-            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs distinct pointers", $mysqli->error);
         }else{
 
 
@@ -295,7 +295,7 @@ if($dt_col){
         $res = $mysqli->query($query);
         if (!$res){
             $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
-            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs", $mysqli->error);
         }else{
 
             $outp = array();

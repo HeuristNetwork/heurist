@@ -249,6 +249,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(labels.no)     lblNo = labels.no;
             if(labels.ok)     lblOk = labels.ok;
             if(labels.cancel) lblCancel = labels.cancel;
+        }else if (labels!=''){
+            title = labels;
         }
         
         if ($.isFunction(buttons)){ //}typeof buttons === "function"){

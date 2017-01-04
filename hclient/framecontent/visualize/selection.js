@@ -22,7 +22,7 @@
 // Functions to select nodes in the visualisation
 
 /*************************************** NODE SELECTION ******************************/
-var foregroundColor = "#fff";
+var foregroundColor = '#fff';
 var selectionColor = "#bee4f8";
 
 /**
@@ -63,7 +63,7 @@ function updateCircles(selector, fgColor, bgColor) {
 * @param node  Clicked node
 */
 function onRecordNodeClick(event, data, node) {
-    console.log("On record selection click");
+//console.log("On record selection click");
     var needSelect = true;
     var recID = ""+data.id;
     
@@ -96,8 +96,17 @@ function onRecordNodeClick(event, data, node) {
         
         // Update circles and show overlay
         updateCircles(node, selectionColor, selectionColor);
-        createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
-    }
+        //was shown on mouse click event.offsetX, event.offsetY, now in center of node
+        //was createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
+        
+        var nodePos = $(node).offset();
+        
+        var r = getEntityRadius(data.count);
+        
+        var dx = event.x - event.offsetX; 
+        var dy = event.y - event.offsetY; 
+                    
+        createOverlay(Math.round(nodePos.left-dx+r), Math.round(nodePos.top-dy+r), "record", "id"+recID, getRecordOverlayData(data));    }
     
     // Trigger selection
     settings.triggerSelection.call(this, settings.selectedNodeIds);
@@ -125,6 +134,7 @@ function visualizeSelection(selectedNodeIds) {
 var rightClicked = false;
 var selectionBox = {};
 var positions = {};
+var selectionMode = 'single';
 
 /** Prevents the context menu from showing on right click */
 function preventMenu(event) {
@@ -137,8 +147,8 @@ function preventMenu(event) {
 * 
 */
 function onMouseDown() {
-    console.log("Mouse down");
-    rightClicked = $("#selection").hasClass("selected");
+//console.log("Mouse down");
+    rightClicked = (selectionMode=='multi');
     if(rightClicked) {
         d3.event.preventDefault();
         svg.on(".zoom", null);
@@ -164,7 +174,7 @@ function onMouseDown() {
 * 
 */
 function onMouseMove() {
-    //console.log("Mouse moved");
+//console.log("Mouse moved");
     if(rightClicked) {
         // X-positions
         positions.x2 = d3.event.offsetX;
@@ -198,7 +208,7 @@ function onMouseMove() {
 * Selects the circles inside the selectionBox
 */
 function onMouseUp() {
-    console.log("Mouse up, rightClicked="+rightClicked);
+//console.log("Mouse up, rightClicked="+rightClicked);
     if(rightClicked) {
         rightClicked = false;
         selectionBox.style("display", "none"); 
@@ -240,6 +250,7 @@ function onMouseUp() {
 
 
 // Handle cursor changes
+/* JJ CODE
 $(document).ready(function(e) {
     // Cursor
     $(".mouse-icon").click(function(e) {
@@ -258,3 +269,4 @@ $(document).ready(function(e) {
         }
     });    
 });
+*/

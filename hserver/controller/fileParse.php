@@ -46,10 +46,10 @@
                             if id and date fields are valid invokes parse_db_save
                             otherwise returns error array and first 100 
                             
-        parse_db_save - save content of file into import table, create session object and saves it to sysImportSessions table, returns session
+        parse_db_save - save content of file into import table, create session object and saves it to sysImportFiles table, returns session
 
-        saveSession - saves session object into  sysImportSessions table (todo move to entity class SysImportSessions)
-        getImportSession - get session from sysImportSessions  (todo move to entity class SysImportSessions)
+        saveSession - saves session object into  sysImportFiles table (todo move to entity class SysImportFiles)
+        getImportSession - get session from sysImportFiles  (todo move to entity class SysImportFiles)
 
     -------------------
     
@@ -77,7 +77,7 @@
 
     */
 require_once(dirname(__FILE__)."/../System.php");
-require_once (dirname(__FILE__).'/../dbaccess/dbSysImportSessions.php');
+require_once (dirname(__FILE__).'/../dbaccess/dbSysImportFiles.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_structure.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_structure_tree.php');
 set_time_limit(0);
@@ -668,7 +668,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
 }
 
 //
-//  save content of file into import table, create session object and saves ti to sysImportSessions table, returns session
+//  save content of file into import table, create session object and saves ti to sysImportFiles table, returns session
 //
 function parse_db_save($preproc){
     global $system;
@@ -799,11 +799,11 @@ function saveSession($imp_session){
     
     $mysqli = $system->get_mysqli();
 
-    $imp_id = mysql__insertupdate($mysqli, "sysImportSessions", "imp",
-        array("imp_ID"=>@$imp_session["import_id"],
-            "ugr_id"=>$system->get_user_id(),
-            "imp_table"=>$imp_session["import_name"],
-            "imp_session"=>json_encode($imp_session) ));
+    $imp_id = mysql__insertupdate($mysqli, "sysImportFiles", "sif",
+        array("sif_ID"=>@$imp_session["import_id"],
+            "sif_UGrpID"=>$system->get_user_id(),
+            "sif_TempDataTable"=>$imp_session["import_name"],
+            "sif_ProcessingInfo"=>json_encode($imp_session) ));
 
     if(intval($imp_id)<1){
         return "Cannot save session. SQL error:".$imp_id;
@@ -824,7 +824,7 @@ function getImportSession($imp_ID){
     if($imp_ID && is_numeric($imp_ID)){
 
         $res = mysql__select_array($system->get_mysqli(),
-            "select imp_session, imp_table from sysImportSessions where imp_id=".$imp_ID);
+            "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".$imp_ID);
 
         $session = json_decode($res[0], true);
         $session["import_id"] = $imp_ID;
@@ -840,7 +840,7 @@ function getImportSession($imp_ID){
     }
     
 /*    new way
-    $entity = new DbSysImportSessions( $system, array('details'=>'list','imp_ID'=>$imp_ID) );
+    $entity = new DbSysImportFiles( $system, array('details'=>'list','sif_ID'=>$imp_ID) );
     $res = $entity->search();
     if( is_bool($res) && !$res ){
         return $res; //error - can not get import session

@@ -20,7 +20,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/initPage.php");
+if(!defined('PDIR')) define('PDIR','../../../');
+require_once(dirname(__FILE__)."/../initPage.php");
 ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
         <style>
@@ -65,6 +66,12 @@ require_once(dirname(__FILE__)."/initPage.php");
             a:hover, input:hover {
                 text-decoration: none;
                 cursor: pointer;
+            }
+            
+            #list_rectypes{
+                background: white;
+                z-index: 9999;
+                top: 5em !important;                
             }
 
             #visualisation {
@@ -130,22 +137,23 @@ require_once(dirname(__FILE__)."/initPage.php");
                     return false;
                 }
             }
-            
-            $(document).ready(function() {
-                setTimeout(function(){$("#expand").click();},1000);
-            });
+           
+           function onPageInit(success){
+                   if(!success) return;
+                   $("#expand").click();
+            }
         </script>
     </head>
 
     <body class="popup">
     
         <div class="ent_wrapper">
-                <div class="ent_wrapper" style="width:350px">
-                    <div class="ent_header">
+                <div id="list_rectypes" class="ent_wrapper" style="width:350px;display:none">
+                    <div class="ent_header" style="display:none">
                         <h3 id="table-header">Record types (entities)</h3>
                         <button id="expand">Expand &#10142;</button>
                     </div>
-                    <div class="ent_content_full" style="padding-left:10px">
+                    <div class="ent_content_full" style="padding-left:10px; top:0">
     
                     <table id="records" class="records" cellpadding="4" cellspacing="1">
 
@@ -161,8 +169,66 @@ require_once(dirname(__FILE__)."/initPage.php");
                         <?php
                         /** RETRIEVING RECORDS WITH CONNECTIONS */
                         // Building query
+                        $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, d.rty_Name as title, count(r.rec_ID) as count 
+FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
+defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID 
+ GROUP BY id ORDER BY grp, title ASC";
+                        // Put record types & counts in the table
+                        $res = $system->get_mysqli()->query($query);
+                        $count = 0; 
+                        $grp_name = null;
+                        $first_grp  = 'first_grp';
+                        
+                        while($row = $res->fetch_assoc()) { // each loop is a complete table row
+                            $rt_ID = $row["id"];
+                            $title = htmlspecialchars($row["title"]);
+                        
+                            if($grp_name!=$row['grp']){
+                                if($grp_name!=null) $first_grp = '';
+                                $grp_name = $row['grp'];
+                                ?>
+                        <tr class="row">
+                            <td colspan="6" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
+                        </tr>
+                                <?php
+                            }
+                                
+                            // ID
+                            echo "<tr class='row'>";
+                            echo "<td align='center'>$rt_ID</td>";
+
+                            // Image
+                            $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
+                            $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                            echo "<td align='center'>$img</td>";
+
+                            // Type
+                            echo "<td style='padding-left: 5px; padding-right: 5px'>"
+                            ."<a href='#' title='Open search for this record type in current page' onclick='onrowclick($rt_ID, false)' class='dotted-link'>"
+                            .$title.
+                            "</a></td>";
+
+                            // Link
+                            echo "<td align='center'><a href='#' title='Open search for this record type in new page' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td>";
+
+                            // Count
+                            echo "<td align='center'>" .$row["count"]. "</td>";
+
+                            // Show
+                            if($row["count"]>0 && $count < 10) {
+                                echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
+                                $count++;
+                            }else{
+                                echo "<td align='center' class='show'><input type='checkbox' class='show-record $first_grp' name='" .$title. "'></td>";
+                            }
+                            echo "</tr>";
+                        }                        
+                        
+/* OLD JJ code
+                        // Building query
                         $query = "SELECT r.rec_RecTypeID as id, d.rty_Name as title, count(*) as count FROM Records r INNER JOIN defRecTypes d ON r.rec_RectypeID=d.rty_ID GROUP BY id ORDER BY count DESC, title ASC;";
 
+                        
                         // Put record types & counts in the table
                         $res = $system->get_mysqli()->query($query);
                         $count = 0;
@@ -176,7 +242,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                             // Image
                             $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                            $img = "<img src='../assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                            $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
                             // Type
@@ -205,7 +271,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                         // Empty space
                         echo "<tr class='empty-row'><td class='empty-row'></tr>";
 
-                        /** RETRIEVING RECORDS WITH NO CONNECTIONS */
+                        // RETRIEVING RECORDS WITH NO CONNECTIONS
                         $query = "SELECT rty_ID as id, rty_Name as title FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY title ASC;";
                         $res = $system->get_mysqli()->query($query);
                         $count = 0;
@@ -220,7 +286,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                             // Image
                             $title = $row["title"];
                             $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                            $img = "<img src='../assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                            $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
                             // Type
@@ -241,14 +307,16 @@ require_once(dirname(__FILE__)."/initPage.php");
                             echo "</tr>";
                             $count++;
                         }//endwhile
+*/                        
                         ?>
 
                     </table>
+                        
                        
                     </div>
                 </div>
-                <div class="ent_wrapper" style="left:350px">
-                    <?php include "visualize/visualize.html";?>
+                <div class="ent_wrapper" style="left:0px">
+                    <?php include PDIR."hclient/framecontent/visualize/visualize.html";?>
                 </div>
         </div>    
 
@@ -262,7 +330,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 //$("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL  @todo - use abs path from HAPI4.basePathV4
-                var url = "../../hserver/controller/rectype_relations.php" + window.location.search;
+                var url = window.hWin.HAPI4.basePathV4+"hserver/controller/rectype_relations.php" + window.location.search;
 //DEBUG                console.log("Loading data from: " + url);
                 d3.json(url, function(error, json_data) {
                     // Error check
@@ -276,17 +344,25 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                     /** RECORD FILTERING */
                     // Set filtering settings in UI
-                    $(".show-record").each(function() {
+                    <?php
+                        if($count>0){ //restore setting for non empty db
+                    ?>
+                        $(".show-record").each(function() {
                         var name = $(this).attr("name");
                         var record = localStorage.getItem(name);
                         if(record) {
                             // Update checked attribute
                             var obj = JSON.parse(record);
                             if("checked" in obj) {
-                                $(this).prop("checked", obj.checked);
+                               $(this).prop("checked", obj.checked);
                             }
                         }
-                    });
+                        });
+                    <?php }else{ ?>
+                        $(".first_grp").each(function() {
+                            $(this).prop("checked", true);
+                        });
+                    <?php } ?>
 
                     // Listen to 'show-record' checkbox changes
                     $(".show-record").change(function(e) {
@@ -305,7 +381,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                         localStorage.setItem(name, JSON.stringify(obj));
 
                         // Update visualisation
-                        visualizeData();
+                        filterData();
                     });
 
                     // Listen to the 'show-all' checkbox
@@ -330,7 +406,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                             localStorage.setItem(name, JSON.stringify(obj));
                         });
 
-                        visualizeData();
+                        filterData();
                     });
 
 
@@ -371,20 +447,37 @@ require_once(dirname(__FILE__)."/initPage.php");
                         return {nodes: nodes, links: links}
                     }
 
-                    // Visualizes the data
-                    function visualizeData() {
+                    // Visualizes the data 
+                    function initVisualizeData() {
                         // Call plugin
-                        //DEBUG console.log("Calling plugin!");
+                        //DEBUG 
+                        console.log("Calling plugin!");
                         var data_to_vis = getData(json_data);
                         
                         $("#visualisation").visualize({
                             data: json_data,
                             getData: function(data) { return data_to_vis; },
-                            linelength: 200
+                            linelength: 200,
+                            isDatabaseStructure: true,
+                            showCounts: false
                         });
                     }
 
-                    visualizeData();
+                    //reset settings for empty database
+                    if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
+                        //localStorage.clear();    
+                    }
+                    var dbkey = 'db'+window.hWin.HAPI4.database;
+                    if(getSetting(dbkey)==null){
+                        putSetting(dbkey, '1');7
+                        $('#divSvg').css('top','7em');
+                        $('#divHint').show();
+                    }else{
+                        $('#divSvg').css('top','5em');
+                        $('#divHint').hide();
+                    }
+                    
+                    initVisualizeData();
 
                 });
             });

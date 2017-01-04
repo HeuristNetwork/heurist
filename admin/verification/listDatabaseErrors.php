@@ -236,7 +236,7 @@ require_once('valueVerification.php');
 
                 $query = 'delete d from recDetails d
                 left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
-                left join Records b on b.rec_ID = d.dtl_Value
+                left join Records b on b.rec_ID = d.dtl_Value and b.rec_FlagTemporary!=1
                 where dt.dty_Type = "resource"
                 and b.rec_ID is null';
                 $res = mysql_query( $query );
@@ -251,8 +251,8 @@ require_once('valueVerification.php');
             $res = mysql_query('select dtl_RecID, dty_Name, a.rec_Title
                 from recDetails
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
-                left join Records a on a.rec_ID = dtl_RecID
-                left join Records b on b.rec_ID = dtl_Value
+                left join Records a on a.rec_ID = dtl_RecID and a.rec_FlagTemporary!=1
+                left join Records b on b.rec_ID = dtl_Value and b.rec_FlagTemporary!=1
                 where dty_Type = "resource"
                 and a.rec_ID is not null
             and b.rec_ID is null');
@@ -311,7 +311,7 @@ require_once('valueVerification.php');
             $res = mysql_query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name
                 from defDetailTypes
                 left join recDetails on dty_ID = dtl_DetailTypeID
-                left join Records on rec_ID = dtl_Value
+                left join Records on rec_ID = dtl_Value and rec_FlagTemporary!=1
                 left join defRecTypes on rty_ID = rec_RecTypeID
                 where dty_Type = "resource"
                 and dty_PtrTargetRectypeIDs > 0
@@ -370,7 +370,7 @@ require_once('valueVerification.php');
             //find all fields with faulty dates
             $res = mysql_query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title
                 from recDetails, defDetailTypes, Records a
-                where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID)
+                where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type = "date") and (dtl_Value is not null)');
 
             $wascorrected = 0;
@@ -463,7 +463,7 @@ require_once('valueVerification.php');
                 $query = 'delete d from recDetails d
                 left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
                 left join defTerms b on b.trm_ID = d.dtl_Value
-                where dt.dty_Type = "enum" or  dt.dty_Type = "relationtype"
+                where dt.dty_Type = "enum" or  dt.dty_Type = "relmarker"
                 and b.trm_ID is null';
                 $res = mysql_query( $query );
                 if(! $res )
@@ -480,7 +480,7 @@ require_once('valueVerification.php');
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join Records a on a.rec_ID = dtl_RecID
                 left join defTerms b on b.trm_ID = dtl_Value
-                where (dty_Type = "enum" or dty_Type = "relationtype") and dtl_Value is not null
+                where (dty_Type = "enum" or dty_Type = "relmarker") and dtl_Value is not null
                 and a.rec_ID is not null
             and b.trm_ID is null');
             $bibs = array();
@@ -542,17 +542,17 @@ require_once('valueVerification.php');
 
             <?php
 
-            $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title
-                from Records, recDetails, defDetailTypes
-                where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relationtype")
-                and dtl_Value is not null
+            $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, rec_RecTypeID, rty_Name, trm_Label
+                from Records, recDetails left join defTerms on dtl_Value=trm_ID, defDetailTypes, defRecTypes
+                where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relmarker")
+                and dtl_Value is not null and rec_RecTypeID=rty_ID and rec_FlagTemporary!=1
             order by dtl_DetailTypeID');
             /*
             'select dtl_RecID, dty_Name, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, dtl_Value, dty_ID
             from defDetailTypes
             left join recDetails on dty_ID = dtl_DetailTypeID
             left join Records on rec_ID = dtl_RecID
-            where dty_Type = "enum" or  dty_Type = "relationtype"
+            where dty_Type = "enum" or  dty_Type = "relmarker"
             order by dtl_DetailTypeID'*/
             $bibs = array();
             $ids = array();
@@ -567,12 +567,12 @@ require_once('valueVerification.php');
                         $is_first = false;
                     ?>
                     <h3>Records with terms not in the list of terms specified for the field</h3>
-                    <span><a target=_new href='#' onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
+                    <span><a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
                     <table>
                     <tr>
                         <th style="width: 30px;">Record</th>
-                        <th style="width: 60px;">Field</th>
-                        <th style="width: 60px;">Terms</th>
+                        <th style="width: 15ex;">Field</th>
+                        <th style="width: 25ex;">Term</th>
                         <th>Record title</th>
                     </tr>
 
@@ -580,15 +580,17 @@ require_once('valueVerification.php');
                     }
                     ?>
                         <tr>
-                            <td style="width:50px; padding-left: 25px;">
+                            <td style="width:50px; padding-left: 5px;">
                                 <a target=_new
-                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=
-                                    <?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
+                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+<img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" 
+title="<?php echo $row['rty_Name']?>" 
+src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dtl_RecID'] ?>
                                 </a>
                             </td>
-                            <td style="width: 60px;padding-left: 25px;"><?= $row['dty_Name'] ?></td>
+                            <td style="width:15ex;padding-left:5px;"><?= $row['dty_Name'] ?></td>
                             <!-- >Artem TODO: Need to render the value as the term label, not the numeric value -->
-                            <td style="width: 60px;padding-left: 25px;"><?= $row['dtl_Value'] ?></td>
+                            <td style="width: 23ex;padding-left: 5px;"><?= $row['dtl_Value'].'&nbsp;'.$row['trm_Label'] ?></td>
                             <td style="padding-left: 25px;"><?= substr($row['rec_Title'], 0, 500) ?></td>
                         </tr>
                     <?php
@@ -623,7 +625,8 @@ require_once('valueVerification.php');
 
             $res = mysql_query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
                 from recDetails, Records, defRecStructure
-                where rec_ID = dtl_RecID and rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
+                where rec_ID = dtl_RecID  and rec_FlagTemporary!=1 
+                and rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
                 and rst_MaxValues=1
                 GROUP BY dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
             HAVING COUNT(*) > 1');
@@ -699,7 +702,7 @@ require_once('valueVerification.php');
                 left join defRecStructure on rst_RecTypeID = rec_RecTypeID
                 left join recDetails on rec_ID = dtl_RecID and rst_DetailTypeID = dtl_DetailTypeID
                 left join defDetailTypes on dty_ID = rst_DetailTypeID
-                where rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
+                where rec_FlagTemporary!=1 and rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
                 and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator'
             order by rec_ID");
 
@@ -775,7 +778,7 @@ require_once('valueVerification.php');
                 left join recDetails on rec_ID = dtl_RecID
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
-                where rst_ID is null
+                where rec_FlagTemporary!=1 and rst_ID is null
             ");
 
             $bibs = array();
