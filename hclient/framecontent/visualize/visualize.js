@@ -252,7 +252,7 @@ function executeFormula(count, maxSize) {
         return maxCount>1?(Math.log(count) / Math.log(maxCount)*maxSize):1;
     }
     else if(formula == "unweighted") { // Unweighted
-        return 2;                                          
+        return maxSize;                                          
     }else {  // Linear
         return (maxCount>0)?((count/maxCount)* maxSize):1 ; 
     }       
@@ -266,17 +266,14 @@ function getLineLength(record) {
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
-    //old way var maxWidth = getSetting(setting_linewidth);                                                                     
-    //old way return 1.5 + (executeFormula(count, maxWidth) / 2);
-
-    if(getSetting(setting_formula)=='unweighted'){
-        return getSetting(setting_linewidth);
-    }else{
-        var val = (count==0)?0:executeFormula(count, maxLinkWidth);
-        if(val<1) val = 1;
-        return val;
-    }
+    var maxWidth = getSetting(setting_linewidth);
     
+    if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
+    else if(maxWidth<1) {maxSize = 1;}
+    
+    var val = (count==0)?0:executeFormula(count, maxWidth);
+    if(val<1) val = 1;
+    return val;
 }            
 
 /** Calculates the marker width that should be used */
@@ -287,13 +284,18 @@ function getMarkerWidth(count) {
 
 /** Calculates the entity raadius that should be used */
 function getEntityRadius(count) {
+    
+    var maxRadius = getSetting(setting_entityradius);
+    if(maxRadius>maxEntityRadius) {maxRadius = maxEntityRadius;}
+    else if(maxRadius<1) {maxRadius = 1;}
+    
     if(getSetting(setting_formula)=='unweighted'){
-        return getSetting(setting_entityradius);
+        return maxRadius;
     }else{
         if(count==0){
             return 0; //no records - no circle
         }else{
-            var val = circleSize + executeFormula(count, maxEntityRadius);
+            var val = circleSize + executeFormula(count, maxRadius);
             if(val<circleSize) val = circleSize;
             return val;
         }

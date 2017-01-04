@@ -163,7 +163,7 @@ function handleSettingsInUI() {
                 $(el).css('color', color);
                 $(el).colpickHide();
                 
-                tick();
+                visualizeData();//tick();
             }});
     
     //------------ LINKS ----------
@@ -210,6 +210,7 @@ function handleSettingsInUI() {
                 //d3.selectAll("path").attr("stroke", color);
                 //d3.selectAll("polyline.link").attr("stroke", color);
                 $(".bottom-lines.link").attr("stroke", color);
+                visualizeData();
                 
                 $(el).css('color', color);
                 $(el).colpickHide();
@@ -225,6 +226,7 @@ function handleSettingsInUI() {
                 putSetting(setting_markercolor, color);
                 //d3.selectAll("marker").attr("fill", color);
                 $("marker").attr("fill", color);
+                visualizeData();
                 
                 $(el).css('color', color);
                 $(el).colpickHide();
