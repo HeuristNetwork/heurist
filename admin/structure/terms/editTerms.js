@@ -1023,7 +1023,7 @@ function EditTerms() {
     * Saves the term on server side
     */
     function _doSave(needConfirm, noValidation){
-        alert(_currentNode.data.label);
+
 
         var sName = Dom.get('edName').value.trim().replace(/\s+/g,' ');
         Dom.get('edName').value = sName;
@@ -2221,8 +2221,9 @@ function EditTerms() {
 
                     $("#btnMergeOK").click(function(){
 
-                        data.otherNode.moveTo(node,data.hitMode);
-                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                        // data.otherNode.moveTo(node,data.hitMode);
+                        //   $_dialogbox.dialog($_dialogbox).dialog("close");
+
 
 
                         if (node.data.id){
@@ -2232,12 +2233,20 @@ function EditTerms() {
                                 Dom.get('edParentId').value = "";
                             }else{
                                 Dom.get('edParentId').value = node.data.id;
+
                             }
-
-                            _doSave(false, true);
-
+                            alert($('#edParentId').val());
+                            //_doMerge(node,data.otherNode);
                             // _updateTermsOnServer(_currentNode,false);
+                            _doSave(false,true);
                         }
+                        data.otherNode.moveTo(node,data.hitMode);
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                        // _doMerge(node,data.otherNode);
+                        // $treediv.remove();
+                        //_defineContentTreeView();
+                        //alert(node.data.label)
+
                     });
 
                 }
