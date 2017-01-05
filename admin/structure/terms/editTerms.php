@@ -369,8 +369,14 @@ if(isForAdminOnly("to modify database structure")){
 
 
         <div id="divTermMergeConfirm" style="display:none;width:500px;padding:20px">
-
+            <h2>Merge</h2>
+            <br/>
             <table border="0" cellpadding="2px;">
+
+                <!--<tr>
+                <td><h2>Insert as child</h2></td>
+                <td></td>
+                </tr> !-->
                 <tr>
                     <td>Term to be retained:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                     <td id="lblTerm_toRetain"></td>
@@ -481,6 +487,18 @@ if(isForAdminOnly("to modify database structure")){
                     title=""  style="width:70px"/>
                 <input id="btnMergeCancel" type="button" value="Cancel"
                     title=""  style="width:70px; padding-left:10px"/>
+            </div>
+
+            <div>
+                <br/> <br/><hr style="border-top: dotted 1px;"/>
+                <h2>Insert as child</h2>
+                <div>
+                    <br/>
+                    <span id ="moveText"></span>
+                    <span>&nbsp;&nbsp;</span>
+                    <input id="moveBtn" type="button" value="Move"
+                        title=""  style="width:70px"/>
+                </div>
             </div>
         </div>
 

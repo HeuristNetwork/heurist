@@ -2148,7 +2148,7 @@ function EditTerms() {
                 activeVisible:true,
                 checkbox: false,
                 //titlesTabbable: false,     // Add all node titles to TAB chain
-                selectMode: 1,
+                //selectMode: 1,
                 source:treedata,
                 activate: function(event, data){
                     // A node was activated: display its details
@@ -2207,16 +2207,13 @@ function EditTerms() {
                 themeroller: {
                     activeClass: "ui-state-active"
                 }
-        }).on("mouseenter,mouseleave", "span.fancytree-title", function(event){
-            // Add a hover handler to all node titles (using event delegation)
-            var node = $.ui.fancytree.getNode(event);
-            node.info(event.type);
         });
-
         function showMergePopUp(node,data)
         {
 
             if(data.hitMode==='over'){
+
+
                 if(!data.otherNode.hasChildren()){
 
                     $("#btnMergeOK").click(function(){
@@ -2226,27 +2223,48 @@ function EditTerms() {
 
 
 
-                        if (node.data.id){
+                        /* if (node.data.id){
 
 
-                            if(node.data.id === "root") {
-                                Dom.get('edParentId').value = "";
-                            }else{
-                                Dom.get('edParentId').value = node.data.id;
+                        if(node.data.id === "root") {
+                        Dom.get('edParentId').value = "";
+                        }else{
+                        Dom.get('edParentId').value = node.data.id;
 
-                            }
-                            alert($('#edParentId').val());
-                            //_doMerge(node,data.otherNode);
-                            // _updateTermsOnServer(_currentNode,false);
-                            _doSave(false,true);
                         }
-                        data.otherNode.moveTo(node,data.hitMode);
+                        // alert($('#edParentId').val());
+
+                        // _updateTermsOnServer(_currentNode,false);
+                        //_doSave(false,true);
+                        } */
+                        // data.otherNode.moveTo(node,data.hitMode);
+                        _doMerge(node,data.otherNode);
+                        $(data.otherNode.span).hide();
                         $_dialogbox.dialog($_dialogbox).dialog("close");
                         // _doMerge(node,data.otherNode);
                         // $treediv.remove();
                         //_defineContentTreeView();
                         //alert(node.data.label)
 
+                    });
+                    $("#moveBtn").click(function(){
+
+                        if(node.data.id)
+                        {
+                            if(node.data.id === "root") {
+                                Dom.get('edParentId').value = "";
+                            }else{
+                                Dom.get('edParentId').value = node.data.id;
+
+                            }
+                            // alert($('#edParentId').val());
+
+                            // _updateTermsOnServer(_currentNode,false);
+                            _doSave(false,true);
+                        }
+
+                        data.otherNode.moveTo(node,data.hitMode);
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
                     });
 
                 }
@@ -2256,28 +2274,52 @@ function EditTerms() {
                         while(data.otherNode.hasChildren())
                         {
                             data.otherNode.getFirstChild().moveTo(node, data.hitMode);
-                            $_dialogbox.dialog($_dialogbox).dialog("close");
-                            if (node.data.id){
+
+                            /*if (node.data.id){
 
 
-                                if(node.data.id === "root") {
-                                    Dom.get('edParentId').value = "";
-                                }else{
-                                    Dom.get('edParentId').value = node.data.id;
-                                }
-
-
-                                // _doSave(false, true);
-
-                                // _updateTermsOnServer(_currentNode,false);
+                            if(node.data.id === "root") {
+                            Dom.get('edParentId').value = "";
+                            }else{
+                            Dom.get('edParentId').value = node.data.id;
                             }
 
+
+                            // _doSave(false, true);
+
                             // _updateTermsOnServer(_currentNode,false);
+                            }
+
+                            // _updateTermsOnServer(_currentNode,false); */
                         }
 
                         _doMerge(node,data.otherNode);
                         $(data.otherNode.span).hide();
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
                     });
+
+
+                    $("#moveBtn").click(function(){
+
+
+                        if(node.data.id)
+                        {
+                            if(node.data.id === "root") {
+                                Dom.get('edParentId').value = "";
+                            }else{
+                                Dom.get('edParentId').value = node.data.id;
+
+                            }
+                            // alert($('#edParentId').val());
+
+                            // _updateTermsOnServer(_currentNode,false);
+                            _doSave(false,true);
+                        }
+
+                        data.otherNode.moveTo(node,data.hitMode);
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                    });
+
 
                 }
 
@@ -2438,6 +2480,8 @@ function EditTerms() {
                 }
 
                 var ele = document.getElementById('divTermMergeConfirm');
+                $("#moveText").html("Insert "+ "&#60;" +data.otherNode.data.label+"&#62; under " + "&#60;"+node.data.label
+                    +"&#62;");
                 $("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
                 //show confirmation dialog
                 $_dialogbox = Hul.popupElement(top, ele,
@@ -2445,14 +2489,14 @@ function EditTerms() {
                         "close-on-blur": false,
                         "no-resize": true,
                         title: 'Select values to be retained',
-                        height: 400,
+                        height: 440,
                         width: 600
                 });
 
 
             }
             else if (data.hitMode==='before' || data.hitMode==='after'){
-                alert(node.data.label);
+
                 var parentNode = node.getParent();
 
                 if (parentNode.data.id){
