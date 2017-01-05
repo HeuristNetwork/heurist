@@ -138,6 +138,7 @@ if (! top.HEURIST.edit) {
                 } catch (e) { }
             });
 
+            
             // create the url for the frame src
             var urlBits = [];
             var parameters = top.HEURIST.edit.record;
@@ -460,6 +461,17 @@ if (! top.HEURIST.edit) {
 
         },  // cancelSave
 
+        /**
+        * duplicate current record and open in editor in new window
+        * 
+        */
+        duplicate_record: function(){
+
+                window.open(top.HEURIST.baseURL_V3 +"records/edit/duplicateRecordInfo.php?mode=edit&recID=" 
+                    + top.HEURIST.edit.record.bibID
+                    + "&db="+top.HEURIST.database.name,'_blank');
+          
+        },
 
         /**
         * Saves the record
@@ -586,6 +598,14 @@ if (! top.HEURIST.edit) {
             // TODO: ? remove :  setTimeout(function() { top.HEURIST.util.closePopup(top.HEURIST.edit.savePopup.id); }, 5000);
 
             top.HEURIST.edit.showRecordProperties();
+            
+            if(top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']=="new_bib"){
+                top.HEURIST.parameters['fromadd']=null;
+                document.getElementById('div-duplication').style.display = 'block';
+            }
+        
+            
+            
             setTimeout(function() {
                 document.getElementById("popup-saved").style.display = "block";
                 setTimeout(function() {
