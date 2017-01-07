@@ -207,10 +207,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         //var title = overlay.append("title").text(info[0].text+' rollover?');
         if(settings.isDatabaseStructure && type=='record'){
             rty_ID = selector.substr(2);
-            
-            var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
-            rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
-   
+            if(window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
+                var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
+                rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
+            }else{
+                console.log('rectype not found '+rty_ID);
+            }
         }
     
         // Draw a semi transparant rectangle       
@@ -225,7 +227,13 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .style("filter", "url(#drop-shadow)");
                           //.on("drag", overlayDrag);
                                     
-        //rect.append("title").text(rollover);                    
+        //rect.append("title").text(rollover);       
+        
+        var maxLength = getSetting(setting_textlength);             
+                    
+        var fontSize = getSetting(setting_fontsize, 12);
+        var textLength = getSetting(setting_textlength, 200);    
+        var fontColor = getSetting(setting_textcolor, '#000000');
                             
         
         /*Adding icon
@@ -258,7 +266,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                               return d.text;
                           })
                           .attr("class", function(d, i) {
-                             return i>0?"info-mode":'';
+                             return (i>0?'info-mode ':'nodelabel ')+'namelabel';
                           })
                           .attr("x", function(d, i) {
                               // Indent check
@@ -270,9 +278,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .attr("y", function(d, i) {
                               // Multiline check
                               if(!d.multiline) { 
-                                  position += d.height;
+                                  position += (d.height+2);
                               }
                               return position; // Position calculation
+                          })
+                          .attr("fill", function(d) { 
+                              return fontColor;
                           })
                           .attr("font-weight", function(d) {  // Font weight based on style property
                               return d.style;
@@ -281,7 +292,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                               return d.style;
                           }, "important")
                           .style("font-size", function(d) {   // Font size based on size property
-                              return d.size;
+                              return fontSize;//d.size;
                           }, "important");
                           
                       
@@ -481,7 +492,7 @@ function removeOverlays() {
 function _addNewLinkField(rty_ID, target_ID){
     
             var body = $(this.document).find('body');
-            var dim = { h:400, w:500 };//Math.max(900, body.innerWidth()-10) };                
+            var dim = { h:480, w:500 };//Math.max(900, body.innerWidth()-10) };                
             
             var target_ID = 10;
             

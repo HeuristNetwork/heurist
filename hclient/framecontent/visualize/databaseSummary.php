@@ -468,12 +468,12 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         //localStorage.clear();    
                     }
                     var dbkey = 'db'+window.hWin.HAPI4.database;
-                    if(getSetting(dbkey)==null){
+                    if(getSetting(dbkey)==null){ //new databse - show hint
                         putSetting(dbkey, '1');7
-                        $('#divSvg').css('top','7em');
+                        $('#divSvg').css('top','12em');//7em
                         $('#divHint').show();
                     }else{
-                        $('#divSvg').css('top','5em');
+                        $('#divSvg').css('top','10em');//5em
                         $('#divHint').hide();
                     }
                     

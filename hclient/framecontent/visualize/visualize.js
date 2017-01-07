@@ -486,7 +486,7 @@ function addContainer() {
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
-                           .scaleExtent(settings.isDatabaseStructure?[0.75,1.5]:[0.05, 10])
+                           .scaleExtent([0.05, 10]) //settings.isDatabaseStructure?[0.75,1.5]:
                            .on("zoom", zoomed);
                       
     return container;
