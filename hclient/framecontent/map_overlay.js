@@ -251,7 +251,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 var lt = window.hWin.HAPI4.sysinfo['layout'];   
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
                     if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
-                        window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], null, false);
+                        
+                        var ele = $(top.document.body).find('#dh_search_2');
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
+                        {options:{resizable:true, modal:false, width:ele.width(), height:ele.height()-100}, 
+                            my:'left top', at:'left top', of:ele}, false);
                     }
                 }
             }
