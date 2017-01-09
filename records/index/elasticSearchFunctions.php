@@ -1,13 +1,14 @@
 <?php
 
     /**
-    * elasticSearchFunctions.php: Functions to index and search for records using Elastic Search
+    * elasticSearchFunctions.php: Functions to interact with ElasticSearch
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2017 University of Sydney
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -36,55 +37,35 @@
 
     Call deleteRecordIndexEntry whenever a record is deleted (Search Actions)
 
+
+    FUNCTION CALLS:
+    testElasticSearchOK()
+    - not used
+
+    sanitiseForES()
+    - used by updateRecordIndexEntry()
+
+    updateRecordIndexEntry()
+    - saveRecord.php
+    - saveRecordDetails.php
+
+    deleteRecordIndexEntry()
+    - deleteRecordInfo.php
+
+    deleteIndexForRectype()
+    - used by buildIndexForRectype()
+
+    buildIndexForRectype()
+    - used by buildAllIndicies()
+
+    buildAllIndices()
+    - cloneDatabase.php
+    - rebuildLuceneIndices.php
+
     */
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    $elasticSearch = true;
-
-    // ****************************************************************************************************************
-    /**
-    * Test whether Elastic Search is installed/operational
-    * @returns  Returns CURL result code, 0 if OK, >0 indicates error
-    */
-    function testElasticSearchOK() {
-        error_log("[elasticSearchFunctions.php] testElasticSearchOK");
-
-        global $elasticSearch;
-        if($elasticSearch) {
-            global $indexServerAddress, $indexServerPort;
-            $url="$indexServerAddress:$indexServerPort"; // Set in configIni.php, address can be blank (not set), default port is 9200
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_GET, true);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $data = curl_exec($ch);
-            $error = curl_error($ch);
-            if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-                curl_close($ch);
-                return($code);
-            }
-        }
-        return(0);
-    } //testElasticSearchOK
-
-
-
-    // ****************************************************************************************************************
-    /**
-    * Remove uppercase letters from database name (ElasticSearch rejects uppercase)
-    * @param    $dbName - the database name to be converted to lower case
-    * @returns  Returns corrected database name
-    */
-    function sanitiseForES ($dbName) {
-        error_log("[elasticSearchFunctions.php] sanitiseForES $dbName");
-
-        $elasticName = strtolower($dbName);
-        if ($dbName == $elasticName) {
-            return($dbName); // no change
-        } else {
-            return($elasticName."_nocaps"); // disambiguate eg. MyDB and mydb
-        }
-    } //sanitiseForES
+    require_once('elasticSearchHelper.php');
 
 
 
@@ -99,8 +80,7 @@
     function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
         error_log("[elasticSearchFunctions.php] updateRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
 
-        global $elasticSearch;
-        if($elasticSearch) {
+        if(isElasticEnabled()) {
             global $indexServerAddress, $indexServerPort;
 
             $jsonData = "{";
@@ -158,7 +138,7 @@
 
             // Terminate the json data
             $jsonData .= '}';
-            $dbnameLoc=sanitiseForES($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
+            $dbnameLoc=getElasticIndex($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
 
             // PUT request to Elasticsearch
             $url = "$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID";
@@ -178,7 +158,7 @@
                 return $code;
             } else {
                 //print "<br />SUCCESS: updateRecordIndexEntry indexed: $url with $jsonData";
-                curl_close(ch); // is this necessary?
+                curl_close($ch); // is this necessary?
             }
         }
         return(0);
@@ -203,8 +183,7 @@
     function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
         error_log("[elasticSearchFunctions.php] deleteRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
 
-        global $elasticSearch;
-        if($elasticSearch) {
+        if(isElasticEnabled()) {
             global $indexServerAddress, $indexServerPort;
 
             $url="$indexServerAddress:$indexServerPort/$dbName/$recTypeID/$recID";
@@ -235,8 +214,7 @@
     function deleteIndexForRectype ($dbName, $recTypeID) {
         error_log("[elasticSearchFunctions.php] deleteIndexForRectype for database $dbName recTypeID=$recTypeID");
 
-        global $elasticSearch;
-        if($elasticSearch) {
+        if(isElasticEnabled()) {
             // TODO: check that this is correct spec for deletion of the index for a record type
             global $indexServerAddress, $indexServerPort;
 
@@ -267,8 +245,7 @@
     function deleteIndexForDatabase ($dbName) {
         error_log("[elasticSearchFunctions.php] deleteIndexForDatabase for database $dbName");
 
-        global $elasticSearch;
-        if($elasticSearch) {
+        if(isElasticEnabled()) {
             // TODO: check that this is correct spec for deletion of the index for a database
             global $indexServerAddress, $indexServerPort;
 
@@ -303,8 +280,7 @@
     function buildIndexForRectype ($dbName, $recTypeID) {
         error_log("[elasticSearchFunctions.php] buildIndexForRectype for database $dbName recTypeID=$recTypeID");
 
-        global $elasticSearch;
-        if($elasticSearch) {
+        if(isElasticEnabled()) {
             //print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
             deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
 
@@ -334,8 +310,7 @@
     function buildAllIndices ($dbName) {
         error_log("[elasticSearchFunctions.php] buildAllIndices for database $dbName");
 
-        global $elasticSearch;
-        if($elasticSearch) {
+        if(isElasticEnabled()) {
             print "Building all Elasticsearch indices for: $dbName<br />";
 
             $query="Select MAX(rec_RecTypeID) from Records where 1";
