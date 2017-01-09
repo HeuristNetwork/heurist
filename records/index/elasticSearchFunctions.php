@@ -39,14 +39,16 @@
     */
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    $elasticSearch = false;
+    $elasticSearch = true;
 
     // ****************************************************************************************************************
     /**
     * Test whether Elastic Search is installed/operational
     * @returns  Returns CURL result code, 0 if OK, >0 indicates error
     */
-    function testElasticSearchOK () {
+    function testElasticSearchOK() {
+        error_log("[elasticSearchFunctions.php] testElasticSearchOK");
+
         global $elasticSearch;
         if($elasticSearch) {
             global $indexServerAddress, $indexServerPort;
@@ -69,17 +71,18 @@
 
     // ****************************************************************************************************************
     /**
-    * Remove uppercase letters from database name (Elastic Search rejects uppercase)
-    * @param    $dbname - the database name to be converted to lower case
+    * Remove uppercase letters from database name (ElasticSearch rejects uppercase)
+    * @param    $dbName - the database name to be converted to lower case
     * @returns  Returns corrected database name
     */
-    function sanitiseForES ($dbname) {
-        $dbname_new=strtolower($dbname);
-        if ($dbname == $dbname_new) {
-            return($dbname); // no change
+    function sanitiseForES ($dbName) {
+        error_log("[elasticSearchFunctions.php] sanitiseForES $dbName");
+
+        $elasticName = strtolower($dbName);
+        if ($dbName == $elasticName) {
+            return($dbName); // no change
         } else {
-            $dbname_new = $dbname_new."_nocaps"; // disambiguate eg. MyDB and mydb
-            return($dbname_new);
+            return($elasticName."_nocaps"); // disambiguate eg. MyDB and mydb
         }
     } //sanitiseForES
 
@@ -94,6 +97,8 @@
     * @return               curl return code, 0 = success
     */
     function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
+        error_log("[elasticSearchFunctions.php] updateRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
+
         global $elasticSearch;
         if($elasticSearch) {
             global $indexServerAddress, $indexServerPort;
@@ -107,13 +112,15 @@
             "from Records where rec_ID=$recID"; // omits scratchpad
             $res = mysql_query($query);
 
-            if (($res) && ($row[3] != $recTypeID)) {// record type has changed
+            // Check if query has succeed 
+            if ($res) {
+                $row = mysql_fetch_array($res); // Fetch record data
 
-                // TODO: Delete index for old record type before updating index for new record type
-                //print "<br />TODO: Delete index for old record type before updating index for new record type<br />";
-            } // change of record type / delete existing index entry
+                // Check if recTypeID has stayed the same 
+                if($row[4] != $recTypeID) {
+                    // TODO: Delete index for old record type before updating index for new record type 
+                }
 
-            if ($res) { // add record level data to json
                 $row = mysql_fetch_array($res); // fetch Record data
                 $jsonData .= '"URL":"'          .$row[0].'"';
                 $jsonData .= ',"Added":"'       .$row[1].'"';
@@ -132,7 +139,7 @@
             } else {
                 // TODO: Should really check and warn and exit if bad query
                 // Also exit if record marked as temporary
-                //print "<br />Query $query has failed";
+                error_log("[elasticSearchFunctions.php] updateRecordIndexEntry query $query has failed");
             }
 
             // Add the detail level data
@@ -194,11 +201,13 @@
     * @return               curl return code, 0 = success
     */
     function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
+        error_log("[elasticSearchFunctions.php] deleteRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
+
         global $elasticSearch;
         if($elasticSearch) {
             global $indexServerAddress, $indexServerPort;
 
-            $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID/$recID";
+            $url="$indexServerAddress:$indexServerPort/$dbName/$recTypeID/$recID";
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -224,12 +233,14 @@
     *  @param $recTypeID    The record type ID of the record being deleted from the index
     */
     function deleteIndexForRectype ($dbName, $recTypeID) {
+        error_log("[elasticSearchFunctions.php] deleteIndexForRectype for database $dbName recTypeID=$recTypeID");
+
         global $elasticSearch;
         if($elasticSearch) {
             // TODO: check that this is correct spec for deletion of the index for a record type
             global $indexServerAddress, $indexServerPort;
 
-            $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID";
+            $url="$indexServerAddress:$indexServerPort/$dbName/$recTypeID";
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -254,6 +265,8 @@
     * @param $dbName       The name of the Heurist databasem, excluding prefix
     */
     function deleteIndexForDatabase ($dbName) {
+        error_log("[elasticSearchFunctions.php] deleteIndexForDatabase for database $dbName");
+
         global $elasticSearch;
         if($elasticSearch) {
             // TODO: check that this is correct spec for deletion of the index for a database
@@ -288,6 +301,8 @@
     * @returns 0 = OK, any other = error
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
+        error_log("[elasticSearchFunctions.php] buildIndexForRectype for database $dbName recTypeID=$recTypeID");
+
         global $elasticSearch;
         if($elasticSearch) {
             //print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
@@ -317,6 +332,8 @@
     * @returns  0 = OK, 1 = error
     */
     function buildAllIndices ($dbName) {
+        error_log("[elasticSearchFunctions.php] buildAllIndices for database $dbName");
+
         global $elasticSearch;
         if($elasticSearch) {
             print "Building all Elasticsearch indices for: $dbName<br />";
