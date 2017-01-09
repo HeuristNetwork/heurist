@@ -272,6 +272,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             selBookmakrs.selectedIndex = 1;
             $(selBookmakrs).change();
 
+            mapping.setTimeMapProperty('centerOnItems', false);
+            
             // Map document layers
             var overlay_index = 1;
             if(doc.layers.length > 0) {
@@ -288,6 +290,13 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             window.hWin.HEURIST4.util.setDisabled(btnMapEdit, false);
             window.hWin.HEURIST4.util.setDisabled(btnMapRefresh, false);
             btnMapEdit.attr('title',"Edit current map "+doc.title+" - add or remove map layers, change settings");
+            
+            //restore auto center on dataset addition, loadItems
+            //@todo - restore after all datasets are added
+            setTimeout(function(){
+                mapping.setTimeMapProperty('centerOnItems', true);    
+            }, 5000);
+            
         }else{
             window.hWin.HEURIST4.util.setDisabled(btnMapEdit, true);
             window.hWin.HEURIST4.util.setDisabled(btnMapRefresh, true);
