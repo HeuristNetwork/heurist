@@ -238,7 +238,7 @@ var cfg_layouts = [
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
-                    {appid:'ha51', options:{layout:['map','timeline'], startup:50926, eventbased:false} } //mapping
+                    {appid:'ha51', options:{layout:['map','timeline'], startup:61557, eventbased:false} } //mapping
                     ,{appid:'h3_resultList', hasheader:true, name: 'List', 
                         options:{title:'List', showmenu:false, eventbased:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
@@ -275,7 +275,7 @@ var cfg_layouts = [
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
-                    {appid:'ha51', options:{layout:['map','timeline'], startup:50926, eventbased:false} } //mapping
+                    {appid:'ha51', options:{layout:['map','timeline'], startup:61557, eventbased:false} } //mapping
                     ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false, eventbased:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                 ]

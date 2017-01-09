@@ -988,7 +988,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     //change last parameter to 1 - to treat links separately
                     var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, source.color, 0); //records with type "secondary"
                     mapdata3.id = random_name_for_secondary;
-                    mapdata3.title = 'Secondary';
+                    mapdata3.title = 'Secondary locations';
                     //mapdata3.timeenabled = 0;
                     //mapdata3.timeline = {items:[]};
                     if(mapdata3.mapenabled>0){
@@ -1000,13 +1000,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     //change last parameter to 1 - to treat links separately
                     var mapdata4 = recset.toTimemap(random_name_for_secondary, 99915, source.color, 0); //records with type "residence"
                     mapdata4.id = random_name_for_secondary;
-                    mapdata4.title = 'Residences';
+                    mapdata4.title = 'Residence of participants';
                     if(mapdata4.mapenabled>0){
                         mapdata.depends.push(mapdata4);
                     }
                     
-                    
-                    /* if we wish show links as separate layer need to unremark it
+                    /* if we wish show links as separate layer need to unremark this section
                     //links
                     var mapdata2 = recset.toTimemap(source.id, null, source.color, 2); //rec_Shape only
                     mapdata2.id = "link_"+window.hWin.HEURIST4.util.random();
