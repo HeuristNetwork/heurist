@@ -75,93 +75,72 @@
     * By reading record from database we ensure that we are indexing only records which have been successfully written
     * @param $dbName        The name of the Heurist database, excluding prefix
     * @param $recTypeID     The record type ID of the record being indexed
-    * @return               curl return code, 0 = success
+    * @return               True if successful
     */
     function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
         error_log("[elasticSearchFunctions.php] updateRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
 
         if(isElasticEnabled()) {
-            global $indexServerAddress, $indexServerPort;
+            $record = new stdClass();
 
-            $jsonData = "{";
-
-            // Add the record level data:
-            // DO NOT CHANGE ORDER unless changing JSON construction below
+            // Retrieve record level data
             $query="SELECT rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,rec_AddedByUGrpID,rec_AddedByImport,rec_Popularity,".
             "rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLLastVerified,rec_URLErrorMessage,rec_URLExtensionForMimeType ".
             "from Records where rec_ID=$recID"; // omits scratchpad
             $res = mysql_query($query);
 
-            // Check if query has succeed 
+            // Check if query has succeed ed
             if ($res) {
                 $row = mysql_fetch_array($res); // Fetch record data
 
+                // Construct record
+                $record->URL            = $row[0];
+                $record->Added          = $row[1];
+                $record->Modified       = $row[2];
+                $record->Title          = $row[3];
+                $record->RecTypeID      = $row[4];
+                $record->AddedBy        = $row[5];
+                $record->Imported       = $row[6];
+                $record->Popularity     = $row[7];
+                $record->Temporary      = $row[8];
+                $record->OwnerUGrpID    = $row[9];
+                $record->NonOwnerVis    = $row[10];
+                $record->URLLastVerif   = $row[11];
+                $record->URLErrMsg      = $row[12];
+                $record->URLExtMimeType = $row[13];
+
                 // Check if recTypeID has stayed the same 
-                if($row[4] != $recTypeID) {
+                if($record->RecTypeID != $recTypeID) {
                     // TODO: Delete index for old record type before updating index for new record type 
                 }
-
-                $row = mysql_fetch_array($res); // fetch Record data
-                $jsonData .= '"URL":"'          .$row[0].'"';
-                $jsonData .= ',"Added":"'       .$row[1].'"';
-                $jsonData .= ',"Modified":"'    .$row[2].'"';
-                $jsonData .= ',"Title":"'       .$row[3].'"';
-                $jsonData .= ',"RecTypeID":"'   .$row[4].'"';
-                $jsonData .= ',"AddedBy":"'     .$row[5].'"';
-                $jsonData .= ',"Imported":"'    .$row[6].'"';
-                $jsonData .= ',"Popularity":"'  .$row[7].'"';
-                $jsonData .= ',"Temporary":"'   .$row[8].'"';
-                $jsonData .= ',"OwnerUGrpID":"' .$row[9].'"';
-                $jsonData .= ',"NonOwnerVis":"' .$row[10].'"';
-                $jsonData .= ',"URLLastVerif":"'.$row[11].'"';
-                $jsonData .= ',"URLErrMsg":"'   .$row[12].'"';
-                $jsonData .= ',"URLExtMimeType":"'.$row[13].'"';
             } else {
-                // TODO: Should really check and warn and exit if bad query
-                // Also exit if record marked as temporary
-                error_log("[elasticSearchFunctions.php] updateRecordIndexEntry query $query has failed");
+                error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> record query failed: $query");
+                return false;
             }
 
-            // Add the detail level data
-            $queryDtl="SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo from recDetails where dtl_RecID=$recID";
-            $res = mysql_query($queryDtl);
+            // Retrieve detail level data
+            $query = "SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo from recDetails where dtl_RecID=$recID";
+            $res = mysql_query($query);
+
+            // Check if query has succeeded
             if ($res) {
-                while (($row = mysql_fetch_array($res))) { // fetch detail data
-                    $jsonData .= ',"' .$row[0]. '":"'.$row[1].$row[2].$row[3].'"';
-                    // numeric detail ID is used as the key for the index, so no namespace conflict
-                    // with textual keys from the Record itself
+                while (($row = mysql_fetch_array($res))) {
+                    // Detail ID is used as key, together with dtl_Value, dtl_UploadedFileID and dtl_Geo
                     // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
-                    // Curent code makes the simplistic assumption that only one of these three
-                    // fields is set or the cioncat is useful. TODO: Verify if this is the case
+                    $record->$row[0] = $row[1].$row[2].$row[3];
                 }
+            }else{
+                error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> details query failed: $query");
+                return false;
             }
 
-            // Terminate the json data
-            $jsonData .= '}';
-            $dbnameLoc=getElasticIndex($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
-
-            // PUT request to Elasticsearch
-            $url = "$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID";
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-
-            $data = curl_exec($ch);
-            $error = curl_error($ch);
-            if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-                //print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code) & url = $url & data = $jsonData";
-                curl_close($ch);
-                return $code;
-            } else {
-                //print "<br />SUCCESS: updateRecordIndexEntry indexed: $url with $jsonData";
-                curl_close($ch); // is this necessary?
-            }
+            // PUT data to ElasticSearch
+            $address = getElasticAddress($dbName, $recTypeID, $recID);
+            $json = putElastic($address, $record);
+            $response = json_decode($json);
+            return property_exists($response, 'created');
         }
-        return(0);
+        return false;
     } // addUpdateRecordIndex
 
 
