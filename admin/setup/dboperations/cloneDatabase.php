@@ -299,7 +299,7 @@ function cloneDatabase($targetdbname) {
 
     // Index new database for Elasticsearch
     //TODO: Needs error report, trap error and warn or abort clone
-    buildAllIndices($targetdbname);
+    buildAllIndices($newname); // ElasticSearch uses full database name including prefix
 
     // Copy the images and the icons directories
     //TODO: Needs error report, trap error and warn or abort clone

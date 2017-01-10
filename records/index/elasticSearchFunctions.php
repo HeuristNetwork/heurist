@@ -135,9 +135,9 @@
             $json = putElastic($address, $record);
             error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> indexed in elastic: $json");
 
-            // Check response
+            // Check if created property exists and is true
             $response = json_decode($json);
-            return property_exists($response, 'created');
+            return property_exists($response, 'created') && $response->created;
         }
         return false;
     } // addUpdateRecordIndex
@@ -166,10 +166,11 @@
             $address = getElasticAddress($dbName, $recTypeID, $recID);
             $query = new stdClass();
             $json = deleteElastic($address, $query);
-
             error_log("[elasticSearchFunctions.php] deleteRecordIndexEntry --> deleted record from elastic: $json");
 
-            return true;
+            // Check if acknowledged property exists and is true
+            $response = json_decode($json);
+            return property_exists($response, 'acknowledged') && $response->acknowledged;
         }
 
         return false;
@@ -190,10 +191,11 @@
             $address = getElasticAddress($dbName, $recTypeID);
             $query = new stdClass();
             $json = deleteElastic($address, $query);
-
             error_log("[elasticSearchFunctions.php] deleteIndexForRectype --> deleted rectype from elastic: $json");
 
-            return true;
+            // Check if acknowledged property exists and is true
+            $response = json_decode($json);
+            return property_exists($response, 'acknowledged') && $response->acknowledged;
         }
 
         return false;
@@ -213,10 +215,11 @@
             $address = getElasticAddress($dbName);
             $query = new stdClass();
             $json = deleteElastic($address, $query);
-
             error_log("[elasticSearchFunctions.php] deleteIndexForDatabase --> deleted index from elastic: $json");
 
-            return true;
+            // Check if acknowledged property exists and is true
+            $response = json_decode($json);
+            return property_exists($response, 'acknowledged') && $response->acknowledged;
         }
 
         return false;

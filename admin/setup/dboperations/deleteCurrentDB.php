@@ -78,7 +78,6 @@
 
                 //$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
                 //$output2 = exec($cmdline . ' 2>&1', $output, $res2); // this is the one we really care about
-
                 if (!db_drop(HEURIST_DB_PREFIX.$dbname, false)) {
                     echo ("<h2>Warning:</h2> Unable to delete <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                     echo ("<p>Check that the database still exists. Consult Heurist helpdesk if needed<br></p>");
@@ -86,7 +85,7 @@
                 } else {
                     // Remove from Elasticsearch
                     print "<p>Removing indexes, calling deleteIndexForDatabase with parameter $dbname<br /><br /></p>";
-                    deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes
+                    deleteIndexForDatabase(HEURIST_DB_PREFIX.$dbname); // ElasticSearch uses full database name
 ?>
                     <h2>Database <b><?=$dbname?></b> has been deleted</h2>
                     <p>Associated files stored in upload subdirectories <b><?=$uploadPath?></b> <br/> have ben moved to <?=HEURIST_UPLOAD_ROOT?>deleted_databases.</p>

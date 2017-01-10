@@ -1,12 +1,15 @@
 Details are dumped in /var/log/apache2/error.log
 
 
-CONSTRUCTING RECORD
-[Mon Jan 09 17:35:54.231773 2017] [:error] [pid 7961] [client 193.55.29.169:47141] [elasticSearchFunctions.php] updateRecordIndexEntry --> indexing record: {"URL":null,"Added":"2017-01-09 17:35:46","Modified":"2017-01-09 17:35:54","Title":"BMW 3-series","RecTypeID":"48","AddedBy":"2","Imported":"0","Popularity":"0","Temporary":"0","OwnerUGrpID":"0","NonOwnerVis":"viewable","URLLastVerif":null,"URLErrMsg":null,"URLExtMimeType":null,"236":"BMW","237":"3-series"}, referer: http://185.22.172.150/h4/records/edit/editRecord.html?db=janja_vehicles&bkmk_id=16&fromadd=new_bib&edit_type=records
+CONSTRUCTING RECORD RESPONSE
+{"URL":null,"Added":"2017-01-09 17:35:46","Modified":"2017-01-09 17:35:54","Title":"BMW 3-series","RecTypeID":"48","AddedBy":"2","Imported":"0","Popularity":"0","Temporary":"0","OwnerUGrpID":"0","NonOwnerVis":"viewable","URLLastVerif":null,"URLErrMsg":null,"URLExtMimeType":null,"236":"BMW","237":"3-series"}
 
+INDEXING RECORD RESPONSE
+{"_index":"hdb_janja_vehicles","_type":"48","_id":"16","_version":1,"_shards":{"total":2,"successful":1,"failed":0},"created":true}
 
-INDEXING RECORD
-[Mon Jan 09 17:35:54.252285 2017] [:error] [pid 7961] [client 193.55.29.169:47141] [elasticSearchFunctions.php] updateRecordIndexEntry --> indexed record: {"_index":"hdb_janja_vehicles","_type":"48","_id":"16","_version":1,"_shards":{"total":2,"successful":1,"failed":0},"created":true}, referer: http://185.22.172.150/h4/records/edit/editRecord.html?db=janja_vehicles&bkmk_id=16&fromadd=new_bib&edit_type=records
+DELETING RECORD RESPONSE
+{"acknowledged":true}
+
 
 
 CHECK INDICES
