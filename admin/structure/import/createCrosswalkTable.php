@@ -103,15 +103,29 @@
 
             // Fills the YUI Datatable with all recordtypes from the temp DB
             <?php
-                $groups = mysql_query("select rtg_ID, rtg_Name from ".$tempDBName.".defRecTypeGroups");
+                $groups = mysql_query("select rtg_ID, rtg_Name from ".$tempDBName.".defRecTypeGroups order by rtg_Name");
+
                 $rectypeGroups = array();
+                $rectypeGroups2 = array();
                 while($group = mysql_fetch_assoc($groups)) {
                     array_push($rectypeGroups, array('id'=>$group["rtg_ID"], 'name' => $group["rtg_Name"]));
+                    $rectypeGroups2[$group["rtg_ID"]] = $group["rtg_Name"];
                 }
 
-                $rectypes = mysql_query("select * from ".$tempDBName.".defRecTypes order by rty_RecTypeGroupID, rty_Name");
+                //$rectypes = mysql_query("select * from ".$tempDBName.".defRecTypes order by rty_RecTypeGroupID, rty_Name");
+                
+                $query = "select rt.*"  //, rtg.rtg_Name
+                    ." from $tempDBName.defRecTypes as rt, $tempDBName.defRecTypeGroups as rtg"
+                    ." where rtg_ID = rty_RecTypeGroupID"
+                    ." order by rtg.rtg_Name, rty_Name";                
+                $rectypes = mysql_query($query);
+                
+                
                 $approxMatches = array();
                 $tableRows = array();
+                $rectypesToImport = array(); //list of rectypes that are offered to import rty_ID => array of dependent rts
+                $currGrpID = null;
+                
                 // For every recordtype in the temp DB
                 while($rectype = mysql_fetch_assoc($rectypes)) {
                     $OriginatingDBID = $rectype["rty_OriginatingDBID"];
@@ -176,22 +190,44 @@
                     'import'=>"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\"
                     src=\"../../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
                     'rtyRecTypeGroupID'=>$rectype["rty_RecTypeGroupID"]));*/
+                    
+                    //before it was possible to show identical matches on client side - now we ihnore them  beforehand
+                    if($numberOfApproxMatches>0 || $numberOfApproxMatches===0){
+                    
+                    
+                        if($currGrpID!=$rectype["rty_RecTypeGroupID"]){
+                            $currGrpID = $rectype["rty_RecTypeGroupID"];
+                            $tableRows[$currGrpID] = array();
+                        }
 
-                    array_push($tableRows,array("<img id=\"arrow".$rectype["rty_ID"]
+                        array_push($tableRows[$currGrpID],array("<img id=\"arrow".$rectype["rty_ID"]
                         ."\" src=\"../../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
                         $rectype["rty_ID"],
                         $rectype["rty_Name"],
                         $numberOfApproxMatches,
                         "<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]
                         ."\" src=\"../../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
-                        $rectype["rty_RecTypeGroupID"]));
+                        $rectype["rty_RecTypeGroupID"]
+                        ));
+                        
+                        $rectypesToImport[$rectype["rty_ID"]] = array();
+                        
+                        
+                    }
                 }
+                //sort by rectype group name
+                /*
+                usort($tableRows, function($a, $b) {
+                        return $a[6] < $b[6]?-1:1;
+                });
+                */
+                
 
                 echo "var approxRectypes = ".json_format($approxMatches,true). ";\n";
-                echo "var tableData = ".json_format($tableRows,true). ";\n\n";
+                echo "var tableDataByGrp = ".json_format($tableRows,true). ";\n\n";
 
                 mysql_query("use ".$tempDBName);
-                $rtyRes = mysql_query("select rty_ID,
+                $query = "select rty_ID,
                     rst_ID,
                     rst_DetailTypeID,
                     rst_DisplayName,
@@ -201,12 +237,18 @@
                     dty_Status,
                     if(dty_OriginatingDBID and dty_IDInOriginatingDB,dty_IDInOriginatingDB,dty_ID) as origDtyID,
                     if(dty_OriginatingDBID,dty_OriginatingDBID,$source_db_id) as origDtyDBID,
-                    rty_Description
+                    rty_Description,
+                    dty_PtrTargetRectypeIDs 
                     from defRecTypes
                     left join defRecStructure on rty_ID = rst_RecTypeID
                     left join defDetailTypes on rst_DetailTypeID = dty_ID
-                    order by rty_ID");
-
+                    where rty_ID in (".implode(",", array_keys($rectypesToImport)).") 
+                    order by rty_ID";
+                    
+//error_log($query);                    
+                    
+                $rtyRes = mysql_query($query); 
+                   
                 // For every recordtype, add the structure to a javascript array, to show in a foldout panel
                 $rectypeStructures = array();
                 if(isset($rtyRes)) {
@@ -229,8 +271,34 @@
                         }else{
                             array_push($rectypeStructures[$rtStruct["rty_ID"]],$rtsShortRow);
                         }
+                        
+                        if($rtStruct["dty_Type"]=='resource' || $rtStruct["dty_Type"]=='relmarker'){
+                            $rtyIds = $rtStruct["dty_PtrTargetRectypeIDs"];
+                            if($rtyIds){
+                                $rtyIds = explode(',', $rtyIds);
+                                if(count($rtyIds)>0){
+                                    $rectypesToImport[$rtStruct["rty_ID"]] = array_unique(array_merge(
+                                            $rectypesToImport[$rtStruct["rty_ID"]], $rtyIds));
+                                }
+                            }
+                            
+                        }
+                        
                     }
                 }
+                
+                //translate ids to names
+                $rtNames = mysql__select_assoc( $tempDBName.'.defRecTypes','rty_ID','rty_Name','1=1');   
+                foreach ($rectypesToImport as $id=>$ids){
+                    $res = array();
+                    foreach ($ids as $id2){
+                        array_push($res,$rtNames[$id2]);
+                    }
+                    $rectypesToImport[$id] = $res;
+                }
+                    
+                
+                
 
                 echo "var rectypeStructures = ".json_format($rectypeStructures,true). ";\n";
                 echo 'var tempDBName = "'.$tempDBName.'";'. "\n";
@@ -239,24 +307,42 @@
                 echo 'var importTargetDBName = "'.HEURIST_DBNAME.'";'. "\n";
                 echo 'var importTargetDBFullName = "'.DATABASE.'";'. "\n";
                 echo "var rectypeGroups = ".json_format($rectypeGroups,true). ";\n";
+                echo "var rectypeGroups2 = ".json_format($rectypeGroups2,true). ";\n";
+                echo "var rectypesToImport = ".json_format($rectypesToImport,true). ";\n"; 
                 echo "var dtlookups = ".json_format(getDtLookups(),true). ";\n";
             ?>
 
-            var myDataTable;
-            var myDataSource;
+            var myDataTables = {};
+            var myDataSources = {};
             var hideTimer;
             var needHideTip;
 
             YAHOO.util.Event.addListener(window, "load", function() {
-                YAHOO.example.Basic = function() {
+                
+            //init tables
+            YAHOO.example.Basic = function() {
+                
+                    var myDataTable;
+                    var myDataSource;
+                
                     // Create the columns. Arrow contains the collapse/expand arrow, rtyID is hidden and contains the ID,
                     // rectype contains the name, matches the amount of matches and a tooltip, import a button
                     var myColumnDefs = [
-                        { key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
+                        { key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion,
+                         width:30, sortable:false, resizeable:false },
                         { key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
                         { key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>",
-                            sortable:true, resizeable:true, width:150 },
-                        { key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:true, hidden:false, formatter:function(elLiner, oRecord, oColumn, oData) {
+                            sortable:true, resizeable:true, width:300 },
+                        { key:"linked_rt", label:"Linked record types", 
+                            sortable:false, resizeable:false, hidden:false,width:300,
+                            formatter:function(elLiner, oRecord, oColumn, oData) {
+                                var rtyID = oRecord.getData("rtyID");
+                                var dependencies = rectypesToImport[rtyID];
+                                elLiner.innerHTML = dependencies.join(',');
+                            }
+                        },
+                        { key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:false, 
+                        hidden:true /*, formatter:function(elLiner, oRecord, oColumn, oData) {
                             var grpid = oRecord.getData("rtyRecTypeGroupID");
                             elLiner.innerHTML = "group #"+grpid+" not found";
                             var index;
@@ -266,12 +352,12 @@
                                     break;
                                 }
                             } //for
-                            }
+                            }*/
                         },
-                        { key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
+                        { key:"rtyID", label:"<u>ID</u>", sortable:false, hidden:true },
                         { key:"matches", label:"<span title='Shows the number of record types in the current database with simliar names'>"
                             +"<u>Potential dupes in this DB</u></span>",
-                            sortable:true, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
+                            sortable:true, resizeable:true, width:300, formatter:function(elLiner, oRecord, oColumn, oData) {
 
                                 var dup = oRecord.getData("matches");
                                 if(dup<0){
@@ -287,48 +373,60 @@
                     ];
 
                     //myDataSource = new YAHOO.util.DataSource();
+                    var  grpID;
+                    for (grpID in tableDataByGrp){
+                        if(grpID>0){
+                            
+                            var tableData = tableDataByGrp[grpID];
+                            
+                            myDataSource = new YAHOO.util.LocalDataSource(tableData, {
+                                responseType:YAHOO.util.DataSource.TYPE_JSARRAY,
+                                responseSchema: {
+                                    fields: ["arrow","rtyID","rectype","matches","import","rtyRecTypeGroupID"]
+                                },
+                                doBeforeCallback: function (req, raw, res, cb) {
+                                    // This is the filter function
+                                    var data  = res.results || [],
+                                    filtered = [],
+                                    i,l;
 
-                    myDataSource = new YAHOO.util.LocalDataSource(tableData, {
-                        responseType:YAHOO.util.DataSource.TYPE_JSARRAY,
-                        responseSchema: {
-                            fields: ["arrow","rtyID","rectype","matches","import","rtyRecTypeGroupID"]
-                        },
-                        doBeforeCallback: function (req, raw, res, cb) {
-                            // This is the filter function
-                            var data  = res.results || [],
-                            filtered = [],
-                            i,l;
+                                    if (req) {
 
-                            if (req) {
+                                        var fvals = req.split("|");   //filter values
 
-                                var fvals = req.split("|");   //filter values
+                                        var sByGroup  = fvals[0];
+                                        var showIdentical = (fvals[1]==="1");
 
-                                var sByGroup  = fvals[0];
-                                var showIdentical = (fvals[1]==="1");
-
-                                for (i = 0, l = data.length; i < l; ++i)
-                                {
-                                    if (showIdentical ||
-                                        !(data[i].matches<0 || isNaN(Number(data[i].matches))))
-                                    {//show all or non identical only
-                                        if (sByGroup==="all" || data[i].rtyRecTypeGroupID===sByGroup)
+                                        for (i = 0, l = data.length; i < l; ++i)
                                         {
-                                            filtered.push(data[i]);
+                                            if (showIdentical ||
+                                                !(data[i].matches<0 || isNaN(Number(data[i].matches))))
+                                            {//show all or non identical only
+                                                if (sByGroup==="all" || data[i].rtyRecTypeGroupID===sByGroup)
+                                                {
+                                                    filtered.push(data[i]);
+                                                }
+                                            }
                                         }
+                                        res.results = filtered;
                                     }
+
+                                    return res;
                                 }
-                                res.results = filtered;
-                            }
-
-                            return res;
-                        }
-                    });
-
-
+                            });
+                            
+                            
+                            
                     YAHOO.widget.DataTable.MSG_EMPTY = "There are no new record types to import from this database (all types already exist in the target)";
+                    
+                    $('<div id="header'+grpID+'"></div>').addClass('rtgroup')
+                        .html('<h4>'+rectypeGroups2[grpID]+'</h4>').appendTo($('#crosswalkTable'));
+                    $('<div id="table'+grpID+'"></div>').addClass('rtgroup').appendTo($('#crosswalkTable'));
+                    
+                    
                     // Create the RowExpansionDataTable
                     myDataTable = new YAHOO.widget.RowExpansionDataTable(
-                        "crosswalkTable",
+                        'table'+grpID, //"crosswalkTable",
                         myColumnDefs,
                         myDataSource,
                         {
@@ -337,6 +435,7 @@
                             rowExpansionTemplate:
                             function(obj) {
                                 var rty_ID = obj.data.getData('rtyID');
+
                                 var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";
                                 info += '<table style="text-align: left;"><tr>';
                                 info += '<th  style="padding-left:10px;" class=\"status\"><b>Already in DB?</b></th>';
@@ -367,12 +466,12 @@
                                 }
                                 info += "</table><br />";
                                 obj.liner_element.innerHTML += info;
-                            },
-                            paginator: new YAHOO.widget.Paginator({
+                            }
+                            /*, paginator: new YAHOO.widget.Paginator({
                                 rowsPerPage:50,
                                 containers:['topPagination','bottomPagination']
                             }),
-                            sortedBy: { key:'rtyRecTypeGroupID'}
+                            sortedBy: { key:'rtyRecTypeGroupID'}*/
                         }
                     );
 
@@ -385,11 +484,18 @@
                         var oRecord;
                         var row;
                         if(column.key != "import") {
+                            
+                            var grpID, myDataTable;
+                            
                             if(YAHOO.util.Dom.hasClass(oArgs.target, 'yui-dt-expandablerow-trigger')) {
                                 record_id = oArgs.target;
                                 oRecord = this.getRecord(record_id);
+                                grpID = oRecord.getData('rtyRecTypeGroupID');
+                                myDataTable = myDataTables[grpID];
                             } else {
                                 oRecord = this.getRecord(oArgs.target);
+                                grpID = oRecord.getData('rtyRecTypeGroupID');
+                                myDataTable = myDataTables[grpID];
                                 record_id = myDataTable.getTdEl({record:oRecord, column:myDataTable.getColumn("rtyID")});
                             }
                             if(record_id != null) {
@@ -419,7 +525,7 @@
                             if(importPending) {
                                 alert("Please wait until previous import is complete.");
                             } else {
-                                importedRowID = oRecord.getId();
+                                imported_rty_ID = rty_ID; //was importedRowID = oRecord.getId();
                                 processAction(rty_ID, "import",rty_Name);
                             }
                         }
@@ -437,11 +543,21 @@
                         }
                     });
 
+                    
+                        myDataSources[grpID] = myDataSource;
+                        myDataTables[grpID] = myDataTable;
+                    
+                        }
+                    }//for groups
+
+
                     return {
-                        oDS: myDataSource,
-                        oDT: myDataTable
+                        oDS: myDataSources,
+                        oDT: myDataTables
                     };
+
                 }();
+                
 
                 var filterByGroup = document.getElementById("inputFilterByGroup");
                 var index;
@@ -459,7 +575,7 @@
                 filterByExist.onchange = _updateFilter;
 
                 _updateFilter();
-            });
+            }); //end of window onload
 
             //
             // update filter by rectype group
@@ -475,13 +591,28 @@
                 var filter_group = document.getElementById("inputFilterByGroup").value;
                 var filterByExist = document.getElementById("inputFilterByExist").checked?"1":"0";
 
+                if(Number(filter_group)>0){
+                    $('div.rtgroup').hide();
+                    $('#header'+filter_group).show();
+                    $('#table'+filter_group).show();
+                }else{
+                    $('div.rtgroup').show();
+                }
+                
                 // Get filtered data
-                myDataSource.sendRequest(filter_group+"|"+filterByExist, {
-                    success : myDataTable.onDataReturnInitializeTable,
-                    failure : myDataTable.onDataReturnInitializeTable,
-                    scope   : myDataTable,
-                    argument : { pagination: { recordOffset: 0 } } // to jump to page 1
-                });
+                for(grpID in myDataSources){
+                if(grpID>0){    
+                    
+                    //hide entire table if filtered out
+                    
+                    myDataSources[grpID].sendRequest(filter_group+"|"+filterByExist, {
+                        success : myDataTables[grpID].onDataReturnInitializeTable,
+                        failure : myDataTables[grpID].onDataReturnInitializeTable,
+                        scope   : myDataTables[grpID],
+                        argument : { pagination: { recordOffset: 0 } } // to jump to page 1
+                    });
+                }
+                }
             }
 
             // Create the tooltip
@@ -625,7 +756,7 @@
                 <div id="crosswalkTable"></div>
                 <div id="bottomPagination"></div>
             </div>
-
+            <div style="padding-top:10px">
             <i>Note: If this function reports 'No records found' this normally means that there are no
                definitions in the selected database which are not already in the current database.</i>
 
@@ -633,7 +764,7 @@
                 <i>In version 3.0 this may also mean that the database is in a
                 different format version which is not being read correctly</i>
             </p>
-
+            </div>
             <!-- TODO: need a check on format version and report if there is a difference in format version -->
 
             <br>&nbsp;<br>
@@ -656,7 +787,7 @@
                 var logHeader = ""
                 var shortImportLog = "";
                 var result = "";
-                var importedRowID;
+                var imported_rty_ID;
                 var importPending = false;
                 var strictImport = false;
                 var noRecursion = false;
@@ -787,19 +918,29 @@
                                 }
 
                                 //myDataTable.deleteRow(importedRowID, -1); //wrong way - need to refresh filter
+                                
+                                /*
                                 var oRecord = myDataTable.getRecord(importedRowID);
+                                oRecord.getData("rtyID");
+                                */
                                 //matches
-                                var rt_id = oRecord.getData("rtyID");
-                                //find
-                                var k, cnt = 0;
-                                for (k=0;k<tableData.length;k++){
-                                    if(tableData[k][1]==rt_id || rt_ids.indexOf(tableData[k][1])>=0){
-                                        tableData[k][3] = -1;
-                                        cnt++;
-                                        if(cnt==rt_ids.length) break;
+                                var rt_id = imported_rty_ID;
+                                //find and set flag  to filter out
+                                var k, grpID, cnt = 0;
+                                for (grpID in tableDataByGrp){
+                                if(grpID>0){
+                                    var tableData = tableDataByGrp[grpID];
+                                    for (k=0;k<tableData.length;k++){
+                                        if(tableData[k][1]==rt_id || rt_ids.indexOf(tableData[k][1])>=0){
+                                            tableData[k][3] = -1;
+                                            cnt++;
+                                            if(cnt==rt_ids.length) break;
+                                        }
                                     }
                                 }
+                                }
                                 _updateFilter();
+                                
                             }
                         }
                     } // end readystate callback
