@@ -37,6 +37,7 @@ $registeredDBs = array();
 
 $is_named = (@$_REQUEST['named']==1); //return associated array
 $is_curated = (@$_REQUEST['curated']==1); //get only maintained/curated databases with id<1000
+$is_public = (@$_REQUEST['public']==1); //get only public
 
 
 $isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
@@ -49,6 +50,9 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     }
     if($is_curated){
         $reg_url =  $reg_url.'&curated=1';
+    }
+    if($is_public){
+        $reg_url =  $reg_url.'&public=1';
     }
 
     //get json array of registered databases
@@ -85,6 +89,9 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     .' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=335 where `rec_RecTypeID`=22';
     if($is_curated){
         $query = $query.' and rec_ID<1000';    
+    }
+    if($is_public){
+        $query = $query." and rec_NonOwnerVisibility='public'";    
     }
     $res = mysql_query( $query );
 
