@@ -540,8 +540,13 @@ function print_private_details($bib) {
 
                 }else if ($bd['dty_Type'] == 'date') {
 
-                    $bd['val'] = temporalToHumanReadableString($bd['val'], true);
-                    $bd['val'] = output_chunker($bd['val']);
+                    if($bd['val']==null || $bd['val']==''){
+                        //ignore empty date
+                        continue;
+                    }else{
+                        $bd['val'] = temporalToHumanReadableString($bd['val'], true);
+                        $bd['val'] = output_chunker($bd['val']);
+                    }
 
                 }else if ($bd['dty_Type'] == 'resource') {
 
