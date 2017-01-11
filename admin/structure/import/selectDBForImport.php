@@ -145,7 +145,7 @@
                         var str = oRecord.getData("name");
                         var id = oRecord.getData("id");
                         if(id=='XXX'){
-                            elLiner.innerHTML = '<h2>'+str+'</h2>';
+                            elLiner.innerHTML = '<h2 style="padding-top:10px">'+str+'</h2>';
                         }else if(Number(id)<21){
                             elLiner.innerHTML = '<b>'+str+'</b>';
                         }else{

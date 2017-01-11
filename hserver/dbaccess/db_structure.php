@@ -309,7 +309,9 @@
         }else{
             error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving terms '.$mysqli->error);
         }
-        $terms['treesByDomain'] = array('relation' => __getTermTree($mysqli, "relation", "prefix"), 'enum' => __getTermTree($mysqli, "enum", "prefix"));
+        $terms['treesByDomain'] = array(
+                'relation' => __getTermTree($mysqli, "relation", "prefix"), 
+                'enum' => __getTermTree($mysqli, "enum", "prefix"));
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
     }
@@ -455,6 +457,7 @@
             if (count($terms[$childIndex])) {
                 foreach ($terms[$childIndex] as $gChildID => $n) {
                     if ($gChildID != null) {
+//error_log($gChildID);                        
                         $terms = __attachChild($childIndex, $gChildID, $terms);//depth first recursion
                     }
                 }
@@ -481,6 +484,7 @@
         left join defTerms b on a.trm_ID = b.trm_ParentTermID
         where $whereClause
         order by a.trm_Label, b.trm_Label";
+
         $res = $mysqli->query($query);
         $terms = array();
         // create array of parent => child arrays

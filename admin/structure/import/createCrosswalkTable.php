@@ -83,9 +83,9 @@
                 border:1px solid #fff;
                 min-width:200;
             }
-            #yui-dt0-th-import {width:30px}
+            /*#yui-dt0-th-import {width:30px}*/
             .yui-dt0-col-import div.yui-dt-liner {text-align:center}
-            #yui-dt0-th-arrow {width:24px}
+            /*#yui-dt0-th-arrow {width:24px}*/
             .yui-dt0-col-matches .yui-dt-liner, .yui-dt0-col-import .yui-dt-liner {text-align: center;}
 
 
@@ -226,6 +226,10 @@
                 echo "var approxRectypes = ".json_format($approxMatches,true). ";\n";
                 echo "var tableDataByGrp = ".json_format($tableRows,true). ";\n\n";
 
+               $rectypeStructures = array();
+               
+            if(count($rectypesToImport)>0){
+                
                 mysql_query("use ".$tempDBName);
                 $query = "select rty_ID,
                     rst_ID,
@@ -250,7 +254,6 @@
                 $rtyRes = mysql_query($query); 
                    
                 // For every recordtype, add the structure to a javascript array, to show in a foldout panel
-                $rectypeStructures = array();
                 if(isset($rtyRes)) {
                     while($rtStruct = mysql_fetch_assoc($rtyRes)) {
                         // check to see if the source rectype field's detailType exist in our DB
@@ -297,6 +300,7 @@
                     $rectypesToImport[$id] = $res;
                 }
                     
+            }//count($rectypesToImport)
                 
                 
 
@@ -329,16 +333,16 @@
                     // rectype contains the name, matches the amount of matches and a tooltip, import a button
                     var myColumnDefs = [
                         { key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion,
-                         width:30, sortable:false, resizeable:false },
-                        { key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
+                         width:24, sortable:false, resizeable:false },
+                        { key:"import", label:"Import", sortable:false, resizeable:false, width:24 },
                         { key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>",
-                            sortable:true, resizeable:true, width:300 },
+                            sortable:true, resizeable:true, width:150 },
                         { key:"linked_rt", label:"Linked record types", 
                             sortable:false, resizeable:false, hidden:false,width:300,
                             formatter:function(elLiner, oRecord, oColumn, oData) {
                                 var rtyID = oRecord.getData("rtyID");
                                 var dependencies = rectypesToImport[rtyID];
-                                elLiner.innerHTML = dependencies.join(',');
+                                elLiner.innerHTML = dependencies.join(', ');
                             }
                         },
                         { key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:false, 
@@ -371,6 +375,11 @@
                                 }
                         }}
                     ];
+
+                    if( tableDataByGrp.length==0){
+                        $('#divMsgNothingToImport').show();
+                        return;
+                    }
 
                     //myDataSource = new YAHOO.util.DataSource();
                     var  grpID;
@@ -408,6 +417,7 @@
                                                 }
                                             }
                                         }
+                                        
                                         res.results = filtered;
                                     }
 
@@ -419,8 +429,8 @@
                             
                     YAHOO.widget.DataTable.MSG_EMPTY = "There are no new record types to import from this database (all types already exist in the target)";
                     
-                    $('<div id="header'+grpID+'"></div>').addClass('rtgroup')
-                        .html('<h4>'+rectypeGroups2[grpID]+'</h4>').appendTo($('#crosswalkTable'));
+                    $('<div id="header'+grpID+'" style="padding-top:5px"></div>').addClass('rtgroup')
+                        .html('<h3>'+rectypeGroups2[grpID]+'</h3>').appendTo($('#crosswalkTable'));
                     $('<div id="table'+grpID+'"></div>').addClass('rtgroup').appendTo($('#crosswalkTable'));
                     
                     
@@ -558,23 +568,26 @@
 
                 }();
                 
+                if(tableDataByGrp.length==0){
+                    $('#divHeader').hide();
+                }else{
+                    var filterByGroup = document.getElementById("inputFilterByGroup");
+                    var index;
+                    for (index in rectypeGroups) {
+                        if( !isNaN(Number(index)) ) {
 
-                var filterByGroup = document.getElementById("inputFilterByGroup");
-                var index;
-                for (index in rectypeGroups) {
-                    if( !isNaN(Number(index)) ) {
+                            var grpID = rectypeGroups[index].id;
+                            var grpName = rectypeGroups[index].name;
 
-                        var grpID = rectypeGroups[index].id;
-                        var grpName = rectypeGroups[index].name;
-
-                        top.HEURIST.util.addoption(filterByGroup, grpID, grpName);
-                    }
-                } //for
-                filterByGroup.onchange = _updateFilter;
-                var filterByExist = document.getElementById("inputFilterByExist");
-                filterByExist.onchange = _updateFilter;
-
-                _updateFilter();
+                            top.HEURIST.util.addoption(filterByGroup, grpID, grpName);
+                        }
+                    } //for
+                    filterByGroup.onchange = _updateFilter;
+                    var filterByExist = document.getElementById("inputFilterByExist");
+                    filterByExist.onchange = _updateFilter;
+                    _updateFilter();
+                }
+                
             }); //end of window onload
 
             //
@@ -592,9 +605,17 @@
                 var filterByExist = document.getElementById("inputFilterByExist").checked?"1":"0";
 
                 if(Number(filter_group)>0){
+                    //hide entire table if filtered out
                     $('div.rtgroup').hide();
                     $('#header'+filter_group).show();
                     $('#table'+filter_group).show();
+                    
+                    if(myDataTables[filter_group]==undefined){
+                        $('#divMsgNothingToImport2').show();
+                    }else{
+                        $('#divMsgNothingToImport2').hide();
+                    }
+                    
                 }else{
                     $('div.rtgroup').show();
                 }
@@ -602,8 +623,6 @@
                 // Get filtered data
                 for(grpID in myDataSources){
                 if(grpID>0){    
-                    
-                    //hide entire table if filtered out
                     
                     myDataSources[grpID].sendRequest(filter_group+"|"+filterByExist, {
                         success : myDataTables[grpID].onDataReturnInitializeTable,
@@ -727,7 +746,7 @@
 
             <!-- Record types/fields/terms -->
             <div id="crosswalk" style="width:100%;margin:auto;">
-                <div>
+                <div id="divHeader">
                     <div style="display:inline-block; vertical-align:top;padding-right:20px;">
                         <label for="inputFilterByGroup">Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1"
                             style="width:138px;height:16px"><option value="all">all groups</option></select>
@@ -756,14 +775,11 @@
                 <div id="crosswalkTable"></div>
                 <div id="bottomPagination"></div>
             </div>
-            <div style="padding-top:10px">
-            <i>Note: If this function reports 'No records found' this normally means that there are no
-               definitions in the selected database which are not already in the current database.</i>
-
-            <p>
-                <i>In version 3.0 this may also mean that the database is in a
-                different format version which is not being read correctly</i>
-            </p>
+            <div style="padding-top:10px;display:none" id="divMsgNothingToImport">
+                <b>Nothing to import: your database already contains all the record types from this database</b>
+            </div>
+            <div style="padding-top:10px;display:none" id="divMsgNothingToImport2">
+                <b>Nothing to import: your database already contains all the record types from the selected group</b>
             </div>
             <!-- TODO: need a check on format version and report if there is a difference in format version -->
 
