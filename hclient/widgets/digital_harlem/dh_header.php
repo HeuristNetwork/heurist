@@ -215,10 +215,10 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
                 }
                 switch ($appcode) {
                     case 4799: ?> 
-                        <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{ window.open('http://digitalharlemblog.wordpress.com/', 'DHBlog'); }">Digital Harlem BLOG</a></div> <?php ;
+                        <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{ window.open('http://digitalharlemblog.wordpress.com/', 'DHBlog'); }">BLOG</a></div> <?php ;
                         break;
                     case 4800: ?>
-                        <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{ window.open('http://1935harlemriot.org', 'DHBlog'); }">Harlem 1935 BLOG</a></div> <?php ;
+                        <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{ window.open('http://1935harlemriot.org', 'DHBlog'); }">1935 BLOG</a></div> <?php ;
                         break;
                 }
 
