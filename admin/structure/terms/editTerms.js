@@ -347,9 +347,6 @@ function EditTerms() {
         }
         sSearch = sSearch.toLowerCase();
         var tree = $treediv.fancytree("getTree");
-
-        var rootNode = tree.getRootNode();
-        var _nodes =  rootNode.children;
         var nodes=[];
 
         tree.visit(function(node){
@@ -369,16 +366,28 @@ function EditTerms() {
 
         function __doSearchById(node){
             return (node.data.id===nodeid);
-        }
 
-        var nodes = _currTreeView.getNodesBy(__doSearchById);
+        }
+        //var nodes = _currTreeView.getNodesBy(__doSearchById);
+        var tree = $treediv.fancytree("getTree");
+        var nodes=[];
+
+        tree.visit(function(node){
+            if(__doSearchById(node))
+                nodes.push(node);
+
+        });
+
 
         //select and expand the node
         if(nodes){
             var node = nodes[0];
             if(needExpand) {
-                node.focus();
-                node.toggle();
+                //node.focus();
+                //node.toggle();
+                node.setFocus(true);
+                node.setActive(true);
+                node.setExpanded(true);
             }
             return node;
         }else{
@@ -1309,6 +1318,8 @@ function EditTerms() {
 
                         $treediv.remove();
                         _defineContentTreeView();
+                        _currentNode.setFocus(true);
+                        _currentNode.setActive(true);
 
 
                         if(needReload){
@@ -1606,7 +1617,9 @@ function EditTerms() {
         if(sel.selectedIndex>=0){
             var nodeid = sel.options[sel.selectedIndex].value;
             var node = _findNodeById(nodeid, true);
+
             if(!Hul.isnull(node)){
+                node.setFocus(true);
                 _onNodeClick(node);
             }
         }
