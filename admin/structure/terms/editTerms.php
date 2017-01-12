@@ -149,7 +149,7 @@ if(isForAdminOnly("to modify database structure")){
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" style="display:none;width:600px;">
+                <div id="formEditor" class="form_editor" style="display:none;width:600px;">
                     <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block"><br/><br/>Edit selected term / vocabulary</h3>
                     <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
                         <b>term saved successfully!</b>
@@ -279,10 +279,14 @@ if(isForAdminOnly("to modify database structure")){
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
-                            <input id="btnSave" type="button" value="Save changes"
+                            <input id="btnSave" class="btn_Save" type="button" value="Save changes"
                                 style="margin-left:80px;font-style: bold !important; color:black; display:none"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
+
+                            <span id = "Saved" style="display:none;"><button id="btnSaved" type="button"
+                                style="border-radius: 25px; background-color: #008CBA;margin-left:5px;font-style: bold !important;  color:black; display:none;"
+                                title=" ">Saved...</button></span>
 
                             <div id='div_btnAddChild'
                                 style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">

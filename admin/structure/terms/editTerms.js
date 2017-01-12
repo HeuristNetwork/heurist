@@ -28,10 +28,11 @@ var editTerms;
 * create composed label with all parents
 */
 function getParentLabel(_node){
-    if(_node.parent._type==="RootNode"){
-        return _node.label;
+    //if(_node.parent._type==="RootNode"){
+    if(_node.parent.isRootNode()){
+        return _node.data.label;
     }else{
-        return getParentLabel(_node.parent)+" > "+_node.label;
+        return getParentLabel(_node.parent)+" > "+_node.data.label;
     }
 }
 
@@ -342,13 +343,21 @@ function EditTerms() {
     function _findNodes(sSearch) {
 
         function __doSearchByName(node){
-            return (node && node.label && (node.label.toLowerCase().indexOf(sSearch)>=0));
+            return (node && node.data.label && (node.data.label.toLowerCase().indexOf(sSearch)>=0));
         }
-
         sSearch = sSearch.toLowerCase();
-        var nodes = _currTreeView.getNodesBy(__doSearchByName);
+        var tree = $treediv.fancytree("getTree");
 
-        //alert("search "+sSearch);
+        var rootNode = tree.getRootNode();
+        var _nodes =  rootNode.children;
+        var nodes=[];
+
+        tree.visit(function(node){
+            if(__doSearchByName(node))
+                nodes.push(node);
+
+        });
+
         return nodes;
     }
     //
@@ -411,12 +420,17 @@ function EditTerms() {
 
         var ele = $('#btnSave');
         if (ischanged) {
+
+            //ele.prop('disabled', 'disabled');
+            //ele.css('color','lightgray');
             ele.removeProp('disabled');
             ele.css('color','black');
         }else{
-            alert("hey");
+
             ele.prop('disabled', 'disabled');
             ele.css('color','lightgray');
+            alert("hey")
+
         }
 
     }
@@ -426,6 +440,9 @@ function EditTerms() {
     * Loads values to edit form
     */
     function _onNodeClick(obj){
+
+
+
 
         var node = null;
         if(obj){
@@ -442,7 +459,7 @@ function EditTerms() {
         {
             if(!Hul.isnull(_currentNode)){
                 _keepCurrentParent = null;
-                //_doSave(true, false);
+                _doSave(true, false);
             }
             _currentNode = node;
             // alert(_currentNode.data.label);
@@ -455,8 +472,13 @@ function EditTerms() {
                 Dom.get('formMessage').style.display = "none";
                 $("#btnMerge").css("display", "none");
                 if (node.isActive())
+
                 {
+                    //$("#formEditor").show();
                     Dom.get('formEditor').style.display = "block";
+                    // $(".form_editor ").hide();
+
+
                 }
 
                 if (Hul.isempty( node.data.conceptid)){
@@ -568,6 +590,7 @@ function EditTerms() {
         if(Hul.isnull(node)){
             Dom.get('formEditor').style.display = "none";
             Dom.get('formMessage').style.display = "block";
+
         }
 
         /* if(node){ //obj && obj.event){
@@ -576,7 +599,7 @@ function EditTerms() {
         tv.onEventToggleHighlight(node);
         } */
 
-        _isNodeChanged();
+        ///();
     }
 
     /**
@@ -1054,6 +1077,7 @@ function EditTerms() {
         if(wasChanged){
             $('#btnSave').removeProp('disabled');
             $('#btnSave').css('color','black');
+
         }
 
         //( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
@@ -1104,11 +1128,13 @@ function EditTerms() {
 
                 _currentNode.data.parent_id = iParentId;
 
+
                 //_currTreeView.render
                 //var tree = $treediv.fancytree("getTree");
                 //tree.reload();
                 // _currentNode.load();
                 //_defineContentTreeView();
+
                 _updateTermsOnServer(_currentNode, needReload);
 
                 //alert("TODO SAVE ON SERVER");
@@ -1270,18 +1296,19 @@ function EditTerms() {
                         title: '',
                         height: 100,
                         width: 200
-                        });
+                        });*/
 
 
                         //Dom.get('div_SaveMessage').style.display = "inline-block";
-                        setTimeout(function(){ $_dialogbox.dialog($_dialogbox).dialog('close');}, 2000);
-                        Dom.get('btnSave').value = "Save";
-
+                        $("#Saved" ).css("display","inline-block");
+                        setTimeout(function(){$("#Saved" ).css("display","none")}, 2000);
+                        $("#btnSave" ).prop('disabled', 'disabled');
+                        $("#btnSave").css("color", "lightgray");
 
                         /*FancyTree needs to be reinitialised manually when terms are modified*/
-                        // $treediv.remove();
-                        //  _defineContentTreeView();
 
+                        $treediv.remove();
+                        _defineContentTreeView();
 
 
                         if(needReload){
@@ -1289,6 +1316,9 @@ function EditTerms() {
                             //_fillTreeView((ind===0)?_termTree1:_termTree2);//; calll fillTreview for only YuI tree
 
 
+                            //_defineContentTreeView();
+
+                            //$treediv.remove();
                             //_defineContentTreeView();
 
 
@@ -1322,7 +1352,7 @@ function EditTerms() {
 
         if(isExistingTerm){
             sMessage = "Delete term '"+_currentNode.data.label+"'?";
-            if(_currentNode.children.length>0){
+            if(_currentNode.countChildren()>0){
                 sMessage = sMessage + "\nWarning: All child terms will be deleted as well";
             }
         }else{
@@ -1346,8 +1376,9 @@ function EditTerms() {
 
                         top.HEURIST.terms = context.terms;
                         //remove from tree
-                        _currTreeView.popNode(_currentNode);
-                        _currTreeView.render();
+                        //_currTreeView.popNode(_currentNode);
+                        //  _currTreeView.render();
+                        _currentNode.remove();
                         _currentNode = null;
                         _onNodeClick(null);
                         _isSomethingChanged = true;
@@ -1363,7 +1394,7 @@ function EditTerms() {
                 Hul.getJsonData(baseurl, callback, params);
             }else{
                 _currTreeView.popNode(_currentNode);
-                _currTreeView.render();
+                // _currTreeView.render();
                 _currentNode = null;
                 _onNodeClick(null);
                 Dom.get('deleteMessage').style.display = "none";
@@ -1486,6 +1517,7 @@ function EditTerms() {
     */
     function _doAddChild(isRoot, value)
     {
+        var tree = $treediv.fancytree("getTree");
         var term;
         if(value==null){
             if (isRoot){
@@ -1499,54 +1531,70 @@ function EditTerms() {
 
             //var rootNode = _currTreeView.getRoot(); YUI tree
             var rootNode =   $treediv.fancytree("getRootNode");
-            var tree = $treediv.fancytree("getTree");
+
 
             term = {}; //new Object();
             //term.id = (value.id)?value.id:"0-" + (rootNodet.getNodeCount()); //correct
-            term.id = (value.id)?value.id:"0-" + (tree.count());
-            term.parent_id = null;
-            term.conceptid = null;
-            term.domain = _currentDomain;
-            term.label = value.label;
-            term.description = value.description;
-            term.termcode = value.termcode;
-            term.inverseid = null;
-            term.folder = true;
-            term.title=  value.label;
+            var newNode= rootNode.addChildren({
+
+
+                id: (value.id)?value.id:"0-" + (tree.count()),
+                parent_id: null,
+                conceptid: null,
+                domain:_currentDomain,
+                label: value.label,
+                description:value.description,
+                termcode : value.termcode,
+                inverseid: null,
+                folder:true,
+                title:value.label});
 
 
 
 
             //rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node
             //  _currTreeView.render();
+            //$treediv.remove();
+            //_defineContentTreeView();
 
-            //rootNode.focus(); //expand
-            rootNode.addChildren(term);
 
-            _onNodeClick(rootNode);
 
-        }else if(!Hul.isnull(_currentNode))
-        {
-            term = {}; //new Object();
-            term.id = (value.id)?value.id:_currentNode.data.id+"-" + (_currentNode.getNodeCount());  //correct
-            term.parent_id = _currentNode.data.id;
-            term.conceptid = null;
-            term.domain = _currentDomain;
-            term.label = value.label;
-            term.description = value.description;
-            term.termcode = value.termcode;
-            term.inverseid = null;
+            // rootNode.setFocus(true); //expand
+            // rootNode.setExpanded(true);
 
-            var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
-            // _currTreeView.render();
-
-            var _temp = _currentNode;
-
-            newNode.focus(); //expand
+            newNode.setActive(true);
 
             _onNodeClick(newNode);
 
-            _parentNode = _temp;
+        }else if(!Hul.isnull(_currentNode))
+        {
+
+            var _temp = _currentNode;
+            var newNode= _currentNode.addChildren({
+
+
+                id: (value.id)?value.id:"0-" + (tree.count()),
+                parent_id: null,
+                conceptid: null,
+                domain:_currentDomain,
+                label: value.label,
+                description:value.description,
+                termcode : value.termcode,
+                inverseid: null,
+                folder:true,
+                title:value.label});
+
+
+            // var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
+            // _currTreeView.render();
+
+
+
+            newNode.setActive(true); //expand
+            _currentNode.setExpanded(true);
+            //_onNodeClick(newNode);
+            _parentNode = newNode.getParent();
+            Dom.get('edParentId').value = _parentNode.data.id;
         }
     }
 
@@ -2187,6 +2235,7 @@ function EditTerms() {
 
                     },
                     dragDrop: function(node, data) {
+                        _onNodeClick(data.otherNode);
 
                         if(data.otherNode.getLevel()===1){
                             if(node.getLevel()!=1)
@@ -2275,22 +2324,6 @@ function EditTerms() {
                         {
                             data.otherNode.getFirstChild().moveTo(node, data.hitMode);
 
-                            /*if (node.data.id){
-
-
-                            if(node.data.id === "root") {
-                            Dom.get('edParentId').value = "";
-                            }else{
-                            Dom.get('edParentId').value = node.data.id;
-                            }
-
-
-                            // _doSave(false, true);
-
-                            // _updateTermsOnServer(_currentNode,false);
-                            }
-
-                            // _updateTermsOnServer(_currentNode,false); */
                         }
 
                         _doMerge(node,data.otherNode);
@@ -2318,130 +2351,13 @@ function EditTerms() {
 
                         data.otherNode.moveTo(node,data.hitMode);
                         $_dialogbox.dialog($_dialogbox).dialog("close");
+                        //var iInverseId = Number(Dom.get('edInverseTermId').value);
+                        //alert(iInverseId);
                     });
 
 
                 }
 
-                var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
-                fi = top.HEURIST.terms.fieldNamesToIndex;
-                var merge_node = data.otherNode.data;
-                var retain_node = node.data;
-
-                var arTerm = termsByDomainLookup[merge_node.id];
-                $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['.fontsize(1)+arTerm[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
-
-                var arTerm2 = termsByDomainLookup[retain_node.id];
-                $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
-
-                $('#lblMergeLabel1').text(arTerm2[fi.trm_Label]);
-
-                /***  Check and Description Buttons-- if "Neither" - disable both buttons and show <none> in both
-                if "One" - select the one and disable the other and show <none> in the empty one
-                if "Both" - Select the first one and the other
-
-                ***/
-                if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
-                    (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
-                    displayPopUpContents(false,false,false,false);
-                }
-                else if((!Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
-                    && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
-                    {
-                        $('#rbMergeCode1').attr('disabled', 'disabled');
-                        $('#lblMergeCode1').html('&#60;none&#62;');
-                        $('#rbMergeDescr1').attr('disabled', 'disabled');
-                        $('#lblMergeDescr1').html('&#60;none&#62;');
-                        $("#rbMergeDescr2").attr('disabled', 'disabled');
-                        $('#lblMergeDescr2').html('&#60;none&#62;');
-                        $("#rbMergeCode2").attr('checked', 'checked');
-                        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-
-                    }
-                    else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
-                        && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
-                        {
-                            $('#rbMergeCode1').attr('disabled', 'disabled');
-                            $('#lblMergeCode1').html('&#60;none&#62;');
-                            $('#rbMergeDescr1').attr('disabled', 'disabled');
-                            $('#lblMergeDescr1').html('&#60;none&#62;');
-                            $("#rbMergeDescr2").attr('checked', 'checked');
-                            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-                            $("#rbMergeCode2").attr('checked', 'checked');
-                            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-
-                        }
-                        else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
-                            && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
-                            {
-                                $('#rbMergeCode1').attr('checked', 'checked');
-                                $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-                                $('#rbMergeDescr1').attr('disabled', 'disabled');
-                                $('#lblMergeDescr1').html('&#60;none&#62;');
-                                $("#rbMergeDescr2").attr('checked', 'checked');
-                                $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-                                $("#rbMergeCode2").attr('checked', 'checked');
-                                $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-
-                            }
-                            else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
-                                && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
-                                {
-                                    $('#rbMergeCode1').attr('disabled', 'disabled');
-                                    $('#lblMergeCode1').html('&#60;none&#62;');
-                                    $('#rbMergeDescr1').attr('disabled', 'disabled');
-                                    $('#lblMergeDescr1').html('&#60;none&#62;');
-                                    $("#rbMergeDescr2").attr('checked', 'checked');
-                                    $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-                                    $("#rbMergeCode2").attr('disabled', 'disabled');
-                                    $('#lblMergeCode2').html('&#60;none&#62;');
-
-                                }
-                                else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
-                                    && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
-                                    {
-                                        $('#rbMergeCode1').attr('disabled', 'disabled');
-                                        $('#lblMergeCode1').html('&#60;none&#62;');
-                                        $('#rbMergeDescr1').attr('disabled', 'disabled');
-                                        $('#lblMergeDescr1').html('&#60;none&#62;');
-                                        $("#rbMergeDescr2").attr('checked', 'checked');
-                                        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-                                        $("#rbMergeCode2").attr('checked', 'checked');
-                                        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-                                    }
-                                    else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
-                                        && (Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
-                                        {
-                                            $('#rbMergeCode1').attr('disabled', 'disabled');
-                                            $('#lblMergeCode1').html('&#60;none&#62;');
-                                            $('input[name ="rbMergeDescr"]').attr('checked','checked');
-                                            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-                                            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-                                            $("#rbMergeCode2").attr('disabled', 'disabled');
-                                            $('#lblMergeCode2').html('&#60;none&#62;');
-                                        }
-                                        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
-                                            && (!Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
-                                            {
-                                                $('#rbMergeCode1').attr('disabled', 'disabled');
-                                                $('#lblMergeCode1').html('&#60;none&#62;');
-                                                $('#rbMergeDescr1').attr('checked', 'checked');
-                                                $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-                                                $("#rbMergeDescr2").attr('checked', 'checked');
-                                                $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-                                                $("#rbMergeCode2").attr('checked', 'checked');
-                                                $('#lblMergeCode2').html((arTerm[fi.trm_Code]));
-                                            }
-                                            else{
-                                                $('#rbMergeCode1').attr('disabled', 'disabled');
-                                                $('#lblMergeCode1').html('&#60;none&#62;');
-                                                $('#rbMergeDescr1').attr('checked', 'checked');
-                                                $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-                                                $("#rbMergeDescr2").attr('checked', 'checked');
-                                                $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-                                                $("#rbMergeCode2").attr('checked', 'checked');
-                                                $('#lblMergeCode2').html((arTerm[fi.trm_Code]));
-                                            }
                 function displayPopUpContents(cbCode1,cbCode2,cbDescr1,cbDescr2){
                     if(cbCode1){
                         $('#rbMergeCode1').attr('checked', 'checked');
@@ -2478,6 +2394,87 @@ function EditTerms() {
                     }
 
                 }
+
+
+                var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+                fi = top.HEURIST.terms.fieldNamesToIndex;
+                var merge_node = data.otherNode.data;
+                var retain_node = node.data;
+
+                var arTerm = termsByDomainLookup[merge_node.id];
+                $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['.fontsize(1)+arTerm[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+
+                var arTerm2 = termsByDomainLookup[retain_node.id];
+                $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+
+                $('#lblMergeLabel1').text(arTerm2[fi.trm_Label]);
+
+                /***  Check and Description Buttons-- if "Neither" - disable both buttons and show <none> in both
+                if "One" - select the one and disable the other and show <none> in the empty one
+                if "Both" - Select the first one and the other
+
+                ***/
+                if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
+                    (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
+                    displayPopUpContents(false,false,false,false);
+                }
+                else if((!Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
+                    && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                    {
+                        displayPopUpContents(true,false,false,false);
+
+                    }
+                    else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                        && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                        {
+                            displayPopUpContents(true,false,true,false);
+
+                        }
+                        else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                            && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                            {
+                                displayPopUpContents(true,true,true,false);
+                            }
+                            else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                                && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                                {
+                                    displayPopUpContents(false,false,true,false);
+
+                                }
+                                else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                                    && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                                    {
+                                        displayPopUpContents(false,true,true,false);
+                                    }
+                                    else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                                        && (Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
+                                        {
+                                            displayPopUpContents(false,false,true,true);
+                                        }
+                                        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                                            && (!Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
+                                            {
+                                                displayPopUpContents(false,true,true,true);
+                                            }
+                                            else if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
+                                                && (!Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
+                                                {
+                                                    displayPopUpContents(false,false,true,true);
+                                                }
+                                                else if((!Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
+                                                    && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                                                    {
+                                                        displayPopUpContents(true,true,false,false);
+                                                    }
+                                                    else if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
+                                                        && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                                                        {
+                                                            displayPopUpContents(false,true,false,false);
+                                                        }
+                                                        else
+                                                        {
+                                                            displayPopUpContents(false,false,false,true);
+                                                        }
 
                 var ele = document.getElementById('divTermMergeConfirm');
                 $("#moveText").html("Insert "+ "&#60;" +data.otherNode.data.label+"&#62; under " + "&#60;"+node.data.label
@@ -2605,7 +2602,9 @@ function EditTerms() {
 /**
 *
 */
-function doSearch(event){ // This Function may not be necessary as an internal function _doSearch has been defined  in _setOrclearInverseTermId2 for popup.
+function doSearch(event){
+
+
 
     var el = event.target;
 
@@ -2614,6 +2613,7 @@ function doSearch(event){ // This Function may not be necessary as an internal f
 
     //remove all
     while (sel.length>0){
+
         sel.remove(0);
     }
 
