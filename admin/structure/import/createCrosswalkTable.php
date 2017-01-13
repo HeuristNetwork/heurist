@@ -260,6 +260,8 @@
                         $dtyExistRes = mysql_query("select dty_ID from " . DATABASE . ".defDetailTypes ".
                             "where dty_OriginatingDBID = ".$rtStruct['origDtyDBID'].
                             " AND dty_IDInOriginatingDB = ".$rtStruct['origDtyID']);
+                        if($dtyExistRes===false) continue; 
+                            
                         $dtyAlreadyImported = mysql_num_rows($dtyExistRes);
 
                         $rtsShortRow = array($rtStruct["rst_DisplayName"],                                              //[0]
@@ -295,7 +297,11 @@
                 foreach ($rectypesToImport as $id=>$ids){
                     $res = array();
                     foreach ($ids as $id2){
-                        array_push($res,$rtNames[$id2]);
+                        if(@$rtNames[$id2]){
+                            array_push($res,$rtNames[$id2]);    
+                        }else{
+                            array_push($res,'Record type '.$id2.' not found');    
+                        }
                     }
                     $rectypesToImport[$id] = $res;
                 }
