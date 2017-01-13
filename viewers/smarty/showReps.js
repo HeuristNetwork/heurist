@@ -210,6 +210,7 @@ function ShowReps() {
 
         var sel = document.getElementById('selTemplates');
         if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
+        if(sel.selectedIndex<0 || !sel.options[sel.selectedIndex]) sel.selectedIndex = 0;
         return sel.options[sel.selectedIndex].value; // by default first entry
     }
 
