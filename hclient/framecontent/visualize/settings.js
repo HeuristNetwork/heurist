@@ -258,9 +258,9 @@ function handleSettingsInUI() {
     
     
     var fontSize = getSetting(setting_fontsize, 12);    
-    if(fontSize<8) fontSize = 8  //min
+    if(isNaN(fontSize) || fontSize<8) fontSize = 8  //min
     else if(fontSize>25) fontSize = 25;
-    
+   
     $('#fontSize').val(fontSize).change(
     function(){
         var newval = $(event.target).val();
