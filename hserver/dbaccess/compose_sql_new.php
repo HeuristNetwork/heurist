@@ -707,7 +707,7 @@ class HPredicate {
         $p = "";
 
         if(intval($this->field_id)>0){
-            //find field type
+            //find field type - @todo from cache
             $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
         }else{
             $this->field_type = 'freetext';
@@ -1067,7 +1067,7 @@ class HPredicate {
 
         if(trim($this->value)=='') return "!=''";
 
-        $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
+            $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
         
         if($this->field_type=='enum' || $this->field_type=='relationtype'){
             
