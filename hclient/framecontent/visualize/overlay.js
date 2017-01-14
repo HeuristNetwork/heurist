@@ -52,7 +52,7 @@ function getRecordOverlayData(record) {
     array.push(header);    
 
     var fontSize = getSetting(setting_fontsize, 12);        
-    
+
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
     if(data && data.links.length > 0) {
