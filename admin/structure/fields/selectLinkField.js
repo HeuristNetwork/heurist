@@ -47,7 +47,6 @@ $(document).ready(function() {
 
     if(!top){
         return;
-    }else if($.isFunction(top.HEURIST.is_admin)){
         onScriptsReady();
     }else{
 
@@ -99,7 +98,7 @@ $(document).ready(function() {
         rt_selector.change(
 
                 function(){
-                    var sDialogTitle = 'Creating link from '+ top.HEURIST.rectypes.names[rty_ID];
+                    var sDialogTitle = 'Creating link from '+ top.HEURIST4.rectypes.names[rty_ID];
                     target_ID = $(this).val();
                     if(!target_ID){
                         top.HEURIST4.util.setDisabled($('.ft_selfield'), true);                        
@@ -110,7 +109,7 @@ $(document).ready(function() {
                     }else{
                         
                         //change title in parent dialog
-                        sDialogTitle = sDialogTitle + ' to '+  top.HEURIST.rectypes.names[target_ID];                                             
+                        sDialogTitle = sDialogTitle + ' to '+  top.HEURIST4.rectypes.names[target_ID];                                             
                         top.HEURIST4.util.setDisabled($('.ft_selfield'), false);                        
                         $('.ft_selfield').css('color', $('#sel_target_rectype_id').css('color'));
                         _getLinkFields();
@@ -130,7 +129,7 @@ $(document).ready(function() {
         } 
         rt_selector.change();
 
-        if(!top.HEURIST.rectypes.typedefs[rty_ID]){
+        if(!top.HEURIST4.rectypes.typedefs[rty_ID]){
             top.HEURIST4.msg.showMsgErr('Parameter for record type "rty_ID" ( '
                 +rty_ID+' ) is not defined or invalid');
             window.close(false);
@@ -150,7 +149,7 @@ $(document).ready(function() {
         var idx_Type = detailTypes['fieldNamesToIndex']['dty_Type'];
         var idx_Ptr  = detailTypes['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
         var idx_Name = detailTypes['fieldNamesToIndex']['dty_Name'];
-        var idx_NameInRecType = top.HEURIST.rectypes.typedefs['dtFieldNamesToIndex']['rst_DisplayName'];
+        var idx_NameInRecType = top.HEURIST4.rectypes.typedefs['dtFieldNamesToIndex']['rst_DisplayName'];
 
         var aPointers = [{key:0, title:'Create new field'}], 
             aRelMarkers = [{key:0, title:'Create new field'}], 
@@ -166,20 +165,20 @@ $(document).ready(function() {
 
                         //if this field type already in rectype
                         var already_inuse = false;
-                        if(top.HEURIST.rectypes.typedefs[rty_ID]['dtFields'][dty_ID]){
+                        if(top.HEURIST4.rectypes.typedefs[rty_ID]['dtFields'][dty_ID]){
                             already_inuse = true;
                         }
 
                         var option_item  = {key:dty_ID, title:detailTypes[dty_ID].commonFields[idx_Name], disabled:already_inuse};
                         if(already_inuse){
-                            if (detailTypes[dty_ID].commonFields[idx_Name] == top.HEURIST.rectypes.typedefs[rty_ID]['dtFields'][dty_ID][idx_NameInRecType])
+                            if (detailTypes[dty_ID].commonFields[idx_Name] == top.HEURIST4.rectypes.typedefs[rty_ID]['dtFields'][dty_ID][idx_NameInRecType])
                             { // field name and base field name are the same
                                 option_item.title = option_item.title +' (already connected)';
                             }
                             else {                            
                                 option_item.title = option_item.title
                                 +' (connected as "'
-                                +top.HEURIST.rectypes.typedefs[rty_ID]['dtFields'][dty_ID][idx_NameInRecType]+'")';
+                                +top.HEURIST4.rectypes.typedefs[rty_ID]['dtFields'][dty_ID][idx_NameInRecType]+'")';
                             }
                         }
 
@@ -198,14 +197,14 @@ $(document).ready(function() {
         // Complicated message removed by Ian 3/1/17 - they are just confusing
         /*
         if(aPointers.length==1){
-            aPointers[0].title  += ('.(No field types that refer to "'+top.HEURIST.rectypes.names[target_ID]+'")');
+            aPointers[0].title  += ('.(No field types that refer to "'+top.HEURIST4.rectypes.names[target_ID]+'")');
         }else if(cnt_ptrs==0){
-            aPointers[0].title  += ('. Other field types already in use in "'+top.HEURIST.rectypes.names[rty_ID]+'")');
+            aPointers[0].title  += ('. Other field types already in use in "'+top.HEURIST4.rectypes.names[rty_ID]+'")');
         }
         if(aRelMarkers.length==1){
-            aRelMarkers[0].title  += ('.(No field types that refer to "'+top.HEURIST.rectypes.names[target_ID]+'")');
+            aRelMarkers[0].title  += ('.(No field types that refer to "'+top.HEURIST4.rectypes.names[target_ID]+'")');
         }else if(cnt_relmarkers==0){
-            aRelMarkers[0].title  += ('. Other field types already in use in "'+top.HEURIST.rectypes.names[rty_ID]+'")');
+            aRelMarkers[0].title  += ('. Other field types already in use in "'+top.HEURIST4.rectypes.names[rty_ID]+'")');
         }
         */
         top.HEURIST4.ui.createSelector($('#sel_resource_fields')[0], aPointers);
