@@ -47,6 +47,7 @@ $(document).ready(function() {
 
     if(!top){
         return;
+    }else if(top.HEURIST && top.HEURIST.rectypes){
         onScriptsReady();
     }else{
 
