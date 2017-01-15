@@ -268,10 +268,12 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_LATITUDE_CENTREPOINT' => array(3, 1075),    //deprecated
     'DT_MINOR_SPAN' => array(3, 1076),              //deprecated
     'DT_MAP_BOOKMARK' => array(3, 1082),
+    'DT_MINIMUM_MAP_ZOOM' => array(3, 1077), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers
+    'DT_MAXIMUM_MAP_ZOOM' => array(3, 1078), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
     // Map layer
     'DT_DATA_SOURCE' => array(3, 1083),
-    'DT_MINIMUM_ZOOM' => array(3, 1085),
-    'DT_MAXIMUM_ZOOM' => array(3, 1086),
+    'DT_MINIMUM_ZOOM' => array(3, 1085), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers
+    'DT_MAXIMUM_ZOOM' => array(3, 1086), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
     'DT_OPACITY' => array(3, 1090),
     'DT_COLOR' => array(3, 1037),
     // Shape
