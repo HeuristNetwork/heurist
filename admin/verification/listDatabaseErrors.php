@@ -186,7 +186,7 @@ require_once('valueVerification.php');
                     ?>
                     <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
                         <?= count($row['invalidTermIDs'])?> invalid term ID<?=(count($row['invalidTermIDs'])>1?"s":"")?>
-                        (code: <?= join(",",$row['invalidTermIDs'])?>)
+                        (code: <?= implode(",",$row['invalidTermIDs'])?>)
                     </div>
                     <?php
                 }//for
@@ -194,7 +194,7 @@ require_once('valueVerification.php');
                     ?>
                     <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
                         <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?>
-                        (code: <?= join(",",$row['invalidNonSelectableTermIDs'])?>)
+                        (code: <?= implode(",",$row['invalidNonSelectableTermIDs'])?>)
                     </div>
                     <?php
                 }
@@ -202,7 +202,7 @@ require_once('valueVerification.php');
                     ?>
                     <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
                         <?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?>
-                        (code: <?= join(",",$row['invalidRectypeConstraint'])?>)
+                        (code: <?= implode(",",$row['invalidRectypeConstraint'])?>)
                     </div>
                     <?php
                 }
@@ -276,7 +276,7 @@ require_once('valueVerification.php');
                 <div>
                     <h3>Records with record pointers to non-existent records</h3>
                     <span>
-                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB');">(show selected as search)</a>
                     </span>
@@ -338,7 +338,7 @@ require_once('valueVerification.php');
                 {
                     ?>
                     <h3>Records with record pointers to the wrong record type</h3>
-                    <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                    <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($bibs)) ?>'>
                         (show results as search)</a></span>
                     <table>
                         <?php
@@ -365,6 +365,95 @@ require_once('valueVerification.php');
             <hr />
 
             <?php
+            // ----- Fields with EMPTY OR NULL values -------------------
+
+            
+            if(@$_REQUEST['fixempty']=="1"){
+                mysql_query('SET SQL_SAFE_UPDATES=0');
+                mysql_query('delete d.* from recDetails d, defDetailTypes, Records a '
+.'where (dtl_ID>0) and (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
+            and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');                
+               
+               $wascorrected = mysql_affected_rows();     
+               mysql_query('SET SQL_SAFE_UPDATES=1');
+            }else{
+                $wascorrected = 0;
+            }
+            
+            $total_count_rows = 0;
+            
+            //find all fields with faulty dates
+            $res = mysql_query('select dtl_ID, dtl_RecID, a.rec_Title, dty_Name, dty_Type
+                from recDetails, defDetailTypes, Records a
+                where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
+            and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
+
+            
+            $fres = mysql_query('select found_rows()');
+            if($fres){
+                $total_count_rows = mysql_fetch_row($fres);
+                if(count($total_count_rows)>0){
+                    $total_count_rows = $total_count_rows[0];    
+                }
+            }
+            
+            if($total_count_rows<1){
+                 print '<div><h3>All records don\'t have empty fields</h3></div>';
+            }
+            if($wascorrected>1){
+                 print "<div>$wascorrected empty fields were deleted</div>";
+            }
+            
+            if($total_count_rows>0){
+                ?>
+
+                <div>
+                    <h3>Records with empty fields</h3>
+                    <span>
+                        <a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_empty_values').click(); return false;}">(show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB6');">(show selected as search)</a>
+                    </span>
+                   
+                    <div>To REMOVE empty fields, please click here:
+                        <button
+                            onclick="{document.getElementById('page-inner').style.display = 'none';
+                                window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixempty=1','_self')}">
+                            Remove all null values</button>
+                    </div>
+                </div>
+
+                <table>
+                <?php
+
+                
+                $ids = array();
+                
+                while ($row = mysql_fetch_assoc($res)){
+                    ?>
+                    <tr>
+                        <td><input type=checkbox name="recCB6" value=<?= $row['dtl_RecID'] ?>></td>
+                        <td><a target=_new
+                                href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                <?= $row['dtl_RecID'] ?>
+                            </a></td>
+                        <td><?= substr($row['rec_Title'],0,50) ?></td>
+                        <td><?= $row['dty_Name'] ?></td>
+                    </tr>
+                    <?php
+                    $ids[$row['dtl_RecID']] = 1;
+
+                }
+                print '</table><br>';
+                
+                echo '<span><a target=_new id="link_empty_values" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
+                            .'&w=all&q=ids:'.implode(',', array_keys($ids)).'>(show results as search)</a></span>';
+                
+            }
+            ?>
+            
+            <hr/>
+
+            <?php
             // ----- Fields of type "Date" with  wrong values -------------------
 
             //find all fields with faulty dates
@@ -379,15 +468,19 @@ require_once('valueVerification.php');
             $dtl_ids = array();
             while ($row = mysql_fetch_assoc($res)){
 
-                //parse and validate value
-                $row['new_value'] = validateAndConvertToISO($row['dtl_Value']);
-                if($row['new_value']=='Temporal'){
-                    continue;
-                }else if($row['new_value']==trim($row['dtl_Value'])){
-                    continue;
+                if(!($row['dtl_Value']==null || $row['dtl_Value']=='')){ //empty dates are not allowed
+                    //parse and validate value
+                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value']);
+                    if($row['new_value']=='Temporal'){
+                        continue;
+                    }else if($row['new_value']==trim($row['dtl_Value'])){
+                        continue;
+                    }
+                }else{
+                    $row['new_value'] = null;
                 }
 
-                //remove wrong term IDs
+                //remove wrong dates
                 if(@$_REQUEST['fixdates']=="1"){
 
                     if($row['new_value']){
@@ -418,7 +511,7 @@ require_once('valueVerification.php');
                 <div>
                     <h3>Records with wrong Date fields</h3>
                     <span>
-                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                     </span>
@@ -441,7 +534,7 @@ require_once('valueVerification.php');
                                 <?= $row['dtl_RecID'] ?>
                             </a></td>
                         <td><?= substr($row['rec_Title'],0,50) ?></td>
-                        <td><?= $row['dtl_Value'] ?></td>
+                        <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
                         <td><?= $row['new_value'] ?></td>
                     </tr>
                     <?php
@@ -505,7 +598,7 @@ require_once('valueVerification.php');
                 <div>
                     <h3>Records with non-existent term values</h3>
                     <span>
-                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB1');">(show selected as search)</a>
                     </span>
@@ -599,15 +692,13 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 }
 
             }
-            ?>
 
-                <?php
                 if (count($ids) == 0) {
                     print "<h3>All records have valid terms (terms are as specified for each field)</h3>";
                 }else{
                     echo '</table><br>';   
                     echo '<span><a target=_new id="link_wrongterms" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
-                            .'&w=all&q=ids:'.join(',', array_keys($ids)).'>(show results as search)</a></span>';
+                            .'&w=all&q=ids:'.implode(',', array_keys($ids)).'>(show results as search)</a></span>';
                 }
                 ?>
             </div>
@@ -648,7 +739,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 <div>
                     <h3>Single value fields with multiple values</h3>
                     <span>
-                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link2 onClick="return open_selected_by_name('recCB2');">(show selected as search)</a>
                     </span>
@@ -723,7 +814,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 <div>
                     <h3>Records with missing or empty required values</h3>
                     <span>
-                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= implode(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link3 onClick="return open_selected_by_name('recCB3');">(show selected as search)</a>
                     </span>
@@ -800,7 +891,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                     ?>
                     <h3>Records with extraneous fields (not defined in the list of fields for the record type)</h3>
                     <span>
-                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search)</a>
                     </span>

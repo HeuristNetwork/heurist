@@ -195,7 +195,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     // buttons - callback function or objects of buttons for dialog option
     // title - either string for title, or object {title:, yes: ,no, cancel, }
     //
-    showMsgDlg: function(message, buttons, labels, position_to_element, isPopupDlg){
+    showMsgDlg: function(message, buttons, labels, ext_options, isPopupDlg){
 
         if(!$.isFunction(window.hWin.HR)){
             alert(message);
@@ -297,9 +297,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
                 };
         }
-
-        if(position_to_element){
-           options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };
+        
+        if(ext_options){
+           if(ext_options.options){
+                $.extend(options, ext_options.options);
+           }
+           if(ext_options.my && ext_options.at && ext_options.of){
+               options.position = {my:ext_options.my, at:ext_options.at, of:ext_options.of};
+           }else if(!ext_options.options){  
+                options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
+           }
         }
 
         $dlg.dialog(options);

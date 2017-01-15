@@ -221,14 +221,17 @@ function executeSmartyTemplate($params){
     if(strpos($content, '$heurist->getRecord(')===false){
             
            $error = '<p>To improve performance we have made some small changes to the report template specifications (July 2016).</p>'. 
-                    '<p>You will need to add  {$r = $heurist->getRecord($r)}  immediately after the start of the main record loop, like this:<p/>'
-                    .'{*------------------------------------------------------------*}'
+                    '<p>Please edit the report and add  <b>{$r = $heurist->getRecord($r)}</b><br/>'
+                    .'immediately after the start of the main record loop indicated by {foreach $results as $r}, like this:<p/>'
+                    .'<p><br/>{*------------------------------------------------------------*}'
                     .'<br/>{foreach $results as $r}'
                     .'<br/><b>{$r = $heurist->getRecord($r)}</b>'
-                    .'<br/>{*------------------------------------------------------------*}'
-                    .'<p>and similar expressions for record pointer loops - example: {$r.f103 = $heurist->getRecord($r.f103)}</p>'
-                    .'<p>Please generate a new report to obtain an example of the syntax, or simply send your report template to '
-                    .'<br/>support at HeuristNetwork dot org and we will adjust the template for you.</p>';
+                    .'<br/>{*------------------------------------------------------------*}</p>'
+                    .'<p><br/>If your report format contains repeating value loops, you will also need to add similar<br/>'
+                    .'expressions to these loops, for example: {$r.f103 = $heurist->getRecord($r.f103)}.<br/>'
+                    .'Generate a new report to obtain examples, then cut and paste into your existing report.</p>'
+                    .'<p>If you are stuck, please send your report template to <br/>'
+                    .'support at HeuristNetwork dot org and we will adjust the template for you.</p>';
            
            if($publishmode>0 && $outputfile!=null){
                 save_report_output2($error);

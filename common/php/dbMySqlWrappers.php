@@ -298,6 +298,8 @@ function mysql__select_assoc($table, $key_column, $val_column, $condition) {
     while (($row = mysql_fetch_array($res))) $matches[$row[0]] = $row[1];
     return $matches;
 }
+
+
 /**
 * Run this query, reporting errors;
 * make a lookup table from the first column to an associative array of the remaining columns.

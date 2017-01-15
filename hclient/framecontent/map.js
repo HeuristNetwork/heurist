@@ -247,6 +247,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     //
     function _reloadDataset(dataset_id){
 
+                //tmap.opts.centerOnItems = false;
+                
                 var dataset = tmap.datasets[dataset_id];
 
                 var mapdata = _getDataset(dataset_id);
@@ -258,6 +260,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 });*/
 
                 if(!dataset){ //already exists with such name
+                
                     dataset = tmap.createDataset(dataset_id);
                     //dataset.opts.theme = datasetTheme;
                 }else{
@@ -1705,6 +1708,13 @@ ed_html +
         getNativeMap: function(){
              return (tmap)?tmap.getNativeMap():null;
         },
+
+        setTimeMapProperty: function(name, value){
+            if(tmap){
+                tmap.opts[name] = value;
+            }
+        },
+
 
         //@todo - separate this functionality to different classes
         map_control: null,    //controls layers on map - add/edit/remove

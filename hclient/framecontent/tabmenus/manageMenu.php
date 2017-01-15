@@ -50,13 +50,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <li><a href="common/connect/getListOfDatabases.php?v=4" name="auto-popup" class="portrait h3link"
                         onClick="{return false;}" data-nologin="1" data-logaction="dbOpen"
                         title="Open and login to another Heurist database - current database remains open">
-                        Open database</a>
+                        Open</a>
                     </li>
 
                     <li><a href="admin/setup/dbcreate/createNewDB.php" name="auto-popup" class="large h3link"
                         onClick="{return false;}" data-logaction="dbNew"
                         title="Create a new database on the current server - essential structure elements are populated automatically">
-                        New database</a>
+                        New</a>
                     </li>
                     
                     <li class="admin-only">
@@ -70,7 +70,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a href="admin/setup/dbproperties/registerDB.php" name="auto-popup" class="portrait h3link"
                             onclick= "{return false;}" data-logaction="dbRegister"
                             title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
-                            Register database</a>
+                            Register</a>
                     </li>
                     
                 </ul>
@@ -95,7 +95,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
                             onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
                             title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
-                            Record types / fields</a>
+                            Organise</a>
                     </li>
 
                     <li>
@@ -129,7 +129,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             name="auto-popup" class="verylarge h3link refresh_structure info_link"
 
                             title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
-                            Vocabularies / terms</a>
+                            Terms</a>
                     </li>
 
                     <!-- Adding Manage relation types menu -->
@@ -137,7 +137,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a  href="admin/structure/terms/editTerms.php?treetype=relation" name="auto-popup" class="verylarge h3link refresh_structure info_link"
                             data-logaction="stRelations"
                             title="Browse and edit the relationship types"  onclick= "{return false;}">
-                            Relationship types</a>
+                            Relations</a>
                     </li>
 
                     <li>
@@ -156,14 +156,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             Refresh</a>
                     </li>
                     
-                    <li>
-                        <a href="applications/faims/exportFAIMS.php" name="auto-popup" class="verylarge h3link"
-                            data-logaction="stFAIMS"
-                            onClick="{return false;}"
-                            title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
-                            Tablet app</a>
-                    </li>
-
                     <!--
                     <li><a href="javascript:void(0)"
                     onClick="{/*window.hWin.HEURIST4.util.reloadStrcuture()*/;}"
@@ -195,14 +187,22 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             data-logaction="adminFull"
                             onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
-                            Full database administration, <br />utilities &amp; special functions</a>
+                            Advanced functions &amp; utilities</a>
                     </li>
                     <li class="admin-only">
                         <a href="export/dbbackup/exportMyDataPopup.php?inframe=1" name="auto-popup" class="portrait h3link"
                             data-logaction="adminArchive"
                             onclick= "{return false;}"
                             title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
-                            Complete data archive package</a>
+                            Create data archive package</a>
+                    </li>
+
+                                        <li>
+                        <a href="applications/faims/exportFAIMS.php" name="auto-popup" class="verylarge h3link"
+                            data-logaction="stFAIMS"
+                            onClick="{return false;}"
+                            title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
+                            Build tablet app</a>
                     </li>
 
                     <!--

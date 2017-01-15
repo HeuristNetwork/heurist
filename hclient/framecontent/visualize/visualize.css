@@ -229,11 +229,12 @@ text.shadow {
 }
 #toolbar{
     line-height: 10px;    
-    display:table-row;
-    border: solid 1px gray;
+    display:table-cell;
+    /*border: solid 1px gray;*/
 }
 #toolbar > div{
-    display:table-cell;
+    /*display:table-row;*/
+    float:left;
 }
 
 .ui-icon-cursor{

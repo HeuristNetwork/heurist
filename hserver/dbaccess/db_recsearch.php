@@ -772,7 +772,6 @@ if(@$params['debug']) echo $query."<br>";
 
             $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
          
-            
         }
         
 

@@ -166,14 +166,22 @@ var svg;        // The SVG where the visualisation will be executed on
     
 
 /*******************************START OF VISUALISATION HELPER FUNCTIONS*******************************/
-var maxCount; 
+var maxCountForNodes, maxCountForLinks; 
 function determineMaxCount(data) {
-    maxCount = 1;
+    maxCountForNodes = 1;
+    maxCountForLinks = 1;
     if(data && data.nodes.length > 0) {
         for(var i = 0; i < data.nodes.length; i++) {
             //console.log(data.nodes[i]);
-            if(data.nodes[i].count > maxCount) {
-                maxCount = data.nodes[i].count;
+            if(data.nodes[i].count > maxCountForNodes) {
+                maxCountForNodes = data.nodes[i].count;
+            } 
+        }
+    }
+    if(data && data.links.length > 0) {
+        for(var i = 0; i < data.links.length; i++) {
+            if(data.links[i].targetcount > maxCountForLinks) {
+                maxCountForLinks = data.links[i].targetcount;
             } 
         }
     }
@@ -236,14 +244,10 @@ var maxLinkWidth = 25;
 
 /** Executes the chosen formula with a chosen count & max size */
 
-function executeFormula(count, maxSize) {
+function executeFormula(count, maxCount, maxSize) {
     // Avoid minus infinity and wrong calculations etc.
     if(count <= 0) {
         count = 1;
-    }
-    
-    if(count > maxCount) {
-        maxCount = count;
     }
     
     //console.log("Count: " + count + ", max count: " + maxCount + ", max Size: " + maxSize);
@@ -271,7 +275,13 @@ function getLineWidth(count) {
     if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
     else if(maxWidth<1) {maxSize = 1;}
     
-    var val = (count==0)?0:executeFormula(count, maxWidth);
+//console.log('cnt='+count);    
+    
+    if(count > maxCountForLinks) {
+        maxCountForLinks = count;
+    }
+    
+    var val = (count==0)?0:executeFormula(count, maxCountForLinks, maxWidth);
     if(val<1) val = 1;
     return val;
 }            
@@ -295,7 +305,12 @@ function getEntityRadius(count) {
         if(count==0){
             return 0; //no records - no circle
         }else{
-            var val = circleSize + executeFormula(count, maxRadius);
+            
+            if(count > maxCountForNodes) {
+                maxCountForNodes = count;
+            }
+            
+            var val = circleSize + executeFormula(count, maxCountForNodes, maxRadius);
             if(val<circleSize) val = circleSize;
             return val;
         }
@@ -486,7 +501,7 @@ function addContainer() {
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
-                           .scaleExtent(settings.isDatabaseStructure?[0.75,1.5]:[0.05, 10])
+                           .scaleExtent([0.05, 10]) //settings.isDatabaseStructure?[0.75,1.5]:
                            .on("zoom", zoomed);
                       
     return container;

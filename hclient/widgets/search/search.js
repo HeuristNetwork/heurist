@@ -805,14 +805,8 @@ $.widget( "heurist.search", {
                     var rectype = (event)?Number(event.target.value):0;
                     window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), rectype, allowed, window.hWin.HR('Any field type'));
 
-                    /*select_sortby.html("<option value=t>"+window.hWin.HR("record title")+"</option>"+
-                    "<option value=rt>"+window.hWin.HR("record type")+"</option>"+
-                    "<option value=u>"+window.hWin.HR("record URL")+"</option>"+
-                    "<option value=m>"+window.hWin.HR("date modified")+"</option>"+
-                    "<option value=a>"+window.hWin.HR("date added")+"</option>"+
-                    "<option value=r>"+window.hWin.HR("personal rating")+"</option>"+
-                    "<option value=p>"+window.hWin.HR("popularity")+"</option>");*/
                     var topOptions = [{key:'t', title:window.hWin.HR("record title")},
+                        {key:'id', title:window.hWin.HR("record id")},
                         {key:'rt', title:window.hWin.HR("record type")},
                         {key:'u', title:window.hWin.HR("record URL")},
                         {key:'m', title:window.hWin.HR("date modified")},

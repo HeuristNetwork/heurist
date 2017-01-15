@@ -468,14 +468,16 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         //localStorage.clear();    
                     }
                     var dbkey = 'db'+window.hWin.HAPI4.database;
-                    if(getSetting(dbkey)==null){
+                    // For the moment - Jan 2017 - it is useful to show the hint at all times.
+                    // for some reason it disappears after first display even though database is still empty, which was not the intention
+                    // if(getSetting(dbkey)==null){ //new databse - show hint
                         putSetting(dbkey, '1');7
-                        $('#divSvg').css('top','7em');
+                        $('#divSvg').css('top','12em');//7em
                         $('#divHint').show();
-                    }else{
-                        $('#divSvg').css('top','5em');
+                    /* }else{
+                        $('#divSvg').css('top','10em');//5em
                         $('#divHint').hide();
-                    }
+                    }*/
                     
                     initVisualizeData();
 

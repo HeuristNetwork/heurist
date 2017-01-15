@@ -341,7 +341,7 @@ function print_header_line($bib) {
     }
     ?>
 
-    <div class=HeaderRow style="margin-bottom:<?=((@$url)?'20px;':'0px;min-height:0px;')?>">
+    <div class=HeaderRow style="margin-bottom:<?php echo ((@$url)?'20px;':'0px;min-height:0px;');?>">
             <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?= $bib['rec_Title'] ?>
             </h2>
@@ -493,7 +493,7 @@ function print_private_details($bib) {
             global $terms, $is_map_popup;
 
             $bds_res = mysql_query('select dty_ID,
-                ifnull(rdr.rst_DisplayName, dty_Name) as name,
+                IF(rdr.rst_DisplayName is NULL OR rdr.rst_DisplayName=\'\', dty_Name, rdr.rst_DisplayName) as name,
                 dtl_Value as val,
                 dtl_UploadedFileID,
                 dty_Type,
@@ -540,8 +540,13 @@ function print_private_details($bib) {
 
                 }else if ($bd['dty_Type'] == 'date') {
 
-                    $bd['val'] = temporalToHumanReadableString($bd['val'], true);
-                    $bd['val'] = output_chunker($bd['val']);
+                    if($bd['val']==null || $bd['val']==''){
+                        //ignore empty date
+                        continue;
+                    }else{
+                        $bd['val'] = temporalToHumanReadableString($bd['val'], true);
+                        $bd['val'] = output_chunker($bd['val']);
+                    }
 
                 }else if ($bd['dty_Type'] == 'resource') {
 
@@ -670,7 +675,7 @@ if($is_map_popup){
             foreach ($bds as $bd) {
                 print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;'
                     .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
-                    .'"><div class=detailType>'.($prevLbl==$bd['name']?"":htmlspecialchars($bd['name']))
+                    .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
                     .'</div><div class="detail'
                     .($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'.$bd['val'].'</div></div>';
                 $prevLbl = $bd['name'];

@@ -185,6 +185,12 @@ function onRecordDataLoaded(){
             //                    window.location.replace("?recID=" + rec.replacedBy +"&db="+dbname);
         }
         
+        if(top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']=="new_bib"){
+            document.getElementById('div-duplication').style.display = 'none';    
+        }else{
+            document.getElementById('div-duplication').style.display = 'block';
+        }
+        
         document.getElementById("adddate").appendChild(document.createTextNode("added: " + top.HEURIST.edit.record.adddate));
         if(top.HEURIST.edit.record.moddate)
             document.getElementById("moddate").appendChild(document.createTextNode("updated: " + top.HEURIST.edit.record.moddate));

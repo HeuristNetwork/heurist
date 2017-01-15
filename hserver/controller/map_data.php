@@ -27,7 +27,7 @@ require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
 
 $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
-                . 'rec_OwnerUGrpID = 0 )';
+. 'rec_OwnerUGrpID = 0 )';
 
 $detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, AsWKT(dtl_Geo) as dtl_Geo FROM recDetails rd WHERE rd.dtl_RecID=";
 
@@ -182,9 +182,9 @@ function getRecordDetails($system, $record) {
     $query = $detailQuery . $record->id;
     $details = $system->get_mysqli()->query($query);
     if($details) {
-        
+
         $record->bookmarks = array();
-        
+
         // [dtl_ID]  [dtl_RecID]  [dtl_DetailTypeID]  [dtl_Value] [dtl_AddedByImport]  [dtl_UploadedFileID]   [dtl_Geo]  [dtl_ValShortened]  [dtl_Modified]
         while($detail = $details->fetch_assoc()) {
             // Fields
@@ -193,7 +193,7 @@ function getRecordDetails($system, $record) {
             $value = $detail["dtl_Value"];
             $fileID = $detail["dtl_UploadedFileID"];
             $geo_value = $detail["dtl_Geo"];
-            
+
             /* GENERAL */
             if($type == DT_SHORT_SUMMARY) {
                 // Description
@@ -243,14 +243,25 @@ function getRecordDetails($system, $record) {
                 $record->lat = floatval($value);
 
 
-                /* ZOOM */
+                /* ZOOM - from 2017 DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM are used for both maps and map layers, 
+                but older databases may have set DT_MINIMUM_MAP_ZOOM or DT_MAXIMUM_MAP_ZOOM for either maps or for layers */
+
+            }else if(defined('DT_MAXIMUM_MAP_ZOOM') && $type == DT_MAXIMUM_MAP_ZOOM) {
+                // Maximum zoom
+                $record->maxZoom = floatval($value);
+
             }else if(defined('DT_MAXIMUM_ZOOM') && $type == DT_MAXIMUM_ZOOM) {
                 // Maximum zoom
                 $record->maxZoom = floatval($value);
 
+            }else if(defined('DT_MINIMUM_MAP ZOOM') && $type == DT_MINIMUM_MAP_ZOOM) {
+                // Minimum zoom
+                $record->minZoom = floatval($value);
+
             }else if(defined('DT_MINIMUM_ZOOM') && $type == DT_MINIMUM_ZOOM) {
                 // Minimum zoom
                 $record->minZoom = floatval($value);
+
 
 
             }else if(defined('DT_OPACITY') && $type == DT_OPACITY) {
@@ -265,11 +276,11 @@ function getRecordDetails($system, $record) {
                 }
                 /* alas timemap understands color only as hex or rgb 
                 else{
-                    $record->color = $color->label;   
+                $record->color = $color->label;   
                 }-*
-                        
-                
-            }else if(defined('DT_MINOR_SPAN') && $type == DT_MINOR_SPAN) {
+
+
+                }else if(defined('DT_MINOR_SPAN') && $type == DT_MINOR_SPAN) {
                 // Initial minor span
                 $record->minorSpan = floatval($value);
 
@@ -325,7 +336,7 @@ function getRecordDetails($system, $record) {
             }else if(defined('DT_ZIP_FILE') && $type == DT_ZIP_FILE) {
                 // Zip file
                 $record->zipFile = getFileURL($system, $fileID);
-                
+
             }else if(defined('DT_GEO_OBJECT') && $type == DT_GEO_OBJECT) {
                 // Zip file
                 $record->bounds = $geo_value;
@@ -367,11 +378,11 @@ function getMapDocuments($system, $recId) {
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
         // Select all Map Document types
         $query = $recordQuery." WHERE ".$recordWhere." and rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
-        
+
         if($recId){
             $query = $query . ' and rec_ID='.$recId;
         }
-        
+
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if ($res) {
@@ -394,13 +405,13 @@ $system = new System();
 
 
 if( $system->init(@$_REQUEST['db']) ){
-    
+
     $wg_ids = $system->get_user_group_ids();
     if($wg_ids==null) $wg_ids = array();
     array_push($wg_ids, 0);
     $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
-                . 'rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
-    
+    . 'rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+
     // Get all Map Documents
     $documents = getMapDocuments($system, @$_REQUEST['id']);
 

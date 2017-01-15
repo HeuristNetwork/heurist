@@ -280,12 +280,18 @@ function importDetailType($importDty) {
 		$importDty["dty_HelpText"] = mysql_real_escape_string($importDty["dty_HelpText"]);
 		$importDty["dty_ExtendedDescription"] = mysql_real_escape_string($importDty["dty_ExtendedDescription"]);
 		$importDty["dty_NameInOriginatingDB"] = mysql_real_escape_string($importDty["dty_NameInOriginatingDB"]);
-		mysql_query("INSERT INTO ".$targetDBName.".defDetailTypes (".implode(", ",array_keys($importDty)).") VALUES ('".implode("', '",array_values($importDty))."')");
+        
+        if(@$importDty['dty_NonOwnerVisibility']==null || $importDty['dty_NonOwnerVisibility']==''){
+            $importDty['dty_NonOwnerVisibility'] = 'viewable';
+        }
+        
+		$query = "INSERT INTO ".$targetDBName.".defDetailTypes (".implode(", ",array_keys($importDty)).") VALUES ('".implode("', '",array_values($importDty))."')";
+        mysql_query($query);
 		// Write the insert action to $logEntry, and set $error to true if one occurred
 		if(mysql_error()) {
 			$error = true;
 			makeLogEntry("<b>Error</b> Importing Field-type", $importDtyID, "MySQL error importing field type - ".mysql_error());
-			break;
+			return null;
 		} else {
 			$importedDtyID = mysql_insert_id();
             $fields_correspondence[$importDtyID] =  $importedDtyID; //keep pair source=>target field id for proper titlemask conversion
@@ -386,10 +392,15 @@ function importRectype($importRty, $alreadyImported) {
 			$rtyGroup = mysql_query("select rtg_ID from ".$targetDBName.".defRecTypeGroups where rtg_Name = '".$rtyGroup_src['rtg_Name']."'");
 			if(mysql_num_rows($rtyGroup) == 0) { //not found
 				//add new one
-				mysql_query("INSERT INTO ".$targetDBName.".defRecTypeGroups ".
+				
+                $rtyGroup_src["rtg_Name"] = mysql_escape_string($rtyGroup_src["rtg_Name"]);
+                $rtyGroup_src["rtg_Description"] = mysql_escape_string($rtyGroup_src["rtg_Description"]);
+                
+                $query = "INSERT INTO ".$targetDBName.".defRecTypeGroups ".
 						"(rtg_Name,rtg_Domain,rtg_Order, rtg_Description) ".
 						"VALUES ('".$rtyGroup_src['rtg_Name']."','".$rtyGroup_src['rtg_Domain']."' , '".$rtyGroup_src['rtg_Order']."',".
-								" '".$rtyGroup_src['rtg_Description']."')");
+								" '".$rtyGroup_src['rtg_Description']."')";
+                mysql_query($query);
 
 				if(mysql_error()) {
 					$error = true;
@@ -460,10 +471,16 @@ function importRectype($importRty, $alreadyImported) {
 			    $importRty["rty_ReferenceURL"] = mysql_escape_string($importRty["rty_ReferenceURL"]);
 			    $importRty["rty_AlternativeRecEditor"] = mysql_escape_string($importRty["rty_AlternativeRecEditor"]);
 
+                if(@$importRty["rty_NonOwnerVisibility"]==null || $importRty["rty_NonOwnerVisibility"]==''){
+                    $importRty["rty_NonOwnerVisibility"] = 'viewable';
+                }
+                
 			    // Insert recordtype
-			    mysql_query("INSERT INTO ".$targetDBName.".defRecTypes ".
+			    $query = "INSERT INTO ".$targetDBName.".defRecTypes ".
 						    "(".implode(", ",array_keys($importRty)).") VALUES ".
-						    "('".implode("', '",array_values($importRty))."')");
+						    "('".implode("', '",array_values($importRty))."')";
+                            
+                mysql_query($query);
 			    // Write the insert action to $logEntry, and set $error to true if one occurred
 			    if(mysql_error()) {
 				    $error = true;
@@ -509,6 +526,7 @@ function importRectype($importRty, $alreadyImported) {
                 $existingDtyID = null;
 				if(mysql_num_rows($resExistingDty) == 0) {
 					$rtsFieldDef["rst_DetailTypeID"] = importDetailType($importDty);
+                    if($rtsFieldDef["rst_DetailTypeID"]==null) return null;
 				} else {
 					$existingDtyID = mysql_fetch_array($resExistingDty);
 					$rtsFieldDef["rst_DetailTypeID"] = $existingDtyID[0];
@@ -551,8 +569,15 @@ function importRectype($importRty, $alreadyImported) {
 					$rtsFieldDef["rst_DisplayExtendedDescription"] = mysql_escape_string($rtsFieldDef["rst_DisplayExtendedDescription"]);
 					$rtsFieldDef["rst_DefaultValue"] = mysql_escape_string($rtsFieldDef["rst_DefaultValue"]);
 					$rtsFieldDef["rst_DisplayHelpText"] = mysql_escape_string($rtsFieldDef["rst_DisplayHelpText"]);
+                    
+                    
+                    if(@$rtsFieldDef["rst_NonOwnerVisibility"]==null || $rtsFieldDef["rst_NonOwnerVisibility"]==''){
+                        $rtsFieldDef["rst_NonOwnerVisibility"] = 'viewable';
+                    }
+
 					// Import the field structure for the imported recordtype
-					mysql_query("INSERT INTO ".$targetDBName.".defRecStructure (".implode(", ",array_keys($rtsFieldDef)).") VALUES ('".implode("', '",array_values($rtsFieldDef))."')");
+					$query = "INSERT INTO ".$targetDBName.".defRecStructure (".implode(", ",array_keys($rtsFieldDef)).") VALUES ('".implode("', '",array_values($rtsFieldDef))."')";
+                    mysql_query($query);
 					// Write the insert action to $logEntry, and set $error to true if one occurred
 					if(mysql_error()) {
 						$error = true;

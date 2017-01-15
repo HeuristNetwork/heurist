@@ -214,7 +214,6 @@ function dragend(d, i) {
     var gravity = getSetting(setting_gravity);
     d.fixed = ( gravity !== "aggressive");
 //console.log("Fixed: ", d.fixed);
-    tick();
     
     
             // Update the location in localstorage
@@ -239,5 +238,8 @@ function dragend(d, i) {
     // Check if force may resume
     if(gravity !== "off") {
         force.resume(); 
-    } 
+    }
+/*    setTimeout(function(){    //tick();
+        d3.select("#container").attr("transform","scale(1)");
+    },500); */
 }

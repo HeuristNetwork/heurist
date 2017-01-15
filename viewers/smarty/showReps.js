@@ -210,6 +210,7 @@ function ShowReps() {
 
         var sel = document.getElementById('selTemplates');
         if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
+        if(sel.selectedIndex<0 || !sel.options[sel.selectedIndex]) sel.selectedIndex = 0;
         return sel.options[sel.selectedIndex].value; // by default first entry
     }
 
@@ -1419,21 +1420,21 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             case 1: // Heading for record type
                 _text= "{* Section heading *} \n" +
-                "\n\n {* Make sure your search results are sorted by record type. \n" +
-                "    Move the following line to the top of the file:\n"+
-                "        {$lastRecordType = 0}\n" +
-                "    Modify the sorting variable and the test according to your needs.*} \n\n" +
+                "\n{* Make sure your search results are sorted by record type. \n" +
+                "   Move the following instruction near the top of the file: {$lastRecordType = 0}\n" +
+                "   Modify the sorting variable and the test according to your needs.*} \n\n" +
 
                 "{if $lastRecordType != $r.recTypeID} {$lastRecordType = $r.recTypeID}\n" +
-                "   <hr> \n<p/> \n"+
-                "   <h1>{$r.recTypeName}</h1> {* Replace this with whatever you want as a heading *} \n" +
+                "      <hr> \n" +
+                "      <p/> \n" +
+                "      <h1>{$r.recTypeName}</h1> {* Replace this with whatever you want as a heading *} \n" +
                 "{/if} {* end of section heading *} " +
                 "\n\n";
                 break;
 
             case 2: // simple table
                 _text='\n\n{* Put narrow specified-width columns at the start and any long text columns at the end *} \n' +
-                '<table style="text-align:left;margin-left:120px;margin-top:2px;" border="0" cellpadding="2"> \n' +
+                '<table style="text-align:left;margin-left:20px;margin-top:2px;" border="0" cellpadding="2"> \n' +
                 '   <tr> \n' +
                 '      <td style="width: 50px"> {$r.recID}    </td> \n' +
                 '      <td style="width:400px"> {$r.recTitle} </td> \n' +
@@ -1441,29 +1442,29 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 '      <td style=" "> </td> \n' +
                 '      <td style=" "> </td> \n' +
                 '   </tr> \n' +
-                '</table> ' +
+                '</table>' +
                 '\n\n';
                 break;
 
             case 3: // information on first element of a loop
                 _text='\n\n{* Information before first element of a loop (nothing output if loop is empty). \n' +
-                '     Place this before the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n' +
-                '{if $smarty.foreach.valueloop.first} {* Before loop *} \n' +
+                '   Place this before the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n\n' +
+                '{if $smarty.foreach.valueloop.first}\n' +
                 ' \n' +
-                ' {* Add the information you want output here *}}\n' +
+                ' {* Add the information you want output before the first iteration here *}}\n' +
                 ' \n' +
-                '{/if} {* End: Before loop*}' +
+                '{/if}' +
                 '\n\n';
                 break;
 
             case 4: // information on first element of a loop
                 _text='\n\n{* Information after last element of a loop (nothing output if loop is empty). \n' +
-                '     Place this after the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n' +
-                '{if $smarty.foreach.valueloop.last} {* After loop *} \n' +
+                '   Place this after the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n' +
+                '{if $smarty.foreach.valueloop.last}\n' +
                 ' \n' +
-                ' {* Add the information you want output here *}}\n' +
+                ' {* Add the information you want output after the last iternation here *}}\n' +
                 ' \n' +
-                '{/if} {* End: After loop*}' +
+                '{/if}' +
                 '\n\n';
                 break;
 

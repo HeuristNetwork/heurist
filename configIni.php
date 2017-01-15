@@ -62,8 +62,10 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.2.14"; // sets current program version number, determined by Heurist development lead
+$version = "4.2.16"; // sets current program version number, determined by Heurist development lead
 
+// Vsn 4.2.16 15 Jan 2017  Small menu tweaks, improved structure import & cosmetics, improvements to structure visualisation
+// Vsn 4.2.15 4 Jan 2017  Lots of small fixes, Digital Harlem fixes, rework structure visualisation to become effective structure editor 
 // Vsn 4.2.14 10 Dec 2016  Fixes - Gephi export, exporter, new map record popup, resolver, better structure verify, memory problems etc, 
 // Vsn 4.2.13 31 Nov 2016  Lots of small fixes on new layout
 // Vsn 4.2.11 4 Nov 2016  New layout of search interfacve using tabs with menus for major function groups

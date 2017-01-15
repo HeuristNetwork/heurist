@@ -47,7 +47,7 @@ $(document).ready(function() {
 
     if(!top){
         return;
-    }else if($.isFunction(top.HEURIST.is_admin)){
+    }else if(top.HEURIST && top.HEURIST.rectypes){
         onScriptsReady();
     }else{
 
@@ -92,6 +92,8 @@ $(document).ready(function() {
         //rectype to be related (constraint for pointers and relmarker target rectype)
         target_ID = top.HEURIST4.util.getUrlParameter("target_ID", document.location.search);
 
+        $('#source_rectype').text(top.HEURIST.rectypes.names[rty_ID]);
+        
         var rt_selector = $('#sel_target_rectype_id');
         top.HEURIST4.ui.createRectypeSelect(rt_selector[0],null,'Select target record type');
         rt_selector.change(

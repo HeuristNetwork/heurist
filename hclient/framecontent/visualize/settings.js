@@ -57,7 +57,7 @@ function getURL() {
  */
 function getSetting(key, defvalue) {
     var value = localStorage.getItem(getURL()+key);
-    if(window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue)){
+    if((window.hWin.HEURIST4.util.isnull(value) || isNaN(value)) && !window.hWin.HEURIST4.util.isnull(defvalue)){
         value = defvalue;
         putSetting(key, value);
     }
@@ -232,6 +232,61 @@ function handleSettingsInUI() {
                 $(el).colpickHide();
             }});
     
+
+    //------------ LABELS ----------
+    
+    var isLabelVisible = (getSetting(setting_labels, 'on')=='on');
+    
+    $('#textOnOff').attr('checked',isLabelVisible).change(function(){
+        
+        var newval = $(event.target).is(':checked')?'on':'off';
+        putSetting(setting_labels, newval);
+        
+        if(currentMode=='icons'){
+            var isLabelVisible = (newval=='on');
+            d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
+        }
+        // visualizeData();
+    });
+    
+    var textLength = getSetting(setting_textlength, 200);    
+    $('#textLength').val(textLength).change(function(){
+        var newval = $(event.target).val();
+        putSetting(setting_textlength, newval);
+        visualizeData();    
+    });
+    
+    
+    var fontSize = getSetting(setting_fontsize, 12);    
+    if(isNaN(fontSize) || fontSize<8) fontSize = 8  //min
+    else if(fontSize>25) fontSize = 25;
+   
+    $('#fontSize').val(fontSize).change(
+    function(){
+        var newval = $(event.target).val();
+        putSetting(setting_fontsize, newval);
+        visualizeData();    
+    });    
+
+    $("#textColor")
+        //.addClass('ui-icon ui-icon-loading-status-circle')
+        .css({'display':'inline-block','cursor':'pointer','font-size':'1em','font-weight':'bold',
+            'color':getSetting(setting_textcolor)})
+        .colpick({
+            layout: 'hex',
+            onSubmit: function(hsb, hex, rgb, el) {
+                var color = "#"+hex; 
+                
+                putSetting(setting_textcolor, color);
+                
+                $(".namelabel").attr("fill", color);
+                //visualizeData();
+                
+                $(el).css('color', color);
+                $(el).colpickHide();
+            }});
+
+
     
     if(settings.isDatabaseStructure){
         initRecTypeSelector();    
@@ -322,6 +377,8 @@ function changeViewMode(mode){
             //d3.selectAll(".icon-mode").style('display', 'initial');
             d3.selectAll(".info-mode").style('display', 'none');
         }
+        var isLabelVisible = (currentMode == 'infoboxes') || (getSetting(setting_labels)=='on');
+        d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
     }
 }
 
@@ -536,7 +593,7 @@ function handleLabels() {
         
         // Listen to changes
         $("#labelCheckBox").change(function(e) {
-            putSetting(setting_labels, $(this).is(':checked'));
+            putSetting(`setting_labels`, $(this).is(':checked'));
             visualizeData();
         });
     }else{

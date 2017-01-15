@@ -51,6 +51,8 @@ function getRecordOverlayData(record) {
     }
     array.push(header);    
 
+    var fontSize = getSetting(setting_fontsize, 12);        
+
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
     if(data && data.links.length > 0) {
@@ -90,7 +92,7 @@ function getRecordOverlayData(record) {
                 }
                
                 // Relation
-                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "9px", height: 12, indent: true};
+                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "9px", height: fontSize, indent: true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -105,7 +107,7 @@ function getRecordOverlayData(record) {
 
         // Convert map to array
         for(key in map) {                                   
-            array.push({text: truncateText(key, maxLength), size: "8px", style:"italic", height: 12, enter: true}); // Heading
+            array.push({text: truncateText(key, maxLength), size: "8px", style:"italic", height: fontSize, enter: true}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
@@ -207,10 +209,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         //var title = overlay.append("title").text(info[0].text+' rollover?');
         if(settings.isDatabaseStructure && type=='record'){
             rty_ID = selector.substr(2);
-            
-            var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
-            rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
-   
+            if(window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
+                var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
+                rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
+            }else{
+                console.log('rectype not found '+rty_ID);
+            }
         }
     
         // Draw a semi transparant rectangle       
@@ -225,7 +229,13 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .style("filter", "url(#drop-shadow)");
                           //.on("drag", overlayDrag);
                                     
-        //rect.append("title").text(rollover);                    
+        //rect.append("title").text(rollover);       
+        
+        var maxLength = getSetting(setting_textlength);             
+                    
+        var fontSize = getSetting(setting_fontsize, 12);
+        var textLength = getSetting(setting_textlength, 200);    
+        var fontColor = getSetting(setting_textcolor, '#000000');
                             
         
         /*Adding icon
@@ -249,7 +259,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         // Adding text 
         var offset = 26;  
         var indent = 5;
-        var position = 0;
+        var position = 2;
         var text = overlay.selectAll("text")
                           .data(info)
                           .enter()
@@ -258,7 +268,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                               return d.text;
                           })
                           .attr("class", function(d, i) {
-                             return i>0?"info-mode":'';
+                             return (i>0?'info-mode ':'nodelabel ')+'namelabel';
                           })
                           .attr("x", function(d, i) {
                               // Indent check
@@ -269,10 +279,14 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           })        // Some left padding
                           .attr("y", function(d, i) {
                               // Multiline check
-                              if(!d.multiline) { 
-                                  position += d.height;
+                              if(!d.multiline) {
+//console.log(d.text + '  ' + position+'  '+d.height);                               
+                                  position += (d.height*1.2);
                               }
                               return position; // Position calculation
+                          })
+                          .attr("fill", function(d) { 
+                              return fontColor;
                           })
                           .attr("font-weight", function(d) {  // Font weight based on style property
                               return d.style;
@@ -281,7 +295,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                               return d.style;
                           }, "important")
                           .style("font-size", function(d) {   // Font size based on size property
-                              return d.size;
+                              return fontSize;//d.size;
                           }, "important");
                           
                       
@@ -298,17 +312,13 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             }
             
             // Height
-            var y = bbox.y;
+            var y = bbox.y*1.1;
             if(y > maxHeight) {
                 maxHeight = y;
             }
         }
         maxWidth  += offset*2.5;//*3.5;
-        maxHeight += offset;//*2; 
-        
-        // Set optimal width & height
-        rect.attr("width", maxWidth)
-            .attr("height", maxHeight);
+        maxHeight = maxHeight + fontSize*1 + offset*1;//offset*1.1;// offset*1.2;//*2; 
       
       if(settings.isDatabaseStructure && type=='record'){
         //edit button
@@ -346,14 +356,20 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                       
                       _addNewLinkField(rty_ID);
                   });;  
+                  
         // add link text        
-        btnAddLink.append("text")
-             .attr("class", "addlink-text")
-             .text("add link")
-             .attr("x", 2)
-             .attr("y", iconSize*0.75);
-      
-      
+        var textAddLink = btnAddLink.append("text")
+                  .attr("class", "addlink-text")
+                  .text("add link")
+                  .attr("x", 2)
+                  .attr("y", iconSize*0.75);
+
+
+        var bbox = textAddLink[0][0].getBBox();
+        var width = bbox.x + bbox.width*1.1;
+                  if(width > maxWidth) {
+                      maxWidth = width;
+                  }      
       }else{
         /* Close button
         var buttonSize = 15;
@@ -378,6 +394,13 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
              .attr("y", buttonSize*0.75);
        */      
       }
+      
+      
+      // Set optimal width & height
+      rect.attr("width", maxWidth+4)
+            .attr("height", maxHeight);      
+      
+      
       
       if(type=='record'){
         if(currentMode=='icons'){
@@ -481,7 +504,7 @@ function removeOverlays() {
 function _addNewLinkField(rty_ID, target_ID){
     
             var body = $(this.document).find('body');
-            var dim = { h:400, w:500 };//Math.max(900, body.innerWidth()-10) };                
+            var dim = { h:480, w:500 };//Math.max(900, body.innerWidth()-10) };                
             
             var target_ID = 10;
             
