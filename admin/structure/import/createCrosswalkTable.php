@@ -100,10 +100,10 @@
             //var crwDefType = "";
             //var crwLocalCode = "";
             var replaceRecTypeName = "";
-
-            // Fills the YUI Datatable with all recordtypes from the temp DB
+            
             <?php
-                $groups = mysql_query("select rtg_ID, rtg_Name from ".$tempDBName.".defRecTypeGroups order by rtg_Name");
+                // Fills the YUI Datatable with all recordtypes from the temp DB
+                $groups = mysql_query("select rtg_ID, rtg_Name from ".$tempDBName.".defRecTypeGroups order by rtg_Order");
 
                 $rectypeGroups = array();
                 $rectypeGroups2 = array();
@@ -117,7 +117,7 @@
                 $query = "select rt.*"  //, rtg.rtg_Name
                     ." from $tempDBName.defRecTypes as rt, $tempDBName.defRecTypeGroups as rtg"
                     ." where rtg_ID = rty_RecTypeGroupID"
-                    ." order by rtg.rtg_Name, rty_Name";                
+                    ." order by rtg.rtg_Order, rty_Name";                
                 $rectypes = mysql_query($query);
                 
                 
@@ -221,10 +221,6 @@
                         return $a[6] < $b[6]?-1:1;
                 });
                 */
-                
-
-                echo "var approxRectypes = ".json_format($approxMatches,true). ";\n";
-                echo "var tableDataByGrp = ".json_format($tableRows,true). ";\n\n";
 
                $rectypeStructures = array();
                
@@ -307,9 +303,9 @@
                 }
                     
             }//count($rectypesToImport)
-                
-                
 
+                echo "var approxRectypes = ".json_format($approxMatches,true). ";\n";
+                echo "var tableDataByGrp = ".json_format($tableRows,true). ";\n\n";
                 echo "var rectypeStructures = ".json_format($rectypeStructures,true). ";\n";
                 echo 'var tempDBName = "'.$tempDBName.'";'. "\n";
                 echo 'var sourceDBName = "'.$source_db_name.'";'. "\n";
@@ -321,6 +317,8 @@
                 echo "var rectypesToImport = ".json_format($rectypesToImport,true). ";\n"; 
                 echo "var dtlookups = ".json_format(getDtLookups(),true). ";\n";
             ?>
+            
+            
 
             var myDataTables = {};
             var myDataSources = {};
@@ -388,9 +386,10 @@
                     }
 
                     //myDataSource = new YAHOO.util.DataSource();
-                    var  grpID;
-                    for (grpID in tableDataByGrp){
-                        if(grpID>0){
+                    var index, grpID;
+                    for (index in rectypeGroups) {
+                        if(index>0 && tableDataByGrp[rectypeGroups[index].id]){
+                            grpID = rectypeGroups[index].id;
                             
                             var tableData = tableDataByGrp[grpID];
                             
@@ -728,6 +727,7 @@
         <script src="../../../common/js/utilsUI.js"></script>
 
         <div id="page-inner" style="overflow:auto">
+            
 
             <!--<button id="finish1" onClick="dropTempDB(true)" class="button">Back to databases</button>
             -->

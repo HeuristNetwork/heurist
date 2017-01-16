@@ -467,20 +467,31 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                     if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
                         //localStorage.clear();    
                     }
-                    var dbkey = 'db'+window.hWin.HAPI4.database;
-                    if(getSetting(dbkey)==null){ //new databse - show hint
-                        putSetting(dbkey, '1');7
-                        $('#divSvg').css('top','12em');//7em
-                        $('#divHint').show();
-                    }else{
-                        $('#divSvg').css('top','10em');//5em
-                        $('#divHint').hide();
-                    }
                     
+                    $(window).resize(onVisualizeResize)
+                    
+                    onVisualizeResize();
                     initVisualizeData();
 
                 });
             });
+            
+            function onVisualizeResize(){
+                
+                    var width = $(window).width();
+              
+                    var supw = (width<1500)?5:0;
+
+                    var dbkey = 'db'+window.hWin.HAPI4.database;
+                    if(getSetting(dbkey)==null){ //new databse - show hint
+                        putSetting(dbkey, '1');
+                        $('#divSvg').css('top', 7+supw+'em');
+                        $('#divHint').show();
+                    }else{
+                        $('#divSvg').css('top', 5+supw+'em');
+                        $('#divHint').hide();
+                    }
+            }
 
         </script>
     </body>

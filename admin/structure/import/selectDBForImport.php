@@ -69,9 +69,9 @@
 
         var params = top.HEURIST.parseParams(location.search);
         if(params && params['popup']){
-                $('.banner').hide();
+                //$('.banner').hide();
         }
-        document.getElementById("statusMsg").innerHTML = "";
+        //document.getElementById("statusMsg").innerHTML = "";
         document.getElementById("filterDiv").style.display = "block";
 
 
@@ -255,7 +255,8 @@
                     setTimeout(updateFilter,600);
                 });
 
-                $('#divLoading').hide()
+                //$('#statusMsg').hide();
+                $('#divLoading').hide();
                 
         }//  initDbTable
         // Enter information about the selected database to an invisible form, and submit to the crosswalk page, to start crosswalking
@@ -267,6 +268,8 @@
             document.getElementById("dbTitle").value = db[3];
             document.getElementById("dbPrefix").value = db[5]?db[5]:"";
             document.forms["crosswalkInfo"].submit();
+            document.getElementById('divLoading').style.display = 'inline-block';
+            document.getElementById('divLoadingMsg').innerHTML = 'Loading record types'
             document.getElementById('page-inner').style.display = 'none';
         }
 
@@ -280,10 +283,14 @@
 
         <script src="../../../common/php/loadCommonInfo.php"></script>
 
-        <div class="banner"><h2>Import structural definitions into current database</h2></div>
+        <div class="banner">
+            <h2 style="display:inline-block">Import structural definitions into current database</h2>
+        
+            <div id="divLoading" style="display:inline-block">&nbsp;<img src="../../../common/images/mini-loading.gif" width="16" height="16" />&nbsp;&nbsp;<span id="divLoadingMsg">Loading databases ...   (Please be patient - this may take several seconds on slow connections)</span></div>
+        
+        </div>
         <div id="page-inner" style="overflow:auto;top:20;">
 
-            <div id="statusMsg"><img src="../../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
 
            <h4>Use the filter to locate a specific term in the name or title. Click the database icon on the left to view, and import if desired, available record types in that database.</h4> 
             
@@ -306,8 +313,6 @@
             <div class="markup" id="filterDiv" style="display:none">
                 <label for="filter">Filter:</label> <input type="text" id="filter" value="">
                 <div id="tbl"></div>
-
-                <div id="divLoading">Loading databases ...   (Please be patient - this may take several seconds on slow connections)</div>
             </div>
             <div id="topPagination"></div>
             <div id="selectDB"></div>
