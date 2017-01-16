@@ -57,7 +57,9 @@ function getURL() {
  */
 function getSetting(key, defvalue) {
     var value = localStorage.getItem(getURL()+key);
-    if((window.hWin.HEURIST4.util.isnull(value) || isNaN(value)) && !window.hWin.HEURIST4.util.isnull(defvalue)){
+    
+    if ((isNaN(value) && $.isNumeric(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
+        (window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue))){
         value = defvalue;
         putSetting(key, value);
     }
