@@ -28,20 +28,20 @@
 
     <div id="toolbar" style="display:none">
 
-        <div id="rectypeSelector" class="toolbar-section" style="width:28ex;display:none;">
+        <div id="rectypeSelector" class="toolbar-section" style="width:25ex;display:none;">
             <label>&nbsp;</label><br>
-            <button id="showRectypeSelector" style="min-width:25ex">Showing</button>
+            <button id="showRectypeSelector" style="min-width:15ex">Showing</button>
         </div>
 
-        <div id="setSelectMode" class="toolbar-section" style="min-width:48px">
+        <div id="setSelectMode" class="toolbar-section" style="min-width:40px">
             <label>&nbsp;</label><br>
             <input type="radio" id="btnSingleSelect" name="selectMode" checked="checked">
-            <label for="btnSingleSelect">Select and drag node</label>
+            <label for="btnSingleSelect">Select and drag nodes</label>
             <input type="radio" id="btnMultipleSelect" name="selectMode">
             <label for="btnMultipleSelect">Select multiple nodes</label>
         </div>
 
-        <div id="setViewMode" class="toolbar-section" style="padding-right:16px;min-width:48px">
+        <div id="setViewMode" class="toolbar-section" style="padding-right:10px;min-width:40px">
             <label>&nbsp;</label><br>
             <input type="radio" id="btnViewModeIcon" name="videMode">
             <label for="btnViewModeIcon">Icons</label>
@@ -50,9 +50,9 @@
             <label for="btnViewModeInfo">Info</label>
         </div>
 
-        <div id="setDivGravity" class="toolbar-section" style="border-left: solid 1px gray; padding-right:16px; min-width:160px">
+        <div id="setDivGravity" class="toolbar-section" style="border-left: solid 1px gray; padding-right:10px; min-width:150px">
             <label>Gravity</label>
-            <div id="setGravityMode" style="padding-left:16px">
+            <div id="setGravityMode" style="padding-left:10px">
                 <input type="radio" id="gravityMode0" name="gravityMode" value="off">
                 <label for="gravityMode0">off</label>
 
@@ -65,9 +65,9 @@
         </div>
 
         <!-- -->
-        <div id="setDivNodes" class="toolbar-section" style="border-left: solid 1px gray; padding-right:16px; min-width:200px">
+        <div id="setDivNodes" class="toolbar-section" style="border-left: solid 1px gray; padding-right:10px; min-width:190px">
             <label>Nodes</label><br>
-            <div id="entityColor" class="colorblock" style="margin-left:16px"  title="Color of nodes"></div>
+            <div id="entityColor" class="colorblock" style="margin-left:10px"  title="Color of nodes"></div>
             <div id="setNodesMode" style="display:inline-block">
                 <input type="radio" id="nodesMode0" name="nodesMode" value="linear" 
                     title="radius of nodes changes linearly">
@@ -88,7 +88,7 @@
         <div id="setDivLinks" class="toolbar-section" style="border-left: solid 1px gray; min-width:214px">
             <label>Links</label><br>
 
-            <div id="linksPathColor" class="colorblock" title="Color of links" style="margin-left:16px">/</div>
+            <div id="linksPathColor" class="colorblock" title="Color of links" style="margin-left:10px">/</div>
             <div id="linksMarkerColor" class="colorblock" title="Color of markers/arrows on links"></div>
 
             <div id="setLinksMode" style="display:inline-block">
@@ -106,7 +106,7 @@
             <input id="linksWidth" title="Links Thickness" class="number-input small" type="number" min="1" max="25" step="1" />
         </div>
 
-        <div id="setDivLabels" class="toolbar-section" style="border-left: solid 1px gray; min-width:150px;">
+        <div id="setDivLabels" class="toolbar-section" style="border-left: solid 1px gray; padding-left: 10px; min-width:140px">
             <label>Labels</label><br>
 
             <input type="checkbox" id="textOnOff" value="on" title="Show labels when infobox is hidden">
@@ -118,14 +118,15 @@
         </div>
         
         
-        <div id="setDivExport" class="toolbar-section" style="padding-left:16px;text-align:right;min-width:110px;">
+        <div id="setDivExport" class="toolbar-section" style="border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px">
             <label>&nbsp;</label><br>
-            <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI export</button>
+            <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
         </div>
 
     </div> <!-- end of toolbar -->
 
-    <div id="divHint" style="display:none;color:darkgreen;font-weight:bold;padding:4px">Entities can be dragged to position them. The positions are remembered across sessions if gravity is OFF.</div>
+    <div id="divHint" style="display:none;color:darkgreen;font-weight:bold;padding:4px; margin-top: 10px;">Choose entities in dropdown above. Turn gravity OFF for more control. Entities can be dragged to position them; layout is remembered across sessions if gravity is off.
+    Drag background to reposition, mousewheel to zoom.</div>
 </div>
 
 <div id="divSvg" class="ent_content_full" style="top:10em;">
