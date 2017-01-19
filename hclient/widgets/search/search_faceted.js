@@ -1050,7 +1050,8 @@ console.log('inpt added '+"fv_"+field['var']);
                        
                         //calculate the total number of terms with value
                         var tot_cnt = __calcTerm(term, 0, null);
-                        var as_list = (field['isfacet']==1 && tot_cnt < that._MIN_DROPDOWN_CONTENT);
+                        var as_list = ((field['isfacet']==1) || 
+                                       (field['isfacet']==2 && tot_cnt > that._MIN_DROPDOWN_CONTENT));
 
 
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
