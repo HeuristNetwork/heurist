@@ -1,5 +1,5 @@
-<?php
 
+<?php
 /**
 * editTerms.php: add/edit/delete terms. Treeveiew on the left side with tabview to select domain: enum or relation
 * form to edit term on the right side
@@ -12,7 +12,6 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     3.2
 */
-
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
@@ -20,11 +19,8 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-
 // User must be system administrator or admin of the owners group for this database
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-
 if(isForAdminOnly("to modify database structure")){
     return;
 }
@@ -61,6 +57,11 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
 
+        <link rel="stylesheet" type="text/css" href="../../../ext/fancytree/skin-themeroller/ui.fancytree.css" />
+        <script type="text/javascript" src="../../../ext/fancytree/jquery.fancytree-all.min.js"></script>
+        <!-- <script type="text/javascript" src="https://github.com/mar10/fancytree/src/jquery.fancytree.wide.js"></script> -->
+
+
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <!--<link rel=stylesheet href="../../common/css/admin.css">-->
@@ -76,6 +77,8 @@ if(isForAdminOnly("to modify database structure")){
                 text-align: right;
                 padding-right: 3px;
             }
+            span.fancytree-title:hover, .fancytree-title-hovered{ background-color: #E6F8FD; border-color: #B8D6FB; }
+            .ui-state-active{ background-color: #E6F8FD; }
         </style>
     </head>
 
@@ -88,16 +91,20 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="editTerms.js"></script>
 
         <div id="divBanner" class="banner">
-            <h2>Manage terms for term list fields and relationship type</h2>
+            <h2>$nbsp</h2>
         </div>
-        <div style="margin-left:10px; padding-top:35px;">
+        <div><br/></div>
+        <div style=" padding-top:15px;">
             <input id="btnAddChild" type="button"
                 value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
             <span style="margin-top:5px; margin-left:10px;"> Adds a new root to the tree</span>
         </div>
 
 
-        <div id="page-inner" style="top:75px">
+        <div id="page-inner">
+            <div><br/><br/><br/></div>
+            <!--<div>&nbsp;&nbsp;&nbsp;&#129155;</div>-->
+            <div><br/></div>
             <div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
                 <!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
@@ -119,7 +126,7 @@ if(isForAdminOnly("to modify database structure")){
             </div>
 
             <div id="formContainer" style="position:absolute;left:303px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
-                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Rollover items in the tree to show available actions<br/>Drag terms to reposition, merge or set as inverse of one another<br/> Select term to edit label and description</h3>
+                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Drag terms to reposition or merge <br/> Select term to edit label and description</h3>
                 <h3 id="formMessage" style="margin-left:10px; border-style:none;display:none;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
                 </h3>
@@ -135,10 +142,10 @@ if(isForAdminOnly("to modify database structure")){
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" style="display:none;width:600px;margin-top:-35px;">
+                <div id="formEditor" class="form_editor" style="display:none;width:600px;">
                     <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block"><br/><br/>Edit selected term / vocabulary</h3>
                     <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-                        <b>term saved</b>
+                        <b>term saved successfully!</b>
                     </div>
 
                     <div style="margin-left:10px; border: black; border-style: solid; border-width:thin; padding:10px;">
@@ -223,12 +230,12 @@ if(isForAdminOnly("to modify database structure")){
                             <div style="float:left;">
                                 <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">Image (~400x400):</label>
                             </div>
-                            <div style="vertical-align: middle;display:inline-block;">
+                            <div style="vertical-align: middle;display:inline-block; padding-left:3px">
                                 <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
                                 </div>
                             </div>
 
-                            <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top;"
+                            <a href='#' id="btnClearImage" style="margin-top:10px;vertical-align: top; padding-left:5px"
                                 onClick="{editTerms.clearImage(); return false;}">
                                 <img src="../../../common/images/cross-grey.png" style="vertical-align:top;width:12px;height:12px">Clear image</a>
                             <!--
@@ -255,19 +262,24 @@ if(isForAdminOnly("to modify database structure")){
                             <input id="btnExport" type="button" value="Export"
                                 title="Print vocabulary as a list"
                                 onClick="{editTerms.doExport(false)}"/>
-                            <input id="btnSetParent" type="button" value="Move"
-                                style="margin-left:20px;"
-                                title="Change the parent" onClick="{editTerms.selectParent()}"/>
+                            <!-- <input id="btnSetParent" type="button" value="Move"
+                            style="display:none;margin-left:20px;"
+                            title="Change the parent" onClick="{editTerms.selectParent()}"/>
                             <input id="btnMerge" type="button" value="Merge"
-                                title="Merge this term with another term and update all records to reference the new term"
-                                onClick="{editTerms.mergeTerms()}"/>
+                            style="display:none;"
+                            title="Merge this term with another term and update all records to reference the new term"
+                            onClick="{editTerms.mergeTerms()}"/> -->
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
-                            <input id="btnSave" type="button" value="Save changes"
+                            <input id="btnSave" class="btn_Save" type="button" value="Save changes"
                                 style="margin-left:80px;font-style: bold !important; color:black; display:none"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
+
+                            <span id = "Saved" style="display:none;"><button id="btnSaved" type="button"
+                                style="border-radius: 25px; background-color: #008CBA;margin-left:5px;font-style: bold !important;  color:black; display:none;"
+                                title=" ">Saved...</button></span>
 
                             <div id='div_btnAddChild'
                                 style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
@@ -326,12 +338,12 @@ if(isForAdminOnly("to modify database structure")){
 
                         <div style="display:inline-block;vertical-align: top; width:130px;">
                             <label class="dtyLabel" style="width:30px;">Find:</label>
-                            <input id="edSearchInverse" style="width:70px" onkeyup="{doSearch(event)}"/><br/>
+                            <input id="edSearchInverse" style="width:70px" /><br/> <!--onkeyup="{doSearch(event)}" Better to add in js file to allow events recognise other ja funnctions-->
                             type 3 or more letters<br/><br/>select inverse from list
-                            <input id="btnSelect2" type="button" value="and Set As Inversed" onClick="{editTerms.doSelectInverse()}" />
+                            <input id="btnSelect2" type="button" value="and Set As Inversed" /> <!-- "onClick="{editTerms.doSelectInverse()}" -->
                         </div>
                         <div style="display:inline-block;">
-                            <select id="resSearchInverse" size="5" style="width:320px" ondblclick="{editTerms.doSelectInverse()}"></select>
+                            <select id="resSearchInverse" size="5" style="width:320px" ></select><!--ondblclick="{editTerms.doSelectInverse()}"-->
                         </div>
                     </div>
 
@@ -354,8 +366,14 @@ if(isForAdminOnly("to modify database structure")){
 
 
         <div id="divTermMergeConfirm" style="display:none;width:500px;padding:20px">
-
+            <h2>Merge</h2>
+            <br/>
             <table border="0" cellpadding="2px;">
+
+                <!--<tr>
+                <td><h2>Insert as child</h2></td>
+                <td></td>
+                </tr> !-->
                 <tr>
                     <td>Term to be retained:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                     <td id="lblTerm_toRetain"></td>
@@ -383,14 +401,14 @@ if(isForAdminOnly("to modify database structure")){
                 <tr>
                     <td><br/>Standard Code:</td>
                     <td><br/>
-                        <input id="rbMergeCode1" type="radio" name="rbMergeCode"/> <!-- initially was checked="checked"-->
+                        <input id="rbMergeCode1" type="checkbox" name="rbMergeCode"/> <!-- initially was checked="checked"-->
                         <label for="rbMergeCode1" id="lblMergeCode1"></label>
                     </td>
                 </tr>
                 <tr id="mergeCode2">
                     <td>&nbsp;</td>
                     <td>
-                        <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
+                        <input id="rbMergeCode2" type="checkbox" name="rbMergeCode"/>
                         <label for="rbMergeCode2" id="lblMergeCode2" ></label>
                     </td>
                 </tr>
@@ -398,14 +416,14 @@ if(isForAdminOnly("to modify database structure")){
                 <tr>
                     <td><br/>Description:</td>
                     <td><br/>
-                        <input id="rbMergeDescr1" type="radio" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
+                        <input id="rbMergeDescr1" type="checkbox" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
                         <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
                     </td>
                 </tr>
                 <tr id="mergeDescr2">
                     <td>&nbsp;</td>
                     <td>
-                        <input id="rbMergeDescr2" type="radio" name="rbMergeDescr"/>
+                        <input id="rbMergeDescr2" type="checkbox" name="rbMergeDescr"/>
                         <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
                     </td>
                 </tr>
@@ -429,7 +447,6 @@ if(isForAdminOnly("to modify database structure")){
             <label class="dtyLabel">Term to be merged:</label>
             <label id="lblTerm_toMerge"></label>
             </div>
-
             <div style="padding-top: 4px;">
             <label class="dtyLabel">Label:</label>
             <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
@@ -439,18 +456,15 @@ if(isForAdminOnly("to modify database structure")){
             <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
             </div>
             </div>
-
             <div style="padding-top: 4px;">
             <label class="dtyLabel">Code:</label>
             <input id="rbMergeCode1" type="radio" name="rbMergeCode" checked="checked"/>
             <label for="rbMergeCode1" id="lblMergeCode1"></label>
-
             <div style='padding-left:106px;'>
             <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
             <label for="rbMergeCode2" id="lblMergeCode2"></label>
             </div>
             </div>
-
             <div style="padding-top: 4px;">
             <label class="dtyLabel">Description:</label>
             <input id="rbMergeDescr1" type="radio" name="rbMergeDescr" checked="checked"/>
@@ -467,12 +481,28 @@ if(isForAdminOnly("to modify database structure")){
                 <input id="btnMergeCancel" type="button" value="Cancel"
                     title=""  style="width:70px; padding-left:10px"/>
             </div>
+
+            <div>
+                <br/> <br/><hr style="border-top: dotted 1px;"/>
+                <h2>Insert as child</h2>
+                <div>
+                    <br/>
+                    <span id ="moveText"></span>
+                    <span>&nbsp;&nbsp;</span>
+                    <input id="moveBtn" type="button" value="Move"
+                        title=""  style="width:70px"/>
+                </div>
+            </div>
         </div>
 
+        <div id=move_mergeTerms style="display:none ">
+            <div id="mergeText" style="font-weight:bold;">Are you sure you want to Merge terms?</div>
+            <input id="mergeBtn" type="button" value="Merge" title="" style="width:70px"/>
+            <input id="cancelBtn" type="button" value="Cancel" title="" style="width:70px; margin:2px"/>
+        </div>
         <input type="file" id="new_term_image" style="display:none"/>
 
         <script  type="text/javascript">
-
             YAHOO.util.Event.addListener(window, "load", function(){ editTerms = new EditTerms();} );
             //YAHOO.util.Event.onDOMReady(EditTerms.init);
         </script>
