@@ -128,7 +128,13 @@ $.widget( "heurist.dh_search", {
                 .menu({
                     select: function( event, ui ) {
                         var map_rec_id =  Number(ui.item.attr('id').substr(5));
+                        
+                        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_maps');
+                        if(app && app.widget){
+                            $(app.widget).dh_maps('loadMapDocument', map_rec_id);
+                        }
 
+/*    
                         var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
                         if(app && app.widget){
                             //switch to Map Tab
@@ -137,7 +143,7 @@ $.widget( "heurist.dh_search", {
                             //load Map Document
                             $(app.widget).app_timemap('loadMapDocumentById', map_rec_id);
                         }
-
+*/
 
                 }})
                 .hide();

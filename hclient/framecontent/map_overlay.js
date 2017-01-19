@@ -162,25 +162,29 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
     }
 
+    function _getMapDocumentDataById(mapdocument_id) {    
+        //find mapdoc data
+        if(mapdocument_id>0 && map_data)
+            for(var i=0;i<map_data.length;i++){
+                if(mapdocument_id==map_data[i].id){
+                    return map_data[i];
+                }
+            }
+        return null;
+        
+    }
+
     function _loadMapDocumentById_continue() {    
 
         var mapdocument_id =  current_map_document_id;
 
         //find mapdoc data
-        var index = -1;
-        if(mapdocument_id>0 && map_data)
-            for(var i=0;i<map_data.length;i++){
-                if(mapdocument_id==map_data[i].id){
-                    index = i;
-                    break;
-                }
-            }
+        var doc = _getMapDocumentDataById(mapdocument_id);
 
         var selBookmakrs = document.getElementById('selMapBookmarks');
         var btnMapRefresh = $("#btnMapRefresh");
         var btnMapEdit = $("#btnMapEdit");
-        if(index >= 0) {
-            var doc = map_data[index];
+        if( !window.hWin.HEURIST4.util.isnull(doc) ) {
 
             var bounds = null, err_msg_all = '';
 
@@ -247,6 +251,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map-zoom bookmark following the instructions in the field help.</div>'
                 );
             }else{
+                
                 //show info popup
                 var lt = window.hWin.HAPI4.sysinfo['layout'];   
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
@@ -259,6 +264,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                             my:'left top', at:'left top', of:ele}, false);
                     }
                 }
+                
             }
 
 
@@ -1516,6 +1522,10 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             _loadMapDocumentById_init(mapdocument_id);
         },
 
+        getMapDocumentDataById: function(mapdocument_id){
+            return _getMapDocumentDataById(mapdocument_id);
+        },
+        
         addQueryLayer: function(params){
             _addQueryLayer(params, -1);   
         },

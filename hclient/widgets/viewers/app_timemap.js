@@ -244,6 +244,15 @@ $.widget( "heurist.app_timemap", {
     * public method
     */
 
+    , getMapDocumentDataById: function(mapdocument_id){
+        var mapping = this.mapframe[0].contentWindow.mapping;
+        if(mapping && mapping.map_control){
+            return mapping.map_control.getMapDocumentDataById(mapdocument_id);
+        }else{
+            return null;
+        }
+    }
+    
     , loadMapDocumentById: function(recId){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
