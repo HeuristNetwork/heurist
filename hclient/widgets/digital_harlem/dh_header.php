@@ -37,6 +37,8 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
         $appcode = 4799; //4750
         $date_filter = '1914-12-31T23:59:59.999Z<>1931-01-01';
         $explanation = '1915-1930';
+    }else{
+        $appcode = 0;
     }  
 
 

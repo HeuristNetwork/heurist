@@ -32,8 +32,12 @@ if($recTypeID==RT_ADDRESS){
     $riotMinDate = new DateTime('1934-12-31T23:59:59');
     $riotMaxDate = new DateTime('1936-01-01');
 
-    $date_filter = $isRiot?'{"f:'.DT_START_DATE.'":"1934-12-31T23:59:59.999Z<>1936-01-01"},':''; //for start date
-    $date_filter2 = $isRiot?'{"f:'.DT_DATE.'":"1934-12-31T23:59:59.999Z<>1936-01-01"},':''; //for single date
+    $date_filter = $isRiot
+                    ?'{"f:'.DT_START_DATE.'":"1934-12-31T23:59:59.999Z<>1936-01-01"},'
+                    :'{"f:'.DT_START_DATE.'":"1914-12-31T23:59:59.999Z<>1935-01-01"},'; //for start date
+    $date_filter2 = $isRiot
+                    ?'{"f:'.DT_DATE.'":"1934-12-31T23:59:59.999Z<>1936-01-01"},'
+                    :'{"f:'.DT_DATE.'":"1914-12-31T23:59:59.999Z<>1935-01-01"},'; //for single date
     // place roles for address related event or person
     $records_placeroles = recordSearch_2('[{"t":"16"},'.$date_filter.'{"linked_to:12:90":"'. $recID .'" }]');
     
@@ -194,9 +198,14 @@ if($recTypeID==RT_ADDRESS){
                                     $relation1 = recordGetRealtionship_2($system, $personID , $addrID, 'address for person');
                                     
                                     //allows 1935 year only
-                                    if($isRiot && !isDateInRange($relation1, 0, $riotMinDate, $riotMaxDate) ){ 
+                                    $isInRiotRange = isDateInRange($relation1, 0, $riotMinDate, $riotMaxDate);
+                                    
+                                    if($isRiot!==$isInRiotRange){
                                         continue;
                                     }
+                                    /*if($isRiot && !isDateInRange($relation1, 0, $riotMinDate, $riotMaxDate) ){ 
+                                        continue;
+                                    }*/
 
                                     $sRealtionOfPersonToAddress = $sRealtionOfPersonToAddress.
                                     '<li>'.getTermById_2( getFieldValue($relation1, 0, DT_RELATION_TYPE))
@@ -278,11 +287,19 @@ if($recTypeID==RT_ADDRESS){
 
                             $records_eventreports['records'] = mergeRecordSets($records_eventreports['records'], $records_eventreports2['records']);
 
-                            $records_eventreports['order'] = array_merge($records_eventreports['order'], array_keys($records_eventreports2['records']));
+                            $records_eventreports['order'] = array_merge($records_eventreports['order'], 
+                                                                        array_keys($records_eventreports2['records']));
                             $records_eventreports['order'] = array_unique($records_eventreports['order']);
                         }
 
-                        if(count($records_eventreports['records'])>0){
+                        
+                        // Newspaper Item (26) <- Place Role (16) -> Address
+                        $records_placerolereports = recordSearch_2(
+                            '[{"t":"26"},'.$date_filter2.'{"linkedfrom:16:151":[{"t":"16"},{"linked_to:12:90":"'. $recID .'"} ]  }] ');
+                            
+                        if(count($records_eventreports['records'])>0 || count($records_placerolereports['records'])>0){
+
+                            //DA REPORT
                             foreach($records_eventreports['order'] as $repID){
                                 //getFieldValue($records_eventreports, $repID, DT_ORIGINAL_RECORD_ID)
 
@@ -294,15 +311,17 @@ if($recTypeID==RT_ADDRESS){
                                     $da_report = getFieldValue($da_report, 0, DT_NAME);
                                 }
 
-                                ?>
-                                <li>
-                                    (#<?php echo $repID.')&nbsp;<em>'.getFieldValue($records_eventreports, $repID, 'rec_Title')
+                                echo '<li>(#'.$repID.')&nbsp;<em>'.getFieldValue($records_eventreports, $repID, 'rec_Title')
                                     .'</em>. ['.getFieldValue($records_eventreports, $repID, DT_DATE).']. '
                                     .getTermById( getFieldValue($records_eventreports, $repID, DT_REPORT_SOURCE_TYPE) ).'&nbsp'
                                     .$da_report.' '
-                                    .getFieldValue($records_eventreports, $repID, DT_REPORT_CITATION); ?>
-                                </li>
-                                <?php
+                                    .getFieldValue($records_eventreports, $repID, DT_REPORT_CITATION).'</li>'; 
+                            }
+                            //NEWSPAPER
+                            foreach($records_placerolereports['order'] as $repID){
+                                
+                                echo '<li><em>'.getFieldValue($records_placerolereports, $repID, 'rec_Title')
+                                    .'</em></li>';
                             }
                         }else{
                             echo '<li>None recorded</li>';

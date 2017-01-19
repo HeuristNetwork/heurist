@@ -57,7 +57,7 @@
     if($eventID) { array_push($ids, $eventID); $need_cnt++;}
     $addrID = @$_REQUEST['addrID'];
     if($addrID) { array_push($ids, $addrID);  $need_cnt++;}
-
+    
     //find record and details
 
     $records = recordSearch_2('ids:'.implode(',',$ids));
@@ -133,6 +133,10 @@
     if($recTypeID==RT_PLACE_ROLE){
 
             if( @$_REQUEST['full']==1 ){
+            
+                $recTypeID = RT_ADDRESS;
+                $recID = $addrID;
+
                 require ('dh_popup_place.php');
             }
 

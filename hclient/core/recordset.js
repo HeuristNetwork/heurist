@@ -107,6 +107,26 @@ function hRecordSet(initdata) {
         }        
         return result;
     }    
+    
+    //
+    //
+    //
+    function getDetailsFieldTypes(){
+        
+        var dty_ids = null;
+        if(fields_detail){
+              dty_ids = fields_detail;
+        }else{
+            if(order.length>0){     
+                var rec = records[order[0]];
+                if(!isnull(rec) && rec['d']){
+                    dty_ids = Object.keys(rec['d']);
+                }
+            }
+        }
+        return dty_ids;
+        
+    }
 
     /**
     * Converts recordSet to OS Timemap dataset
@@ -131,18 +151,9 @@ function hRecordSet(initdata) {
         iconColor = iconColor || 'rgb(255, 0, 0)'; //'#f00';
          
 
-        var geofields = [], timefields = [], dty_ids = null;
-
-        if(fields_detail){
-              dty_ids = fields_detail;
-        }else{
-            if(order.length>0){     
-                var rec = records[order[0]];
-                if(!isnull(rec) && rec['d']){
-                    dty_ids = Object.keys(rec['d']);
-                }
-            }
-        }
+        var geofields = [], timefields = [];
+        
+        var dty_ids = getDetailsFieldTypes(); 
         
         if(!isnull(dty_ids) && window.hWin.HEURIST4){
 
@@ -350,6 +361,52 @@ function hRecordSet(initdata) {
         DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'], //3
         DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']; //28
         
+
+    //
+    // find linked records of specified rectype for given recID
+    //
+    function _getLinkedRecords(forRecID, forRecTypeID){
+        
+        
+        var record = records[forRecID];
+        var dty_ids = getDetailsFieldTypes(); 
+        var links = []; //{related, relation:0, rel_rt}
+        
+        if(!isnull(record) && !isnull(dty_ids) && window.hWin.HEURIST4){
+
+            //find resource fields and its values
+            var dtype_idx = window.hWin.HEURIST4.detailtypes.typedefs['fieldNamesToIndex']['dty_Type'];
+            
+            for (var i=0; i<dty_ids.length; i++) {
+                var dtype = window.hWin.HEURIST4.detailtypes.typedefs[dty_ids[i]]['commonFields'][dtype_idx];
+                if(dtype=='resource'){
+                    
+                    var fldvalue = _getFieldValues(record, dty_ids[i]);
+                    
+                    if(!isnull(fldvalue)){   
+                         var m, n, res = [];
+                         for(m=0; m<fldvalue.length; m++){
+                            var g = fldvalue[m].split(',');
+                            for(n=0; n<g.length; n++){
+                                var relRec_ID = g[n];
+                                var relRec = records[relRec_ID];
+                                if(!isnull(relRec)){
+                                    var relRec_RecTypeID = Number(_getFieldValue(relRec, 'rec_RecTypeID'));
+                                    if(isnull(forRecTypeID) || forRecTypeID == relRec_RecTypeID)
+                                    {
+                                        links.push({related:relRec_ID, relation:0, rel_rt:relRec_RecTypeID}); 
+                                    }
+                                }
+                            }
+                         }
+                    }
+                    
+                    
+                }
+            }
+        }
+        return links;        
+    }
    
     // find relation records of given type for recID
     // 1. search all relationship records
@@ -1019,6 +1076,10 @@ function hRecordSet(initdata) {
 
         getProgressInfo: function(){
             return _progress;
+        },
+        
+        getLinkedRecords: function(forRecID, forRecTypeID){
+            return _getLinkedRecords(forRecID, forRecTypeID);
         },
         
         getRelationRecords: function(forRecID, forRecTypeID){

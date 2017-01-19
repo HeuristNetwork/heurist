@@ -219,6 +219,7 @@ function hSearchMinimalDigitalHarlem() {
     DT_EVENT_TIME_END = 76,
     DT_EVENT_ORDER = 94; //Order of addresses within a serial event, eg. a march or multi-stage crime
     DT_USAGE_TYPE = 89; //usage type terms for place functions
+    DT_ADDRESS = 90; //address of place function
 
     //constants for relation types
     var TERM_MAIN_CRIME_LOCATION = 4536, //primary event location
@@ -275,14 +276,47 @@ console.log('primary '+primary_rt);
             {
                 var record = records[idx];
                 var recID = recordset.fld(record, 'rec_ID');
-                var recTypeID   = Number(recordset.fld(record, 'rec_RecTypeID'));
+                var recTypeID = Number(recordset.fld(record, 'rec_RecTypeID'));
                 
                 var record_result = null;
                 
-                if(recTypeID == RT_ADDRESS){
+                
+                if(primary_rt==RT_PLACE_FUNCTION){
+                     
+                     if(recTypeID == RT_PLACE_FUNCTION){
+                            
+                        //find address and assign geo
+                        var addrID = recordset.fld(record, DT_ADDRESS);
+                        var record_address = recordset.getById(addrID);
+                           
+                        if(record_address){   
+                            //this is just address
+                            recordset.setFld(record, 'rec_Icon', 'term4326' ); //icon - house
+                            recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //special record type to distiguish 
+                            recordset.setFld(record, 'rec_Info',
+                                window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                    +window.hWin.HAPI4.database+"&recID="+recID+"&addrID="+addrID+is_Riot);
+
+                            var addr_geo = recordset.fld(record_address, DT_GEO);
+                            if( window.hWin.HEURIST4.util.isempty(addr_geo)) {
+                                //exclude addresses without geo
+                                console.log('address '+addrID+' has no geo');
+                                continue;
+                            }else{
+                                recordset.setFld(record, DT_GEO, addr_geo);
+                            }
+                            //console.log('address '+recID+' '+addr_geo);
+                        
+                            record_result = record;        
+                            res_records[recID] = record_result;
+                            res_orders.push(recID);
+                        }
+                           
+                     }     
+                            
+                }else if(recTypeID == RT_ADDRESS){
 
                     var shtml = '';
-
                     //2. find relation records
                     var rels = recordset.getRelationRecords(recID, null);
 
@@ -309,47 +343,7 @@ console.log('primary '+primary_rt);
                         
                     }else{
                         
-                        if(primary_rt==RT_PLACE_FUNCTION){
-                            
-                            var events_per_address = [];    
-                            
-                            for(i=0; i<rels.length; i++){ //all records related to addresses
-                                //3. if event try to find related persons
-                                if(rels[i]['relrt'] == RT_PLACE_FUNCTION){
-                                    
-                                    var placeID = rels[i]['related'];
-                                    var rel_place = records[ placeID ];
-                                    
-                                    var recID_res = rels[i]['relation'];
-                                    record_result = relationships[recID_res];
-                                    
-                                    //assign to event data into record_result and change its rectype
-                                    recordset.setFld(record_result, 'rec_RecTypeID', DH_RECORDTYPE); //change record type 
-                                    recordset.setFld(record_result, 'rec_Icon',  'term'+recordset.fld(rel_place, DT_USAGE_TYPE) );
-                                    recordset.transFld(record_result, rel_place, 'rec_Title' );
-                                    recordset.transFld(record_result, rel_place, DT_STARTDATE );
-                                    recordset.transFld(record_result, rel_place, DT_ENDDATE );
-                                    
-                                    //
-                                    recordset.setFld(record_result, 'rec_Info',
-                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
-                                            +window.hWin.HAPI4.database
-                                            +"&recID="+placeID+"&addrID="+recID+is_Riot);
-
-                                    //assign geo from address
-                                    if(!recordset.transFld(record_result, record, DT_GEO, true )){
-                                        console.log('address '+recID+' has no geo');
-                                        continue;
-                                    }
-                                    
-                                    res_records[recID_res] = record_result;
-                                    res_orders.push(recID_res);
-                                    
-                                }
-                            }//for place roles
-                            
-                            
-                        }else if(primary_rt==RT_EVENT){
+                        if(primary_rt==RT_EVENT){
 
                             var events_per_address = [];    
                             
