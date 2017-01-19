@@ -280,43 +280,12 @@ function hSvsEdit(args) {
                     $dlg.find('#svs_Rules').val('');
                 });
 
+                /* this button is moved to bottom panel
                 $dlg.find("#svs_GetQuery").button({
                         label:'Get filter + rules as string',
                         title:'Gety query string for Mappable Query'})
-                .click(function( event ) {
-
-                    var filter = $dlg.find('#svs_Query').val();
-                    if(filter.trim()!=''){
-                        var rules = $dlg.find('#svs_Rules').val();
-
-                        var res = '';
-
-                        try {
-                            var r = $.parseJSON(filter);
-                            if($.isArray(r) || $.isPlainObject(r)){
-                                res = '{"q":'+filter;
-                            }
-                        }
-                        catch (err) {
-                        }
-                        if(res==''){
-                            res = '{"q":"'+filter+'"';
-                        }
-
-                        if(rules!=''){
-                            res = res + ',"rules":'+rules+'}';
-                        } else{
-                            res = res + '}';
-                        }
-                        window.hWin.HEURIST4.msg.showPrompt(
-                        '<label>Edit and copy it to paste in Mappable Query filter field</label>'
-                        + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
-                        + ' style="min-width: 400px; margin-left:0.2em" rows="4" cols="80">'
-                        +res
-                        +'</textarea>'
-                        );
-                    }
-                });
+                .click(__getFilterString);
+                */
 
                 var allFields = $dlg.find('input, textarea');
 
@@ -411,6 +380,43 @@ function hSvsEdit(args) {
                     }
                 }
 
+                
+                function __getFilterString(){
+                    var filter = $dlg.find('#svs_Query').val();
+                    if(filter.trim()!=''){
+                        var rules = $dlg.find('#svs_Rules').val();
+
+                        var res = '';
+
+                        try {
+                            var r = $.parseJSON(filter);
+                            if($.isArray(r) || $.isPlainObject(r)){
+                                res = '{"q":'+filter;
+                            }
+                        }
+                        catch (err) {
+                        }
+                        if(res==''){
+                            res = '{"q":"'+filter+'"';
+                        }
+
+                        if(rules!=''){
+                            res = res + ',"rules":'+rules+'}';
+                        } else{
+                            res = res + '}';
+                        }
+                        window.hWin.HEURIST4.msg.showPrompt(
+                        '<label>Edit and copy it to paste in Mappable Query filter field</label>'
+                        + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
+                        + ' style="min-width: 200px; margin-left:0.2em" rows="4" cols="50">'
+                        +res
+                        +'</textarea>',null,null,
+                        {options:{width:450}, my:'center bottom', at:'center bottom', of: $dlg}
+                        );
+                    }
+                }
+                
+                
                 allFields.on("keypress",function(event){
                     var code = (event.keyCode ? event.keyCode : event.which);
                     if (code == 13) {
@@ -428,6 +434,7 @@ function hSvsEdit(args) {
                     resizable: false,
                     title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
                     buttons: [
+                        {text:window.hWin.HR('Get filter + rules as string'), click: __getFilterString},  //svs_GetQuery
                         {text:window.hWin.HR('Save'), click: __doSave},
                         {text:window.hWin.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );

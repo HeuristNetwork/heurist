@@ -141,7 +141,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     // show simple input value dialog with given message
     //
-    showPrompt: function(message, callbackFunc){
+    showPrompt: function(message, callbackFunc, sTitle, ext_options){
         
         if(message.indexOf('dlg-prompt-value')<0){
             message = message+'<input id="dlg-prompt-value" class="text ui-corner-all" '
@@ -155,7 +155,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 callbackFunc.call(this, $dlg.find('#dlg-prompt-value').val());
             }
         },
-        'Specify value');
+         window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle,ext_options);
         
     },
     
@@ -308,6 +308,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
            }
         }
+        
 
         $dlg.dialog(options);
         //$dlg.dialog('option','buttons',buttons);
