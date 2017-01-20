@@ -806,7 +806,7 @@
 
             <script type="text/javascript">
                 var detailedImportLog = "";
-                var logHeader = ""
+                var logHeader = "", logHeader2 = '';
                 var shortImportLog = "";
                 var result = "";
                 var imported_rty_ID;
@@ -846,6 +846,7 @@
                         importPending = true;
                         document.getElementById("importIcon"+rtyID).src = "../../../common/images/mini-loading.gif";
                         curTime = new Date();
+                        logHeader2 = rectypeName;
                         logHeader = "Importing record type " + '<p style="color:green; font-weight:bold">' + rectypeName + " at "+ curTime +"</p>";
                     }
                     strictImport = $("#strict").attr("checked");
@@ -881,6 +882,8 @@
                                 changeDuplicateEntryName(rtyID, rectypeName);
                             } else if(response.substring(0,5) == "Error") {
 
+                                response = response.substring(6);
+                                
                                 detailedImportLog = '<p style="color:red">'+ logHeader+response+"</p>" + detailedImportLog;
 
                                 document.getElementById("log").innerHTML='<p style="color:red">'+response+"</p>";
@@ -894,7 +897,23 @@
                                     }
                                 }
 
-                                alert("Import error. Check log for details at the end of page");
+                                //alert("Import error. Check log for details at the end of page");
+                                
+                                var sMsg =
+                                'Sorry, we were unable to import <b>'+logHeader2+'</b> due to errors in the source database.<br><br>'
+                                +'All changes for this record type have been rolled back - nothing was imported.<br><br><hr><br>'
+                                +'The following error log has been sent to the owner of the source database.'
+                                +'They can use the Structure > Verify function to fix the problem.<br><br>'
+                                +'<p style="color:red;max-height:300px;overflow:auto;">'
+                                +tempLog+'</p>';
+                                
+                                if(window.hWin.HEURIST4 && window.hWin.HEURIST4.msg){
+                                    //window.hWin
+                                    window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 'Importing record type: '+logHeader2);
+                                }else{
+                                    alert(sMasg);
+                                }
+                                
 
                                 shortImportLog = logHeader+'<p style="color:red">'+tempLog+"</p><br />"+shortImportLog;
                                 document.getElementById("detailedLog").innerHTML = "Show detailed log";

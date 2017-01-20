@@ -101,8 +101,8 @@ function import() {
 					"importRtyID={numeric ID of record type} tempDBName={temp db name where source DB type data are held}");
 		$error = true;
 	}
-
-
+   
+    
     $startedTransaction = false;
 
 	if(!$error) {
