@@ -493,7 +493,7 @@ class System {
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
-                    "basePathV3"=>HEURIST_BASE_URL,
+                    "baseURL"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
                     "dbrecent"=>$dbrecent,
                     'max_post_size'=>$this->_get_config_bytes(ini_get('post_max_size')),
@@ -509,7 +509,7 @@ class System {
                     "help"=>HEURIST_HELP,
                     "version"=>HEURIST_VERSION,
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
-                    "basePathV3"=>HEURIST_BASE_URL)
+                    "baseURL"=>HEURIST_BASE_URL)
             );
 
         }

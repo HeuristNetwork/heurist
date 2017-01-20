@@ -392,13 +392,13 @@ $.widget( "heurist.file_manager", {
                 if(obf_recID){
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css({ 'background-image':'url('+ window.hWin.HAPI4.basePathV4+'/redirects/file_download.php?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
+                    .css({ 'background-image':'url('+ window.hWin.HAPI4.baseURL+'/redirects/file_download.php?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
                     .appendTo($recdiv);
                 }else{
                     //@todo - thumbnail and icons for all mediatype
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css('background-image', 'url('+ window.hWin.HAPI4.basePathV4 + 'hclient/assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)')
+                    .css('background-image', 'url('+ window.hWin.HAPI4.baseURL + 'hclient/assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)')
                     .appendTo($recdiv);
                 }
 
@@ -599,7 +599,7 @@ $.widget( "heurist.file_manager", {
             var $dlg = this.edit_dialog = $( "<div>" ).appendTo( this.element );
 
             //load edit dialogue
-            $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/tag_edit.html", function(){
+            $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/tag_edit.html", function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){

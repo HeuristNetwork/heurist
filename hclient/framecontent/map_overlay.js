@@ -139,7 +139,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(current_map_document_id>0)
         {
 
-            var api = window.hWin.HAPI4.basePathV4 + "hserver/controller/map_data.php?db=" + window.hWin.HAPI4.database+'&id='+current_map_document_id;
+            var api = window.hWin.HAPI4.baseURL + "hserver/controller/map_data.php?db=" + window.hWin.HAPI4.database+'&id='+current_map_document_id;
             $.getJSON(api, function(_data) {
                 map_data = _data;
                 // define bookmark by default
@@ -364,7 +364,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             rectypeID = rectypeID_or_color;
 
             if(rectypeID==RT_SHP_SOURCE && overlay.visible){
-                icon_bg = 'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white20.gif);'
+                icon_bg = 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif);'
                 + 'background-position: center; background-repeat: no-repeat;"'            
                 + ' data-icon="'+window.hWin.HAPI4.iconBaseURL + rectypeID + '.png"';
             } else if(Number.isInteger(rectypeID)){
@@ -391,7 +391,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         + overlay_idx+'" id="chbox-'+legendid+'" class="overlay-legend" '
         + (overlay.visible?'checked="checked">':'>')
         + ((ismapdoc && icon_bg)
-            ? ('<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif"'
+            ? ('<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif"'
                 + ' align="top" class="rt-icon" ' + icon_bg     
                 + '>')
             : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+rectypeID_or_color+'" />')
@@ -856,7 +856,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             request['detail'] = 'timemap';
 
             if(loadingbar==null){
-                var image = window.hWin.HAPI4.basePathV4+'hclient/assets/loading_bar.gif';
+                var image = window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif';
                 loadingbar = new google.maps.Marker({
                     icon: image,
                     optimized: false

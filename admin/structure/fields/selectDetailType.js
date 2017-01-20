@@ -555,7 +555,7 @@ function SelectDetailType() {
 
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
+			var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db;
 
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,

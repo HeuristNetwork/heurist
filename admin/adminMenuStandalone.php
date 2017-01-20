@@ -97,9 +97,9 @@ if (array_key_exists('mode', $_REQUEST)) {
         <script type="text/javascript">
             function loadContent(url){
                 var recordFrame = document.getElementById("adminFrame");
-                recordFrame.src = top.HEURIST.baseURL_V3+"common/html/msgLoading.html";
+                recordFrame.src = top.HEURIST.baseURL+"common/html/msgLoading.html";
                 setTimeout(function(){
-                    recordFrame.src = top.HEURIST.baseURL_V3+"admin/"+url;
+                    recordFrame.src = top.HEURIST.baseURL+"admin/"+url;
                     },500);
                 return false;
             }; // end loadContent

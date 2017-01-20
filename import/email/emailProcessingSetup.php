@@ -57,7 +57,7 @@ if(!is_admin()){
 		var URL = "";
 
 		if(userID>0) {
-			URL = top.HEURIST.baseURL_V3 + "admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>&recID="+userID;
+			URL = top.HEURIST.baseURL + "admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>&recID="+userID;
 		}
 		else {
 			return;

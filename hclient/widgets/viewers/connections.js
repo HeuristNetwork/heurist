@@ -39,7 +39,7 @@ $.widget( "heurist.connections", {
         this.framecontent = $('<div>')
                    .css({
                         position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-                        'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
+                        'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
                    .appendTo( this.element );
                    
         this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.framecontent );
@@ -135,7 +135,7 @@ $.widget( "heurist.connections", {
         
             if(this.dosframe.attr('src')!==this.options.url){
                 
-                this.options.url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
+                this.options.url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
                 this.dosframe.attr('src', this.options.url);
               
             // Content loaded already    
@@ -185,7 +185,7 @@ $.widget( "heurist.connections", {
     loadanimation: function(show){
         if(show){
             //this.dosframe.hide();
-            this.framecontent.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.framecontent.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.framecontent.css('background','none');
             //this.dosframe.show();

@@ -294,7 +294,7 @@ console.log('primary '+primary_rt);
                             recordset.setFld(record, 'rec_Icon', 'term4326' ); //icon - house
                             recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //special record type to distiguish 
                             recordset.setFld(record, 'rec_Info',
-                                window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                window.hWin.HAPI4.baseURL + "hclient/widgets/digital_harlem/dh_popup.php?db="
                                     +window.hWin.HAPI4.database+"&recID="+recID+"&addrID="+addrID+is_Riot);
 
                             var addr_geo = recordset.fld(record_address, DT_GEO);
@@ -326,7 +326,7 @@ console.log('primary '+primary_rt);
                         recordset.setFld(record, 'rec_Icon', 'term4326' );
                         recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //special record type to distiguish 
                         recordset.setFld(record, 'rec_Info',
-                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                            window.hWin.HAPI4.baseURL + "hclient/widgets/digital_harlem/dh_popup.php?db="
                                 +window.hWin.HAPI4.database+"&recID="+recID+is_Riot);
 
                         var addr_geo = recordset.fld(record, DT_GEO);
@@ -372,7 +372,7 @@ console.log('primary '+primary_rt);
                                     
                                     //
                                     recordset.setFld(record_result, 'rec_Info',
-                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                            window.hWin.HAPI4.baseURL + "hclient/widgets/digital_harlem/dh_popup.php?db="
                                             +window.hWin.HAPI4.database
                                             +"&recID="+eventID+"&addrID="+recID+is_Riot);
 
@@ -445,7 +445,7 @@ console.log('primary '+primary_rt);
                                     //role at this address: resident (primary)
                                     recordset.setFld(record_result, 'rec_Icon',     'term'+relation_type );   
 
-                                    var recInfoUrl = window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                    var recInfoUrl = window.hWin.HAPI4.baseURL + "hclient/widgets/digital_harlem/dh_popup.php?db="
                                                     +window.hWin.HAPI4.database+"&recID="+
                                                     personID+"&addrID="+recID; //+"&eventID="+eventID
 
@@ -505,7 +505,7 @@ console.log('primary '+primary_rt);
                                     recordset.setFld(record_result, 'rec_RecTypeID', DH_RECORDTYPE);
                                     recordset.setFld(record_result, 'rec_Icon', 'term'+relation_type );   //role at this address: resident (primary)
 
-                                    var recInfoUrl = window.hWin.HAPI4.basePathV4 
+                                    var recInfoUrl = window.hWin.HAPI4.baseURL 
                                         + "hclient/widgets/digital_harlem/dh_popup.php?db="+window.hWin.HAPI4.database
                                         +"&recID="+recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
                                         
@@ -551,7 +551,7 @@ console.log('primary '+primary_rt);
                                     recordset.setFld(record_result, DT_STARTDATE, recordset.fld(rel_event, 'dtl_StartDate' ) );
                                     recordset.setFld(record_result, DT_ENDDATE,   recordset.fld(rel_event, DT_ENDDATE) );
                                     recordset.setFld(record_result, 'rec_Info',
-                                            window.hWin.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="
+                                            window.hWin.HAPI4.baseURL + "hclient/widgets/digital_harlem/dh_popup.php?db="
                                             +window.hWin.HAPI4.database
                                             +"&recID="+eventID+"&addrID="+recID+is_Riot);
 

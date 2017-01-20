@@ -42,11 +42,11 @@ $.widget( "heurist.recordListExt", {
         this.div_content = $('<div>')
         .css({
             position:'absolute', top:'2.5em', bottom:0, left:0, right:0})
-        //'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
+        //'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
         .appendTo( this.element );
 
         this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'})
-        //.attr('src',window.hWin.HAPI4.basePathV3+"common/html/msgNoRecordsSelected.html")
+        //.attr('src',window.hWin.HAPI4.baseURL+"common/html/msgNoRecordsSelected.html")
         .appendTo( this.div_content );
 
         //-----------------------     listener of global events
@@ -122,7 +122,7 @@ $.widget( "heurist.recordListExt", {
     /*
     _setOption: function( key, value ) {
     if(key=='url'){
-    value = window.hWin.HAPI4.basePathV3 + value;
+    value = window.hWin.HAPI4.baseURL + value;
     }else if (key=='title'){
     var id = this.element.attr('id');
     $(".header"+id).html(value);
@@ -161,7 +161,7 @@ $.widget( "heurist.recordListExt", {
                 }
             }
 
-            newurl = window.hWin.HAPI4.basePathV3 +  newurl;
+            newurl = window.hWin.HAPI4.baseURL +  newurl;
 
             if(this.dosframe.attr('src')!==newurl){
                 this.loadanimation(true);
@@ -170,7 +170,7 @@ $.widget( "heurist.recordListExt", {
 
         }else if(this.dosframe.attr('src')!==this.options.url){
 
-            this.options.url = window.hWin.HAPI4.basePathV3 +  this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
+            this.options.url = window.hWin.HAPI4.baseURL +  this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
 
             this.loadanimation(true);
             this.dosframe.attr('src', this.options.url);
@@ -254,7 +254,7 @@ $.widget( "heurist.recordListExt", {
     loadanimation: function(show){
 
         if(show){
-            this.div_content.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }

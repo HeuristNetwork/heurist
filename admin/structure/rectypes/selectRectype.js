@@ -575,7 +575,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var url = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
+			var url = top.HEURIST.baseURL + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
 
             var dim = Hul.innerDimensions(top);                    
             

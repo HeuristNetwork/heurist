@@ -744,7 +744,7 @@ console.log('inpt added '+"fv_"+field['var']);
                 var div_facets = this.facets_list.find(".facets");
                 if(div_facets.length>0)
                     div_facets.empty()
-                    .css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white20.gif) no-repeat center center');
+                    .css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif) no-repeat center center');
         }
         
         var that = this;

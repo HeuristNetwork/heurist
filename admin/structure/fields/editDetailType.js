@@ -463,7 +463,7 @@ function DetailTypeEditor() {
         var el_sel = Dom.get("selVocab");
         if(is_add_vocab || (el_sel && el_sel.value>0)){ //add term to vocabulary
 
-            Hul.popupURL(top, top.HEURIST.baseURL_V3 +
+            Hul.popupURL(top, top.HEURIST.baseURL +
                 "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
                 {
                     "close-on-blur": false,
@@ -489,7 +489,7 @@ function DetailTypeEditor() {
 
         }else{ //select terms (advanced)
 
-            Hul.popupURL(top, top.HEURIST.baseURL_V3 +
+            Hul.popupURL(top, top.HEURIST.baseURL +
                 "admin/structure/terms/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
                 {
                     "close-on-blur": false,
@@ -538,9 +538,9 @@ function DetailTypeEditor() {
             }
 
             if(args) {
-                URL =  top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
+                URL =  top.HEURIST.baseURL + "admin/structure/rectypes/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
             } else {
-                URL =  top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+_db;
+                URL =  top.HEURIST.baseURL + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+_db;
             }
 
             Hul.popupURL(top, URL, {
@@ -670,7 +670,7 @@ function DetailTypeEditor() {
             document.title = "Field Type # " + _dtyID+" '"+_detailType[fi.dty_Name]+"'";
             var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
             var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
-            var warningImg = "<img src='" + top.HEURIST.baseURL_V3 + "common/images/url_warning.png'>";
+            var warningImg = "<img src='" + top.HEURIST.baseURL + "common/images/url_warning.png'>";
 
             if(iusage > 0) {
 
@@ -871,7 +871,7 @@ function DetailTypeEditor() {
         if(str !== null) {
 
             // 3. sends data to server
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveDT&db="+_db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -935,7 +935,7 @@ function DetailTypeEditor() {
                     if(hasH4()){
                         $("#topdiv_closebtn").hide();
                     }
-                    $("#field_types_context_help").load(top.HEURIST.baseURL_V3+'context_help/field_data_types.html #content_body');
+                    $("#field_types_context_help").load(top.HEURIST.baseURL+'context_help/field_data_types.html #content_body');
                     
                     _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
                 }
@@ -1048,7 +1048,7 @@ function DetailTypeEditor() {
 			var body = $(this.document).find('body');
             var dim = { h:700, w:980 };//Math.max(900, body.innerWidth()-10) };		    	
 		    	
-            Hul.popupURL(window, top.HEURIST.baseURL_V3 +
+            Hul.popupURL(window, top.HEURIST.baseURL +
                 "admin/structure/fields/selectFieldType.html?&db="+_db,
                 {
                     "close-on-blur": false,
@@ -1115,7 +1115,7 @@ function DetailTypeEditor() {
             var el_sel = Dom.get("selVocab");
             var vocab_id =  el_sel.value>0?el_sel.value:'';
 
-            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/terms/editTerms.php?"+
+            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL + "admin/structure/terms/editTerms.php?"+
                 "popup=1&vocabid="+vocab_id+"&treetype="+type+"&db="+_db,
                 {
                     "close-on-blur": false,

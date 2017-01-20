@@ -119,7 +119,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
             function onrowclick(rt_ID, innewtab){
                 var query = "w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
-                    window.open(window.hWin.HAPI4.basePathV4+"?"+query, "_blank");
+                    window.open(window.hWin.HAPI4.baseURL+"?"+query, "_blank");
                     return false;
                 }else{
        
@@ -329,8 +329,8 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 //$(".show").slideToggle(500);
                 //$("#visualisation-column").slideToggle(500);
 
-                // VISUALISATION CALL  @todo - use abs path from HAPI4.basePathV4
-                var url = window.hWin.HAPI4.basePathV4+"hserver/controller/rectype_relations.php" + window.location.search;
+                // VISUALISATION CALL  @todo - use abs path from HAPI4.baseURL
+                var url = window.hWin.HAPI4.baseURL+"hserver/controller/rectype_relations.php" + window.location.search;
 //DEBUG                console.log("Loading data from: " + url);
                 d3.json(url, function(error, json_data) {
                     // Error check

@@ -156,7 +156,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         // Mapping data
         var mapdata = [];
-        mapping = new hMapping("map", "timeline", window.hWin.HAPI4.basePathV4, mylayout);
+        mapping = new hMapping("map", "timeline", window.hWin.HAPI4.baseURL, mylayout);
 
         var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
         //t:26 f:85:3313  f:1:building
@@ -232,7 +232,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 $helper.dialog( "open" );
             }
         });
-        $( "#helper" ).load(window.hWin.HAPI4.basePathV4+'context_help/mapping_overview.html #content');
+        $( "#helper" ).load(window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content');
         //$( "#helper" ).find('p').css('padding','10px');
         $( "#helper" ).dialog({
             autoOpen: false, //(window.hWin.HAPI4.get_prefs('help_on')=='1'),
@@ -386,7 +386,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-        var url = window.hWin.HAPI4.basePathV4+'hclient/framecontent/map.php' + query;
+        var url = window.hWin.HAPI4.baseURL+'hclient/framecontent/map.php' + query;
 
         //document.getElementById("linkTimeline").href = url;
 
@@ -414,7 +414,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
         }else{
             query = query + '&a=1&depth=1&db='+window.hWin.HAPI4.database;
-            var url_kml = window.hWin.HAPI4.basePathV3+"export/xml/kml.php" + query;
+            var url_kml = window.hWin.HAPI4.baseURL+"export/xml/kml.php" + query;
 
             var win = window.open(url_kml, "_new");
         }
@@ -431,14 +431,14 @@ require_once(dirname(__FILE__)."/initPage.php");
     function mapEdit(){
         var recID = $("#map-doc-select").val();
         if(recID>0){
-            window.open(window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
+            window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
         }
     }
     function addNewRecord(rt){
 
 
         if(parseInt(rt)>0){
-            window.open(window.hWin.HAPI4.basePathV3 + 'records/add/addRecord.php?addref=1&db='+window.hWin.HAPI4.database+'&rec_rectype='+rt);
+            window.open(window.hWin.HAPI4.baseURL + 'records/add/addRecord.php?addref=1&db='+window.hWin.HAPI4.database+'&rec_rectype='+rt);
         }else{
             window.hWin.HEURIST4.msg.showMsgDlg(
                 "The required record type "+rt+" has not been defined.<br><br>"+

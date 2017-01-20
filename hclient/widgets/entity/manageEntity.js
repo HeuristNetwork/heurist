@@ -284,7 +284,7 @@ $.widget( "heurist.manageEntity", {
         //init hint and help buttons on dialog titlebar
         if(this.options.isdialog){
             window.hWin.HEURIST4.ui.initDialogHintButtons(this.element,
-             window.hWin.HAPI4.basePathV4+'context_help/'+this.options.entity.helpContent+' #content');
+             window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
              
              //construct entity from config
              if(window.hWin.HEURIST4.util.isempty(this.options.title)){

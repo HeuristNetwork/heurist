@@ -1416,7 +1416,7 @@ console.log('tileloaded 2');
                 if(item.opts.info && item.opts.info.indexOf('http://')==0){
                     popupURL =  item.opts.info; //load content from url
                 }else{
-                    popupURL = window.hWin.HAPI4.basePathV4 + 'records/view/renderRecordData.php?mapPopup=1&recID='
+                    popupURL = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='
                             +item.opts.recid+'&db='+window.hWin.HAPI4.database;
                     
                     //html =  bubble_header + item.opts.info + '</div>'; //predefined content
@@ -1437,14 +1437,14 @@ console.log('tileloaded 2');
 
                 ed_html = bubble_header
             +   '<div style="display:inline-block;">'
-            +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+window.hWin.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
-            +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+window.hWin.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
+            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
             +   '</div>'
             +  ((window.hWin.HAPI4.currentUser.ugr_ID>0)?
                 '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" >'
               /*  '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" '
             + 'class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
-            //+ ' onclick={event.preventDefault(); window.open("'+(window.hWin.HAPI4.basePathV3+'records/edit/editRecord.html?db='+window.hWin.HAPI4.database+'&recID='+recID)+'", "_new");} >'
+            //+ ' onclick={event.preventDefault(); window.open("'+(window.hWin.HAPI4.baseURL+'records/edit/editRecord.html?db='+window.hWin.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'*/
             +   '</div>':'')
             + '</div>';
@@ -1551,8 +1551,8 @@ ed_html +
                         }, text:false})
                      .click(function( event ) {
                 event.preventDefault();
-                //window.open(window.hWin.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
-                window.open(window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
+                //window.open(window.hWin.HAPI4.baseURL + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
+                window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
                     });
             }
 

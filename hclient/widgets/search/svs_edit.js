@@ -154,7 +154,7 @@ function hSvsEdit(args) {
         if($.isFunction($('body').search_faceted_wiz)){ //already loaded
             showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
         }
 
     }
@@ -166,7 +166,7 @@ function hSvsEdit(args) {
 
        var that = this;
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
         if(!window.hWin.HEURIST4.util.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
@@ -254,7 +254,7 @@ function hSvsEdit(args) {
             var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
-            $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
+            $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){

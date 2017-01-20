@@ -31,7 +31,7 @@ function hmanageMenu() {
     //
     function _showDbSummary(){
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
 
         var body = $(top.document).find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
@@ -71,7 +71,7 @@ function hmanageMenu() {
 
         _initLinks(parentdiv);
 
-        //$('#frame_container').attr('src', window.hWin.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+window.hWin.HAPI4.database);           }
+        //$('#frame_container').attr('src', window.hWin.HAPI4.baseURL+'admin/structure/rectypes/manageRectypes.php?db='+window.hWin.HAPI4.database);           }
         $(parentdiv[1]).accordion('option', 'active', 0); //STRUCTURE
         $('#linkDatabaseSummary').click();
     }
@@ -87,7 +87,7 @@ function hmanageMenu() {
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
 
                 if(ele.hasClass('h3link')){
-                    href = window.hWin.HAPI4.basePathV3 + href;
+                    href = window.hWin.HAPI4.baseURL + href;
                     //h3link class on menus implies location of older (vsn 3) code
                 }
                 
@@ -119,7 +119,7 @@ function hmanageMenu() {
 /*
         $('#menulink-database-admin').click( //.attr('href', 
             function(event){
-                window.hWin.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank');
+                window.hWin.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank');
                 event.preventDefault();
                 return false;
             }

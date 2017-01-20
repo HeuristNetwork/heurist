@@ -121,7 +121,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
                     var link = inputDiv.appendChild(window.document.createElement("a"));
                     if (bdValue.file.nonce) {
-                        link.href = top.HEURIST.baseURL_V3+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
+                        link.href = top.HEURIST.baseURL+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
                         "?ulf_ID=" + encodeURIComponent(bdValue.file.nonce)+"&db=<?=HEURIST_DBNAME?>";
                     } else if (bdValue.file.remoteURL) {
                         link.href = bdValue.file.remoteURL;
@@ -132,7 +132,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
                     link.appendChild(window.document.createTextNode(bdValue.file.origName));	//saw TODO: add a title to this which is the bdValue.file.description
 
                     var linkImg = link.appendChild(window.document.createElement("img"));
-                    linkImg.src = top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif";
+                    linkImg.src = top.HEURIST.baseURL+"common/images/external_link_16x16.gif";
                     linkImg.className = "link-image";
 
                     var fileSizeSpan = inputDiv.appendChild(window.document.createElement("span"));
@@ -140,7 +140,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
                     fileSizeSpan.appendChild(window.document.createTextNode("[" + bdValue.file.fileSize + "]"));
                     /*
                     var removeImg = inputDiv.appendChild(window.document.createElement("img"));
-                    removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
+                    removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
                     removeImg.className = "delete-file";
                     removeImg.title = "Remove this file";
                     var windowRef = window.document.parentWindow  ||  window.document.defaultView  ||  window.document._parentWindow;

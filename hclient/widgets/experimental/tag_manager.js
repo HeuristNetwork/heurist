@@ -538,7 +538,7 @@ $.widget( "heurist.tag_manager", {
             var $dlg = this.edit_dialog = $( "<div>" ).appendTo( this.element );
 
             //load edit dialogue
-            $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/tag_edit.html", function(){
+            $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/tag_edit.html", function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){

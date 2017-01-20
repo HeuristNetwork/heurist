@@ -326,7 +326,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .append("svg:image")
                   .attr("class", "icon info-mode")
                   .attr("xlink:href", function(d) {
-                        return window.hWin.HAPI4.basePathV4+'hclient/assets/edit-pencil.png';
+                        return window.hWin.HAPI4.baseURL+'hclient/assets/edit-pencil.png';
                   })
                   .attr("transform", "translate("+offset+","+(maxHeight-iconSize-3)+")")
                   /*.attr("x", 2)
@@ -426,7 +426,7 @@ console.log('overlay drag '+d);
 //
 function _editRecStructure(rty_ID) {
 
-    var URL = window.hWin.HAPI4.basePathV4 + "admin/structure/fields/editRecStructure.html?db="
+    var URL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="
             +  window.hWin.HAPI4.database+ '&rty_ID='+rty_ID;
 
     //var dim = Hul.innerDimensions(top);
@@ -508,7 +508,7 @@ function _addNewLinkField(rty_ID, target_ID){
             
             var target_ID = 10;
             
-            var url = window.hWin.HAPI4.basePathV3 +
+            var url = window.hWin.HAPI4.baseURL +
                 "admin/structure/fields/selectLinkField.html?&db="+window.hWin.HAPI4.database
                    +'&rty_ID='+rty_ID;
                    //+'&target_ID='+target_ID;

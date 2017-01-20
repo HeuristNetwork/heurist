@@ -136,7 +136,7 @@ function ReportScheduleEditor() {
     * loads list of templates
     */
     function _reload_templates(){
-                var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
+                var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php";
                 var callback = _updateTemplatesList;
                 Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
     }
@@ -314,7 +314,7 @@ function ReportScheduleEditor() {
 //DEBUG alert("Stringified changes: " + str);
 
             // 3. sends data to server
-            var baseurl = top.HEURIST.baseURL_V3 + "export/publish/loadReports.php";
+            var baseurl = top.HEURIST.baseURL + "export/publish/loadReports.php";
             var callback = _updateResult;
             var params = "method=savereport&db=" + _db + "&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);

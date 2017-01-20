@@ -75,7 +75,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				var sfilter = "";
 
-				var baseurl = top.HEURIST.baseURL_V3 + "export/publish/loadReports.php";
+				var baseurl = top.HEURIST.baseURL + "export/publish/loadReports.php";
 				var params = "method=searchreports&db=" + _db + sfilter;
 				Hul.getJsonData(baseurl, __updateRecordsList, params);
 	};
@@ -345,7 +345,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 								}
 							}
 
-							var baseurl = top.HEURIST.baseURL_V3 + "export/publish/loadReports.php";
+							var baseurl = top.HEURIST.baseURL + "export/publish/loadReports.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deletereport&db=" + _db + "&recID=" + recID;
 							Hul.getJsonData(baseurl, callback, params);
@@ -477,7 +477,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 	*/
 	function _onAddEditRecord(params){
 
-		var url = top.HEURIST.baseURL_V3 + "export/publish/editReportSchedule.html";
+		var url = top.HEURIST.baseURL + "export/publish/editReportSchedule.html";
 		if(!Hul.isempty(params)){
 			url = url + params;
 		}

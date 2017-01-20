@@ -301,7 +301,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 var that = this;
                 var $dlg = this.step0.find("#facets_options");
                 if($dlg.html()==''){
-                    $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
+                    $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
 
                         $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
@@ -626,7 +626,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var that = this;
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
         if(!Hul.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
@@ -1146,10 +1146,10 @@ $.widget( "heurist.search_faceted_wiz", {
 function showSearchFacetedWizard( params ){
 
     if(!$.isFunction($('body').rectype_manager)){ //@todo - replace to new entity/rectypes as soon as it will be implemented
-        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
     }else if(!$.isFunction($('body').fancytree)){
 
-        $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
 
     }else{
 

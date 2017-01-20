@@ -57,7 +57,7 @@ $.widget( "heurist.search", {
 
 
         /*if(!$.isFunction( hSearchIncremental )){        //jquery.fancytree-all.min.js
-        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
         this.element.css({'height':'6.88em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
@@ -360,7 +360,7 @@ $.widget( "heurist.search", {
             .button()
             .click(function(){ 
                 window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
-                    window.hWin.HEURIST4.msg.showDialog(window.HAPI4.basePathV3 + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+window.hWin.HAPI4.database,
+                    window.hWin.HEURIST4.msg.showDialog(window.HAPI4.baseURL + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+window.hWin.HAPI4.database,
                     { width:1200, height:600, title:'Manage Structure', 
                       afterclose: function(){window.hWin.HAPI4.SystemMgr.get_defs_all( false, that.document)}})
                 });
@@ -544,7 +544,7 @@ $.widget( "heurist.search", {
             q ="&q=" + encodeURIComponent(this.query_request.q);
         }
 
-        var url = window.hWin.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
+        var url = window.hWin.HAPI4.baseURL+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
 
         window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
             function(res){
@@ -729,7 +729,7 @@ $.widget( "heurist.search", {
         var that = this;
 
         //load template
-        $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/search/search_quick.html?t="+(new Date().getTime()), function(){
+        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_quick.html?t="+(new Date().getTime()), function(){
 
 
             var search_quick_close = $( "<button>", {
@@ -952,12 +952,12 @@ $.widget( "heurist.search", {
     , _addNewRecord: function(){
 
 
-        var url = window.hWin.HAPI4.basePathV3+ "records/add/addRecordPopup.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "records/add/addRecordPopup.php?db=" + window.hWin.HAPI4.database;
 
         window.hWin.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record',
             callback:function(responce) {
                 /*
-                var sURL = window.hWin.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
+                var sURL = window.hWin.HAPI4.baseURL + "common/php/reloadCommonInfo.php";
                 top.HEURIST.util.getJsonData(
                 sURL,
                 function(responce){
@@ -979,7 +979,7 @@ $.widget( "heurist.search", {
             doLogin(this.options.isloginforced);
         }else{
             //var that = this;
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_login.js', this._doLogin );
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doLogin );
         }
 
 
@@ -989,7 +989,7 @@ $.widget( "heurist.search", {
 
         if(false && !$.isFunction(doLogin)){  // already loaded in index.php
             //var that = this;
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_login.js', this._doRegister );
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doRegister );
         }else{
             doRegister();
         }
@@ -1004,7 +1004,7 @@ $.widget( "heurist.search", {
 
         }else{
         var that = this;
-        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
         if($.isFunction($('body').profile_edit)){
         that._doRegister();
         }else{

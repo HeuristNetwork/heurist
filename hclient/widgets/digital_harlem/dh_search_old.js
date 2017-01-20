@@ -654,7 +654,7 @@ $.widget( "heurist.dh_search", {
     loadanimation: function(show){
         if(show){
             //this.tab_control.hide();
-            this.res_div.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.res_div.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.res_div.css('background','none');
             //this.tab_control.show();

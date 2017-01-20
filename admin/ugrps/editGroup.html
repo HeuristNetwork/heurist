@@ -96,7 +96,7 @@
 
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                 (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var _url = top.HEURIST.baseURL_V3 +'admin/ugrps/loadUserGrps.php?method=getgroup&db='+_db;
+            var _url = top.HEURIST.baseURL +'admin/ugrps/loadUserGrps.php?method=getgroup&db='+_db;
 
             top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
             var _recID = top.HEURIST.parameters.recID;

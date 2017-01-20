@@ -635,7 +635,7 @@ function EditRecStructure() {
                 }else */
                 if(elLink.hash === "#delete"){
 
-                    var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 
                     function _onCheckEntries(context)
                     {
@@ -830,7 +830,7 @@ function EditRecStructure() {
             //save all changes
             _doExpliciteCollapse(null, true);
 
-            var url = top.HEURIST.baseURL_V3 +
+            var url = top.HEURIST.baseURL +
             "admin/structure/fields/editRecStructurePreview.html?rty_ID="+editStructure.getRty_ID()+"&db="+db;
 
             window.open(url,'','scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,location=no,status=no');
@@ -1302,7 +1302,7 @@ function EditRecStructure() {
             }
 
             //
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _addNewSeparator;
             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -1613,7 +1613,7 @@ function EditRecStructure() {
                     window.close(_structureWasUpdated);
                 }
             };
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
             var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
             _isServerOperationInProgress = true;
@@ -1655,7 +1655,7 @@ function EditRecStructure() {
         var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
         var maskvalue = typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
 
-        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -1694,7 +1694,7 @@ function EditRecStructure() {
         var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
         var maskvalue = typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
 
-        Hul.popupURL(top, top.HEURIST.baseURL_V3 +
+        Hul.popupURL(top, top.HEURIST.baseURL +
             "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
             {
                 "close-on-blur": false,
@@ -2179,7 +2179,7 @@ function onAddNewDetail(index_toinsert){
         var dim = top.HEURIST.util.innerDimensions(top);
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
-        popupSelect = Hul.popupURL(window, top.HEURIST.baseURL_V3 +
+        popupSelect = Hul.popupURL(window, top.HEURIST.baseURL +
             "admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
             {	"close-on-blur": false,
                 "no-resize": false,
@@ -2221,7 +2221,7 @@ function onDefineNewType(index_toinsert){
 
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
-        var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
+        var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db;
 
         popupSelect = Hul.popupURL(top, url,
             {	"close-on-blur": false,
@@ -2559,7 +2559,7 @@ function _onAddEditFieldType(dty_ID, rty_ID){
     
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
         (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
+    var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
 
     top.HEURIST.util.popupURL(top, url,
         {   "close-on-blur": false,
@@ -2617,7 +2617,7 @@ function onEditRecordType(){
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
             
-        var url = top.HEURIST.baseURL_V3 
+        var url = top.HEURIST.baseURL 
                     + "admin/structure/rectypes/editRectype.html?supress=1&db="
                     + db+"&rectypeID="+editStructure.getRty_ID();
 

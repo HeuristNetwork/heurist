@@ -143,20 +143,20 @@ $(document).ready(function() {
         if(top.HEURIST4){
             top.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
                             'Field data type: Record pointer', 
-                            top.HAPI4.basePathV3+'context_help/field_data_types.html #resource',
+                            top.HAPI4.baseURL+'context_help/field_data_types.html #resource',
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
             top.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
                             'Field data type: Relationship marker', 
-                            top.HAPI4.basePathV3+'context_help/field_data_types.html #relmarker',
+                            top.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
         }else{
             
             $('#hint_more_info1').click(function(){
-                $('#hintpopup').load(top.HEURIST.baseURL_V3+'context_help/field_data_types.html #resource');
+                $('#hintpopup').load(top.HEURIST.baseURL+'context_help/field_data_types.html #resource');
                 top.HEURIST.util.popupElement(top, $('#hintpopup')[0],{width:400,height:300});
             });
             $('#hint_more_info2').click(function(){
-                $('#hintpopup').load(top.HEURIST.baseURL_V3+'context_help/field_data_types.html #relmarker');
+                $('#hintpopup').load(top.HEURIST.baseURL+'context_help/field_data_types.html #relmarker');
                 top.HEURIST.util.popupElement(top, $('#hintpopup')[0],{width:400,height:300});
             });
             

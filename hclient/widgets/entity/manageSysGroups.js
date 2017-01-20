@@ -92,7 +92,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">'
-        +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'   //class="rt-icon" 
         + '</div>'
         + '<div class="recordTitle">'

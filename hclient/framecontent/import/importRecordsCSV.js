@@ -78,7 +78,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                 
                 uploadWidget.fileupload({
-        url: window.hWin.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
+        url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php', 
         formData: [ {name:'db', value: window.hWin.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
                     {name:'max_file_size', value: _max_upload_size},
                     {name:'entity', value:'temp'}],  //just place file into scratch folder
@@ -2588,7 +2588,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     
         //window.hWin.HAPI4.parseCSV(request, 
         
-        var url = window.hWin.HAPI4.basePathV3 + 'import/delimited/importCSV.php';
+        var url = window.hWin.HAPI4.baseURL + 'import/delimited/importCSV.php';
         
         window.hWin.HEURIST4.util.sendRequest(url, request, null, 
                 function(response){
@@ -2705,7 +2705,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         _showStep(0);
     
         //window.hWin.HAPI4.parseCSV(request, 
-        var url = window.hWin.HAPI4.basePathV3 + 'import/delimited/importCSV.php';
+        var url = window.hWin.HAPI4.baseURL + 'import/delimited/importCSV.php';
         
         window.hWin.HEURIST4.util.sendRequest(url, request, null, 
                 function(response){
@@ -2905,7 +2905,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                            }
                        }
                        var params = params.join('&');
-                       var url = window.hWin.HAPI4.basePathV4 + 'hserver/controller/fileParse.php?'+params;
+                       var url = window.hWin.HAPI4.baseURL + 'hserver/controller/fileParse.php?'+params;
                         
                        window.hWin.HEURIST4.util.downloadURL(url);
                         
@@ -3018,7 +3018,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
                 s = s + '<option value="-1">[create new record] None of these</option>';
                 s = s + '</select>&nbsp;'
-                + '<a href="#" onclick="{window.open(\''+window.hWin.HAPI4.basePathV4+'?db='+window.hWin.HAPI4.database
+                + '<a href="#" onclick="{window.open(\''+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records</a></td></tr>';
             }
             

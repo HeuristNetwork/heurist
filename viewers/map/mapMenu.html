@@ -47,14 +47,14 @@
 			if(currentSearchQuery)
 			{
 
-	 			var url = top.HEURIST.baseURL_V3+"viewers/map/showMapS.html?" + currentSearchQuery;
+	 			var url = top.HEURIST.baseURL+"viewers/map/showMapS.html?" + currentSearchQuery;
 
 				document.getElementById("linkTimeline").href = url;
 
      			document.getElementById("code-textbox").value = '<iframe src="' + url +
      										'" width="800" height="650" frameborder="0"></iframe>';
 
-	 			var url_kml = top.HEURIST.baseURL_V3+"export/xml/kml.php?" + currentSearchQuery;
+	 			var url_kml = top.HEURIST.baseURL+"export/xml/kml.php?" + currentSearchQuery;
 
 				document.getElementById("linkKml").href = url_kml;
 

@@ -53,22 +53,17 @@ function hAPI(_db, _oninit) { //, _currentUser
         //
         var installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, ""); // Upddate in 2 places this file and 6 other files if changed
         //TODO: top directories - admin|applications|common| ... are defined in SEVEN separate locations. Rationalise.
-        that.basePathV4 = window.hWin.location.protocol + '//'+window.hWin.location.host + installDir;
+        that.baseURL = window.hWin.location.protocol + '//'+window.hWin.location.host + installDir;
+console.log('init '+that.baseURL);        
         // TODO: This is actually a proto URL rather than a base URL. Rename.
-        that.iconBaseURL= that.basePathV4 + 'hserver/dbaccess/rt_icon.php?db='+_database+'&id=';
-        // TODO: why is this todo? Explain or delete
-        //window.hWin.location.protocol + '//'+window.hWin.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!
+        that.iconBaseURL = that.baseURL + 'hserver/dbaccess/rt_icon.php?db='+_database+'&id=';
         that.database = _database;
-
-        //path to old interface - it will be get from server sysinfo
-        installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
-        that.basePathV3 = window.hWin.location.protocol + '//'+window.hWin.location.host  + installDir;
 
         //global variable defined in localization.js
         if(!(typeof regional === 'undefined')){
             _regional = regional;
             /*todo
-            $.getScript(that.basePathV4+'hclient/core/localization.js', function() {
+            $.getScript(that.baseURL+'hclient/core/localization.js', function() {
             _regional = regional;
             });
             */
@@ -93,7 +88,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(success){
                     if(response.data.currentUser) that.setCurrentUser(response.data.currentUser);
                     that.sysinfo = response.data.sysinfo;
-                    that.basePathV3 = that.sysinfo['basePathV3'];
+                    that.baseURL = that.sysinfo['baseURL'];
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response.message);
                 }
@@ -127,7 +122,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
-        var url = that.basePathV4+"hserver/controller/"+action+".php"; //+(new Date().getTime());
+        var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 
         //window.hWin.HEURIST4.ajax.getJsonData(url, callback, request);
 
@@ -805,8 +800,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     //public members
     var that = {
 
-        basePathV4: '',
-        basePathV3: '', //base path for old interface
+        baseURL: '', 
         iconBaseURL: '',
         database: '',
 
@@ -1053,7 +1047,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         , getImageUrl: function(entityName, recID, version){
             if(recID>0){
-                     return window.hWin.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php'
+                     return window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php'
                             +'?db='+ window.hWin.HAPI4.database
                             +'&entity='+entityName
                             +'&recID='+recID

@@ -403,7 +403,7 @@ $.widget( "heurist.rec_list", {
 
         //record type icon
         $('<img>',{
-            src:  window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif',
+            src:  window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
         })
         //!!! .addClass('rtf')
@@ -412,7 +412,7 @@ $.widget( "heurist.rec_list", {
 
         //bookmark icon - asterics
         $('<img>',{
-            src:  window.hWin.HAPI4.basePathV4+'hclient/assets/13x13.gif'
+            src:  window.hWin.HAPI4.baseURL+'hclient/assets/13x13.gif'
         })
         .addClass(fld('bkm_ID')?'bookmarked':'unbookmarked')
         .appendTo($iconsdiv);
@@ -435,23 +435,23 @@ $.widget( "heurist.rec_list", {
             text:false})
         .click(function( event ) {
             event.preventDefault();
-            window.open(window.hWin.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
+            window.open(window.hWin.HAPI4.baseURL + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
         })
         .appendTo($recdiv);
 
 
         /*
         var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
-        window.hWin.HAPI4.basePathV4+ "records/edit/editRecord.html?sid=" +
+        window.hWin.HAPI4.baseURL+ "records/edit/editRecord.html?sid=" +
         window.hWin.HEURIST4.search.results.querySid + "&recID="+ res[2] +
         (window.hWin.HEURIST4.database && window.hWin.HEURIST4.database.name ? '&db=' + window.hWin.HEURIST4.database.name : '');
 
         if (window.hWin.HEURIST4.user && res[6] && (window.hWin.HEURIST4.user.isInWorkgroup(res[6])|| res[6] == window.hWin.HEURIST4.get_user_id()) || res[6] == 0) {
         editLinkIcon += "' target='_blank' title='Click to edit record'><img src='"+
-        window.hWin.HAPI4.basePathV4 + "common/images/edit-pencil.png'/></a></div>";
+        window.hWin.HAPI4.baseURL + "common/images/edit-pencil.png'/></a></div>";
         }else{
         editLinkIcon += "' target='_blank' title='Click to edit record extras only'><img src='"+
-        window.hWin.HAPI4.basePathV4 + "common/images/edit-pencil-no.png'/></a></div>";
+        window.hWin.HAPI4.baseURL + "common/images/edit-pencil-no.png'/></a></div>";
         }
         */
 
@@ -523,7 +523,7 @@ $.widget( "heurist.rec_list", {
     
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }

@@ -60,7 +60,7 @@ function hexportMenu() {
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
                 if(lnk.hasClass('h3link')){
                     //h3link class on menus implies location of older (vsn 3) code
-                    href = window.hWin.HAPI4.basePathV3 + href;
+                    href = window.hWin.HAPI4.baseURL + href;
                 }
                 }
                 
@@ -98,7 +98,7 @@ function hexportMenu() {
 
                 if(ele.hasClass('h3link')){
                     //h3link class on menus implies location of older (vsn 3) code
-                    href = window.hWin.HAPI4.basePathV3 + href;
+                    href = window.hWin.HAPI4.baseURL + href;
                 }
                 
                 ele.attr('href', href).click(
@@ -255,7 +255,7 @@ function hexportMenu() {
 
         if(q!=''){
 
-            var url = window.hWin.HAPI4.basePathV3 + "export/xml/flathml.php?"+
+            var url = window.hWin.HAPI4.baseURL + "export/xml/flathml.php?"+
             "w=all"+
             "&a=1"+
             "&depth="+depth +
@@ -297,7 +297,7 @@ function hexportMenu() {
         }
 
         if(q!=''){
-            var url = window.hWin.HAPI4.basePathV3 + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
+            var url = window.hWin.HAPI4.baseURL + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
             window.open(url, '_blank');
         }
 
@@ -323,7 +323,7 @@ function hexportMenu() {
                 }
 
 
-                var url = window.hWin.HAPI4.basePathV3 + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + window.hWin.HAPI4.database + mode + rules;
+                var url = window.hWin.HAPI4.baseURL + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + window.hWin.HAPI4.database + mode + rules;
                 window.hWin.open(url, '_blank');
             }
         }

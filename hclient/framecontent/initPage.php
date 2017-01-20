@@ -318,7 +318,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
             if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
-                $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
+                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
                     window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
                 });
             }

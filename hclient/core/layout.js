@@ -444,7 +444,7 @@ function hLayout(args) {
     function _initLayoutGridster(layout, $container){
 
             if(!$.isFunction($('body').gridster)){
-                $.getScript(window.hWin.HAPI4.basePathV4+'ext/gridster/jquery.gridster.js', initLayoutGridster );
+                $.getScript(window.hWin.HAPI4.baseURL+'ext/gridster/jquery.gridster.js', initLayoutGridster );
                 return;
             }
 

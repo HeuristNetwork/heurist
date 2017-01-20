@@ -78,7 +78,7 @@ $.widget( "heurist.mainMenu", {
                 'margin-left':'50px',
                 'background-position': 'left center',
                 'background-repeat': 'no-repeat',
-                'background-image': 'url("'+window.hWin.HAPI4.basePathV4+'hclient/assets/database.png")'});
+                'background-image': 'url("'+window.hWin.HAPI4.baseURL+'hclient/assets/database.png")'});
             
             var wasCtrl = false;
             var selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);        
@@ -89,7 +89,7 @@ $.widget( "heurist.mainMenu", {
             })
             .change(function(event){
                 if(window.hWin.HAPI4.database!=$(event.target).val()){
-                    var url =  window.hWin.HAPI4.basePathV4+'?db='+$(event.target).val();
+                    var url =  window.hWin.HAPI4.baseURL+'?db='+$(event.target).val();
                     $(event.target).val(window.hWin.HAPI4.database);
     //console.log('2'+wasCtrl);
                     if(wasCtrl){
@@ -107,7 +107,7 @@ $.widget( "heurist.mainMenu", {
             $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
                 'background-position': 'left center',
                 'background-repeat': 'no-repeat',
-                'background-image': 'url("'+window.hWin.HAPI4.basePathV4+'hclient/assets/database.png")' })
+                'background-image': 'url("'+window.hWin.HAPI4.baseURL+'hclient/assets/database.png")' })
             .text(window.hWin.HAPI4.database).appendTo( this.div_dbname );
             
         }
@@ -190,7 +190,7 @@ $.widget( "heurist.mainMenu", {
             .appendTo( this.div_BottomRow )
             .button()
             .click(function( event ) {
-                var url = window.hWin.HAPI4.basePathV3 + "admin/adminMenuStandalone.php?db=" + window.hWin.HAPI4.database;
+                var url = window.hWin.HAPI4.baseURL + "admin/adminMenuStandalone.php?db=" + window.hWin.HAPI4.database;
                 window.open(url, "_blank");
             });
         }
@@ -348,7 +348,7 @@ $.widget( "heurist.mainMenu", {
         if(name=='Database_lo'){
             link = $('<a>',{
                 text: 'Open database',
-                href: window.hWin.HAPI4.basePathV3 + 'common/connect/getListOfDatabases.php?popup=1&v=4&db=' + window.hWin.HAPI4.database,
+                href: window.hWin.HAPI4.baseURL + 'common/connect/getListOfDatabases.php?popup=1&v=4&db=' + window.hWin.HAPI4.database,
                 target: '_blank'
             });
 
@@ -382,7 +382,7 @@ $.widget( "heurist.mainMenu", {
 
             this['menu_'+name] = $('<ul>')
             .load(
-                window.hWin.HAPI4.basePathV4+'hclient/widgets/dropdownmenus/mainMenu'+(name=='Help_lo'?'Help':name)+'.html',
+                window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+(name=='Help_lo'?'Help':name)+'.html',
               function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
              
                 that['menu_'+name].find('.list-menu-only').hide();
@@ -500,7 +500,7 @@ $.widget( "heurist.mainMenu", {
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
 
                 if(ele.hasClass('h3link')){
-                    href = window.HAPI4.basePathV3 + href;
+                    href = window.HAPI4.baseURL + href;
                     //h3link class on menus implies location of older (vsn 3) code
                 }
                 
@@ -585,7 +585,7 @@ $.widget( "heurist.mainMenu", {
 
     importCSV: function(){
         
-           var url = window.hWin.HAPI4.basePathV4 + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
+           var url = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
            
            var body = $(this.document).find('body');
            var dim = {h:body.innerHeight(), w:body.innerWidth()};
@@ -594,7 +594,7 @@ $.widget( "heurist.mainMenu", {
                 title: 'Import Records from CSV/TSV',
                 height: dim.h-5,
                 width: dim.w-5,
-                'context_help':window.hWin.HAPI4.basePathV4+'context_help/importRecordsCSV.html #content'
+                'context_help':window.hWin.HAPI4.baseURL+'context_help/importRecordsCSV.html #content'
                 //callback: _import_complete
             });
     },
@@ -602,12 +602,12 @@ $.widget( "heurist.mainMenu", {
     _addNewRecord: function(){
 
 
-        var url = window.hWin.HAPI4.basePathV3+ "records/add/addRecordPopup.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "records/add/addRecordPopup.php?db=" + window.hWin.HAPI4.database;
 
         window.hWin.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record',
             callback:function(responce) {
                 /*
-                var sURL = window.hWin.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
+                var sURL = window.hWin.HAPI4.baseURL + "common/php/reloadCommonInfo.php";
                 top.HEURIST.util.getJsonData(
                 sURL,
                 function(responce){
@@ -685,7 +685,7 @@ $.widget( "heurist.mainMenu", {
 
         if(q!=''){
 
-            var url = window.hWin.HAPI4.basePathV3 + "export/xml/flathml.php?"+
+            var url = window.hWin.HAPI4.baseURL + "export/xml/flathml.php?"+
             "w=all"+
             "&a=1"+
             "&depth="+depth +
@@ -729,7 +729,7 @@ $.widget( "heurist.mainMenu", {
         }
 
         if(q!=''){
-            var url = window.hWin.HAPI4.basePathV3 + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
+            var url = window.hWin.HAPI4.baseURL + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
             window.open(url, '_blank');
         }
 
@@ -757,7 +757,7 @@ $.widget( "heurist.mainMenu", {
                 }
 
 
-                var url = window.hWin.HAPI4.basePathV3 + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + window.hWin.HAPI4.database + mode + rules;
+                var url = window.hWin.HAPI4.baseURL + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + window.hWin.HAPI4.database + mode + rules;
                 window.open(url, '_blank');
             }
         }
@@ -782,7 +782,7 @@ $.widget( "heurist.mainMenu", {
         var $dlg = $("#heurist-dialog").addClass('ui-heurist-bg-light');
         $dlg.empty();
 
-        $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/profile/profile_preferences.html?t="+(new Date().time), function(){
+        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_preferences.html?t="+(new Date().time), function(){
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){

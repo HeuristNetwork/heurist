@@ -78,7 +78,7 @@ require_once('valueVerification.php');
 
             function onEditFieldType(dty_ID){
 
-                var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
+                var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
                 if(dty_ID>0){
                     url = url + "&detailTypeID="+dty_ID; //existing
                 }else{
@@ -168,7 +168,7 @@ require_once('valueVerification.php');
 
                         var str = JSON.stringify(dt);
 
-                        var baseurl = top.HEURIST.baseURL_V3 + "admin/verification/repairFieldTypes.php";
+                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairFieldTypes.php";
                         var callback = _callback;
                         var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
                         top.HEURIST.util.getJsonData(baseurl, callback, params);

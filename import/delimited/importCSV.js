@@ -332,7 +332,7 @@ function init() {
                 divUnmatchedBtns.hide();
 
                 $.ajax({
-                    url: top.HEURIST.baseURL_V3+'import/delimited/importCSV.php',
+                    url: top.HEURIST.baseURL+'import/delimited/importCSV.php',
                     type: "POST",
                     data: {deleteunmatched: $('#import_id').val(), idfield:$("#recid_field").val(), db:currentDb},
                     dataType: "text",
@@ -745,7 +745,7 @@ function getValues(dest){
         }
 
         $.ajax({
-            url: top.HEURIST.baseURL_V3+'import/delimited/importCSV.php',
+            url: top.HEURIST.baseURL+'import/delimited/importCSV.php',
             type: "POST",
             data: {recid: currentId, table:currentTable, db:currentDb},
             dataType: "json",

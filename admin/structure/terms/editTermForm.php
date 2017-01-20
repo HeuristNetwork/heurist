@@ -121,7 +121,7 @@
             var context_return_res = "<?=$return_res ?>";
 
             function showOtherTerms(){
-                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL +
                     "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&treetype=<?=$_REQUEST['treetype'] ?>&db=<?=$_REQUEST['db'] ?>",
                     {
                         "close-on-blur": false,

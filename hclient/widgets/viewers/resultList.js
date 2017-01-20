@@ -146,7 +146,7 @@ $.widget( "heurist.resultList", {
 
         this.div_loading = $( "<div>" )
         .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
-            'z-index':'99999999', 'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
+            'z-index':'99999999', 'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
         .appendTo( this.element ).hide();
 
         this.action_buttons_div = $( "<span>" )
@@ -689,7 +689,7 @@ $.widget( "heurist.resultList", {
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" >'
         + '<div class="recordIcons">'
-        +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif">'
+        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif">'
         + '</div>'
         + '<div class="recordTitle">id ' + recID
         + '...</div>'
@@ -810,7 +810,7 @@ $.widget( "heurist.resultList", {
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
         + html_thumb
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
-        +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>'
         +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline;left:4px">&nbsp;&nbsp;</span>'
         +     html_owner
@@ -852,7 +852,7 @@ $.widget( "heurist.resultList", {
         text:false})
         .click(function( event ) {
         event.preventDefault();
-        window.open(window.hWin.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
+        window.open(window.hWin.HAPI4.baseURL + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
         })
         .appendTo($recdiv);*/
 
@@ -901,7 +901,7 @@ $.widget( "heurist.resultList", {
                 this._trigger( "onaction", null, {action:action, recID:selected_rec_ID});
             }else if (action=='edit'){
                 
-                var url = window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
+                var url = window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                 window.open(url, "_new");
             }
             return;
@@ -915,7 +915,7 @@ $.widget( "heurist.resultList", {
             if(this.options.renderer){
                 this._trigger( "onaction", null, {action:'edit', recID:selected_rec_ID});
             }else{
-                var url = window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
+                var url = window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                 window.open(url, "_new");
             }
             return;
@@ -942,7 +942,7 @@ $.widget( "heurist.resultList", {
                     :null;
 
                     if( !recInfoUrl ){
-                        recInfoUrl = window.hWin.HAPI4.basePathV3 + "records/view/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
+                        recInfoUrl = window.hWin.HAPI4.baseURL + "records/view/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                     }
 
                     window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { width: 700, height: 800, title:'Record Info', });
@@ -1125,7 +1125,7 @@ $.widget( "heurist.resultList", {
     loadanimation: function(show){
         if(show){
             this.div_loading.show();
-            //this.div_content.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            //this.div_content.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
             this.element.css('cursor', 'progress');
         }else{
             this.div_loading.hide();
@@ -1499,7 +1499,7 @@ $.widget( "heurist.resultList", {
                 var recID = $rdiv.attr('recid');
 
                 event.preventDefault();
-                window.open(window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
+                window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
 
             }
         });

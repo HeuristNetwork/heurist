@@ -60,7 +60,7 @@
                
 				currentSearchQuery = currentSearchQuery.replace('"','%22');
 
-				var surl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php?"+
+				var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
 					currentSearchQuery + '&publish=1&debug=0&template='+template_file;
 
 				document.getElementById("linkOpenInNewWindow").href = surl;

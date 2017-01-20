@@ -185,7 +185,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <li class="admin-only">
                         <a  href="#" id="menulink-database-admin"
                             data-logaction="adminFull"
-                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
+                            onclick="{window.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
                             Advanced functions &amp; utilities</a>
                     </li>

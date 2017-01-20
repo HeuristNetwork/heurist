@@ -492,7 +492,7 @@ $.widget( "heurist.editing_input", {
                             __show_select_dialog = function __show_select_dialog(event){
                                 event.preventDefault();
 
-                                var url = window.hWin.HAPI4.basePathV4 +
+                                var url = window.hWin.HAPI4.baseURL +
                                 'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
                                 window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:600,
@@ -637,7 +637,7 @@ $.widget( "heurist.editing_input", {
                         
                         //init upload widget
                         $input.fileupload({
-    url: window.hWin.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
+    url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},

@@ -326,7 +326,7 @@ function EditTerms() {
     // $("#termTree1").hide();
 
     //alert('drag-n-drop extension for tree not loaded');
-    $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js').done(function() {
+    $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js').done(function() {
     });
 
       /*  if(!$.ui.fancytree._extensions["dnd"]){
@@ -736,7 +736,7 @@ function EditTerms() {
 
             //alert(str);
 
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
             Hul.getJsonData(baseurl, callback, params);
@@ -1161,7 +1161,7 @@ function EditTerms() {
             };
 
             //
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveTerms&data=" + encodeURIComponent(str)+"&db="+_db;
             Hul.getJsonData(baseurl, callback, params);
@@ -1220,7 +1220,7 @@ function EditTerms() {
                     Dom.get('deleteMessage').style.display = "none";
                 }
 
-                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                 var callback = __updateAfterDelete;
                 var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
                 Hul.getJsonData(baseurl, callback, params);
@@ -1253,7 +1253,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.baseURL_V3 +
+        var url = top.HEURIST.baseURL +
         "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
         if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
@@ -1314,7 +1314,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.baseURL_V3 +
+        var url = top.HEURIST.baseURL +
         "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
         /*if(keep_target_newparent_id){
         url = url + "&parent=" + keep_target_newparent_id;
@@ -1456,7 +1456,7 @@ function EditTerms() {
                 term_ID = _currentNode.data.parent_id;
             }
 
-            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/printVocabulary.php?db="+ _db
+            var sURL = top.HEURIST.baseURL + "admin/structure/terms/printVocabulary.php?db="+ _db
             + '&domain=' + _currentDomain + '&trm_ID=' + term_ID;
 
             window.open(sURL, '_blank');
@@ -1475,12 +1475,12 @@ function EditTerms() {
             var term_label = (isRoot)?'root vocabulary':_currentNode.label;
 
             /* old way
-            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/editTermsImport.php?db="+ _db +
+            var sURL = top.HEURIST.baseURL + "admin/structure/terms/editTermsImport.php?db="+ _db +
             "&parent="+term_id+
             "&domain="+_currentDomain;
             */
 
-            var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/import/importDefTerms.php?db="+ _db +
+            var sURL = top.HEURIST.baseURL + "hclient/framecontent/import/importDefTerms.php?db="+ _db +
             "&trm_ID="+term_id;
 
             Hul.popupURL(top, sURL, {
@@ -1491,7 +1491,7 @@ function EditTerms() {
                 //width: 500,
                 height: 460,
                 width: 800,
-                'context_help':top.HEURIST.baseURL_V3+'context_help/defTerms.html #import',
+                'context_help':top.HEURIST.baseURL+'context_help/defTerms.html #import',
                 callback: _import_complete
             });
 
@@ -1700,7 +1700,7 @@ function EditTerms() {
         var disTerms = deftype[fi.dty_TermIDTreeNonSelectableIDs];
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        Hul.popupURL(top, top.HEURIST.baseURL_V3 +
+        Hul.popupURL(top, top.HEURIST.baseURL +
             "admin/structure/terms/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
             {
                 "close-on-blur": false,
@@ -1755,7 +1755,7 @@ function EditTerms() {
 
                         if(!Hul.isnull(str)) {
 
-                            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+                            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                             var callback = _updateResult;
                             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
                             Hul.getJsonData(baseurl, callback, params);
@@ -1775,7 +1775,7 @@ function EditTerms() {
         Hul.getJsonData(baseurl, function(context){
             if(!Hul.isnull(context) && !context.error){
                 if(context.res=='ok'){
-                    $('#termImage').find('img').prop('src', top.HEURIST.baseURL_V3 + 'hclient/assets/100x100click.png');
+                    $('#termImage').find('img').prop('src', top.HEURIST.baseURL + 'hclient/assets/100x100click.png');
                 }
             }
             }, null);
@@ -1788,7 +1788,7 @@ function EditTerms() {
         var $input_img = $('#termImage');
 
         $input.fileupload({
-            url: top.HEURIST.baseURL_V3 +  'hserver/utilities/fileUpload.php',
+            url: top.HEURIST.baseURL +  'hserver/utilities/fileUpload.php',
             formData: [ {name:'db', value: _db},
                 {name:'entity', value:'terms'},
                 {name:'newfilename', value: Dom.get('edId').value }],

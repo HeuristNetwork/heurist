@@ -77,11 +77,11 @@ $(document).ready(function() {
 
         top.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
                             'Field data type: Record pointer', 
-                            top.HAPI4.basePathV3+'context_help/field_data_types.html #resource',
+                            top.HAPI4.baseURL+'context_help/field_data_types.html #resource',
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
         top.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
                             'Field data type: Relationship marker', 
-                            top.HAPI4.basePathV3+'context_help/field_data_types.html #relmarker',
+                            top.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
 	    
         $('#btnSelect').click( editDetailType );
@@ -231,7 +231,7 @@ $(document).ready(function() {
 
         }else{ //create new field type
 
-            var url = top.HAPI4.basePathV3 
+            var url = top.HAPI4.baseURL 
             + "admin/structure/fields/editDetailType.html?db="
             + top.HAPI4.database 
             + '&dty_Type='+dt_type
@@ -321,7 +321,7 @@ $(document).ready(function() {
             window.close(_structureWasUpdated);
         };
 
-        var baseurl = top.HAPI4.basePathV3 + "admin/structure/saveStructure.php";
+        var baseurl = top.HAPI4.baseURL + "admin/structure/saveStructure.php";
         var callback = updateResult;
         var params = "method=saveRTS&db="+top.HAPI4.database+"&data=" + encodeURIComponent(str);
 

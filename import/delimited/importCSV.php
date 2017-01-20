@@ -232,7 +232,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                 if( confirm(msg) ) {
 
                     $.ajax({
-                        url: top.HEURIST.baseURL_V3+'import/delimited/importCSV.php',
+                        url: top.HEURIST.baseURL+'import/delimited/importCSV.php',
                         type: "POST",
                         data: {clearsession: session_id, db:currentDb},
                         dataType: "json",
@@ -1163,7 +1163,7 @@ if(is_array($imp_session)){
                 var uploadWidget = $('#upload_file');
                 
                 uploadWidget.fileupload({
-        url: window.hWin.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
+        url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php', 
         formData: [ {name:'db', value: window.hWin.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
                     {name:'max_file_size', value: max_size},
                     {name:'entity', value:'temp'}],  //just place file into scratch folder

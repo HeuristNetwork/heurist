@@ -105,7 +105,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 	var valueVisible = "";
 	var valueHidden = "";
-	var thumbUrl = top.HEURIST.baseURL_V3+"common/images/icon_file.jpg";
+	var thumbUrl = top.HEURIST.baseURL+"common/images/icon_file.jpg";
 
 	if(bdValue){
 		if(bdValue.file){
@@ -204,7 +204,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
-		removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
+		removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
 		removeImg.className = "delete-resource";
 		removeImg.title = "Clear";
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -217,12 +217,12 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 /*
 	var editImg = newDiv.appendChild(this.document.createElement("img"));
-		editImg.src = top.HEURIST.baseURL_V3 +"common/images/edit-pencil.png";
+		editImg.src = top.HEURIST.baseURL +"common/images/edit-pencil.png";
 		editImg.className = "edit-resource";
 		editImg.title = "Edit this record";
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
-		top.HEURIST.util.popupURL(window,top.HEURIST.baseURL_V3 +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value, {
+		top.HEURIST.util.popupURL(window,top.HEURIST.baseURL +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value, {
 			callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
 		});
 	});
@@ -257,7 +257,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 		recID = "&recid="+top.HEURIST.edit.record.bibID;
 	}
 
-	var url = top.HEURIST.baseURL_V3+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
+	var url = top.HEURIST.baseURL+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
 	/*if (element.input.constrainrectype){
 		url += "&t="+element.input.constrainrectype;
 	}*/
