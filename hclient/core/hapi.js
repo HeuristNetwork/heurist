@@ -54,7 +54,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         var installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, ""); // Upddate in 2 places this file and 6 other files if changed
         //TODO: top directories - admin|applications|common| ... are defined in SEVEN separate locations. Rationalise.
         that.baseURL = window.hWin.location.protocol + '//'+window.hWin.location.host + installDir;
-console.log('init '+that.baseURL);        
+
         // TODO: This is actually a proto URL rather than a base URL. Rename.
         that.iconBaseURL = that.baseURL + 'hserver/dbaccess/rt_icon.php?db='+_database+'&id=';
         that.database = _database;

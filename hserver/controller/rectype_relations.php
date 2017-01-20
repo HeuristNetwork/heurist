@@ -69,7 +69,8 @@
             $rectype->id = intval($row["id"]);
             $rectype->name = $row["name"];
             $rectype->count = intval($row["count"]);
-            $rectype->image = HEURIST_ICON_URL . $row["id"] . ".png";
+            $rectype->image = HEURIST_ICON_SCRIPT.$row["id"];
+            //was HEURIST_ICON_URL . $row["id"] . ".png";
             
             //print_r($rectype);
             array_push($rectypes, $rectype);

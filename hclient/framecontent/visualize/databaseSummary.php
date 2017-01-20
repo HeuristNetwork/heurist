@@ -197,8 +197,9 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                             echo "<tr class='row'>";
                             echo "<td align='center'>$rt_ID</td>";
 
+                            //HAPI4.iconBaseURL
                             // Image
-                            $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
+                            $rectypeImg = "style='background-image:url(".HEURIST_ICON_SCRIPT.$rt_ID.")'";
                             $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 

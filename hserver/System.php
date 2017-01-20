@@ -338,6 +338,8 @@ class System {
         define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
         define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
 
+        define('HEURIST_ICON_SCRIPT', HEURIST_BASE_URL.'hserver/dbaccess/rt_icon.php?db='.$dbname.'&id=');
+        
         define('HEURIST_TERM_ICON_DIR', HEURIST_FILESTORE_DIR . 'term-icons/');
         define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
 
