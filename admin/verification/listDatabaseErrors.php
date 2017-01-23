@@ -45,9 +45,9 @@ if(@$_REQUEST['data']){
     }
 }
 
-$dtysWithInvalidTerms = $lists["terms"];
-$dtysWithInvalidNonSelectableTerms = $lists["terms_nonselectable"];
-$dtysWithInvalidRectypeConstraint = $lists["rt_contraints"];
+$dtysWithInvalidTerms = @$lists["terms"];
+$dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
+$dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
 ?>
 
