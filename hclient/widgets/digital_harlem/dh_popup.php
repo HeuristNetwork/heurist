@@ -140,7 +140,7 @@
                 require ('dh_popup_place.php');
             }
 
-            $comment = getFieldValue($relation2, 0, DT_EXTENDED_DESCRIPTION);
+            $comment = getFieldValue($records, $recID, DT_EXTENDED_DESCRIPTION);
             //date
             $date_out = composeDates( $records, $recID, '<b>Date: </b>');
 ?>
@@ -150,7 +150,7 @@
         <p><b><?php echo getTermById(getFieldValue($records, $recID, DT_PLACE_USAGE_TYPE)) ?> </b></p>
 
         <?php echo getFieldValue($records, $addrID, 'rec_Title'); ?></p>
-        <p><?php echo $comment; ?></p>
+        <p><?php echo @$comment?$comment:''; ?></p>
 
         <p>
             <?php echo $date_out; ?>&nbsp;

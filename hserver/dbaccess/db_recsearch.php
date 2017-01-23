@@ -758,6 +758,9 @@ if(@$params['debug']) echo $query."<br>";
             }else{
                 $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL OR compose_sql_query at once
             }
+            
+
+            
 
             if($is_count_only || ($is_ids_only && @$params['needall'])){
                 $chunk_size = PHP_INT_MAX;
@@ -772,7 +775,7 @@ if(@$params['debug']) echo $query."<br>";
             }
 
             $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
-         
+
         }
         
 
