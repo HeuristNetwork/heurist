@@ -243,10 +243,15 @@ function handleSettingsInUI() {
         
         var newval = $(event.target).is(':checked')?'on':'off';
         putSetting(setting_labels, newval);
-        
+
         if(currentMode=='icons'){
             var isLabelVisible = (newval=='on');
-            d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
+            //d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
+            if(isLabelVisible) {
+                visualizeData();
+            }else{
+                d3.selectAll(".nodelabel").style('display', 'none');
+            }
         }
         // visualizeData();
     });
@@ -255,7 +260,8 @@ function handleSettingsInUI() {
     $('#textLength').val(textLength).change(function(){
         var newval = $(event.target).val();
         putSetting(setting_textlength, newval);
-        visualizeData();    
+        var isLabelVisible = (currentMode!='icons' || (getSetting(setting_labels, 'on')=='on'));
+        if(isLabelVisible) visualizeData();    
     });
     
     
@@ -267,7 +273,8 @@ function handleSettingsInUI() {
     function(){
         var newval = $(event.target).val();
         putSetting(setting_fontsize, newval);
-        visualizeData();    
+        var isLabelVisible = (currentMode!='icons' || (getSetting(setting_labels, 'on')=='on'));
+        if(isLabelVisible) visualizeData();    
     });    
 
     $("#textColor")
