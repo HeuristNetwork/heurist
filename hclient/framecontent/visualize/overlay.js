@@ -117,11 +117,25 @@ function getRecordOverlayData(record) {
     return array;
 }
 
-/** Finds all relationships between the source and target */
+/** get info about particular relation */
 function getRelationOverlayData(line) {
-    //console.log(line);
     var array = [];
     var maxLength = getSetting(setting_textlength);
+    var relation = {text: 
+            truncateText(line.relation.name, maxLength)
+            +(line.relation.type=='resource'?'->':'->>'), size: "9px", height: 11};
+    if(true || settings.showCounts) {
+            relation.text = relation.text + ", n=" + line.targetcount;
+    }
+    array.push(relation);  
+    return array;
+}
+
+/** Finds all relationships between the source and target */
+function getRelationOverlayData_old(line) {
+    var array = [];
+    var maxLength = getSetting(setting_textlength);
+    var linetype = getSetting(setting_linetype);
     
     // Header
     var header1 = truncateText(line.source.name, maxLength);
@@ -132,6 +146,7 @@ function getRelationOverlayData(line) {
     }else{
         array.push({text: header1+" ↔ "+header2, size: "11px", style: "bold", height: 15, enter: true}); 
     }
+    
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
@@ -139,20 +154,20 @@ function getRelationOverlayData(line) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
-            //console.log(link);
+            
             
             // Pointing to target
             if(link.source.id == line.source.id && link.target.id == line.target.id) {
-                var relation = {text: "➜ " + truncateText(link.relation.name, maxLength), size: "9px", height: 11}; 
+                var relation = {text: '-> '+ truncateText(link.relation.name, maxLength), size: "9px", height: 11}; //"➜ " 
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
                 array.push(relation);  
             }
    
-           // Pointing to source 
-           if(link.source.id == line.target.id && link.target.id == line.source.id) {
-                var relation = {text: "← "+ truncateText(link.relation.name, maxLength), size: "9px", height: 11}; 
+            // Pointing to source 
+            if(link.source.id == line.target.id && link.target.id == line.source.id) {
+                var relation = {text: '<- '+ truncateText(link.relation.name, maxLength), size: "9px", height: 11}; //"← "
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -161,9 +176,10 @@ function getRelationOverlayData(line) {
         }
     }
     
-    //console.log("Line overlay data", array);
     return array;
 }
+
+var drag_link_source_id, drag_link_target_id, drag_link_line; 
 
 /**
 * Creates an overlay over the node / on the location that the user has clicked on.
@@ -198,10 +214,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             overlay  = parent_node.append("g")
                      .attr("transform", "translate(" +(x-iconSize/2-6)+ "," +(y-iconSize/2-6)+ ")");
         }else{
-        
             overlay = svg.append("g")
                          .attr("class", "overlay "+type+ " " + selector)      
-                         .attr("transform", "translate(" +(x-iconSize/2-3)+ "," +(y-iconSize/2-3)+ ")"); //was shifted  +5
+                         .attr("transform", "translate(" +x +','+y+')');
         }
         var rty_ID = '';                 
         // Title
@@ -257,7 +272,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         icon.append("title").text(rollover);         
         */
         // Adding text 
-        var offset = 26;  
+        var offset = (type=='record')?26:6;  
         var indent = 5;
         var position = 2;
         var text = overlay.selectAll("text")
@@ -280,7 +295,6 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .attr("y", function(d, i) {
                               // Multiline check
                               if(!d.multiline) {
-//console.log(d.text + '  ' + position+'  '+d.height);                               
                                   position += (d.height*1.2);
                               }
                               return position; // Position calculation
@@ -297,7 +311,6 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .style("font-size", function(d) {   // Font size based on size property
                               return fontSize;//d.size;
                           }, "important");
-                          
                       
         // Calculate optimal rectangle size
         var maxWidth = 1;
@@ -342,6 +355,52 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                    .text(function(d) {
                         return 'Click to edit the entity / record type structure';
                    });
+                   
+                          
+                   
+        var drag2 = d3.behavior.drag()
+                 .on("dragstart", function(d, i){
+                    d3.event.sourceEvent.stopPropagation();
+
+                    drag_link_source_id = d.id;
+                   
+                    var bbox = $(".node.id"+d.id + " .foreground")[0].getBoundingClientRect();
+                    var svgPos = $("svg").position();
+                    var x = bbox.left + bbox.width/2 - svgPos.left;
+                    var y = bbox.top + bbox.height/2 - svgPos.top;  
+                    
+                    drag_link_line = svg.append("svg:line")
+                       .attr("stroke","#ff0000")
+                       .attr("stroke-width",4)
+                       .attr("x1", x).attr("y1", y)
+                       .attr("x2", event.clientX - svgPos.left).attr("y2", event.clientY - svgPos.top);
+                    
+                 })
+                 .on("drag", 
+                 function(){
+                    if(drag_link_line){
+                        //drag_link_line
+                        //.attr("x2", Number(drag_link_line.attr("x2"))+d3.event.dx)
+                        //.attr("y2", Number(drag_link_line.attr("y2"))+d3.event.dy); //scale is not used
+                    
+                        var svgPos = $("svg").position();
+                        drag_link_line
+                            .attr("x2", event.clientX - svgPos.left)
+                            .attr("y2", event.clientY - svgPos.top);
+                        
+                    }
+                    
+                 })
+                 .on("dragend", function(){
+                     if(drag_link_source_id!=null && drag_link_target_id!=null){
+                            _addNewLinkField(drag_link_source_id, drag_link_target_id);  
+                     }
+                     drag_link_source_id = null;
+                     if(drag_link_line) drag_link_line.remove();
+                     drag_link_line = null;
+                 }
+                 );
+                   
       
         //link button      
         var btnAddLink = overlay
@@ -351,11 +410,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("height", iconSize)
                   .attr("width", 30)
                   .on("mouseup", function(d) {
-                      event.preventDefault();
-                      //_editRecStructure(rty_ID);
-                      
-                      _addNewLinkField(rty_ID);
-                  });;  
+                      //event.preventDefault();
+                      //_addNewLinkField(rty_ID); - current version open dialog
+                  }).call(drag2);
                   
         // add link text        
         var textAddLink = btnAddLink.append("text")
@@ -363,6 +420,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .text("add link")
                   .attr("x", 2)
                   .attr("y", iconSize*0.75);
+                  
 
 
         var bbox = textAddLink[0][0].getBBox();
@@ -410,8 +468,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
              
         /** Handles dragging events on overlay */
         function overlayDrag(d) { //NOT USED
-console.log('overlay drag '+d);            
-            overlay.attr("transform", "translate("+d.x+","+d.y+")");
+            //overlay.attr("transform", "translate("+d.x+","+d.y+")");
             //"translate(" +(d.x-iconSize/2)+ "," +(d.y-iconSize/2)+ ")");
         }
         
@@ -452,7 +509,6 @@ function updateOverlays() {
         var pieces = $(this).attr("class").split(" ");
         var type = pieces[1];
         var id = pieces[2];
-        //console.log("Type: " + type + ", id:" + id);
         
         // Select element to align to
         var bbox;
@@ -462,6 +518,7 @@ function updateOverlays() {
             bbox = $(".link."+id)[0].getBoundingClientRect();
         }
         //console.log(bbox);
+        
         
         // Update position 
         var svgPos = $("svg").position();
@@ -506,12 +563,14 @@ function _addNewLinkField(rty_ID, target_ID){
             var body = $(this.document).find('body');
             var dim = { h:480, w:500 };//Math.max(900, body.innerWidth()-10) };                
             
-            var target_ID = 10;
+            //ar target_ID = 10;
             
             var url = window.hWin.HAPI4.baseURL +
                 "admin/structure/fields/selectLinkField.html?&db="+window.hWin.HAPI4.database
                    +'&rty_ID='+rty_ID;
-                   //+'&target_ID='+target_ID;
+            if(target_ID>0){
+                url = url +'&target_ID='+target_ID;
+            }
                 
             window.hWin.HEURIST4.msg.showDialog(url, 
                 {

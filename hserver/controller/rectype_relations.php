@@ -98,7 +98,7 @@
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) { 
             $relation = new stdClass();
-            $relation->id = intval($row["id"]);
+            $relation->id = intval($row["id"]); //detail type id
             $relation->name = $row["name"];
             $relation->count = intval($row["count"]);
             $relation->type = $row["reltype"];
@@ -131,6 +131,8 @@
                 ."FROM recLinks rl INNER JOIN Records r1 ON r1.rec_ID=rl.rl_SourceID "
                 ."INNER JOIN Records r2 ON r2.rec_ID=rl.rl_TargetID "
                 ."WHERE rl.rl_DetailTypeID IS NULL AND r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
+
+                
             }else{
                 // Count how many times the $relation points to this id. The recLinks table is used to determine record links. 
                 // rl_sourceID and rl_targetID details are looked up in the Records table. 
@@ -206,6 +208,10 @@ source:1
 target:9
 targetcount:0                    
 */
+
+//@TODO - FIX count for relationships. It returns count of links disregard detail type id
+
+
                     // Records
                     $link->source = $i;
                     $link->target = getIndex($rectypes, $target);

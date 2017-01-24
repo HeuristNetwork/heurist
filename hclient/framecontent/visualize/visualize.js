@@ -580,7 +580,6 @@ function addForce() {
     return force;
 }  
 
-
 /*************************************************** MARKERS ******************************************/
 /**
 * Adds marker definitions to a container
@@ -617,11 +616,28 @@ function addMarkerDefinitions() {
                     .attr("viewBox", "0 -5 10 10")
                     .attr("markerUnits", "userSpaceOnUse")
                     .attr("orient", "auto")
-                    .attr("fill", markercolor) // color of arrows on links (Using the markercolor setting)
+                    .attr("fill", markercolor)// color of arrows on links (Using the markercolor setting)
+                    //.attr("stroke", markercolor)
+                    //.attr("stroke-width", 2)
                     .attr("opacity", "0.6")
-                    .append("path")                                                      
-                    .attr("d", "M0,-5L10,0L0,5");
+                    .append("path")                
+                    .attr("d",
+                        function(d) { 
+                            //console.log(d.relation);
+                            return d.relation.type=='resource' 
+                                            ?'M0,-5 L10,0 L0,5' 
+                                            :'M0,-5 L5,0 L0,5 M5,-5 L10,0 L5,5'});  //double arrow
      return markers;
+/*     
+CROSS
+<path d="M 3,3 L 7,7 M 3,7 L 7,3"
+               fill="none" stroke="black" stroke-width="2"/>
+
+    { id: 0, name: 'circle', path: 'M 0, 0  m -5, 0  a 5,5 0 1,0 10,0  a 5,5 0 1,0 -10,0', viewbox: '-6 -6 12 12' }
+  , { id: 1, name: 'square', path: 'M 0,0 m -5,-5 L 5,-5 L 5,5 L -5,5 Z', viewbox: '-5 -5 10 10' }
+  , { id: 2, name: 'arrow', path: 'M 0,0 m -5,-5 L 5,0 L -5,5 Z', viewbox: '-5 -5 10 10' }
+  , { id: 2, name: 'stub', path: 'M 0,0 m -1,-5 L 1,-5 L 1,5 L -1,5 Z', viewbox: '-1 -5 2 10' }     
+*/  
 }
 
 /************************************ LINES **************************************/      
@@ -669,13 +685,14 @@ function addLines(name, color, thickness) {
          
          
          .style("stroke-width", function(d) { return getLineWidth(d.targetcount); })
-         .on("click", function(d) {
-             // Close all overlays and create a line overlay
-             /* 2016-12-15 it works, however we do not need info for links anymore
-             removeOverlays();
+         .on("mouseover", function(d) {
+//console.log(d.relation.id);  //field type id           
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
-             */
+         })
+         .on("mouseout", function(d) {
+             var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+             removeOverlay(selector);
          });
          
     return lines;
