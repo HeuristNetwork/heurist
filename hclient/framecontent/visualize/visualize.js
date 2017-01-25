@@ -629,9 +629,7 @@ function addMarkerDefinitions() {
                                             :'M0,-5 L5,0 L0,5 M5,-5 L10,0 L5,5'});  //double arrow
      return markers;
 /*     
-CROSS
-<path d="M 3,3 L 7,7 M 3,7 L 7,3"
-               fill="none" stroke="black" stroke-width="2"/>
+CROSS  M 3,3 L 7,7 M 3,7 L 7,3
 
     { id: 0, name: 'circle', path: 'M 0, 0  m -5, 0  a 5,5 0 1,0 10,0  a 5,5 0 1,0 -10,0', viewbox: '-6 -6 12 12' }
   , { id: 1, name: 'square', path: 'M 0,0 m -5,-5 L 5,-5 L 5,5 L -5,5 Z', viewbox: '-5 -5 10 10' }
@@ -710,10 +708,15 @@ function tick() {
     if(linetype == "curved") {
         //updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);     
+    }else if(linetype == "stepped") {
+        updateSteppedLines(bottomLines);     
     }else{
         //updateStraightLines(topLines);
         updateStraightLines(bottomLines);   
     }
+    
+    // Update node locations
+    updateNodes();
     
     // Update overlay
     updateOverlays(); 
@@ -751,8 +754,6 @@ function updateCurvedLines(lines) {
         ].join(" ");
     });
 
-    // Update node locations
-    updateNodes();
 }
 
 /**
@@ -766,22 +767,73 @@ function updateStraightLines(lines) {
     // Calculate the straight points
     lines.attr("points", function(d) {
         
-       var key = d.source.id+'_'+d.target.id; 
-       if(!pairs[key]){
-           pairs[key] = 1;
+       var key = d.source.id+'_'+d.target.id,
+           indent = 30;
+       
+       if(pairs[d.target.id+'_'+d.source.id]){
+           key = d.target.id+'_'+d.source.id;
+       }else if(!pairs[key]){
+           indent = 0;
+       }
+       
+       if(indent>0){
+           pairs[key] = pairs[key]+20;
        }else{
-           pairs[key] = pairs[key]+30;
+           pairs[key] = 1;
        } 
-       var k = pairs[d.source.id+'_'+d.target.id];
-        
+       var R = pairs[key];
+       
+       var dx = (d.target.x-d.source.x)/2;
+       var dy = (d.target.y-d.source.y)/2;
+
+       var tg = (dx!=0)?Math.atan(dy/dx):0;
+       
+       var dx2 = dx-R*Math.sin(tg);
+       var dy2 = dy+R*Math.cos(tg);
+  
        return d.source.x + "," + d.source.y + " " +
-              (d.source.x + (d.target.x-d.source.x)/2+k) + "," + 
-              (d.source.y + (d.target.y-d.source.y)/2-k) + " " +  
+              (d.source.x + dx2) + "," + 
+              (d.source.y + dy2) + " " +  
               d.target.x + "," + d.target.y;
     });
     
-    // Update node locations
-    updateNodes();
+}
+
+function updateSteppedLines(lines){
+    var pairs = {};
+    
+    // Calculate the straight points
+    lines.attr("points", function(d) {
+        
+       var dx = (d.target.x-d.source.x)/2,
+           dy = (d.target.y-d.source.y)/2;
+       
+       var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
+       
+       var key = d.source.id+'_'+d.target.id;
+       if(pairs[d.target.id+'_'+d.source.id]){
+           key = d.target.id+'_'+d.source.id;
+       }else if(!pairs[key]){
+           pairs[key] = 1-indent;
+       }
+       
+       pairs[key] = pairs[key]+indent;
+       var k = pairs[key];
+       
+       var mid = '';    
+       if(Math.abs(dx)>Math.abs(dy)) {
+           dx = dx + k;
+           mid = (d.source.x + dx) + ',' + (d.source.y) + ' ' +  (d.source.x + dx) + ',' + (d.target.y) + ' ';
+       }else{
+           dy = dy + k;
+           mid = (d.source.x) + ',' + (d.source.y+dy) + ' ' +  (d.target.x) + ',' + (d.source.y+dy) + ' ';
+       }
+        
+       return d.source.x + "," + d.source.y + " " +
+              mid +
+              d.target.x + "," + d.target.y;
+    });
+    
 }
 
 

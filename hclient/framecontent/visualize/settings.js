@@ -175,6 +175,9 @@ function handleSettingsInUI() {
         .click( setLinkMode );
     $('#linksMode1').button({icons: { primary: 'ui-icon-link-curved' }, text:false})
         .click( setLinkMode );
+    $('#linksMode2').button({icons: { primary: 'ui-icon-link-stepped' }, text:false})
+        .click( setLinkMode );
+        
     $( "#setLinksMode" ).buttonset();    
     
 

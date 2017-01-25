@@ -267,3 +267,8 @@ text.shadow {
     width: 16;
     height: 16;
 }
+.ui-icon-link-stepped{
+    background-image: url(link_stepped.png) !important; 
+    width: 16;
+    height: 16;
+}
