@@ -146,7 +146,6 @@ function getRelationOverlayData_old(line) {
     }else{
         array.push({text: header1+" ↔ "+header2, size: "11px", style: "bold", height: 15, enter: true}); 
     }
-    
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 

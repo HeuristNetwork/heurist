@@ -188,6 +188,18 @@ function determineMaxCount(data) {
     //console.log("Max count: " + maxCount);
 }
 
+function getNodeDataById(id){
+    if(data && data.nodes.length > 0) {
+        for(var i = 0; i < data.nodes.length; i++) {
+            //console.log(data.nodes[i]);
+            if(data.nodes[i].id==id) {
+                return data.nodes[i];
+            } 
+        }
+    }
+    return null;
+}
+
 /** Calculates log base 10 */
 function log10(val) {
     return Math.log(val) / Math.LN10;
@@ -363,6 +375,9 @@ function filterData(json_data) {
             return false;
         });
 
+        
+//console.log(json_data.links);        
+        
         // Filter links
         var links = [];
         json_data.links.filter(function(d) {
@@ -740,18 +755,38 @@ function updateCurvedLines(lines) {
            pairs[key] = pairs[key]+0.25;
        } 
        var k = pairs[d.source.id+'_'+d.target.id];
+       
+       var target_x = d.target.x,
+           target_y = d.target.y;
+       if(d.target.id==d.source.id){
+           //link to itself
+           target_x = d.source.x+100;
+           target_y = d.source.y-100;
+       }
         
-        var dx = d.target.x - d.source.x,
-            dy = d.target.y - d.source.y,
+        var dx = target_x - d.source.x,
+            dy = target_y - d.source.y,
             dr = Math.sqrt(dx * dx + dy * dy)/k,
             mx = d.source.x + dx,
             my = d.source.y + dy;
+
+       if(d.target.id==d.source.id){
+
+            return [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              "A",dr,dr,0,0,1,target_x,target_y,
+              "A",dr,dr,0,0,1,d.source.x,d.source.y
+            ].join(" ");
+           
+       }else{
             
-        return [
-          "M",d.source.x,d.source.y,
-          "A",dr,dr,0,0,1,mx,my,
-          "A",dr,dr,0,0,1,d.target.x,d.target.y
-        ].join(" ");
+            return [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              "A",dr,dr,0,0,1,target_x,target_y
+            ].join(" ");
+       }
     });
 
 }
@@ -763,6 +798,11 @@ function updateCurvedLines(lines) {
 function updateStraightLines(lines) {
     
     var pairs = {};
+    
+    $(".icon_self").each(function() {
+            $(this).remove();
+    });
+
     
     // Calculate the straight points
     lines.attr("points", function(d) {
@@ -783,8 +823,51 @@ function updateStraightLines(lines) {
        } 
        var R = pairs[key];
        
-       var dx = (d.target.x-d.source.x)/2;
-       var dy = (d.target.y-d.source.y)/2;
+       var target_x = d.target.x,
+           target_y = d.target.y;
+       if(d.target.id==d.source.id){
+           //link to itself
+           target_x = d.source.x+100;
+           target_y = d.source.y-100;
+           
+           /*
+           var nodes = d3.selectAll(".node.id"+d.source.id);
+           nodes.each(function(d, i) {      
+
+           svg.append("svg:image")
+                  .attr("class", "icon_self")
+                  .attr("xlink:href", d.image?d.image:'')
+                  .attr("transform", "translate(" +(d.x+100) +','+(d.x-100)+')')
+                  //.attr("x", d.x+100y
+                  //.attr("y", d.y-100)
+                  .attr("height", iconSize*0.75)
+                  .attr("width", iconSize*0.75);
+           
+           });*/
+           
+           /*
+           var node = getNodeDataById(d.target.id);
+           if(node){
+               var nodePos = $(".node.id"+d.source.id).offset();
+
+           svg.append("svg:image")
+                  .attr("class", "icon_self")
+                  .attr("xlink:href", node.image?node.image:'')
+                  //.attr("transform", "translate(" +(nodePos.left+100) +','+(nodePos.top-100)+')')
+                  .attr("x", target_x)
+                  .attr("y", target_y)
+                  .attr("height", iconSize*0.75)
+                  .attr("width", iconSize*0.75);
+               
+           //var overlay = svg.append("g").attr("class", "icon_self")
+           //             .attr("transform", "translate(" +target_x +','+target_y+')');
+           //.attr("xlink:href", node.image?node.image:'')
+           }
+           */
+       }
+       
+       var dx = (target_x-d.source.x)/2;
+       var dy = (target_y-d.source.y)/2;
 
        var tg = (dx!=0)?Math.atan(dy/dx):0;
        
@@ -794,7 +877,7 @@ function updateStraightLines(lines) {
        return d.source.x + "," + d.source.y + " " +
               (d.source.x + dx2) + "," + 
               (d.source.y + dy2) + " " +  
-              d.target.x + "," + d.target.y;
+              target_x + "," + target_y;
     });
     
 }
@@ -820,18 +903,33 @@ function updateSteppedLines(lines){
        pairs[key] = pairs[key]+indent;
        var k = pairs[key];
        
-       var mid = '';    
+       var target_x = d.target.x,
+           target_y = d.target.y;
+       if(d.target.id==d.source.id){
+           //link to itself
+           target_x = d.source.x+100;
+           target_y = d.source.y-100;
+       }
+       
+       var res = [d.source.x + "," + d.source.y];
+       
        if(Math.abs(dx)>Math.abs(dy)) {
            dx = dx + k;
-           mid = (d.source.x + dx) + ',' + (d.source.y) + ' ' +  (d.source.x + dx) + ',' + (d.target.y) + ' ';
+           res.push((d.source.x + dx) + ',' + (d.source.y));
+           res.push((d.source.x + dx) + ',' + (target_y));
        }else{
            dy = dy + k;
-           mid = (d.source.x) + ',' + (d.source.y+dy) + ' ' +  (d.target.x) + ',' + (d.source.y+dy) + ' ';
+           res.push((d.source.x) + ',' + (d.source.y+dy));
+           res.push((target_x) + ',' + (d.source.y+dy));
        }
-        
-       return d.source.x + "," + d.source.y + " " +
-              mid +
-              d.target.x + "," + d.target.y;
+
+       res.push(target_x + "," + target_y);
+       if(d.target.id==d.source.id){
+           res.push((d.source.x - dx) + ',' + target_y);
+           res.push(d.source.x  + ',' + d.source.y);
+       }
+       
+       return res.join(' ');
     });
     
 }
