@@ -256,7 +256,8 @@ var cfg_layouts = [
         south:{size:40, resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_static', hasheader:false,
-                    options:{url: 'hclient/widgets/digital_harlem/dh_footer.html'}
+                    options:{url: 'hclient/widgets/digital_harlem/dh_footer.php?db=[dbname]&app=[layout]'}
+                    //old way options:{url: 'hclient/widgets/digital_harlem/dh_footer.html'}
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0}}
         ]},
     },
@@ -292,7 +293,8 @@ var cfg_layouts = [
         south:{size:40, resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_static', hasheader:false,
-                    options:{url: 'hclient/widgets/digital_harlem/dh_footer.html'}
+                    options:{url: 'hclient/widgets/digital_harlem/dh_footer.php?db=[dbname]&app=[layout]'}
+                    //old static version options:{url: 'hclient/widgets/digital_harlem/dh_footer.html'}
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0}}
         ]},
     },

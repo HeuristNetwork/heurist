@@ -1050,8 +1050,9 @@ console.log('inpt added '+"fv_"+field['var']);
                        
                         //calculate the total number of terms with value
                         var tot_cnt = __calcTerm(term, 0, null);
-                        var as_list = ((field['isfacet']==1) || 
-                                       (field['isfacet']==2 && tot_cnt > that._MIN_DROPDOWN_CONTENT));
+                        var as_list = ( field['isfacet']==1 );    //is list
+                                            //is dropdown but too many entries
+//this feature is remarked on 2017-01-26 || (field['isfacet']==2 && tot_cnt > that._MIN_DROPDOWN_CONTENT)); 
 
 
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
