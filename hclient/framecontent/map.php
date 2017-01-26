@@ -17,12 +17,16 @@
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
-*/
+*/  
 
+//&callback=initMap" async defer  for gmap
+//<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+//
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
 <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk&libraries=drawing"></script>
 <!-- Timemap -->
 <!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
 <script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
@@ -58,7 +62,6 @@ require_once(dirname(__FILE__)."/initPage.php");
 <link href="<?php echo PDIR;?>ext/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <!-- Mapping -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/map.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/map_overlay.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/map_bubble.js"></script>
@@ -68,7 +71,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     .ui-map-document { background-image: url('<?php echo PDIR;?>hclient/assets/mapdocument.png') !important;}
     .ui-map-layer { background-image: url('<?php echo PDIR;?>hclient/assets/maplayer.png') !important;}
 
-    /*
+    /*   
     .vis-item-overflow{
     position:absolute;
     }
@@ -203,6 +206,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                     $("#map-doc-select-lbl").show();
                 }
             }
+            
+            mapping.onWinResize();
         });
 
         $( "#timeline" ).mousedown(function(){

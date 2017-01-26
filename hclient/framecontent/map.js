@@ -1686,8 +1686,9 @@ ed_html +
 
         onWinResize: function(){
             _onWinResize();
-            if(tmap && tmap.map){ //fix google map bug
-                tmap.map.resizeTo(0,0)
+            if(tmap && tmap.map){ //fix google map bug to force redraw on previously hidden area
+                    var ele = $("#mapping");
+                    tmap.map.resizeTo(ele.width(),ele.height());
             }
         },
 

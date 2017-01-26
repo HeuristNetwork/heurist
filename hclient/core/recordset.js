@@ -201,7 +201,7 @@ function hRecordSet(initdata) {
                     //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
                 }
                 
-                var k, m, dates = [], startDate, endDate, dres;
+                var k, m, dates = [], startDate=null, endDate=null, dres=null;
                 for(k=0; k<timefields.length; k++){
                     var datetime = _getFieldValues(record, timefields[k]);
                     if(!isnull(datetime)){   
@@ -220,6 +220,7 @@ function hRecordSet(initdata) {
                         }
                     }
                 }
+                
                 //need to verify date and convert from Temporal
                 dres = window.hWin.HEURIST4.util.parseDates(startDate, endDate);
                 if(dres){
@@ -248,7 +249,6 @@ function hRecordSet(initdata) {
                                 titem['type'] = 'point';
                             }
                             titems.push(titem);
-                        
                         }
                         timeenabled++;
                 }
