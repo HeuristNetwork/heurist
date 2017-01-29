@@ -81,7 +81,7 @@
     </head>
 
 
-    <body class="popup">
+    <body class="popup" style="margin:0 !important">
 
         <?php
 

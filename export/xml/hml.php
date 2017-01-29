@@ -767,15 +767,23 @@ function outputDateDetail($attrs, $value) {
 	if (preg_match('/^\\s*-?(\\d+)\\s*$/', $value, $matches)) { // year only
 		makeTag('year', null, $matches[1]);
 	} else {
-		$date = strtotime($value);
-		if ($date) {
-			makeTag('year', null, date('Y', $date));
-			makeTag('month', null, date('n', $date));
-			makeTag('day', null, date('j', $date));
+        
+         try{   
+            $t2 = new DateTime($value);
+            $datestamp = $t2->format('Y-m-d H:i:s');
+         } catch (Exception  $e){
+            $t2 = null;
+            //print $value.' => NOT SUPPORTED<br>';                            
+         }                            
+        
+		if ($t2) {
+			makeTag('year', null, $t2->format('Y')); // date('Y', $date));
+			makeTag('month', null, $t2->format('n')); // date('n', $date));
+			makeTag('day', null, $t2->format('j')); // date('j', $date));
 			if (preg_match("![ T]!", $value)) {	// looks like there's a time
-				makeTag('hour', null, date('H', $date));
-				makeTag('minutes', null, date('i', $date));
-				makeTag('seconds', null, date('s', $date));
+				makeTag('hour', null, $t2->format('H')); // date('H', $date));
+				makeTag('minutes', null, $t2->format('i')); // date('i', $date));
+				makeTag('seconds', null, $t2->format('s')); // date('s', $date));
 			}
 		} else {
 			// cases that strtotime doesn't catch

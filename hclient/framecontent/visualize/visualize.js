@@ -1,4 +1,3 @@
-
 /**
 * filename: explanation
 *
@@ -72,10 +71,12 @@ var svg;        // The SVG where the visualisation will be executed on
 (function ( $ ) {
     // jQuery extension
     $.fn.visualize = function( options ) {
+        
         // Select and clear SVG.
         svg = d3.select("#d3svg");
         svg.selectAll("*").remove();
-        svg.append("text").text("Processing...").attr("x", "25").attr("y", "25");   
+        svg.append("text").text("Building graph ...").attr("x", "25").attr("y", "25");   
+        
         
         // Default plugin settings
         settings = $.extend({
@@ -86,7 +87,11 @@ var svg;        // The SVG where the visualisation will be executed on
             selectedNodeIds: [],
             triggerSelection: function(selection){}, 
             
+            isDatabaseStructure: false,
+            
             showCounts: true,
+            
+            // Limits tha maximum results whichg can be plotted to avoid overloading the browser - user will get warning message
             limit: 2000,
             
             // UI setting controls
@@ -119,7 +124,7 @@ var svg;        // The SVG where the visualisation will be executed on
             // UI default settings
             linetype: "straight",
             linelength: 100,
-            linewidth: 15,
+            linewidth: 3,
             linecolor: "#22a",
             markercolor: "#000",
             
@@ -134,7 +139,7 @@ var svg;        // The SVG where the visualisation will be executed on
             formula: "linear",
             fisheye: false,
             
-            gravity: "off",
+            gravity: "touch",
             attraction: -3000,
             
             translatex: 0,
@@ -149,7 +154,7 @@ var svg;        // The SVG where the visualisation will be executed on
         // Check visualisation limit
         var amount = Object.keys(settings.data.nodes).length;
         if(amount > settings.limit) {
-             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set at ' +settings.limit+ ' records, you are trying to visualize ' +amount+ ' records. Please refine your filter.</text>');  
+             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set to ' +settings.limit+ ' records to avoid overloading the browser. You are trying to visualize ' +amount+ ' records. Please refine your filter to reduce the number of results.</text>');  
              return; 
         }else{
             visualizeData();    
@@ -161,14 +166,22 @@ var svg;        // The SVG where the visualisation will be executed on
     
 
 /*******************************START OF VISUALISATION HELPER FUNCTIONS*******************************/
-var maxCount; 
+var maxCountForNodes, maxCountForLinks; 
 function determineMaxCount(data) {
-    maxCount = 1;
+    maxCountForNodes = 1;
+    maxCountForLinks = 1;
     if(data && data.nodes.length > 0) {
         for(var i = 0; i < data.nodes.length; i++) {
             //console.log(data.nodes[i]);
-            if(data.nodes[i].count > maxCount) {
-                maxCount = data.nodes[i].count;
+            if(data.nodes[i].count > maxCountForNodes) {
+                maxCountForNodes = data.nodes[i].count;
+            } 
+        }
+    }
+    if(data && data.links.length > 0) {
+        for(var i = 0; i < data.links.length; i++) {
+            if(data.links[i].targetcount > maxCountForLinks) {
+                maxCountForLinks = data.links[i].targetcount;
             } 
         }
     }
@@ -180,53 +193,128 @@ function log10(val) {
     return Math.log(val) / Math.LN10;
 }
 
+function _addDropShadowFilter(){
+
+// filter chain comes from:
+// https://github.com/wbzyl/d3-notes/blob/master/hello-drop-shadow.html
+// cpbotha added explanatory comments
+// read more about SVG filter effects here: http://www.w3.org/TR/SVG/filters.html
+
+// filters go in defs element
+var defs = svg.append("defs");
+
+// create filter with id #drop-shadow
+// height=130% so that the shadow is not clipped
+var filter = defs.append("filter")
+    .attr("id", "drop-shadow")
+    .attr("height", "120%");
+
+// SourceAlpha refers to opacity of graphic that this filter will be applied to
+// convolve that with a Gaussian with standard deviation 3 and store result
+// in blur
+filter.append("feGaussianBlur")
+    .attr("in", "SourceAlpha")
+    .attr("stdDeviation", 3)
+    .attr("result", "blur");
+
+// translate output of Gaussian blur to the right and downwards with 2px
+// store result in offsetBlur
+filter.append("feOffset")
+    .attr("in", "blur")
+    .attr("dx", 3)
+    .attr("dy", 3)
+    .attr("result", "offsetBlur");
+
+// overlay original SourceGraphic over translated blurred opacity by using
+// feMerge filter. Order of specifying inputs is important!
+var feMerge = filter.append("feMerge");
+
+feMerge.append("feMergeNode")
+    .attr("in", "offsetBlur")
+feMerge.append("feMergeNode")
+    .attr("in", "SourceGraphic");
+}
+
+var iconSize = 16; // The icon size
+var circleSize = 12; //iconSize * 0.75; // Circle around icon size
+var currentMode = 'infoboxes'; //or 'icons';
+var maxEntityRadius = 40;
+var maxLinkWidth = 25;
+
+
 /** Executes the chosen formula with a chosen count & max size */
 
-function executeFormula(count, maxSize) {
+function executeFormula(count, maxCount, maxSize) {
     // Avoid minus infinity and wrong calculations etc.
     if(count <= 0) {
         count = 1;
     }
     
-    if(count > maxCount) {
-        maxCount = count;
-    }
-    
     //console.log("Count: " + count + ", max count: " + maxCount + ", max Size: " + maxSize);
     var formula = getSetting(setting_formula);
     if(formula == "logarithmic") { // Log                                                           
-        return Math.log(count) / Math.log(maxCount) * maxSize;
+        return maxCount>1?(Math.log(count) / Math.log(maxCount)*maxSize):1;
     }
     else if(formula == "unweighted") { // Unweighted
-        return 2;                                          
+        return maxSize;                                          
     }else {  // Linear
-        return (count/maxCount) * maxSize; 
+        return (maxCount>0)?((count/maxCount)* maxSize):1 ; 
     }       
 }
 
 /** Returns the line length */
 function getLineLength(record) {
-    console.log("Default line length function");
+//console.log("Default line length function");
     return getSetting(setting_linelength);
 }
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
-    var maxWidth = getSetting(setting_linewidth);                                                                     
-    return 1.5 + (executeFormula(count, maxWidth) / 2);
+    var maxWidth = getSetting(setting_linewidth);
+    
+    if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
+    else if(maxWidth<1) {maxSize = 1;}
+    
+//console.log('cnt='+count);    
+    
+    if(count > maxCountForLinks) {
+        maxCountForLinks = count;
+    }
+    
+    var val = (count==0)?0:executeFormula(count, maxCountForLinks, maxWidth);
+    if(val<1) val = 1;
+    return val;
 }            
 
 /** Calculates the marker width that should be used */
 function getMarkerWidth(count) {
+    if(isNaN(count)) count = 0;
     return 4 + getLineWidth(count)*2;
 }
 
 /** Calculates the entity raadius that should be used */
-var iconSize = 16; // The icon size
-var circleSize = iconSize * 0.75; // Circle around icon size
 function getEntityRadius(count) {
+    
     var maxRadius = getSetting(setting_entityradius);
-    return circleSize + executeFormula(count, maxRadius) - 1;
+    if(maxRadius>maxEntityRadius) {maxRadius = maxEntityRadius;}
+    else if(maxRadius<1) {maxRadius = 1;}
+    
+    if(getSetting(setting_formula)=='unweighted'){
+        return maxRadius;
+    }else{
+        if(count==0){
+            return 0; //no records - no circle
+        }else{
+            
+            if(count > maxCountForNodes) {
+                maxCountForNodes = count;
+            }
+            
+            var val = circleSize + executeFormula(count, maxCountForNodes, maxRadius);
+            if(val<circleSize) val = circleSize;
+            return val;
+        }
+    }
 }
 
 /***********************************START OF VISUALISATION FUNCIONS***********************************/
@@ -235,9 +323,75 @@ var data; // Currently visualised dataset
 var zoomBehaviour;
 var force;
 
+
+function getDataFromServer(){
+
+    var url = window.hWin.HAPI4.basePathV4+"hserver/controller/rectype_relations.php" + window.location.search;
+    d3.json(url, function(error, json_data) {
+        // Error check
+        if(error) {
+            return alert("Error loading JSON data: " + error.message);
+        }
+        
+        settings.data = json_data; //all data
+        filterData(json_data);
+        
+    });
+    
+}
+
+function filterData(json_data) {
+    
+        if(!json_data) json_data = settings.data; 
+    
+        var names = [];
+        $(".show-record").each(function() {
+            var name = $(this).attr("name");
+            if(!$(this).is(':checked')){ //to exclude
+                names.push(name);
+            }
+        });    
+        
+        // Filter nodes
+        var map = {};
+        var size = 0;
+        var nodes = json_data.nodes.filter(function(d, i) {
+            if($.inArray(d.name, names) == -1) {
+                map[i] = d;
+                return true;
+            }
+            return false;
+        });
+
+        // Filter links
+        var links = [];
+        json_data.links.filter(function(d) {
+            if(map.hasOwnProperty(d.source) && map.hasOwnProperty(d.target)) {
+                var link = {source: map[d.source], target: map[d.target], relation: d.relation, targetcount: d.targetcount};
+                links.push(link);
+            }
+        })
+
+        var data_visible = {nodes: nodes, links: links};
+        settings.getData = function(all_data) { return data_visible; }; 
+        visualizeData();
+}
+
 function visualizeData() {
     svg.selectAll("*").remove();
     addSelectionBox();
+    //define shadow filter
+    _addDropShadowFilter();
+    
+    
+    /*Set up tooltip
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function (d) {
+        return  d.name + "";
+    })
+    svg.call(tip);*/
     
     // SVG data  
     this.data = settings.getData.call(this, settings.data);
@@ -250,38 +404,67 @@ function visualizeData() {
     force = addForce();
 
     // Lines 
-    addMarkerDefinitions();
-    addLines("bottom", getSetting(setting_linecolor), 0.5);
-    addLines("top", "rgba(255, 255, 255, 0.0)", 8.5);
+    addMarkerDefinitions(); //markers/arrows on lines
+    addLines("bottom-lines", getSetting(setting_linecolor), 0.5);
+    //addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5);
 
     // Nodes
     addNodes();
-    addTitles();
+    //addTitles();
     
     // Circles
-    addBackgroundCircles();
-    addForegroundCircles();
-    addIcons();
+    //addBackgroundCircles();
+    //addForegroundCircles();
+    //addIcons();
     
     // Labels
     if(getSetting(setting_labels) == "true") {
-        addLabels("shadow", "#000");
-        addLabels("namelabel", getSetting(setting_textcolor));
+    // addLabels("shadow", "#000");
+    // addLabels("namelabel", getSetting(setting_textcolor));
     }
     //DEBUG console.log("EVERYTHING HAS BEEN ADDED");
-
+    /*
     // Get everything into positon when gravity is off.
     if(getSetting(setting_gravity) == "off") {
+        force.stop();
+        
         for(var i=0; i<10; i++) {
             force.tick();
         }
+        
+        force.tick();
         d3.selectAll(".node").attr("fixed", true);
-        force.stop();
+        
+    }else{
+        force.start();
+    }
+    */
+    
+    /*var gravity = getSetting(setting_gravity);
+    svg.selectAll(".node")
+       .attr("fixed", function(d, i) {
+            d.fixed = (gravity == "off");
+            return d.fixed;
+       }); 
+    d.fixed = true;*/
+    
+    if(settings.isDatabaseStructure){
+        
+        var cnt_vis = data.nodes?data.nodes.length:0;
+        var cnt_tot = (settings.data && settings.data.nodes)?settings.data.nodes.length:0;
+        
+        if(cnt_vis==0){
+            sText = 'Select record types to show';
+        }else{
+            sText = 'Showing '+cnt_vis+' of '+cnt_tot;
+        }
+        
+        $('#showRectypeSelector').button({label:sText, icons:{secondary:'ui-icon-carat-1-'
+            +($('#list_rectypes').is(':visible')?'n':'s')   }});
     }
     
+    
 } //end visualizeData
-
-
 
 
 /****************************************** CONTAINER **************************************/
@@ -307,6 +490,8 @@ function addContainer() {
         s = s + "scale("+scale+")";
     }
     
+    //s = "translate(1,1)scale(1)";    
+    
     // Append zoomable container       
     var container = svg.append("g")
                        .attr("id", "container")
@@ -316,7 +501,7 @@ function addContainer() {
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
-                           .scaleExtent([0.05, 10])
+                           .scaleExtent([0.05, 10]) //settings.isDatabaseStructure?[0.75,1.5]:
                            .on("zoom", zoomed);
                       
     return container;
@@ -326,7 +511,7 @@ function addContainer() {
 * Called after a zoom-event takes place.
 */
 function zoomed() { 
-    // Translate   
+    //keep current setting Translate   
     if(d3.event.translate !== undefined) {
         if(!isNaN(d3.event.translate[0])) {           
             putSetting(setting_translatex, d3.event.translate[0]); 
@@ -336,15 +521,38 @@ function zoomed() {
         }
     }
     
-    // Scale
+    //keep current setting Scale
     if(!isNaN(d3.event.scale)) {
         putSetting(setting_scale, d3.event.scale);
     }   
+    
+    
+//console.log( 'trans='+d3.event.translate );
+//console.log( 'scale='+d3.event.scale );
     
     // Transform  
     var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
     d3.select("#container").attr("transform", transform);
     
+    //d3.selectAll(".node").select(".icon").attr('transform',"scale("+(1/d3.event.scale)+")");
+    d3.selectAll(".node").attr('transform',
+    function(d) { 
+        //keep zoomed position 
+        var tr = "translate(" + d.x + "," + d.y + ")";
+        //however restore scale
+        tr = tr+"scale("+(1/d3.event.scale)+")";
+        
+        return tr; 
+    });
+    
+    d3.selectAll("path").style("stroke-width", function(d) { return getLineWidth(d.targetcount); });
+    
+    //.attr("d", d3.svg.symbol().type(function (d) { return d.Shape; }).size(1/d3.event.scale));
+    
+    //d3.selectAll(".node").attr('transform',"translate(0,0)scale("+(1/d3.event.scale)+")"); //translate("+d3.event.translate+")
+    //d3.selectAll("path").attr("transform", transform); //"scale("+d3.event.scale+")");
+    //updateNodes();
+
     updateOverlays();
 }  
 
@@ -362,11 +570,13 @@ function addForce() {
                   .links(data.links)
                   .charge(attraction)        // Using the attraction setting
                   .linkDistance(function(d) {         
-                     return settings.getLineLength.call(this, d.target);
+                     var linkDist = settings.getLineLength.call(this, d.target);
+                     return linkDist;//linkDist;
                   })  // Using the linelength setting 
                   .on("tick", tick)
                   .size([width, height])
                   .start();
+                  
     return force;
 }  
 
@@ -379,6 +589,7 @@ function addMarkerDefinitions() {
     var linetype = getSetting(setting_linetype);
     var linelength = getSetting(setting_linelength);
     var markercolor = getSetting(setting_markercolor);
+    
     
     var markers = d3.select("#container")
                     .append("defs")
@@ -406,7 +617,7 @@ function addMarkerDefinitions() {
                     .attr("viewBox", "0 -5 10 10")
                     .attr("markerUnits", "userSpaceOnUse")
                     .attr("orient", "auto")
-                    .attr("fill", markercolor) // Using the markercolor setting
+                    .attr("fill", markercolor) // color of arrows on links (Using the markercolor setting)
                     .attr("opacity", "0.6")
                     .append("path")                                                      
                     .attr("d", "M0,-5L10,0L0,5");
@@ -439,7 +650,9 @@ function addLines(name, color, thickness) {
                   .enter()
                   .append("svg:polyline");
     }    
-     
+
+    var thickness = parseInt(getSetting(setting_linewidth))+1;
+
     // Adding shared attributes
     lines.attr("class", function(d) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
@@ -453,14 +666,16 @@ function addLines(name, color, thickness) {
                 return "3, 3"; 
              } 
          })) 
-         .style("stroke-width", function(d) { 
-            return thickness + getLineWidth(d.targetcount);
-         })
+         
+         
+         .style("stroke-width", function(d) { return getLineWidth(d.targetcount); })
          .on("click", function(d) {
              // Close all overlays and create a line overlay
+             /* 2016-12-15 it works, however we do not need info for links anymore
              removeOverlays();
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
+             */
          });
          
     return lines;
@@ -470,18 +685,21 @@ function addLines(name, color, thickness) {
 * Updates the correct lines based on the linetype setting 
 */
 function tick() {
-    //console.log("tick");
-    var topLines = d3.selectAll(".top");
-    var bottomLines = d3.selectAll(".bottom");
+    
+    //not used anymore var topLines = d3.selectAll(".top-lines"); 
+    var bottomLines = d3.selectAll(".bottom-lines");
     
     var linetype = getSetting(setting_linetype);
     if(linetype == "curved") {
-        updateCurvedLines(topLines);
+        //updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);     
     }else{
-        updateStraightLines(topLines);
+        //updateStraightLines(topLines);
         updateStraightLines(bottomLines);   
     }
+    
+    // Update overlay
+    updateOverlays(); 
 }
 
 /**
@@ -489,11 +707,23 @@ function tick() {
 * @param lines Object holding curved lines
 */
 function updateCurvedLines(lines) {
+    
+    var pairs = {};
+    
     // Calculate the curved segments
     lines.attr("d", function(d) {
+        
+       var key = d.source.id+'_'+d.target.id; 
+       if(!pairs[key]){
+           pairs[key] = 1.5;
+       }else{
+           pairs[key] = pairs[key]+0.25;
+       } 
+       var k = pairs[d.source.id+'_'+d.target.id];
+        
         var dx = d.target.x - d.source.x,
             dy = d.target.y - d.source.y,
-            dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+            dr = Math.sqrt(dx * dx + dy * dy)/k,
             mx = d.source.x + dx,
             my = d.source.y + dy;
             
@@ -513,11 +743,23 @@ function updateCurvedLines(lines) {
 * @param lines Object holding straight lines
 */
 function updateStraightLines(lines) {
+    
+    var pairs = {};
+    
     // Calculate the straight points
     lines.attr("points", function(d) {
+        
+       var key = d.source.id+'_'+d.target.id; 
+       if(!pairs[key]){
+           pairs[key] = 1;
+       }else{
+           pairs[key] = pairs[key]+30;
+       } 
+       var k = pairs[d.source.id+'_'+d.target.id];
+        
        return d.source.x + "," + d.source.y + " " +
-              (d.source.x +(d.target.x-d.source.x)/2) + "," + 
-              (d.source.y +(d.target.y-d.source.y)/2) + " " +  
+              (d.source.x + (d.target.x-d.source.x)/2+k) + "," + 
+              (d.source.y + (d.target.y-d.source.y)/2-k) + " " +  
               d.target.x + "," + d.target.y;
     });
     
@@ -564,8 +806,7 @@ function addForegroundCircles() {
     var circles = d3.selectAll(".node")
                     .append("circle")
                     .attr("r", circleSize)
-                    .attr("class", "foreground")
-                    .style("fill", "#fff")
+                    .attr("class", 'foreground')
                     .style("stroke", "#ddd")
                     .style("stroke-opacity", function(d) {
                         if(d.selected == true) {
@@ -591,6 +832,7 @@ function addIcons() {
                   .attr("y", iconSize/-2)
                   .attr("height", iconSize)
                   .attr("width", iconSize);  
+                  
     return icons;
 }
 

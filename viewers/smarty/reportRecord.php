@@ -5,6 +5,7 @@ Thus, we need to obtain all records data in code of report template. To achieve 
 
 getRecord - returns a record by recID or reload record if record array is given as parameter
 getRelatedRecords - returns an array of related record for given recID or record array
+getLinkedRecords - returns array of linkedto and linkedfrom record IDs
 getWootText  - returns text related with given record ID
 */
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -134,6 +135,54 @@ class ReportRecord {
             return $res;
     }
     
+    //
+    //
+    //
+    public function getLinkedRecords($rec, $rty_ID=null, $smarty_obj=null){
+        
+            if(is_array($rec) && $rec['recID']){
+                $rec_ID = $rec['recID'];
+            }else{
+                $rec_ID = $rec;
+            }
+            
+            $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID in (';
+            
+            if(is_array($rty_ID)){
+                if(count($rty_ID)>0){
+                    $where = $where.implode(',',$rty_ID).') and ';
+                }
+            }else if(is_int(rty_ID)){
+                $where = $where.$rty_ID.') and ';
+            }else {
+                $where = ' WHERE ';
+            }
+        
+            $to_records = array();
+            $from_records = array();
+            
+            // get rel records where current record is source
+            $from_res = mysql_query('SELECT rl_TargetID as linkID FROM recLinks '.$where.' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID);
+
+            // get rel records where current record is target
+            $to_res = mysql_query('SELECT rl_SourceID as linkID FROM recLinks '.$where.' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID);
+
+            if (mysql_num_rows($from_res) > 0  ||  mysql_num_rows($to_res) > 0) {
+
+                //find targets
+                while ($row = mysql_fetch_row($from_res)) {
+                    array_push($to_records, $row[0]);
+                }
+                //find sources
+                while ($row = mysql_fetch_row($to_res)) {
+                    array_push($from_records, $row[0]);
+                }
+            }
+            
+            return array('linkedto'=>$to_records, 'linkedfrom'=>$from_records);
+    }
+    
+    
 
     //
     // convert record array to array to be assigned to smarty variable
@@ -192,6 +241,7 @@ class ReportRecord {
             }
             
             if(count($this->loaded_recs)>2500){
+                unset($this->loaded_recs);
                 $this->loaded_recs = array(); //reset to avoid memory overflow
             }
             
@@ -282,6 +332,7 @@ class ReportRecord {
                             $res_cid = "";
                             $res_code = "";
                             $res_label = "";
+                            $res_label_full = '';
                             $res = array();
 
 
@@ -295,14 +346,14 @@ class ReportRecord {
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
                                     $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
-                                    $res_label_full = $this->_add_term_val($res_label, $term_full);
+                                    $res_label_full = $this->_add_term_val($res_label_full, $term_full);
                                     $res_label = $this->_add_term_val($res_label, $term[ $fi['trm_Label'] ]);
 
                                     //NOTE id and label are for backward
                                     array_push($res, array("id"=>$value, "internalid"=>$value, 
                                         "code"=>$term[ $fi['trm_Code'] ], 
                                         "label"=>$term[ $fi['trm_Label'] ], 
-                                        "term"=>$res_label_full, 
+                                        "term"=>$term_full, 
                                         "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
                                 }
                             }

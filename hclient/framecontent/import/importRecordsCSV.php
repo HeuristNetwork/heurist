@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('LOGIN_REQUIRED',1);
+define('MANAGER_REQUIRED',1);
 define('PDIR','../../../');    
 
 require_once(dirname(__FILE__)."/../initPage.php");
@@ -107,8 +107,14 @@ function get_config_bytes($val) {
             .select_rectype_seq{
                 cursor: pointer;
                 display: inline-block;
-                /*font-weight:bold !important;*/
                 padding:0.2em;
+                margin-bottom:1em;
+            }
+            .select_rectype_seq > .hid_temp, .select_rectype_seq > .rt_arrow{
+                display:none;    
+            }
+            .select_rectype_seq:hover > .hid_temp, .select_rectype_seq:hover > .rt_arrow{
+                display:inline-block;    
             }
         </style>
     </head>
@@ -347,7 +353,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                                 <td style="width:50px;text-align:center">Date</td>
                                 <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></table>
                 </div>
-                <div class="ent_content" id="divFieldRoles" style="top:7em;padding: 0.2em 0.5em 4em;">
+                <div class="ent_content" id="divFieldRoles" style="top:7em;bottom:5em;padding: 0.2em 0.5em">
                     list of field roles
                 </div>
                 <div  class="ent_footer">
@@ -396,13 +402,16 @@ If you have missing data for Required fields, you may find it convenient to set 
     
         </div>
 
-        <fieldset style="padding-top:1.5em;padding-bottom:1.5em">
+        <fieldset style="padding-top:1.5em;padding-bottom:0.2em">
         <div>
-            <div class="header optional" style="min-width: 60px; width: 60px;"><label style="vertical-align: top;">Importing:</label></div>
+            <div class="header optional" style="min-width: 80px; width: 80px;">
+                <label style="vertical-align: top;">Importing:</label><br>
+                <label style="vertical-align: bottom;font-size:0.8em">(rollover for details)</label>
+            </div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
-                    <div id="sa_rectype_sequence"></div>
+                    <div id="sa_rectype_sequence" style="min-height:4em;height:6em"></div>
                 </div>
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
@@ -515,10 +524,10 @@ If you have missing data for Required fields, you may find it convenient to set 
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
-                                        <td rowspan="2">
+                                        <td rowspan="2" width="250">
                                             <h2 id="mrr_big">Existing: 586  New: 100</h2>
                                         </td>
-                                        <td width="130" align=right>Existing:</td>
+                                        <td width="50" align=left style="padding-left:30px">Existing:</td>
                                         <td width="50" id="mrr_cnt_update"></td>
                                         <td width="50" class="mrr_update">rows:</td>
                                         <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
@@ -532,7 +541,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr><td align=right>New:</td>
+                                    <tr><td align=left style="padding-left:30px">New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
                                         <td width="50" class="mrr_insert">rows:</td>
                                         <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>
@@ -591,8 +600,8 @@ If you have missing data for Required fields, you may find it convenient to set 
 
 </div>
 
-<div id="divPopupPreview" style="display:none">
-</div>
+<div id="divPopupPreview" style="display:none"></div>
+<div id="divPopupPreview2" style="display:none"></div>
 
 <div id="divSelectPrimaryRecType" style="display:none;height:100%;" class="">
         <fieldset>
@@ -610,7 +619,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <div class="heurist-helper1" style="display: block;padding-top:0.5em">
                     The creation of the primary record type from rows in the input file depends on the prior identification of other entities which will be connected via pointer fields or relationships. The tree below shows the dependencies of the primary record type determined from its pointer and relationship marker fields. Where an input entity matches an existing record, its ID value will be recorded in an ID field which can be used subsequently as a pointer field value; where no existing record is matched a new record is created and the new ID recorded<br><br>
                     Check record types to be imported. <span style="color:red">Red</span> indicates required pointer field
-                    <div style="float:right">View Mode:
+                    <div style="display:none;float:right;/*hidden 2016-11-26*/">View Mode:
                     <input type="radio" name="mode_view" value="0" id="mode_view0" checked><label for="mode_view0">Dependency list</label>
                     &nbsp;&nbsp;
                     <input type="radio" name="mode_view" value="1" id="mode_view1"><label for="mode_view1">Treeview</label>

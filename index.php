@@ -191,6 +191,7 @@ _time_debug = new Date().getTime() / 1000;
      echo 'var db_total_records='.($db_total_records>0?$db_total_records:0).';';  
 ?>
                
+               window.hWin.HAPI4.sysinfo.db_total_records = db_total_records;
                
                 if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
                     //switch to FAP tab if q parameter is defined

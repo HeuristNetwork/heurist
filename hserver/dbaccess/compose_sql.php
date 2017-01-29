@@ -946,16 +946,25 @@ class Predicate {
     }
 
     function isDateTime() {
-
+        
+        $timestamp0 = null;
+        $timestamp1 = null;
         if (strpos($this->value,"<>")>0) {
             $vals = explode("<>", $this->value);
-            $timestamp0 = strtotime($vals[0]);
-            $timestamp1 = strtotime($vals[1]);
+            
+             try{   
+                $timestamp0 = new DateTime($vals[0]);
+                $timestamp1 = new DateTime($vals[1]);
+             } catch (Exception  $e){
+             }                            
         }else{
-            $timestamp0 = strtotime($this->value);
-            $timestamp1 = 1;
+             try{   
+                $timestamp0 = new DateTime($this->value);
+                $timestamp1 = 1;
+             } catch (Exception  $e){
+             }                            
         }
-        return ($timestamp0  &&  $timestamp0 != -1 && $timestamp1  &&  $timestamp1 != -1);
+        return ($timestamp0  &&  $timestamp1);
     }
 
     function makeDateClause() {
@@ -1440,16 +1449,16 @@ class FieldPredicate extends Predicate {
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
             . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
             . 'left join Records link on rd.dtl_Value=link.rec_ID '
-            //. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
+//. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
             . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
             . ' and if(rdt.dty_Type = "resource" AND '.($isnumericvalue?'0':'1').', '
             .'link.rec_Title ' . $match_pred . ', '
-            .'if(rdt.dty_Type in ("enum","relationtype"), rd.dtl_Value '.$match_pred_for_term.', '
+//see 1377            .'if(rdt.dty_Type in ("enum","relationtype"), rd.dtl_Value '.$match_pred_for_term.', '
             . ($timestamp ? 'if(rdt.dty_Type = "date", '
                 .'getTemporalDateString(rd.dtl_Value) ' . $date_match_pred . ', '
                 //.'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
                 .'rd.dtl_Value ' . $match_pred . ')'
-                : 'rd.dtl_Value ' . $match_pred ) . '))'
+                : 'rd.dtl_Value ' . $match_pred ) . ')'
             . $rd_type_clause . ')';
         }
 
@@ -2288,12 +2297,18 @@ class RelationsForPredicate extends Predicate {
 
 class AfterPredicate extends Predicate {
     function makeSQL() {
-        $timestamp = strtotime($this->value);
-        if ($timestamp  &&  $timestamp != -1) {
+        
+         try{   
+            $timestamp = new DateTime($this->value);
+            
             $not = ($this->parent->negate)? 'not' : '';
-            $datestamp = date('Y-m-d H:i:s', $timestamp);
+            $datestamp = $timestamp->format('Y-m-d H:i:s');
+            
             return "$not TOPBIBLIO.rec_Modified >= '$datestamp'";
-        }
+            
+         } catch (Exception  $e){
+            //print $this->value.' => NOT SUPPORTED<br>';                            
+         }                            
         return '1';
     }
 }
@@ -2301,12 +2316,17 @@ class AfterPredicate extends Predicate {
 
 class BeforePredicate extends Predicate {
     function makeSQL() {
-        $timestamp = strtotime($this->value);
-        if ($timestamp  &&  $timestamp != -1) {
+         try{   
+            $timestamp = new DateTime($this->value);
+            
             $not = ($this->parent->negate)? 'not' : '';
-            $datestamp = date('Y-m-d H:i:s', $timestamp);
+            $datestamp = $timestamp->format('Y-m-d H:i:s');
+            
             return "$not TOPBIBLIO.rec_Modified <= '$datestamp'";
-        }
+            
+         } catch (Exception  $e){
+            //print $this->value.' => NOT SUPPORTED<br>';                            
+         }                            
         return '1';
     }
 }

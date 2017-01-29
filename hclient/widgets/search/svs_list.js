@@ -107,8 +107,8 @@ $.widget( "heurist.svs_list", {
 
         this.helper_top = $( '<div>'+window.hWin.HR('right-click for actions')+'</div>' )
         .addClass('logged-in-only heurist-helper1')
-        .appendTo( $( "<div>" ).css({'height':'1.3em', 'padding':'0.2em 0 0 1.2em'}).appendTo(this.div_header) )
-        //.appendTo( this.accordeon );
+        .appendTo( $( "<div>" ).css({'padding':'0.2em 0 0 1.2em'}).appendTo(this.div_header) )
+        //.appendTo( this.accordeon ); 'height':'1.3em', 
         if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
 
 
@@ -205,27 +205,29 @@ $.widget( "heurist.svs_list", {
         if(this.btn_search_save){
             $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data){
                 //show if there is resulst
-                var is_changed = 0;
-                if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0)
-                {
-                    if(!that.btn_search_save.is(':visible')) is_changed = 1;
-                    that.btn_search_save.show();
-                }else{
-                    if(that.btn_search_save.is(':visible')) is_changed = -1;
-                    that.btn_search_save.hide();
-
-                }
-                if(is_changed!=0){
-                    var px = window.hWin.HEURIST4.util.em(2.5);
-                    that.accordeon.css('top', that.accordeon.position().top + is_changed * px );
-                }
-
+                that._adjustAccordionTop();
             });
         }
 
 
         this._refresh();
     }, //end _create
+    
+    _adjustAccordionTop: function(){
+        if(this.btn_search_save){
+            
+                if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0)
+                {
+                    this.btn_search_save.show();
+                }else{
+                    this.btn_search_save.hide();
+
+                }
+                var is_vis = (this.btn_search_save.is(':visible'))?0:-1;
+                var px = 0;//window.hWin.HEURIST4.util.em(2.5);
+                this.accordeon.css('top', this.div_header.height() + is_vis*px + 5);
+        }
+    },
 
     _setOption: function( key, value ) {
         this._super( key, value );
@@ -351,13 +353,16 @@ $.widget( "heurist.svs_list", {
     //
     _updateAccordeon: function(){
 
-
+        
         // show saved searches as a list of buttons
         if(this.options.buttons_mode){
             this._updateAccordeonAsListOfButtons();
             return;
         }
 
+        
+        this._adjustAccordionTop();
+        
         this.accordeon.hide();
 
 
@@ -1408,6 +1413,7 @@ $.widget( "heurist.svs_list", {
                         onclose:function(event){
                             that.search_faceted.hide();
                             that.search_tree.show();
+                            that._adjustAccordionTop();
                     }};
 
                     if(this.search_faceted.html()==''){ //not created yet
@@ -1575,7 +1581,7 @@ $.widget( "heurist.svs_list", {
 
     , _showDbSummary: function(){
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
 
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};

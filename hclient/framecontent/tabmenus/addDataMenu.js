@@ -93,6 +93,8 @@ function haddDataMenu() {
         
         menu.find('#menu-import-csv').click(
             function(event){
+                window.hWin.HAPI4.SystemMgr.user_log('impDelim');
+                
                 window.hWin.HAPI4.SystemMgr.is_logged(
                 function(){
                    var url = window.hWin.HAPI4.basePathV4 + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
@@ -161,6 +163,11 @@ function haddDataMenu() {
         if (link.hasClass('currentquery')) {
             url = url + that._current_query_string
         }
+        
+        if(link && link.attr('data-logaction')){
+            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
+        }
+        
         
         if (link.hasClass('refresh_structure')) {
                options['afterclose'] = this._refreshLists;

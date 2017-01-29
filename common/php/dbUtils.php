@@ -71,7 +71,7 @@ function db_create($db_name, $verbose = true){
                 $res = true;
             }else if($verbose) {
                 print '<p class="error ui-state-error" style="margin:10px"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'
-                    .'Error '.$mysqli->error." Unable to create database $db_name .</p>";
+                .'Error '.$mysqli->error." Unable to create database $db_name .</p>";
                 //echo ("<p class='error'>Error ".$mysqli->error.". Unable to create database $db_name<br/></p>");
             }
             $mysqli->close();
@@ -225,11 +225,11 @@ function db_clone($db_source, $db_target, $verbose=true){
             $tables = $mysqli->query("SHOW TABLES");
             if($tables){
 
-                $mysqli->query("SET foreign_key_checks = 0");
+                $mysqli->query("SET foreign_key_checks = 0"); //disable
                 $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
                 echo ("<b>Adding records to tables: </b>");
-                while ($table = $tables->fetch_row()) {
+                while ($table = $tables->fetch_row()) { //loop for all tables
                     $table = $table[0];
                     $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
                     $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
@@ -253,7 +253,7 @@ function db_clone($db_source, $db_target, $verbose=true){
                     $mysqli->query("ALTER TABLE `".$table."` ENABLE KEYS");
                 }
 
-                $mysqli->query("SET foreign_key_checks = 1");
+                $mysqli->query("SET foreign_key_checks = 1"); //restore/enable foreign indexes verification
 
             }else{
                 $res = false;
@@ -425,7 +425,7 @@ function zip($source, $folders, $destination, $verbose=true) {
 
             //ignore files that are not in list of specifiede folders
             $is_filtered = true;
-            if( $folders ){
+            if( is_array($folders) ){
 
                 $is_filtered = false;
                 foreach ($folders as $folder) {
@@ -467,12 +467,12 @@ function unzip($zipfile, $destination, $entries=null){
 
         $zip = new ZipArchive;
         if ($zip->open($zipfile) === TRUE) {
-            
-          /*debug to find proper name in archive 
-          for($i = 0; $i < $zip->numFiles; $i++) { 
-             $entry = $zip->getNameIndex($i);
-error_log( $entry );
-          }*/
+
+            /*debug to find proper name in archive 
+            for($i = 0; $i < $zip->numFiles; $i++) { 
+            $entry = $zip->getNameIndex($i);
+            error_log( $entry );
+            }*/
             if($entries==null){
                 $zip->extractTo($destination, array());
             }else{
@@ -507,16 +507,18 @@ function db_delete($db, $verbose=true) {
         // Zip $source to $file
         $source = HEURIST_UPLOAD_ROOT.$db;
         $destination = $folder.$db."_".time().".zip";
-        if(zip($source, $destination)) {
-            // Delete $source folder
-            deleteFolder($source);
-            if($verbose) echo "<br/>Folder ".$source." has been deleted";
-
+                
+        if(zip($source, null, $destination)) {
             // Delete from MySQL
             $mysqli = server_connect();
             $mysqli->query("DROP DATABASE hdb_".$db);
             $mysqli->close();
             if($verbose) echo "<br/>Database ".$db." has been dropped";
+            
+            // Delete $source folder
+            deleteFolder($source);
+            if($verbose) echo "<br/>Folder ".$source." has been deleted";
+            
             return true;
         }else{
             if($verbose) echo "<br/>Failed to zip ".$source." to ".$destination;
@@ -582,10 +584,10 @@ function createDatabaseFolders($newDBName){
     }
     /*
     if(recurse_copy( HEURIST_DIR."admin/setup/settings", $uploadPath."/settings" )){
-        add_index_html($uploadPath."/settings"); // index file to block directory browsing
+    add_index_html($uploadPath."/settings"); // index file to block directory browsing
     }else{
-        echo ("<h3>Warning:</h3> Unable to create/copy settings folder to $uploadPath<br>");
-        $warnings = 1;
+    echo ("<h3>Warning:</h3> Unable to create/copy settings folder to $uploadPath<br>");
+    $warnings = 1;
     }*/
     if(recurse_copy( HEURIST_DIR."admin/setup/smarty-templates", $uploadPath."/smarty-templates" )){
         add_index_html($uploadPath."/smarty-templates"); // index file to block directory browsing
@@ -657,7 +659,7 @@ function createFolder($newDBName, $name, $msg, $allow_web_access=false){
     }
 
     add_index_html($folder); // index file to block directory browsing
-    
+
     if($allow_web_access){
         //copy htaccess
         $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
@@ -681,14 +683,14 @@ function deleteFolder($dir) {
         foreach ($objects as $object) {
             if ($object != "." && $object != "..") {
                 if (filetype($dir."/".$object) == "dir") {
-                    rmdir($dir."/".$object);
+                    deleteFolder($dir."/".$object); //delte files
                 } else {
                     unlink($dir."/".$object);
                 }
             }
         }
         reset($objects);
-        rmdir($dir);
+        rmdir($dir); //delete folder itself
     }
 }
 
@@ -700,11 +702,11 @@ function deleteFolder($dir) {
 * @param mixed $dst
 * @param array $folders - zero level folders to copy
 */
-function recurse_copy($src, $dst, $folders=null, $file_to_copy=null) {
+function recurse_copy($src, $dst, $folders=null, $file_to_copy=null, $copy_files_in_root=true) {
     $res = false;
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
-    
+
     $dir = opendir($src);
     if($dir!==false){
 
@@ -715,18 +717,18 @@ function recurse_copy($src, $dst, $folders=null, $file_to_copy=null) {
             while(false !== ( $file = readdir($dir)) ) {
                 if (( $file != '.' ) && ( $file != '..' )) {
                     if ( is_dir($src . $file) ) {
-                        
+
                         if($folders==null || count($folders)==0 || in_array($src.$file.'/',$folders))
                         {
                             if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
                             {
-                                $res = recurse_copy($src.$file, $dst . '/' . $file, null, $file_to_copy);
+                                $res = recurse_copy($src.$file, $dst . '/' . $file, null, $file_to_copy, true);
                                 if(!$res) break;
                             }
                         }
-                        
+
                     }
-                    else if($file_to_copy==null || $src.$file==$file_to_copy){
+                    else if($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
                         copy($src.$file,  $dst . '/' . $file);
                         if($file_to_copy!=null) return false;
                     }
@@ -829,57 +831,57 @@ function checkDatabaseFunctions(){
 // set Origin ID for rectype, detail and term defintions
 //
 function db_register($db_name, $dbID){
-    
+
     $res = true;
-    
+
     if($dbID>0){
 
-    $mysqli = server_connect();
-    if($mysqli){
+        $mysqli = server_connect();
+        if($mysqli){
 
-        if(!$mysqli->select_db($db_name)){
-            $res = false;
-            if($verbose) {
-                echo ("<br/><p>Warning: Could not open database ".$db_name);
+            if(!$mysqli->select_db($db_name)){
+                $res = false;
+                if($verbose) {
+                    echo ("<br/><p>Warning: Could not open database ".$db_name);
+                }
+            }
+
+            if($res){
+                //@todo why 3 actions for every table????? 
+                $result = 0;
+                $res = $mysqli->query("update defRecTypes set rty_OriginatingDBID='$dbID' ".
+                    "where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
+                if (!$res) {$result = 1; }
+                $res = $mysqli->query("update defRecTypes set rty_NameInOriginatingDB=rty_Name ".
+                    "where (rty_NameInOriginatingDB = '') OR (rty_NameInOriginatingDB IS NULL)");
+                if (!$res) {$result = 1; }
+                $res = $mysqli->query("update defRecTypes set rty_IDInOriginatingDB=rty_ID ".
+                    "where (rty_IDInOriginatingDB = '0') OR (rty_IDInOriginatingDB IS NULL) ");
+                if (!$res) {$result = 1; }
+                // Fields
+                $res = $mysqli->query("update defDetailTypes set dty_OriginatingDBID='$dbID' ".
+                    "where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
+                if (!$res) {$result = 1; }
+                $res = $mysqli->query("update defDetailTypes set dty_NameInOriginatingDB=dty_Name ".
+                    "where (dty_NameInOriginatingDB = '') OR (dty_NameInOriginatingDB IS NULL)");
+                if (!$res) {$result = 1; }
+                $res = $mysqli->query("update defDetailTypes set dty_IDInOriginatingDB=dty_ID ".
+                    "where (dty_IDInOriginatingDB = '0') OR (dty_IDInOriginatingDB IS NULL) ");
+                if (!$res) {$result = 1; }
+                // Terms
+                $res = $mysqli->query("update defTerms set trm_OriginatingDBID='$dbID' ".
+                    "where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
+                if (!$res) {$result = 1; }
+                $res = $mysqli->query("update defTerms set trm_NameInOriginatingDB=trm_Label ".
+                    "where (trm_NameInOriginatingDB = '') OR (trm_NameInOriginatingDB IS NULL)");
+                if (!$res) {$result = 1; }
+                $res = $mysqli->query("update defTerms set trm_IDInOriginatingDB=trm_ID ".
+                    "where (trm_IDInOriginatingDB = '0') OR (trm_IDInOriginatingDB IS NULL) ");
+                if (!$res) {$result = 1; }
+
+                $res = ($result==0);
             }
         }
-
-        if($res){
-                        //@todo why 3 actions for every table????? 
-                        $result = 0;
-                        $res = $mysqli->query("update defRecTypes set rty_OriginatingDBID='$dbID' ".
-                            "where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        $res = $mysqli->query("update defRecTypes set rty_NameInOriginatingDB=rty_Name ".
-                            "where (rty_NameInOriginatingDB = '') OR (rty_NameInOriginatingDB IS NULL)");
-                        if (!$res) {$result = 1; }
-                        $res = $mysqli->query("update defRecTypes set rty_IDInOriginatingDB=rty_ID ".
-                            "where (rty_IDInOriginatingDB = '0') OR (rty_IDInOriginatingDB IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        // Fields
-                        $res = $mysqli->query("update defDetailTypes set dty_OriginatingDBID='$dbID' ".
-                            "where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        $res = $mysqli->query("update defDetailTypes set dty_NameInOriginatingDB=dty_Name ".
-                            "where (dty_NameInOriginatingDB = '') OR (dty_NameInOriginatingDB IS NULL)");
-                        if (!$res) {$result = 1; }
-                        $res = $mysqli->query("update defDetailTypes set dty_IDInOriginatingDB=dty_ID ".
-                            "where (dty_IDInOriginatingDB = '0') OR (dty_IDInOriginatingDB IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        // Terms
-                        $res = $mysqli->query("update defTerms set trm_OriginatingDBID='$dbID' ".
-                            "where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        $res = $mysqli->query("update defTerms set trm_NameInOriginatingDB=trm_Label ".
-                            "where (trm_NameInOriginatingDB = '') OR (trm_NameInOriginatingDB IS NULL)");
-                        if (!$res) {$result = 1; }
-                        $res = $mysqli->query("update defTerms set trm_IDInOriginatingDB=trm_ID ".
-                            "where (trm_IDInOriginatingDB = '0') OR (trm_IDInOriginatingDB IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        
-                        $res = ($result==0);
-        }
-    }
     }
     return $res;
 }
@@ -891,7 +893,7 @@ function db_register($db_name, $dbID){
 * @param mixed $dbname
 */
 function mysql__usedatabase($mysqli, $dbname){
-    
+
     if($dbname){
 
         $success = $mysqli->select_db($dbname);
@@ -921,7 +923,7 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
 
     $mysqli = server_connect();
     mysql__usedatabase($mysqli, $database);
-    
+
     $ret = null;
 
     if (substr($table_prefix, -1) !== '_') {
@@ -973,9 +975,9 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
     }else{
         $query = $query." where ".$table_prefix."ID=".$rec_ID;
     }
-    
-//error_log($query);        
-//error_log(print_r($params, true));
+
+    //error_log($query);        
+    //error_log(print_r($params, true));
 
     $stmt = $mysqli->prepare($query);
     if($stmt){

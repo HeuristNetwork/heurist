@@ -26,6 +26,9 @@
 
 
 /**
+* @todo
+* 1) use temp table to store relatedSet
+* 2) use recLinks
 *
 * Function list:
 * - makeTag()
@@ -39,10 +42,10 @@
 * - get_group_ids()
 * - is_admin()
 * - is_logged_in()
-* - findPointers()
-* - findReversePointers()
-* - findRelatedRecords()
-* - buildGraphStructure()
+* - findPointers()  NOT USED
+* - findReversePointers()  NOT USED
+* - findRelatedRecords()  NOT USED
+* - buildGraphStructure()   NOT USED
 * - outputRecords()
 * - outputRecord()
 * - outputXInclude()
@@ -285,7 +288,7 @@ $USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ? true : false; //default
 $OUTPUT_STUBS = @$_REQUEST['stub'] == '1' ? true : false; //default to not output stubs
 $INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == - 1 ? false : (@$_REQUEST['fc'] && is_numeric($_REQUEST['fc']) ? $_REQUEST['fc'] : 0)); // default to expand xml file content
 //TODO: supress loopback by default unless there is a filter.
-$SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0 ? false : true); // default to supress loopbacks or gives oneside of a relationship record
+$SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0 ? false : true); // default to supress loopbacks or gives oneside of a relationship record  ARTEM:NOT USED ANYMORE
 $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1 ? true : false);
 //$PUBONLY = (((@$_REQUEST['pub_ID'] && is_numeric($_REQUEST['pub_ID'])) ||
 //			(@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0)) ? true :false);
@@ -340,6 +343,7 @@ if (!isset($SELIDS_FILTERS)) {
 }
 
 $MAX_DEPTH = (@$_REQUEST['depth'] ? intval($_REQUEST['depth']) : (count(array_merge(array_keys($PTRTYPE_FILTERS), array_keys($RELTYPE_FILTERS), array_keys($RECTYPE_FILTERS), array_keys($SELIDS_FILTERS))) > 0 ? max(array_merge(array_keys($PTRTYPE_FILTERS), array_keys($RELTYPE_FILTERS), array_keys($RECTYPE_FILTERS), array_keys($SELIDS_FILTERS))) : 0)); // default to only one level
+
 
 // handle special case for collection where ids are stored in teh session.
 if (array_key_exists('q', $_REQUEST)) {
@@ -715,6 +719,130 @@ function buildGraphStructure($rec_ids, &$recSet) {
     }
 }
 
+//-----------------------------
+//
+// new set of functions to find linkes and related records dynamically
+//
+function _getReversePointers($rec_id, $depth){
+    
+    global $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $PTRTYPE_FILTERS;
+
+    $rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
+    $ptrfilter = (@$PTRTYPE_FILTERS && array_key_exists($depth, $PTRTYPE_FILTERS) ? $PTRTYPE_FILTERS[$depth] : null);
+    
+    $query = 'SELECT rl_SourceID, rl_TargetID, src.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records src '
+            .' where rl_TargetID='.$rec_id.' and rl_DetailTypeID>0 '
+            .'  and src.rec_ID = rl_SourceID '
+            . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+            . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
+    .(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? ' and (src.rec_OwnerUGrpID in (' .
+        join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
+    (is_logged_in() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : '.rec_NonOwnerVisibility = "public")');
+    
+
+    $res = mysql_query($query);
+    
+    $resout = array();
+
+    if($res)
+    while ($row = mysql_fetch_assoc($res)) {
+        if(@$resout[$row['rl_SourceID']]){
+            if(!in_array($row['rl_DetailTypeID'], $resout[$row['rl_SourceID']]['dty_IDs'])){ //rare case
+                array_push($resout[$row['rl_SourceID']]['dty_IDs'], $row['rl_DetailTypeID']);
+            }
+        }else{
+            $resout[$row['rl_SourceID']] = array('rec_RecTypeID'=>$row['rec_RecTypeID'], 'dty_IDs'=>array($row['rl_DetailTypeID']));
+        }
+    }
+    
+    return $resout;    
+}
+
+//
+//
+//
+function _getForwardPointers($rec_id, $depth){
+    
+    global $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $PTRTYPE_FILTERS;
+
+    $rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
+    $ptrfilter = (@$PTRTYPE_FILTERS && array_key_exists($depth, $PTRTYPE_FILTERS) ? $PTRTYPE_FILTERS[$depth] : null);
+    
+    $query = 'SELECT rl_SourceID, rl_TargetID, trg.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records trg '
+            .' where rl_SourceID='.$rec_id.' and rl_DetailTypeID>0 '
+            .'  and trg.rec_ID = rl_TargetID '
+            . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+            . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
+    .(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? ' and (trg.rec_OwnerUGrpID in (' .
+        join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
+    (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : '.rec_NonOwnerVisibility = "public")');
+    
+
+    $res = mysql_query($query);
+    
+    $resout = array();
+
+    if($res)
+    while ($row = mysql_fetch_assoc($res)) {
+        if(@$resout[$row['rl_TargetID']]){
+            if(!in_array($row['rl_DetailTypeID'], $resout[$row['rl_TargetID']]['dty_IDs'])){ //rare case
+                array_push($resout[$row['rl_TargetID']]['dty_IDs'], $row['rl_DetailTypeID']);
+            }
+        }else{
+            $resout[$row['rl_TargetID']] = array('rec_RecTypeID'=>$row['rec_RecTypeID'], 'dty_IDs'=>array($row['rl_DetailTypeID']));
+        }
+    }
+    
+    return $resout;    
+}
+
+//
+//
+//
+function _getRelations($rec_id, $depth){
+    
+    global $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $RELTYPE_FILTERS;
+
+    $rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
+    $relfilter = (@$RELTYPE_FILTERS && array_key_exists($depth, $RELTYPE_FILTERS) ? $RELTYPE_FILTERS[$depth] : null);
+    
+    $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM recLinks, Records trg '
+            .' where rl_SourceID='.$rec_id.' and rl_RelationTypeID>0 '
+            .'  and trg.rec_ID = rl_TargetID '
+            . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+            . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', $relfilter) . ') ' : '') 
+    .(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? ' and (trg.rec_OwnerUGrpID in (' .
+        join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
+    (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : '.rec_NonOwnerVisibility = "public")');
+
+    $res = mysql_query($query);
+    
+    $resout = array();
+
+    if($res)
+    while ($row = mysql_fetch_assoc($res)) {
+        $resout[$row['rl_RelationID']] = array('termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_TargetID']);
+    }
+    
+    $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM recLinks, Records src '
+            .' where rl_TargetID='.$rec_id.' and rl_RelationTypeID>0 '
+            .'  and src.rec_ID = rl_SourceID '
+            . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+            . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', $relfilter) . ') ' : '') 
+    .(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? ' and (src.rec_OwnerUGrpID in (' .
+        join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
+    (is_logged_in() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : '.rec_NonOwnerVisibility = "public")');
+    
+    $res = mysql_query($query);
+    
+    if($res)
+    while ($row = mysql_fetch_assoc($res)) {
+        $resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+    }
+    
+    return $resout;    
+}
+
 
 //----------------------------------------------------------------------------//
 //  Output functions
@@ -722,12 +850,14 @@ function buildGraphStructure($rec_ids, &$recSet) {
 
 /**
 * Outputs the set of records as an xml stream or separate files per record (if $intofile set)
+* 
+* returns array of printed out recID=>recTypeID
 *
 * @param mixed $result
 */
 function outputRecords($result) {
 
-    global $OUTPUT_STUBS, $FRESH, $MAX_DEPTH, $intofile, $hunifile;
+    global $OUTPUT_STUBS, $FRESH, $MAX_DEPTH, $intofile, $hunifile, $relRT;
 
     $recSet = array('count' => 0, 'relatedSet' => array());
     $rec_ids = explode(",", $result['recIDs']);
@@ -740,10 +870,95 @@ function outputRecords($result) {
         $rec_ids = array();
     }
 
+    set_time_limit(0);
+    /*
     if(count($rec_ids)>1000){
         set_time_limit( 30 * count($rec_ids) % 1000 );
     }
+    */
 
+    $current_depth_recs_ids = $rec_ids;
+    $current_depth = 0;
+    $already_out = array(); //result - array of all printed out records recID => recTypeID
+    
+    if(!$intofile){
+        openTag('records');//, array('count' => $recSet['count']));
+    }
+    
+    $relations_rec_ids = array(); //list of all relationship records
+    
+    while ($current_depth<= $MAX_DEPTH){
+        $next_depth_recs_ids = array();
+        $relations_rec_ids[$current_depth] = array();
+        
+        foreach ($current_depth_recs_ids as $recID) {
+
+            // output one record - returns recTypeID and array of related records for given record
+            $res = outputRecord($recID, $current_depth, $OUTPUT_STUBS);
+            
+            // close the file if using HuNI manifest + separate files output
+            // The file is opened in outputRecord but left open!
+            if($intofile && $hunifile){
+                fclose($hunifile);
+            }
+
+            if($res){
+                //output is successful
+                 
+                $already_out[$recID] = $res['recTypeID'];
+                
+                $related_rec_ids = $res['related'];
+                
+                if(count($res['relationRecs'])>0){
+                    $relations_rec_ids[$current_depth] = array_merge($relations_rec_ids[$current_depth], $res['relationRecs']);    
+                }
+                
+                
+                //add to $next_depth_recs_ids if not already printed out or in current depth
+                foreach ($related_rec_ids as $rel_recID) {
+                   if (!(@$already_out[$rel_recID] || 
+                        in_array($rel_recID, $current_depth_recs_ids) || 
+                        in_array($rel_recID, $next_depth_recs_ids) )) {
+                            
+                        array_push($next_depth_recs_ids, $rel_recID);    
+                   } 
+                }
+                
+            }else if ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
+                unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
+            }
+        }
+        
+        unset($current_depth_recs_ids);
+        $current_depth_recs_ids = $next_depth_recs_ids;
+        $current_depth++;
+    }//while depth
+    
+    //print out relationship records with half depth
+    $current_depth = 0;
+    while ($current_depth<= $MAX_DEPTH){
+        foreach ($relations_rec_ids[$current_depth] as $recID) {
+            if (!@$already_out[$recID]){
+             
+                $res = outputRecord($recID, $current_depth.'.5', $OUTPUT_STUBS);
+                if($res){
+                    $already_out[$recID] = $relRT;   
+                }elseif ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
+                    unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
+                }
+            }
+        }
+        $current_depth++;
+    }
+    
+    
+    if(!$intofile){
+        closeTag('records');
+    }
+    return $already_out;
+    
+
+/* OLD VERSION pre 2016-12-05
     foreach ($rec_ids as $recID) {
         if($recID>0)
             $recSet['relatedSet'][$recID] = array('depth' => 0, 'recID' => $recID );
@@ -751,12 +966,6 @@ function outputRecords($result) {
 
     buildGraphStructure($rec_ids, $recSet);
     $recSet['count'] = count($recSet['relatedSet']);
-
-    /* ARTEM: avoid memory overflow
-    foreach ($recSet['relatedSet'] as $recID => $recInfo) {
-    $recSet['relatedSet'][$recID]['record'] = loadRecord_NoCache($recID, true); //loadRecord($recID, $FRESH, true);
-    }
-    */
 
     $resout = array();
 
@@ -767,7 +976,7 @@ function outputRecords($result) {
     foreach ($recSet['relatedSet'] as $recID => $recInfo) {
         if (intval($recInfo['depth']) <= $MAX_DEPTH) {
 
-            // output one record - returs rec_RecTypeID for given record
+            // output one record - returns rec_RecTypeID for given record
             $res = outputRecord($recInfo, $recSet['relatedSet'], $OUTPUT_STUBS);
 
             // close the file if using HuNI manifest + separate files output
@@ -788,21 +997,27 @@ function outputRecords($result) {
         closeTag('records');
     }
 
-
     return $resout;
+*/
+    
 }
 
 
-function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = null) {
-    global $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL,
-    $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID;
+//
+//returns recTypeID and array of related records for given record
+//
+// $parentID - NOT USED
+function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
+    
+    
+    global $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $already_out,
+    $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID,
+    $EXPAND_REV_PTR, $REVERSE;
 
     $hunifile = null;
 
-    //$record = $recordInfo['record'];
-    $record = loadRecord_NoCache($recordInfo['recID'], true); //loadRecord($recID, $FRESH, true);
-
-    $depth = $recordInfo['depth'];
+    $record = loadRecord_NoCache($recID, true); //loadRecord($recID, $FRESH, true);
+    
     $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
 
     if (isset($filter) && !in_array($record['rec_RecTypeID'], $filter)) {
@@ -820,6 +1035,8 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
             return false;
         }
     }
+    
+    $resout = array('recTypeID'=>$record['rec_RecTypeID'], 'related'=>array(), 'relationRecs'=>array());
 
     // using separare files per record
     // TODO: no error checking on success so silent failure if directory non-writable
@@ -864,6 +1081,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
 
     $conceptID = getRecTypeConceptID($record['rec_RecTypeID']);
 
+    makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.HEURIST_DBNAME);
     makeTag('id', null, $record['rec_ID']);
     makeTag('type', array('id' => $record['rec_RecTypeID'],
         'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
@@ -887,7 +1105,8 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
 
     foreach ($record['details'] as $dt => $details) {
         foreach ($details as $value) {
-            outputDetail($dt, $value, $record['rec_RecTypeID'], $recInfos, $depth, $outputStub, $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
+            outputDetail($dt, $value, $record['rec_RecTypeID'], $depth, $outputStub);
+                        //parentID - not used anymore $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
         }
 
     }
@@ -904,118 +1123,60 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
             closeTag('woot');
         }
     }
+    
+    
+    if(strpos($depth, '.')===false){
 
-    if (array_key_exists('revPtrLinks', $recordInfo) && $recordInfo['revPtrLinks']['byRecIDs']) {
-        foreach ($recordInfo['revPtrLinks']['byRecIDs'] as $rec_id => $dtIDs) {
-            foreach ($dtIDs as $dtID) {
-                $linkedRec = loadRecord_NoCache($rec_id, true); //$recInfos[$rec_id]['record'];
+    //artem - find reverse pointers dynamically
+    if($REVERSE){
+        $relations = _getReversePointers($recID, $depth+1);
+        foreach ($relations as $rec_id => $rels) {
+            $linkedRecType = $rels['rec_RecTypeID'];
+            foreach ($rels['dty_IDs'] as $dtID) {
                 $attrs = array('id' => $dtID, 'conceptID' => getDetailTypeConceptID($dtID), 'type' => $DTN[$dtID]);
-                if (array_key_exists($dtID, $RQS[$linkedRec['rec_RecTypeID']])) {
-                    $attrs['name'] = $RQS[$linkedRec['rec_RecTypeID']][$dtID];
+                if (array_key_exists($dtID, $RQS[$linkedRecType])) {
+                    $attrs['name'] = $RQS[$linkedRecType][$dtID];
                 }
                 makeTag('reversePointer', $attrs, $rec_id);
             }
         }
-    }
-
-    if (array_key_exists('revRelLinks', $recordInfo) && $recordInfo['revRelLinks']['relRecIDs']) {
-        $recID = $record['rec_ID'];
-        foreach ($recordInfo['revRelLinks']['relRecIDs'] as $relRec_id) {
-            $relRec = loadRecord_NoCache($relRec_id, true); //$recInfos[$relRec_id]['record'];
-            $attrs = array();
-            if ($details = $relRec['details']) {
-                if ($details[$relTrgDT]) {
-                    list($key, $value) = each($details[$relTrgDT]);
-                    $toRecord = $value;
-                    if (intval($toRecord['id']) != $recID) {
-                        $relatedRecID = $toRecord['id'];
-                    } else {
-                        $attrs['useInverse'] = 'true';
-                        if ($details[$relSrcDT]) {
-                            list($key, $value) = each($details[$relSrcDT]);
-                            $fromRecord = $value;
-                            if (intval($fromRecord['id']) != $recID) {
-                                $relatedRecID = $fromRecord['id'];
-                            }
-                        }
-                    }
-                }
-
-                if ($details[$relTypDT]) {
-                    list($key, $value) = each($details[$relTypDT]);
-                    preg_replace("/-/", "", $value);
-                    $trmID = $value;
-                    if ($trmID) { //saw Enum change
-                        $attrs['type'] = $TL[$trmID]['trm_Label'];
-                        $attrs['termID'] = $trmID;
-                        $attrs['termConceptID'] = getTermConceptID($trmID);
-                        if ($TL[$trmID]['trm_Code']) {
-                            $attrs['code'] = $TL[$trmID]['trm_Code'];
-                        };
-                        if ($relatedRecID) {
-                            $attrs['relatedRecordID'] = $relatedRecID;
-                        }
-                        if (array_key_exists($trmID, $INV) && $INV[$trmID]) {
-                            $attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
-                            $attrs['invTermID'] = $INV[$trmID];
-                            $attrs['invTermConceptID'] = getTermConceptID($INV[$trmID]);
-                        }
-                    }
-                }
-            }
-            makeTag('relationship', $attrs, $relRec_id);
+        if($EXPAND_REV_PTR && $depth<$MAX_DEPTH){
+            $resout['related'] = array_merge($resout['related'], array_keys($relations));
         }
     }
 
-    if (array_key_exists('relLinks', $recordInfo) && $recordInfo['relLinks']['relRecIDs']) {
-        $recID = $record['rec_ID'];
-        foreach ($recordInfo['relLinks']['relRecIDs'] as $relRec_id) {
-            $relRec = loadRecord_NoCache($relRec_id, true); //$recInfos[$relRec_id]['record'];
-            $attrs = array();
-            if ($details = $relRec['details']) {
-                if ($details[$relTrgDT]) {
-                    list($key, $value) = each($details[$relTrgDT]);
-                    $toRecord = $value;
-                    if (intval($toRecord['id']) != $recID) {
-                        $relatedRecID = $toRecord['id'];
-                    } else {
-                        $attrs['useInverse'] = 'true';
-                        if ($details[$relSrcDT]) {
-                            list($key, $value) = each($details[$relSrcDT]);
-                            $fromRecord = $value;
-                            if (intval($fromRecord['id']) != $recID) {
-                                $relatedRecID = $fromRecord['id'];
-                            }
-                        }
-                    }
-                }
-
-                if ($details[$relTypDT]) {
-                    list($key, $value) = each($details[$relTypDT]);
-                    preg_replace("/-/", "", $value);
-                    $trmID = $value;
-                    if ($trmID) { //saw Enum change
-                        $attrs['type'] = $TL[$trmID]['trm_Label'];
-                        $attrs['termID'] = $trmID;
-                        $attrs['termConceptID'] = getTermConceptID($trmID);
-                        if ($relatedRecID) {
-                            $attrs['relatedRecordID'] = $relatedRecID;
-                        }
-                        if (array_key_exists($trmID, $INV) && $INV[$trmID]) {
-                            $attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
-                            $attrs['invTermID'] = $INV[$trmID];
-                            $attrs['invTermConceptID'] = getTermConceptID($INV[$trmID]);
-                        }
-                    }
-                }
-            }
-            makeTag('relationship', $attrs, $relRec_id);
-        }
+    if($depth<$MAX_DEPTH){
+        $relations = _getForwardPointers($recID, $depth+1);
+        $resout['related'] = array_merge($resout['related'], array_keys($relations));
     }
 
+
+    $relations = _getRelations($recID, $depth+1);
+    //$resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+    foreach ($relations as $relRec_id => $attrs) {
+        
+        $trmID = $attrs['termID'];
+
+        $attrs['type'] = $TL[$trmID]['trm_Label'];
+        $attrs['termConceptID'] = getTermConceptID($trmID);
+        if ($TL[$trmID]['trm_Code']) {
+            $attrs['code'] = $TL[$trmID]['trm_Code'];
+        };
+        if (array_key_exists($trmID, $INV) && $INV[$trmID]) {
+            $attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
+            $attrs['invTermID'] = $INV[$trmID];
+            $attrs['invTermConceptID'] = getTermConceptID($INV[$trmID]);
+        }
+        array_push($resout['related'], $attrs['relatedRecordID']);    
+        array_push($resout['relationRecs'], $relRec_id);
+        
+        makeTag('relationship', $attrs, $relRec_id);
+    }
+
+    }
     closeTag('record');
 
-    return $record['rec_RecTypeID']; //true;
+    return $resout;
 } //outputRecord
 
 
@@ -1091,7 +1252,10 @@ function makeFileContentNode($file) {
 }
 
 
-function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $parentID) {
+//
+//
+//
+function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
     global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT;
     $attrs = array('id' => $dt, 'conceptID' => getDetailTypeConceptID($dt));
@@ -1143,8 +1307,9 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $par
                         $fpath = realpath($file['fullpath']);
                         $fpath = str_replace('\\','/',$fpath);
 
-                        recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'/', null, 
-                            $fpath);
+                        //ARTEM 2016-12-13 This recurse_copy - since ti copy everything in backup recursively!!!!
+                        //moreover it is already done in exportMyDataPopup
+                        //recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'/', array('no copy folders'), $fpath);
 
                         $file['URL'] = @$file['ulf_FilePath'].@$file['ulf_FileName']; //relative path to db root    
 
@@ -1597,73 +1762,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
             print '</body></html>';
         }
     }
-    /*
 
-    $_REQUEST['limit'] = 1000;
-
-    $total_out_count = 0;
-
-    // create HuNI manifest
-    $huni_resources = fopen( HEURIST_HML_DIR."resources.xml","w");
-    fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
-
-    // dbID set at start of script
-    if (isset($dbID) && ($dbID != 0)) {
-    fwrite( $huni_resources, "<dbID>".$dbID."</dbID>\n");
-    }
-    else
-    {
-    fwrite( $huni_resources, "<dbID>0</dbID>\n"); // unregistered indicated by 0
-    }
-
-
-    while ($last_limit==null || $offset<$last_limit){
-
-    $_REQUEST['offset'] = $offset;
-    $result = loadSearch($_REQUEST, false, true, $PUBONLY);
-
-    if (array_key_exists('error', $result)) {
-    print "Error: ".$result['error'];
-    break;
-    }else if($result['recordCount']>0){
-
-    // write out all records as separate files
-    $resout = outputRecords($result);
-
-    // add each output file to the manifest
-    foreach ($resout as $recID => $recTypeID) {
-
-    $resfile = HEURIST_HML_DIR.$recID.".xml";
-
-    if(file_exists($resfile)){
-    $conceptID = getRecTypeConceptID($recTypeID);
-    fwrite( $huni_resources, "<record>\n");
-    fwrite( $huni_resources, "<name>".$recID.".xml</name>\n");
-    fwrite( $huni_resources, "<hash>".md5_file($resfile)."</hash>\n");
-    fwrite( $huni_resources, "<RTConceptID>".$conceptID."</RTConceptID>\n");
-    fwrite( $huni_resources, "</record>\n");
-    }
-    }
-
-    $offset = $offset + 1000;
-    $total_out_count = $total_out_count + count($resout);
-
-    if($result['recordCount']<100){
-    break;
-    }
-    }
-    }
-
-    fseek( $huni_resources, 1);   // move pointer to the file position where we saved above
-    fwrite( $huni_resources, '<resources recordCount="'.count($total_out_count)."\">\n");      // !!!!!!
-
-    fwrite($huni_resources, $newline);
-
-    fwrite( $huni_resources, "</resources>");
-    fclose( $huni_resources );
-
-    print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
-    */
 }else{ // single output stream
 
     openTag('hml', $hmlAttrs);
@@ -1687,9 +1786,11 @@ if($intofile){ // flags HuNI manifest + separate files per record
         makeTag('error', null, $result['error']);
     } else {
         makeTag('resultCount', null, @$result['resultCount']>0 ? $result['resultCount'] : " 0 ");
-        makeTag('recordCount', null, @$result['recordCount']>0 ? $result['recordCount'] : " 0 ");
         // Output all the records as XML blocks
-        if (@$result['recordCount'] > 0) outputRecords($result);
+        if (@$result['resultCount'] > 0){
+            $resout = outputRecords($result);  
+            makeTag('recordCount', null, count($resout));//@$result['recordCount']>0 ? $result['recordCount'] : " 0 ");
+        } 
     }
     closeTag('hml');
 

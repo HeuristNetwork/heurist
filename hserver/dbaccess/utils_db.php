@@ -229,7 +229,7 @@
     * @param mixed $mysqli
     * @param mixed $query
     * @param mixed $mode 
-    *                   0 - 2 dim array of records
+    *                   0 - 2 dimensions array of records
     *                   1 - array of records with index from first column
     * @return []
     */

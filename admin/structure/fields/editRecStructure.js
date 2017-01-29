@@ -98,6 +98,12 @@ function EditRecStructure() {
     * Reads GET parameters, creates TabView and triggers init of first tab
     */
     function _init() {
+        
+        if(!top.HEURIST.rectypes && window.hWin && window.hWin.HEURIST4){
+            top.HEURIST.rectypes = window.hWin.HEURIST4.rectypes;
+            top.HEURIST.detailTypes = window.hWin.HEURIST4.detailtypes;
+            top.HEURIST.terms = window.hWin.HEURIST4.terms;
+        }
 
         db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -450,9 +456,9 @@ function EditRecStructure() {
                         '</div></div>'+
 
                         // Required/recommended optional
-                        '<div class="input-row"><div class="input-header-cell">Requirement:</div>'+
+                        '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Requirement:</div>'+
                         '<div class="input-cell" title="Determines whether the field must be filled in, should generally be filled in, or is optional">'+
-                        '<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:0px">'+
+                        '<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:0px;vertical-align: top;">'+
                         '<option value="required">required</option>'+
                         '<option value="recommended">recommended</option>'+
                         '<option value="optional">optional</option>'+
@@ -474,17 +480,20 @@ function EditRecStructure() {
                         '<input type="radio" id="incValue_'+rst_ID+'_2" name="incValue_'+rst_ID+'" value="1"  title="'+incrementTip+'" onchange="onIncrementModeChange('+rst_ID+')">'+
                         '<label  style="min-width: 120px;width: 120px;" for="incValue_'+rst_ID+'_2" title="'+incrementTip+'">Increament value by 1</label>'+
                         '</span>'
-                        :'<span style="padding-left:50px">'+
+                        :'<div style="padding-left:50px;display:inline-block">'+
                         '<label class="input-header-cell" for="ed'+rst_ID+'_rst_DefaultValue">Default&nbsp;Value:</label>'+
-                        '<div id="termsDefault_'+rst_ID+'" style="display:inline-block;"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/></div>'+
-                        '</span>')+
+                        '<div id="termsDefault_'+rst_ID+'" style="display:inline-block;"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/>'+
+                        ((fieldType=='date')?'<br><span class="prompt">yesterday, today, tomorrow, now, specific date</span>':'')+
+                        '</div>'+
+                        '</div>')+
 
                         // Minimum values
                         '<span id="ed'+rst_ID+'_spanMinValue" style="display:none;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
                         '<input id="ed'+rst_ID+
                         '_rst_MinValues" title="Minimum number of values which are required in data entry" style="width:20px" size="2" '+
-                        'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
-
+                        'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span>'+
+                        '</div></div>'+
+                        
                         // Repeatability
                         '<div class="input-row" id="divRepeatability'+rst_ID+'">'+
                         '<div class="input-header-cell">Repeatability :</div>'+
@@ -586,7 +595,10 @@ function EditRecStructure() {
             //
             _myDataTable.subscribe('linkClickEvent', function(oArgs){
 
-                if(!Hul.isnull(popupSelect) || _isServerOperationInProgress) { return; }
+                if(!Hul.isnull(popupSelect) || _isServerOperationInProgress) { 
+                    console.log('popup or action-in-progress');
+                    return; 
+                }
 
                 YAHOO.util.Event.stopEvent(oArgs.event);
 
@@ -722,7 +734,10 @@ function EditRecStructure() {
                     if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
                         (!Hul.isnull(column) && 
                             (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
-                        { return; }
+                        { 
+                            if (!Hul.isnull(popupSelect) || _isServerOperationInProgress) console.log('popup or action-in-progress');
+                            return; 
+                        }
 
 
 
@@ -1360,7 +1375,7 @@ function EditRecStructure() {
             var dty_ID = arrDty_ID[k];
             if(Hul.isnull(recDetTypes[dty_ID])){ //not added
                 var arrs = detTypes[dty_ID].commonFields;
-                //add new detail type
+                // add new detail type
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
                 var def_width = 80;  // default width, used by single line text fields
                 var dt_type = arrs[fi.dty_Type];
@@ -1691,6 +1706,9 @@ function EditRecStructure() {
                     if(!is_onexit && newvalue){
                         document.getElementById('rty_TitleMask').value = newvalue;    
                     }
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
     }
@@ -2174,6 +2192,9 @@ function onAddNewDetail(index_toinsert){
                         editStructure.addDetails(detailTypesToBeAdded, index_toinsert);
                     }
                     popupSelect = null;
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
 
@@ -2220,6 +2241,9 @@ function onDefineNewType(index_toinsert){
                     }
 
                     popupSelect =  null;
+                },
+                afterclose: function(){
+                    popupSelect = null;
                 }
         });
     }
@@ -2580,7 +2604,11 @@ function _onAddEditFieldType(dty_ID, rty_ID){
                     _removeTable(grpID_old, true);
                     }*/
                 }
+            },
+            afterclose: function(){
+                popupSelect = null;
             }
+            
     });
 }
 
@@ -2612,6 +2640,9 @@ function onEditRecordType(){
                 }
                 //refresh icon, title, mask
                 editStructure.refreshTitleAndIcon();
+            },
+            afterclose: function(){
+                popupSelect = null;
             }
         });
         

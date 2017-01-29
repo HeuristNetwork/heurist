@@ -48,29 +48,29 @@ require_once(dirname(__FILE__)."/../initPage.php");
             <div>
                 <ul>
                     <li><a href="common/connect/getListOfDatabases.php?v=4" name="auto-popup" class="portrait h3link"
-                        onClick="{return false;}" data-nologin="1"
+                        onClick="{return false;}" data-nologin="1" data-logaction="dbOpen"
                         title="Open and login to another Heurist database - current database remains open">
-                        Open database</a>
+                        Open</a>
                     </li>
 
                     <li><a href="admin/setup/dbcreate/createNewDB.php" name="auto-popup" class="large h3link"
-                        onClick="{return false;}"
+                        onClick="{return false;}" data-logaction="dbNew"
                         title="Create a new database on the current server - essential structure elements are populated automatically">
-                        New database</a>
+                        New</a>
                     </li>
                     
                     <li class="admin-only">
                         <a href="admin/setup/dbproperties/editSysIdentificationAll.php" name="auto-popup" class="portrait h3link"
-                            onclick= "{return false;}"
+                            onclick= "{return false;}" data-logaction="dbProperties"
                             title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
                             Properties</a>
                     </li>
                     
                     <li class="admin-only">
                         <a href="admin/setup/dbproperties/registerDB.php" name="auto-popup" class="portrait h3link"
-                            onclick= "{return false;}"
+                            onclick= "{return false;}" data-logaction="dbRegister"
                             title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
-                            Register database</a>
+                            Register</a>
                     </li>
                     
                 </ul>
@@ -84,17 +84,25 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <!-- database name is appended automatically by auto-popup -->
 
                     <li>
+                        <a href="hclient/framecontent/visualize/databaseSummary.php" name="auto-popup" class="large h3link"
+                            data-logaction="stVis"
+                            onClick="{return false;}"  id="linkDatabaseSummary"
+                            title="Visualise the internal connections between record types in the database and add connections (record pointers and relationshi markers) between them">
+                            Visualise</a>
+                    </li>
+                    
+                    <li>
                         <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
-                            onClick="{return false;}" id="linkEditRectypes"
-                            title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
-                            Manage record types / fields</a>
+                            onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
+                            title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
+                            Organise</a>
                     </li>
 
                     <li>
                         <a href="admin/structure/import/selectDBForImport.php" name="auto-popup" class="verylarge h3link refresh_structure"
-                            onClick="{return false;}"
+                            onClick="{return false;}" data-logaction="stAcquire"
                             title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
-                            Acquire from databases</a>
+                            Templates</a>
                     </li>
 
                     <!-- Remarked temporarely 2016-05-11
@@ -116,48 +124,38 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     -->
 
                     <li>
-                        <a id= "manage_terms" href="admin/structure/terms/editTerms.php?treetype=enum" name="auto-popup" class="verylarge h3link refresh_structure info_link"
+                        <a id= "manage_terms" href="admin/structure/terms/editTerms.php?treetype=enum" 
+                            data-logaction="stTerms"
+                            name="auto-popup" class="verylarge h3link refresh_structure info_link"
 
                             title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
-                            Manage terms</a>
+                            Terms</a>
                     </li>
 
                     <!-- Adding Manage relation types menu -->
                     <li>
                         <a  href="admin/structure/terms/editTerms.php?treetype=relation" name="auto-popup" class="verylarge h3link refresh_structure info_link"
-
+                            data-logaction="stRelations"
                             title="Browse and edit the relationship types"  onclick= "{return false;}">
-                            Manage relation types</a>
-                    </li>
-
-                    <li>
-                        <a href="hclient/framecontent/databaseSummary.php" name="auto-popup" class="large h3link"
-                            onClick="{return false;}"  xid="menulink-database-summary"
-                            title="Take a look at the internal connections between record types in this database">
-                            Visualise structure</a>
+                            Relations</a>
                     </li>
 
                     <li>
                         <a href="admin/verification/listDatabaseErrors.php" name="auto-popup" class="verylarge h3link"
+                            data-logaction="stVerify"
                             onClick="{return false;}"
                             title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
-                            Verify structure and data</a>
+                            Verify</a>
                     </li>
 
                     <li id="menu-database-refresh">
                         <a href="#" id="menulink-database-refresh"
+                            data-logaction="stRefresh"
                             onClick="{return false;}" data-nologin="1"
                             title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
                             Refresh</a>
                     </li>
                     
-                    <li>
-                        <a href="applications/faims/exportFAIMS.php" name="auto-popup" class="verylarge h3link"
-                            onClick="{return false;}"
-                            title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
-                            Tablet configuration</a>
-                    </li>
-
                     <!--
                     <li><a href="javascript:void(0)"
                     onClick="{/*window.hWin.HEURIST4.util.reloadStrcuture()*/;}"
@@ -186,15 +184,25 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 <ul>
                     <li class="admin-only">
                         <a  href="#" id="menulink-database-admin"
+                            data-logaction="adminFull"
                             onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
-                            Full database administration, <br />utilities &amp; special functions</a>
+                            Advanced functions &amp; utilities</a>
                     </li>
                     <li class="admin-only">
                         <a href="export/dbbackup/exportMyDataPopup.php?inframe=1" name="auto-popup" class="portrait h3link"
+                            data-logaction="adminArchive"
                             onclick= "{return false;}"
                             title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
-                            Complete data archive package</a>
+                            Create data archive package</a>
+                    </li>
+
+                                        <li>
+                        <a href="applications/faims/exportFAIMS.php" name="auto-popup" class="verylarge h3link"
+                            data-logaction="stFAIMS"
+                            onClick="{return false;}"
+                            title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
+                            Build tablet app</a>
                     </li>
 
                     <!--

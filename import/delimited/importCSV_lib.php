@@ -28,6 +28,7 @@ $rep_processed = 0;
 $rep_added = 0;
 $rep_updated = 0;
 $rep_skipped = 0;
+$rep_permission = 0;
 
 $wg_id = 1;  //database owners
 $rec_visibility = 'viewable';
@@ -734,6 +735,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
     $imp_session['validation']['count_update_rows'] = $cnt_update_rows;
     $imp_session['validation']['count_insert_rows'] = $cnt_insert_rows;
     $imp_session['validation']['disambiguation'] = $disambiguation;
+    $imp_session['validation']['disambiguation_lines'] = '';
     $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
 
     //MAIN RESULT - ids to be assigned to each record in import table
@@ -825,6 +827,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
     $rep_added   = 0;
     $rep_updated = 0;
     $rep_skipped = 0;
+    $rep_permission = 0;
 
     //update values in import table - replace negative to new one
     foreach($records as $imp_id => $ids){
@@ -1249,7 +1252,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if($ignore_insert){
             $only_for_specified_id = " (".$id_field." > 0) AND ";
         }else{
-            $only_for_specified_id = " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+            $only_for_specified_id = "";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
         }
     }else{
         $only_for_specified_id = "";
@@ -1401,7 +1404,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             return $wrong_records;
         }
     }
-
+    
     //6. Verify datetime fields
     $k=0;
     foreach ($query_date as $field){
@@ -1725,8 +1728,16 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
                         array_push($newvalue, $r_value);
                     }else{
 
+                         try{   
+                            $t2 = new DateTime($r_value);
+                            $value = $t2->format('Y-m-d H:i:s');
+                            array_push($newvalue, $value);
+                         } catch (Exception  $e){
+                            $is_error = true;
+                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                         }                            
+                        /* OLD VERSION - strtotime doesn't work for dates prior 1901
                         $date = date_parse($r_value);
-
                         if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
                         {
                             $value = strtotime($r_value);
@@ -1736,6 +1747,7 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
                             $is_error = true;
                             array_push($newvalue, "<font color='red'>".$r_value."</font>");
                         }
+                        */
 
                     }
                 }
@@ -1777,7 +1789,7 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
 */
 function doImport($mysqli, $imp_session, $params, $mode_output){
 
-    global $rep_processed,$rep_added,$rep_updated,$rep_skipped,$wg_id,$rec_visibility;
+    global $rep_processed,$rep_added,$rep_updated,$rep_skipped,$rep_permission,$wg_id,$rec_visibility;
 
     $addRecDefaults = getDefaultOwnerAndibility(null);
     
@@ -1914,6 +1926,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
         $rep_added = 0;
         $rep_updated = 0;
         $rep_skipped = 0;
+        $rep_permission = 0;
         $tot_count = $imp_session['reccount'];
         $first_time = true;
         $step = ceil($tot_count/10);
@@ -1964,7 +1977,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
                             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                             //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
-                            doInsertUpdateRecord($recordId, $params, $details, $id_field);
+                            doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
                         }
                         $previos_recordId = $recordId_in_import;
 
@@ -2182,7 +2195,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                 if(  ($id_field_not_defined || $recordId==null) && count($details)>0 ){ //id field not defined - insert for each line
 
                     if(!$ignore_insert){
-                        $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field);
+                        $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
                         $details = array();
                     }
                     
@@ -2191,7 +2204,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                     //THIS SECTION IS NOT USED
                     //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                     if(count($details)>1){
-                        $new_id = doInsertUpdateRecord($recordId, $params, $details, null);
+                        $new_id = doInsertUpdateRecord($recordId, $params, $details, null, $mode_output);
                         if($new_id!=null && intval($new_id)>0) array_push($new_record_ids, $new_id);
                         $previos_recordId = null;
 
@@ -2229,7 +2242,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
         if($id_field && count($details)>0 && !$is_mulivalue_index && $recordId!=null){ //action for last record
             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
-            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field);
+            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
         }
         if(!$id_field){
             array_push($imp_session['uniqcnt'], $rep_added);
@@ -2240,7 +2253,8 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
               'inserted'=>$rep_added,
               'updated'=>$rep_updated,
               'total'=>$tot_count,
-              'skipped'=>$rep_skipped
+              'skipped'=>$rep_skipped,
+              'permission'=>$rep_permission
             );   
 
         //update counts array                
@@ -2408,15 +2422,27 @@ function findOriginalRecord($recordId){
 //
 //
 //
-function doInsertUpdateRecord($recordId, $params, $details, $id_field){
+function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output){
 
-    global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated, $rep_skipped,
+    global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated, $rep_skipped, $rep_permission,
             $wg_id,$rec_visibility;
 
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
     //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
 
+    //check permission beforehand
+    if($recordId>0){
+        $res = checkPermission($recordId, $wg_id);            
+        if($res!==true){
+            // error message: $res;
+            $rep_permission++;
+            return null;
+        }
+    }
+
+    
+    
     //add-update Heurist record
     $out = saveRecord($recordId, $recordType,
         @$details["recordURL"],
@@ -2441,7 +2467,6 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
 
     if (@$out['error']) {
 
-
         //special formatting
         foreach($out["error"] as $idx=>$value){
             $value = str_replace(". You may need to make fields optional. Missing data","",$value);
@@ -2453,14 +2478,16 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
             }
             $out["error"][$idx] = $value;
         }
-        foreach($details['imp_id'] as $imp_id){
-            print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$out["error"]);
-            $res = get_import_value($imp_id, $import_table);
-            if(is_array($res)){
-                $s = htmlspecialchars(implode(", ", $res));
-                print "<div style='padding-left:40px'>".$s."</div>";
+        if ($mode_output!='array'){
+            foreach($details['imp_id'] as $imp_id){
+                print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$out["error"]);
+                $res = get_import_value($imp_id, $import_table);
+                if(is_array($res)){
+                    $s = htmlspecialchars(implode(", ", $res));
+                    print "<div style='padding-left:40px'>".$s."AAAA</div>";
+                }
+                print "</div>";
             }
-            print "</div>";
         }
 
         $rep_skipped++;
@@ -2474,7 +2501,7 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
                 ." SET ".$id_field."=".$out["bibID"]
                 ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
 
-                if(!$mysqli->query($updquery)){
+                if(!$mysqli->query($updquery) && $mode_output!='array'){
                     print "<div style='color:red'>Cannot update import table (set record id ".$out["bibID"].") for lines:".
                     implode(",",$details['imp_id'])."</div>";
                 }
@@ -2485,7 +2512,7 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
             $rep_updated++;
         }
 
-        if (@$out['warning']) {
+        if (@$out['warning'] && $mode_output!='array') {
             print "<div style=\"color:#ff8844\">Warning: ".implode("; ",$out["warning"])."</div>";
         }
 
@@ -2503,11 +2530,11 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
 */
 function saveSession($mysqli, $imp_session){
 
-    $imp_id = mysql__insertupdate($mysqli, "sysImportSessions", "imp",
-        array("imp_ID"=>@$imp_session["import_id"],
-            "ugr_id"=>get_user_id(),
-            "imp_table"=>$imp_session["import_name"],
-            "imp_session"=>json_encode($imp_session) ));
+    $imp_id = mysql__insertupdate($mysqli, "sysImportFiles", "sif",
+        array("sif_ID"=>@$imp_session["import_id"],
+            "sif_UGrpID"=>get_user_id(),
+            "sif_TempDataTable"=>$imp_session["import_name"],
+            "sif_ProcessingInfo"=>json_encode($imp_session) ));
 
     if(intval($imp_id)<1){
         return "Cannot save session. SQL error:".$imp_id;
@@ -2590,14 +2617,14 @@ function download_import_session($session_id, $idfield=null, $mode=1){
     $ret = "";
     $where = "";
     if(is_numeric($session_id)){
-        $where = " where imp_id=".$session_id;
+        $where = " where sif_ID=".$session_id;
     }else{
         print "session id is not defined";
         return;
     }
 
     $res = mysql__select_array2($mysqli,
-        "select imp_session from sysImportSessions".$where);
+        "select sif_ProcessingInfo  from sysImportFiles".$where);
 
     //get field names and original filename
     $session = json_decode($res[0], true);
@@ -2655,11 +2682,11 @@ function clear_import_session($session_id){
     $ret = "";
     $where = "";
     if(is_numeric($session_id)){
-        $where = " where imp_id=".$session_id;
+        $where = " where sif_ID=".$session_id;
     }
 
     $res = mysql__select_array3($mysqli,
-        "select imp_id, imp_session from sysImportSessions".$where);
+        "select sif_ID, sif_ProcessingInfo  from sysImportFiles".$where);
 
     if(!$res){
         $ret = "cannot get list of imported files";
@@ -2678,10 +2705,10 @@ function clear_import_session($session_id){
 
         if($ret==""){
             if($where==""){
-                $where = " where imp_id>0";
+                $where = " where sif_ID>0";
             }
 
-            if (!$mysqli->query("delete from sysImportSessions ".$where)) {
+            if (!$mysqli->query("delete from sysImportFiles ".$where)) {
                 $ret = "cannot delete data from list of imported files: " . $mysqli->error;
             }else{
                 $ret = "ok";
@@ -2705,7 +2732,7 @@ function get_import_session($mysqli, $import_id){
     if($import_id && is_numeric($import_id)){
 
         $res = mysql__select_array2($mysqli,
-            "select imp_session, imp_table from sysImportSessions where imp_id=".$import_id);
+            "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".$import_id);
 
         $session = json_decode($res[0], true);
         $session["import_id"] = $import_id;
@@ -2727,18 +2754,30 @@ function get_list_import_sessions(){
 
     global $mysqli;
 
-    $query = "CREATE TABLE IF NOT EXISTS `sysImportSessions` (
+    /*
+    $query = "CREATE TABLE IF NOT EXISTS `sysImportFiles` (
     `imp_ID` int(11) unsigned NOT NULL auto_increment,
     `ugr_ID` int(11) unsigned NOT NULL default 0,
     `imp_table` varchar(255) NOT NULL default '',
     `imp_session` text,
     PRIMARY KEY  (`imp_ID`))";
+    */
+    
+    $query = "CREATE TABLE IF NOT EXISTS `sysImportFiles` (
+    `sif_ID` int(11) unsigned NOT NULL auto_increment
+    COMMENT 'Sequentially generated ID for delimited text or other files imported into temporary tables ready for processing',
+    `sif_FileType` enum('delimited') NOT NULL Default 'delimited' COMMENT 'The type of file which has been read into a temporary table for this import',   
+    `sif_UGrpID` int(11) unsigned NOT NULL default 0 COMMENT 'The user ID of the user who imported the file',   
+    `sif_TempDataTable` varchar(255) NOT NULL default '' COMMENT 'The name of the temporary data table created by the import',
+    `sif_ProcessingInfo` text  COMMENT 'Primary record type, field matching selections, dependency list etc. created while processing the temporary data table',
+    PRIMARY KEY  (`sif_ID`))";    
+    
     if (!$mysqli->query($query)) {
         return "SQL error: cannot create imported files table: " . $mysqli->error;
     }
 
     $ret = '<option value="0">select uploaded file ...</option>';
-    $query = "select imp_ID, imp_table from sysImportSessions"; //" where ugr_ID=".get_user_id();
+    $query = "select sif_ID, sif_TempDataTable from sysImportFiles"; //" where sif_UGrpID=".get_user_id();
     $res = $mysqli->query($query);
     if ($res){
         while ($row = $res->fetch_row()){

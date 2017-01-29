@@ -56,7 +56,7 @@ $.widget( "heurist.resultListMenu", {
         this.divMainMenuItems.find('li').css('padding-right','3px'); //reduce gap
 
         this.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');
-        
+
         //-----------------------     listener of global events
         var sevents = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT;
         /*window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT;
@@ -189,9 +189,9 @@ $.widget( "heurist.resultListMenu", {
             .appendTo( that.document.find('body') )
             //.addClass('ui-menu-divider-heurist')
             .menu({select: function(event, ui){ 
-                    event.preventDefault(); 
-                    that._menuActionHandler(ui.item.attr('id')); 
-                    return false; }});
+                event.preventDefault(); 
+                that._menuActionHandler(ui.item.attr('id')); 
+                return false; }});
 
             if(window.hWin.HAPI4.is_logged()){
                 that['menu_'+name].find('.logged-in-only').show();
@@ -241,13 +241,13 @@ $.widget( "heurist.resultListMenu", {
             }
             var url = window.hWin.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
 
-                window.hWin.HEURIST4.msg.showDialog(url, {
-                    title: window.hWin.HR('Advanced search builder'),
-                    callback: function(res){
-                        if(!Hul.isempty(res)) {
-                                that.reloadSearch(res);
-                        }
-                    }});
+            window.hWin.HEURIST4.msg.showDialog(url, {
+                title: window.hWin.HR('Advanced search builder'),
+                callback: function(res){
+                    if(!Hul.isempty(res)) {
+                        that.reloadSearch(res);
+                    }
+            }});
 
         }else if(action == "menu-search-save"){  //H4
 
@@ -378,7 +378,7 @@ $.widget( "heurist.resultListMenu", {
                     window.hWin.HEURIST4.msg.showMsgErr(context.problem);
                 }else if(context.none){
                     window.hWin.HEURIST4.msg.showMsgFlash(context.none, 1000, null, 
-                            { my: "center top", at: "center bottom", of: that.element.parent() });
+                        { my: "center top", at: "center bottom", of: that.element.parent() });
                 }else if(context.execute){
                     var fname = context.execute.shift();
                     var args = context.execute;
@@ -399,7 +399,7 @@ $.widget( "heurist.resultListMenu", {
                 }else if(context.ok){
 
                     window.hWin.HEURIST4.msg.showMsgFlash(context.ok, 1000, null, 
-                            { my: "center top", at: "center bottom", of: that.element.parent() });
+                        { my: "center top", at: "center bottom", of: that.element.parent() });
                     that.reloadSearch();
 
                     /*window.hWin.HEURIST4.msg.showMsgDlg(context.ok+
@@ -419,11 +419,11 @@ $.widget( "heurist.resultListMenu", {
 
         var callback = (typeof cbAction == "function" ? cbAction : _requestCallBack);
         var params = "db="+window.hWin.HAPI4.database+"&action="+action+"&data=" + encodeURIComponent(str);
-        
+
         if(top.HEURIST){
             top.HEURIST.util.getJsonData(baseurl, callback, params);
         }
-            
+
 
 
     },
@@ -802,9 +802,9 @@ $.widget( "heurist.resultListMenu", {
         else{
             var body = $(this.document).find('body');
             dheight = Math.min(dheight, body.innerHeight());
-            
+
         }
-        
+
         window.hWin.HEURIST4.msg.showDialog(url, {
             title: window.hWin.HR('Delete Records'),
             height: dheight, width: 600,
@@ -896,10 +896,11 @@ $.widget( "heurist.resultListMenu", {
     addDetailPopup: function() {
 
         if(!top.HEURIST) return;
-        
+
         var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
         if (Hul.isempty(recIDs_all)) {
             window.hWin.HEURIST4.msg.showMsgDlg("No results found. Please run a query with at least one result record. You can use selection to direct your change.");
+            // TODO: the identical string is used 4 times in this file alone. Replace with a constant]
             return;
         }
         var recIDs_sel = this.getSelectionIds();
@@ -912,8 +913,8 @@ $.widget( "heurist.resultListMenu", {
         }
 
         var url = window.hWin.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" +
-                window.hWin.HAPI4.database + '&t='+window.hWin.HEURIST4.util.random();
-                //(new Date().time) ;
+        window.hWin.HAPI4.database + '&t='+window.hWin.HEURIST4.util.random();
+        //(new Date().time) ;
 
         //substitutes
         top.HEURIST.search4 = {};
@@ -936,17 +937,17 @@ $.widget( "heurist.resultListMenu", {
             return;
         }
         window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds();
-   /*
+        /*
         var that = this;
 
         if(!top.HEURIST.rectypes){
-            $.getScript(window.hWin.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+window.hWin.HAPI4.database, function(){ that.addDetailPopup(); } );
-            return
+        $.getScript(window.hWin.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+window.hWin.HAPI4.database, function(){ that.addDetailPopup(); } );
+        return
         }
 
         var url = window.hWin.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" +
-                window.hWin.HAPI4.database + '&t='+window.hWin.HEURIST4.util.random();
-                //(new Date().time) ;
+        window.hWin.HAPI4.database + '&t='+window.hWin.HEURIST4.util.random();
+        //(new Date().time) ;
 
         //substitutes
         top.HEURIST.search4 = {};
@@ -954,7 +955,7 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.recids_sel = recIDs_sel;
         top.HEURIST.search4.rectypes =  window.hWin.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
-   */
+        */
         var url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database+'&action='+action_type;
 
         window.hWin.HEURIST4.msg.showDialog(url, {height:450, width:700,

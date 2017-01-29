@@ -55,17 +55,24 @@ function hexportMenu() {
             var lnk = ele.parent().find('a').css({'text-decoration':'none','color':'black'});
             var href = lnk.attr('href');
             if(!window.hWin.HEURIST4.util.isempty(href)){
+                
+                if(href!='#'){
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
                 if(lnk.hasClass('h3link')){
                     //h3link class on menus implies location of older (vsn 3) code
                     href = window.hWin.HAPI4.basePathV3 + href;
                 }
+                }
                 
                 lnk.attr('href', href).click(
                     function(event){
-                        var action = $(event.target).attr('data-action');
+                        var ele = $(event.target);
+                        if(ele.is('span')){
+                            ele = ele.parent();
+                        }
+                        var action = ele.attr('data-action');
                         if(action){
-                            _menuActionHandler(event, action);
+                            _menuActionHandler(event, action, ele.attr('data-logaction'));
                             return false;
                         }else{
                             _onPopupLink(event);
@@ -82,7 +89,7 @@ function hexportMenu() {
         });
 
         
-       //old way 
+       //old way - REMOVE
         menu.find('[name="auto-popup"]').each(function(){
             var ele = $(this);
             var href = ele.attr('href');
@@ -109,7 +116,7 @@ function hexportMenu() {
                 action = $(event.target).parent().attr('id')
             }
             if(action){
-               _menuActionHandler(event, action);
+               _menuActionHandler(event, action, $(event.target).attr('data-logaction'));
                return false;
             }
       });
@@ -169,6 +176,9 @@ function hexportMenu() {
                options['afterclose'] = this._refreshLists;
         }
 
+        if(link && link.attr('data-logaction')){
+            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
+        }
 
         if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
@@ -185,8 +195,12 @@ function hexportMenu() {
     //
     //
     //
-    function _menuActionHandler(event, action){
+    function _menuActionHandler(event, action, action_log){
 
+        if(action_log){
+            window.hWin.HAPI4.SystemMgr.user_log(action_log);
+        }
+        
         if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
             window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,false)}); // isAll, includeRelated, multifile = separate files
         }else if(action == "menu-export-hml-selected"){ // Currently selected records only
@@ -254,7 +268,7 @@ function hexportMenu() {
             "&db=" + window.hWin.HAPI4.database +
             (multifile?'&file=1':'');
 
-            window.hWin.open(url, '_blank');
+            window.open(url, '_blank');
         }
 
         return false;
@@ -284,7 +298,7 @@ function hexportMenu() {
 
         if(q!=''){
             var url = window.hWin.HAPI4.basePathV3 + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
-            window.hWin.open(url, '_blank');
+            window.open(url, '_blank');
         }
 
         return false;

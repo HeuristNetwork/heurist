@@ -60,7 +60,7 @@ $.widget( "heurist.search", {
         $.getScript(window.hWin.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'5.8em', 'min-width':'1100px', 'border-bottom':'2px solid lightgray'});
+        this.element.css({'height':'6.88em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
         if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
             this.element.addClass('ui-heurist-header1');
         }else{
@@ -82,7 +82,7 @@ $.widget( "heurist.search", {
 
             // database summary, login and register buttons in navigation panel
             var div_left  = $('<div>')
-            .css({'height':'2em','width':'200px', 'padding':'1.8em','float':'left'})
+            .css({'height':'2em','width':0, 'padding':'1.8em','float':'left'})
             .appendTo( this.element );
 
             if(!this.options.isloginforced){
@@ -111,6 +111,8 @@ $.widget( "heurist.search", {
                     .button()
                     .click( function(){ that._doRegister(); });
                 } // register button
+                
+                div_left.css('width','200px');
 
             } // not bypassing login
 
@@ -123,30 +125,45 @@ $.widget( "heurist.search", {
 
         // Search functions container
         //'height':'100%', 'float':'left'   , 'min-width':sz_search
-        this.div_search   = $('<div>').css({ 'float':'left', 'padding-left':sz_search_padding}).appendTo( this.element );
+        this.div_search   = $('<div>').css({ 'float':'left', 
+                                'padding-left':sz_search_padding}).appendTo( this.element );
 
                
         
         //header-label
         this.div_search_header = $('<div>')
-        .css({'width':'110px','text-align':'right'})
+        .css({'width':'0','text-align':'right', 'height':'6.88em'}) //was width:110px
         .addClass('div-table-cell')
         .appendTo( this.div_search );
+/* hidden on 2016-11-11        
         $( "<label>" ).text(window.hWin.HR("Filter"))
         .css({'font-weight':'bold','font-size':'1.2em','padding-left':'1em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
         .appendTo( this.div_search_header );
-
+*/
 
         // Search field
         this.div_search_input = $('<div>')
         .addClass('div-table-cell')
         .appendTo( this.div_search );
 
+        this.input_search_prompt = $( "<span>" ).text(window.hWin.HR("enter search/filter or use filter builder"))
+        .css({'color':'gray','font-size':'0.8em', 'margin': '0.2em 0 0 0.5em',
+              'position': 'absolute'})
+        .appendTo( this.div_search_input );
+
+        
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 'max-width':sz_input, 
+        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
+            'max-width':sz_input, 'padding':'0.4em', 
             'min-width':'10em', 'width':sz_input, 'padding-right':'18px' }) 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
+        
+        this._on( this.input_search, {
+            keyup: this._showhide_input_prompt, 
+            change: this._showhide_input_prompt
+            });
+        
         window.hWin.HEURIST4.util.setDisabled(this.input_search, true);
 
         var menu_h = window.hWin.HEURIST4.util.em(1);
@@ -203,13 +220,13 @@ $.widget( "heurist.search", {
         this.btn_search_as_user = $( "<button>", {
             text: window.hWin.HR("filter"), title: "Apply the filter/search in the search field and display results in the central panel below"
         })
-        .css({'vertical-align':'top', 'font-size':'1.3em'})  //'width':'10em', 
+        .css({'vertical-align':'top', 'font-size':'1.3em', 'width':'8em'})  //'width':'10em', 
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1')
-        .button({text:false, icons: {
-            secondary: 'ui-icon-filter'  //was "ui-icon-search"
+        .button({text:true, icons: {
+            primary: 'ui-icon-filter'  //was "ui-icon-search"
         }});
-
+        
         this.btn_search_domain = $( "<button>", {
             text: window.hWin.HR("filter option")
         })
@@ -262,7 +279,7 @@ $.widget( "heurist.search", {
         if(window.hWin.HAPI4.sysinfo['layout']=='original'){
             div_save_filter.appendTo( this.div_search );
         }else{
-            div_save_filter.css({'min-width': '200px'});
+            div_save_filter.css({'min-width': '245px'});
             div_save_filter.insertBefore( this.div_search_header );
         }
         
@@ -371,7 +388,7 @@ $.widget( "heurist.search", {
 
         var linkGear = $('<a>',{href:'#', 
         title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px','height':'18px'})
+        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px','height':'18px','opacity':'0.5'})
         .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
         .appendTo(this.div_buttons);
         this._on( linkGear, {  click: this.showSearchAssistant });
@@ -458,6 +475,15 @@ $.widget( "heurist.search", {
 
     }, //end _create
 
+    
+    _showhide_input_prompt:function() {
+                if(this.input_search.val()==''){
+                    this.input_search_prompt.show();    
+                }else{
+                    this.input_search_prompt.hide();     
+                }
+    },
+
     /* EXPERIMENTAL
     _initPagination: function(){
     this.div_paginator = $('<span>')
@@ -494,7 +520,7 @@ $.widget( "heurist.search", {
             }
         }
 
-        $(this.element).find('.div-table-cell').height( $(this.element).height() );
+//ART        $(this.element).find('.div-table-cell').height( $(this.element).height() );
 
         this.btn_search_as_user.button( "option", "label", window.hWin.HR(this._getSearchDomainLabel(this.options.search_domain)));
 
@@ -504,6 +530,8 @@ $.widget( "heurist.search", {
             this.select_rectype.empty();
             window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set);
         }
+        
+        this._showhide_input_prompt();
     },
 
     _showAdvancedAssistant: function(){
@@ -522,6 +550,7 @@ $.widget( "heurist.search", {
             function(res){
                 if(!Hul.isempty(res)) {
                     that.input_search.val(res);
+                    that.input_search.change();
                     that._doSearch();
                 }
         }});
@@ -558,6 +587,7 @@ $.widget( "heurist.search", {
             }else if(data==null){
                 that.input_search.val('');
             }
+            that.input_search.change();
 
             //ART that.div_search.css('display','none');
 
@@ -775,14 +805,8 @@ $.widget( "heurist.search", {
                     var rectype = (event)?Number(event.target.value):0;
                     window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), rectype, allowed, window.hWin.HR('Any field type'));
 
-                    /*select_sortby.html("<option value=t>"+window.hWin.HR("record title")+"</option>"+
-                    "<option value=rt>"+window.hWin.HR("record type")+"</option>"+
-                    "<option value=u>"+window.hWin.HR("record URL")+"</option>"+
-                    "<option value=m>"+window.hWin.HR("date modified")+"</option>"+
-                    "<option value=a>"+window.hWin.HR("date added")+"</option>"+
-                    "<option value=r>"+window.hWin.HR("personal rating")+"</option>"+
-                    "<option value=p>"+window.hWin.HR("popularity")+"</option>");*/
                     var topOptions = [{key:'t', title:window.hWin.HR("record title")},
+                        {key:'id', title:window.hWin.HR("record id")},
                         {key:'rt', title:window.hWin.HR("record type")},
                         {key:'u', title:window.hWin.HR("record URL")},
                         {key:'m', title:window.hWin.HR("date modified")},
@@ -891,6 +915,7 @@ $.widget( "heurist.search", {
 
 
         this.input_search.val(q);
+        this.input_search.change();
 
         e = window.hWin.HEURIST4.util.stopEvent(e);
     }
@@ -913,6 +938,7 @@ $.widget( "heurist.search", {
         this.search_assistant.remove();
         this.menu_search_domain.remove();
         this.input_search.remove();
+        this.input_search_prompt.remove();
         if(this.select_rectype) this.select_rectype.remove();
 
         this.div_search_as_user.remove();

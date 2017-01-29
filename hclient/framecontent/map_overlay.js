@@ -251,7 +251,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 var lt = window.hWin.HAPI4.sysinfo['layout'];   
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
                     if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
-                        window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], null, false);
+                        
+                        var ele = $(top.document.body).find('#dh_search_2');
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
+                        {options:{resizable:true, modal:false, width:ele.width(), height:ele.height()-100}, 
+                            my:'left top', at:'left top', of:ele}, false);
                     }
                 }
             }
@@ -272,6 +277,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             selBookmakrs.selectedIndex = 1;
             $(selBookmakrs).change();
 
+            mapping.setTimeMapProperty('centerOnItems', false);
+            
             // Map document layers
             var overlay_index = 1;
             if(doc.layers.length > 0) {
@@ -288,6 +295,13 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             window.hWin.HEURIST4.util.setDisabled(btnMapEdit, false);
             window.hWin.HEURIST4.util.setDisabled(btnMapRefresh, false);
             btnMapEdit.attr('title',"Edit current map "+doc.title+" - add or remove map layers, change settings");
+            
+            //restore auto center on dataset addition, loadItems
+            //@todo - restore after all datasets are added
+            setTimeout(function(){
+                mapping.setTimeMapProperty('centerOnItems', true);    
+            }, 5000);
+            
         }else{
             window.hWin.HEURIST4.util.setDisabled(btnMapEdit, true);
             window.hWin.HEURIST4.util.setDisabled(btnMapRefresh, true);
@@ -576,10 +590,11 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     //console.log(zoom);
 
                     var bound = Math.pow(2, zoom);
-                    var url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
+                    var tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
                     + (source.mimeType.label == "image/png" ? ".png" : ".gif");
-                    //console.log("URL: " + url);
-                    return url;
+                    //console.log("URL: " + tile_url);
+               
+                    return tile_url;
                 };
 
             }
@@ -807,6 +822,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         // Query
         if(source.query !== undefined) {
             //console.log("Query: " + source.query);
+            
+            
 
             var request = null;
             try{
@@ -814,7 +831,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 if(query && query['q']){
                     request = { q: query['q'], 
                         rules: query['rules'],
-                        w: query['w']?query['w']:'all'}; 
+                        w: query['w']?query['w']:'all',
+                        //keep primary rt in case faceted search (need for DH) to distinguish what info to show in map popup
+                        primary_rt:query['primary_rt']}; 
                 }
             }catch(err){
             }
@@ -952,19 +971,46 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 }
 
                 var lt = window.hWin.HAPI4.sysinfo['layout'];
-                if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
+                if(lt && lt.indexOf('DigitalHarlem')==0){ 
+                    //for DigitalHarlem we adds 3 dataset 
+                    // For events search: primary events, secondary events+links, residences+links
+                    // For persons search: everything on one layer
 
                     if(colors_idx>=myColors.length) colors_idx = -1;
                     colors_idx++;
                     source.color = myColors[colors_idx];
 
-                    //points
-                    mapdata = recset.toTimemap(source.id, null, source.color, 1); //main geo only
+                    //points  DH_RECORDTYPE
+                    //change last parameter to 1 - to treat links separately
+                    mapdata = recset.toTimemap(source.id, 99913, source.color, 0); //set to 1 to show main geo only (no links)
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
 
                     mapdata.depends = [];
 
+                    //secondary points  DH_RECORDTYPE_SECONDARY
+                    var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
+                    //change last parameter to 1 - to treat links separately
+                    var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, source.color, 0); //records with type "secondary"
+                    mapdata3.id = random_name_for_secondary;
+                    mapdata3.title = 'Secondary locations';
+                    //mapdata3.timeenabled = 0;
+                    //mapdata3.timeline = {items:[]};
+                    if(mapdata3.mapenabled>0){
+                        mapdata.depends.push(mapdata3);
+                    }
+
+                    //residences  DH_RECORDTYPE_RESIDENCES
+                    var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
+                    //change last parameter to 1 - to treat links separately
+                    var mapdata4 = recset.toTimemap(random_name_for_secondary, 99915, source.color, 0); //records with type "residence"
+                    mapdata4.id = random_name_for_secondary;
+                    mapdata4.title = 'Residence of participants';
+                    if(mapdata4.mapenabled>0){
+                        mapdata.depends.push(mapdata4);
+                    }
+                    
+                    /* if we wish show links as separate layer need to unremark this section
                     //links
                     var mapdata2 = recset.toTimemap(source.id, null, source.color, 2); //rec_Shape only
                     mapdata2.id = "link_"+window.hWin.HEURIST4.util.random();
@@ -974,6 +1020,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     if(mapdata2.mapenabled>0){
                         mapdata.depends.push(mapdata2);
                     }
+                    */
 
                 }else{
 
@@ -1415,26 +1462,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //end custom overlay
 
     
-    function _adjustLegendHeight(tocollapse) {
-        
-            var legend = document.getElementById('map_legend');
-            var ch = $("#map_legend .content").height();
-            var nt = parseInt($(legend).css('bottom'), 10);
-            var mh = $('#map').height();
-            
-            if(tocollapse===true){
-                $(legend).css('top', mh-nt-60);   
-            }else{
-            
-            if(ch > mh-nt-70){
-                $(legend).css('top', 60);
-            }else{
-                $(legend).css('top', mh-nt-ch-70);        
-            }
-        
-            }
-    }
-
     /**
     * Initialization
     */
@@ -1454,7 +1481,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
             $("#map_legend .content").toggle();//(400);
             
-            _adjustLegendHeight(tocollapse);
+            _adjustLegendHeight();
             
         });
 

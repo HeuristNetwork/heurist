@@ -661,7 +661,7 @@ div .selected_last{
     left: 2px;
     right: 2px;
     height: 25px;
-    width: 180px;
+/*    width: 180px; */
 }
 
 .thumbs2 .recordDiv .recTypeThumb{
@@ -1071,8 +1071,50 @@ background: #8ea9b9
     padding-left:35px;
 }
     
-.ui-icon-filter { background-image: url(hclient/assets/filter_icon.png) !important; }
+.ui-icon-filter { 
+    background-image: url(hclient/assets/filter_icon24.png) !important; 
+    width: 24;
+    height: 24;
+    margin-top: -0.8em !important;
+    margin-left: -0.3em;
+}
 
 .ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon.png) !important; }
 
 .ui-iconalign { display: inline-block; vertical-align: text-bottom; padding-right:1em }
+
+/* for popup on map for renderRecordData.php */
+#recID {
+    float: right;
+}
+.detailType {
+    width: 80px;
+    display: table-cell;
+    color: #999999;
+    vertical-align: top;
+    padding: 0 10px 0 0;
+    text-align: right;
+    text-transform: none;
+}
+.detail a, .detail {
+    text-wrap: normal;
+    word-wrap: break-word;
+    white-space: nowrap;
+    word-break: break-word;
+    min-width: 300px;
+    max-width: 300px;
+/*
+    overflow: hidden;
+    text-overflow: ellipsis;
+*/    
+}
+.detail {
+    display: table-cell;
+    padding-right: 5px;
+    text-transform: none;
+    color: #333;
+}
+.thumbnail{
+    margin-left: 80px;
+}
+/*end for map popup*/

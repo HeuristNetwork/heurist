@@ -98,6 +98,9 @@ $mysqli = null;
 $wg_ids = null;
 $publicOnly = false;
 
+//keep params for debug only!
+$params_global;
+
 /*
 
 [{"t":14},{"f:74":"X0"},
@@ -117,7 +120,9 @@ $publicOnly = false;
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
-    global $mysqli, $wg_ids, $publicOnly;
+    global $mysqli, $wg_ids, $publicOnly, $params_global;
+    
+    $params_global = $params;
 
     $mysqli = $db;
 
@@ -327,6 +332,10 @@ class HQuery {
             } else if ($subtext[0] == '+') {
                 $subtext = substr($subtext, 1);
             }
+            $dty_ID = null;
+            if(strpos($subtext,':')>0){
+                list($subtext,$dty_ID) = explode(':',$subtext);
+            }
             
             switch (strtolower($subtext)) {
                 case 'r': case 'rating':
@@ -387,7 +396,12 @@ class HQuery {
                     break;
                     
                 case 'f': case 'field':
-                    //@todo 
+                    if($dty_ID!=null && !in_array($dty_ID, $sort_fields)) {
+                    $sort_expr[] = 
+'ifnull((select if(link.rec_ID is null, dtl_Value, link.rec_Title) from recDetails left join Records link on dtl_Value=link.rec_ID where dtl_RecID=r'.$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID.' ORDER BY link.rec_Title limit 1), "~~"), rec_Title';                    
+                        $sort_fields[] = $dty_ID;   
+                    }
+                    
             }//switch
         
         }//foreach
@@ -693,7 +707,7 @@ class HPredicate {
         $p = "";
 
         if(intval($this->field_id)>0){
-            //find field type
+            //find field type - @todo from cache
             $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
         }else{
             $this->field_type = 'freetext';
@@ -948,21 +962,30 @@ class HPredicate {
 
     function isDateTime() {
 
+        $timestamp0 = null;
+        $timestamp1 = null;
+        
         if (strpos($this->value,"<>")>0) {
             $vals = explode("<>", $this->value);
 
             if(is_numeric($vals[0]) || is_numeric($vals[1])) return false;
 
-            $timestamp0 = strtotime($vals[0]);
-            $timestamp1 = strtotime($vals[1]);
+             try{   
+                $timestamp0 = new DateTime($vals[0]);
+                $timestamp1 = new DateTime($vals[1]);
+             } catch (Exception  $e){
+             }                            
         }else{
 
             if(is_numeric($this->value)) return false;
 
-            $timestamp0 = strtotime($this->value);
-            $timestamp1 = 1;
+             try{   
+                $timestamp0 = new DateTime($this->value);
+                $timestamp1 = 1;
+             } catch (Exception  $e){
+             }                            
         }
-        return ($timestamp0  &&  $timestamp0 != -1 && $timestamp1  &&  $timestamp1 != -1);
+        return ($timestamp0  &&  $timestamp1);
     }
 
     function    makeDateClause() {
@@ -1015,9 +1038,14 @@ class HPredicate {
     */
     function getFieldValue(  ){
 
-        global $mysqli;
+        global $mysqli, $params_global;
 
         //@todo between , datetime, terms
+        if(is_array($this->value)){
+            error_log('value expected string - array given');
+            error_log(print_r($params_global,true));
+            $this->value = reset($this->value);
+        }
 
         //
         if (strpos($this->value,"<>")===false) {
@@ -1039,7 +1067,7 @@ class HPredicate {
 
         if(trim($this->value)=='') return "!=''";
 
-        $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
+            $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
         
         if($this->field_type=='enum' || $this->field_type=='relationtype'){
             

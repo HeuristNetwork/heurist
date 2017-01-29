@@ -57,7 +57,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
             "color": "#0000FF",  //for lines and polygones
             "lineColor": "#0000FF",
             //"icon": "assets/star-red.png",
-            "iconSize": [25,25],
+            "iconSize": [24,24], //[25,25],
             "iconShadow": null,
             "iconAnchor":[9,17]
     });
@@ -225,7 +225,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
                 for (var i=0; i<mapdata.options.items.length; i++){
                     mapdata.options.items[i].options.icon =
-                        window.hWin.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId + 'm.png&color='+encodeURIComponent(new_color);
+                        window.hWin.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId 
+                        + 'm.png&color='+encodeURIComponent(new_color);
 
                     mapdata.options.items[i].options.color = new_color;
                     mapdata.options.items[i].options.lineColor = new_color;
@@ -246,6 +247,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     //
     function _reloadDataset(dataset_id){
 
+                //tmap.opts.centerOnItems = false;
+                
                 var dataset = tmap.datasets[dataset_id];
 
                 var mapdata = _getDataset(dataset_id);
@@ -257,6 +260,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 });*/
 
                 if(!dataset){ //already exists with such name
+                
                     dataset = tmap.createDataset(dataset_id);
                     //dataset.opts.theme = datasetTheme;
                 }else{
@@ -293,12 +297,26 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                     
                 });
                 
+                
+                var forceZoom = false;
+                if(minLat<-40 && maxLat>70 && minLng<-120 && maxLng>120){
+                    minLat = -40;
+                    maxLat = 70;
+                    minLng = -120;
+                    maxLng = 120;
+                    forceZoom = true;
+                }
+                
                 var southWest = new google.maps.LatLng(minLat, minLng);
                 var northEast = new google.maps.LatLng(maxLat, maxLng);
                 mapdata.geoextent = new google.maps.LatLngBounds(southWest, northEast);
 
                 dataset.hide();
                 dataset.show();
+                
+                if(forceZoom){
+                    setTimeout( function(){ _zoomDataset( dataset_id );}, 500 );
+                }
     }
 
     //
@@ -1359,22 +1377,49 @@ console.log('tileloaded 2');
             var item = this,
                 html = item.getInfoHtml(),
                 ds = item.dataset,
-                placemark = item.placemark,
+                placemark, placemark_type,
                 show_bubble_on_map = false;
                                                               //text-align:right;
-            show_bubble_on_map = (item.getType() != "" && placemark.api!=null);
+            if($.isArray(item.placemark)){
+                for(var i=0;i<item.placemark.length;i++){
+                    if(item.placemark[i] instanceof mxn.Marker){
+                        placemark = item.placemark[i];
+                        placemark_type = "marker";
+                        break;
+                    }
+                }
+                if(!placemark){
+                    placemark = item.placemark[0];
+                    if(placemark instanceof mxn.Marker){
+                        placemark_type = "marker";
+                    }else{
+                        placemark_type = "object";    
+                    }
+                    
+                }
+            }else{
+                placemark = item.placemark;
+                placemark_type = item.getType();
+            }                
+                                                              
+                                                              
+            show_bubble_on_map = (placemark_type != "" && placemark.api!=null);
             var bubble_header = '<div style="width:99%;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'
             var ed_html =  '';
             var popupURL = null;
 
-            if(!window.hWin.HEURIST4.util.isnull(item.opts.info)){
+            if(true){ //Since 2016-11-17 use common renderRecordData !window.hWin.HEURIST4.util.isnull(item.opts.info)){
 
-                if(!item.opts.info){
-                    return;   //supress popup
-                }else if(item.opts.info.indexOf('http://')==0){
+                //if(!item.opts.info){
+                //    return;   //supress popup
+                //}else 
+                if(item.opts.info && item.opts.info.indexOf('http://')==0){
                     popupURL =  item.opts.info; //load content from url
                 }else{
-                    html =  bubble_header + item.opts.info + '</div>'; //predefined content
+                    popupURL = window.hWin.HAPI4.basePathV4 + 'records/view/renderRecordData.php?mapPopup=1&recID='
+                            +item.opts.recid+'&db='+window.hWin.HAPI4.database;
+                    
+                    //html =  bubble_header + item.opts.info + '</div>'; //predefined content
                 }
 
             }else{
@@ -1437,7 +1482,7 @@ ed_html +
             if (show_bubble_on_map)
             {
 
-                if (item.getType() == "marker") {
+                if (placemark_type == "marker") {
 
                     if(popupURL){
                         $.get(popupURL, function(responseTxt, statusTxt, xhr){
@@ -1664,6 +1709,13 @@ ed_html +
              return (tmap)?tmap.getNativeMap():null;
         },
 
+        setTimeMapProperty: function(name, value){
+            if(tmap){
+                tmap.opts[name] = value;
+            }
+        },
+
+
         //@todo - separate this functionality to different classes
         map_control: null,    //controls layers on map - add/edit/remove
         map_selection: null,  //@todo working with selection - search within selected area, highlight and popup info
@@ -1673,3 +1725,39 @@ ed_html +
     _init(_mapdiv_id, _timeline, _basePath, _mylayout);
     return that;  //returns object
 }
+
+
+var recordPopupFrame = null;
+//
+// function to open link from record viewer
+//
+function link_open(link) {
+    link.href = link.href+'&reloadPopup=1';
+    try{
+        if(recordPopupFrame && recordPopupFrame.is(':visible')){
+            recordPopupFrame.attr('src', link.href);
+            return false;
+        }
+    }catch(e){
+    }
+ 
+    try{
+        if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
+        
+            recordPopupFrame = top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500, modal:false });
+            return false;
+        }
+        else return true;
+    }catch(e){
+    }
+}
+function sane_link_opener(link) {
+    if (window.frameElement  &&  window.frameElement.name == 'viewer') {
+        top.location.href = link.href;
+        return false;
+    }
+}
+//stub
+function showPlayer(obj, id, url) {
+}
+

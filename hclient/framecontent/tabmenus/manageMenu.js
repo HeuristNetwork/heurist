@@ -27,11 +27,11 @@ function hmanageMenu() {
     _version   = "0.4";
 
     //
-    //
+    // show db structure visualization in popup dialog
     //
     function _showDbSummary(){
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
 
         var body = $(top.document).find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
@@ -73,7 +73,7 @@ function hmanageMenu() {
 
         //$('#frame_container').attr('src', window.hWin.HAPI4.basePathV4+'admin/structure/rectypes/manageRectypes.php?db='+window.hWin.HAPI4.database);           }
         $(parentdiv[1]).accordion('option', 'active', 0); //STRUCTURE
-        $('#linkEditRectypes').click();
+        $('#linkDatabaseSummary').click();
     }
     
     
@@ -134,10 +134,12 @@ function hmanageMenu() {
         var link = $(event.target);
         var url = link.attr('href');
         
-        if(event.target && $(event.target).attr('id')=='menulink-database-summary'){
-            _showDbSummary();
-        }else
-        if(event.target && $(event.target).attr('data-nologin')!='1'){
+//console.log($(event.target).attr('id'));        
+        if(link && link.attr('data-logaction')){
+            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
+        }
+        
+        if(link && link.attr('data-nologin')!='1'){
             
             //check if login
             window.hWin.HAPI4.SystemMgr.is_logged(function(){

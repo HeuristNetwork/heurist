@@ -158,7 +158,10 @@ if($mode=='2' && file_exists($folder.".zip") ){
             
             set_time_limit(0); //no limit
 
+            
+            
             if(file_exists($folder)){
+                echo_flush("<br>Clear folder ".$folder."<br>");
                 //clean folder
                 $res = delFolderTree($folder, true);
                 if(!$res){
@@ -180,7 +183,6 @@ if($mode=='2' && file_exists($folder.".zip") ){
             
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
-                
                 $system_folders = array(
                     HEURIST_ICON_DIR,
                     HEURIST_FILESTORE_DIR.'documentation_and_templates/',
@@ -193,14 +195,27 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 // - these are derivative products, which don't therefore need to be archived    
                 //if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
                 //if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
+
+                echo_flush("<br><br>Exporting system folders<br>");
+                //echo_flush('<br>'.HEURIST_FILESTORE_DIR.' to '.$folder.'<br>');             
                 
-                print "Exporting system folder<br>";
-                //print HEURIST_FILESTORE_DIR.' to '.$folder.'<br>';             
-                ob_flush();flush();
+                //recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders);
+            }else{
+                $system_folders = array('no copy folders');
+            }
+            
+            if(@$_REQUEST['includeresources']=='1'){
+                $copy_files_in_root = true; //copy all files within database folder
+            }else{
+                $copy_files_in_root = false;
+            }
                 
-                recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders);
-                
-                // 2016-10-25  
+           if(@$_REQUEST['include_docs']=='1' || @$_REQUEST['includeresources']=='1'){     
+               recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders, null, $copy_files_in_root);
+           }
+            
+            if(@$_REQUEST['include_docs']=='1'){// 2016-10-25  
+                echo_flush('Copy context_help folder<br>');                
                 recurse_copy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
             }
             
@@ -211,20 +226,20 @@ if($mode=='2' && file_exists($folder.".zip") ){
             if(@$_REQUEST['allrecs']!="1"){
                 $userid = get_user_id();
                 $q = "owner:$userid"; //user:$userid OR
+                $_REQUEST['depth'] = '5';
             }else{
                 $q = "sortby:-m";
+                $_REQUEST['depth'] = '0';
             }
 
 
             $_REQUEST['w'] = 'all';
             $_REQUEST['a'] = '1';
-            $_REQUEST['depth'] = '5';
             $_REQUEST['q'] = $q;
             $_REQUEST['rev'] = 'no'; //do not include reverse pointers
             $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
 
-            print "Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>";
-            ob_flush();flush();
+            echo_flush("Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>");
 
             $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
             if (is_file($to_include)) {
@@ -252,14 +267,12 @@ if($mode=='2' && file_exists($folder.".zip") ){
             
             // Export database definitions as readable text
 
-            print "Exporting database definitions as readable text<br>";
-            ob_flush();flush();
+            echo_flush("Exporting database definitions as readable text<br>");
 
             $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
             saveURLasFile($url, $folder."/Database_Structure.txt");
 
-            print "Exporting database definitions as XML<br>";
-            ob_flush();flush();
+            echo_flush("Exporting database definitions as XML<br>");
             
             $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
             saveURLasFile($url, $folder."/Database_Structure.xml");
@@ -267,8 +280,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             if(is_admin()){
                 // Do an SQL dump of the whole database
-                print "Exporting SQL dump of the whole database<br>";
-                ob_flush();flush();
+                echo_flush("Exporting SQL dump of the whole database<br>");
 
                 try{
                     $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
@@ -283,8 +295,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             //this coode not used anymore - we copy entire content of file_uploads
             if(false && $_REQUEST['includeresources']){
-                print "Exporting resources (indexed/uploaded files)<br>";
-                ob_flush();flush();
+                echo_flush("Exporting resources (indexed/uploaded files)<br>");
 
                 $squery = "select rec_ID, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt ";
                 $ourwhere = " and (dtl_RecID=rec_ID) and (ulf_ID = dtl_UploadedFileID) ";

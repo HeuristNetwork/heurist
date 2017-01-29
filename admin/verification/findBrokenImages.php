@@ -51,7 +51,7 @@
     mysql_connection_overwrite(DATABASE);
     mysql_query('set character set binary');
 
-    $res = mysql_query('select * from recUploadedFiles where ulf_ID>11710 order by ulf_ID'); // where ulf_ID>12000 11710     12060
+    $res = mysql_query('select * from recUploadedFiles order by ulf_ID'); // where ulf_ID>12000 11710     12060
     
     $current_file;
     $cnt_jpg = 0;

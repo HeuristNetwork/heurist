@@ -653,33 +653,41 @@ class Predicate {
 	}
 
 	function makeDateClause() {
-		$timestamp = strtotime($this->value);
-		if ($this->parent->exact) {
-			$datestamp = date('Y-m-d H:i:s', $timestamp);
-			return "= '$datestamp'";
-		}
-		else if ($this->parent->lessthan) {
-			$datestamp = date('Y-m-d H:i:s', $timestamp);
-			return "< '$datestamp'";
-		}
-		else if ($this->parent->greaterthan) {
-			$datestamp = date('Y-m-d H:i:s', $timestamp);
-			return "> '$datestamp'";
-		}
-		else {
-			// it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
-            $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
-			if (@$matches[0]) {
-				$date = $matches[0];
-			}
-			else if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
-				$date = date('Y-m', $timestamp);
-			}
-			else {
-				$date = date('Y-m-d', $timestamp);
-			}
-			return "like '$date%'";
-		}
+        
+         try{   
+            $t2 = new DateTime($this->value);
+            $datestamp = $t2->format('Y-m-d H:i:s');
+            if ($this->parent->exact) {
+                return "= '$datestamp'";
+            }else if ($this->parent->lessthan) {
+                return "< '$datestamp'";
+            }else if ($this->parent->greaterthan) {
+                return "> '$datestamp'";
+            }else {
+                // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
+                $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
+                if (@$matches[0]) {
+                    $date = $matches[0];  
+                }
+                else if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
+                    $date = $t2->format('Y-m'); //date('Y-m', $timestamp);
+                }
+                else {
+                    $date = $t2->format('Y-m-d'); //date('Y-m-d', $timestamp);
+                }
+                return "like '$date%'";
+            }
+                            
+                            
+         } catch (Exception  $e){
+                $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
+                if (@$matches[0]) {
+                    $date = $matches[0];  
+                    return "like '$date%'";
+                }
+         }                            
+         return '=0';
+        
 	}
 }
 
@@ -832,11 +840,12 @@ class FieldPredicate extends Predicate {
         }else{
             $match_pred_for_term = " = trm.trm_ID";
         }
-
-		$timestamp = strtotime($this->value);
-		if ($timestamp) {
-			$date_match_pred = $this->makeDateClause();
-		}
+        
+         try{   
+            $timestamp0 = new DateTime($this->value);
+            if($timestamp0) $date_match_pred = $this->makeDateClause();
+         } catch (Exception  $e){
+         }                            
 
 		if (preg_match('/^\\d+$/', $this->field_type)) {
 			/* handle the easy case: user has specified a (single) specific numeric type */
@@ -860,7 +869,7 @@ class FieldPredicate extends Predicate {
 		                                      .'link.rec_Title ' . $match_pred . ', '
 		                                      .'if(rdt.dty_Type in ("enum","relationtype"), '
 		                                      .'rd.dtl_Value '.$match_pred_for_term.', '
-		                       . ($timestamp ? 'if(rdt.dty_Type = "date", '
+		                       . (isset($timestamp0) ? 'if(rdt.dty_Type = "date", '
 		                                         .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
 		                                         .'rd.dtl_Value ' . $match_pred . ')'
 		                                     : 'rd.dtl_Value ' . $match_pred ) . '))'
@@ -1111,11 +1120,13 @@ class DatePredicate extends Predicate {
 
 	function makeSQL() {
 		$col = $this->col;
-		$timestamp = strtotime($this->value);
-		if ($timestamp  &&  $timestamp != -1) {
-			$not = ($this->parent->negate)? 'not' : '';
-			return "$not $col " . $this->makeDateClause();
-		}
+        
+         try{   
+            $timestamp = new DateTime($this->value);
+            $not = ($this->parent->negate)? 'not' : '';
+            return "$not $col " . $this->makeDateClause();
+         } catch (Exception  $e){
+         }                            
 		return '1';
 	}
 }

@@ -19,71 +19,79 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../configIni.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+//require_once(dirname(__FILE__).'/../../configIni.php');
 
-    if(isForAdminOnly("to get information on all databases on this server")){
-        return;
+if(isForAdminOnly("to get information on all databases on this server")){
+    return;
+}
+
+set_time_limit(0); //no limit
+
+mysql_connection_select();
+$dbs = mysql__getdatabases(true);
+
+$usrEmail = mysql__select_val('select ugr_eMail from sysUGrps where ugr_ID = '.get_user_id());
+$sysadmin = (defined('HEURIST_MAIL_TO_ADMIN') && ($usrEmail==HEURIST_MAIL_TO_ADMIN));
+//$sysadmin = is_systemadmin();
+//$sysadmin = true; // Force system admin rights
+if($sysadmin){
+    startMySession();
+    $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin'] = '1';
+    session_write_close();
+}
+
+/**
+* Selects the value after a query
+* @param mixed $query Query to execute
+*/
+function mysql__select_val($query) {
+    $res = mysql_query($query);
+    if (!$res) {
+        return 0;
     }
 
-    set_time_limit(0); //no limit
-    
-    mysql_connection_select();
-    $dbs = mysql__getdatabases(true);
-    $sysadmin = is_systemadmin();
-    //$sysadmin = true; // Force system admin rights
-
-    /**
-    * Selects the value after a query
-    * @param mixed $query Query to execute
-    */
-    function mysql__select_val($query) {
-        $res = mysql_query($query);
-        if (!$res) {
-            return 0;
-        }
-
-        $row = mysql_fetch_array($res);
-        if($row){
-            return $row[0];
-        }else{
-            0;
-        }
+    $row = mysql_fetch_array($res);
+    if($row){
+        return $row[0];
+    }else{
+        0;
     }
+}
 
-    /**
-    * Calculates the directory size
-    * @param mixed $dir Directory to check
-    */
-    function dirsize($dir)
+/**
+* Calculates the directory size
+* @param mixed $dir Directory to check
+*/
+function dirsize($dir)
+{
+    @$dh = opendir($dir);
+    $size = 0;
+    while ($file = @readdir($dh))
     {
-        @$dh = opendir($dir);
-        $size = 0;
-        while ($file = @readdir($dh))
+        if ($file != "." and $file != "..")
         {
-            if ($file != "." and $file != "..")
+            $path = $dir."/".$file;
+            if (is_dir($path))
             {
-                $path = $dir."/".$file;
-                if (is_dir($path))
-                {
-                    $size += dirsize($path); // recursive in sub-folders
-                }
-                elseif (is_file($path))
-                {
-                    $size += filesize($path); // add file
-                }
+                $size += dirsize($path); // recursive in sub-folders
+            }
+            elseif (is_file($path))
+            {
+                $size += filesize($path); // add file
             }
         }
-        @closedir($dh);
-        return $size;
     }
+    @closedir($dh);
+    return $size;
+}
 
 ?>
 
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Databases statistics</title>
+        <title>Database statistics for this server</title>
 
         <link rel="icon" href="../../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
@@ -124,27 +132,29 @@
             <div id="tabContainer"></div>
         </div>
 
-        <?php if($sysadmin) { ?>
-        <!-- Database verification dialog -->
-        <div id="db-verification" title="Verification" style="display: none">
-            <div>
-                <span>Deletion password:</span>
-                <input id="db-password" type="password" placeholder="password">
-                <button id="pw-check" onclick="checkPassword()">Submit</button>
-            </div>
-
-            <div id="authorized" style="display: none">
-                <div>Correct password</div>
-                <div>Starting to delete selected databases</div>
-
-                <div class="progress-bar">
-                    <span class="progress">0/0</span>
-                    <progress class="bar" value="0" max="100"></progress>
+        <?php
+         if($sysadmin) { 
+         ?>
+            <!-- Database verification dialog -->
+            <div id="db-verification" title="Verification" style="display: none">
+                <div>
+                    <span>Deletion password:</span>
+                    <input id="db-password" type="password" placeholder="password">
+                    <button id="pw-check" onclick="checkPassword()">Submit</button>
                 </div>
-            </div>
 
-        </div>
-        <?php } ?>
+                <div id="authorized" style="display: none">
+                    <div>Correct password</div>
+                    <div>Starting to delete selected databases</div>
+
+                    <div class="progress-bar">
+                        <span class="progress">0/0</span>
+                        <progress class="bar" value="0" max="100"></progress>
+                    </div>
+                </div>
+
+            </div>
+            <?php } ?>
 
         <!-- Table generation script -->
         <script type="text/javascript">
@@ -152,48 +162,54 @@
             var showTimer,hideTimer;
             var arr = [
                 <?php
-                    $com = "";
-                    $i = 0;
-                    foreach ($dbs as $db){
+                $com = "";
+                $i = 0;
+                foreach ($dbs as $db){
 
-                        $owner = mysql__select_val("SELECT concat(ugr_FirstName,' ',ugr_LastName,' ',ugr_eMail,' ',ugr_Organisation) ".
-                                                   "FROM ".$db.".sysUGrps where ugr_id=2");
-                        $owner = str_replace("'","\'",$owner);
-                        $owner = str_replace("\n","",$owner);
+                    $owner = mysql__select_val("SELECT concat(ugr_FirstName,' ',ugr_LastName,' ',ugr_eMail,' ',ugr_Organisation) ".
+                        "FROM ".$db.".sysUGrps where ugr_id=2");
+                    $owner = str_replace("'","\'",$owner);
+                    $owner = str_replace("\n","",$owner);
 
-                        //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
+                    //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
 
-                        print $com."['". substr($db, 4) ."',".
-                        mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1").",".
-                        mysql__select_val("select count(*) from ".$db.".Records").",".
-                        mysql__select_val("select count(*) from ".$db.".recDetails").",".
-                        mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
-                        mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
-                        mysql__select_val("select count(*) from ".$db.".defTerms").",".
-                        mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='workgroup'").",".
-                        mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='user'").",".
-                        mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
-                            ." from ".$db.".sysIdentification where 1").",".
-                        mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
-                            ." FROM information_schema.tables where table_schema='".$db."'").",".
-                        round( (dirsize(HEURIST_UPLOAD_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",'".
-                        mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
-                        mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."','".
-                        $owner."','".
-                        $sysadmin."']";
+                    print $com."['". substr($db, 4) ."',".
+                    mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1").",".
+                    mysql__select_val("select count(*) from ".$db.".Records").",".
+                    mysql__select_val("select count(*) from ".$db.".recDetails").",".
+                    /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
+                    mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
+                    mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
+                    mysql__select_val("select count(*) from ".$db.".defTerms").",".
+                    mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='workgroup'").",".
+                    mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='user'").",".
+                    */
+                    mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
+                        ." from ".$db.".sysIdentification where 1").",".
+                    /*
+                    mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
+                    ." FROM information_schema.tables where table_schema='".$db."'").",".
+                    round( (dirsize(HEURIST_UPLOAD_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
+                    */
+                    "'".mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
+                    mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."','".
+                    $owner."','".
+                    $sysadmin."']";
 
-                        $com = ",\n";
+                    $com = ",\n";
 
-                    }//foreach
+                }//foreach
                 ?>
             ];
 
             var myDataSource = new YAHOO.util.LocalDataSource(arr, {
                 responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
                 responseSchema : {
-                    fields: ["dbname","db_regid","cnt_recs", "cnt_vals", "cnt_rectype",
-                        "cnt_fields", "cnt_terms", "cnt_groups", "cnt_users", "db_version",
-                        "size_db", "size_file", "date_mod", "date_login","owner","deleteable"]
+                    fields: ["dbname","db_regid","cnt_recs", "cnt_vals", 
+//removed by Ian                    "cnt_rectype","cnt_fields", "cnt_terms", "cnt_groups", "cnt_users", 
+                    "db_version",
+//removed by Ian                    "size_db", "size_file", 
+                    "date_mod", "date_login","owner","deleteable"]
             }});
 
             var myColumnDefs = [
@@ -203,14 +219,18 @@
                 { key: "db_regid", label: "Reg ID", sortable:true, className:'right'},
                 { key: "cnt_recs", label: "Records", sortable:true, className:'right'},
                 { key: "cnt_vals", label: "Values", sortable:true, className:'right'},
+                /* Removed to increase speed - see equivalent section commented out above
                 { key: "cnt_rectype", label: "RecTypes", sortable:true, className:'right'},
                 { key: "cnt_fields", label: "Fields", sortable:true, className:'right'},
                 { key: "cnt_terms", label: "Terms", sortable:true, className:'right'},
                 { key: "cnt_groups", label: "Groups", sortable:true, className:'right'},
                 { key: "cnt_users", label: "Users", sortable:true, className:'right'},
+                */
                 { key: "db_version", label: "DB Vsn", sortable:true, className:'right'},
+                /* removed by Ian
                 { key: "size_db", label: "DB (MB)", sortable:true, className:'right'},
                 { key: "size_file", label: "Files (MB)", sortable:true, className:'right'},
+                */
                 { key: "date_mod", label: "Modified", sortable:true},
                 { key: "date_login", label: "Access", sortable:true},
                 { key: "owner", label: "Owner", formatter: function(elLiner, oRecord, oColumn, oData){
@@ -220,7 +240,7 @@
                     ,{ key: 'deleteable', label: 'Delete', className: 'right', formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<input type=\"checkbox\" value=\"'+oRecord.getData('dbname')+'\">';
                     }}
-                <?php } ?>
+                    <?php } ?>
             ];
 
             var dt = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
@@ -265,100 +285,103 @@
         </script>
 
         <?php if($sysadmin) { ?>
-        <!-- Delete databases scipt -->
-        <script>
-            var databases = [];
-            var password;
+            <!-- Delete databases scipt -->
+            <script>
+                var databases = [];
+                var password;
 
-            /**
-            * Returns the values of checkboxes that have been selected
-            */
-            function getSelectedDatabases() {
-                this.databases = [];
-                var checkboxes = document.getElementsByTagName("input");
-                if(checkboxes.length > 0) {
-                    for(var i=0; i<checkboxes.length; i++) {
-                        if(checkboxes[i].checked) {
-                            databases.push(checkboxes[i].value);
+                /**
+                * Returns the values of checkboxes that have been selected
+                */
+                function getSelectedDatabases() {
+                    this.databases = [];
+                    var checkboxes = document.getElementsByTagName("input");
+                    if(checkboxes.length > 0) {
+                        for(var i=0; i<checkboxes.length; i++) {
+                            if(checkboxes[i].checked) {
+                                databases.push(checkboxes[i].value);
+                            }
                         }
                     }
                 }
-            }
 
-            /**
-            * Makes an API call to delete each selected database
-            */
-            function deleteDatabases() {
-                // Determine selected databases
-                getSelectedDatabases();
-                console.log("Databases to delete", databases);
-                if(databases.length == 0) {
-                    alert("Select at least one database to delete");
-                    return false;
+                /**
+                * Makes an API call to delete each selected database
+                */
+                function deleteDatabases() {
+                    // Determine selected databases
+                    getSelectedDatabases();
+                    if(this.databases.length>10){
+                        alert("You selected "+this.databases.length+" databases to be deleted. Max 10 allowed per once");
+                        return false;
+                    }else if(this.databases.length == 0) {
+                        alert("Select at least one database to delete");
+                        return false;
+                    }
+
+                    // Verificate user
+                    $("#db-verification").dialog({
+                        autoOpen: false,
+                        modal: true,
+                        width: "90%"
+                    })
+                    .dialog("open");
+
+
                 }
 
-                // Verificate user
-                $("#db-verification").dialog({
-                    autoOpen: false,
-                    modal: true,
-                    width: "90%"
-                })
-                .dialog("open");
+                /**
+                * Checks if the database deletion password is correct
+                */
+                function checkPassword() {
+                    var submit = document.getElementById("pw-check");
+                    submit.disabled = true;
 
-
-            }
-
-            /**
-            * Checks if the database deletion password is correct
-            */
-            function checkPassword() {
-                var submit = document.getElementById("pw-check");
-                submit.disabled = true;
-
-                // Authenticate user
-                this.password = document.getElementById("db-password").value;
-                $.post("deleteDB.php", {password: password}, function(response) {
-                    // Succesful, post requests to delete databases
-                    submit.parentNode.removeChild(submit);
-                    $("#authorized").slideDown(500);
-                    updateProgress(0);
-                    postDeleteRequest(0);
-                }).fail(function(jqXHR, textStatus, errorThrown) {
-                    // Invalid
-                    alert(jqXHR.status + ": " + jqXHR.responseText);
-                    submit.disabled = false;
-                });
-            }
-
-            /**
-            * Posts a delete request to the server for the database at the given index
-            */
-            function postDeleteRequest(i) {
-                if(i < databases.length) {
-                    // Delete database
-                    $.post("deleteDB.php", {password: password, database: databases[i]}, function(response) {
-                        //alert(response);
-                        $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
-                        postDeleteRequest(i+1);
-                        updateProgress(i+1);
+                    // Authenticate user
+                    this.password = document.getElementById("db-password").value;
+                    $.post( '<?php echo HEURIST_BASE_URL; ?>admin/verification/deleteDB.php',
+                         {password: password}, function(response) {
+                        // Succesful, post requests to delete databases
+                        submit.parentNode.removeChild(submit);
+                        $("#authorized").slideDown(500);
+                        updateProgress(0);
+                        postDeleteRequest(0);
                     }).fail(function(jqXHR, textStatus, errorThrown) {
-                        alert(textStatus);
+                        // Invalid
+                        alert(jqXHR.status + ": " + jqXHR.responseText);
+                        submit.disabled = false;
                     });
-                }else{
-                    // All post-requests have finished.
-                    $("#authorized").append("<div style='margin-top: 10px'>The selected databases have been deleted!</div>");
-                    $("#authorized").append("<div style='font-weight: bold'>Please reload the page if you want to do delete more databases</div>");
                 }
-            }
 
-            /**
-            * Updates the progress bar
-            */
-            function updateProgress(count) {
-                $(".progress").text(count+"/"+databases.length);
-                $(".bar").attr("value", (count*100/databases.length));
-            }
-        </script>
-        <?php } ?>
+                /**
+                * Posts a delete request to the server for the database at the given index
+                */
+                function postDeleteRequest(i) {
+                    if(i < databases.length) {
+                        // Delete database
+                        $.post("<?php echo HEURIST_BASE_URL; ?>admin/verification/deleteDB.php", {password: password, database: databases[i]}, function(response) {
+                            //alert(response);
+                            $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
+                            postDeleteRequest(i+1);
+                            updateProgress(i+1);
+                        }).fail(function(jqXHR, textStatus, errorThrown) {
+                            alert(textStatus);
+                        });
+                    }else{
+                        // All post-requests have finished.
+                        $("#authorized").append("<div style='margin-top: 10px'>The selected databases have been deleted!</div>");
+                        $("#authorized").append("<div style='font-weight: bold'>Please reload the page if you want to do delete more databases</div>");
+                    }
+                }
+
+                /**
+                * Updates the progress bar
+                */
+                function updateProgress(count) {
+                    $(".progress").text(count+"/"+databases.length);
+                    $(".bar").attr("value", (count*100/databases.length));
+                }
+            </script>
+            <?php } ?>
     </body>
 </html>

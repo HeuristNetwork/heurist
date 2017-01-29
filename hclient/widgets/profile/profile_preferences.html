@@ -106,6 +106,23 @@
 
         <div>
             <div class="header">
+                <label for="search_result_pagesize">
+                    Page size for search result list
+                </label>
+            </div>
+            <select name="search_result_pagesize" id="search_result_pagesize" class="text ui-widget-content ui-corner-all" style="min-width:50px"
+                title="This limit does not apply to filter. This is just for pagination of result list">
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1,000</option>
+                <option value="5000">5,000 (not recommended)</option>
+            </select>
+        </div>
+        
+        
+        <div>
+            <div class="header">
                 <label for="smarty-output-limit">
                     Limit lines in interactive custom report output<br/><i>only in web interface, not external calls</i>
                 </label>
@@ -193,7 +210,7 @@
         </div>
         
         <div>
-            <div class="header"><label>Theme (colours & styles)</label></div>
+            <div class="header"><label>Theme (colours &amp; styles)</label></div>
             <div id="layout_theme" style="min-width: 300px;"></div>
             <!-- <select name="layout_theme" id="layout_theme" class="text ui-widget-content ui-corner-all"></select> -->
         </div>

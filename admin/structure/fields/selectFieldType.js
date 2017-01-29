@@ -1,5 +1,3 @@
-<!--
-
 /*
 * Copyright (C) 2005-2016 University of Sydney
 *
@@ -15,7 +13,7 @@
 */
 
 /**
-* selectFieldType.html
+* selectFieldType.js
 * select type for Heurist field
 *
 * @author      Tom Murtagh
@@ -30,8 +28,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
--->
 $.getMultiScripts = function(arr, path) {
     var _arr = $.map(arr, function(scr) {
         return $.getScript( (path||"") + scr );
@@ -144,10 +140,27 @@ $(document).ready(function() {
 	$(container).find('[name="savebutton"]').css('color','lightgray').prop('disabled','disabled');
     
 
-    $('#hint_more_info1').click(function(){ top.HEURIST.util.popupElement(window, document.getElementById('div_more_info1'), 
-                {'title':'More info', 'close-on-blur':true}); });
-    $('#hint_more_info2').click(function(){ top.HEURIST.util.popupElement(window, document.getElementById('div_more_info2'),
-                {'title':'More info', 'close-on-blur':true}); });
+        if(top.HEURIST4){
+            top.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
+                            'Field data type: Record pointer', 
+                            top.HAPI4.basePathV3+'context_help/field_data_types.html #resource',
+                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
+            top.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
+                            'Field data type: Relationship marker', 
+                            top.HAPI4.basePathV3+'context_help/field_data_types.html #relmarker',
+                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
+        }else{
+            
+            $('#hint_more_info1').click(function(){
+                $('#hintpopup').load(top.HEURIST.baseURL_V3+'context_help/field_data_types.html #resource');
+                top.HEURIST.util.popupElement(top, $('#hintpopup')[0],{width:400,height:300});
+            });
+            $('#hint_more_info2').click(function(){
+                $('#hintpopup').load(top.HEURIST.baseURL_V3+'context_help/field_data_types.html #relmarker');
+                top.HEURIST.util.popupElement(top, $('#hintpopup')[0],{width:400,height:300});
+            });
+            
+        }
 	
 	$('.input-cell > .prompt').hide(); //hide help text
 	$('.input-header-cell').css({'width':'0','min-width':'15ex','font-size':'0.8em'});

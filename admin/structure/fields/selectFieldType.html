@@ -178,29 +178,29 @@
 
 			<div class="ft_col">
 				<h2 style="color:black">Record linking fields</h2>
+                
+                <!-- redundancy note: this functionality is repeated in selectLinkField.html/js -->
 			
 			    <input type="radio" name="ft_type" id="t_resourse" value="resource">
 			 	<label for="t_resourse">Record pointer</label>                                                         
 			    <div class="ft_notes">
 			    	A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
-                    <a id="hint_more_info1" class="ft_notes">more...</a>
+                    <a id="hint_more_info1" class="ft_notes" style="cursor:pointer">more...</a>
 			    </div>
-                <div id="div_more_info1" style="display:none; padding:5px">which will pop up the text about about using record pointers</div>
                 
 			    <div id="inpt8" class="ft_preview"></div>
                 
-			    <input type="radio" name="ft_type" id="t_relmaker" value="relmarker">
-			 	<label for="t_relmaker">Relationship maker</label>                                                         
+			    <input type="radio" name="ft_type" id="t_relmarker" value="relmarker">
+			 	<label for="t_relmarker">Relationship marker</label>                                                         
 			    <div class="ft_notes">
 			    	A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
-                    <a id="hint_more_info2" class="ft_notes">more...</a>
+                    <a id="hint_more_info2" class="ft_notes" style="cursor:pointer">more...</a>
 			    </div>
-                <div id="div_more_info2" style="display:none; padding:5px">which will pop up the text about about using relationship markers</div>
                 
 			    <div id="inpt9" class="ft_preview">
                 
                 
-<div><fieldset class="relation editable reminder" stye="width:200px"><legend>Add new relationship</legend><div class="resource"><div class="input-row"><div style="display: inline-block;"></div><div style="display: inline-block; padding-right: 10px; padding-left: 10px;">
+<div><fieldset class="relation editable reminder" style="width:200px"><legend>Add new relationship</legend><div class="resource"><div class="input-row"><div style="display: inline-block;"></div><div style="display: inline-block; padding-right: 10px; padding-left: 10px;">
 <span style="font-size:0.8em">This record: </span><div class="input2-row required" style="padding-left: 0px;"><div class="input2-header-cell" style="padding-left: 0px; min-width: 0px; font-size: 0.8em;"></div><div class="input2-cell" style="padding-left: 0px;"><select name="relationship-type" title="" bib-detail-type="6" data-dispname="" id="relationship-type" style="width: 150px; padding-left: 0px; font-size: 0.8em;"><option value="" style="padding-left: 0px;"></option><optgroup label="1. Generic" style="padding-left: 0px;"><option value="3108" class="depth1" style="padding-left: 0px;">IsRelatedTo</option><option value="3170" class="depth1" style="padding-left: 0px;">has_location</option></optgroup><optgroup label="2. Spatial" style="padding-left: 0px;"><option value="3290" class="depth1" style="padding-left: 0px;">Overlaps</option><option value="3291" class="depth1" style="padding-left: 0px;">Wholly outside</option><option value="3289" class="depth1" style="padding-left: 0px;">Wholly within</option></optgroup><optgroup label="3. Temporal" style="padding-left: 0px;"><option value="3005" class="depth1" style="padding-left: 0px;">Causes</option><option value="3271" class="depth1" style="padding-left: 0px;">IsCausedBy</option><option value="3269" class="depth1" style="padding-left: 0px;">Overlap</option><option value="3262" class="depth2" style="padding-left: 0px;">. . . Overlap.Contains</option><option value="3263" class="depth2" style="padding-left: 0px;">. . . Overlap.IsContainedWithin</option><option value="3091" class="depth2" style="padding-left: 0px;">. . . Overlap.IsContemporaryWith</option><option value="3264" class="depth2" style="padding-left: 0px;">. . . Overlap.IsCoterminousWith</option><option value="3268" class="depth2" style="padding-left: 0px;">. . . Overlap.OverlapsEndOf</option><option value="3267" class="depth2" style="padding-left: 0px;">. . . Overlap.OverlapsStartOf</option><option value="3270" class="depth1" style="padding-left: 0px;">Sequence</option><option value="3012" class="depth2" style="padding-left: 0px;">. . . Sequence.EndsBefore</option><option value="3266" class="depth2" style="padding-left: 0px;">. . . Sequence.ImmediatelyFollows</option><option value="3265" class="depth2" style="padding-left: 0px;">. . . Sequence.ImmediatelyPrecedes</option></optgroup></select><div class="help prompt" style="padding-left: 0px;"></div></div></div></div><div class="input2-row optional"><div class="input2-header-cell" style="min-width: 0px; font-size: 0.8em;">Related record</div><div class="input2-cell"><div class="resource-div empty" title="Related record" bib-detail-type="5" data-dispname="Related record" style=""><input type="text" value="" title="Click here to search for a record, or drag-and-drop a search value" autocomplete="off" class="resource-title" id="title_1470335610681" style="width: 150px;"><input name="relationship-type" value="" type="hidden"><img src="/h4-ao/common/images/12x12.gif" class="delete-resource" title="Remove this record pointer"><img src="/h4-ao/common/images/edit-pencil.png" class="edit-resource" title="Edit this record (opens in a new tab)"><img src="/h4-ao/common/images/magglass_15x14.gif" class="view-resource" title="View the record linked via this pointer field (opens in a new tab)"></div><div class="help prompt"></div></div></div><div class="input2-header-cell" style="padding: 0px; height: 22px; min-width: 0px; font-size: 0.8em;"><input type="button" name="savebutton" value="Add relationship" disabled="" style="margin-right: 10px; padding: 0px 3px; color: lightgray;"><input type="button" value="Cancel" style="padding: 0px 3px;"></div></div><div class="resource optional"><div class="input-row optional"><div class="section-header-cell optional"><a href="#" title="Optional Fields" style="text-decoration: none; background: none;"><img src="/h4-ao/common/images/tright.gif">Optional fields</a></div></div>
 
 
@@ -210,14 +210,16 @@
 		        <div style="text-align:center;width:100%;padding-top:2em;">
 		            <button type="button" id="btnSelect" disabled="disabled"
 		            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-		            role="button" aria-disabled="false" style="color:lightgray;padding:4px 10px;font-size: 1.4em;"
-		            <span class="ui-button-text">Select</span>
+		            role="button" aria-disabled="false" style="color:lightgray;padding:4px 10px;font-size: 1.4em;">
+		            <span class="ui-button-text">Use this field type</span>
 		            </button>
 		        </div>
 			</div>
 
 
         </div>
+        
+        <div id="hintpopup" style="dispay:none;padding:5px"></div>
 
     </body>
 </html>

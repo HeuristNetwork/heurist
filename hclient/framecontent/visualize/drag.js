@@ -31,17 +31,21 @@ function addNodes() {
                   .data(data.nodes)
                   .enter()
                   .append("g");
+                  
     // Dragging
     var drag = d3.behavior.drag()
                  .on("dragstart", dragstart)
                  .on("drag", dragmove)
                  .on("dragend", dragend);
+     
+   var entitycolor = getSetting(setting_entitycolor);
       
-     // Details for each node            
-     nodes.each(function(d, i) {
+   // Details for each node            
+   nodes.each(function(d, i) {
         // Restore location data
         var record = getSetting(d.id);
         if(record) {
+//console.log('restore id '+d.id+'   '+record);            
             var obj = JSON.parse(record);
             if("x" in obj) {
                 d.x = obj.x;
@@ -56,9 +60,57 @@ function addNodes() {
                 d.py = obj.py;
             }
         }
+
+        var  node = d3.select(this);
+        
+        
+        //add infobox
+        if(true || settings.isDatabaseStructure){
+            createOverlay(0, 0, "record", "id"+d.id, d, node);                  
+        }
+        
+        //add outer circle
+        node.append("circle")
+                    .attr("r", function(d) {
+                        return getEntityRadius(d.count);
+                    })
+                    .style('fill-opacity','0.5')
+                    .attr("class", "background")
+                    .attr("fill", entitycolor);        
+        
+        //add internal circle
+        node.append("circle")
+            .attr("r", circleSize)
+            .attr("class", 'foreground')
+                    .style("stroke", "#ddd")
+                    .style("stroke-opacity", function(d) {
+                        if(d.selected == true) {
+                            return 1;
+                        }
+                        return .25;
+                    });
+
+        //add icon
+        node.append("svg:image")
+                  .attr("class", "icon") 
+                  .attr("xlink:href", function(d) {
+                        if(d.image){
+                            return d.image;
+                        }else{
+                            return '';
+                        }
+                  })
+                  .attr("x", -iconSize/2)
+                  .attr("y", -iconSize/2)
+                  .attr("height", iconSize)
+                  .attr("width", iconSize);
+
+
+                           
+        var gravity = getSetting(setting_gravity);
         
         // Attributes
-        d3.select(this)
+        node  //d3.select(this)
           .attr("class", "node id"+d.id)
           .attr("transform", "translate(10, 10)")
           .attr("x", d.x) 
@@ -75,12 +127,14 @@ function addNodes() {
          .on("click", function(d) {
               // Check if it's not a click after dragging
               if(!d3.event.defaultPrevented) {
-                  // Remove all overlays and create a record overlay
-                  removeOverlays();
-                  onRecordNodeClick(d3.event, d, ".node.id"+d.id);
+                  // Remove all overlays and create a record overlay for selected node
+                  //tempXXX
+                  //removeOverlays();
+                  //onRecordNodeClick(d3.event, d, ".node.id"+d.id);
               }
          })
          .call(drag);
+
      });            
      return nodes;
 }
@@ -101,6 +155,7 @@ function updateNodes() {
 
 /** Called when a dragging event starts */
 function dragstart(d, i) {
+    
     d3.event.sourceEvent.stopPropagation();
     force.stop();
 
@@ -128,6 +183,39 @@ function dragmove(d, i) {
             d.x += d3.event.dx;
             d.y += d3.event.dy;
             
+            /* Update the location in localstorage
+            var record = getSetting(d.id); 
+            //console.log("Record", record);
+            var obj;
+            if(record === null) {
+                obj = {}; 
+            }else{
+                obj = JSON.parse(record);
+            }  
+            
+            // Set attributes 'x' and 'y' and store object
+            obj.px = d.px;
+            obj.py = d.py;
+            obj.x = d.x;
+            obj.y = d.y;
+            putSetting(d.id, JSON.stringify(obj));
+            */
+        }   
+    });
+
+    // Update nodes & lines
+    tick();                                                          
+
+}
+
+/** Called when a dragging event ends */
+function dragend(d, i) {
+    // Update nodes & lines
+    var gravity = getSetting(setting_gravity);
+    d.fixed = ( gravity !== "aggressive");
+//console.log("Fixed: ", d.fixed);
+    
+    
             // Update the location in localstorage
             var record = getSetting(d.id); 
             //console.log("Record", record);
@@ -144,25 +232,14 @@ function dragmove(d, i) {
             obj.x = d.x;
             obj.y = d.y;
             putSetting(d.id, JSON.stringify(obj));
-        }   
-    });
-
-    // Update nodes & lines
-    tick();                                                          
-
-    // Update overlay
-    updateOverlays(); 
-}
-
-/** Called when a dragging event ends */
-function dragend(d, i) {
-    // Update nodes & lines
-    d.fixed = (getSetting(setting_gravity) !== "aggressive");
-    console.log("Fixed: ", d.fixed);
-    tick();
+    
+//console.log("save pos "+d.id+'  '+JSON.stringify(obj));    
     
     // Check if force may resume
     if(gravity !== "off") {
         force.resume(); 
-    } 
+    }
+/*    setTimeout(function(){    //tick();
+        d3.select("#container").attr("transform","scale(1)");
+    },500); */
 }

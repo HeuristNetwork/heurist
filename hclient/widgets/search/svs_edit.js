@@ -339,7 +339,7 @@ function hSvsEdit(args) {
 
                     if(bValid){
 
-                        var bOk = window.hWin.HEURIST4.msg.checkLength( svs_query, "Query", null, 1 );
+                        var bOk = isRules || window.hWin.HEURIST4.msg.checkLength( svs_query, "Query", null, 1 );
                         if(!bOk) bOk = window.hWin.HEURIST4.msg.checkLength( svs_rules, "Rules", null, 1 );
                         if(!bOk){
                             message.text("Define query, rules or both.");

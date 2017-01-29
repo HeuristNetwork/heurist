@@ -552,7 +552,8 @@ function RectypeManager() {
                                     if(!Hul.isnull(context)){
                                         dt.deleteRow(oRecord.getId(), -1);
                                         //  this alert is a pain alert("Record type #"+rectypeID+" was deleted");
-                                        top.HEURIST.rectypes = context.rectypes;
+                                        _refreshClientStructure(context);
+                                        
                                         _cloneHEU = null;
                                     }
                                 }
@@ -894,7 +895,8 @@ function RectypeManager() {
                 }
                 _clearGroupAndVisibilityChanges(false);
             }
-            top.HEURIST.rectypes = context.rectypes;
+            _refreshClientStructure(context);
+            
             _cloneHEU = null;
         }
     }
@@ -1037,7 +1039,8 @@ function RectypeManager() {
                             var rty_ID = Number(context.id);
 
                             //refresh the local heurist
-                            top.HEURIST.rectypes = context.rectypes;
+                            _refreshClientStructure(context);
+                            
                             _cloneHEU = null;
 
                             //detect what group
@@ -1162,7 +1165,8 @@ function RectypeManager() {
                             }
 
                             //refresh the local heurist
-                            top.HEURIST.rectypes = context.rectypes;
+                            _refreshClientStructure(context);
+                            
                             _cloneHEU = null;
 
                             //detect what group
@@ -1281,7 +1285,8 @@ function RectypeManager() {
                     Hul.showError(context['0']);
                 }else{
                     var ind;
-                    top.HEURIST.rectypes = context.rectypes;
+                    _refreshClientStructure(context);
+                    
                     _cloneHEU = null;
 
                     if(grpID<0){
@@ -1409,7 +1414,8 @@ function RectypeManager() {
 
                         tabView.removeTab(tabView.getTab(ind));
                         tabView.set("activeIndex", 0);
-                        top.HEURIST.rectypes = context.rectypes;
+                        _refreshClientStructure(context);
+                        
                         _cloneHEU = null;
 
                         _refreshAllTables();
@@ -1508,6 +1514,14 @@ function onGroupChange() {
         edDescription.value = top.HEURIST.rectypes.groups[top.HEURIST.rectypes.groups.groupIDToIndex[grpID]].description;
     }
 
+}
+
+function _refreshClientStructure(context){
+console.log('refresh rectypes');
+    top.HEURIST.rectypes = context.rectypes;
+    if(window.hWin && window.hWin.HEURIST4){
+        window.hWin.HEURIST4.rectypes = context.rectypes;
+    }
 }
 
 function _upload_icon(rectypeID,mode) {

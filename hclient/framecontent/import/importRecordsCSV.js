@@ -67,7 +67,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Upload File'), icons:{secondary: "ui-icon-circle-arrow-n"}})
                     .click(function(e) {
-                            uploadWidget.click();
+                            if( window.hWin.HAPI4.is_admin() ){
+                                uploadWidget.click();    
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    status:window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED,
+                                    message:'Administrator permissions are required'});    
+                            }
                         });
                 
                 
@@ -197,7 +203,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
            }
         });
         window.hWin.HEURIST4.ui.createEntitySelector( selImportID.get(0), 
-                    {entity:'SysImportSessions', filter_group:'0,'+window.hWin.HAPI4.currentUser['ugr_ID']}, 
+                    {entity:'SysImportFiles', filter_group:'0,'+window.hWin.HAPI4.currentUser['ugr_ID']}, 
                     window.hWin.HR('select uploaded file...'),
                     function(){
                         window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), selImportID.find('option').length<2 );
@@ -331,6 +337,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     function _doClearSession(is_current){
         
+        if( !window.hWin.HAPI4.is_admin() ){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                status:window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED,
+                message:'Administrator permissions are required'});    
+            return;
+        }
+
+        
         if(is_current==true){
              recID = imp_ID;
         }else{
@@ -338,7 +352,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         }
         
         window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), true);
-        window.hWin.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportSessions', recID:recID},
+        window.hWin.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportFiles', recID:recID},
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             if(is_current==true){
@@ -351,7 +365,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 window.hWin.HEURIST4.msg.showMsgDlg('Import session was cleared');
                             }else{
                                 $('#selImportId').empty();
-                                window.hWin.HEURIST4.msg.showMsgDlg('Import sessions were cleared');
+                                //IJ asked 2016-11-15 window.hWin.HEURIST4.msg.showMsgDlg('Import sessions were cleared');
                             }
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -369,9 +383,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             var request = {
                     'a'          : 'search',
-                    'entity'     : 'sysImportSessions',
+                    'entity'     : 'sysImportFiles',
                     'details'    : 'list',
-                    'imp_ID'     : imp_ID
+                    'sif_ID'     : imp_ID
             };
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -388,7 +402,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             var resp = new hRecordSet( response.data );
                             var record = resp.getFirstRecord();
-                            var ses = resp.fld(record, 'imp_session');
+                            var ses = resp.fld(record, 'sif_ProcessingInfo');
                             //DEBUG $('#divFieldMapping2').html( ses );
                             
                             imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
@@ -455,24 +469,33 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                     //find names of identification fields
                     var ele = treeElement.find('.id_fieldname[data-res-rt="'+field_key+'"][data-mode="0"]');
-                    for(j=0;j<ele.length;j++){
-                        var isfound = false;
-                        for(k=0;k<sequence.length;k++){
-                            if(sequence[k].field == $(ele[j]).text()){
-                                isfound = true;
-                                break;
+                    if(ele.length>0){
+                        for(j=0;j<ele.length;j++){
+                            var isfound = false;
+                            for(k=0;k<sequence.length;k++){
+                                if(sequence[k].field == $(ele[j]).text()){
+                                    isfound = true;
+                                    break;
+                                }
+                            }
+                            if(!isfound){
+                                sequence.push({field:$(ele[j]).text(), rectype:recTypeID, 
+                                    hierarchy:$(rectypes[i]).attr('data-tree') });    
                             }
                         }
-                        if(!isfound){
-                            sequence.push({field:$(ele[j]).text(), rectype:recTypeID, 
+                    }else{
+                        var fname = _getColumnNameForPresetIndex(recTypeID);
+                        sequence.push({field: fname, rectype:recTypeID, 
                                 hierarchy:$(rectypes[i]).attr('data-tree') });    
-                        }
                     }
+                    
                 }
                 if(sequence.length==0){ //no dependencies - add main rectype only
-                    recTypeID = imp_session['primary_rectype'];
+                    recTypeID = $('#sa_primary_rectype').val()>0?
+                                        $('#sa_primary_rectype').val()
+                                        :imp_session['primary_rectype'];
                     var fname = _getColumnNameForPresetIndex(recTypeID);
-                    sequence.push({field:fname, rectype:recTypeID});    
+                    sequence.push({field:fname, rectype:recTypeID, hierarchy:recTypeID});    
                 }
                          
                 //comapre  current and new sequences
@@ -571,13 +594,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
                 var s_count = _getInsertUpdateCountsForSequence( i ); //todo change to field                                    
                 
-                if(s!=''){
-                    s = '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="vertical-align:super"></span>'+s;
+                var sArr = '';
+                if(i<sequence.length-1){
+                    sArr = '<div style="display:inline-block;min-height:2em"><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="vertical-align:super"></span>';
                 }       
+                
+                
 
-                sid_fields =  
-                          '<div style="border:1px solid black;-size:0.9em" '
-                          +'class="select_rectype_seq" data-seq-order="' + i + '">';
+                sid_fields =  sArr 
+                          + '<div style="border:1px solid black;-size:0.9em" '
+                          + 'class="select_rectype_seq" data-seq-order="' + i + '">';
                 
                 var fields = hierarchy;
                 if(!$.isArray(hierarchy) && !window.hWin.HEURIST4.util.isempty(hierarchy)){
@@ -600,10 +626,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                var rt_title = window.hWin.HEURIST4.rectypes.names[rt_id];                               
                                prev_rt = rt_id;
                                
-                                sid_fields =  sid_fields + ((j<fields.length-2)?'<br>':'')
-                                        + '<i>' +field_title + '</i>'
-                                        + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="padding:0"></span>'
-                                        + '<b>' + rt_title + '</b>';
+                                sid_fields =  sid_fields + ((j<fields.length-2)?'<br class="hid_temp">':'')   // class="hid_temp"
+                                        + '<span class="hid_temp"><i>' + field_title + '</i></span>'
+                                        + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow'                                                                      + '" style="padding:0"></span>'
+                                        + '<b'+(j>0?' class="hid_temp"':'') +'>' + rt_title + '</b>';
                         }else if(fields.length==1){
                             sid_fields = sid_fields + '<b>' + title + '</b>'; 
                             
@@ -615,7 +641,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                 s =  sid_fields +  '<span data-cnt="1" id="rt_count_'
                         + i + '">' + s_count + '</span><br><span data-cnt="1" class="id_fieldname" data-mode="0" style="padding-left:0em">'
-                        +fieldname+'</span></div>'+s;
+                        +fieldname+'</span></div>'+(sArr!=''?'</div>':'')+s;
                 
                 
                 /*
@@ -830,8 +856,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             if(depth!=0){
 
                                 if(field){
+                                    
+                                    var is_required = false;
+                                    if(hierarchy.length>1){
+                                        var field_id = _getFt_ID(field_key)
+                                        var parent_field_key = hierarchy[1];
+                                        var parent_rt = _getRt_ID(parent_field_key);
+                                        var recStruc = window.hWin.HEURIST4.rectypes['typedefs'][parent_rt]['dtFields'];
+                                        is_required = (recStruc[field_id][idx_reqtype]=='required');
+                                    }
+                                    
                                     sRectypeItem = sRectypeItem + '<div style="display:inline-block">'
-                                    + '<i>'  + field['title'] + '</i>'
+                                    + '<i'+(is_required?' style="color:red"':'')+'>'  + field['title'] + '</i>'
                                     + '</div>'                                     
                                     + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'; 
                                 }
@@ -859,7 +895,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                             //resorce fields
                             var rt_fields = field['depend'], sid_fields = '', prev_field='';
-
+ 
                             if(rt_fields && rt_fields.length>0){
                                 for (j=0;j<rt_fields.length;j++){
 
@@ -917,7 +953,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }else{
 
                     var rt_added = [];
-                    var treeList = $('<div id="tree_list">').appendTo(treeElement);
+                    var treeList = $('<div id="tree_list">').appendTo(treeElement).hide();
                     
                 //Treview==========================================================
                 function __renderTree(field_key, depth){
@@ -935,7 +971,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             + '&nbsp;<input type="checkbox" class="rt_select" data-mode="2" data-rectype="'+field['rt_id']
                             +  '" data-rt="'+field_key+'" '
-                            +  ' data-lvl="'+depth+'" checked="checked" disabled="disabled">'
+                            +  ' data-lvl="'+depth+'" checked="checked" disabled="disabled">'  
                             +  '</span></div>';
                             $(sRectypeItem).appendTo(treeList);                            
 
@@ -1024,62 +1060,32 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     });
 
 
-                    window.hWin.HEURIST4.util.setDisabled( treeElement.find('.rt_select'), false);
+                    window.hWin.HEURIST4.util.setDisabled( treeElement.find('.rt_select[data-rt!="'+primary_rt+'"]'), false);
 
                     // find all dependent rectypes to be marked and disabled
-                    fields_affected = _getCrossDependencies(rtOrder, f_key_selected_all, []);
+                    if(recTypeID==primary_rt){
+                        fields_affected = _getCrossDependencies(rtOrder, f_key_selected_all, []);    
+                    }else{
+                        fields_affected = _getCrossDependencies(rtOrder, [recTypeID], []);    
+                    }
+                    
 
-                    /*                                     
-                    if(!rt_checkbox.is(':checked')){
-
-                        //disable if marked rt has marked parent 
-                        for(i=0;i<rt_depend_all.length;i++){
-
-                            var recTypeID = rt_depend_all[i];
-
-                            var depth = rtOrder['levels'][recTypeID],
-                            need_disable = false;
-
-                            if(depth==0){ 
-                                need_disable = true;
-                            }else{
-                                //find previous level
-                                // rt_ids = Object.keys(rtOrder['levels'])
-                                for(j=0;j<rt_depend_all.length;j++){
-                                    if(i!=j  //not itself
-                                        && (rtOrder['levels'][rt_depend_all[j]]==depth-1)    //from prev level
-                                        &&  rtOrder['depend'][rt_depend_all[j]]
-                                        && (rtOrder['depend'][rt_depend_all[j]].indexOf(recTypeID)>=0))
-                                    {
-                                        need_disable = true;
-                                        break;    
-                                    }
-                                }
-                            }
-
-                            if(need_disable && disable_dependent){
-                                var cb = treeElement.find('.rt_select[data-rt="'+recTypeID+'"]');
-                                window.hWin.HEURIST4.util.setDisabled(cb, true);
-                                cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
-                            }
-
-                        }                                         
-                    }*/
-
-                    //mark and disable all of them
+                    //mark all of them
                     for(i=0;i<fields_affected.length;i++){
                         var cb = treeElement.find('.rt_select[data-rt="'+fields_affected[i]+'"]');
                         cb.prop('checked',true);
                         if(keep_field_key!=fields_affected[i]){ //do not disable itself
-                            window.hWin.HEURIST4.util.setDisabled(cb, true);
-                            cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
+                            //NO MORE DISABLITY since 2016-11-29
+                            //window.hWin.HEURIST4.util.setDisabled(cb, true);
+                            //cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                         }
                     }
                     
                     //always disable primary key
                     var cb = treeElement.find('.rt_select[data-rt="'+primary_rt+'"]');
+                    cb.prop('checked',true);
                     window.hWin.HEURIST4.util.setDisabled(cb, true);
-                    
+                    cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                 }//end  __rt_checkbox_click                           
 
                 treeElement.find('.rt_select').click(
@@ -1155,6 +1161,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     function _getFt_ID(field_key){
         return field_key.substr(0, field_key.indexOf('.'));
+    }
+    //
+    //
+    //
+    function _getRt_ID(field_key){
+        var k = field_key.indexOf('.');
+        if(k<0){
+            return field_key;
+        }else{
+            return field_key.substr(k+1);
+        }
+        
     }
     
     //
@@ -1690,8 +1708,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
             $('#mrr_big').html('Existing: ' +counts[0]+'&nbsp;&nbsp;&nbsp;New: '+counts[2]);                                 
             
-            $('#mrr_cnt_update').text(counts[0]);                                 
-            $('#mrr_cnt_insert').text(counts[2]);                                 
+            $('#mrr_cnt_update').text('');//counts[0]);                                 
+            $('#mrr_cnt_insert').text('');//counts[2]);                                 
             if(counts[1]>0){
                 $('#mrr_cnt_update_rows').text(counts[1]);                                     
                 $('.mrr_update').show();                                     
@@ -1959,7 +1977,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     ele = $.find("input[id^='d_field_']");
                     $.each(ele, function(idx,item){
                             if($(item).is(':checked')){
-                                request['datefield'].push(item.value )   
+                                request['datefield'][item.value] = 1;
                             }
                     }); 
                 }               
@@ -1971,9 +1989,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     _showStep(2);                    
                     //that.loadanimation(false);
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+
+                        //something went wrong - index fields have wrong values, problem with encoding or column number mismatch
+                        var container3 = container.find('#error_messages');
+                        if(container3.length==0){
+                            container3 = $('<div>',{id:'error_messages'}).appendTo(container);
+                        }else{
+                            container3.empty();
+                        }
                        
                         if(jQuery.type(response.data) === "string"){
-                            $( window.hWin.HEURIST4.msg.createAlertDiv(response.data)).appendTo(container);
+                            $( window.hWin.HEURIST4.msg.createAlertDiv(response.data)).appendTo(container3);
                             return;
                         }
                         
@@ -1984,14 +2011,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         var tbl,i,j,
                             haveErrors = false;
 
-                        
-                        //something went wrong - index fields have wrong values, problem with encoding or column number mismatch
-                        var container3 = container.find('#error_messages');
-                        if(container3.length==0){
-                            container3 = $('<div>',{id:'error_messages'}).appendTo(container);
-                        }else{
-                            container3.empty();
-                        }
 
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(response.data['err_colnums'])){
 
@@ -2016,9 +2035,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         }
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(response.data['err_encoding'])){
 
-                            var msg = ' Wrong encoding detected in import file. At least '
-                                        +response.data['err_encoding'].length
-                                        +'lines have such issue';
+                            var msg = 'Your file can\'t be converted to UTF-8. '
+                            +'Please open it in an advanced text editor and save with UTF-8 text encoding.<br>'
+                            +response.data['err_encoding_count']+' lines have such issue';
                                 
                             $( window.hWin.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
 
@@ -2607,7 +2626,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             +' These could include unrecognised terms, invalid dates, unknown record pointers (no record with given ID), '
                             +' missing required values and so forth.<br><br>'
                             + 'It is better to fix these in the source file and then process it again, as uploading faulty data generally leads to major fix-up work.'
-                            + 'Click "Show errors" button  for a list of errors');                            
+                            + 'Click "Show" button  for a list of errors');                            
                     
                             $('.step3 > .normal').hide();
                             $('.step3 > .skip_step').hide();
@@ -2704,10 +2723,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                           +'</td></tr><tr><td>Processed:</td><td>'+ imp_result['processed']
                           +'</td></tr><tr><td>Skipped:</td><td>'+ imp_result['skipped']
                           +'</td></tr><tr><td>Records added:</td><td>'+ imp_result['inserted']
-                          +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated']
-                          +'</td></tr></table>';
+                          +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated'];
+                          
+                        if (imp_result['permission']>0){
+                            msg = msg 
+                            +'</td></tr><tr><td colspan="2" style="color:red"><br>' + imp_result['permission'] 
+                            +' records could not be updated as you do not have adequate rights to modify them '
+                            +'(workgroup administrator rights required)';
+                        }   
+                          
+                        msg = msg +'</td></tr></table>';
                         
-                        window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Import of '+window.hWin.HEURIST4.rectypes.names[rtyID]+' complete.');
+                        window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
+                                'Import of '+window.hWin.HEURIST4.rectypes.names[rtyID]+' complete.');
                         
                         //if everything is added - skip to next step
                         var counts = _getInsertUpdateCounts( currentSeqIndex );
@@ -2939,13 +2967,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             s = '<div>The following rows match with multiple records. This may be due to the existence of duplicate '
             +'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
             +'the incoming rows against existing data records.</div><br/><br/>'
-            +'<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>Count</th><th>Records in Heurist</th></tr>';
+            +'<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>Source</th><th>Count</th><th>Records in Heurist</th></tr>';
 
             
             var buttons = {};
-            buttons[window.hWin.HR('Confirm and cotinue to assign IDs')]  = function() {
+            buttons[window.hWin.HR('Confirm and continue to assign IDs')]  = function() {
                     
                     var keyvalues = Object.keys(res['disambiguation']);
+
                     var disamb_resolv = [];  //recid=>keyvalue
                     $dlg.find('.sel_disamb').each(function(idx, item){
                          disamb_resolv.push({recid:$(item).val(),key:keyvalues[$(item).attr('data-key')]});
@@ -2975,14 +3004,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                 //list of heurist records
                 var disamb = res['disambiguation'][keyvalues[i]];
+                var disambig_imp_id = res['disambiguation_lines'][keyvalues[i]];
+
                 var recIds = Object.keys(disamb);
                         
-                s = s + '<tr><td>'+keyvalue+'</td><td>'+recIds.length+'</td><td>'+
+                s = s + '<tr><td>'+keyvalue+'</td><td>'
+                + '<a href="#" onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">view</a>'
+                +'</td><td>'+recIds.length+'</td><td>'+
                         '<select class="sel_disamb" data-key="'+i+'">';                
 
                 for(j=0;j<recIds.length;j++){
                     s = s +  '<option value="'+recIds[j]+'">[rec# '+recIds[j]+'] '+disamb[recIds[j]]+'</option>';
                 }
+                s = s + '<option value="-1">[create new record] None of these</option>';
                 s = s + '</select>&nbsp;'
                 + '<a href="#" onclick="{window.open(\''+window.hWin.HAPI4.basePathV4+'?db='+window.hWin.HAPI4.database
                 + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records</a></td></tr>';
@@ -3138,7 +3172,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 for(i=0;i<records.length;i++){
 
                     var row = records[i];
-                    s = s + '<tr><td class="truncate">'+row[0]+'</td>'; //line#
+                    s = s + '<tr><td class="truncate">'+(row[0]+1)+'</td>'; //line#
                     if(is_missed){
                         s = s + "<td style='color:red'>&lt;missing&gt;</td>";
                     } else if(ismultivalue){
@@ -3202,6 +3236,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         }
         
         if(s!=''){
+            dlg_options['window'] = window;  //current frame
             dlg_options['element'] = container.get(0);
             container.html(s);
             
@@ -3214,6 +3249,74 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
     } 
 
+    //
+    // get import line on server and show it on popup
+    //
+    function _showImportLineInPopup(imp_ID){
+        
+            if(!imp_session) return;
+            var currentTable = imp_session['import_table']; 
+        
+            var request = { action: 'records',
+                            imp_ID: imp_ID,
+                            table:currentTable,
+                            id: window.hWin.HEURIST4.util.random()
+                               };
+            
+            window.hWin.HAPI4.parseCSV(request, function(response){
+                
+                //that.loadanimation(false);
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    
+                    var i, response = response.data, res = '<table>';
+                    
+                        for(i=1; i<response.length;i++){
+                            if(window.hWin.HEURIST4.util.isnull(response[i])){
+                                sval = "&nbsp;";
+                            }else{
+
+                                var idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
+                                
+                                var isIndex =  (idx_id_fieldname==(i-1)) || !window.hWin.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
+                                
+                                var sval = response[i].substr(0,100);
+
+                                if(isIndex && response[i]<0){
+                                    sval = "&lt;New Record&gt;";
+                                }else if(sval==""){
+                                    sval = "&nbsp;";
+                                }else if(response[i].length>100){ //add ... 
+                                    sval = sval + '&#8230;';
+                                }
+                            }
+                            
+                            res = res + '<tr><td>'+imp_session['columns'][i-1]+'</td><td>'+sval+'</td></tr>';
+                        }
+                    res = res + '</table>';     
+
+                    var $dlg2, buttons={};
+                    buttons[window.hWin.HR('Close')]  = function() {
+                            $dlg2.dialog( "close" );
+                    };
+                    
+                    var container = $('#divPopupPreview2');
+                    container.html(res);
+                    
+                    var dlg_options = {
+                        title:'Import source',
+                        buttons: buttons,
+                        element:container.get(0)
+                        };
+            
+                    $dlg2 = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
+                
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+
+            });        
+    
+    }
     //
     //
     //
@@ -3306,6 +3409,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
         showRecords: function (mode) {_showRecords(mode)},
         showRecords2: function (mode, is_download) {_showRecords2(mode, is_download)},
+
+        showImportLineInPopup: function (imp_ID) {_showImportLineInPopup(imp_ID)},
         
         onUpdateModeSet:function (event){
             _onUpdateModeSet();

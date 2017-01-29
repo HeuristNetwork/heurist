@@ -54,7 +54,7 @@
 
             $res = $mysqli->query($query);
             if (!$res){
-                $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+                $response = $system->addError(HEURIST_DB_ERROR, "Search query error on min/max. Query ".$query, $mysqli->error);
             }else{
                 $row = $res->fetch_assoc();
                 if($row){
@@ -267,7 +267,7 @@ if(@$params['debug']) echo $query."<br>";
         $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records where rec_ID in ('.$ids.')';
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on search related. Query ".$query, $mysqli->error);
         }else{
                 while ($row = $res->fetch_row()) {
                     $headers[$row[0]] = array($row[1], $row[2]);   
@@ -277,12 +277,12 @@ if(@$params['debug']) echo $query."<br>";
         
         
         //find all target related records
-        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
+        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
             .'where rl_SourceID in ('.$ids.') order by rl_SourceID';
 
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on related records. Query ".$query, $mysqli->error);
         }else{
                 while ($row = $res->fetch_row()) {
                     $relation = new stdClass();
@@ -290,19 +290,20 @@ if(@$params['debug']) echo $query."<br>";
                     $relation->targetID = intval($row[1]);
                     $relation->trmID = intval($row[2]);
                     $relation->dtID  = intval($row[3]);
+                    $relation->relationID  = intval($row[4]);
                     array_push($direct, $relation);
                 }
                 $res->close();
         }
 
         //find all reverse related records
-        $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
+        $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
             .'where rl_TargetID in ('.$ids.') order by rl_TargetID';
 
 
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on reverse related records. Query ".$query, $mysqli->error);
         }else{
                 while ($row = $res->fetch_row()) {
                     $relation = new stdClass();
@@ -310,6 +311,7 @@ if(@$params['debug']) echo $query."<br>";
                     $relation->sourceID = intval($row[1]);
                     $relation->trmID = intval($row[2]);
                     $relation->dtID  = intval($row[3]);
+                    $relation->relationID  = intval($row[4]);
                     array_push($reverse, $relation);
                 }
                 $res->close();
@@ -335,7 +337,7 @@ if(@$params['debug']) echo $query."<br>";
             .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
         $res = $mysqli->query($query);
         if (!$res){
-            return null;// $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            return null;// $system->addError(HEURIST_DB_ERROR, "Search query error on get relationship type", $mysqli->error);
         }else{
             if($row = $res->fetch_row()) {
                 return $row[0];
@@ -359,7 +361,7 @@ if(@$params['debug']) echo $query."<br>";
 
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on relationship records for source-target. Query ".$query, $mysqli->error);
         }else{
                 $ids = array();
                 while ($row = $res->fetch_row()) {
@@ -402,6 +404,7 @@ if(@$params['debug']) echo $query."<br>";
     *       publiconly (=1) - ignore current user and returns only public records
     *
     *       detail (former 'f') - ids       - only record ids
+    *                             count     - only count of records  
     *                             header    - record header
     *                             timemap   - record header + timemap details
     *                             detail    - record header + all details
@@ -428,9 +431,15 @@ if(@$params['debug']) echo $query."<br>";
         
         $fieldtypes_ids = null;
         if($istimemap_request){
-                $fieldtypes_ids = '9,10,11,28';
+             //get date,year and geo fields from structure
+             $fieldtypes_ids = dbs_GetDetailTypes($system, array('date','year','geo'), 3);
+             if($fieldtypes_ids==null || count($fieldtypes_ids)==0){
+                $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE); //9,10,11,28';    
+             }
+             $fieldtypes_ids = implode(',', $fieldtypes_ids);
+             
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
-
+            //specific set of detail fields
             if(is_array($params['detail'])){
                 $fieldtypes_ids = $params['detail'];
             } else {
@@ -446,6 +455,7 @@ if(@$params['debug']) echo $query."<br>";
 
         }
 
+        $is_count_only = ('count'==$params['detail']);
         $is_ids_only = ('ids'==$params['detail']);
         $return_h3_format = (@$params['vo']=='h3' &&  $is_ids_only);
 
@@ -468,8 +478,11 @@ if(@$params['debug']) echo $query."<br>";
             $params['w'] = 'all'; //does not allow to search bookmarks if not logged in
         }
 
+        if($is_count_only){
 
-        if($is_ids_only){
+            $select_clause = 'select count(rec_ID) ';
+
+        }else if($is_ids_only){
 
             $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT rec_ID ';
 
@@ -621,7 +634,7 @@ if(@$params['debug']) echo $query."<br>";
                                         $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records']));
                             }
 
-                            if($is_get_relation_records && (strpos($params3['q'],"related_to")>0 || strpos($params3['q'],"relatedfrom")>0) ){ //find relation records (recType=1)
+                            if($is_get_relation_records && (strpos($params3['q'],"related_to")>0 || strpos($params3['q'],"relatedfrom")>0) ){ //find relationship records (recType=1)
 
                                 //create query to search related records
                                 if (strcasecmp(@$params3['w'],'B') == 0  ||  strcasecmp(@$params3['w'], 'bookmark') == 0) {
@@ -637,10 +650,18 @@ if(@$params['debug']) echo $query."<br>";
                                          $fld1 = "rl_SourceID";
                                          $fld2 = "rl_TargetID";
                                 }
+                                
+                                $ids_party1 = $params3['topids'];
+                                $ids_party2 = $is_ids_only?$response['data']['records'] :array_keys($response['data']['records']);
+                                
+                                if(is_array($ids_party2) && count($ids_party2)>0)
+                                {
 
-                                $where = "WHERE (TOPBIBLIO.rec_ID in (select rl_RelationID from recLinks where (rl_RelationID is not null) and $fld1 in ("
-                                            .$params3['topids'].") and $fld2 in ("
-                                            .implode(",", $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records'])).")))";
+//error_log('get related '.$params3['q'].'   '.implode(",",$ids_party2));
+                                
+                                $where = "WHERE (TOPBIBLIO.rec_ID in (select rl_RelationID from recLinks "
+                                    ."where (rl_RelationID is not null) and $fld1 in ("
+                                    .$ids_party1.") and $fld2 in (".implode(",", $ids_party2).")))";
 
                                 $params2 = $params3;
                                 unset($params2['topids']);
@@ -674,6 +695,8 @@ if(@$params['debug']) echo $query."<br>";
                                     }
                                     */
                                 }
+                                }//array of ids is defined
+                                
                             }  //$is_get_relation_records
 
                     }else{
@@ -735,7 +758,7 @@ if(@$params['debug']) echo $query."<br>";
                 $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL OR compose_sql_query at once
             }
 
-            if($is_ids_only && @$params['needall']){
+            if($is_count_only || ($is_ids_only && @$params['needall'])){
                 $chunk_size = PHP_INT_MAX;
                 $aquery["limit"] = '';
             }else{
@@ -748,22 +771,29 @@ if(@$params['debug']) echo $query."<br>";
             }
 
             $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
-
-//error_log($is_mode_json.' '.$query);
-/* DEBUG
-            if($params['q']=='doerror'){ //force error
-                $query ='abracadabra'; 
-            }
-*/            
-            
+         
         }
         
 
 
         $res = $mysqli->query($query);
         if (!$res){
-            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error', $mysqli->error);
+            
+error_log('params '.print_r($params, true));            
+            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.' Search query error on saved search. Query '.$query, $mysqli->error);
+        }else if($is_count_only){
+        
+                $total_count_rows = $res->fetch_row();
+                $total_count_rows = (int)$row[0];
+                $res->close();
+                
+                $response = array('status'=>HEURIST_OK,
+                            'data'=> array(
+                                'queryid'=>@$params['id'],  //query unqiue id
+                                'count'=>$total_count_rows));
+                
         }else{
+            
 
             $fres = $mysqli->query('select found_rows()');
             if (!$fres)     {
@@ -859,6 +889,7 @@ if(@$params['debug']) echo $query."<br>";
 
                             }
 
+                          
                             // @todo - we may use getAllRecordDetails
                             $res_det = $mysqli->query( $detail_query );
 
@@ -943,7 +974,9 @@ if(@$params['debug']) echo $query."<br>";
                                 'order'=>$order,
                                 'rectypes'=>$rectypes,
                                 'structures'=>$rectype_structures));
-
+                        if($fieldtypes_ids){
+                              $response['data']['fields_detail'] =  explode(',', $fieldtypes_ids);
+                        }
 
                 }//$is_ids_only
 
