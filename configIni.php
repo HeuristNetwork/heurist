@@ -97,6 +97,11 @@ $dbReadonlyUsername = "";
 $dbReadonlyPassword = "";
 //$serverName = "null";
 $dbPrefix = "";
+
+// Elastic Search (Lucene) server
+$indexServerAddress = ""; 
+$indexServerPort = "";
+
 $httpProxy = "";
 $httpProxyAuth = "";
 $indexServerAddress="";
