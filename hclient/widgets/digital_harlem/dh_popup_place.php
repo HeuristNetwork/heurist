@@ -65,6 +65,8 @@ if($recTypeID==RT_ADDRESS){
                     <ul>
 
                         <?php
+                        $sourcesInfoFromPlaceRoles = '';
+                        
                         if(@$records_placeroles['reccount']>0){
                             foreach($records_placeroles['order'] as $roleID){
 
@@ -77,6 +79,15 @@ if($recTypeID==RT_ADDRESS){
                                     <em>(<?php echo getFieldValue($records_placeroles, $roleID, DT_EXTENDED_DESCRIPTION); ?>)</em>
                                 </li>
                                 <?php
+                                
+                                $citation = getFieldValue($records_placeroles, $roleID, DT_REPORT_CITATION);
+                                
+                                if($citation){
+                                    $sourcesInfoFromPlaceRoles = $sourcesInfoFromPlaceRoles.'<li>'
+                                        .getTermById( getFieldValue($records_placeroles, $roleID, DT_REPORT_SOURCE_TYPE) ).' '
+                                        .getFieldValue($records_placeroles, $roleID, DT_REPORT_CITATION).'</li>'; 
+                                }
+                                
                             }
                         }else{
                             echo '<li>None recorded</li>';
@@ -87,7 +98,8 @@ if($recTypeID==RT_ADDRESS){
 
                 <br />
 
-
+                
+                
                 <p>
                     <b>What Happened Here: </b>
 
@@ -161,8 +173,6 @@ if($recTypeID==RT_ADDRESS){
                                     }
                                     print '<li>Event described in source #'.$reportID.'</li>';
                                 }
-
-
                                 print '</ul></li>';
                             }//for events
                         }else{
@@ -297,7 +307,9 @@ if($recTypeID==RT_ADDRESS){
                         $records_placerolereports = recordSearch_2(
                             '[{"t":"26"},'.$date_filter2.'{"linkedfrom:16:151":[{"t":"16"},{"linked_to:12:90":"'. $recID .'"} ]  }] ');
                             
-                        if(count($records_eventreports['records'])>0 || count($records_placerolereports['records'])>0){
+                        if($sourcesInfoFromPlaceRoles!='' || 
+                            count($records_eventreports['records'])>0 || 
+                            count($records_placerolereports['records'])>0){
 
                             //DA REPORT
                             foreach($records_eventreports['order'] as $repID){
@@ -317,12 +329,20 @@ if($recTypeID==RT_ADDRESS){
                                     .$da_report.' '
                                     .getFieldValue($records_eventreports, $repID, DT_REPORT_CITATION).'</li>'; 
                             }
+                            
+                            
+                            
                             //NEWSPAPER
                             foreach($records_placerolereports['order'] as $repID){
                                 
                                 echo '<li><em>'.getFieldValue($records_placerolereports, $repID, 'rec_Title')
                                     .'</em></li>';
                             }
+                            
+                            if($sourcesInfoFromPlaceRoles!=''){
+                                echo $sourcesInfoFromPlaceRoles;     
+                            }
+                            
                         }else{
                             echo '<li>None recorded</li>';
                         }

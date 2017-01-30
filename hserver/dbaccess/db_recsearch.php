@@ -778,7 +778,7 @@ if(@$params['debug']) echo $query."<br>";
 
         }
         
-
+//error_log('Q='.$query);                
 
         $res = $mysqli->query($query);
         if (!$res){
