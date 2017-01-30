@@ -420,8 +420,8 @@ function visualizeData() {
 
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
-    addLines("bottom-lines", getSetting(setting_linecolor), 0.5);
-    //addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5);
+    addLines("bottom-lines", getSetting(setting_linecolor), 0);
+    addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5); //tick transparent line to catch mouse over
 
     // Nodes
     addNodes();
@@ -623,7 +623,7 @@ function addMarkerDefinitions() {
                     .attr("refX", function(d) {
                         // Move markers to display a pointer on a straight line
                         if(linetype=="straight" && d.relation.pointer) {
-                           return linelength*-0.2;
+                           return linelength*0.5;
                         }
                         return -1;
                     })
@@ -677,10 +677,20 @@ function addLines(name, color, thickness) {
                   .selectAll("polyline.link")
                   .data(data.links)
                   .enter()
-                  .append("svg:polyline");
+                  .append("svg:polyline")
+                    /*.attr("class", function(d) { 
+                        return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                    })*/
+                    // links to marker by id and place marker in the mid of segment
+                    //unfortunately it does not work
+                    .attr("marker-mid", function(d) { 
+                        var cls = "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                        //console.log(cls); 
+                        //console.log('found '+$("#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id).attr('id'));
+                        return "url(#" + cls + ")"; });
     }    
 
-    var thickness = parseInt(getSetting(setting_linewidth))+1;
+    //var thickness = parseInt(getSetting(setting_linewidth))+1;
 
     // Adding shared attributes
     lines.attr("class", function(d) {
@@ -697,7 +707,7 @@ function addLines(name, color, thickness) {
          })) 
          
          
-         .style("stroke-width", function(d) { return getLineWidth(d.targetcount); })
+         .style("stroke-width", function(d) { return getLineWidth(d.targetcount)+thickness; })
          .on("mouseover", function(d) {
 //console.log(d.relation.id);  //field type id           
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
@@ -716,17 +726,18 @@ function addLines(name, color, thickness) {
 */
 function tick() {
     
-    //not used anymore var topLines = d3.selectAll(".top-lines"); 
+    //not used anymore 
+    var topLines = d3.selectAll(".top-lines"); 
     var bottomLines = d3.selectAll(".bottom-lines");
     
     var linetype = getSetting(setting_linetype);
     if(linetype == "curved") {
-        //updateCurvedLines(topLines);
+        updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);     
     }else if(linetype == "stepped") {
         updateSteppedLines(bottomLines);     
     }else{
-        //updateStraightLines(topLines);
+        updateStraightLines(topLines);
         updateStraightLines(bottomLines);   
     }
     

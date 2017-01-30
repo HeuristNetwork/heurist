@@ -121,9 +121,8 @@ function getRecordOverlayData(record) {
 function getRelationOverlayData(line) {
     var array = [];
     var maxLength = getSetting(setting_textlength);
-    var relation = {text: 
-            truncateText(line.relation.name, maxLength)
-            +(line.relation.type=='resource'?'->':'->>'), size: "9px", height: 11};
+    var relation = {type: line.relation.type, cnt: line.targetcount, text: 
+            truncateText(line.relation.name, maxLength), size: "9px", height: 11};
     if(true || settings.showCounts) {
             relation.text = relation.text + ", n=" + line.targetcount;
     }
@@ -274,7 +273,11 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         var offset = (type=='record')?26:6;  
         var indent = 5;
         var position = 2;
-        var text = overlay.selectAll("text")
+        
+
+        var text;
+        if(type=='record'){        
+            text = overlay.selectAll("text")
                           .data(info)
                           .enter()
                           .append("text")
@@ -310,7 +313,45 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .style("font-size", function(d) {   // Font size based on size property
                               return fontSize;//d.size;
                           }, "important");
-                      
+        }else{
+            // links info needs icon
+            var k, text = [[]];
+            for(k=0;k<info.length;k++){
+                
+                var linkicon = overlay.append("svg:image")
+                  .attr("class", 'icon info-mode')
+                  .attr("xlink:href", function(d) {
+                        return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_'+(info[k].type=='resource'?1:2)+'.png';
+                  })
+                  //.attr("transform", "translate("+offset+","+(maxHeight-iconSize-3)+")")
+                  .attr("x", 2) 
+                  .attr("y", function(d, i) {
+                        return iconSize/2;//position;
+                  })
+                  .attr("height", iconSize)
+                  .attr("width", iconSize)
+                  
+                text[0].push(linkicon[0][0]);
+                          
+                var linkline = overlay.append("text")
+                          .text(info[k].text)
+                          .attr("class", 'info-mode')
+                          .attr("x", iconSize+2)
+                          .attr("y", function(d, i) {
+                              //position += (info[k].height*1.2);
+                              position += (iconSize*1.2);
+                              return position; // Position calculation
+                          })
+                          .attr("fill", fontColor)
+                          .attr("font-weight", info[k].style)
+                          .style("font-style", info[k].style, "important")
+                          .style("font-size", fontSize, "important");
+                          
+                          
+                text[0].push(linkline[0][0]);
+            }
+            
+        }      
         // Calculate optimal rectangle size
         var maxWidth = 1;
         var maxHeight = 10;                              
@@ -329,7 +370,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 maxHeight = y;
             }
         }
-        maxWidth  += offset*2.5;//*3.5;
+        maxWidth  += ((type=='record')?offset:10)*2.5;//*3.5;
         maxHeight = maxHeight + fontSize*1 + offset*1;//offset*1.1;// offset*1.2;//*2; 
       
       if(settings.isDatabaseStructure && type=='record'){
@@ -543,7 +584,7 @@ function updateOverlays() {
 
 /** Removes the overlay with the given ID */
 function removeOverlay(selector) {
-    $(".overlay."+selector).fadeOut(300, function() {
+    $(".overlay."+selector).fadeOut(1000, function() {
         $(this).remove();
    }); 
 }
