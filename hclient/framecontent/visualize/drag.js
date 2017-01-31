@@ -118,8 +118,6 @@ function addNodes() {
             },200);
             }            
         });
-
-
                            
         var gravity = getSetting(setting_gravity);
         

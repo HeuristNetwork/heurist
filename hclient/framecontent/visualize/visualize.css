@@ -223,6 +223,7 @@ text.shadow {
 
 .toolbar-section{
     padding:0 4px;
+    margin-bottom: 5px;
 }
 .toolbar-section > label{
     font-size:0.8em;
@@ -230,6 +231,7 @@ text.shadow {
 #toolbar{
     line-height: 10px;    
     display:table-cell;
+    height:auto;
     /*border: solid 1px gray;*/
 }
 #toolbar > div{

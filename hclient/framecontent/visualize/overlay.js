@@ -177,7 +177,7 @@ function getRelationOverlayData_old(line) {
     return array;
 }
 
-var drag_link_source_id, drag_link_target_id, drag_link_line; 
+var drag_link_source_id, drag_link_target_id, drag_link_line, drag_link_timer; 
 
 /**
 * Creates an overlay over the node / on the location that the user has clicked on.
@@ -230,6 +230,30 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             }
         }
     
+    if(parent_node){
+        parent_node.on("mouseover", function(d) {
+            if(drag_link_source_id!=null){
+                //cancel timer
+                if(drag_link_timer>0){
+                    clearTimeout(drag_link_timer);
+                    drag_link_timer = 0;
+                }
+                drag_link_target_id = d.id;
+                drag_link_line.attr("stroke","#00ff00");
+            }            
+        })
+        .on("mouseout", function(d) {
+            if(drag_link_source_id!=null){
+            drag_link_timer = setTimeout(function(){
+                drag_link_target_id = null;
+                if(drag_link_line) drag_link_line.attr("stroke","#ff0000");
+            },500);
+            }            
+        });
+    }
+
+    
+    
         // Draw a semi transparant rectangle       
         var rect = overlay.append("rect")
                           .attr("class", "semi-transparant info-mode")              
@@ -240,7 +264,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .style('stroke','#ff0000')
                           .style("stroke-width", 0.5)
                           .style("filter", "url(#drop-shadow)");
-                          //.on("drag", overlayDrag);
+                          
                                     
         //rect.append("title").text(rollover);       
         
@@ -313,6 +337,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .style("font-size", function(d) {   // Font size based on size property
                               return fontSize;//d.size;
                           }, "important");
+                          
         }else{
             // links info needs icon
             var k, text = [[]];
@@ -352,6 +377,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             }
             
         }      
+        
+        
+        
         // Calculate optimal rectangle size
         var maxWidth = 1;
         var maxHeight = 10;                              
@@ -374,29 +402,6 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         maxHeight = maxHeight + fontSize*1 + offset*1;//offset*1.1;// offset*1.2;//*2; 
       
       if(settings.isDatabaseStructure && type=='record'){
-        //edit button
-        var btnEdit = overlay
-                  .append("svg:image")
-                  .attr("class", "icon info-mode")
-                  .attr("xlink:href", function(d) {
-                        return window.hWin.HAPI4.baseURL+'hclient/assets/edit-pencil.png';
-                  })
-                  .attr("transform", "translate("+offset+","+(maxHeight-iconSize-3)+")")
-                  /*.attr("x", 2)
-                  .attr("y", 2) */
-                  .attr("height", iconSize)
-                  .attr("width", iconSize)
-                  .on("mouseup", function(d) {
-                      event.preventDefault();
-                      _editRecStructure(rty_ID);
-                  });  
-                  
-        btnEdit.append("title")
-                   .text(function(d) {
-                        return 'Click to edit the entity / record type structure';
-                   });
-                   
-                          
                    
         var drag2 = d3.behavior.drag()
                  .on("dragstart", function(d, i){
@@ -440,30 +445,71 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                      drag_link_line = null;
                  }
                  );
-                   
-      
+                  
         //link button      
         var btnAddLink = overlay
-                  .append("g")
-                  .attr("class", "addlink info-mode")
-                  .attr("transform", "translate("+(offset+iconSize+5)+","+(maxHeight-iconSize-3)+")")
+                  .append("svg:image")
+                  .attr("class", "icon info-mode")
+                  .attr("xlink:href", function(d) {
+                        return window.hWin.HAPI4.baseURL+'hclient/assets/edit-link.png';
+                  })
+                  .attr("transform", "translate("+(maxWidth-2*iconSize-3)+","+(maxHeight-iconSize-3)+")")
                   .attr("height", iconSize)
-                  .attr("width", 30)
+                  .attr("width", iconSize)
+                  .on("mousedown", function(d) {
+                      
+                      var svgPos = $("svg").position();
+                      var x = event.clientX - svgPos.left;
+                      var y = event.clientY + 26 - svgPos.top 
+                      
+                      var hintoverlay = svg.append("g")
+                        .attr("class", "hintoverlay")
+                         .attr("transform", "translate(" +x +','+y+')');
+                      
+                      $('.hintoverlay').fadeOut(2000, function() {
+                            $(this).remove();
+                      });                       
+                         
+                      hintoverlay.append("text")
+                      .text('drag me to another node …')
+                      .attr("fill", fontColor)
+                      .style("font-style", 'italic', "important")
+                      .style("font-size", 10, "important");
+
+                  })
+                  .call(drag2);
+                  
+                  
+        btnAddLink.append("title")
+                   .text(function(d) {
+                        return 'Click and drag to another node to create link';
+                   });
+
+
+        //edit button
+        var btnEdit = overlay
+                  .append("svg:image")
+                  .attr("class", "icon info-mode")
+                  .attr("xlink:href", function(d) {
+                        return window.hWin.HAPI4.baseURL+'hclient/assets/edit-pencil.png';
+                  })
+                  .attr("transform", "translate("+(maxWidth-iconSize)+","+(maxHeight-iconSize-3)+")")
+                  /*.attr("x", 2)
+                  .attr("y", 2) */
+                  .attr("height", iconSize)
+                  .attr("width", iconSize)
                   .on("mouseup", function(d) {
-                      //event.preventDefault();
-                      //_addNewLinkField(rty_ID); - current version open dialog
-                  }).call(drag2);
+                      event.preventDefault();
+                      _editRecStructure(rty_ID);
+                  });  
                   
-        // add link text        
-        var textAddLink = btnAddLink.append("text")
-                  .attr("class", "addlink-text")
-                  .text("add link")
-                  .attr("x", 2)
-                  .attr("y", iconSize*0.75);
+        btnEdit.append("title")
+                   .text(function(d) {
+                        return 'Click to edit the entity / record type structure';
+                   });
                   
-
-
-        var bbox = textAddLink[0][0].getBBox();
+                  
+        var bbox = btnEdit[0][0].getBBox();
         var width = bbox.x + bbox.width*1.1;
                   if(width > maxWidth) {
                       maxWidth = width;

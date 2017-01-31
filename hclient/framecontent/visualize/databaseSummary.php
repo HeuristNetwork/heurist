@@ -23,7 +23,7 @@
 if(!defined('PDIR')) define('PDIR','../../../');
 require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
         <style>
             #rectypes {
                 height: 100%;
@@ -481,7 +481,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 
                     var width = $(window).width();
               
-                    var supw = (width<1500)?5:0;
+                    var supw = (width<1120)?4:0;
 
                     var dbkey = 'db'+window.hWin.HAPI4.database;
 
@@ -490,7 +490,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 // intention                           
                 //if(getSetting(dbkey)==null){ //new databse - show hint
                     putSetting(dbkey, '1');
-                    $('#divSvg').css('top', 7+supw+'em');
+                    $('#divSvg').css('top', 8+supw+'em');
                     $('#divHint').show();
                     /*}else{
                         $('#divSvg').css('top', 5+supw+'em');
