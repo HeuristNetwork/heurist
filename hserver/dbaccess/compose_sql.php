@@ -1051,7 +1051,7 @@ class TypePredicate extends Predicate {
         if (is_numeric($this->value)) {
             $res = "rec_RecTypeID $eq ".intval($this->value);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             // comma-separated list of defRecTypes ids
             $in = ($this->parent->negate)? 'not in' : 'in';
             $res = "rec_RecTypeID $in (" . $this->value . ")";
@@ -1104,7 +1104,7 @@ class UserPredicate extends Predicate {
             return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
             . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . ')';
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
             . ' and bkmk.bkm_UGrpID in (' . $this->value . '))';
         }
@@ -1131,7 +1131,7 @@ class AddedByPredicate extends Predicate {
         if (is_numeric($this->value)) {
             return "TOPBIBLIO.rec_AddedByUGrpID $eq " . intval($this->value);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             $not = ($this->parent->negate)? "not" : "";
             return "TOPBIBLIO.rec_AddedByUGrpID $not in (" . $this->value . ")";
         }
@@ -1376,7 +1376,7 @@ class FieldPredicate extends Predicate {
         
         $match_pred = $this->get_field_value();
 
-        if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             $isnumericvalue = false;
             $isin = true;
         }else{
@@ -1466,6 +1466,8 @@ class FieldPredicate extends Predicate {
 
     function get_field_type_clause(){
         global $mysqli;
+
+error_log('test1'.$this->field_type);
         
         if(trim($this->value)==''){
             
@@ -1475,7 +1477,7 @@ class FieldPredicate extends Predicate {
             /* handle the easy case: user has specified a (single) specific numeric type */
             $rd_type_clause = '= ' . intval($this->field_type);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->field_type)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->field_type)) {
             /* user has specified a list of numeric types ... match any of them */
             $rd_type_clause = 'in (' . $this->field_type . ')';
         }
@@ -1491,13 +1493,16 @@ class FieldPredicate extends Predicate {
     function get_field_value(){
         global $mysqli;
 
+error_log('test1 2 '.$this->value);
+        
+        
         if(trim($this->value)==''){
             
             $match_pred = " !='' ";
         
         }else if($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
             
-            if(preg_match('/^\d+(?:,\d+)+$/', $this->value)){
+            if(preg_match('/^\d+(?:,\d*)+$/', $this->value)){
                 $match_pred = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
             }else if(intval($this->value)>0){
@@ -1524,7 +1529,7 @@ class FieldPredicate extends Predicate {
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
         }else 
-        if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             // comma-separated list of ids
             $match_pred = ' in ('.$this->value.')';
             
@@ -1694,7 +1699,7 @@ class BibIDPredicate extends Predicate {
             $vals = explode("<>", $this->value);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
-        }else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        }else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             // comma-separated list of ids
             $not = ($this->parent->negate)? ' not' : '';
             $match_pred = $not.' in ('.join(',', array_map('intval', explode(',', $this->value))).')';
@@ -2377,7 +2382,7 @@ class WorkgroupPredicate extends Predicate {
         if (is_numeric($this->value)) {
             return "TOPBIBLIO.rec_OwnerUGrpID $eq ".intval($this->value);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             $in = ($this->parent->negate)? 'not in' : 'in';
             return "TOPBIBLIO.rec_OwnerUGrpID $in (" . $this->value . ")";
         }

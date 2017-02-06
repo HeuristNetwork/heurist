@@ -634,7 +634,7 @@ class HPredicate {
                 if (is_numeric($this->value)) {
                     $res = "$eq ".intval($this->value);
                 }
-                else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+                else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
                     // comma-separated list of defRecTypes ids
                     $in = ($this->negate)? 'not in' : 'in';
                     $res = "$in (" . $this->value . ")";
@@ -1071,7 +1071,7 @@ class HPredicate {
         
         if($this->field_type=='enum' || $this->field_type=='relationtype'){
             
-            if (preg_match('/^\d+(?:,\d+)+$/', $this->value)){   //numeric comma separated
+            if (preg_match('/^\d+(?:,\d*)+$/', $this->value)){   //numeric comma separated
                 $res = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
             }else if(intval($this->value)>0){
@@ -1098,7 +1098,7 @@ class HPredicate {
             }
             $this->field_list = true;
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             // comma-separated list of defRecTypes ids
             $in = ($this->negate)? 'not in' : 'in';
             $res = " $in (" . $this->value . ")";
