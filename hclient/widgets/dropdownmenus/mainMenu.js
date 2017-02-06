@@ -290,6 +290,11 @@ $.widget( "heurist.mainMenu", {
         
         this['btn_Profile'].find('a').text(window.hWin.HAPI4.currentUser.ugr_FullName);
         
+        //need to update position of carat icon according width of user name
+        var ele = $('#carat1');
+        if(ele.length>0){
+            ele.css({'left': (ele.parent().width())+'px'});// (link.width()-16+'px !important')});
+        }
     },
 
 
@@ -419,12 +424,6 @@ $.widget( "heurist.mainMenu", {
             mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
             mouseleave : function(){_hide(this['menu_'+name])}
         });
-
-        var ele = $('#carat1');
-        if(ele.length>0){
-            ele.css({'left': (ele.parent().width())+'px'});// (link.width()-16+'px !important')});
-        }
-        
 
     },
 
