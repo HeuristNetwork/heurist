@@ -100,17 +100,19 @@
             //var crwDefType = "";
             //var crwLocalCode = "";
             var replaceRecTypeName = "";
-            
-            <?php
-                // Fills the YUI Datatable with all recordtypes from the temp DB
-                $groups = mysql_query("select rtg_ID, rtg_Name from ".$tempDBName.".defRecTypeGroups order by rtg_Order");
 
-                $rectypeGroups = array();
-                $rectypeGroups2 = array();
-                while($group = mysql_fetch_assoc($groups)) {
-                    array_push($rectypeGroups, array('id'=>$group["rtg_ID"], 'name' => $group["rtg_Name"]));
-                    $rectypeGroups2[$group["rtg_ID"]] = $group["rtg_Name"];
-                }
+            // Fills the YUI Datatable with all recordtypes from the temp DB
+            <?php
+            $groups = mysql_query("select rtg_ID, rtg_Name, rtg_Description from ".$tempDBName.".defRecTypeGroups order by rtg_Name");
+
+            $rectypeGroups = array();
+            $rectypeGroups2 = array();
+            $rectypeGroups3 = array();
+            while($group = mysql_fetch_assoc($groups)) {
+                array_push($rectypeGroups, array('id'=>$group["rtg_ID"], 'name' => $group["rtg_Name"]));
+                $rectypeGroups2[$group["rtg_ID"]] = $group["rtg_Name"];
+                $rectypeGroups3[$group["rtg_ID"]] = $group["rtg_Description"];
+            }
 
                 //$rectypes = mysql_query("select * from ".$tempDBName.".defRecTypes order by rty_RecTypeGroupID, rty_Name");
                 
@@ -314,6 +316,7 @@
                 echo 'var importTargetDBFullName = "'.DATABASE.'";'. "\n";
                 echo "var rectypeGroups = ".json_format($rectypeGroups,true). ";\n";
                 echo "var rectypeGroups2 = ".json_format($rectypeGroups2,true). ";\n";
+                echo "var rectypeGroups3 = ".json_format($rectypeGroups3,true). ";\n";
                 echo "var rectypesToImport = ".json_format($rectypesToImport,true). ";\n"; 
                 echo "var dtlookups = ".json_format(getDtLookups(),true). ";\n";
             ?>
@@ -429,27 +432,29 @@
                                     return res;
                                 }
                             });
-                            
-                            
-                            
-                    YAHOO.widget.DataTable.MSG_EMPTY = "There are no new record types to import from this database (all types already exist in the target)";
-                    
-                    $('<div id="header'+grpID+'" style="padding-top:5px"></div>').addClass('rtgroup')
-                        .html('<h3>'+rectypeGroups2[grpID]+'</h3>').appendTo($('#crosswalkTable'));
-                    $('<div id="table'+grpID+'"></div>').addClass('rtgroup').appendTo($('#crosswalkTable'));
-                    
-                    
-                    // Create the RowExpansionDataTable
-                    myDataTable = new YAHOO.widget.RowExpansionDataTable(
-                        'table'+grpID, //"crosswalkTable",
-                        myColumnDefs,
-                        myDataSource,
-                        {
-                            // Create the expansion for every recordtype, showing all it's recstructure,
-                            // and the detailtype name and type the recstructures point to
-                            rowExpansionTemplate:
-                            function(obj) {
-                                var rty_ID = obj.data.getData('rtyID');
+
+
+
+                            YAHOO.widget.DataTable.MSG_EMPTY = "There are no new record types to import from this database (all types already exist in the target)";
+
+                            $('<div id="header'+grpID+'" style="padding-top:5px"></div>').addClass('rtgroup')
+                            .html('<h3>'+rectypeGroups2[grpID]+'</h3>').appendTo($('#crosswalkTable'));
+                            $('<div id="label'+grpID+'" style="margin-bottom:10px;font-weight:bold"></div>')
+                            .html(rectypeGroups3[grpID]).appendTo($('#header'+grpID));
+                            $('<div id="table'+grpID+'"></div>').addClass('rtgroup').appendTo($('#crosswalkTable'));
+
+
+                            // Create the RowExpansionDataTable
+                            myDataTable = new YAHOO.widget.RowExpansionDataTable(
+                                'table'+grpID, //"crosswalkTable",
+                                myColumnDefs,
+                                myDataSource,
+                                {
+                                    // Create the expansion for every recordtype, showing all it's recstructure,
+                                    // and the detailtype name and type the recstructures point to
+                                    rowExpansionTemplate:
+                                    function(obj) {
+                                        var rty_ID = obj.data.getData('rtyID');
 
                                 var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";
                                 info += '<table style="text-align: left;"><tr>';
