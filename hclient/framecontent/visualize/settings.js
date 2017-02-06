@@ -119,6 +119,7 @@ function handleSettingsInUI() {
     $( "#setViewMode" ).buttonset();    
 
     //
+    if(setting_gravity=='agressive') setting_gravity='touch';
     $("input[name='gravityMode'][value='" +getSetting(setting_gravity)+ "']").attr("checked", true);
     
     $('#gravityMode0').button() //{icons: { primary: 'ui-icon-gravity0' }, text:false})
@@ -240,6 +241,7 @@ function handleSettingsInUI() {
 
     //------------ LABELS ----------
     
+    putSetting(setting_labels, 'on'); //always on
     var isLabelVisible = (getSetting(setting_labels, 'on')=='on');
     
     $('#textOnOff').attr('checked',isLabelVisible).change(function(){
@@ -302,10 +304,10 @@ function handleSettingsInUI() {
     
     if(settings.isDatabaseStructure){
         initRecTypeSelector();    
+        $('#setDivExport').hide();
+    }else{
+        $('#gephi-export').button();
     }
-    
-
-    $('#gephi-export').button();
     
     tBar.show();
  /*   OLD JJ CODE

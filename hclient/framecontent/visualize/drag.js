@@ -25,6 +25,7 @@
 * Appends nodes to the visualisation
 */
 function addNodes() {
+    
     // Append nodes
     var nodes = d3.select("#container")
                   .selectAll(".node")
@@ -137,6 +138,8 @@ function addNodes() {
               return false;
           })    
          .on("click", function(d) {
+             
+              closeRectypeSelector();
               // Check if it's not a click after dragging
               if(!d3.event.defaultPrevented) {
                   // Remove all overlays and create a record overlay for selected node

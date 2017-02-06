@@ -209,6 +209,7 @@ text.shadow {
     fill: #000;
     /*font-size: 20px;*/
     font-weight: bold;
+    cursor: pointer;
 }
 
 /** Selection */

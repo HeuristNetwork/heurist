@@ -44,7 +44,7 @@ function getRecordOverlayData(record) {
     // Header
     var header = {text: truncateText(record.name, maxLength), 
                   count: record.count,  
-                  size: "11px", style: "bold", height: 15,
+                  size: "11px", style: "bold", height: 15, indent:false,
                                  enter: true, image:record.image}; 
     if(settings.showCounts) {
         header.text += ", n=" + record.count;  
@@ -107,7 +107,8 @@ function getRecordOverlayData(record) {
 
         // Convert map to array
         for(key in map) {                                   
-            array.push({text: truncateText(key, maxLength), size: "8px", style:"italic", height: fontSize, enter: true}); // Heading
+            array.push({text: truncateText(key, maxLength), size: "8px", 
+                    style:"italic", height: fontSize, indent:true, enter: true}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
@@ -219,6 +220,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         var rty_ID = '';                 
         // Title
         var rollover = info[0].text;
+
         //var title = overlay.append("title").text(info[0].text+' rollover?');
         if(settings.isDatabaseStructure && type=='record'){
             rty_ID = selector.substr(2);
@@ -383,6 +385,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         // Calculate optimal rectangle size
         var maxWidth = 1;
         var maxHeight = 10;                              
+        var widthTitle = 1;
         for(var i = 0; i < text[0].length; i++) {
             var bbox = text[0][i].getBBox();
 
@@ -392,14 +395,16 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 maxWidth = width;
             }
             
+            if(i==0) widthTitle = maxWidth;
+            
             // Height
             var y = bbox.y*1.1;
             if(y > maxHeight) {
                 maxHeight = y;
             }
         }
-        maxWidth  += ((type=='record')?offset:10)*2.5;//*3.5;
-        maxHeight = maxHeight + fontSize*1 + offset*1;//offset*1.1;// offset*1.2;//*2; 
+        maxWidth  += ((type=='record')?(offset):10)*2;//*3.5;
+        maxHeight = maxHeight + offset*1;//fontSize*1 + 
       
       if(settings.isDatabaseStructure && type=='record'){
                    
@@ -445,7 +450,18 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                      drag_link_line = null;
                  }
                  );
-                  
+
+/*
+        var bbox = btnEdit[0][0].getBBox();
+        var width = bbox.x + bbox.width*1.1;
+                  if(width > maxWidth) {
+                      maxWidth = width;
+                  }
+*/                  
+
+        widthTitle = widthTitle+(iconSize+3)*5;
+        if(widthTitle>maxWidth) maxWidth = widthTitle;
+
         //link button      
         var btnAddLink = overlay
                   .append("svg:image")
@@ -453,7 +469,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("xlink:href", function(d) {
                         return window.hWin.HAPI4.baseURL+'hclient/assets/edit-link.png';
                   })
-                  .attr("transform", "translate("+(maxWidth-2*iconSize-3)+","+(maxHeight-iconSize-3)+")")
+                  .attr("transform", "translate("+(maxWidth-3*iconSize-3)+",3)")
+//on bottom                  .attr("transform", "translate("+(maxWidth-2*iconSize-3)+","+(maxHeight-iconSize-3)+")")
                   .attr("height", iconSize)
                   .attr("width", iconSize)
                   .on("mousedown", function(d) {
@@ -466,16 +483,32 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         .attr("class", "hintoverlay")
                          .attr("transform", "translate(" +x +','+y+')');
                       
-                      $('.hintoverlay').fadeOut(2000, function() {
-                            $(this).remove();
-                      });                       
+                      var hintrect = hintoverlay.append("rect")
+                          .attr("class", "semi-transparant")              
+                          .attr("x", 0)
+                          .attr("y", 0)
+                          .attr("rx", 0)
+                          .attr("ry", 0)
+                          .style('stroke','#000000')
+                          .style("stroke-width", 0.5);
                          
-                      hintoverlay.append("text")
+                      var hinttext = hintoverlay.append("text")
                       .text('drag me to another node …')
+                      .attr('x',3)
+                      .attr('y',10)
                       .attr("fill", fontColor)
                       .style("font-style", 'italic', "important")
                       .style("font-size", 10, "important");
+                      
+                      var bbox = hinttext[0][0].getBBox();
+                      
+                      hintrect.attr("width", bbox.width+6)
+                            .attr("height", bbox.height+4);      
 
+
+                      $('.hintoverlay').fadeOut(3000, function() {
+                            $(this).remove();
+                      });    
                   })
                   .call(drag2);
                   
@@ -493,7 +526,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("xlink:href", function(d) {
                         return window.hWin.HAPI4.baseURL+'hclient/assets/edit-pencil.png';
                   })
-                  .attr("transform", "translate("+(maxWidth-iconSize)+","+(maxHeight-iconSize-3)+")")
+                  .attr("transform", "translate("+(maxWidth-2*iconSize-3)+",3)")
+//                  .attr("transform", "translate("+(maxWidth-iconSize)+","+(maxHeight-iconSize-3)+")")
                   /*.attr("x", 2)
                   .attr("y", 2) */
                   .attr("height", iconSize)
@@ -508,35 +542,30 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         return 'Click to edit the entity / record type structure';
                    });
                   
-                  
-        var bbox = btnEdit[0][0].getBBox();
-        var width = bbox.x + bbox.width*1.1;
-                  if(width > maxWidth) {
-                      maxWidth = width;
-                  }      
-      }else{
-        /* Close button
-        var buttonSize = 15;
+
+        // Close button
         var close = overlay.append("g")
-                           .attr("class", "close")
-                           .attr("transform", "translate("+(maxWidth-buttonSize)+",0)")
+                           .attr("class", "close info-mode")
+                           .attr("transform", "translate("+(maxWidth-iconSize)+",3)")
                            .on("mouseup", function(d) {
-                               removeOverlay(selector);                
-                           });
+                               $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();                                              });
                            
         // Close rectangle                                                                     
         close.append("rect")
                .attr("class", "close-button")
-               .attr("width", buttonSize)
-               .attr("height", buttonSize)
+               .attr("width", iconSize)
+               .attr("height", iconSize)
 
         // Close text        
         close.append("text")
              .attr("class", "close-text")
              .text("X")
-             .attr("x", buttonSize/4)
-             .attr("y", buttonSize*0.75);
-       */      
+             .attr("x", iconSize/4)
+             .attr("y", iconSize*0.75);
+
+                  
+      }else{
+          maxHeight = maxHeight + fontSize*1;
       }
       
       

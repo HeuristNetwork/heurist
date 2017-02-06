@@ -365,6 +365,9 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         });
                     <?php } ?>
 
+                    
+
+                    
                     // Listen to 'show-record' checkbox changes
                     $(".show-record").change(function(e) {
                         // Update record field 'checked' value in localstorage
@@ -481,7 +484,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 
                     var width = $(window).width();
               
-                    var supw = (width<1120)?4:0;
+                    var supw = (width<841)?4:0; //1120
 
                     var dbkey = 'db'+window.hWin.HAPI4.database;
 

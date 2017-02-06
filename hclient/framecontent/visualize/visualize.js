@@ -423,6 +423,28 @@ function visualizeData() {
     addLines("bottom-lines", getSetting(setting_linecolor), 0);
     addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5); //tick transparent line to catch mouse over
 
+/*    
+svg.append("svg:defs").selectAll("marker")
+    .data(data.links)
+  .enter().append("svg:marker")
+    .attr("id", 'marker')
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 5)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+  .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5");    
+var lines = svg.append("svg:g").selectAll("path")
+    .data(data.links)
+    .enter().append("svg:path")
+    .attr("marker-mid", "url(#marker)")
+    .style("stroke-width", 2)
+    .attr("stroke", '#ff0000');    
+  lines.attr("class", function(d) {
+            return "bottom-lines link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+         });
+*/    
     // Nodes
     addNodes();
     //addTitles();
@@ -481,7 +503,6 @@ function visualizeData() {
     
 } //end visualizeData
 
-
 /****************************************** CONTAINER **************************************/
 /**
 * Adds a <g> container to the SVG, which all other elements will get added to.
@@ -511,14 +532,13 @@ function addContainer() {
     var container = svg.append("g")
                        .attr("id", "container")
                        .attr("transform", s);
-                       
     // Zoom behaviour                   
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
                            .scaleExtent([0.05, 10]) //settings.isDatabaseStructure?[0.75,1.5]:
                            .on("zoom", zoomed);
-                      
+                    
     return container;
 }
 
@@ -527,6 +547,7 @@ function addContainer() {
 */
 function zoomed() { 
     //keep current setting Translate   
+    var translateXY = [];
     if(d3.event.translate !== undefined) {
         if(!isNaN(d3.event.translate[0])) {           
             putSetting(setting_translatex, d3.event.translate[0]); 
@@ -534,39 +555,64 @@ function zoomed() {
         if(!isNaN(d3.event.translate[1])) {    
             putSetting(setting_translatey, d3.event.translate[1]);
         }
+/*    
+        if(prev_translate!=null && !isNaN(prev_translate[0]) && !isNaN(prev_translate[1])){
+            translateXY[0] = prev_translate[0] + 
+                        (d3.event.translate[0]==prev_translate[0])?0:Math.pow(d3.event.translate[0]-prev_translate[0], 0.5);
+            translateXY[1] = prev_translate[1] + 
+                        (d3.event.translate[1]==prev_translate[1])?0:Math.pow(d3.event.translate[1]-prev_translate[1], 0.5);
+            prev_translate = [translateXY[0], translateXY[1]];
+        }else{
+            prev_translate = d3.event.translate;
+            translateXY[0] = d3.event.translate[0];
+            translateXY[1] = d3.event.translate[1];
+        }
+console.log('A '+translateXY[0]+','+translateXY[1]);        
+console.log('B '+d3.event.translate);    
+*/    
     }
     
-    //keep current setting Scale
-    if(!isNaN(d3.event.scale)) {
-        putSetting(setting_scale, d3.event.scale);
-    }   
+    var scale = d3.event.scale; //Math.pow(d3.event.scale,0.75);
     
+    //keep current setting Scale
+    if(!isNaN(d3.event.scale)){
+        putSetting(setting_scale, scale);
+    }
+   
     
 //console.log( 'trans='+d3.event.translate );
-//console.log( 'scale='+d3.event.scale );
+//console.log( 'scale='+scale );
     
-    // Transform  
-    var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
+    // Transform  d3.event.translate  d3.event.translate
+    var transform = "translate("+d3.event.translate
+            //((d3.event.translate==undefined)?d3.event.translate
+            //                            :(translateXY[0]+','+translateXY[1]))
+                                        +")scale("+scale+")";
     d3.select("#container").attr("transform", transform);
     
     //d3.selectAll(".node").select(".icon").attr('transform',"scale("+(1/d3.event.scale)+")");
+    /*
     d3.selectAll(".node").attr('transform',
     function(d) { 
         //keep zoomed position 
         var tr = "translate(" + d.x + "," + d.y + ")";
         //however restore scale
-        tr = tr+"scale("+(1/d3.event.scale)+")";
+        tr = tr+"scale("+(1/scale)+")";
         
         return tr; 
     });
+    */
     
-    d3.selectAll("path").style("stroke-width", function(d) { return getLineWidth(d.targetcount); });
-    
-    //.attr("d", d3.svg.symbol().type(function (d) { return d.Shape; }).size(1/d3.event.scale));
-    
-    //d3.selectAll(".node").attr('transform',"translate(0,0)scale("+(1/d3.event.scale)+")"); //translate("+d3.event.translate+")
-    //d3.selectAll("path").attr("transform", transform); //"scale("+d3.event.scale+")");
-    //updateNodes();
+    d3.selectAll(".bottom-lines").style("stroke-width", 
+            function(d) { 
+                var w = getLineWidth(d.targetcount); //width for scale 1
+                return  (scale>1)?w:(w/scale);
+            });
+    d3.selectAll(".top-lines").style("stroke-width", 
+            function(d) { 
+                var w = getLineWidth(d.targetcount)+8.5; //width for scale 1
+                return  (scale>1)?w:(w/scale);
+            });
 
     updateOverlays();
 }  
@@ -603,6 +649,7 @@ function addMarkerDefinitions() {
     var linetype = getSetting(setting_linetype);
     var linelength = getSetting(setting_linelength);
     var markercolor = getSetting(setting_markercolor);
+    
     
     
     var markers = d3.select("#container")
@@ -642,6 +689,7 @@ function addMarkerDefinitions() {
                             return d.relation.type=='resource' 
                                             ?'M0,-5 L10,0 L0,5' 
                                             :'M0,-5 L5,0 L0,5 M5,-5 L10,0 L5,5'});  //double arrow
+                                            
      return markers;
 /*     
 CROSS  M 3,3 L 7,7 M 3,7 L 7,3
@@ -677,21 +725,12 @@ function addLines(name, color, thickness) {
                   .selectAll("polyline.link")
                   .data(data.links)
                   .enter()
-                  .append("svg:polyline")
-                    /*.attr("class", function(d) { 
-                        return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                    })*/
-                    // links to marker by id and place marker in the mid of segment
-                    //unfortunately it does not work
-                    .attr("marker-mid", function(d) { 
-                        var cls = "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                        //console.log(cls); 
-                        //console.log('found '+$("#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id).attr('id'));
-                        return "url(#" + cls + ")"; });
+                  .append("svg:polyline");
     }    
 
     //var thickness = parseInt(getSetting(setting_linewidth))+1;
-
+    var scale = this.zoomBehaviour.scale(); //current scale
+    
     // Adding shared attributes
     lines.attr("class", function(d) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
@@ -707,7 +746,10 @@ function addLines(name, color, thickness) {
          })) 
          
          
-         .style("stroke-width", function(d) { return getLineWidth(d.targetcount)+thickness; })
+         .style("stroke-width", function(d) { 
+             var w = getLineWidth(d.targetcount)+thickness; //width for scale 1
+             return  (scale>1)?w:(w/scale);
+         })
          .on("mouseover", function(d) {
 //console.log(d.relation.id);  //field type id           
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
@@ -886,8 +928,10 @@ function updateStraightLines(lines) {
        var dy2 = dy+R*Math.cos(tg);
   
        return d.source.x + "," + d.source.y + " " +
-              (d.source.x + dx2) + "," + 
-              (d.source.y + dy2) + " " +  
+              //(d.source.x + dx/2-R*Math.sin(tg)) + "," + 
+              //(d.source.y + dy/2+R*Math.cos(tg)) + " " +  
+              (d.source.x + dx-R*Math.sin(tg)) + "," + 
+              (d.source.y + dy+R*Math.cos(tg)) + " " +  
               target_x + "," + target_y;
     });
     
@@ -896,11 +940,13 @@ function updateStraightLines(lines) {
 function updateSteppedLines(lines){
     var pairs = {};
     
+    var mode = 0; //
+    
     // Calculate the straight points
     lines.attr("points", function(d) {
         
-       var dx = (d.target.x-d.source.x)/2,
-           dy = (d.target.y-d.source.y)/2;
+       var dx = (d.target.x-d.source.x)/(mode==1?1:2),
+           dy = (d.target.y-d.source.y)/(mode==1?1:2);
        
        var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
        
