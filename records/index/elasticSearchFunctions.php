@@ -83,7 +83,7 @@
             "from Records where rec_ID=$recID"; // omits scratchpad
             $res = mysql_query($query);
 
-            // Check if query has succeed ed
+            // Check if query has succeed
             if ($res) {
                 $row = mysql_fetch_array($res); // Fetch record data
 
@@ -105,7 +105,8 @@
 
                 // Check if recTypeID has changed
                 if($record->RecTypeID != $recTypeID) {
-                    // Delete index for old record type before updating index for new record type 
+                    // Delete index for old record type before updating index for new record type
+
                     deleteRecordIndexEntry($dbName, $recTypeID, $recID);
                 }
             } else {
@@ -136,8 +137,13 @@
             error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> indexed in elastic: $json");
 
             // Check if created property exists and is true
-            $response = json_decode($json);
-            return property_exists($response, 'created') && $response->created;
+            if($json!=null){ //without check it ruins main save function
+                $response = json_decode($json);
+                return property_exists($response, 'created') && $response->created;
+            }
+            else{
+                return false;
+            }
         }
         return false;
     } // addUpdateRecordIndex
