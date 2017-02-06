@@ -36,7 +36,6 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] ){
     return;
 }
 
-
 define('IS_INDEX_PAGE',true);
 define('PDIR','');
 
@@ -125,6 +124,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         
         <script type="text/javascript">
 
+            var _gaq = _gaq || []; //google analytics
+            
            function onPageInit(success){
 
                 if(!success) return;
@@ -216,6 +217,15 @@ _time_debug = new Date().getTime() / 1000;
                     }, 3000);
                 }else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
                         || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
+                            
+                    //add google analytics for digital harlem
+                    _gaq.push(['_setAccount', 'UA-22188173-1']);
+                    _gaq.push(['_trackPageview']);
+                    
+                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                            
                             
                     var init_search = window.hWin.HEURIST?window.hWin.HEURIST.displayPreferences['defaultSearch']:'';
                     if(!window.hWin.HEURIST4.util.isempty(init_search)){
