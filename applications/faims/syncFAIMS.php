@@ -1843,7 +1843,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                         print "<div style='color:red; font-weight:bold;padding:10px'>
                         Sorry, we are unable to sync the Heurist database with the FAIMS SQLite database
                         <br/>as we cannot detect SpatiaLite (spatial functions for SQLite).
-                        <br/>Please ask your sysadmin to SpatiaLite on the server.</div>";
+                        <br/>Please ask your sysadmin to install SpatiaLite on the server.</div>";
                         return false;
                     }
 
