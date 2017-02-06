@@ -360,7 +360,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         setTimeout(function(){
             var legend = document.getElementById('map_legend');
-            var ch = $("#map_legend .content").height()+70;
+            var ch = $("#map_legend .content").height()+65;
 
             var nt = parseInt($(legend).css('bottom'), 10);
             var mh = $('#map').height();
@@ -368,11 +368,11 @@ require_once(dirname(__FILE__)."/initPage.php");
             var is_collapsed = ($(legend).find('#collapse').text() == "+");
             
             if(is_collapsed===true){
-                $(legend).css('top', mh-nt-60);   
+                $(legend).css('top', mh-nt-50);   
             }else{
             
             if(mh-nt-ch < 70){
-                $(legend).css('top', 60);
+                $(legend).css('top', 50);
             }else{
                 $(legend).css('top', mh-nt-ch);        
             }
@@ -531,12 +531,12 @@ require_once(dirname(__FILE__)."/initPage.php");
 
             <!-- Legend overlay -->
             <div id="map_legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; overflow-y:auto; display:none;">
-                <div>
+                <div id="map_extents"  style="font-size: 0.9em;display:inline-block;visibility:hidden;padding-bottom:1em;">Zoom to:&nbsp;
+                        <select id="selMapBookmarks" style="font-size:1.0em;"></select>
+                </div>
+                <div style="float:right;">
                     <span style="font-size: 1.25em">&nbsp;</span>
                     <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
-                </div>
-                <div id="map_extents"  style="font-size: 0.9em;display:none; padding-bottom:1em;">Zoom to:&nbsp;
-                        <select id="selMapBookmarks" style="font-size:1.0em;"></select>
                 </div>
                 <div class="content"></div>
             </div>

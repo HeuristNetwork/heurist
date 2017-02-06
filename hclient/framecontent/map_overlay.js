@@ -126,7 +126,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         console.log('load '+current_map_document_id);    
 
         // Clean old data
-        $('#map_extents').hide();
+        $('#map_extents').css('visibility','hidden');
         _removeMapDocumentOverlays();
         var selBookmakrs = document.getElementById('selMapBookmarks');
         $(selBookmakrs).empty();
@@ -257,11 +257,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
                     if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
                         
-                        var ele = $(top.document.body).find('#dh_search_2');
+                        var ele = $(window.hWin.document.body).find('#dh_search_2');
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
                         {options:{resizable:true, modal:false, width:ele.width(), height:ele.height()-100}, 
                             my:'left top', at:'left top', of:ele}, false);
+                            
                     }
                 }
                 
@@ -279,7 +280,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         mapping.timelineZoomToRange(map_bookmarks[val]['tmin'],map_bookmarks[val]['tmax']);
                 }
             }
-            $('#map_extents').show();
+            $('#map_extents').css('visibility','visible');
             selBookmakrs.selectedIndex = 1;
             $(selBookmakrs).change();
 
@@ -698,7 +699,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 preserveViewport: is_mapdoc,
                 map: map,
                 status_changed: function(){
-                    console.log('status: '+kmlLayer.getStatus());
+                    //console.log('status: '+kmlLayer.getStatus());
                 }
             });
         }
