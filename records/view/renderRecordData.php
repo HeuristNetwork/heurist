@@ -824,7 +824,8 @@ function print_linked_details($bib) {
     'and dtl_Value = ' . $bib['rec_ID'].' '.
     'and rec_RecTypeID != '.$relRT.' '.
     'and '.(count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
-    (is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")');
+    ((is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")').
+    ' ORDER BY rec_RecTypeID, rec_Title');
     $res = mysql_query($query);
 
     if (mysql_num_rows($res) <= 0) return;
@@ -833,7 +834,6 @@ function print_linked_details($bib) {
            print '<div>';
         }else{
            print '<div class=detailRowHeader>Linked from'; 
-        
     ?>
         <div class=detailRow>
             <div class=detailType>Referencing records</div>
