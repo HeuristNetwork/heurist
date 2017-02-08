@@ -315,7 +315,15 @@ function isForAdminOnly($message="", $redirect=true)
 
 // TODO: Replace this ugly popup with a brief duration message
 function outWarning($role, $message){
-    ?>
+    
+/* Version 3 Artem: using our standard error page */
+define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
+
+$message = 'It appears you have insufficient access rights '.(($message)?$message:'for this operation');
+
+header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($message));
+
+/* Version 2 Mitema: using third party "toaster" widget
     <html>
         <head>
             <!--<link rel=stylesheet href='../../../common/css/global.css'> -->
@@ -340,23 +348,26 @@ function outWarning($role, $message){
                 });
             </script>
             <meta http-equiv="content-type" content="text/html; charset=utf-8">
-
+            
         </head>
 
         <body>
+            <!--  Version 1 (oldest) - static page with message
             <div class=wrap>
                 <div id=errorMsg>
-                    <!--  <span>You do not have the permission to perform this action</span>
+                    <span>You do not have the permission to perform this action</span>
                     <p>
                     <a href="<?php //echo HEURIST_BASE_URL; ?>common/connect/login.php?logout=1&db=<?php // echo HEURIST_DBNAME; ?>"
                     target="_top">Log out / log in again</a>
-                    </p>-->
+                    </p>
+                    
                 </div>
             </div>
+            -->
 
         </body>
     </html>
-    <?php
+*/            
 
 }
 
