@@ -81,7 +81,7 @@
                         </td>
                         <td style="width: 140px;" title="Restrict search to this record type">
                             in <select id="t" name="t" style="width: 90%;"
-                            onChange="onSelectRecordtype(true)"></select>
+                                onChange="changeOption(true, false);onSelectRecordtype(true);"></select>
                         </td>
                         <td style="width: 80px; padding: 10 5px;">
                             <div class="radio" style="white-space:nowrap;">
@@ -107,12 +107,18 @@
                     <tr>
                         <td colspan="5" rowspan="1" style="padding-top: 0px; padding-left: 30px;">
                             <b>or</b> &nbsp;&nbsp;&nbsp;
-                            <a href="#" style="border: 3px; border-style: outset; border-color: black;"
-                            id="btn_CreateNewRecord"
-                            title="Create and edit a new record, which will become the target of the pointer field"
-                            onClick=" return addRecord();">
-                            <img src="../../common/images/add-record-small.png" style="border: 1px;"/>
-                            <b>Create a new record</b></a>
+
+                            <div style='display:inline-block'>   
+                                <a href="#" style="border: 3px; border-style: outset; border-color: black; font-style:bold"
+                                    id="btn_CreateNewRecord"
+                                    title="Create and edit a new record, which will become the target of the pointer field"
+                                    onClick=" return addRecord();">
+                                    <img src="../../common/images/add-record-small.png" style="border: 1px;"
+                                        title="Create and edit a new record, which will become the target of the pointer field"/>                                   <span id="rtNameToAdd">Create new</span></a>
+                            </div> 
+                            <select id="recTypeToAdd" style="border: 3px; border-style: outset; border-color: black;"
+                                onChange="changeOption(false, true);"></select>
+
                             &nbsp;&nbsp;<i>Record becomes target of current pointer field</i>
                         </td>
                     </tr>
@@ -135,7 +141,7 @@
             var parentVisibility = window.HEURIST.parameters["visibility"];
 
             // check for type constraints
-            var rectype = window.HEURIST.parameters["t"];
+            var rectype = window.HEURIST.parameters['t'];
             var rtName;
             var rectypes = [];
 
@@ -170,20 +176,69 @@
             }
             
             function onSelectRecordtype(is_submit){
-                if(is_submit) document.forms[0].submit('record-search-type');    
-                var rt_name = top.HEURIST.rectypes.names[document.getElementById('t').value];
-                if(!rt_name) rt_name = 'a new record';
-                document.getElementById('btn_CreateNewRecord').innerHTML = 
-                    '&nbsp;<img src="../../common/images/add-record-small.png" style="border: 1px;"/>'
-                    +'&nbsp;<b>Create new '+rt_name+'</b>';
+                if(is_submit) document.forms[0].submit('record-search-type'); 
+                var tElt = document.getElementById('t');   
+                var rt_name = top.HEURIST.rectypes.names[tElt.value];
+                if(!rt_name) rt_name = 'a new record'
+                else rt_name = 'new '+rt_name;
+                
+                if(!rectypes || tElt.length<2 ){ //unconstrined
+                    document.getElementById('rtNameToAdd').innerHTML = '&nbsp;Create '+rt_name;
+                }else{
+                    document.getElementById('rtNameToAdd').innerHTML = '&nbsp;Create new';
+                }
+                                    
+
+                
+/*artem
+                var select = document.getElementById('recTypeToAdd');
+                if (select.options.length==0){
+                    $("#t option" ).each(function(){
+                        //tElt.appendChild(new Option(name, recTypeID));
+                        //alert($(this).val());
+                        $(select).append('<option data-class ="ui-icon.record" value=' +
+                            top.HEURIST.rectypes.names[$(this).val()]+'>'
+                            + 'Create new '
+                            + top.HEURIST.rectypes.names[$(this).val()]+ '</option>');
+                    });
+                }
+*/
+                // <img src="../../common/images/add-record-small.png" style="border: 1px;"/>
+                //$(select).val(rt_name);
+                //document.getElementById('btn_CreateNewRecord').innerHTML =
+                // '&nbsp;<img src="../../common/images/add-record-small.png" style="border: 1px;"/>'
+                // +'&nbsp;<b>Create new '+rt_name+'</b>';
             }
+            function changeOption(first_filter, second_filter)
+            {
+                if(first_filter)
+                {
+                    var select = document.getElementById('t');
+                    var index =select.selectedIndex;
+                    var _select = document.getElementById('recTypeToAdd'); 
+                    _select.selectedIndex = index; //update accordingly
+                }
+
+                else if(second_filter)
+                {
+                    
+                    var select = document.getElementById('recTypeToAdd');
+                    var index = select.selectedIndex;
+                    var _select = document.getElementById('t')
+                    _select.selectedIndex = index;
+                    _select.onchange();
+                    //addRecord();
+                }
+            }
+
+
 
             /*
             *
             */
             function addRecord(){
                 
-                var recTypeId = document.getElementById('t').value;
+                var recTypeId = document.getElementById('recTypeToAdd').value;
 
                 //was  getRectypeIconAndName
                 var title = "Add new record "+top.HEURIST.util.getRectypeName(recTypeId);
@@ -283,7 +338,7 @@
             document.forms[0].submit = function(txt) {
                 // Make an AJAX request for the search results.  If no search specified, default to RECENT entries.
                 var q = document.forms[0].elements["q"].value;
-                var t = document.forms[0].elements["t"].value;
+                var t = document.forms[0].elements['t'].value;
                 q = q.replace(/^\s*/,"");
                 q = q.replace(/\s*$/,"");
                 t = t.replace(/^\s*/,"");
@@ -371,8 +426,10 @@
                 }
 
                 //create rectype selector and set intial selection
-                var tElt = document.getElementById("t");
+                var tElt = document.getElementById('t');
                 tElt.selectedIndex = 0;
+                
+                var tEltToAdd = document.getElementById('recTypeToAdd');
 
                 if (!rectypes) {// unconstrained pointer
                     tElt.options[tElt.options.length] = new Option("Any record type", "");
@@ -390,14 +447,18 @@
                         var grp = document.createElement("optgroup");
                         grp.label = top.HEURIST.rectypes.groups[index].name;
                         tElt.appendChild(grp);
+                        tEltToAdd.appendChild(grp);
+                        
                         for (var recTypeIDIndex in top.HEURIST.rectypes.groups[index].showTypes) {
                             var recTypeID = top.HEURIST.rectypes.groups[index].showTypes[recTypeIDIndex];
                             var name = top.HEURIST.rectypes.names[recTypeID];
                             if(!top.HEURIST.util.isnull(name)){
                                 tElt.appendChild(new Option(name, recTypeID));
+                                tEltToAdd.appendChild(new Option(name, recTypeID));
 
                                 if(recTypeID == lastSearchType){
                                     tElt.selectedIndex = tElt.options.length-1;
+                                    tEltToAdd.selectedIndex = tEltToAdd.options.length-1;
                                     isNotFound = false;
                                 }
                             }
@@ -419,8 +480,12 @@
                         if(!top.HEURIST.util.isnull(name))
                         {
                             tElt.appendChild( new Option(name, rectypeID));
+                            tEltToAdd.appendChild( new Option(name, rectypeID));
                             if (rectypeID == initialType) {// select inital type
                                 tElt.selectedIndex = tElt.options.length-1;
+                                tEltToAdd.selectedIndex = tElt.options.length-1;
+                                
+                                //document.getElementById('rtNameToAdd').innerHTML = '&nbsp;Create new '+name;
                             }
                             if(rectypeID == lastSearchType){
                                 isNotFound = false;
@@ -433,6 +498,13 @@
                     }
                     tElt.rectypes = rectypeIDList.join();
                 }
+               
+                if(tEltToAdd.length>1){
+                    document.getElementById('recTypeToAdd').style.display = 'inline-block';
+                }else{
+                    document.getElementById('recTypeToAdd').style.display = 'none';
+                }
+                
 
                 //initialise form
                 if(existingRecord)
