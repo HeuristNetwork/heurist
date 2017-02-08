@@ -686,7 +686,7 @@ if (! top.HEURIST.edit) {
             $("#close-button").hide();
             $("#save-record-buttons").show();
             $("#close-button2").hide();
-            $("#save-record-buttons2").show();
+            $("#save-record-buttons2").css('display','table-row');//show();
 
         },
 
