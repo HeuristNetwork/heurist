@@ -429,15 +429,13 @@ $.widget( "heurist.search", {
 
         // bind click events
         this._on( this.btn_search_as_user, {
-            click:  function(){
-                //that.option("search_domain", "a");
-                that._doSearch(true);}
+            click: "_doSearch"
         });
 
         this._on( this.btn_search_as_guest, {
             click: function(){
                 that.option("search_domain", "a");
-                that._doSearch(true);
+                that._doSearch();
             }
         });
 
@@ -447,7 +445,7 @@ $.widget( "heurist.search", {
                 if (code == 13) {
                     window.hWin.HEURIST4.util.stopEvent(e);
                     e.preventDefault();
-                    that._doSearch(true);
+                    that._doSearch();
                 }
             }
         });
@@ -644,38 +642,16 @@ $.widget( "heurist.search", {
     //
     // search from input - query is defined manually
     //
-    _doSearch: function(fl_btn){
+    _doSearch: function(){
 
         //if(!window.hWin.HEURIST4.util.isempty(search_query)){
         //    this.input_search.val(search_query);
         //}
 
-        var select_rectype = $("#sa_rectype");
-        var select_fieldtype = $("#sa_fieldtype");
-        var select_sortby = $("#sa_sortby");
-        var select_terms = $("#sa_termvalue");
-        var sortasc =  $('#sa_sortasc');
-        //$dlg.find("#fld_enum").hide();
-        //alert(select_rectype.val());
-
-
-        var qsearch;
-        if(!fl_btn){
-
-            if(select_rectype && select_rectype.val() || select_fieldtype|| select_fieldtype.val()){
-                this.calcShowSimpleSearch();
-                qsearch = this.input_search.val();
-            }
+        var qsearch = this.input_search.val();
+        if( this.select_rectype && this.select_rectype.val()){
+            qsearch = qsearch + ' t:'+this.select_rectype.val();
         }
-
-        else
-            qsearch = this.input_search.val();
-
-
-        qsearch = qsearch.replace(/,\s*$/, "");
-
-
-
 
         if ( qsearch ) {
 

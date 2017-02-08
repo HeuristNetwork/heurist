@@ -87,7 +87,8 @@ function RectypeManager() {
                 _addNewTab(ind,
                     top.HEURIST.rectypes.groups[index].id,
                     top.HEURIST.rectypes.groups[index].name,
-                    top.HEURIST.rectypes.groups[index].description);
+                    top.HEURIST.rectypes.groups[index].description
+                    );
                 ind++;
             }
         }//for groups
@@ -178,7 +179,7 @@ function RectypeManager() {
 
         tabView.addTab(new YAHOO.widget.Tab({
                     id: grpID,
-                    label: "<label title='"+grpDescription+"'>"+grpName+"</label>",
+                    label: "<label title='Drag tab to reposition. Use [+/-] tab to add, rename or delete tabs'>"+grpName+"</label>",
                     content:
                     ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
                         '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
