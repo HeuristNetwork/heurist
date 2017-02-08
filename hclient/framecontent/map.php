@@ -132,7 +132,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         };
 
         // Setting layout
-        layout_opts.center__minHeight = 100;
+        layout_opts.center__minHeight = 30;
         layout_opts.center__minWidth = 200;
         layout_opts.north__size = 30;
         layout_opts.north__spacing_open = 0;
@@ -489,7 +489,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         <!-- Map -->
         <div class="ui-layout-center">
             <div id="map" style="width:100%; height:100%">Mapping</div>
-            <div id="map_empty_message" style="width:100%; height:100%;display: none;">There are no spatial objects to plot on map</div>
+            <div id="map_empty_message" style="width:100%; height:100%;margin:7px;display: none;">There are no spatial objects to plot on map</div>
         </div>
 
         <!-- Toolbar -->

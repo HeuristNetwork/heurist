@@ -123,7 +123,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
             //mylayout.changeOption('center','minSize',300);
             //$(".ui-layout-resizer-south").css('height',7);
 
-            var tha = $('#mapping').height();
+            var tha = $('#mapping').height();    //entire height of layout
             var th = Math.floor(tha*0.2);
             th = th>200?200:th;
 
@@ -139,7 +139,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 if(ismap){
                     mylayout.sizePane('south', th);
                 }else{
-                    mylayout.sizePane('south', tha-40);
+                    mylayout.sizePane('south', tha-30);  //center panel with map - reduced to minimum (30px)
                 }
             }
             if(ismap || !istime){
