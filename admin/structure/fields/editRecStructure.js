@@ -41,6 +41,8 @@ DDM = YAHOO.util.DragDropMgr,
 Hul = top.HEURIST.util;
 
 
+top.HEURIST.database.id = 1; //temp
+
 function EditRecStructure() {
 
     var _className = "EditRecStructure",
@@ -59,7 +61,6 @@ function EditRecStructure() {
     db,
     warningPopupID = null,
     _structureWasUpdated = false;
-    _changeClicked = true;
 
     // buttons on top and bottom of design tab
     var hToolBar = '<div style=\"display:none;\">'+
@@ -383,6 +384,7 @@ function EditRecStructure() {
                         var status = oRecord.getData('rst_Status');
                         var isRequired = (oRecord.getData('rst_RequirementType')==='required');
                         if ( (_isReserved && isRequired) || status === "reserved"){ // || status === "approved"
+                            //before it was "lock" icon
                             statusLock  ='<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" '+
                             'title="Click to remove field from this record type" /><\/a>';
                         }else{
@@ -635,6 +637,20 @@ function EditRecStructure() {
                     _onAddEditFieldType(rst_ID, 0); //NOT USED
                 }else */
                 if(elLink.hash === "#delete"){
+                    
+                    if(oRecord.getData("rst_Status") === 'reserved')
+                    {
+                        var isRequired = (oRecord.getData('rst_RequirementType')==='required');
+                        
+                        alert("This is a reserved field, which may be required for correct operation of a specific function, "
+                           + "such as Zotero import or mapping.\n"
+                           + "It cannot therefore be deleted. If you do not need to use the field we suggest "
+                           + (isRequired?'making it "optional" and ':'') + "dragging it to "
+                           + "the end of the form under a heading 'Unused' or 'Ignore'.\n"
+                           + "Empty fields do not affect performance or take up any space in the database.");
+                           
+                           return;
+                    }
 
                     var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 
@@ -645,10 +661,9 @@ function EditRecStructure() {
                             var dty_name = oRecord.getData('dty_Name');
 
                             var sWarn;
-                            /** Do not allow Delete of fields markked as reserved
-                            /* if(context[rty_ID]){
-                            sWarn = "This field #"+rst_ID+" '"+dty_name+"' is utilised in the title mask. If you delete it you will need to edit the title mask in the record type definition form (click on the pencil icon for the record type after exiting this popup).\n\n Do you still wish to delete this field?";
-                            var r=confirm(sWarn);
+                            if(context[rty_ID]){
+                                sWarn = "This field #"+rst_ID+" '"+dty_name+"' is utilised in the title mask. If you delete it you will need to edit the title mask in the record type definition form (click on the pencil icon for the record type after exiting this popup).\n\n Do you still wish to delete this field?";
+                                var r=confirm(sWarn);
                             }else{
                                 // unnecessary: sWarn =  "Delete field # "+rst_ID+" '"+dty_name+"' from this record structure?";
                                 var r=1; // force deletion
@@ -658,18 +673,10 @@ function EditRecStructure() {
 
                                 _doExpliciteCollapse(null ,false); //force collapse this row
 
-                            var callback = __updateAfterDelete;
-                            var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+rst_ID;
-                            _isServerOperationInProgress = true;
-                            Hul.getJsonData(baseurl, callback, params);
-                            } */
-                            if(context[rty_ID]){
-                                if(oRecord.getData("rst_Status") === 'reserved')
-                                {
-                                    alert("This is a reserved field, which may be required for correct operation of a specific function, such as Zotero import or mapping.\n"+
-                                        "It cannot therefore be deleted.If you do not need to use the field we suggest dragging it to the end of the form under a heading 'Unused' or 'Ignore'.\n"
-                                        + "Empty fields do not affect performance or take up any space in the database.")
-                                }
+                                var callback = __updateAfterDelete;
+                                var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+rst_ID;
+                                _isServerOperationInProgress = true;
+                                Hul.getJsonData(baseurl, callback, params);
                             }
 
                         }
@@ -760,40 +767,6 @@ function EditRecStructure() {
             oRecord = _myDataTable.getRecord(oArgs.target);
             record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
         }
-
-
-        if (false && oRecord.getData('rst_RequirementType')==='required')
-        {
-            var ele = document.getElementById("change_Req");
-            $("#change_Req").css("display","block");
-            $("#reqText").text("This is a reserved field which may be required by a specific function such as Zotero import or mapping."+
-                "Reserved fields can be marked as Recommended or Optional rather than Required, however we recommend thinking " +
-                "carefully about whether the value is required before changing this setting.")
-
-            $("#change_Btn").click(function(){
-                _changeClicked = false;
-console.log('change status for '+rst_ID);                
-                onStatusChange(Number(rst_ID));
-                $_dialogbox.dialog($_dialogbox).dialog("close");
-            });
-            $("#cancel_Btn").click(function(){
-                $_dialogbox.dialog($_dialogbox).dialog("close");
-            });
-            //show confirmation dialog
-            $_dialogbox = Hul.popupElement(top, ele,
-                {
-                    "close-on-blur": false,
-                    "no-resize": true,
-                    title: '',
-                    height: 140,
-                    width: 600
-            });
-        }
-
-
-
-
-
 
                     // after expansion - fill input values from HEURIST db
                     // after collapse - save data on server
@@ -1103,9 +1076,14 @@ console.log('change status for '+rst_ID);
             }else{
                 _optionReserved(selstatus, false);
             }
-            selstatus.disabled = ((status === "reserved") && (original_dbId!==dbId) && 
-                                  (original_dbId>0) && (original_dbId<1001));
+            //2017-02-09 no more restrictions for reserved fields
+            //selstatus.disabled = ((status === "reserved") && (original_dbId!==dbId) && 
+            //                      (original_dbId>0) && (original_dbId<1001));
         }
+        
+        //store to show warning for reserved field
+        $('#ed'+rst_ID+'_rst_RequirementType').attr('data-original', values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType]);
+        $(selstatus).attr('data-original', status);
 
         var k;
         for(k=0; k<fieldnames.length; k++){
@@ -1226,6 +1204,9 @@ console.log('change status for '+rst_ID);
             }else if(maxval>1){
                 res = 'limited';
             }
+            
+            $(sel).attr('data-original', res);
+            
             sel.value = res;
             onRepeatChange(Number(rst_ID));
 
@@ -2242,8 +2223,6 @@ function onAddNewDetail(index_toinsert){
                 }
         });
 
-        //alert("111");
-
     }
 }
 
@@ -2317,7 +2296,12 @@ function onUpdateStructureOnServer(needClose)
 *
 */
 function onStatusChange(evt){
-    var name;
+    
+    var dbId = Number(top.HEURIST.database.id);
+    
+    if(dbId>=1000) return;
+
+    var name, el;
 
     if(typeof evt === 'number'){
         name = 'ed'+evt;
@@ -2325,9 +2309,38 @@ function onStatusChange(evt){
         var el = evt.target;
         name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
     }
+    
+    el = Dom.get(name+"_rst_Status");
 
+    var curr_value = $(el).attr('data-original');
+    var new_value = el.value;
+        
+    if(curr_value=='reserved' && new_value!=curr_value){ //value was changed - confirm
+            el.value = curr_value; //restore
+            //show prompt
+            window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                function(value){
+                    
+                    window.hWin.HAPI4.SystemMgr.action_password({action:'ReservedChanges', password:value},
+                        function(response){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK && response.data=='ok'){
+                                $(el).attr('data-original', ''); //reset to warining once
+                                el.value = new_value;
+                            }else{
+                                alert('Wrong password');
+                            }
+                        }
+                    );
+                    
+                },
+            'To reset field status from "reserved"');
+    
+    }
+    
+    
+    //2017-02-09 no more restrictions for reserved fields
+    /*
     //If reserved, requirements can only be increased, nor can you change min or max values
-    var status = Dom.get(name+"_rst_Status").value;
     var isReserved = (status === "reserved"); // || status === "approved");
     Dom.get(name+"_rst_MinValues").disabled = isReserved;
     Dom.get(name+"_rst_MaxValues").disabled = isReserved;
@@ -2335,7 +2348,8 @@ function onStatusChange(evt){
     sel.disabled = isReserved;
 
     sel = Dom.get(name+"_rst_RequirementType");
-    sel.disabled = (isReserved && (sel.value==='required')&& _changeClicked);
+    sel.disabled = (isReserved && (sel.value==='required'));
+    */
 }
 
 function onIncrementModeChange(rst_ID){
@@ -2352,15 +2366,71 @@ function onIncrementModeChange(rst_ID){
 * Listener of requirement type selector (combobox)
 */
 function onReqtypeChange(evt){
-    var el, name;
+    var el, name, rst_ID;
 
     if(typeof evt === 'number'){
         el = Dom.get("ed"+evt+"_rst_RequirementType")
         name = 'ed'+evt;
+        rst_ID = evt;
     }else{
         el = evt.target;
         name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+        rst_ID = Number(name.substring(2));
     }
+    
+    //in case of reserved field show warning
+    var status = Dom.get(name+"_rst_Status").value;
+    if (status === "reserved"){
+        
+        /*var rty_ID = editStructure.getRty_ID();
+        var values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID];    
+        var curr_value = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType];     */
+        var curr_value = $(el).attr('data-original');
+        var new_value = el.value;
+        if(new_value=='forbidden'){
+            el.value = curr_value; //restore
+            return;
+        }
+
+        
+        if(curr_value=='required' && new_value!=curr_value){ //value was changed - confirm
+        
+            el.value = curr_value; //restore
+            
+            var ele = document.getElementById("change_Req");
+            $("#change_Req").css("display","block");
+            $("#reqText").text("This is a reserved field which may be required by a specific function such as Zotero import or mapping. "+
+                "Reserved fields can be marked as Recommended or Optional rather than Required, however we recommend thinking " +
+                "carefully about whether the value is required before changing this setting.")
+
+            $("#change_Btn").click(function(){
+                $(el).attr('data-original', new_value); //reset - to show this warning once only
+                el.value = new_value;
+                ___onReqtypeChange_continue();
+                $_dialogbox.dialog($_dialogbox).dialog("close");
+            });
+            $("#cancel_Btn").click(function(){
+                $_dialogbox.dialog($_dialogbox).dialog("close");
+            });
+            //show confirmation dialog
+            $_dialogbox = Hul.popupElement(top, ele,
+                {
+                    "close-on-blur": false,
+                    "no-resize": true,
+                    title: '',
+                    height: 140,
+                    width: 600
+            });
+            
+            
+        }
+    }//approve change of "requirement" for reserved field
+    else{
+        ___onReqtypeChange_continue();    
+    }
+
+    
+    function ___onReqtypeChange_continue(){
 
     var rep_el =  Dom.get(name+'_Repeatability');
 
@@ -2395,6 +2465,8 @@ function onReqtypeChange(evt){
         //rep_el.disabled = false;
         onRepeatChange(evt);
     }
+    
+    }  //___onReqtypeChange_continue
 }
 
 /**
@@ -2407,10 +2479,60 @@ function onRepeatChange(evt){
     if(typeof evt === 'number'){
         el = Dom.get("ed"+evt+"_Repeatability")
         name = 'ed'+evt;
+        rst_ID = evt;
     }else{
         el = evt.target;
-        name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+        name = el.id.substring(0,el.id.indexOf("_")); 
+        rst_ID = Number(name.substring(2));
     }
+    
+    
+    //in case of reserved field show warning
+    var status = Dom.get(name+"_rst_Status").value;
+    if (status === "reserved"){
+        
+        var curr_value = $(el).attr('data-original');
+        var new_value = el.value;
+        
+        // empty curr_value means that user already changed repeatability
+        if(curr_value!='' && new_value!=curr_value){ //value was changed - confirm
+        
+            el.value = curr_value;
+            
+            var ele = document.getElementById("change_Req");
+            $("#change_Req").css("display","block");
+            $("#reqText").text("This is a reserved field which may be required by a specific function such as Zotero import or mapping."
+            +" Please think carefully before changing between a single value and repeating value field for a reserved field, "
+            +"as this could affect the way that the field");
+
+            $("#change_Btn").click(function(){
+                el.value = new_value;
+                $(el).attr('data-original',''); //reset
+                ___onRepeatChange_continue();
+                $_dialogbox.dialog($_dialogbox).dialog("close");
+            });
+            $("#cancel_Btn").click(function(){
+                $_dialogbox.dialog($_dialogbox).dialog("close");
+            });
+            //show confirmation dialog
+            $_dialogbox = Hul.popupElement(top, ele,
+                {
+                    "close-on-blur": false,
+                    "no-resize": true,
+                    title: '',
+                    height: 140,
+                    width: 600
+            });
+            
+            
+        }
+    }//approve change of "requirement" for reserved field
+    else{
+        ___onRepeatChange_continue();    
+    }
+
+    
+    function ___onRepeatChange_continue(){    
 
     var el =  Dom.get(name+'_rst_RequirementType');
     if(el.value !== "forbidden"){
@@ -2437,6 +2559,8 @@ function onRepeatChange(evt){
             //TEMP Dom.setStyle(span_max, "visibility", "visible");
         }
 
+    }
+    
     }
 }
 
