@@ -94,7 +94,16 @@
                 if($system->logout()){
                     $res = true;
                 }
-
+                
+            } else  if ($action=="action_password") { //special passwords for some admin actions - defined in configIni.php
+            
+                    $action = @$_REQUEST['action'];
+                    $password = @$_REQUEST['password'];
+                    if($action && $password){
+                        $varname = 'passwordFor'.$action;
+                        $res = (@$$varname==$password)?'ok':'wrong';
+                    }
+                        
             } else if ($action == "save_prefs"){ //save preferences into session
 
                 user_setPreferences($system->dbname_full(), $_REQUEST);
@@ -167,7 +176,6 @@
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
         
-
     header('Content-type: text/javascript');
     print json_encode($response);
 ?>

@@ -130,6 +130,9 @@ $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
 $defaultFaimsModulesPath = ""; // FAIMS only: the location where FAIMS module files will be written
 
+//action passwords
+$passwordForReservedChanges = "SpeakEasy1935";
+
 // parent directory configuration file is optional, hence include not require
 if (is_file($parentIni)){
     include_once($parentIni);
