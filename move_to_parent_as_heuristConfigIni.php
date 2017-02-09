@@ -74,7 +74,8 @@ if (!@$defaultDBname) $defaultDBname = ""; // not required, generally best left 
 if (!@$httpProxy) $httpProxy = ""; // if access to the outside world is through a proxy
 if (!@$httpProxyAuth) $httpProxyAuth = ""; // ditto
 if (!@$passwordForDatabaseCreation) $passwordForDatabaseCreation=""; // normally blank = any logged in user can create
-
+if (!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion=""; // normally blank = any admin user can delete
+if (!@$passwordForReservedChanges) $passwordForReservedChanges=""; // normally blank = any admin user can modify reserved fields
 
 
 ?>

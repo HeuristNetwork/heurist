@@ -107,8 +107,11 @@ $httpProxy = "";
 $httpProxyAuth = "";
 $indexServerAddress="";
 $indexServerPort="";
+
 $passwordForDatabaseCreation="";
 $passwordForDatabaseDeletion="";
+$passwordForReservedChanges="";
+
 $defaultRootFileUploadPath ="";
 $defaultRootFileUploadURL = "";
 $sysAdminEmail = "";
