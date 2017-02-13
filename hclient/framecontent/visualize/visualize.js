@@ -421,6 +421,7 @@ function visualizeData() {
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
     addLines("bottom-lines", getSetting(setting_linecolor), 0);
+    
     addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5); //tick transparent line to catch mouse over
 
 /*    
@@ -658,7 +659,7 @@ function addMarkerDefinitions() {
                     .data(data.links)
                     .enter()
                     .append("svg:marker")    
-                    .attr("id", function(d) {
+                    .attr("id", function(d) {  //use this id to connect markers to the appropriate link
                         return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
                     })
                     .attr("markerWidth", function(d) {    
@@ -710,7 +711,9 @@ function addLines(name, color, thickness) {
     // Add the chosen lines [using the linetype setting]
     var lines;
     
-    if(getSetting(setting_linetype) == "curved") {
+    var linetype = getSetting(setting_linetype);
+    
+    if(true){ //getSetting(setting_linetype) != "straight"){//} == "curved") {
         // Add curved lines
          lines = d3.select("#container")
                    .append("svg:g")
@@ -734,9 +737,6 @@ function addLines(name, color, thickness) {
     // Adding shared attributes
     lines.attr("class", function(d) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-         }) 
-         .attr("marker-mid", function(d) {
-            return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")";
          })
          .attr("stroke", color)
          .style("stroke-dasharray", (function(d) {
@@ -744,13 +744,19 @@ function addLines(name, color, thickness) {
                 return "3, 3"; 
              } 
          })) 
-         
-         
          .style("stroke-width", function(d) { 
              var w = getLineWidth(d.targetcount)+thickness; //width for scale 1
              return  (scale>1)?w:(w/scale);
-         })
-         .on("mouseover", function(d) {
+         });
+         
+    if(name=='bottom-lines' && linetype != "stepped"){
+         lines.attr("marker-mid", function(d) {
+            return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")"; //reference to marker id
+         });
+    }
+    
+    if(name=='top-lines'){
+         lines.on("mouseover", function(d) {
 //console.log(d.relation.id);  //field type id           
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
@@ -759,6 +765,7 @@ function addLines(name, color, thickness) {
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              removeOverlay(selector);
          });
+    }
          
     return lines;
 }
@@ -777,7 +784,8 @@ function tick() {
         updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);     
     }else if(linetype == "stepped") {
-        updateSteppedLines(bottomLines);     
+        updateSteppedLines(topLines, 'top');
+        updateSteppedLines(bottomLines,'bottom'); //with marker
     }else{
         updateStraightLines(topLines);
         updateStraightLines(bottomLines);   
@@ -858,7 +866,7 @@ function updateStraightLines(lines) {
 
     
     // Calculate the straight points
-    lines.attr("points", function(d) {
+    lines.attr("d", function(d) {
         
        var key = d.source.id+'_'+d.target.id,
            indent = 30;
@@ -875,69 +883,162 @@ function updateStraightLines(lines) {
            pairs[key] = 1;
        } 
        var R = pairs[key];
-       
+       var pnt = [];
        var target_x = d.target.x,
            target_y = d.target.y;
+           
        if(d.target.id==d.source.id){
            //link to itself
            target_x = d.source.x+100;
            target_y = d.source.y-100;
            
-           /*
-           var nodes = d3.selectAll(".node.id"+d.source.id);
-           nodes.each(function(d, i) {      
-
-           svg.append("svg:image")
-                  .attr("class", "icon_self")
-                  .attr("xlink:href", d.image?d.image:'')
-                  .attr("transform", "translate(" +(d.x+100) +','+(d.x-100)+')')
-                  //.attr("x", d.x+100y
-                  //.attr("y", d.y-100)
-                  .attr("height", iconSize*0.75)
-                  .attr("width", iconSize*0.75);
+           var dx = target_x - d.source.x,
+               dy = target_y - d.source.y,
+               dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+               mx = d.source.x + dx,
+               my = d.source.y + dy;
            
-           });*/
+            pnt = [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              //"A",dr,dr,0,0,1,target_x,target_y,
+              "L",d.source.x+50,d.source.y-50,
+              "L",d.source.x,d.source.y
+              //"A",dr,dr,0,0,1,d.source.x,d.source.y
+            ];
            
-           /*
-           var node = getNodeDataById(d.target.id);
-           if(node){
-               var nodePos = $(".node.id"+d.source.id).offset();
+       }else{
+       
+           var dx = (target_x-d.source.x)/2;
+           var dy = (target_y-d.source.y)/2;
 
-           svg.append("svg:image")
-                  .attr("class", "icon_self")
-                  .attr("xlink:href", node.image?node.image:'')
-                  //.attr("transform", "translate(" +(nodePos.left+100) +','+(nodePos.top-100)+')')
-                  .attr("x", target_x)
-                  .attr("y", target_y)
-                  .attr("height", iconSize*0.75)
-                  .attr("width", iconSize*0.75);
-               
-           //var overlay = svg.append("g").attr("class", "icon_self")
-           //             .attr("transform", "translate(" +target_x +','+target_y+')');
-           //.attr("xlink:href", node.image?node.image:'')
-           }
-           */
+           var tg = (dx!=0)?Math.atan(dy/dx):0;
+           
+           var dx2 = dx-R*Math.sin(tg);
+           var dy2 = dy+R*Math.cos(tg);
+      
+           pnt = [
+                  "M", d.source.x, d.source.y,
+                  "L", (d.source.x + dx-R*Math.sin(tg)), (d.source.y + dy+R*Math.cos(tg)),
+                  "L", target_x, target_y ];
+  
        }
        
-       var dx = (target_x-d.source.x)/2;
-       var dy = (target_y-d.source.y)/2;
-
-       var tg = (dx!=0)?Math.atan(dy/dx):0;
-       
-       var dx2 = dx-R*Math.sin(tg);
-       var dy2 = dy+R*Math.cos(tg);
+       return pnt.join(' '); 
   
-       return d.source.x + "," + d.source.y + " " +
+       //for polyline
+       /*return d.source.x + "," + d.source.y + " " +
               //(d.source.x + dx/2-R*Math.sin(tg)) + "," + 
               //(d.source.y + dy/2+R*Math.cos(tg)) + " " +  
               (d.source.x + dx-R*Math.sin(tg)) + "," + 
               (d.source.y + dy+R*Math.cos(tg)) + " " +  
               target_x + "," + target_y;
+       */
     });
     
 }
 
-function updateSteppedLines(lines){
+function updateSteppedLines(lines, type){
+    var pairs = {};
+    
+    
+    $(".hidden_line_for_markers").remove();
+    
+    var mode = 0; //
+    
+    // Calculate the straight points
+    lines.attr("d", function(d) {
+        
+       var dx = (d.target.x-d.source.x)/2,
+           dy = (d.target.y-d.source.y)/2;
+       
+       var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
+       
+       var key = d.source.id+'_'+d.target.id;
+       if(pairs[d.target.id+'_'+d.source.id]){
+           key = d.target.id+'_'+d.source.id;
+       }else if(!pairs[key]){
+           pairs[key] = 1-indent;
+       }
+       
+       pairs[key] = pairs[key]+indent;
+       var k = pairs[key];
+       
+       var target_x = d.target.x,
+           target_y = d.target.y;
+       var res = [];    
+           
+       if(d.target.id==d.source.id){
+           //link to itself
+           target_x = d.source.x+65;
+           target_y = d.source.y-65;
+           
+           var dx = target_x - d.source.x,
+               dy = target_y - d.source.y,
+               dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+               mx = d.source.x + dx,
+               my = d.source.y + dy;
+           
+            res = [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              //"A",dr,dr,0,0,1,target_x,target_y,
+              "L",d.source.x+35,d.source.y-35,
+              "L",d.source.x,d.source.y
+              //"A",dr,dr,0,0,1,d.source.x,d.source.y
+            ];
+            
+            $(this).attr("marker-mid", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+           
+       }else{  
+      
+           var dx2 = 45*(dx==0?0:((dx<0)?-1:1));
+           var dy2 = 45*(dy==0?0:((dy<0)?-1:1));
+
+           //path
+           res = [
+                  "M",d.source.x,d.source.y,
+                  "L",(d.source.x + dx2),(d.source.y + dy2 ),
+                  "L",(d.source.x + dx2 + dx + k),(d.source.y + dy2),
+                  "L",(d.source.x + dx2 + dx + k),target_y,
+                  "L",target_x,target_y
+                ];
+           
+           
+           if(type=='bottom'){
+                //add 3 lines - specially for markers
+                var g = d3.select("#container").append("svg:g").attr("class", "hidden_line_for_markers");
+                
+                var pnt = [
+                  "M",(d.source.x + dx2),(d.source.y + dy2 ),
+                  "L",(d.source.x + dx2 + dx/2 + k),(d.source.y + dy2)];
+                
+                g.append("svg:path")
+                        .attr("d", pnt.join(' '))
+                        //reference to marker id
+                        .attr("marker-end", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+
+                pnt = [
+                  "M",(d.source.x + dx2 + dx + k), (d.source.y + dy2),
+                  "L",(d.source.x + dx2 + dx + k), d.source.y + dy2 + (target_y - d.source.y - dy2)/2 ];
+                        
+                g.append("svg:path")
+                        //.attr("class", "hidden_line_for_markers")
+                        .attr("d", pnt.join(' '))
+                        //reference to marker id
+                        .attr("marker-end", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+
+           }
+           dx = dx + k;
+           
+       }
+       
+       return res.join(' ');      
+    });
+    
+}
+
+function updateSteppedLines_OLD(lines){
     var pairs = {};
     
     var mode = 0; //
