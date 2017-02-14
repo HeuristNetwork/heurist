@@ -91,7 +91,6 @@ require_once(dirname(__FILE__)."/initPage.php");
             </p>
         </div>
 
-
         <div style="position:absolute;width:99%;height:2em;bottom:10px; text-align:right">
 
             <button id="btn_save">Save RuleSet</button>

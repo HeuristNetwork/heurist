@@ -763,7 +763,7 @@ function addLines(name, color, thickness) {
          })
          .on("mouseout", function(d) {
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-             removeOverlay(selector);
+             removeOverlay(selector, 0);
          });
     }
          
@@ -988,6 +988,7 @@ function updateSteppedLines(lines, type){
               //"A",dr,dr,0,0,1,d.source.x,d.source.y
             ];
             
+            if($.isFunction($(this).attr))
             $(this).attr("marker-mid", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
            
        }else{  

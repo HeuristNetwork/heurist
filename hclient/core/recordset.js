@@ -509,6 +509,7 @@ function hRecordSet(initdata) {
     
     /**
     * Returns field value by fieldname
+    * WARNING for multivalues it returns first value ONLY
     * @todo - obtain fieldtype codes from server side
     */
     function _getFieldValue(record, fldname){
@@ -601,6 +602,10 @@ function hRecordSet(initdata) {
         */
         fld: function(record, fldName){
             return _getFieldValue(record, fldName);
+        },
+
+        values: function(record, fldName){
+            return _getFieldValues(record, fldName);
         },
         
         setFld: function(record, fldName, value){

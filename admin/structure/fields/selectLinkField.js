@@ -88,7 +88,7 @@ $(document).ready(function() {
     
 
         //rectype new field to be added to
-        rty_ID = top.HEURIST4.util.getUrlParameter("rty_ID", document.location.search);
+        rty_ID = top.HEURIST4.util.getUrlParameter("source_ID", document.location.search);
         //rectype to be related (constraint for pointers and relmarker target rectype)
         target_ID = top.HEURIST4.util.getUrlParameter("target_ID", document.location.search);
 

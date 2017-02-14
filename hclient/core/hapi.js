@@ -327,7 +327,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             /**
-            *  Get saved searched for current user and all usergroups where user is memeber
+            *  Get saved searches for current user and all usergroups where user is memeber
             *
             * request
             *    UGrpID: group id -  if not defined returns all saved searches for current user
@@ -504,7 +504,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             ,details: function(request, callback){
                 _callserver('record_details', request, callback);
             }
-
+            
             /**
             * Search for records via global events
             * to search directly use SearchMgr

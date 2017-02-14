@@ -217,19 +217,24 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                          .attr("class", "overlay "+type+ " " + selector)      
                          .attr("transform", "translate(" +x +','+y+')');
         }
-        var rty_ID = '';                 
+        var rty_ID = '', rec_ID = '';                 
         // Title
         var rollover = info[0].text;
 
         //var title = overlay.append("title").text(info[0].text+' rollover?');
-        if(settings.isDatabaseStructure && type=='record'){
-            rty_ID = selector.substr(2);
-            if(window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
-                var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
-                rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
+        if(type=='record'){
+            if(settings.isDatabaseStructure){
+                rty_ID = selector.substr(2);
+                if(window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
+                    var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
+                    rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
+                }else{
+                    console.log('rectype not found '+rty_ID);
+                }
             }else{
-                console.log('rectype not found '+rty_ID);
+                rec_ID = selector.substr(2);
             }
+                
         }
     
     if(parent_node){
@@ -406,7 +411,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         maxWidth  += ((type=='record')?(offset):10)*2;//*3.5;
         maxHeight = maxHeight + offset*1;//fontSize*1 + 
       
-      if(settings.isDatabaseStructure && type=='record'){
+      //drag and edit icons and actions
+      if(type=='record'){
                    
         var drag2 = d3.behavior.drag()
                  .on("dragstart", function(d, i){
@@ -459,9 +465,11 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   }
 */                  
 
-        widthTitle = widthTitle+(iconSize+3)*5;
-        if(widthTitle>maxWidth) maxWidth = widthTitle;
+        var icons_cnt = settings.isDatabaseStructure?3:2;
 
+        widthTitle = widthTitle+(iconSize+3)*(icons_cnt+2);
+        if(widthTitle>maxWidth) maxWidth = widthTitle;
+        
         //link button      
         var btnAddLink = overlay
                   .append("svg:image")
@@ -469,7 +477,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("xlink:href", function(d) {
                         return window.hWin.HAPI4.baseURL+'hclient/assets/edit-link.png';
                   })
-                  .attr("transform", "translate("+(maxWidth-3*iconSize-3)+",3)")
+                  .attr("transform", "translate("+(maxWidth-icons_cnt*iconSize-3)+",3)")
 //on bottom                  .attr("transform", "translate("+(maxWidth-2*iconSize-3)+","+(maxHeight-iconSize-3)+")")
                   .attr("height", iconSize)
                   .attr("width", iconSize)
@@ -526,7 +534,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("xlink:href", function(d) {
                         return window.hWin.HAPI4.baseURL+'hclient/assets/edit-pencil.png';
                   })
-                  .attr("transform", "translate("+(maxWidth-2*iconSize-3)+",3)")
+                  .attr("transform", "translate("+(maxWidth-(icons_cnt-1)*iconSize-3)+",3)")
 //                  .attr("transform", "translate("+(maxWidth-iconSize)+","+(maxHeight-iconSize-3)+")")
                   /*.attr("x", 2)
                   .attr("y", 2) */
@@ -534,7 +542,16 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("width", iconSize)
                   .on("mouseup", function(d) {
                       event.preventDefault();
-                      _editRecStructure(rty_ID);
+                      
+                      if(settings.isDatabaseStructure){
+                            _editRecStructure(rty_ID);    
+                      }else{
+                            window.open(window.hWin.HAPI4.baseURL
+                                +'records/edit/editRecord.html?db='
+                                +window.hWin.HAPI4.database+'&recID='+rec_ID, '_new');
+                      }
+                      
+                      
                   });  
                   
         btnEdit.append("title")
@@ -543,26 +560,28 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                    });
                   
 
-        // Close button
-        var close = overlay.append("g")
-                           .attr("class", "close info-mode")
-                           .attr("transform", "translate("+(maxWidth-iconSize)+",3)")
-                           .on("mouseup", function(d) {
-                               $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();                                              });
-                           
-        // Close rectangle                                                                     
-        close.append("rect")
-               .attr("class", "close-button")
-               .attr("width", iconSize)
-               .attr("height", iconSize)
+        if(settings.isDatabaseStructure){
+            // Close button
+            var close = overlay.append("g")
+                               .attr("class", "close info-mode")
+                               .attr("transform", "translate("+(maxWidth-iconSize)+",3)")
+                               .on("mouseup", function(d) {
+                                   $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();                                              });
+                               
+            // Close rectangle                                                                     
+            close.append("rect")
+                   .attr("class", "close-button")
+                   .attr("width", iconSize)
+                   .attr("height", iconSize)
 
-        // Close text        
-        close.append("text")
-             .attr("class", "close-text")
-             .text("X")
-             .attr("x", iconSize/4)
-             .attr("y", iconSize*0.75);
-
+            // Close text        
+            close.append("text")
+                 .attr("class", "close-text")
+                 .text("X")
+                 .attr("x", iconSize/4)
+                 .attr("y", iconSize*0.75);
+                 
+        }
                   
       }else{
           maxHeight = maxHeight + fontSize*1;
@@ -658,8 +677,9 @@ function updateOverlays() {
 }
 
 /** Removes the overlay with the given ID */
-function removeOverlay(selector) {
-    $(".overlay."+selector).fadeOut(1000, function() {
+function removeOverlay(selector, delay) {
+    if(!(delay>=0)) delay = 1000;
+    $(".overlay."+selector).fadeOut(delay, function() {
         $(this).remove();
    }); 
 }
@@ -673,16 +693,32 @@ function removeOverlays() {
     });
 }
 
-function _addNewLinkField(rty_ID, target_ID){
+function _addNewLinkField(source_ID, target_ID){
     
             var body = $(this.document).find('body');
             var dim = { h:480, w:500 };//Math.max(900, body.innerWidth()-10) };                
             
             //ar target_ID = 10;
             
-            var url = window.hWin.HAPI4.baseURL +
-                "admin/structure/fields/selectLinkField.html?&db="+window.hWin.HAPI4.database
-                   +'&rty_ID='+rty_ID;
+            var url = window.hWin.HAPI4.baseURL;
+            var dlg_title = '';
+            
+            if(settings.isDatabaseStructure){
+            
+                url = url + "admin/structure/fields/selectLinkField.html?&db="
+                    + window.hWin.HAPI4.database
+                    + '&source_ID='+source_ID;
+               
+               dlg_title = 'Select or Create new link field type';   
+            }else{
+
+                url = url + "hclient/framecontent/recordAddLink.php?&db="
+                    + window.hWin.HAPI4.database
+                    + '&source_ID='+source_ID;
+                    
+               dlg_title = 'Add new link or create a relationship between records'; 
+            }
+                   
             if(target_ID>0){
                 url = url +'&target_ID='+target_ID;
             }
@@ -692,7 +728,7 @@ function _addNewLinkField(rty_ID, target_ID){
                     "close-on-blur": false,
                     //"no-resize": true,
                     //"no-close": true, //hide close button
-                    title: 'Select or Create new link field type',
+                    title: dlg_title,
                     height: dim.h,
                     width: dim.w,
                     callback: function(context) {
