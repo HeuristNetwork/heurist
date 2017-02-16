@@ -28,7 +28,9 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
+*/  
+var sSourceName, sTargetName;
+
 function onPageInit(success) //callback function of hAPI initialization
 {
     
@@ -40,7 +42,10 @@ function onPageInit(success) //callback function of hAPI initialization
         //destination record
         var target_ID = window.hWin.HEURIST4.util.getUrlParameter("target_ID", window.location.search);
 
-        $('#btn_save').attr('title', 'explanatory rollover' ).button().on('click', 3, addLinks);
+        $('#btn_save').attr('title', 'explanatory rollover' ).button().on('click', function(){
+            addLinks();
+        });
+        window.hWin.HEURIST4.util.setDisabled($('#btn_save'), true);
         $('#btn_cancel').button().on('click', function(){  window.close()});
         
         
@@ -51,38 +56,39 @@ function onPageInit(success) //callback function of hAPI initialization
                 var resdata = new hRecordSet(response.data);
         
                 //add SELECT and fill it with values
-                var idx, dty, index = 0, rec_titles = [];
+                var idx, dty, rec_titles = [];
                 var records = resdata.getRecords();
             
                 // create list of 3 columns checkboxes, fieldname and relation type     
                 var opposites = []; //recId:recTypeID
                 
-                for(idx in records){
-                    if(idx)
-                    {
-                        var record = records[idx];
+                var record = resdata.getById(source_ID);
+                sSourceName = resdata.fld(record, 'rec_Title');
+                var recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
 
-                        var recID  = resdata.fld(record, 'rec_ID'),
-                            recName = resdata.fld(record, 'rec_Title'),
-                            recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
+                rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
+                $('#rec0_title').html(
+                    'Source ['+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'] <h2 style="padding-top:5px">'+sSourceName+'</h2>'
+                );                                
+                //recordsPair[recID] = recRecTypeID;
+                opposites.push( { recID:source_ID, recRecTypeID:recRecTypeID} );
 
-                        rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
-                        $('#rec'+index+'_title').text(recName);                                
-                        
-                        //recordsPair[recID] = recRecTypeID;
-                        opposites.push( { recID:recID, recRecTypeID:recRecTypeID} );
-                        
-                        index++;
-                    }
-                }//for
+                record = resdata.getById(target_ID);
+                sTargetName = resdata.fld(record, 'rec_Title');
+                recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
+
+                rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
+                $('#rec1_title').html(
+                    'Target ['+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'] <h2 style="padding-top:5px">'+sTargetName+'</h2>'
+                );                                
+                //recordsPair[recID] = recRecTypeID;
+                opposites.push( { recID:target_ID, recRecTypeID:recRecTypeID} );
+                    
                 
                 $('#rec_titles').html(rec_titles.join(' and '));
                 $('#link_rec_edit').attr('href', window.hWin.HAPI4.baseURL
                                 +'records/edit/editRecord.html?db='
                                 +window.hWin.HAPI4.database+'&recID='+source_ID);
-                $('#link_structure_edit').click(function(){
-                     alert('boo!');
-                });                
                 
                 var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 
                     fi_constraints = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs'], 
@@ -91,16 +97,13 @@ function onPageInit(success) //callback function of hAPI initialization
                     fi_term_dis =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs'],
                     hasSomeLinks = false;
                     
-                index = 0;
+                var index = 0;
                             
-                for(idx in records){
+                for(idx in opposites){
                     if(idx)
                     {
-                        var record = records[idx];
-
-                        var recID  = resdata.fld(record, 'rec_ID'),
-                            recName = resdata.fld(record, 'rec_Title'),
-                            recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
+                        var recID  = opposites[idx]['recID'],
+                            recRecTypeID = opposites[idx]['recRecTypeID'];
 
                         // get structures for both record types and filter out link and relation maker fields
                         for (dty in window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields) {
@@ -129,6 +132,7 @@ function onPageInit(success) //callback function of hAPI initialization
                                 hasSomeLinks = true; //reset flag
                                 
                                 //get value of field and compare with opposite record id
+                                var record = resdata.getById(recID);    
                                 var values = resdata.values(record, dty);
                                 var oppositeRecID = opposites[index==0?1:0]['recID'];
                                 
@@ -136,13 +140,19 @@ function onPageInit(success) //callback function of hAPI initialization
                                 var isAlready = (field_type=='resource') && $.isArray(values) && (values.indexOf(oppositeRecID)>=0);
                                 
                                 //add UI elements
-                    $('<div style="line-height:2.5em;"><input type="checkbox" id="rec'+index+'_cb_'+dty+'" '
-                    +(isAlready?'disabled checked="checked"':'')
+                    $('<div style="line-height:2.5em;padding-left:20px"><input type="checkbox" id="cb'+recID+'_cb_'+dty+'" '
+                    +(isAlready?'disabled checked="checked"'
+                        :' class="cb_addlink"  data-recid="'
+                            +recID+'" data-dtyid="'+dty+'" data-target="'+oppositeRecID+'" data-type="'+field_type+'"')
                     +' class="text ui-widget-content ui-corner-all"/>'                                     
-                    +'<label id="rec'+index+'_lbl_'+dty+'" style="font-style:italic">'+dtyName+'</label>&nbsp;'
-                    +'<select id="rec'+index+'_sel_'+dty+'" class="text ui-widget-content ui-corner-all">'
-                        +'<option>relation1</option>'
+                    +'<label style="font-style:italic" for="cb'+recID+'_cb_'+dty+'">'+dtyName+'</label>&nbsp;'
+                    +'<select id="rec'+recID+'_sel_'+dty+'" class="text ui-widget-content ui-corner-all">'  
+                        +'<option>relation type</option>'
                     +'</select><div>').appendTo($('#rec'+index));
+                    
+                                if(index==1){
+                                    $('#rec1_hint').show();
+                                }
                     
                     
                                 if(field_type=='relmarker'){
@@ -151,10 +161,10 @@ function onPageInit(success) //callback function of hAPI initialization
                                         terms_dis = details[fi_term_dis],
                                         currvalue = null;
                                     
-                                    window.hWin.HEURIST4.ui.createTermSelectExt($('#rec'+index+'_sel_'+dty).get(0), 
+                                    window.hWin.HEURIST4.ui.createTermSelectExt($('#rec'+recID+'_sel_'+dty).get(0), 
                                             'relation', terms, terms_dis, currvalue, null, false);    
                                 }else{
-                                    $('#rec'+index+'_sel_'+dty).hide();
+                                    $('#rec'+recID+'_sel_'+dty).hide();
                                 }
                             }
                             
@@ -165,9 +175,24 @@ function onPageInit(success) //callback function of hAPI initialization
                 }//for
                 
                 if(!hasSomeLinks){
+                    
+                    var rectypeID =(opposites[0]['recID']==source_ID)
+                                        ?opposites[0]['recRecTypeID']
+                                        :opposites[1]['recRecTypeID'];
+                    
+                    $('#link_structure_edit').click(function(){
+                         window.open(window.hWin.HAPI4.baseURL+"/admin/adminMenuStandalone.php?db="+
+                                window.hWin.HAPI4.database+
+                                "&mode=rectype&rtID="+rectypeID, "_blank");
+                    });                
+                    
                     $('#btn_save').hide();
                     $('#mainForm').hide();
                     $('#infoForm').show();
+                }else{    
+                    $('.cb_addlink').click(function(){
+                        window.hWin.HEURIST4.util.setDisabled($('#btn_save'), !$('.cb_addlink').is(':checked'));
+                    });
                 }
 
             }else{
@@ -193,7 +218,88 @@ function onPageInit(success) //callback function of hAPI initialization
 * 
 */
 function addLinks(){
+
+
+    /*       recIDs - list of records IDS to be processed
+    *       rtyID  - filter by record type
+    *       dtyID  - detail field to be added
+    *       for addition: val: | geo: | ulfID: - value to be added
+    *       for edit sVal - search value,  rVal - replace value
+    *       for delete: sVal  
+    *       tag  = 0|1  - add system tag to mark processed records
+    */
     
+    var RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
+        DT_TARGET_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_TARGET_RESOURCE'], //5
+        DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'], //6
+        DT_PRIMARY_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_PRIMARY_RESOURCE']; //7
+    
+    var requests = []
+    
+    $('.cb_addlink').each(function(index, ele){
+
+        if($(ele).is(':checked')){
+
+            if($(ele).attr('data-type')=='resource'){
+                requests.push({a: 'add',
+                    recIDs: $(ele).attr('data-recid'),
+                    dtyID:  $(ele).attr('data-dtyid'),
+                    val:    $(ele).attr('data-target')});
+            }else{ //relmarker
+            
+                var recID = $(ele).attr('data-recid'),
+                    dtyID = $(ele).attr('data-dtyid'),
+                    termID = $('#rec'+recID+'_sel_'+dtyID).val(),
+                    sRelation = $('#rec'+recID+'_sel_'+dtyID).find('option:selected').text();
+            
+                var details = {};
+                details['t:'+DT_PRIMARY_RESOURCE] = [ recID ];
+                details['t:'+DT_RELATION_TYPE] = [ termID ];
+                details['t:'+DT_TARGET_RESOURCE] = [$(ele).attr('data-target')];
+                
+                requests.push({a: 'save',    //add new relationship record
+                    
+                    ID:-1, //new record
+                    RecTypeID: RT_RELATION,
+                    RecTitle: 'Relationship ('+sSourceName+' '+sRelation+' '+sTargetName+')',
+                    details: details });
+
+            }
+        }
+
+        }
+    );//each
+    
+    addLinkOrRelation(0, requests);
     
 }
 
+//
+// individual action
+//
+function addLinkOrRelation(idx, requests){
+
+    if(idx<requests.length){
+
+        var request = requests[idx];
+        
+        var hWin = window.hWin;
+        
+        function __callBack(response){
+                if(response.status == hWin.HAPI4.ResponseStatus.OK){
+                    idx = idx + 1;
+                    addLinkOrRelation(idx, requests);
+                }else{
+                    hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        }        
+    
+        if(request.a=='add'){
+            window.hWin.HAPI4.RecordMgr.details(request, __callBack);
+        }else{
+            window.hWin.HAPI4.RecordMgr.save(request, __callBack);
+        }
+    }else if(requests.length>0){
+        window.close('Link'+(requests.length>1?'s':'')+' created...');
+    }
+}

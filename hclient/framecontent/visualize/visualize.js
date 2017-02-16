@@ -85,6 +85,7 @@ var svg;        // The SVG where the visualisation will be executed on
             getLineLength: function() { return getSetting(setting_linelength); },
             
             selectedNodeIds: [],
+            onRefreshData: function(){},
             triggerSelection: function(selection){}, 
             
             isDatabaseStructure: false,

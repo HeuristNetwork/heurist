@@ -335,8 +335,11 @@ $.widget( "heurist.connections", {
                     function(selected){
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         { selection:selected, source:that.element.attr('id') } );
-                    }            
-            
+                    },
+                    function(selected){
+                        that._getRelations(that.options.recordset);
+                        //$(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null);
+                    }
             );
             this.recordset_changed = false;
         }

@@ -62,7 +62,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                  visualizeSelection( selectedRecordsIds );
             }
 
-            function showData(data, selectedRecordsIds, onSelectEvent) {
+            function showData(data, selectedRecordsIds, onSelectEvent, onRefreshData) {
                 // Processing...
                 if(data && data.nodes && data.links)
                 console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
@@ -90,6 +90,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     selectedNodeIds: selectedRecordsIds,   //assign current selection
                     triggerSelection: onSelectEvent,
+                    onRefreshData: onRefreshData,
                     /*function(selection){
                         //parentDocument    top.window.document
                         $(parentDocument).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );

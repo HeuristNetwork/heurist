@@ -115,7 +115,7 @@ function getRecordOverlayData(record) {
         }
     }
 
-    return array;
+    return array;                                                                                
 }
 
 /** get info about particular relation */
@@ -722,8 +722,10 @@ function _addNewLinkField(source_ID, target_ID){
             if(target_ID>0){
                 url = url +'&target_ID='+target_ID;
             }
+            
+            var hWin = window.hWin?window.hWin:top;
                 
-            window.hWin.HEURIST4.msg.showDialog(url, 
+            hWin.HEURIST4.msg.showDialog(url, 
                 {
                     "close-on-blur": false,
                     //"no-resize": true,
@@ -733,8 +735,15 @@ function _addNewLinkField(source_ID, target_ID){
                     width: dim.w,
                     callback: function(context) {
                         if(context!="" && context!=undefined) {
-                            top.HEURIST4.msg.showMsgFlash("Link created...", 2000);
-                            getDataFromServer();
+                            var sMsg = (context==true)?'Link created...':context;
+                            hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
+                            if(settings.isDatabaseStructure){
+                                getDataFromServer();    
+                            }else{
+                                // Trigger refresh
+                                settings.onRefreshData.call(this);
+                            }
+                            
                         }
                     }
               });

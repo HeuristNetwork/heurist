@@ -464,7 +464,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             /**
-            *  Save Record (remove temporary falg if new record)
+            *  Save Record (remove temporary flag if new record)
             *
             * @param request a: s|save
             * @param callback - response hRecordSet object

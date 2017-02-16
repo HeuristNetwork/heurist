@@ -163,7 +163,7 @@
     *   1) prepareDetails
     *   2) add or update header
     *   3) remove old details, add new details
-    *   4) recordUpdateTitle
+    *   4) recordUpdateTitle   - todo
     *
     * @param mixed $system
     * @param mixed $record
@@ -303,9 +303,9 @@
             return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
         }
 
-        $mysqli->commit();
+        recordUpdateTitle($mysqli, $recID, $rectype, @$record['RecTitle']);
 
-        recordUpdateTitle($mysqli, $recID, $rectype);
+        $mysqli->commit();
 
         return array("status"=>HEURIST_OK, "data"=> $recID);
         /*
@@ -516,7 +516,7 @@
     * @param mixed $recID
     * @param mixed $rectype
     */
-    function recordUpdateTitle($mysqli, $recID, $rectype)
+    function recordUpdateTitle($mysqli, $recID, $rectype, $recTitleDefault)
     {
 
         $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
@@ -527,7 +527,9 @@
 
         $title = null;
 
+        
         //@TODO $title = fill_title_mask($mask, $recID, $rectype);
+        if($title==null && $recTitleDefault!=null) $title = $recTitleDefault;
 
         if ($title) {
             $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
@@ -550,7 +552,7 @@
 
     //function doDetailInsertion($recID, $details, $rectype, $wg, &$nonces, &$retitleRecs, $modeImport)
     /**
-    * put your comment there...
+    * 
     *
     * @param mixed $mysqli
     * @param mixed $rectype
@@ -579,7 +581,7 @@
 
         $mysqli = $system->get_mysqli();
 
-        //exlude empty and wrong entries
+        //exlude empty and wrong entries         t:dty_ID:[0:value, 1:value]
         $details2 = array();
         foreach ($details as $dtyID => $pairs) {
             if( (!preg_match("/^t:\\d+$/", $dtyID)) || count($pairs)==0 ) continue;

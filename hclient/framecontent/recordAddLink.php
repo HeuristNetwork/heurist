@@ -33,6 +33,7 @@
 
 
 require_once(dirname(__FILE__)."/initPage.php");
+
 ?>
 <script type="text/javascript" src="recordAddLink.js"></script>
 
@@ -40,29 +41,34 @@ require_once(dirname(__FILE__)."/initPage.php");
 </style>
 </head>
 <body style="overflow:hidden">
-    <div class="ent_wrapper" style="padding:10px 10px 10px 0">
 
-        <fieldset id="mainForm" class="ent_content">
+        <div id="mainForm" class="popup_content_div" class="ui-widget-content">
             <label>Choose the link(s) to create:</label><br><br>
             <div>
-                <div class="header" style="vertical-align:top; margin-top:5px;">
-                    <h2 id="rec0_title">First record</h2>
+                <div class="header" id="rec0_title" style="vertical-align:top; margin-top:5px;">
                 </div>
                 <div id="rec0">
                 </div>
             </div>
             <br><br>
             <div>
-                <div class="header" style="vertical-align:top; margin-top:5px;">
-                    <h2 id="rec1_title">Other record</h2>
+                <div class="header" id="rec1_title" style="vertical-align:top; margin-top:5px;">
                 </div>
+                
+                <div id="rec1_hint" style="display:none;padding-top:15px">
+                    <hr>
+                    <div style="padding-top:15px">
+                    You may also create a link in the reverse direction with one of the following fields in the target record:
+                    </div>
+                </div>
+                
                 <div id="rec1">
                 </div>
             </div>
         
-        </fieldset>
+        </div>
         
-        <div  id="infoForm" class="ent_content" style="display:none;font-size:1.2em;padding:30px 5px">
+        <div  id="infoForm" class="popup_content_div ui-widget-content" style="display:none;font-size:1.2em;padding:30px 5px">
             There are no suitable fields (pointers or relationship markers) to create a link between 
             <span id="rec_titles">xxxxxxx and yyyyyyy</span> record types.<br><br>
 
@@ -73,13 +79,11 @@ require_once(dirname(__FILE__)."/initPage.php");
             will hold the link. You will then be able to create links by dragging, and the links will be controlled for consistency.
         </div>
 
-        <div class="ent_footer" style="text-align:right">
+        <div class="popup_buttons_div" style="text-align:right">
 
-            <button id="btn_save" disabled="disabled">Create links</button>
+            <button id="btn_save">Create links</button>
             <button id="btn_cancel">Cancel</button>
         </div>
-
-    </div>
 
 </body>
 </html>
