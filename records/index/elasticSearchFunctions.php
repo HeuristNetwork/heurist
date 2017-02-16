@@ -175,8 +175,13 @@
             error_log("[elasticSearchFunctions.php] deleteRecordIndexEntry --> deleted record from elastic: $json");
 
             // Check if acknowledged property exists and is true
-            $response = json_decode($json);
-            return property_exists($response, 'acknowledged') && $response->acknowledged;
+            if($json!=null){ //without check it ruins delete function
+                $response = json_decode($json);
+                return property_exists($response, 'acknowledged') && $response->acknowledged;
+            }
+            else{
+                return false;
+            }
         }
 
         return false;
