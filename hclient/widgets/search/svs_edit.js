@@ -397,21 +397,49 @@ function hSvsEdit(args) {
                         catch (err) {
                         }
                         if(res==''){
-                            res = '{"q":"'+filter+'"';
+                            //escape backslash to avoid errors
+                            res = '{"q":"'+filter.split('"').join('\\\"')+'"';
                         }
 
                         if(rules!=''){
                             res = res + ',"rules":'+rules+'}';
                         } else{
-                            res = res + '}';
+                            res = res + '}';     
                         }
+                        
+                        
+                        var buttons = {};
+                        buttons[window.hWin.HR('Copy')]  = function() {
+                            
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                            var target = $dlg.find('#dlg-prompt-value')[0];
+                            target.focus();
+                            target.setSelectionRange(0, target.value.length);
+                            var succeed;
+                            try {
+                                succeed = document.execCommand("copy");
+                                
+                                $dlg.dialog( "close" );
+                            } catch(e) {
+                                succeed = false;
+                                alert('Browser does not support');
+                            }                            
+                            
+                        }; 
+                        buttons[window.hWin.HR('Close')]  = function() {
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                            $dlg.dialog( "close" );
+                        };
+                        
+                        //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                         window.hWin.HEURIST4.msg.showPrompt(
-                        '<label>Edit and copy it to paste in Mappable Query filter field</label>'
+                        '<label>Edit and copy the string and paste into the Mappable Query filter field</label>'
                         + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
                         + ' style="min-width: 200px; margin-left:0.2em" rows="4" cols="50">'
                         +res
                         +'</textarea>',null,null,
-                        {options:{width:450}, my:'center bottom', at:'center bottom', of: $dlg}
+                        {options:{width:450, buttons:buttons},
+                        my:'center bottom', at:'center bottom', of: $dlg}
                         );
                     }
                 }

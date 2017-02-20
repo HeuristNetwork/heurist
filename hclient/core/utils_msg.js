@@ -148,14 +148,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 + ' style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/>';    
         }
         
-        window.hWin.HEURIST4.msg.showMsgDlg( message,
+        return window.hWin.HEURIST4.msg.showMsgDlg( message,
         function(){
             if($.isFunction(callbackFunc)){
                 var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                 callbackFunc.call(this, $dlg.find('#dlg-prompt-value').val());
             }
         },
-         window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle,ext_options);
+        window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle,ext_options);
         
     },
     

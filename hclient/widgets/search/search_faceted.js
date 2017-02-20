@@ -701,6 +701,10 @@ console.log('inpt added '+"fv_"+field['var']);
             var div_facets = this.facets_list.find(".facets");
             if(div_facets.length>0)  div_facets.empty();
 
+            //this approach adds supplemntary(preliminary) filter to every request 
+            //it works however 
+            //1) it requires that this filter must be a valid json
+            //2) it makes whole request heavier
             //add additional/supplementary filter
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
             

@@ -304,8 +304,10 @@ $.widget( "heurist.search_faceted_wiz", {
                     $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
 
-                        $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
-
+                        $dlg.find("#svs_btnset")
+                                .css({'width':'20px'})
+                                .position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
+                                
                         $dlg.find("#svs_Rules_edit")
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
                         .attr('title', window.hWin.HR('Edit RuleSet'))
@@ -323,6 +325,24 @@ $.widget( "heurist.search_faceted_wiz", {
                             $dlg.find('#svs_Rules').val('');
                         });
 
+                                
+                        $dlg.find("#svs_btnset2")
+                                .css({'width':'20px'})
+                                .position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Query') });
+
+                        $dlg.find("#svs_getCurrentFilter")
+                        .button({icons: {primary: "ui-icon-search"}, text:false})
+                        .attr('title', window.hWin.HR('Get current query'))
+                        .css({'height':'16px', 'width':'16px'})
+                        .click(function( event ) {
+                            
+                                var filter = window.hWin.HEURIST4.current_query_request.q;
+                                var rules = window.hWin.HEURIST4.current_query_request.rules;
+                                
+                                var res = window.hWin.HEURIST4.util.getJSON_HeuristQueryAndRules(filter, rules);
+                                
+                                $dlg.find('#svs_Query').val(res);
+                        });
 
                         var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
                         $dlg.find('.heurist-helper1').css('display',ishelp_on?'block':'none');

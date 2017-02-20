@@ -148,6 +148,8 @@ window.hWin.HEURIST4.util = {
         
     },
 
+    //--- HEURIST QUERY ROUTINE -------
+    
     //
     // from object to query string
     //
@@ -258,6 +260,40 @@ window.hWin.HEURIST4.util = {
         return {q:qsearch, w:domain, rules:rules, notes:notes};
     },
 
+    //
+    //
+    //    
+    getJSON_HeuristQueryAndRules: function(filter, rules){
+
+        var res = '';
+        if(!window.hWin.HEURIST4.util.isempty(filter.trim())){
+
+            try {
+                var r = $.parseJSON(filter);
+                if($.isArray(r) || $.isPlainObject(r)){
+                    res = '{"q":'+filter;
+                }
+            }
+            catch (err) {
+            }
+            if(res==''){
+                //escape backslash to avoid errors
+                res = '{"q":"'+filter.split('"').join('\\\"')+'"';
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(rules)){
+                res = res + ',"rules":'+rules+'}';
+            } else{
+                res = res + '}';     
+            }
+        }
+        
+        return res;
+    },
+    
+    //
+    //
+    //
     getUrlParameter: function getUrlParameter(name, query){
 
         if(!query){
