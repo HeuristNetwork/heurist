@@ -219,7 +219,7 @@ $.widget( "heurist.connections", {
                 var resdata = null;
                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                     // Store relationships
-                    console.log("Successfully retrieved relationship data!", response.data);
+//console.log("Successfully retrieved relationship data!", response.data);
                     that.option("relations", response.data);
                     
                     // Parse response to spring diagram format
@@ -301,7 +301,8 @@ $.widget( "heurist.connections", {
                                     target: nodes[target],
                                     targetcount: 1,
                                     relation: {id: dtID>0?dtID:trmID, 
-                                               name: relationName} 
+                                               name: relationName,
+                                               type: dtID>0?'resource':'relationship'} 
                                    };
                         links.push(link); 
                     }      

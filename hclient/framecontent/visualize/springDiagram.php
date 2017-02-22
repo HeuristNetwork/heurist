@@ -82,6 +82,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     }
                     return length;
                 }
+                
+                $(window).resize(onVisualizeResize);
+                onVisualizeResize();
 
                 $("#visualize").visualize({
                     data: data,
@@ -104,6 +107,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     showFormula: false
                 });
             }
+            
+            function onVisualizeResize(){
+                    var width = $(window).width();
+                    var supw = (width<690)?5:0; //1120
+                    $('#divSvg').css('top', 5+supw+'em');
+            }
+            
 
         </script>
     </body>

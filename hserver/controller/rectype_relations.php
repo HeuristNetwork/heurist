@@ -95,6 +95,7 @@
         ."WHERE rst.rst_RectypeID=" .$rectype->id. " AND NOT (dty.dty_PtrTargetRectypeIDs IS NULL OR dty.dty_PtrTargetRectypeIDs='') "
         ."GROUP BY rst.rst_DetailTypeID;";
         
+        
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) { 
             $relation = new stdClass();
@@ -210,6 +211,9 @@ targetcount:0
 */
 
 //@TODO - FIX count for relationships. It returns count of links disregard detail type id
+// This issue is a bit more complex than I’d expected. At the moment we have no data to 
+// restore what relmarker was an originator of relationship.
+
 
 
                     // Records

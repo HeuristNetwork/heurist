@@ -283,7 +283,9 @@ function getLineLength(record) {
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
-    var maxWidth = getSetting(setting_linewidth);
+
+    count = Number(count);
+    var maxWidth = Number(getSetting(setting_linewidth));
     
     if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
     else if(maxWidth<1) {maxSize = 1;}
@@ -687,7 +689,6 @@ function addMarkerDefinitions() {
                     .append("path")                
                     .attr("d",
                         function(d) { 
-                            //console.log(d.relation);
                             return d.relation.type=='resource' 
                                             ?'M0,-5 L10,0 L0,5' 
                                             :'M0,-5 L5,0 L0,5 M5,-5 L10,0 L5,5'});  //double arrow
