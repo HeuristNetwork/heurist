@@ -108,8 +108,8 @@ var cfg_layouts = [
     {id:'H4Default', name:'Heurist Def v3', theme:'heurist', type:'free',
         north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
-                    'background':'none', 'min-width':'75em'}, 
-            apps:[{appid:'h3_mainMenu', hasheader:false, css:{border:'solid'} }] 
+                     'min-width':'75em'}, 
+            apps:[{appid:'h3_mainMenu', hasheader:false, css:{height:'100%', border:'solid'} }] 
         },
         center_pane:{ dockable:false, dropable:false, dragable:false, 
                 css:{position:'absolute', top:'6em',left:0,bottom:0,right:0},
