@@ -267,24 +267,26 @@ window.hWin.HEURIST4.util = {
 
         var res = '';
         if(!window.hWin.HEURIST4.util.isempty(filter.trim())){
+            
+            var hasRules = !window.hWin.HEURIST4.util.isempty(rules);
 
             try {
                 var r = $.parseJSON(filter);
                 if($.isArray(r) || $.isPlainObject(r)){
-                    res = '{"q":'+filter;
+                    res = (hasRules?'{"q":':'')+filter;
                 }
             }
             catch (err) {
             }
             if(res==''){
                 //escape backslash to avoid errors
-                res = '{"q":"'+filter.split('"').join('\\\"')+'"';
+                res = hasRules?('{"q":"'+filter.split('"').join('\\\"')+'"'):filter;
             }
 
-            if(!window.hWin.HEURIST4.util.isempty(rules)){
+            if(hasRules){
                 res = res + ',"rules":'+rules+'}';
             } else{
-                res = res + '}';     
+                //res = res + '}';     
             }
         }
         
