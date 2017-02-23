@@ -907,8 +907,9 @@
 
         $terms_ids = null;
 
+        //terms constraints are not defined in rectype structure anymore
+        /*
         $recstr = dbs_GetRectypeStructure($system, $recstructures, $rectype);
-
         if($recstr && @$recstr['dtFields'][$dtyID])
         {
             $val = $recstr['dtFields'][$dtyID];
@@ -918,14 +919,15 @@
             $terms_none = $val[$idx];
         }else{
             //detail type may be not in rectype structure
+        }
+        */
 
-            $dtype = getDetailType($system, $detailtypes, $dtyID);
-            if ($dtype) {
-                $idx = $detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree'];
-                $terms_ids = @$dtype[$idx];
-                $idx = $detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
-                $terms_none = @$dtype[$idx];
-            }
+        $dtype = getDetailType($system, $detailtypes, $dtyID);
+        if ($dtype) {
+            $idx = $detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree'];
+            $terms_ids = @$dtype[$idx];
+            $idx = $detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+            $terms_none = @$dtype[$idx];
         }
 
         if($terms_ids){
