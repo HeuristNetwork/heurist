@@ -101,11 +101,11 @@ render: function() {
 	a.href = Heurist.uriBase;
 	if (document.all) {
 		i = document.createElement('img');
-		i.src = Heurist.uriBase +'common/images/H3-favicon.png';
+		i.src = Heurist.uriBase +'hclient/assets/h4logo16.png';
 		a.appendChild(i);
 	}
 	else
-	a.innerHTML = '<img src="'+ Heurist.uriBase +'common/images/H3-favicon.png">';
+	a.innerHTML = '<img src="'+ Heurist.uriBase +'hclient/assets/h4logo16.png">';
 	a.className='imglnk';
 	hdr.appendChild(a);
 	s = document.createTextNode('Heurist bookmarklet');

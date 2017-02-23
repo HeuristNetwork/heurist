@@ -863,15 +863,19 @@ function print_linked_details($bib) {
         $cmts = getAllComments($bib["rec_ID"]);
         $result = loadWoot(array("title" => "record:".$bib["rec_ID"]));
         if (! $result["success"] && count($cmts) == 0) return;
-        ?>
-    </div>
-    <div class=detailRowHeader>Text
+        
+        $content = "";
+        $woot = $result["woot"];
+        foreach ($woot["chunks"] as $chunk) {
+            $content .= $chunk["text"] . " ";
+        }
+        if (strlen($content) == 0 && count($cmts) == 0) return;
 
-        <?php
-
-        print_woot_precis($result["woot"],$bib);
+        
+        print '<div class=detailRowHeader>Text';
+        print_woot_precis($content, $bib);
         print_threaded_comments($cmts);
-        print '<br>&nbsp;'; // avoid ugly spacing
+        print '</div><br>&nbsp;'; // avoid ugly spacing
     }
 
 
@@ -931,12 +935,7 @@ function print_linked_details($bib) {
     [groupId] =>
     [groupName] => ) ) ) ) )
     */
-    function print_woot_precis($woot,$bib) {
-
-        $content = "";
-        foreach ($woot["chunks"] as $chunk) {
-            $content .= $chunk["text"] . " ";
-        }
+    function print_woot_precis($content,$bib) {
         if (strlen($content) == 0) return;
         ?>
         <div class=detailRow>
@@ -976,7 +975,6 @@ function print_linked_details($bib) {
                 ?>
             </div>
         </div>
-    </div>
     <?php
 }
 

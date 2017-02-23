@@ -570,7 +570,7 @@ if (typeof mxn.LatLonPoint == "function") {
 				'</div>'+
 '</div></div>';
 
-			var customIcon = basePath + "common/images/H3-favicon.png";// "heuristicon.png"; //TODO!!!! - deault marker
+			var customIcon = basePath + "hclient/assets/h4logo16.png";// "heuristicon.png"; //TODO!!!! - deault marker
 
     		// see http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMapTheme.html for fields
             var customTheme = new TimeMapTheme({

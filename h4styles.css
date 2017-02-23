@@ -1099,7 +1099,7 @@ background: #8ea9b9
 .detail a, .detail {
     text-wrap: normal;
     word-wrap: break-word;
-    white-space: nowrap;
+    /*white-space: nowrap;*/
     word-break: break-word;
     min-width: 300px;
     max-width: 300px;
