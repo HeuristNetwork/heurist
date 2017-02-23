@@ -472,6 +472,20 @@ if (! top.HEURIST.edit) {
                     + "&db="+top.HEURIST.database.name,'_blank');
           
         },
+        
+        /**
+        * save current record and add new one - edit in current window
+        * 
+        */
+        save_record_and_add_newone: function(){
+            
+            var rt = top.HEURIST.edit.record.rectypeID;
+            
+            top.HEURIST.edit.save_record(function(){ //callback is called in case of success
+               window.document.location = top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&db='
+                    + top.HEURIST.database.name+'&rec_rectype='+rt; 
+            })
+        },
 
         /**
         * Saves the record
@@ -500,7 +514,7 @@ if (! top.HEURIST.edit) {
                     {
                         callback.call(this);
 
-                    } else if(callback){ //force close
+                    } else if(callback==true){ //force close
 
                         top.HEURIST.edit.closeEditWindow();
 
@@ -525,6 +539,7 @@ if (! top.HEURIST.edit) {
         *
         */
         save: function(callback) {
+            
             // Attempt to save all the modules that need saving
             // Display a small saving window
             /* TODO: ? remove
@@ -558,6 +573,11 @@ if (! top.HEURIST.edit) {
                 }
             }
 
+            
+            top.HEURIST.util.bringCoverallToFront();
+            top.HEURIST.util.coverallDiv.style.cursor = "wait";
+            top.HEURIST.util.coverallDiv.style.backgroundImage = "url(../../common/images/loading-animation-black.gif)";
+            
             for (var moduleName in top.HEURIST.edit.modules) {
                 var module = top.HEURIST.edit.modules[moduleName];
 
@@ -575,6 +595,10 @@ if (! top.HEURIST.edit) {
                 top.HEURIST.deregisterEvent(module.frame, "load", moduleUnchangeFunction);
                 if (module.changed) { // don't bother saving unchanged tabs
                     if (form.onsubmit  &&  ! form.onsubmit()) {
+                        //top.HEURIST.util.finishLoadingPopup();
+                        top.HEURIST.util.sendCoverallToBack();
+                        top.HEURIST.util.coverallDiv.style.backgroundImage = "none";  // get rid of "saving" animation
+                        top.HEURIST.util.coverallDiv.style.cursor = "default";
                         top.HEURIST.edit.showModule(moduleName);
                         return;    // submit failed ... up to the individual form handlers to display messages
                     }
@@ -607,6 +631,10 @@ if (! top.HEURIST.edit) {
             
             
             setTimeout(function() {
+                top.HEURIST.util.sendCoverallToBack();
+                top.HEURIST.util.coverallDiv.style.backgroundImage = "none";  // get rid of "saving" animation
+                top.HEURIST.util.coverallDiv.style.cursor = "default";
+                
                 document.getElementById("popup-saved").style.display = "block";
                 setTimeout(function() {
                     document.getElementById("popup-saved").style.display = "none";
@@ -620,7 +648,7 @@ if (! top.HEURIST.edit) {
 
                     if(callback && typeof(callback)==="function"){
                         callback.call(this);
-                    }else if (callback){
+                    }else if (callback==true){
                         top.HEURIST.edit.closeEditWindow();
                     }
                     }, 1000);
