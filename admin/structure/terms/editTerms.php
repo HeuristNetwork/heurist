@@ -97,16 +97,13 @@ if(isForAdminOnly("to modify database structure")){
             span.fancytree-title,
             span.svs-contextmenu3 > span.ui-icon{
                 vertical-align:bottom;
+                padding-left:2px;
             }
             span.svs-contextmenu3{
                 cursor:pointer;
                 min-width: 100px;
                 visibility: hidden;
                 padding-left:10px;
-                xfloat:right;
-            }
-            span.fancytree-title{
-                xmin-width: 200px;
             }
             span.fancytree-node{
                 min-width: 300px;
@@ -182,7 +179,10 @@ if(isForAdminOnly("to modify database structure")){
             </div>
 
             <div id="formContainer" style="position:absolute;left:353px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
-                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">Drag terms to reposition or merge <br/> Select term to edit label and description</h3>
+                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">
+                    Rollover terms in the tree to show available actions<br>
+                    Drag terms to reposition or merge <br/> Select term to edit label and description
+                </h3>
                 <h3 id="formMessage" style="margin-left:10px; border-style:none;display:none;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
                 </h3>
@@ -258,7 +258,7 @@ if(isForAdminOnly("to modify database structure")){
                         </div>
 
 
-                        <div class="dtyField">
+                        <div class="dtyField" style="display:none">
                             <label class="dtyLabel">Definition URL(s)</label>
                             <input id="edURL" style="width:350px; margin-top:5px;"/>
                             <div style="padding-left:105;padding-top:3px;  font-size:smaller;">
@@ -286,6 +286,10 @@ if(isForAdminOnly("to modify database structure")){
                             <div style="float:left;">
                                 <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">Image (~400x400):</label>
                             </div>
+                            <div id="termImageForNew" style="vertical-align: middle;display:none;padding-left:3px">
+                                  <h3 style="padding-top:5px">Save term first to allow upload of an image representing the term</h3>
+                            </div>
+                            
                             <div style="vertical-align: middle;display:inline-block; padding-left:3px">
                                 <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
                                 </div>
@@ -311,7 +315,8 @@ if(isForAdminOnly("to modify database structure")){
                         <!--
                         NOTE: button labelling is set in the JS file
                         -->
-                        <div style="display:inline-block; margin-top:30px;width:90%">
+                        <div style="display:inline-block; margin-top:30px;width:90%;">
+                            <span style="visibility:hidden;">
                             <input id="btnImport" type="button" value="Import"
                                 title=""
                                 onClick="{editTerms.doImport(false)}"/>
@@ -328,6 +333,8 @@ if(isForAdminOnly("to modify database structure")){
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
+                            </span>
+                            
                             <input id="btnSave" class="btn_Save" type="button" value="Save changes"
                                 style="margin-left:80px;font-style: bold !important; color:black; display:none"
                                 title=" "
@@ -337,9 +344,8 @@ if(isForAdminOnly("to modify database structure")){
                                 style="border-radius: 6px; background-color:gray;margin-left:5px;font-style: bold !important;  color:black; display:none;"
                                 title=" ">Saved...</button></span>
 
-                            <div id='div_btnAddChild'
-                                style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
-                                <input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
+                            <div id='div_btnAddChild' style="visibility:hidden;text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
+                                    <input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
                             </div>
                         </div>
                         <!--

@@ -526,9 +526,13 @@ function EditTerms() {
                     '<img id="imgThumb" style="max-width: 380px;" src="'+
                     top.HEURIST.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
                     '"></a>';
-                    Dom.get('termImage').style.display = 'block';
+                    Dom.get('termImage').style.display = 'inline-block';
+                    Dom.get('btnClearImage').style.display = 'inline-block';
+                    Dom.get('termImageForNew').style.display = 'none';
                 }else{
                     Dom.get('termImage').style.display = 'none';
+                    Dom.get('btnClearImage').style.display = 'none';
+                    Dom.get('termImageForNew').style.display = 'inline-block';
                 }
 
 
@@ -732,13 +736,6 @@ function EditTerms() {
 
 
         }
-
-
-
-
-
-
-
 
         var $_dialogbox = "";
         var ele = document.getElementById('formInverse');
@@ -1114,40 +1111,67 @@ function EditTerms() {
             }
 
             if(needConfirm){
-                var r=confirm("Term was modified. Save it?");
-                if (!r) {
-                    //if new - remove from tree
-                    if( isNaN(Number(_currentNode.data.id)) ){
-                        _doDelete(false);
+                
+                if(hasH4()){
+                    
+                     var buttons = {};
+                     buttons['Yes'] = function() {
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog( "close" );
+                            __doSave_continue();
+                     };
+                     buttons['No'] = function() {
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog( "close" );
+                            if( isNaN(Number(_currentNode.data.id)) ){
+                                _doDelete(false);           //@todo - not removed from fancytree
+                            }
+                     };
+                    
+                     window.hWin.HEURIST4.msg.showMsgDlg("Term was modified. Save it?", buttons, "");
+                }else{
+                    var r = confirm("Term was modified. Save it?");
+                    if (!r) {
+                        //if new - remove from tree
+                        if( isNaN(Number(_currentNode.data.id)) ){
+                            _doDelete(false);           //@todo - not removed from fancytree
+                        }
+                        return;
+                    }else{
+                        __doSave_continue();
                     }
-                    return;
                 }
+            }else{
+                __doSave_continue();
             }
 
-            if(noValidation || _validateDups(_currentNode, sName, sCode)){
+            function __doSave_continue(){
+            
+                if(noValidation || _validateDups(_currentNode, sName, sCode)){
 
-                var needReload = (_currentNode.data.parent_id != iParentId || _currentNode.data.inverseid != iInverseId);
+                    var needReload = (_currentNode.data.parent_id != iParentId || _currentNode.data.inverseid != iInverseId);
 
-                _currentNode.data.label = sName;
-                _currentNode.data.description = sDesc;
-                _currentNode.data.termcode = sCode;
-                _currentNode.data.status = sStatus;
+                    _currentNode.data.label = sName;
+                    _currentNode.data.description = sDesc;
+                    _currentNode.data.termcode = sCode;
+                    _currentNode.data.status = sStatus;
 
-                _currentNode.data.inverseid = iInverseId;
-                _currentNode.data.title = _currentNode.data.description;
+                    _currentNode.data.inverseid = iInverseId;
+                    _currentNode.data.title = _currentNode.data.description;
 
-                _currentNode.data.parent_id = iParentId;
+                    _currentNode.data.parent_id = iParentId;
 
 
-                //_currTreeView.render
-                //var tree = $treediv.fancytree("getTree");
-                //tree.reload();
-                // _currentNode.load();
-                //_defineContentTreeView();
+                    //_currTreeView.render
+                    //var tree = $treediv.fancytree("getTree");
+                    //tree.reload();
+                    // _currentNode.load();
+                    //_defineContentTreeView();
 
-                _updateTermsOnServer(_currentNode, needReload);
+                    _updateTermsOnServer(_currentNode, needReload);
 
-                //alert("TODO SAVE ON SERVER");
+                    //alert("TODO SAVE ON SERVER");
+                }
             }
         }
     }
@@ -2297,12 +2321,14 @@ function EditTerms() {
            if($(item).find('.svs-contextmenu3').length==0){
 
                var actionspan = $('<span class="svs-contextmenu3">'
-                   +'<span class="ui-icon ui-icon-plus"></span>'
-                   +'<span class="ui-icon ui-icon-reload"></span>'
-                   +'<span class="ui-icon ui-icon-minus"></span>'
-                   +'<span class="ui-icon ui-icon-sign-in"></span>'
-                   +'<span class="ui-icon ui-icon-sign-out"></span>'
-                   +'<span class="ui-icon ui-icon-image"></span>'
+                   +'<span class="ui-icon ui-icon-plus" title="Add child"></span>'
+                   +((_currTreeView === _termTree2)
+                      ?'<span class="ui-icon ui-icon-reload" title="Set inverse"></span>' //for relations only
+                      :'')
+                   +'<span class="ui-icon ui-icon-close" title="Delete"></span>'
+                   +'<span class="ui-icon ui-icon-image" title="Add image"></span>'
+                   +'<span class="ui-icon ui-icon-sign-in" title="Import. Add children from separated text"></span>'
+                   +'<span class="ui-icon ui-icon-file-txt" title="Export. Print vocabulary as a list"></span>'
                    +'</span>').appendTo(item);
                    
                    
@@ -2314,12 +2340,14 @@ function EditTerms() {
                     if(ele.hasClass('ui-icon-plus')){
                         _doAddChild(false);
                     }else if(ele.hasClass('ui-icon-reload')){
-                        
-                    }else if(ele.hasClass('ui-icon-minus')){
-                        _doDelete();
+                         $("#btnInverseSetClear").click();
+                         //_setOrclearInverseTermId();
+                    }else if(ele.hasClass('ui-icon-close')){
+                        $("#btnDelete").click();
+                        //_doDelete();
                     }else if(ele.hasClass('ui-icon-sign-in')){
                         _import(false)
-                    }else if(ele.hasClass('ui-icon-sign-out')){
+                    }else if(ele.hasClass('ui-icon-file-txt')){
                         _export(false);
                     }else if(ele.hasClass('ui-icon-image')){
                          that.showFileUploader();
@@ -2339,11 +2367,23 @@ function EditTerms() {
 
                $(item).hover(
                    function(event){
-                       var ele = $(event.target).children('.svs-contextmenu3');
+                       var node;
+                       if($(event.target).hasClass('fancytree-node')){
+                          node =  $(event.target);
+                       }else{
+                          node = $(event.target).parents('.fancytree-node');
+                       }
+                       var ele = node.find('.svs-contextmenu3');
                        ele.css('visibility','visible');
                }).mouseleave(
                    function(event){
-                       var ele = $treediv.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
+                       var node;
+                       if($(event.target).hasClass('fancytree-node')){
+                          node =  $(event.target);
+                       }else{
+                          node = $(event.target).parents('.fancytree-node');
+                       }
+                       var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
                        ele.css('visibility','hidden');
                });
            }
