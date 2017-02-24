@@ -721,7 +721,10 @@ function do_fix_dupe() {
         $master_pers_record = mysql_fetch_assoc($res1);
         $delete_dup_pers_record = mysql_fetch_assoc($res2);
         //        $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
-        $master_pers_record['bkm_PwdReminder'] .= "; ". $delete_dup_pers_record['bkm_PwdReminder'];
+        if(strlen(@$delete_dup_pers_record['bkm_PwdReminder'])>0){
+            $master_pers_record['bkm_PwdReminder'] = $master_pers_record['bkm_PwdReminder']."; ". $delete_dup_pers_record['bkm_PwdReminder'];    
+        }
+        
         $master_pers_record['bkm_Rating'] = max($master_pers_record['bkm_Rating'],$delete_dup_pers_record['bkm_Rating']);
         if (!$master_pers_record['bkm_ZoteroID']) $master_pers_record['bkm_ZoteroID']= $delete_dup_pers_record['bkm_ZoteroID'];
         unset($master_pers_record['bkm_ID']);
