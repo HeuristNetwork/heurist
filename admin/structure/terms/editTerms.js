@@ -2327,8 +2327,8 @@ function EditTerms() {
                       :'')
                    +'<span class="ui-icon ui-icon-close" title="Delete"></span>'
                    +'<span class="ui-icon ui-icon-image" title="Add image"></span>'
-                   +'<span class="ui-icon ui-icon-sign-in" title="Import. Add children from separated text"></span>'
-                   +'<span class="ui-icon ui-icon-file-txt" title="Export. Print vocabulary as a list"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-w" title="Import. Add children from separated text"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-e" title="Export. Print vocabulary as a list"></span>'
                    +'</span>').appendTo(item);
                    
                    
@@ -2345,9 +2345,9 @@ function EditTerms() {
                     }else if(ele.hasClass('ui-icon-close')){
                         $("#btnDelete").click();
                         //_doDelete();
-                    }else if(ele.hasClass('ui-icon-sign-in')){
+                    }else if(ele.hasClass('ui-icon-arrowthick-1-w')){
                         _import(false)
-                    }else if(ele.hasClass('ui-icon-file-txt')){
+                    }else if(ele.hasClass('ui-icon-arrowthick-1-e')){
                         _export(false);
                     }else if(ele.hasClass('ui-icon-image')){
                          that.showFileUploader();
