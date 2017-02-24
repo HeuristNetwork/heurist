@@ -851,6 +851,7 @@ $.widget( "heurist.search", {
 
                     $("#sa_fieldvalue").val("");
                     $("#sa_negate").prop("checked",'');
+                    $("#sa_negate2").prop("checked",'');
                     $dlg.find("#fld_contain").show();
                     $dlg.find("#fld_enum").hide();
                     this.calcShowSimpleSearch();
@@ -874,7 +875,8 @@ $.widget( "heurist.search", {
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
-                        window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, allTerms, disabledTerms, null, false);
+                        window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, 
+                                            allTerms, disabledTerms, null, window.hWin.HR('n/a'));
                     } else {
                         $dlg.find("#fld_contain").show();
                         $dlg.find("#fld_enum").hide();
@@ -903,6 +905,12 @@ $.widget( "heurist.search", {
                     this.calcShowSimpleSearch();
                 }
             });
+            that._on( $("#sa_negate2"), {
+                change: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
+            
             that._on( sortasc, {
                 click: function(event){
                     //window.hWin.HEURIST4.util.stopEvent(event);
@@ -920,12 +928,14 @@ $.widget( "heurist.search", {
     // recalculate search query value
     ,calcShowSimpleSearch: function (e) {
 
+        var isEnum = this.search_assistant.find("#fld_enum").is(':visible');
+        
         var q = this.search_assistant.find("#sa_rectype").val(); if(q) q = "t:"+q;
         var fld = this.search_assistant.find("#sa_fieldtype").val(); if(fld) fld = "f:"+fld+":";
-        var ctn = this.search_assistant.find("#fld_enum").is(':visible') ?this.search_assistant.find("#sa_termvalue").val()
+        var ctn =  isEnum?this.search_assistant.find("#sa_termvalue").val()
         :this.search_assistant.find("#sa_fieldvalue").val();
         
-        if(this.search_assistant.find("#sa_negate").is(':checked')){
+        if(this.search_assistant.find("#sa_negate"+(isEnum?'2':'')).is(':checked')){
             fld  = '-'+fld;
         }
 
