@@ -318,10 +318,10 @@ if(isForAdminOnly("to modify database structure")){
                         <div style="display:inline-block; margin-top:30px;width:90%;">
                             <span style="visibility:hidden;">
                             <input id="btnImport" type="button" value="Import"
-                                title=""
+                                title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"
                                 onClick="{editTerms.doImport(false)}"/>
                             <input id="btnExport" type="button" value="Export"
-                                title="Print vocabulary as a list"
+                                title="EXPORT this vocabulary to a text file"
                                 onClick="{editTerms.doExport(false)}"/>
                             <!-- <input id="btnSetParent" type="button" value="Move"
                             style="display:none;margin-left:20px;"
@@ -331,11 +331,11 @@ if(isForAdminOnly("to modify database structure")){
                             title="Merge this term with another term and update all records to reference the new term"
                             onClick="{editTerms.mergeTerms()}"/> -->
                             <input id="btnDelete" type="button" value="Delete"
-                                title=" "
+                                title="Delete this term (if unused in database)"
                                 onClick="{editTerms.doDelete()}" />
                             </span>
                             
-                            <input id="btnSave" class="btn_Save" type="button" value="Save changes"
+                            <input id="btnSave" class="btn_Save" type="button" value="Save changes to this term"
                                 style="margin-left:80px;font-style: bold !important; color:black; display:none"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
@@ -345,7 +345,7 @@ if(isForAdminOnly("to modify database structure")){
                                 title=" ">Saved...</button></span>
 
                             <div id='div_btnAddChild' style="visibility:hidden;text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
-                                    <input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
+                                    <input id="btnAddChild" type="button" value="Add a child term (a term hierarchichally below the current vocabulary or term)" onClick="{editTerms.doAddChild(false)}"/>
                             </div>
                         </div>
                         <!--

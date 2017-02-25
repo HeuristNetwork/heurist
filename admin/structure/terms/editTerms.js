@@ -1095,7 +1095,7 @@ function EditTerms() {
 
             var swarn = "";
             if(Hul.isempty(sName)){
-                swarn = "Term (label) is mandatory - terms must have a term / label"
+                swarn = "The term cannot be blank (the standard code, description and image are optional)"
             }else {
                 //IJ 2014-04-09 swarn = Hul.validateName(sName, "Field 'Display Name'");
             }
@@ -2321,14 +2321,14 @@ function EditTerms() {
            if($(item).find('.svs-contextmenu3').length==0){
 
                var actionspan = $('<span class="svs-contextmenu3">'
-                   +'<span class="ui-icon ui-icon-plus" title="Add child"></span>'
+                   +'<span class="ui-icon ui-icon-plus" title="Add a child term (a term hierarchichally below the current vocabulary or term)"></span>'
                    +((_currTreeView === _termTree2)
-                      ?'<span class="ui-icon ui-icon-reload" title="Set inverse"></span>' //for relations only
+                      ?'<span class="ui-icon ui-icon-reload" title="Set the inverse term for this term"></span>' //for relations only
                       :'')
-                   +'<span class="ui-icon ui-icon-close" title="Delete"></span>'
-                   +'<span class="ui-icon ui-icon-image" title="Add image"></span>'
-                   +'<span class="ui-icon ui-icon-arrowthick-1-w" title="Import. Add children from separated text"></span>'
-                   +'<span class="ui-icon ui-icon-arrowthick-1-e" title="Export. Print vocabulary as a list"></span>'
+                   +'<span class="ui-icon ui-icon-close" title="Delete this term (if unused in database)"></span>'
+                   +'<span class="ui-icon ui-icon-image" title="Add an image which illustrates this term"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-w" title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-e" title="EXPORT this vocabulary to a text file"></span>'
                    +'</span>').appendTo(item);
                    
                    
