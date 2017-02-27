@@ -28,7 +28,7 @@
 
     // Enable or disable ElasticSearch indexing
     function isElasticEnabled() {
-        error_log("[elasticSearchHelper.php] isElasticEnabled");
+//DEBUG        error_log("[elasticSearchHelper.php] isElasticEnabled");
         return true;
     }
 
@@ -77,7 +77,7 @@
      * @returns  Returns true if ElasticSearch is operational
      */
     function testElasticOK() {
-        error_log("[elasticSearchHelper.php] testElasticSearchOK");
+//DEBUG        error_log("[elasticSearchHelper.php] testElasticSearchOK");
 
         if(isElasticEnabled()) {
             $address = getElasticAddress();
