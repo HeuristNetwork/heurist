@@ -386,6 +386,7 @@ function EditTerms() {
             if(needExpand) {
                 //node.focus();
                 //node.toggle();
+                
                 node.setFocus(true);
                 node.setActive(true);
                 node.setExpanded(true);
@@ -419,28 +420,31 @@ function EditTerms() {
         var ischanged = false;
 
         if(_currentNode!=null){
+            
+            var termName = Dom.get('edName').value.trim();
 
+            var iInverseId = Number(Dom.get('edInverseTermId').value);
+            iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
+            var iInverseId_prev = Number(_currentNode.data.inverseid);
+            iInverseId_prev = (iInverseId_prev>0)?iInverseId_prev:null;
+            
             ischanged =
-            Dom.get('edName').value.trim() != _currentNode.data.label ||
+            termName != _currentNode.data.label ||
             Dom.get('edDescription').value.trim() != _currentNode.data.description ||
             Dom.get('edCode').value.trim() != _currentNode.data.termcode ||
             Dom.get("trm_Status").value != _currentNode.data.status ||
-            Dom.get('edInverseTermId').value != _currentNode.data.inverseid;
+            iInverseId != iInverseId_prev;
         }
 
         var ele = $('#btnSave');
-        if (ischanged) {
-
+        if (ischanged && termName!='') {
             //ele.prop('disabled', 'disabled');
             //ele.css('color','lightgray');
             ele.removeProp('disabled');
-            ele.css('color','black');
+            $(ele).removeClass('save-disabled');
         }else{
-
             ele.prop('disabled', 'disabled');
-            ele.css('color','lightgray');
-            alert("hey")
-
+            $(ele).addClass('save-disabled');
         }
 
     }
@@ -1082,9 +1086,9 @@ function EditTerms() {
 
 
         if(wasChanged){
-            $('#btnSave').removeProp('disabled');
-            $('#btnSave').css('color','black');
-
+            var ele = $('#btnSave');
+            ele.removeProp('disabled');
+            $(ele).removeClass('save-disabled');
         }
 
         //( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
@@ -1109,6 +1113,9 @@ function EditTerms() {
                 Dom.get('edInverseTermId').setFocus();
                 return;
             }
+            
+            //keep node, since current node can be changed while this async action
+            var nodeForAction = _currentNode;
 
             if(needConfirm){
                 
@@ -1123,8 +1130,8 @@ function EditTerms() {
                      buttons['No'] = function() {
                             var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                             $dlg.dialog( "close" );
-                            if( isNaN(Number(_currentNode.data.id)) ){
-                                _doDelete(false);           //@todo - not removed from fancytree
+                            if( !isExistingNode(nodeForAction) ){
+                                _doDelete2(nodeForAction, false);           //@todo - to fix - not removed from fancytree
                             }
                      };
                     
@@ -1133,8 +1140,8 @@ function EditTerms() {
                     var r = confirm("Term was modified. Save it?");
                     if (!r) {
                         //if new - remove from tree
-                        if( isNaN(Number(_currentNode.data.id)) ){
-                            _doDelete(false);           //@todo - not removed from fancytree
+                        if( !isExistingNode(nodeForAction) ){
+                            _doDelete2(nodeForAction, false);           //@todo - not removed from fancytree
                         }
                         return;
                     }else{
@@ -1147,19 +1154,19 @@ function EditTerms() {
 
             function __doSave_continue(){
             
-                if(noValidation || _validateDups(_currentNode, sName, sCode)){
+                if(noValidation || _validateDups(nodeForAction, sName, sCode)){
 
-                    var needReload = (_currentNode.data.parent_id != iParentId || _currentNode.data.inverseid != iInverseId);
+                    var needReload = (nodeForAction.data.parent_id != iParentId || nodeForAction.data.inverseid != iInverseId);
 
-                    _currentNode.data.label = sName;
-                    _currentNode.data.description = sDesc;
-                    _currentNode.data.termcode = sCode;
-                    _currentNode.data.status = sStatus;
+                    nodeForAction.data.label = sName;
+                    nodeForAction.data.description = sDesc;
+                    nodeForAction.data.termcode = sCode;
+                    nodeForAction.data.status = sStatus;
 
-                    _currentNode.data.inverseid = iInverseId;
-                    _currentNode.data.title = _currentNode.data.description;
+                    nodeForAction.data.inverseid = iInverseId;
+                    nodeForAction.data.title = _currentNode.data.description;
 
-                    _currentNode.data.parent_id = iParentId;
+                    nodeForAction.data.parent_id = iParentId;
 
 
                     //_currTreeView.render
@@ -1168,7 +1175,7 @@ function EditTerms() {
                     // _currentNode.load();
                     //_defineContentTreeView();
 
-                    _updateTermsOnServer(_currentNode, needReload);
+                    _updateTermsOnServer(nodeForAction, needReload);
 
                     //alert("TODO SAVE ON SERVER");
                 }
@@ -1222,6 +1229,9 @@ function EditTerms() {
     {
 
         var term = node.data;
+        var current_id = node.data.id;
+        var wasExpanded = node.isExpanded();
+        var parent_id = null;
 
         /*
         var sibs = node.getSiblings();
@@ -1271,11 +1281,11 @@ function EditTerms() {
                                 error = true;
                             }else{
 
-                                if(node.data.id != item){ //new term
-                                    node.data.id = item;
+                                if(term.id != item){ //new term
+                                    term.id = item;
                                     //find vocab term (top level)
                                     //top.HEURIST.treesByDomain
-                                    var topnode = _findTopLevelForId(node.data.parent_id);
+                                    var topnode = _findTopLevelForId(term.parent_id);
                                     if (!Hul.isnull(topnode)) {
                                         var vocab_id = topnode.data.id;
                                         if(_affectedVocabs.indexOf(vocab_id)<0){
@@ -1285,6 +1295,11 @@ function EditTerms() {
                                             Dom.get('formAffected').style.display = 'block';
                                             }*/
                                         }
+                                    }
+                                    if(_parentNode){
+                                        //reselect parent node
+                                        parent_id = _parentNode.data.id;
+                                        wasExpanded = true;
                                     }
                                 }
 
@@ -1307,9 +1322,15 @@ function EditTerms() {
                                 if(_currentNode ===  node){
                                     Dom.get('edId').value = item;
                                 }
+                                /*
                                 if(_parentNode){
-                                    _onNodeClick(_parentNode);
+                                    //reselect parent node
+                                    var parent_id = _parentNode.data.id;
+                                    _findNodeById(parent_id, true);
+                                    wasExpanded = true;
+                                    //_parentNode.setExpanded(true);
                                 }
+                                */
                             }
                         }
                     }//for
@@ -1337,14 +1358,31 @@ function EditTerms() {
                         $("#Saved" ).css("display","inline-block");
                         setTimeout(function(){$("#Saved" ).css("display","none")}, 1000);
                         $("#btnSave" ).prop('disabled', 'disabled');
-                        $("#btnSave").css("color", "lightgray");
+                        $('#btnSave').addClass('save-disabled');
 
                         /*FancyTree needs to be reinitialised manually when terms are modified*/
 
+                        
                         $treediv.remove();
                         _defineContentTreeView();
-                        _currentNode.setFocus(true);
-                        _currentNode.setActive(true);
+                        
+                        var term_id;
+                        if(parent_id){
+                            term_id = parent_id;
+                        }else if(_currentNode){
+                            term_id = _currentNode.data.id;
+                        }else{
+                            term_id = current_id;    
+                        }
+                        
+                        var node = _findNodeById(term_id, wasExpanded);
+                        node.setFocus(true);    
+                        
+                        
+                        //_currentNode.setExpanded(true);
+                        
+                        /*_currentNode.setFocus(true);
+                        _currentNode.setActive(true);*/
 
 
                         if(needReload){
@@ -1382,13 +1420,18 @@ function EditTerms() {
     * Deletes current term
     */
     function _doDelete(needConfirm){
-        if(_currentNode===null) return;
-        var isExistingTerm = isExistingNode(_currentNode),
+        _doDelete2(_currentNode, needConfirm);
+    }
+
+    function _doDelete2(nodeToDelete, needConfirm){
+        
+        if(nodeToDelete===null) return;
+        var isExistingTerm = isExistingNode(nodeToDelete),
         sMessage = "";
 
         if(isExistingTerm){
-            sMessage = "Delete term '"+_currentNode.data.label+"'?";
-            if(_currentNode.countChildren()>0){
+            sMessage = "Delete term '"+nodeToDelete.data.label+"'?";
+            if(nodeToDelete.countChildren()>0){
                 sMessage = sMessage + "\nWarning: All child terms will be deleted as well";
             }
         }else{
@@ -1414,9 +1457,16 @@ function EditTerms() {
                         //remove from tree
                         //_currTreeView.popNode(_currentNode);
                         //  _currTreeView.render();
-                        _currentNode.remove();
-                        _currentNode = null;
-                        _onNodeClick(null);
+                        var term_id = _currentNode?_currentNode.data.id:0;
+                        var term_id2 = nodeToDelete.data.id;
+                        
+                        nodeToDelete.remove();
+                        nodeToDelete = null;
+                        if(term_id2==term_id){
+                            _currentNode = null;    
+                            _onNodeClick(null);
+                        }
+                        
                         _isSomethingChanged = true;
                     }else{
                         Dom.get('formEditor').style.display = "block";
@@ -1429,10 +1479,17 @@ function EditTerms() {
                 var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
                 Hul.getJsonData(baseurl, callback, params);
             }else{
-                _currTreeView.popNode(_currentNode);
-                // _currTreeView.render();
-                _currentNode = null;
-                _onNodeClick(null);
+                
+                        var term_id = _currentNode?_currentNode.data.id:0;
+                        var term_id2 = nodeToDelete.data.id;
+                        
+                        nodeToDelete.remove();
+                        nodeToDelete = null;
+                        if(term_id2==term_id){
+                            _currentNode = null;    
+                            _onNodeClick(null);
+                        }
+                
                 Dom.get('deleteMessage').style.display = "none";
             }
         }

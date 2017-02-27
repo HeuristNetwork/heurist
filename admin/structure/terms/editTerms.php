@@ -84,6 +84,9 @@ if(isForAdminOnly("to modify database structure")){
                 text-align: right;
                 padding-right: 3px;
             }
+            .save-disabled, #btnSave.save-disabled:hover{
+                color:lightgray !important;
+            }
 
             ul.fancytree-container li {
                 width:100%;
@@ -153,7 +156,7 @@ if(isForAdminOnly("to modify database structure")){
             <div id="pnlLeft" style="position:absolute; top:25;bottom:0;width:350; max-width:350; padding-right:5px; overflow: hidden;">
 
                 <div style="margin-left:10px; xpadding-top:35px;">
-                    <input id="btnAddChild" type="button"
+                    <input id="btnAddRoot1" type="button"
                         value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
                     <span style="margin-top:5px; margin-left:10px;"> Adds a new root to the tree</span>
                 </div>
@@ -188,7 +191,7 @@ if(isForAdminOnly("to modify database structure")){
                 </h3>
 
                 <div style="margin-left:10px; padding-top:15px;display:none">
-                    <input id="btnAddChild" type="button"
+                    <input id="btnAddRoot2" type="button"
                         value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
                     <span style="margin-top:5px; margin-left:10px; display:none" > Adds a new root to the tree</span>
                 </div>
@@ -313,7 +316,8 @@ if(isForAdminOnly("to modify database structure")){
 
 
                         <!--
-                        NOTE: button labelling is set in the JS file
+                         These buttons are hidden now. They are replaced by action icons in treeview (see __defineActionIcons)
+                         Either this section of code will be removed or restored in next months
                         -->
                         <div style="display:inline-block; margin-top:30px;width:90%;">
                             <span style="visibility:hidden;">
@@ -344,8 +348,11 @@ if(isForAdminOnly("to modify database structure")){
                                 style="border-radius: 6px; background-color:gray;margin-left:5px;font-style: bold !important;  color:black; display:none;"
                                 title=" ">Saved...</button></span>
 
-                            <div id='div_btnAddChild' style="visibility:hidden;text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
-                                    <input id="btnAddChild" type="button" value="Add a child term (a term hierarchichally below the current vocabulary or term)" onClick="{editTerms.doAddChild(false)}"/>
+                            <div id='div_btnAddChild' style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
+                                    <input id="btnAddChild" type="button"
+                                         title="Add a child term (a term hierarchichally below the current vocabulary or term)"
+                                         value="Add Child"
+                                         onClick="{editTerms.doAddChild(false)}"/>
                             </div>
                         </div>
                         <!--
