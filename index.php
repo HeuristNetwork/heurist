@@ -200,6 +200,7 @@ _time_debug = new Date().getTime() / 1000;
                     }else{
                         window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
                     }
+                    
                 }else if(db_total_records<1){
                     showTipOfTheDay(false);
                 }

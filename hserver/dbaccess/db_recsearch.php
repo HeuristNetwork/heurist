@@ -33,6 +33,8 @@
     require_once (dirname(__FILE__).'/db_searchfacets.php');
 
     require_once ( dirname(__FILE__).'/../../common/php/Temporal.php');
+    
+    define('MAX_TIMEMAP_RECORDS',10000);
 
     /**
     * Find minimal and maximal values for given detail type and record type
@@ -438,6 +440,8 @@ if(@$params['debug']) echo $query."<br>";
              }
              $fieldtypes_ids = implode(',', $fieldtypes_ids);
              
+//DEBUG error_log('timemap fields '.$fieldtypes_ids);
+             
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
             //specific set of detail fields
             if(is_array($params['detail'])){
@@ -783,7 +787,7 @@ if(@$params['debug']) echo $query."<br>";
         $res = $mysqli->query($query);
         if (!$res){
             
-error_log('params '.print_r($params, true));            
+//error_log('params '.print_r($params, true));            
             $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.' Search query error on saved search. Query '.$query, $mysqli->error);
         }else if($is_count_only){
         
@@ -869,7 +873,7 @@ error_log('params '.print_r($params, true));
                             $params['detail']=='structure') && count($records)>0){
 
                             //search for specific details
-                            if(!$fieldtypes_ids && $fieldtypes_ids!=''){
+                            if($fieldtypes_ids!=null && $fieldtypes_ids!=''){
 
                                 $detail_query =  'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
@@ -878,7 +882,7 @@ error_log('params '.print_r($params, true));
                                 .'from recDetails
                                 where dtl_RecID in (' . join(',', array_keys($records)) . ') '
                                 .' and dtl_DetailTypeID in ('.$fieldtypes_ids.')';
-
+                                
                             }else{
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
@@ -939,13 +943,14 @@ error_log('params '.print_r($params, true));
                                 //1. exclude records without timemap data
                                 //2. limit to $chunk_size
                                 if($istimemap_request){
+error_log('remove non timemap records '.count($records));                                    
                                     $tm_records = array();
                                     $order = array();
                                     $rectypes = array();
                                     foreach ($records as $recID => $record) {
                                         if(is_array(@$record['d']) && count($record['d'])>0){
                                             //this record is time enabled 
-                                            if($istimemap_counter<$chunk_size){
+                                            if($istimemap_counter<MAX_TIMEMAP_RECORDS){
                                                 $tm_records[$recID] = $record;        
                                                 array_push($order, $recID);
                                                 $rectypes[$record[4]]=1; 
@@ -954,6 +959,7 @@ error_log('params '.print_r($params, true));
                                         }
                                    }
                                    $records = $tm_records;
+error_log('now '.count($records));                                    
                                    $total_count_rows = $istimemap_counter;
                                 }//$istimemap_request
                             }
