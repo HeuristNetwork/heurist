@@ -396,7 +396,14 @@ function executeSmartyTemplate($params){
     if($publishmode==0 && $session_id!=null){
         updateProgress($mysqli, $session_id, false, 'REMOVE');
     }
-    $mysqli->close();               
+    $mysqli->close();        
+    
+    if($publishmode==0 && $params["limit"] < count($recIDs)){
+        echo '<div><b>Report preview has been truncated to '.$params["limit"].' records.<br>'
+        .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
+    }
+    
+
 
 }
 

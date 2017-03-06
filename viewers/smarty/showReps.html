@@ -465,7 +465,9 @@
 
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
-                Hul.popupURL(this, top.HEURIST.baseURL + 'viewers/smarty/repMenu.html?template_file='+template_file,
+                Hul.popupURL(this, top.HEURIST.baseURL 
+                            + 'viewers/smarty/repMenu.html?template_file='
+                            + encodeURIComponent(template_file),
                     {   title: 'Publish report',
                         callback: function(filename){
                             if(!Hul.isnull(filename)) {
