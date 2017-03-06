@@ -285,10 +285,13 @@ function EditRecStructure() {
                 {
                     key:"rst_DisplayName", label: "Field prompt in form", width:120, sortable:false,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
+                        var ccode = oRecord.getData("conceptCode");
                         elLiner.innerHTML = oData;
                         elLiner.title = "Base field type: "+oRecord.getData("dty_Name")+"\n\n"+
                         "Help: "+oRecord.getData("rst_DisplayHelpText")+"\n\n"+
-                        "For non owner: " + oRecord.getData("rst_NonOwnerVisibility");
+                        "For non owner: " + oRecord.getData("rst_NonOwnerVisibility")+
+                        (ccode?("\n\nConcept code:"+ccode):'');
+                        
                         var type = oRecord.getData("dty_Type");
                         if(type=='separator'){
                             $(elLiner).css({'font-size':'1.2em','font-weight':'bold'});
@@ -425,6 +428,7 @@ function EditRecStructure() {
                     function ( obj ) {
                         var rst_ID = obj.data.getData('rst_ID');
                         //var rst_values = obj.data.getData('rst_values');
+                        var ccode = obj.data.getData("conceptCode");
                         
                         var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
                         var allowEditBaseFieldType = (fieldType=='enum' || fieldType=='resource' || fieldType=='relmarker' || fieldType=='relationtype');
@@ -572,8 +576,11 @@ function EditRecStructure() {
                         '<option value="viewable">viewable</option>'+
                         '<option value="public">public</option>'+
                         '<option value="pending">pending</option></select></span>'+
+                        
                         '</div></div>'+
 
+                        (ccode?'<div class="input-row"><div class="input-header-cell">Concept code:</div><div style="display:table-cell">'+ccode+'</div></div>':'')+
+                        
                         '</div></div>'
 
                     }

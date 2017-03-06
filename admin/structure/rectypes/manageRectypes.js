@@ -201,7 +201,7 @@ function RectypeManager() {
                         // 'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
                         
                         //Remarked temporarely 2016-05-11 '<input type="button" id="btnImportFromTemplate'+grpID+'" value="From templates" class="add"/>'+
-                        '<input type="button" id="btnImportFromDb'+grpID+'" value="From databases" class="add" style="margin-right:1em"/>'+
+                        '<input type="button" id="btnImportFromDb'+grpID+'" value="From databases" class="import" style="margin-right:1em"/>'+
                         '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add" style="margin-right:1em"/>'+
 
                         //'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
@@ -210,7 +210,7 @@ function RectypeManager() {
                         '<div style="position:absolute;bottom:8px;right:425px;">'+
 
                         //Remarked temporarely 2016-05-11 '<input type="button" id="btnImportFromTemplate'+grpID+'_2" value="From templates" class="add"/>'+
-                        '<input type="button" id="btnImportFromDb'+grpID+'_2" value="From databases" class="add" style="margin-right:1em"/>'+
+                        '<input type="button" id="btnImportFromDb'+grpID+'_2" value="From databases" class="import" style="margin-right:1em"/>'+
                         '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add" style="margin-right:1em"/>'+
                         '</div>'+
                         '</div>')

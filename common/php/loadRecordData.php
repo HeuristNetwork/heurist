@@ -51,7 +51,7 @@ if (!defined("JSON_RESPONSE")) {
 }
 
 mysql_connection_select(DATABASE);
-list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["recID"],@$_REQUEST['bkmk_id']);
+list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["recID"], @$_REQUEST['bkmk_id']);
 
 if(@$_REQUEST["action"]=="getrelated"){
 

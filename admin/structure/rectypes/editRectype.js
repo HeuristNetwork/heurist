@@ -83,6 +83,7 @@ function init() {
     }
 
     setTimeout(function(){document.getElementById("rty_Name").focus();},1000);
+
 }
 
 /**
@@ -503,6 +504,7 @@ var updateResult = function(context) {
 
             rectypeID = Math.abs(rectypeID);
 
+            
             if(_openEditStrucutreAfterClose){
                 //editRecStructure();
                 context.isOpenEditStructure = true;

@@ -950,12 +950,17 @@ h3 {
     background-position: center;
     background-repeat: no-repeat;
 }
-input[type="button"].add {
+input[type="button"].add, input[type="button"].import {
     float: right;
-    background-image: url(../../common/images/add-record-small.png);
     background-repeat: no-repeat;
     padding: 0 5px 0 20px !important;
     background-position: 2px;
+}
+input[type="button"].add{
+    background-image: url(../../common/images/add-record-small.png);
+}
+input[type="button"].import {
+    background-image: url(../../common/images/drag-minimise.gif);
 }
 .actionButtons {
     padding-top: 10px;
