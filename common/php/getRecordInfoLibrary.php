@@ -837,16 +837,20 @@ function getAllRectypeConstraint() {
 * @param     boolean $getAllDescentTerms determines whether to recurse and retrieve children of children (default = true)
 * @return    array  of term IDs
 */
-function getTermOffspringList($termID, $getAllDescentTerms = true) {
+function getTermOffspringList($termID, $parentlist = null) {
+    if($parentlist==null) $parentlist = array($termID);
     $offspring = array();
     if ($termID) {
         $res = mysql_query("select * from defTerms where trm_ParentTermID=$termID");
         if ($res && mysql_num_rows($res)) { //child nodes exist
             while ($row = mysql_fetch_assoc($res)) { // for each child node
                 $subTermID = $row['trm_ID'];
-                array_push($offspring, $subTermID);
-                if (true){ //ARTEM: trm_ChildCount is not reliable   }$row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
-                    $offspring = array_merge($offspring, getTermOffspringList($subTermID));
+                if(array_search($subTermID, $parentlist)===false){
+                    array_push($offspring, $subTermID);
+                    array_push($parentlist, $subTermID);
+                    $offspring = array_merge($offspring, getTermOffspringList($subTermID, $parentlist));
+                }else{
+                    error_log('Database '.DATABASE.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
                 }
             }
         }
