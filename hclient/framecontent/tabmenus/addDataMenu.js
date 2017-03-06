@@ -55,6 +55,7 @@ function haddDataMenu() {
 
         $(parentdiv[0]).accordion('option', 'active', 0); //KEYBOARD
         $('#menulink-add-record').click();
+
     }
     
     
