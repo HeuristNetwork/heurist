@@ -77,15 +77,15 @@ if($step=='2' && $projname && file_exists($arc_filename)){
     <body style="padding:22px;" class="popup">
         <script src="../../common/php/loadCommonInfo.php"></script>
         <div class="banner"><h2>Build FAIMS Module</h2></div>
-        <div id="page-inner" style="padding-left: 30px;padding-right:10px">
-
+        <div id="page-inner" style="top:15px; padding-left: 30px;padding-right:10px">
+         
             <!-- TODO: This takes up too much space, but would be nice to include it:
             <div style='background: url(../../common/images/logo_faims.png) center top no-repeat;height:120px;'>&nbsp;</div> -->
 
 
             <div style="width: 900px;">
 
-                <p>
+                <p style="line-height:1em !important;">
                     The FAIMS project ( Field Acquired Information Management System, 
                     <a href="http://fedarch.org" target="_blank">http://fedarch.org</a> ) has built a highly configurable system for data
                     collection using consumer grade Android tablets, funded by the Australian Research Council (ARC) and 
@@ -94,7 +94,7 @@ if($step=='2' && $projname && file_exists($arc_filename)){
                     or excavation (the original target audience). The system is geographically aware, connects to internal or external cameras and GPS, 
                     and seamlessly synchronises data collection across multiple tablets for team use.
                 </p>
-                <p>
+                <p style="line-height:1em !important;">
                     This function allows the configuration of the FAIMS app (a 'module' in FAIMS parlance) directly from the structure 
                     of the Heurist database, allowing Heurist to sct as a module designer for FAIMS. The Heurist database defines the types of entities 
                     and attributes (fields) to be displayed on the tablet app, and the connections between entities. Heurist can also import data from 
@@ -319,7 +319,7 @@ if($step=='2' && $projname && file_exists($arc_filename)){
         });
     </script>
     </body>
-    </html>;
+    </html>
     <?php
 }
 exit();
