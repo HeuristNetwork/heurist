@@ -144,7 +144,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
         <hr>
 
 
-        <div id="page-inner">
+        <div id="page-inner" style="top:80px">
 
 
             <!-- CHECK FOR FIELD TYPE ERRORS -->
