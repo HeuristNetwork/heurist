@@ -762,7 +762,8 @@ function do_fix_dupe() {
 
     //delete dups
     mysql_query('delete from Records where rec_ID in '.$dup_rec_list);
-
+//DEBUG error_log('delete from Records where rec_ID in '.$dup_rec_list);
+    
     //delete unwanted details in master
     //if ($master_delete_dt_ids && $master_delete_dt_ids[0]){
     //    $master_delete_dt_ids_list = '('.join(',',$master_delete_dt_ids). ')' ;
