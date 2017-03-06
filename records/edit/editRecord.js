@@ -2822,9 +2822,11 @@ console.log('heurist not defined');
             
             this.inputs = [];
         }
-
+        
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
         var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
+        var domain = this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']];
 
         var sAllTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
         var sDisTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']];
@@ -2835,7 +2837,7 @@ console.log('heurist not defined');
         var    allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) : null;
         if(allTerms==null){
             
-            if(this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum"){
+            if(domain == "enum"){
                 //2016-03-25 vocabulary must be defined! top.HEURIST.terms.treesByDomain['enum']
                 allTerms = -1;
             }else{
@@ -2851,7 +2853,7 @@ console.log('heurist not defined');
             disabledTerms = "";
         }
         
-        var newInput;
+        var newInput, wrongValues=[];
 
         if(bd_Values.length>0){
         
@@ -2859,6 +2861,12 @@ console.log('heurist not defined');
                     newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
                             this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
                             bd_Values[k], true);
+                            
+                    if(bdValues[k] && newInput.value!=bdValues[k]){
+                        var term = top.HEURIST.terms.termsByDomainLookup[domain][bdValues[k]];
+                        if(term) wrongValues.push(term[top.HEURIST.terms.fieldNamesToIndex['trm_Label']]);
+                    }
+                            
 
                     this.addInputHelper.call(this, {value:bd_Values[k]}, newInput);
                     newInput.style.width = "auto";         
@@ -2879,14 +2887,26 @@ console.log('heurist not defined');
 
             this.addInputHelper.call(this, bdValue, newInput);
             newInput.style.width = "auto";
-
+            
+            if(bdValue && bdValue.value && newInput.value!=bdValue.value){
+                var term = top.HEURIST.terms.termsByDomainLookup[domain][bdValue.value];
+                if(term) wrongValues.push(term[top.HEURIST.terms.fieldNamesToIndex['trm_Label']]);
+            }
         }
+        
 
         //move span before prompt div
         if(this.linkSpan){
             this.inputCell.removeChild(this.linkSpan);
             this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
         }
+
+        if(wrongValues.length>0){
+            $(this.promptDiv).after('<div style="color:red">'
+            + 'Invalid value'+(wrongValues.length>1?'s':'')+': '+ wrongValues.join(',')
+            +'</div><div class="prompt" style="color:blue">Please edit the field definition to include these values or select new values from the dropdown</div>');
+        }
+        
         
         this.createSelectTermsByImage(newInput);
 /*        

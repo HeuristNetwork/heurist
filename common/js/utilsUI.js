@@ -1846,7 +1846,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 termCode = "";
 
                 if(localLookup[termID]){
-                    if(depth<1){
+                    if(true){ //2017-02-28 no more hierarchy in list  was (depth<1){
                         termName = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
                     }else{
                         termName = getFullTermLabel(localLookup[termID], datatype, false);
@@ -1883,7 +1883,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
                     //for non mozilla add manual indent
                     var a = new Array(depth*2);
-                    termName = a.join('. ') + termName;
+                    termName = a.join('…') + termName; //was '. '
                 }
 
                 var isDisabled = (disabledTerms[termID]? true:false);
