@@ -100,7 +100,7 @@ function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 * @param mixed $label
 * @param mixed $dtyID
 */
-function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
+function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $isStripAccents=false){
     global $dtyID_term_label;
 
     $allowed_terms = null;
@@ -124,6 +124,10 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
         $allowed_terms = $dtyID_term_label[$dtyID];
     }
 
+    if($isStripAccents){
+        array_walk($allowed_terms, 'trim_lower_accent2');
+    }
+    
     $label = mb_strtolower($label);
 
     if(is_array($allowed_terms)){
@@ -135,6 +139,20 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
     return $term_ID;
 
 }
+
+function stripAccents($stripAccents){
+    return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
+}
+
+function  trim_lower_accent($item){
+    return mb_strtolower(stripAccents($item));
+}
+
+function  trim_lower_accent2(&$item, $key){
+    $item = trim_lower_accent($item);
+}
+
+
 
 //
 // Is given termid in list of allowed terms or in vocab

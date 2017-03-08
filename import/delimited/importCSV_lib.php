@@ -1522,6 +1522,7 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
             $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
                 $r_value2 = trim_lower_accent($r_value);
+          
                 if($r_value2!=""){
 
                     $is_termid = false;
@@ -1532,7 +1533,8 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
                     if($is_termid){
                         $term_id = $r_value;
                     }else{
-                        $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+                        //strip accents on both sides
+                        $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
                     }
 
                     if (!$term_id)
@@ -2070,7 +2072,8 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                                     }
 
                                     if($value == null){
-                                        $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
+                                        //stip accents on both sides
+                                        $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type, true );
                                     }
                                 }
                             }
@@ -3278,19 +3281,5 @@ function my_strtr($inputStr, $from, $to, $encoding = 'UTF-8') {
     return $translated;
 }
 
-
-function stripAccents($stripAccents){
-    return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
-}
-
-
-function  trim_lower_accent($item){
-    return mb_strtolower(stripAccents($item));
-}
-
-
-function  trim_lower_accent2(&$item, $key){
-    $item = trim_lower_accent($item);
-}
 
 ?>
