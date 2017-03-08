@@ -98,13 +98,14 @@ if(isForAdminOnly("to modify database structure")){
             */
             span.fancytree-node,
             span.fancytree-title,
-            span.svs-contextmenu3 > span.ui-icon{
+            div.svs-contextmenu3 > span.ui-icon{
                 vertical-align:bottom;
                 padding-left:2px;
             }
-            span.svs-contextmenu3{
+            div.svs-contextmenu3{
                 cursor:pointer;
-                min-width: 100px;
+                float:right;
+                min-width: 80px;
                 visibility: hidden;
                 padding-left:10px;
             }

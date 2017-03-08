@@ -2377,16 +2377,16 @@ function EditTerms() {
        function __defineActionIcons(item){ 
            if($(item).find('.svs-contextmenu3').length==0){
 
-               var actionspan = $('<span class="svs-contextmenu3">'
+               var actionspan = $('<div class="svs-contextmenu3">'
                    +'<span class="ui-icon ui-icon-plus" title="Add a child term (a term hierarchichally below the current vocabulary or term)"></span>'
                    +((_currTreeView === _termTree2)
                       ?'<span class="ui-icon ui-icon-reload" title="Set the inverse term for this term"></span>' //for relations only
                       :'')
                    +'<span class="ui-icon ui-icon-close" title="Delete this term (if unused in database)"></span>'
-                   +'<span class="ui-icon ui-icon-image" title="Add an image which illustrates this term"></span>'
+                   //+'<span class="ui-icon ui-icon-image" title="Add an image which illustrates this term"></span>'
                    +'<span class="ui-icon ui-icon-arrowthick-1-w" title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"></span>'
                    +'<span class="ui-icon ui-icon-arrowthick-1-e" title="EXPORT this vocabulary to a text file"></span>'
-                   +'</span>').appendTo(item);
+                   +'</div>').appendTo(item);
                    
                    
                actionspan.find('.ui-icon').click(function(event){
@@ -2421,28 +2421,40 @@ function EditTerms() {
                ).appendTo(actionspan);
                */
 
-
-               $(item).hover(
-                   function(event){
+               //hide icons on mouse exit
+               function _onmouseexit(event){
                        var node;
-                       if($(event.target).hasClass('fancytree-node')){
-                          node =  $(event.target);
-                       }else{
-                          node = $(event.target).parents('.fancytree-node');
-                       }
-                       var ele = node.find('.svs-contextmenu3');
-                       ele.css('visibility','visible');
-               }).mouseleave(
-                   function(event){
-                       var node;
-                       if($(event.target).hasClass('fancytree-node')){
+                       if($(event.target).is('li')){
+                          node = $(event.target).find('.fancytree-node');
+                       }else if($(event.target).hasClass('fancytree-node')){
                           node =  $(event.target);
                        }else{
                           node = $(event.target).parents('.fancytree-node');
                        }
                        var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
                        ele.css('visibility','hidden');
-               });
+               }               
+               
+
+               $(item).parents('li').hover(
+                   function(event){
+                       var node;
+                       if($(event.target).is('li')){
+                          node = $(event.target).find('.fancytree-node');
+                         if(node.length>0) node = $(node[0]);
+                       }else if($(event.target).hasClass('fancytree-node')){
+                          node =  $(event.target);
+                       }else{
+                          node = $(event.target).parents('.fancytree-node');
+                       }
+                       var ele = $(node).find('.svs-contextmenu3');
+                       ele.css('visibility','visible');
+               }).mouseleave(
+                   _onmouseexit
+               );
+               $(item).mouseleave(
+                   _onmouseexit
+               );
            }
        }
 

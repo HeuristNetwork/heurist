@@ -1518,7 +1518,6 @@ function onGroupChange() {
 }
 
 function _refreshClientStructure(context){
-console.log('refresh rectypes');
     top.HEURIST.rectypes = context.rectypes;
     if(window.hWin && window.hWin.HEURIST4){
         window.hWin.HEURIST4.rectypes = context.rectypes;

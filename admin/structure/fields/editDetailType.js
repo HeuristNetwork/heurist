@@ -462,6 +462,8 @@ function DetailTypeEditor() {
 
         var el_sel = Dom.get("selVocab");
         if(is_add_vocab || (el_sel && el_sel.value>0)){ //add term to vocabulary
+        
+            var vocab_id =  el_sel.value>0?el_sel.value:''; //keep value
 
             Hul.popupURL(top, top.HEURIST.baseURL +
                 "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
@@ -475,8 +477,11 @@ function DetailTypeEditor() {
                     callback: function(context) {
                         if(context!="") {
 
-                            if(context=="ok"){
-                                _recreateTermsPreviewSelector(type, allTerms, "");
+                            if(context=="ok"){    //after edit term tree
+                                //_recreateTermsPreviewSelector(type, allTerms, "");
+                                _recreateTermsVocabSelector(type, vocab_id);
+                                _recreateTermsPreviewSelector(type, vocab_id, "");
+                                
                             }else if(!Hul.isempty(context)) { //after add new vocab
                                 Dom.get("dty_JsonTermIDTree").value =  context;
                                 Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
@@ -1124,6 +1129,7 @@ function DetailTypeEditor() {
                     height: 750,
                     width: 1200,
                     callback: function(needTreeReload) {
+                        _recreateTermsVocabSelector(type, vocab_id);
                         _recreateTermsPreviewSelector(type, vocab_id, "");
                     }
             });
