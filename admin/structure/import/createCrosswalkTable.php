@@ -343,7 +343,16 @@
                          width:24, sortable:false, resizeable:false },
                         { key:"import", label:"Import", sortable:false, resizeable:false, width:24 },
                         { key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>",
-                            sortable:true, resizeable:true, width:150 },
+                            sortable:true, resizeable:true, width:150,
+                        
+                            formatter:function(elLiner, oRecord, oColumn, oData) {
+                                var rt_name = oRecord.getData("rectype");
+                                var rtyID = oRecord.getData("rtyID");
+                                //description as rollover
+                                elLiner.innerHTML = '<span title="'+rectypeStructures[rtyID][0][4]+'">'+rt_name+'</span>';
+                            }
+                        
+                        },
                         { key:"linked_rt", label:"Linked record types", 
                             sortable:false, resizeable:false, hidden:false,width:300,
                             formatter:function(elLiner, oRecord, oColumn, oData) {
@@ -456,7 +465,7 @@
                                     function(obj) {
                                         var rty_ID = obj.data.getData('rtyID');
 
-                                var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";
+                                var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";   //description
                                 info += '<table style="text-align: left;"><tr>';
                                 info += '<th  style="padding-left:10px;" class=\"status\"><b>Already in DB?</b></th>';
                                 info += '<th style="padding-left:10px;"><b>Field name (used for this record type)</b></th>';

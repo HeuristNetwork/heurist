@@ -145,14 +145,25 @@
                         var str = oRecord.getData("name");
                         var id = oRecord.getData("id");
                         if(id=='XXX'){
-                            elLiner.innerHTML = '<h2 style="padding-top:10px">'+str+'</h2>';
+                            var str2 = oRecord.getData('description');
+                            elLiner.innerHTML = '<h2 style="padding-top:3px">'+str+
+                                '</h2><div>&nbsp;</div><div style="position: absolute;margin-top: -12px;"><i>'+
+                                str2+'</i></div>';
                         }else if(Number(id)<21){
                             elLiner.innerHTML = '<b>'+str+'</b>';
                         }else{
                             elLiner.innerHTML = str;
                         }
                     }},
-                    {key:"description", label:"Description", sortable:false, resizeable:true},
+                    {key:"description", label:"Description", sortable:false, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
+                        var id = oRecord.getData("id");
+                        if(id!='XXX'){
+                            var str = oRecord.getData("description");
+                            elLiner.innerHTML = '<span title="'+str+'">'+str+'</span>';
+                        }else{
+                            elLiner.innerHTML = '';
+                        }
+                    }},
                     // Currently no useful data in popularuity value
                     //{key:"popularity", label:"Popularity", formatter:YAHOO.widget.DataTable.formatNumber,sortable:true, resizeable:true, hidden:true }
                     {key:"URL", label:"Server URL",sortable:false, resizeable:true}
@@ -163,13 +174,13 @@
 
                 // Add databases to an array that YUI DataTable can use. Do not show URL for safety
                 dataArray = [
-                    ['XXX','Curated templates','','','']
+                    ['XXX','Curated templates','Databases curated by the Heurist team as a source of useful entity types for new databases','','']
                 ];
                 var notAdded = true;
                 for(dbID in registeredDBs) {
                     if(notAdded && Number(dbID)>21){
                         notAdded = false;
-                        dataArray.push(['XXX','User databases','','','']);
+                        dataArray.push(['XXX','User databases','Databases registered by Heurist users - use with care, look for entity types with good internal documentation','','']);
                     }else{
                         db = registeredDBs[dbID];
                         dataArray.push([db[0],db[2],db[3],
