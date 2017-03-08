@@ -975,7 +975,6 @@ if (! top.HEURIST.edit) {
         createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
 
             if(!top || !window) {
-console.log('top not defined');    
 				return;            
                 window.top = window.self;    
             }
@@ -2032,11 +2031,14 @@ console.log('heurist not defined');
             for (var i=0; i < fieldValues.length; ++i) {
                 var ele = this.addInput( fieldValues[i] )
 
-                if(!this.repeatable && i>0){
-                    $(ele).after('<div class="prompt" style="color:red">Repeated value for a single value field - please correct</div>');
-                }
                 //nonsense typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
             }
+            
+            if(!this.repeatable && this.inputs.length>1){ //fieldValues.length>1 && i==fieldValues.length-1){
+                var sWarning = '<div class="prompt" style="color:red">Repeated value for a single value field - please correct</div>';
+                $(this.promptDiv).before(sWarning);
+            }
+            
             if (fieldValues.length == 0) {   //add default value for first element of repeatable field
             
                 if(defaultValue=='increment_new_values_by_1'){
@@ -2796,7 +2798,7 @@ console.log('heurist not defined');
 
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = function(bdValue, needClear){
 
-        var bd_Values = [];
+        var bd_Values = []; //keep existing values
         
         if(needClear){
             //find and remove previous selector
@@ -2806,7 +2808,7 @@ console.log('heurist not defined');
             var nodes = parent.childNodes;
             while(i<nodes.length) {
                 var ele = nodes[i];
-                if(ele.className == "repeat-separator"){
+                if(ele.className == "repeat-separator" || ele.className == "delete-resource" || ele.className == 'warning-wrong-term'){
                     parent.removeChild(ele);
                 }else{
                     i++;
@@ -2820,7 +2822,11 @@ console.log('heurist not defined');
             
             $(parent).find('a[id^="term_by_image"]').remove();
             
-            this.inputs = [];
+            this.inputs = []; //clear all inputs
+        }else if(bdValue && bdValue.value){
+            bd_Values.push(bdValue.value)
+        }else{
+            bd_Values.push(null);
         }
         
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
@@ -2852,22 +2858,50 @@ console.log('heurist not defined');
             allTerms = 0;
             disabledTerms = "";
         }
+          
+        //-----
+        function __getTermLabel(term_id){
+            var term = null;
+            if(term_id>0){
+                term = top.HEURIST.terms.termsByDomainLookup['enum'][term_id];
+                if(!term){
+                    term = top.HEURIST.terms.termsByDomainLookup['relation'][term_id];
+                }
+            }
+            if(term){
+                s = term[top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
+                if(s=='') {s = 'Term label for #'+term_id+' is empty. Please edit and correct';}
+                else {s = 'Invalid value: '+s;}
+                return s;
+            }else{
+                return null; //'Undefined value '+term_id;
+            }
+        } 
+        //-----
         
-        var newInput, wrongValues=[];
+        var newInput = null;
 
         if(bd_Values.length>0){
         
             for (var k = 0; k < bd_Values.length; k++) {
+                
+                    var wrongValue = null;
+                
                     newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
                             this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
                             bd_Values[k], true);
-                            
-                    if(bdValues[k] && newInput.value!=bdValues[k]){
-                        var term = top.HEURIST.terms.termsByDomainLookup[domain][bdValues[k]];
-                        if(term) wrongValues.push(term[top.HEURIST.terms.fieldNamesToIndex['trm_Label']]);
+                                                          
+                    if(bd_Values[k] && newInput.value!=bd_Values[k]){
+                        var term = __getTermLabel(bd_Values[k]);
+                        if(term) {
+                            wrongValue = term;
+                        } else if(this.inputs.length>0) {
+                            newInput = null; //do not add repeatable empty or non-existing term id
+                            continue;   
+                        }
                     }
                             
-
+                   //add select to input div
                     this.addInputHelper.call(this, {value:bd_Values[k]}, newInput);
                     newInput.style.width = "auto";         
                     
@@ -2877,38 +2911,43 @@ console.log('heurist not defined');
                             br.className = "repeat-separator";
                             this.inputCell.insertBefore(br, newInput);
                     }
-            }
-            
-        }else{
-        
-            newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
-                    this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
-                    (bdValue && bdValue.value ? bdValue.value : null), true);
-
-            this.addInputHelper.call(this, bdValue, newInput);
-            newInput.style.width = "auto";
-            
-            if(bdValue && bdValue.value && newInput.value!=bdValue.value){
-                var term = top.HEURIST.terms.termsByDomainLookup[domain][bdValue.value];
-                if(term) wrongValues.push(term[top.HEURIST.terms.fieldNamesToIndex['trm_Label']]);
-            }
+                    //add clear image
+                    var removeImg = this.document.createElement("img"); //newDiv.appendChild();
+                    removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
+                    removeImg.className = "delete-resource";
+                    removeImg.title = "Remove this value";
+                    removeImg['data-idx'] = (this.inputs.length-1);
+                    
+                    $(newInput).after(removeImg);
+                    //this.inputCell.insertBefore(removeImg, this.promptDiv);
+                    
+                    var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+                    var thatRef = this;
+                    top.HEURIST.registerEvent(removeImg, "click", function( event ) {
+                        var idx = event.target['data-idx'];
+                        if(thatRef.inputs && thatRef.inputs[idx]){
+                            var inpt = thatRef.inputs[idx];
+                            if (!inpt.readOnly) {
+                                inpt.selectedIndex = -1;
+                                if (windowRef.changed) windowRef.changed();
+                            }
+                        }
+                    });
+                    
+                    if(wrongValue){
+                        $(removeImg).after('<div style="color:red" class="warning-wrong-term">'
+                            + wrongValue //'Invalid value'+(wrongValues.length>1?'s':'')+': '+ wrongValues.join(',')
+                            +'</div>');
+                    }
+                    
+                    if(this.linkSpan && this.inputs.length==1){ //after first remove image
+                        $(removeImg).after($(this.linkSpan));
+                    }
+                    
+                    this.createSelectTermsByImage(newInput);
+            }//for
         }
         
-
-        //move span before prompt div
-        if(this.linkSpan){
-            this.inputCell.removeChild(this.linkSpan);
-            this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
-        }
-
-        if(wrongValues.length>0){
-            $(this.promptDiv).after('<div style="color:red">'
-            + 'Invalid value'+(wrongValues.length>1?'s':'')+': '+ wrongValues.join(',')
-            +'</div><div class="prompt" style="color:blue">Please edit the field definition to include these values or select new values from the dropdown</div>');
-        }
-        
-        
-        this.createSelectTermsByImage(newInput);
 /*        
         if(this.selectSpan){
             this.inputCell.removeChild(this.selectSpan);
@@ -2919,6 +2958,9 @@ console.log('heurist not defined');
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector
 
 
+    //
+    // create edit link to manage vocabulary
+    //
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = function(bdValue){
 
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
@@ -3018,9 +3060,7 @@ console.log('heurist not defined');
             }
         }; // urlSpan.onclick
 
-        this.inputCell.insertBefore(urlSpan, this.promptDiv);
-        //this.inputCell.appendChild(urlSpan);
-
+        
         this.linkSpan = urlSpan;
 
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms
@@ -3089,18 +3129,29 @@ console.log('heurist not defined');
 
         var newInput = this.recreateSelector(bdValue, false);
 
-        if(this.inputs.length>1){
-            var br = this.document.createElement("div");
-            br.style.height = "3px";
-            br.className = "repeat-separator";
-            this.inputCell.insertBefore(br, newInput);
-            //br = this.document.createElement("br");
-            //this.inputCell.insertBefore(br, newInput);
-        }
-        
-        if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
+        if(newInput){
+            if(this.inputs.length>1){
+                var br = this.document.createElement("div");
+                br.style.height = "3px";
+                br.className = "repeat-separator";
+                this.inputCell.insertBefore(br, newInput);
+                //br = this.document.createElement("br");
+                //this.inputCell.insertBefore(br, newInput);
+            }
+            
+            
+            if($(this.inputCell).find('.warning-wrong-term').length==1){
+                $(this.promptDiv).after(
+                '<div class="prompt warning-wrong-term" style="color:blue">Please edit the field definition to include these values or select new values from the dropdown</div>');
+            }
+            
+            if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
 
-        this.createSpanLinkTerms();
+            this.createSpanLinkTerms(); //for admin only - place it after FIRST remove link/image
+            //add after FIRST clear image
+            $(this.inputs[0]).next().after($(this.linkSpan));
+            
+        }
         return newInput;
     }; //top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput
 
