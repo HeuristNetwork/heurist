@@ -15,6 +15,7 @@ showMsgWorkInProgress - shows standard work in progress message
 showPrompt    - show simple input value dialog with given prompt message
     
 showMsgFlash - show buttonless dialog with given timeout
+showHintFlash
 checkLength  - fill given element with error message and highlight it
 checkLength2 - get message if input value beyound given ranges
 
@@ -318,6 +319,49 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
         //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
+    },
+    
+    //
+    //
+    //
+    showTooltipFlash: function(message, timeout, to_element){
+        
+        if(!$.isFunction(window.hWin.HR)){
+            alert(message);
+            return;
+        }
+        
+        if(window.hWin.HEURIST4.util.isempty(message) ||  window.hWin.HEURIST4.util.isnull(to_element)){
+            return;   
+        }
+        
+        var position;
+        
+        if($.isPlainObject(to_element)){
+                position = { my:to_element.my, at:to_element.at};
+                to_element =  to_element.of;
+        }else{
+                position = { my: "left top", at: "left bottom", of: $(to_element) };    
+        }
+
+        if (!(timeout>200)) {
+            timeout = 1000;
+        }
+        
+        $( to_element ).attr('title',window.hWin.HR(message));
+        $( to_element ).tooltip({
+            position: position,
+            //content: '<span>'+window.hWin.HR(message)+'</span>',
+            hide: { effect: "explode", duration: 500 }
+        });
+
+        $( to_element ).tooltip('open');
+        
+        setTimeout(function(){
+            $( to_element ).tooltip('close');
+            $( to_element ).attr('title',null);
+        }, timeout);
+        
     },
 
     //
