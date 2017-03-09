@@ -988,7 +988,7 @@ class HPredicate {
         return ($timestamp0  &&  $timestamp1);
     }
 
-    function    makeDateClause() {
+    function makeDateClause() {
 
         if (strpos($this->value,"<>")) {
 
@@ -1090,11 +1090,11 @@ class HPredicate {
             $res = (($this->negate)?' not':'').$res;
             
         }else
-        if (is_numeric($this->value)) {
+        if (($this->field_type=='float' || $this->field_type=='inbteger' || $this->field_type == 'link') && is_numeric($this->value)) {
             if($this->field_type == "link"){
                 $res = " $eq ".intval($this->value);  //no quotes
             }else{
-                $res = " $eq '".intval($this->value)."'"; //floatval
+                $res = " $eq '".($this->field_type=='float'?floatval($this->value):intval($this->value))."'";
             }
             $this->field_list = true;
         }

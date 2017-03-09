@@ -84,7 +84,9 @@ function checkPermission($recordID, $wg){
 
 // NOTE  tags are a complete replacement list of personal tags for this record and are only used if personalised is true
 // $modeImport    0 - no import, 1 - import and check structure, 2 - import as is (without check record type structure
-function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null, $modeImport=0) {
+function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details,
+                         $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, 
+                         &$nonces=null, &$retitleRecs=null, $modeImport=0) {
     global $msgInfoSaveRec;
     $msgInfoSaveRec = array(); // reset the message array
 

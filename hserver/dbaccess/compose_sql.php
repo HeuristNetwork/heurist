@@ -1541,7 +1541,7 @@ class FieldPredicate extends Predicate {
             } else if ($this->parent->greaterthan) {
                 $match_pred = " > $match_value";
             } else {
-                if($isnumericvalue){
+                if(($this->field_type_value=='float' || $this->field_type_value=='inbteger') && $isnumericvalue){
                     $match_pred = " = $match_value";
                 }else if(strpos($this->value,"%")===false){
                     $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";

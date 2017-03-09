@@ -988,10 +988,17 @@ $.widget( "heurist.search_faceted_wiz", {
                 +'</div>';
 
                 var sTypeLabel = '<div class="ent_search_cb" style="font-size:smaller;font-style:italic; margin-bottom:5px;"><div class="header_narrow"><label></label></div>';
-                if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
+                if(facets[k].type=='freetext'){
                     sContent = sContent +
                     sTypeLabel
                     +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>first char</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
+                    +'</div>';
+                }else if(facets[k].type=='float' || facets[k].type=='integer'){
+                    sContent = sContent +
+                    sTypeLabel
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>slider</label>'
                     +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
                     +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
                     +'</div>';

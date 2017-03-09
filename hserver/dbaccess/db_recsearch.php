@@ -34,8 +34,6 @@
 
     require_once ( dirname(__FILE__).'/../../common/php/Temporal.php');
     
-    define('MAX_TIMEMAP_RECORDS',10000);
-
     /**
     * Find minimal and maximal values for given detail type and record type
     *
@@ -116,6 +114,7 @@
             $dt_type     = @$params['type'];
             $step_level  = @$params['step'];
             $fieldid     = $params['field'];
+            $facet_type =  @$params['facet_type'];
 
             //do not include bookmark join
             if(!(strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0)){
@@ -163,7 +162,7 @@
                     $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
 
             }
-            else if($dt_type=="integer" || $dt_type=="float" || $dt_type=="year"){
+            else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==1) || $dt_type=="year"){
 
                     //if ranges are not defined there are two steps 1) find min and max values 2) create select case
                     $select_field = "cast($select_field as DECIMAL)";
@@ -173,7 +172,11 @@
             }
             else { //freetext and other if($dt_type==null || $dt_type=="freetext")
 
-                if($step_level>0 || !($dt_type=="freetext" || $dt_type=="integer" || $dt_type=="float")){
+                if($dt_type=="integer" || $dt_type=="float"){
+
+                    $select_field = "cast($select_field as DECIMAL)";
+                    
+                }else if($step_level>0 || !($dt_type=="freetext" || $dt_type=="integer" || $dt_type=="float")){
 
                 }else{
                     $select_field = "SUBSTRING(trim(".$select_field."), 1, 1)";
@@ -210,17 +213,18 @@
 
             //
 //DEBUG
-if(@$params['debug']) echo $query."<br>";
+//if(@$params['debug']) echo $query."<br>";
 
             $res = $mysqli->query($query);
             if (!$res){
-                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName."Facet query error", $mysqli->error);
+                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName
+                        .'Facet query error. Parameters:'.print_r($params, true), $mysqli->error);
             }else{
                 $data = array();
 
                 while ( $row = $res->fetch_row() ) {
 
-                    if($dt_type=="integer" || $dt_type=="float" || $dt_type=="year" || $dt_type=="date"){
+                    if((($dt_type=="integer" || $dt_type=="float") && $facet_type==1)   || $dt_type=="year" || $dt_type=="date"){
                         $third_element = $row[2];
                     }else if($step_level>0 || $dt_type!='freetext'){
                         $third_element = $row[0];
@@ -782,13 +786,16 @@ if(@$params['debug']) echo $query."<br>";
 
         }
         
-//error_log('Q='.$query);                
+//error_log($istimemap_request.' Q='.$query);                
+
+//error_log($istimemap_request.' limit '.$aquery["limit"]);
 
         $res = $mysqli->query($query);
         if (!$res){
             
 //error_log('params '.print_r($params, true));            
-            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.' Search query error on saved search. Query '.$query, $mysqli->error);
+            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.
+            ' Search query error on saved search. Parameters:'.print_r($params, true).' Query '.$query, $mysqli->error);
         }else if($is_count_only){
         
                 $total_count_rows = $res->fetch_row();
@@ -841,6 +848,16 @@ if(@$params['debug']) echo $query."<br>";
 
                 }else{ //----------------------------------
 
+                    $rectype_structures  = array();
+                    $rectypes = array();
+                    $records = array();
+                    $order = array();
+                    
+                    /*if($istimemap_request){ //special case need to scan all result set and pick up only timemap enabled
+                    
+                        $tm_records = _getTimemapRecords($res);    
+                        
+                    }else{ */
 
                     // read all field names
                     $_flds =  $res->fetch_fields();
@@ -851,10 +868,6 @@ if(@$params['debug']) echo $query."<br>";
                     array_push($fields, 'rec_ThumbnailURL');
                     //array_push($fields, 'rec_Icon'); //last one -icon ID
 
-                    $rectype_structures  = array();
-                    $rectypes = array();
-                    $records = array();
-                    $order = array();
                     
                     // load all records
                     while ($row = $res->fetch_row()) {  //3000 maximal allowed chunk
@@ -868,9 +881,29 @@ if(@$params['debug']) echo $query."<br>";
                     }
                     $res->close();
                     
-                        if(($istimemap_request ||
-                            $params['detail']=='detail' ||
-                            $params['detail']=='structure') && count($records)>0){
+                    
+                    
+                    if(($istimemap_request ||
+                        $params['detail']=='detail' ||
+                        $params['detail']=='structure') && count($records)>0){
+                                
+                                
+                            $all_rec_ids = array_keys($records); 
+                            $res_count = count($all_rec_ids);
+                            //split to 2500 to use in detail query
+                            $offset = 0;
+                            
+                            if($istimemap_request){
+                                    $tm_records = array();
+                                    $order = array();
+                                    $rectypes = array();
+                                    $istimemap_counter = 0;
+                            }
+                            
+                    while ($offset<$res_count){   
+                            
+                            $chunk_rec_ids = array_slice($all_rec_ids, $offset, 2500); 
+                            $offset = $offset + 2500;
 
                             //search for specific details
                             if($fieldtypes_ids!=null && $fieldtypes_ids!=''){
@@ -880,7 +913,7 @@ if(@$params['debug']) echo $query."<br>";
                                 .'dtl_Value,'            // 1
                                 .'AsWKT(dtl_Geo), 0, 0, 0 '
                                 .'from recDetails
-                                where dtl_RecID in (' . join(',', array_keys($records)) . ') '
+                                where dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
                                 .' and dtl_DetailTypeID in ('.$fieldtypes_ids.')';
                                 
                             }else{
@@ -893,7 +926,7 @@ if(@$params['debug']) echo $query."<br>";
                                 .'recUploadedFiles.ulf_Parameters '         // 5
                                 .'from recDetails
                                   left join recUploadedFiles on ulf_ID = dtl_UploadedFileID
-                                where dtl_RecID in (' . join(',', array_keys($records)) . ')';
+                                where dtl_RecID in (' . join(',', $chunk_rec_ids) . ')';
 
                             }
 
@@ -941,16 +974,14 @@ if(@$params['debug']) echo $query."<br>";
 // 3. return geojson and timeline items
                                 //additional loop for timemap request 
                                 //1. exclude records without timemap data
-                                //2. limit to $chunk_size
+                                //2. limit to $chunk_size from preferences 'search_detail_limit'
                                 if($istimemap_request){
-error_log('remove non timemap records '.count($records));                                    
-                                    $tm_records = array();
-                                    $order = array();
-                                    $rectypes = array();
-                                    foreach ($records as $recID => $record) {
+                                    
+                                    foreach ($chunk_rec_ids as $recID) {
+                                        $record = $records[$recID];
                                         if(is_array(@$record['d']) && count($record['d'])>0){
                                             //this record is time enabled 
-                                            if($istimemap_counter<MAX_TIMEMAP_RECORDS){
+                                            if($istimemap_counter<$chunk_size){
                                                 $tm_records[$recID] = $record;        
                                                 array_push($order, $recID);
                                                 $rectypes[$record[4]]=1; 
@@ -958,12 +989,18 @@ error_log('remove non timemap records '.count($records));
                                             $istimemap_counter++;
                                         }
                                    }
-                                   $records = $tm_records;
-error_log('now '.count($records));                                    
-                                   $total_count_rows = $istimemap_counter;
                                 }//$istimemap_request
                             }
-                        }//$need_details
+                            
+                    }//while offset
+                    
+                            if($istimemap_request){
+//error_log('found count '.count($records));                                   
+                                   $records = $tm_records;
+                                   $total_count_rows = $istimemap_counter;
+//error_log('maptime enabled '.count($records).'  '.$total_count_rows);                                   
+                            }
+                    }//$need_details
 
                         $rectypes = array_keys($rectypes);
                         if( $params['detail']=='structure' && count($rectypes)>0){ //rarely used in editing.js
@@ -1062,4 +1099,13 @@ error_log('now '.count($records));
     function _loadRecordDetails( $system, $record_ids){
 
     }
+    
+    //
+    // pickup only timemap enabled records
+    //
+    function _getTimemapRecords($res){
+        
+        
+    }
+    
 ?>
