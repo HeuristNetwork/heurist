@@ -489,20 +489,21 @@ $.widget( "heurist.search_faceted", {
                                 title:  harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
                                 detailtype: field['type'],  //overwrite detail type from db (for example freetext instead of memo)
                                 showclear_button: false,
-                                suppress_prompts:true  //supress help, error and required features
+                                suppress_prompts: true,  //supress help, error and required features
+                                suppress_repeat: true
                         };
                         
                    if(isNaN(Number(field['id']))){
                        ed_options['dtFields'] = {
                            dty_Type: field['type'],
                            rst_RequirementType: 'optional',
-                           rst_MaxValues: 1,
+                           rst_MaxValues: 1,   //non repeatable
                            rst_DisplayWidth:0
                            //rst_DisplayHelpText: field['help']
                        };
                    }
 
-console.log('inpt added '+"fv_"+field['var']);                   
+//console.log('inpt added '+"fv_"+field['var']+'   '+field['id']);                   
                      
                     var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
                             ed_options
@@ -873,6 +874,7 @@ console.log('inpt added '+"fv_"+field['var']);
                                      field:  field['id'],
                                      type:   field['type'],
                                      step:   step_level,
+                                     facet_type: field['isfacet'], //0 search, 1 - first char/slider, 2 - list
                                      needcount: needcount,
                                      qname:this.options.query_name, 
                                      source:this.element.attr('id') }; //, facets: facets
@@ -944,7 +946,7 @@ console.log('inpt added '+"fv_"+field['var']);
                         field.history.push(field.selectedvalue);
                     }
                     
-                    
+               
                     var that = this;
                     
                     if( field['type']=="enum" ){
@@ -1064,7 +1066,7 @@ console.log('inpt added '+"fv_"+field['var']);
                             var f_link = this._createFacetLink(facet_index, term);
                             $span.append(f_link).appendTo($facet_values);
                         }                        
-                        
+
                         if(as_list){
                                 __drawTerm(term, 0, $facet_values, true);
                         }else{
@@ -1158,7 +1160,8 @@ console.log('inpt added '+"fv_"+field['var']);
                         }
 
                     }else 
-                    if(field['type']=="float" || field['type']=="integer" || field['type']=="date" || field['type']=="year"){  //add slider
+                    if( ((field['type']=="float" || field['type']=="integer")&& field['isfacet']==1)
+                        || field['type']=="date" || field['type']=="year"){  //add slider
                     
 //console.log(facet_index);
                     
@@ -1523,6 +1526,8 @@ console.log('inpt added '+"fv_"+field['var']);
                             readonly: false,
                             title:  "<span style='font-weight:bold'>" + field['title'] + "</span>",
                             showclear_button: false,
+                            suppress_prompts: true,  //supress help, error and required features
+                            suppress_repeat: true,
                             detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
                     };
                     

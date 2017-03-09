@@ -101,9 +101,15 @@ $.widget( "heurist.editing_input", {
 
             var repeatable = (this.f('rst_MaxValues') != 1)? true : false; //saw TODO this really needs to check many exist
 
-            //multiplier button
-            if(repeatable){
+            
+            if(!repeatable || this.options.suppress_repeat){
 
+                $( "<span>")
+                .addClass('editint-inout-repeat-button')
+                .css({width:'16px', display:'table-cell'})
+                .appendTo( this.element );
+                
+            }else{ //multiplier button
                 this.btn_add = $( "<button>")
                 .addClass("smallbutton editint-inout-repeat-button")
                 //.css('display','table-cell')
@@ -120,13 +126,6 @@ $.widget( "heurist.editing_input", {
                         }
                     }
                 });
-
-            }else{
-                $( "<span>")
-                .addClass('editint-inout-repeat-button')
-                .css({width:'16px', display:'table-cell'})
-                .appendTo( this.element );
-
             }
         }
 
@@ -399,6 +398,7 @@ $.widget( "heurist.editing_input", {
                     if(!valid){
                         window.hWin.HEURIST4.util.stopEvent(e);
                         e.preventDefault();
+                        window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
                     }
 
                 });
@@ -426,6 +426,7 @@ $.widget( "heurist.editing_input", {
                         if(!valid){
                             window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
+                            window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
                         }
 
                     });
