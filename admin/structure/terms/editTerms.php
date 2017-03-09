@@ -106,6 +106,7 @@ if(isForAdminOnly("to modify database structure")){
                 cursor:pointer;
                 float:right;
                 min-width: 80px;
+                /*color: white !important;*/
                 visibility: hidden;
                 padding-left:10px;
             }
@@ -119,11 +120,15 @@ if(isForAdminOnly("to modify database structure")){
             span.fancytree-node {
                 border: none !important;
                 font-weight:bold !important;
+                display: block;
+                width:100%;
             }
+            
             span.fancytree-node.fancytree-active{
-                background: #364050  !important;
+                background: #95A7B7 !important;
                 color: white !important;
             }
+            
             
         /*
         width":"100%","height":"100%
