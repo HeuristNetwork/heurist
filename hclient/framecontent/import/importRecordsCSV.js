@@ -1320,7 +1320,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                        
                        var field_title = window.hWin.HEURIST4.util.trim_IanGt(field.title); 
                        
-                       var ids = field.rt_ids.split(',');
+                       var ids = (field.rt_ids)?field.rt_ids.split(','):[];
                        var field_id = field['key'];
                        field_id = field_id.substr(2);//remove prefix "f:"
                       
@@ -2700,7 +2700,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             sa_upd2: $("input[name='sa_upd2']:checked"). val()
         };
         
-        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
+//        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
         
         _showStep(0);
     

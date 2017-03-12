@@ -25,6 +25,7 @@
 
 $dtyIDDefs = array();  //list of allowed terms for particular detail type ID
 $dtyID_term_label = array();
+$dtyID_term_codes = array();
 
 /**
 * put your comment there...
@@ -139,6 +140,51 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $isStripAccents=f
     return $term_ID;
 
 }
+
+/**
+* Returns term ID if code is valid and false if invalid
+*
+* @param mixed $defs
+* @param mixed $defs_nonsel
+* @param mixed $label
+* @param mixed $dtyID
+*/
+function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
+    global $dtyID_term_codes;
+
+    $allowed_terms = null;
+
+    if($dtyID==null || !@$dtyID_term_codes[$dtyID]){
+
+        //ids
+        $allowed_terms = getAllowedTerms($defs, $defs_nonsel, $dtyID);
+
+        //get labels
+        if(is_array($allowed_terms)){
+            $allowed_terms = getTermCodes($allowed_terms);
+        }
+
+        //keep for future use
+        if($dtyID!=null){
+            $dtyID_term_codes[$dtyID] = $allowed_terms;
+        }
+
+    }else{ //already found
+        $allowed_terms = $dtyID_term_codes[$dtyID];
+    }
+    
+    $code = mb_strtolower($code);
+
+    if(is_array($allowed_terms)){
+        $term_ID = array_search($code, $allowed_terms, true);
+    }else{
+        $term_ID = getTermByCode($code);
+    }
+
+    return $term_ID;
+
+}
+
 
 function stripAccents($stripAccents){
     return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');

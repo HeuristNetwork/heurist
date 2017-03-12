@@ -737,7 +737,7 @@ echo '</div>';
             ' and rec_RecTypeID = '.$relRT.
             ' and dtl_Value = ' . $bib['rec_ID']);          //linked resource
 
-        if (mysql_num_rows($from_res) <= 0  &&  mysql_num_rows($to_res) <= 0) return;
+        if (($from_res==false || mysql_num_rows($from_res) <= 0)  &&  ($to_res==false || mysql_num_rows($to_res) <= 0)) return;
 
         if($is_map_popup){
            print '<div>';
@@ -828,7 +828,7 @@ function print_linked_details($bib) {
     ' ORDER BY rec_RecTypeID, rec_Title');
     $res = mysql_query($query);
 
-    if (mysql_num_rows($res) <= 0) return;
+    if ($res==false || mysql_num_rows($res) <= 0) return;
     
         if($is_map_popup){
            print '<div>';

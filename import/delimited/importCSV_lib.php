@@ -243,7 +243,7 @@ function matchingSearch($mysqli, $imp_session, $params){
 
                     //if fieldname is numeric - compare it with dtl_Value directly
                     $where = $where." d".$index.".dtl_Value=t".$index.".trm_ID and "
-                    ." t".$index.".trm_Label=$field_name ";
+                    ." (t".$index.".trm_Label=$field_name OR t".$index.".trm_Code=$field_name)";
                     //." if(concat('',$field_name * 1) = $field_name,d".$index.".dtl_Value=$field_name,t".$index.".trm_Label=$field_name) ";
 
                     array_push($select_query_update_from, "defTerms t".$index);
@@ -422,7 +422,7 @@ function matchingAssign($mysqli, $imp_session, $params){
 
                     //if fieldname is numeric - compare it with dtl_Value directly
                     $where = $where." d".$index.".dtl_Value=t".$index.".trm_ID and "
-                    ." t".$index.".trm_Label=$field_name ";
+                    ." (t".$index.".trm_Label=$field_name OR t".$index.".trm_Code=$field_name)";
 
                     array_push($select_query_update_from, "defTerms t".$index);
 
@@ -590,9 +590,12 @@ function matchingMultivalues($mysqli, $imp_session, $params){
                 if( $dt_type == "enum" ||  $dt_type == "relationtype") {
 
                     //if fieldname is numeric - compare it with dtl_Value directly
-                    $where = $where."( d".$index.".dtl_Value=t".$index.".trm_ID and t".$index.".trm_Label=?)";
+                    $where = $where."( d".$index.".dtl_Value=t".$index.".trm_ID and "
+                    ." (? in (t".$index.".trm_Label, t".$index.".trm_Code)))";
+                    //"t".$index.".trm_Label=?)";
                     //." if(concat('',? * 1) = ?,d".$index.".dtl_Value=?,t".$index.".trm_Label=?) ";
-
+error_log('ehre !!! '.$where);
+                    
                     array_push($select_query_update_from, "defTerms t".$index);
                 }else{
                     $where = $where." (d".$index.".dtl_Value=?)";
@@ -1203,9 +1206,8 @@ function validateImport($mysqli, $imp_session, $params){
                 array_push($query_enum, $field_name);
                 $trm1 = "trm".count($query_enum);
                 array_push($query_enum_join,
-                    " defTerms $trm1 on $trm1.trm_Label=$field_name ");
+                    " defTerms $trm1 on ($trm1.trm_Label=$field_name OR $trm1.trm_Code=$field_name)");
                 array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name=''))");
-
             }else if($ft_vals[$idx_fieldtype] == "resource"){
                 array_push($query_res, $field_name);
                 $trm1 = "rec".count($query_res);
@@ -1316,7 +1318,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             ." from $import_table where ".$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
-
+            
             $wrong_records = validateEnumerations($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType,
                 "Term list values read must match existing terms defined for the field", "Invalid Terms");
 
@@ -1488,10 +1490,10 @@ function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsag
 
 
 /**
-* put your comment there...
+* validate values for field that is matched to enumeration fieldtype
 *
 * @param mixed $mysqli
-* @param mixed $query
+* @param mixed $query  - query to retrieve values from import table
 * @param mixed $imp_session
 * @param mixed $fields_checked - name of field to be verified
 * @param mixed $dt_id - mapped detail type ID
@@ -1526,7 +1528,7 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
                 if($r_value2!=""){
 
                     $is_termid = false;
-                    if(ctype_digit($r_value2)){
+                    if(ctype_digit($r_value2)){ //value is numeric try to compare with trm_ID
                         $is_termid = isValidTerm( $dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id);
                     }
 
@@ -1535,6 +1537,9 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
                     }else{
                         //strip accents on both sides
                         $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
+                        if(!$is_termid){
+                            $term_id = isValidTermCode($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+                        }
                     }
 
                     if (!$term_id)
@@ -2075,12 +2080,15 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                                         //stip accents on both sides
                                         $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type, true );
                                     }
+                                    if(!($value>0)){
+                                        $value = isValidTermCode($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
+                                    }
                                 }
                             }
                             else if($fieldtype_type == "resource"){
 
                                 if(!isValidPointer(null, $r_value, $field_type)){
-                                    $value  = null;
+                                     $value  = null;
                                 }else{
                                      $value = $r_value;
                                 }

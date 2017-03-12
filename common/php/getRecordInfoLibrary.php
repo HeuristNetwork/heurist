@@ -375,22 +375,26 @@ function getAllReminders($recID) {
 function getAllComments($recID) {
     $res = mysql_query("select cmt_ID, cmt_Deleted, cmt_Text, cmt_ParentCmtID, cmt_Added, cmt_Modified, cmt_OwnerUgrpID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from recThreadedComments left join " . USERS_DATABASE . ".sysUGrps usr on cmt_OwnerUgrpID=usr.ugr_ID where cmt_RecID = $recID order by cmt_Added");
     $comments = array();
-    while ($cmt = mysql_fetch_assoc($res)) {
-        if ($cmt["cmt_Deleted"]) {
-            /* indicate that the comments exists but has been deleted */
+    if($res==false){
+        
+    }else{
+        while ($cmt = mysql_fetch_assoc($res)) {
+            if ($cmt["cmt_Deleted"]) {
+                /* indicate that the comments exists but has been deleted */
+                $comments[$cmt["cmt_ID"]] = array("id" => $cmt["cmt_ID"],
+                    "owner" => $cmt["cmt_ParentCmtID"],
+                    "deleted" => true);
+                continue;
+            }
             $comments[$cmt["cmt_ID"]] = array("id" => $cmt["cmt_ID"],
-                "owner" => $cmt["cmt_ParentCmtID"],
-                "deleted" => true);
-            continue;
-        }
-        $comments[$cmt["cmt_ID"]] = array("id" => $cmt["cmt_ID"],
-            "text" => $cmt["cmt_Text"],
-            "owner" => $cmt["cmt_ParentCmtID"], /* comments that owns this one (i.e. parent, just like in Dickensian times) */
-            "added" => $cmt["cmt_Added"],
-            "modified" => $cmt["cmt_Modified"],
-            "user" => $cmt["Realname"],
-            "userID" => $cmt["cmt_OwnerUgrpID"],
-            "deleted" => false);
+                "text" => $cmt["cmt_Text"],
+                "owner" => $cmt["cmt_ParentCmtID"], /* comments that owns this one (i.e. parent, just like in Dickensian times) */
+                "added" => $cmt["cmt_Added"],
+                "modified" => $cmt["cmt_Modified"],
+                "user" => $cmt["Realname"],
+                "userID" => $cmt["cmt_OwnerUgrpID"],
+                "deleted" => false);
+        }//while
     }
     return $comments;
 }
@@ -873,6 +877,33 @@ function getTermListAll($termDomain) {
         }
         return $terms;
 }
+
+function getTermCodes($termIDs) {
+    $labels = array();
+    if ($termIDs) {
+        $res = mysql_query("select trm_ID, LOWER(trm_Code) from defTerms where trm_ID in (".implode(",", $termIDs).")");
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_row($res)) {
+                $labels[$row[0]] = $row[1];
+            }
+        }
+    }
+    return $labels;
+}
+
+function getTermByCode($code){
+
+    if ($label) {
+        $res = mysql_query("select trm_ID from defTerms where LOWER(trm_Code) = '".mysql_real_escape_string($code)."'" );
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_row($res)) {
+                return $row[0];
+            }
+        }
+    }
+    return false;
+}
+
 
 function getTermLabels($termIDs) {
     $labels = array();
