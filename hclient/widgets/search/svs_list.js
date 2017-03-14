@@ -1139,10 +1139,16 @@ $.widget( "heurist.svs_list", {
                 }
             });
 
-            $.each( tree.find('li'), function( idx, item ){
-                $('<div class="svs-contextmenu2 ui-icon ui-icon-pencil"></div>')
+            $.each( tree.find('span.fancytree-node'), function( idx, item ){
+
+                var ele = $(item); //.find('span.fancytree-node');
+                ele.css({display: 'block', width:'99%'});         
+                
+                ele.find('.fancytree-title').css({display: 'inline-block', width:'80%'}).addClass('truncate');
+                
+                $('<div class="svs-contextmenu2 ui-icon ui-icon-menu"></div>')
                 .click(function(event){ tree.contextmenu("open", $(event.target) ); window.hWin.HEURIST4.util.stopEvent(event); return false;})
-                .appendTo(item);
+                .appendTo(ele);
 
                 if($(item).find('span.fancytree-folder').length==0)
                 {
@@ -1151,10 +1157,12 @@ $.widget( "heurist.svs_list", {
                     $(item).mouseenter(
                         function(event){
                             var ele = $(item).find('.svs-contextmenu2');
-                            ele.css('display','inline-block');
+                            //ele.css('color','red');
+                            ele.show();//css('display','inline-block');
                     }).mouseleave(
                         function(event){
                             var ele = $(item).find('.svs-contextmenu2');
+                            //ele.css('color','black');
                             ele.hide();
                     });
                     /*
@@ -1166,8 +1174,8 @@ $.widget( "heurist.svs_list", {
                     $(event.target).find('.svs-contextmenu2').hide();
                     });*/
                 }
-            })
-
+            });
+            
 
             var context_opts = this._getAddContextMenu(groupID);
 
