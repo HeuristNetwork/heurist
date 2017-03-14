@@ -917,7 +917,10 @@ function validateImport($mysqli, $imp_session, $params){
         "count_update_rows"=>0,
         "count_insert_rows"=>0,  //row that are source of insertion
         "count_error"=>0, 
-        "error"=>array() );
+        "error"=>array(),
+        "count_warning"=>0, 
+        "warning"=>array()
+         );
 
     //get rectype to import
     $recordType = @$params['sa_rectype'];
@@ -1114,7 +1117,7 @@ function validateImport($mysqli, $imp_session, $params){
 
     $missed = array();
     $query_reqs = array(); //fieldnames from import table
-    $query_reqs_where = array(); //where clause for validation
+    $query_reqs_where = array(); //where clause for validation of required fields
 
     $query_enum = array();
     $query_enum_join = array();
@@ -1164,6 +1167,7 @@ function validateImport($mysqli, $imp_session, $params){
                 $field_name2 = array_search($recordType.".".$ft_id."_long", $mapping_prev_session, true);
             }
 
+            //search for empty required fields in import table
             if($ft_vals[$idx_reqtype] == "required"){
                 if(!$field_name1 || !$field_name2){
                     array_push($missed, $ft_vals[0]);
@@ -1269,19 +1273,22 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         $k++;
         
         $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
-            "This field is required - a value must be supplied for every record",
-            "Missing Values", $field);
+            "This field is required. It is recommended that a value must be supplied for every record. "
+            ."You can find and correct these values using Manage > Structure > Verify",
+            "Missing Values", $field, 'warning');
         if(is_array($wrong_records)) {
-
-            $cnt = count(@$imp_session['validation']['error']);//was
+            
+            $cnt = count(@$imp_session['validation']['warning']);//was
+            //@$imp_session['validation']['count_warning']
             $imp_session = $wrong_records;
 
-            //remove from array to be inserted - wrong records with missed required field
-            if(count(@$imp_session['validation']['recs_insert'])>0 ){
-                $cnt2 = count(@$imp_session['validation']['error']);//now
+            //allow add records with empty required field - 2017/03/12
+            if(false && count(@$imp_session['validation']['recs_insert'])>0 ){
+                //--remove from array to be inserted - wrong records with missed required field
+                $cnt2 = count(@$imp_session['validation']['warning']);//now
                 if($cnt2>$cnt){
-                    $wrong_recs_ids = $imp_session['validation']['error'][$cnt]['recs_error_ids'];
-                    if(count($wrong_recs_ids)>0){
+                    $wrong_recs_ids = $imp_session['validation']['warning'][$cnt]['recs_error_ids'];
+                    if(count($wrong_recs_ids)>0){ 
                         $badrecs = array();
                         foreach($imp_session['validation']['recs_insert'] as $idx=>$flds){
                             if(in_array($flds[0], $wrong_recs_ids)){
@@ -1290,14 +1297,15 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                         }
                         $imp_session['validation']['recs_insert'] = array_diff_key($imp_session['validation']['recs_insert'],
                                     array_flip($badrecs) );
-                        $imp_session['validation']["count_insert"] = count($imp_session['validation']['recs_insert']);                                     }
+                        $imp_session['validation']["count_insert"] = count($imp_session['validation']['recs_insert']);                                     
+                    }
                 }
             }
 
 
-        }else if($wrong_records) {
+       }else if($wrong_records) {
             return $wrong_records;
-        }
+       }
     }
     //3. In DB: Verify that enumeration fields have correct values =====================================
     if(!@$imp_session['csv_enclosure']){
@@ -1452,8 +1460,9 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 * @param mixed $message
 * @param mixed $imp_session
 * @param mixed $fields_checked
+* @param mixed $type  error or warning
 */
-function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsage, $fields_checked){
+function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsage, $fields_checked, $type='error'){
 
 //error_log('valquery: '.$query);
 
@@ -1476,8 +1485,8 @@ function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsag
             $error["err_message"] = $message;
             $error["short_message"] = $short_messsage;
 
-            $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
-            array_push($imp_session['validation']['error'], $error);
+            $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
+            array_push($imp_session['validation'][$type], $error);
 
             return $imp_session;
         }
@@ -1516,7 +1525,10 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
     $res = $mysqli->query($query." LIMIT 5000");
 
     if($res){
+        
         $wrong_records = array();
+        $wrong_values = array();
+        
         while ($row = $res->fetch_row()){
 
             $is_error = false;
@@ -1537,7 +1549,8 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
                     }else{
                         //strip accents on both sides
                         $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
-                        if(!$is_termid){
+                     
+                        if(!$term_id){
                             $term_id = isValidTermCode($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
                         }
                     }
@@ -1546,6 +1559,9 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
                     {//not found
                         $is_error = true;
                         array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        if(array_search($r_value, $wrong_values)==false){
+                                array_push($wrong_values, $r_value);
+                        }
                     }else{
                         array_push($newvalue, $r_value);
                     }
@@ -1563,6 +1579,7 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
             $error = array();
             $error["count_error"] = $cnt_error;
             $error["recs_error"] = array_slice($wrong_records,0,1000);
+            $error["values_error"] = array_slice($wrong_values,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = $message;
             $error["short_messsage"] = $short_messsage;
@@ -1731,7 +1748,7 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
                 if($r_value!=null && trim($r_value)!=""){
 
 
-                    if( is_numeric($r_value) && intval($r_value) ){
+                    if( is_numeric($r_value) && ($r_value=='0' || intval($r_value)) ){
                         array_push($newvalue, $r_value);
                     }else{
 
@@ -2452,8 +2469,8 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_out
         }
     }
 
-    
-    
+    $nonces = null;
+    $rectile_recs = null;
     //add-update Heurist record
     $out = saveRecord($recordId, $recordType,
         @$details["recordURL"],
@@ -2470,7 +2487,10 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_out
         null, //+notify
         null, //-comment
         null, //comment
-        null //+comment
+        null, //+comment
+        $nonces, //nonces
+        $rectile_recs, //retitle recs 
+        2 //save as it is without verification of record type structure
     );
 
 //error_log('to Add '.print_r($details,true));
