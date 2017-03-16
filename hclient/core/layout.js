@@ -396,19 +396,25 @@ function hLayout(args) {
     */
     function _initLayoutFree(layout, $container){
 
-        //pane - the base container for widgets/applications
+        //find main container and load template
+        if(layout['template']){
+               $container.load(layout['template'], function(){ layout['template']=null; _initLayoutFree(layout, $container); });    
+               return;
+        }
 
         //1. loop trough all layout panes  - create divs or use existing ones
         var panes = Object.keys(layout);
-        var i, reserved = ['id', 'name', 'theme', 'type', 'options', 'cssfile'];
+        var i, reserved = ['id', 'name', 'theme', 'type', 'options', 'cssfile', 'template'];
 
-        function __layoutAddPane(pos){
+        function __layoutAddPane($container, pos){
+            
             if(layout[pos]){
 
                 var lpane = layout[pos];
 
+                var ele = $container.find('#'+pos);
                 //this div may already exists
-                if($('#'+pos).length<1){
+                if(ele.length<1){
                     $pane = $('<div>',{id:pos})
                             .addClass('ui-layout-'+pos)
                             .appendTo($container);
@@ -418,17 +424,25 @@ function hLayout(args) {
                     }else{
                         $pane.css({'min-width':400,'min-height':400});
                     }
+                }else if(!ele.hasClass('ui-layout-'+pos)){
+                    
+                    ele.addClass('ui-layout-'+pos); //need to proper init
+                    if(lpane.css){
+                        ele.css(lpane.css);
+                    }
                 }
             }
         }
 
+        
         var bg_color = $('.ui-widget-content:first').css('background-color');
-        $('body').css('background-color', bg_color);
-
+        $('body').css('background-color', '');
+        
+        
         for (i=0; i<panes.length; i++){
             if(reserved.indexOf(panes[i])<0){
-                 __layoutAddPane(panes[i]);
-                 layoutInitPane(layout, $container, panes[i], bg_color);
+                 __layoutAddPane($container, panes[i]);
+                 layoutInitPane(layout, $container, panes[i], null);
             }
         }
 
@@ -528,7 +542,9 @@ function hLayout(args) {
     /**
     * Adds application/widgets to specified pane
     *
-    * @param pos
+    * @param $container
+    * @param pos - position in cardinal layout (north,eastwest,center,south) - searched by class name in $container
+    *              for "free" layout designer has to specify container div with class ui-layout-NAME
     * @param bg_color
     */
     function layoutInitPane(layout, $container, pos, bg_color){
@@ -543,8 +559,11 @@ function hLayout(args) {
 
                 var $pane_content = $(document.createElement('div'));
                 $pane_content.attr('id','content_'+pos).addClass('ui-layout-content')
-                    .css('background-color', bg_color)
                     .appendTo($pane);
+                    
+                if(bg_color)    {
+                    $pane_content.css('background-color', bg_color);
+                }
 
                 if(lpane.dropable){
                     $pane_content.addClass('pane_dropable');

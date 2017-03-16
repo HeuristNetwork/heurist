@@ -33,7 +33,8 @@ $.widget( "heurist.svs_list", {
 
         buttons_mode: false,
         allowed_UGrpID: [], // allowed groups
-        allowed_svsIDs: []   // allowed searches
+        allowed_svsIDs: [], // allowed searches
+        init_svsID:null    // launch search on init
     },
 
     allowed_svsIDs: null,

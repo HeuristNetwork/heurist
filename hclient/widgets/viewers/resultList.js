@@ -33,7 +33,7 @@ $.widget( "heurist.resultList", {
 
         recordview_onselect: false,
         multiselect: true,    //@todo replace to select_mode
-        isapplication: true,  //do if false it does not listen global events @todo merge with eventbased
+        isapplication: true,  //if false it does not listen global events @todo merge with eventbased
         showcounter: true,
         showmenu: true,       //@todo - replace to action_select and action_buttons
         innerHeader: false,   // show title of current search in header
@@ -81,6 +81,115 @@ $.widget( "heurist.resultList", {
             this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
         }
 
+        this._initControls();
+
+        //-----------------------     listener of global events
+        if(this.options.eventbased)
+        {
+            this._events = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT + " " + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE;
+            if(this.options.isapplication){
+                this._events = this._events + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
+                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
+                + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
+                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;
+            }
+
+            $(this.document).on(this._events, function(e, data) {
+
+                if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
+
+                    that._showHideOnWidth();
+                 
+
+                }else if(e.type == window.hWin.HAPI4.Event.LOGIN){
+
+                    that._refresh();
+
+                }else  if(e.type == window.hWin.HAPI4.Event.LOGOUT)
+                {
+                    that._clearAllRecordDivs('');
+
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
+
+                    that.loadanimation(false);
+
+                    if(that._query_request!=null && data && data.queryid()==that._query_request.id) {
+
+                        that._renderRecordsIncrementally(data); //hRecordSet
+                    }
+
+                    //@todo show total number of records ???
+
+
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+
+                    that.span_pagination.hide();
+
+                    that.setSelected(null);
+                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                                {selection:null, source:that.element.attr('id')} );
+
+                    if(data){
+
+                        if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
+                            //new search from outside
+                            var new_title = window.hWin.HR(data.qname || that.options.title || 'Filtered Result');
+                            that._clearAllRecordDivs(new_title);
+
+                            if(!window.hWin.HEURIST4.util.isempty(data.q)){
+                                that.loadanimation(true);
+                                that._renderProgress();
+                            }else{
+                                that._renderMessage('<div style="font-style:italic;">'+window.hWin.HR(data.message)+'</div>');
+                            }
+
+                        }
+
+                        that._query_request = data;  //keep current query request
+
+                    }else{ //fake restart
+                        that._clearAllRecordDivs('');
+                        //that.loadanimation(true);
+                    }
+
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
+
+                    that._showHideOnWidth();
+                    that._renderPagesNavigator();
+                    
+                    if(data==null){
+                        var empty_message = window.hWin.HR('No filter defined');
+                        var $emptyres = that._renderMessage( empty_message );
+                    }
+
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
+
+                    //this selection is triggered by some other app - we have to redraw selection
+                    if(data && data.source!=that.element.attr('id')) {
+                        that.setSelected(data.selection);
+                    }
+                }
+                //that._refresh();
+            });
+
+        }
+        /*
+        if(this.options.isapplication){
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
+        that.option("recordset", data); //hRecordSet
+        that._refresh();
+        });
+        }
+        */
+
+        this._refresh();
+
+    }, //end _create
+
+    _initControls: function() {
+
+        var that = this;
+        
         var right_padding = window.hWin.HEURIST4.util.getScrollBarWidth()+1;
 
         /*if(hasHeader){
@@ -265,112 +374,9 @@ $.widget( "heurist.resultList", {
             .appendTo(this.div_toolbar);
         }else if(!this.options.innerHeader) {
                     this.div_toolbar.hide();
-        }
-
-
-        //-----------------------     listener of global events
-        if(this.options.eventbased)
-        {
-            this._events = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT + " " + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE;
-            if(this.options.isapplication){
-                this._events = this._events + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
-                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-                + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
-                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;
-            }
-
-            $(this.document).on(this._events, function(e, data) {
-
-                if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
-
-                    that._showHideOnWidth();
-                 
-
-                }else if(e.type == window.hWin.HAPI4.Event.LOGIN){
-
-                    that._refresh();
-
-                }else  if(e.type == window.hWin.HAPI4.Event.LOGOUT)
-                {
-                    that._clearAllRecordDivs('');
-
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
-
-                    that.loadanimation(false);
-
-                    if(that._query_request!=null && data && data.queryid()==that._query_request.id) {
-
-                        that._renderRecordsIncrementally(data); //hRecordSet
-                    }
-
-                    //@todo show total number of records ???
-
-
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
-
-                    that.span_pagination.hide();
-
-                    that.setSelected(null);
-                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                                {selection:null, source:that.element.attr('id')} );
-
-                    if(data){
-
-                        if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
-                            //new search from outside
-                            var new_title = window.hWin.HR(data.qname || that.options.title || 'Filtered Result');
-                            that._clearAllRecordDivs(new_title);
-
-                            if(!window.hWin.HEURIST4.util.isempty(data.q)){
-                                that.loadanimation(true);
-                                that._renderProgress();
-                            }else{
-                                that._renderMessage('<div style="font-style:italic;">'+window.hWin.HR(data.message)+'</div>');
-                            }
-
-                        }
-
-                        that._query_request = data;  //keep current query request
-
-                    }else{ //fake restart
-                        that._clearAllRecordDivs('');
-                        //that.loadanimation(true);
-                    }
-
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
-
-                    that._showHideOnWidth();
-                    that._renderPagesNavigator();
-                    
-                    if(data==null){
-                        var empty_message = window.hWin.HR('No filter defined');
-                        var $emptyres = that._renderMessage( empty_message );
-                    }
-
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
-
-                    //this selection is triggered by some other app - we have to redraw selection
-                    if(data && data.source!=that.element.attr('id')) {
-                        that.setSelected(data.selection);
-                    }
-                }
-                //that._refresh();
-            });
-
-        }
-        /*
-        if(this.options.isapplication){
-        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
-        that.option("recordset", data); //hRecordSet
-        that._refresh();
-        });
-        }
-        */
-
-        this._refresh();
-
-    }, //end _create
-
+        }        
+    },
+    
     _setOptions: function() {
         /*if(!(arguments['pagesize']>0)){
             arguments['pagesize'] = 9999999999999;
@@ -1546,19 +1552,8 @@ $.widget( "heurist.resultList", {
 
             if($.isFunction(this.options.searchfull)){
 
-                this.options.searchfull.call(this, rec_toload, this.current_page,
-                    function(response){
-                        that.loadanimation(false);
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            if(response.data.queryid==that.current_page) {
-                                that._currentRecordset.fillHeader( new hRecordSet( response.data ));
-                                that._renderPage( that.current_page );
-                            }
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    }
-                );
+                this.options.searchfull.call(this, rec_toload, this.current_page, this._onGetFullRecordData);
+                
             }else{
 
                 var ids = rec_toload.join(',');
@@ -1568,40 +1563,42 @@ $.widget( "heurist.resultList", {
                     id: that.current_page,
                     source:this.element.attr('id') };
 
-                window.hWin.HAPI4.RecordMgr.search(request, function( response ){
-
-                    that.loadanimation(false);
-
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-
-                        if(response.data.queryid==that.current_page) {
-
-                            var resp = new hRecordSet( response.data );
-                            that._currentRecordset.fillHeader( resp );
-
-                            //remove records that we can't recieve data
-                            for(i in rec_toload){
-                                var recID = rec_toload[i];
-                                if(resp.getById(recID)==null){
-                                    that._currentRecordset.removeRecord(recID);
-                                    //that._currentRecordset.setRecord(recID,{rec_ID:recID, rec_Title:'Error! Cannot get data from server'});
-                                }
-                            }
-
-                            that._renderPage( that.current_page );
-                        }
-
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-
+                window.hWin.HAPI4.RecordMgr.search(request, function(responce){
+                    that._onGetFullRecordData(responce, rec_toload);   
                 });
-
             }
 
 
         }
 
+    },
+    
+    _onGetFullRecordData: function( response, rec_toload ){
+        
+                    this.loadanimation(false);
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+                        if(response.data.queryid==this.current_page) {
+
+                            var resp = new hRecordSet( response.data );
+                            this._currentRecordset.fillHeader( resp );
+
+                            //remove records that we can't recieve data
+                            for(i in rec_toload){
+                                var recID = rec_toload[i];
+                                if(resp.getById(recID)==null){
+                                    this._currentRecordset.removeRecord(recID);
+                                    //this._currentRecordset.setRecord(recID,{rec_ID:recID, rec_Title:'Error! Cannot get data from server'});
+                                }
+                            }
+
+                            this._renderPage( this.current_page );
+                        }
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+        
     },
 
     showRetainedSelection: function(){

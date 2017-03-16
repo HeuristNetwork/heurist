@@ -77,6 +77,9 @@ var cfg_widgets = [
     {id:'dh_maps', name:'Saved Maps', widgetname:'dh_maps', script:'hclient/widgets/digital_harlem/dh_maps.js'},
     {id:'dh_results', name:'Layers', widgetname:'dh_results', script:'hclient/widgets/digital_harlem/dh_results.js'},
     {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'hclient/widgets/digital_harlem/dh_legend.js'},
+
+    // BORO APPS
+    {id:'boro_results', name:'Search Result', widgetname:'boro_results', script:'hclient/widgets/boro/boro_results.js'},
     
     //fake app - reference to another layout to include
     {id:'include_layout',name:'Inner Layout', widgetname:'include_layout'}
@@ -224,6 +227,18 @@ var cfg_layouts = [
     },
     */
 
+    {id:'boro', name:'Beyond 1914 - Book of Rememberance', theme:'heurist', type:'free', 
+                cssfile:'hclient/widgets/boro/256dd9d.css', template: 'hclient/widgets/boro/boro_main.html'
+       ,search_pane:{dropable:false,css:{},
+                apps:[{appid:'ha_search_tree', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
+       ,result_pane:{dropable:false,css:{},
+                apps:[{appid:'boro_results', options:{
+                    view_mode:'list', hide_view_mode: true, select_mode:'select_single', multiselect:false, showmenu: false
+                }, hasheader:true, css:{border:'none', 'background':'none'} }]}
+/*       ,search_pane:{dropable:false,apps:[{appid:'boro_search', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
+       ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
+    },
+    
     {id:'DigitalHarlem', name:'Digital Harlem', theme:'heurist', type:'cardinal', cssfile:'hclient/widgets/digital_harlem/dh_style.css',
         north:{size:140, resizable:false, overflow:'hidden',
             apps:[

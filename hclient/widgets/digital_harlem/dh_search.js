@@ -336,8 +336,6 @@ $.widget( "heurist.dh_search", {
 
     },
 
-
-
     //
     // this is public method, it is called on search complete - see dh_search_minimal._doSearch
     //
