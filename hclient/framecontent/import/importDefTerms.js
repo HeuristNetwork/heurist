@@ -144,7 +144,8 @@ function hImportDefTerms(_trm_ParentTermID) {
                         $('#sourceContent').val(file.error);
                     }else{
                         
-                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')+'&db='+window.hWin.HAPI4.database;
+                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
+                            +'&encoding='+$('#csv_encoding').val()+'&&db='+window.hWin.HAPI4.database;
                         
                         $('#sourceContent').load(url_get, function(){
                             _setCurtain( 2 );

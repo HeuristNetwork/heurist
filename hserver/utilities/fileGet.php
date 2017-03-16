@@ -3,6 +3,7 @@
 * 
 * fileGet.php - 1) get image for given entity, record ID, version and color 
 *               2) get or check file from code folders - tips, help, doc content
+*               3) load file from scratch folder (tries to convert to UTF8) - for import terms
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -39,6 +40,7 @@ $entity_name = @$_REQUEST['entity'];
 $recID = @$_REQUEST['recID'];
 $db = @$_REQUEST['db'];
 $filename = @$_REQUEST['file'];
+$csv_encoding = @$_REQUEST['encoding'];
 
 $error = null;
 
@@ -63,6 +65,56 @@ if($entity_name && !($recID>0)){
         $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
 
         $content_type = null;//'image/'.$file_ext;
+        
+        if($csv_encoding && $csv_encoding!='UTF-8'){ //force convert to utf8       
+        
+            $handle = @fopen($file_read, "r");
+            if (!$handle) {
+                $s = null;
+                if (! file_exists($file_read)) $s = ' does not exist.<br><br>'
+                    .'Please clear your browser cache and try again. if problem persists please report immediately to Heurist developers (info at HeuristNetwork dot org)';
+                else if (! is_readable($file_read)) $s = ' is not readable';
+                else $s = ' could not be read';        
+                
+                if($s){
+                    print 'Temporary file (uploaded csv data) '.$file_read. $s;                
+                    exit();
+                }
+            }
+        
+            setlocale(LC_ALL, 'en_US.utf8');
+            fclose($handle);
+            /*
+            // read header only - since import terms is no big we can omit this section
+            $line = fgets($handle, 1000000);
+            fclose($handle);
+            if(!mb_check_encoding( $line, 'UTF-8' )){
+               $line = mb_convert_encoding( $line, 'UTF-8'); 
+            }
+            if(!$line){
+                print 'Temporary file (uploaded csv data) '.$file_read
+                .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
+                exit();
+            } 
+            */           
+            $content = file_get_contents($file_read);
+            $content = mb_convert_encoding( $content, 'UTF-8', $csv_encoding);
+            if(!$content){
+                print 'Temporary file (uploaded csv data) '.$file_read
+                .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
+                exit();
+            } 
+               
+            //$encoded_file_name = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $original_filename);      
+            $res = file_put_contents($file_read, $content);
+            unset($content);
+            if(!$res){
+                print 'Cant save temporary file (with UTF-8 encoded csv data) '.$file_read;
+                exit();
+            }
+    
+        }
+        
         
     }else{
 
