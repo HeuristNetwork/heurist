@@ -1799,6 +1799,7 @@ function EditTerms() {
                     + ' term'
                     + (context.result.length>1?'s were':' was')
                     + ' added.', null, 'Terms imported');
+                window.hWin.HEURIST4.terms = context.terms;
             }
 
 
@@ -1822,6 +1823,8 @@ function EditTerms() {
                                 var term = {}; //new Object();
                                 term.id = termid;
                                 term.label = arTerm[fi.trm_Label];
+                                term.title = arTerm[fi.trm_Label];
+                                term.folder = false;
                                 term.conceptid = null;
                                 term.description = arTerm[fi.trm_Description];
                                 term.termcode = "";
@@ -1829,13 +1832,18 @@ function EditTerms() {
                                 term.domain = _currentDomain;
                                 term.inverseid = null;
 
-                                var newNode = new YAHOO.widget.TextNode(term, parentNode, false);
+                                var newNode= parentNode.addChildren(term);    
+                                
+                                //OLD var newNode = new YAHOO.widget.TextNode(term, parentNode, false);
                             }
                         }
                     }
                 }//for
-                _currTreeView.render();
-                parentNode.focus(); //expand
+                
+            
+                parentNode.setExpanded(true);    
+                //_currTreeView.render();
+                //parentNode.focus(); //expand
                 /*var _temp = _currentNode;
                 _onNodeClick(_currentNode);
                 _parentNode = _temp;
