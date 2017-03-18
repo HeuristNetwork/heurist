@@ -230,7 +230,8 @@ var cfg_layouts = [
     {id:'boro', name:'Beyond 1914 - Book of Rememberance', theme:'heurist', type:'free', 
                 cssfile:'hclient/widgets/boro/256dd9d.css', template: 'hclient/widgets/boro/boro_main.html'
        ,search_pane:{dropable:false,css:{},
-                apps:[{appid:'ha_search_tree', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
+                apps:[                           //18
+                {appid:'dh_search', options:{UGrpID:48}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
        ,result_pane:{dropable:false,css:{},
                 apps:[{appid:'boro_results', options:{
                     view_mode:'list', hide_view_mode: true, select_mode:'select_single', multiselect:false, showmenu: false
