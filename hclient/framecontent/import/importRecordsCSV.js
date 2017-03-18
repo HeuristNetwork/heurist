@@ -3153,7 +3153,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     if(dt_id>0 && detDefs[dt_id]['commonFields'][idx_dt_type]=='enum'){ //button to add terms
                         s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" '
                         +'title="Adds the unrecognised terms below to the field definition">'
-                        +'Add unrecognised terms</button>';     
+                        +'Add unrecognised terms</button><br><br>';     
                     }
     
     
@@ -3288,7 +3288,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 var tab_idx = ele.attr('tab_id');
                 var dt_id = ele.attr('dt_id');
                 var wrong_values = tabs[tab_idx]['values_error'];
-                _importNewTerms(dt_id, wrong_values);
+                _importNewTerms($dlg, dt_id, wrong_values, -1, '');
                 //alert('add '+wrong_values.join(',')); 
             });
             
@@ -3301,126 +3301,157 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     // add new terms
     //
-    function _importNewTerms(dt_id, newvalues){
+    function _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, trm_ParentLabel){
         
         if(window.hWin.HEURIST4.util.isempty(newvalues)) return;
 
-        //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
-        
-        var fi_term =  window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_JsonTermIDTree'];
-        var terms = window.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_term];
-        var trm_ParentTermID;
-
-        if(window.hWin.HEURIST4.util.isNumber(terms)){
-            trm_ParentTermID = Number(terms);
-        }else{
-            //selection - find special vocabuary  'Auto-added terms'
-            return;   
-        }
-        
-        
-        
-        
         var label_idx = window.hWin.HEURIST4.terms.fieldNamesToIndex['trm_Label'];
         
-        window.hWin.HEURIST4.msg.showMsgDlg(
-        newvalues.join(',')+' terms will be added to the vocabulary '
-        +window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][trm_ParentTermID][label_idx]
+        if(!(trm_ParentTermID>0)){
+        //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
+        
+            var fi_term =  window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_JsonTermIDTree'];
+            var terms = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_term];
 
-        , function(){
-            return;
-                 //_importNewTerms_continue(trm_ParentTermID, newvalues);
-        });
-        
-    }
-    
-    function _importNewTerms_continue(trm_ParentTermID, newvalues){
-        
-        var trm_ParentDomain = 'enum';
-        //prepare array
-
-        
-        var _prepareddata = array();
-        
-                for(;i<_parseddata.length;i++){
+            if(window.hWin.HEURIST4.util.isNumber(terms)){ //this is vocabulary
+                trm_ParentTermID = Number(terms);
+            }else{
+                //this is a set of terms - find special vocabulary  'Auto-added terms'
+                for (trmID in window.hWin.HEURIST4.terms.termsByDomainLookup['enum']){
+                    if(trmID>0)
+                     if(window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][trmID][label_idx]=='Auto-added terms'){
+                            trm_ParentTermID = trmID;
+                            break;
+                     }
+                }
+                if(!(trm_ParentTermID>0)){ //add new vocabulary to root
                     
-                    record = {};
-                    
-                    if(field_term>=_parseddata[i].length) continue;
-                    
-                    var lbl = null;
-                    
-                    if(!window.hWin.HEURIST4.util.isempty(_parseddata[i][field_term])){
-                        lbl = _parseddata[i][field_term].trim();
-                    }
-                    
-                    if(!window.hWin.HEURIST4.util.isempty(lbl)){
-                        
-                        //verify duplication in parent term and in already added
-                        if(trm_ParentChildren.indexOf(lbl.toLowerCase())>=0 || 
-                           labels.indexOf(lbl.toLowerCase())>=0)
-                        {
-                                skip_dup++;
-                        }else{
-                            
-                            if(lbl.length>500){
-                                skip_long++;    
-                            }
-                            labels.push(lbl.toLowerCase());
-                            record['trm_Label'] = lbl;
-                            record['trm_ParentTermID'] = trm_ParentTermID;
-                            record['trm_Domain'] = trm_ParentDomain;
-                            
-                            if(field_desc>-1 && field_desc<_parseddata[i].length){
-                                record['trm_Description'] = _parseddata[i][field_desc];
-                            }
-                            if(field_code>-1 && field_code<_parseddata[i].length){
-                                record['trm_Code'] = _parseddata[i][field_code];
-                            }
-                           
-                            _prepareddata.push(record);
-                        
-                        }
-                        
-                    }else{
-                        skip_na++;
-                    }
-                }//for        
-        
-    
-            var request = {
-                'a'          : 'save',
-                'entity'     : 'defTerms',
-                'request_id' : window.hWin.HEURIST4.util.random(),
-                'fields'     : _prepareddata                     
-                };
+                    var request = {
+                        'a'          : 'save',
+                        'entity'     : 'defTerms',
+                        'request_id' : window.hWin.HEURIST4.util.random(),
+                        'fields'     : [{trm_Label:'Auto-added terms', trm_ParentTermID:'', trm_Depth:0, trm_Domain:'enum'}]                     
+                        };
                 
-                var that = this;                                                
-                //that.loadanimation(true);
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-
                             var recIDs = response.data;
-                            
-                            window.hWin.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                /*    
-                            window.hWin.HEURIST4.msg.showMsgDlg(recIDs.length
-                                + ' term'
-                                + (recIDs.length>1?'s were':' was')
-                                + ' added.', null, 'Terms imported'); // Title was an unhelpful and inelegant "Info"
-                                */    
-                                    window.close( {result:recIDs, parent:trm_ParentTermID, terms:response.data.terms } );
-                                }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
-                                }
-                            });
-                            
+                            trm_ParentTermID = Number(recIDs[0]);
+                            _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, 'Auto-added terms');
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
-                    });
+                    });                    
+                    
+                    return;
+                }
+            }
+        }//find parent term id
+        
+        if(trm_ParentLabel==''){
+            trm_ParentLabel = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][trm_ParentTermID][label_idx];
+        }
+        
+        
+        var s;
+        if(newvalues.length>5){
+            s = newvalues.slice(0,5).join(',') + ' and '+(newvalues.length-5)+ ' more';
+        }else{
+            s = newvalues.join(',');
+        }
+                
+        window.hWin.HEURIST4.msg.showMsgDlg(
+                'Terms ' + s +' will be added to the vocabulary "'
+                + trm_ParentLabel +'"'
+                , function(){
+                    _importNewTerms_continue($dlg, newvalues, trm_ParentTermID);
+                }); 
+    }
+    
+    //
+    //  continue addition of new terms
+    //            
+    function _importNewTerms_continue($dlg, newvalues, trm_ParentTermID){    
+        
+        var _prepareddata = [], record;
+        
+        var skip_dup=0, skip_long=0, skip_long=0, skip_na=0;
+        
+        var trm_ParentChildren = window.hWin.HEURIST4.ui.getChildrenLabels('enum', trm_ParentTermID);
+        
+        for(var i=0;i<newvalues.length;i++){
+                
+                var lbl = null;
+                
+                if(!window.hWin.HEURIST4.util.isempty(newvalues[i])){
+                    lbl = newvalues[i].trim();
+                }
+                
+                if(!window.hWin.HEURIST4.util.isempty(lbl)){
+                    
+                    //verify duplication in parent term and in already added
+                    if(trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
+                    {
+                        skip_dup++;
+                        continue;
+                    }
+                    
+                    
+                    if(lbl.length>500){
+                        skip_long++;
+                        continue;
+                    }
+                   
+                    _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
+                    
+                }else{
+                    skip_na++;
+                }
+        }//for    
+        
+        if(_prepareddata.length==0){
+            var s = 'Nothing to import. Validation reports that among proposed terms<br>'
+                +((skip_dup>0)?skip_dup+' already exist; ':' ')
+                +((skip_long>0)?skip_long+' have too long label; ':' ')
+                +((skip_na>0)?skip_na+' label is empty':'');
+            setTimeout(function(){window.hWin.HEURIST4.msg.showMsgErr(s);}, 1000);
+            return;
+        }
+        
+    
+        var request = {
+            'a'          : 'save',
+            'entity'     : 'defTerms',
+            'request_id' : window.hWin.HEURIST4.util.random(),
+            'fields'     : _prepareddata                     
+            };
+                
+            var that = this;                                                
+            //that.loadanimation(true);
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+                        var recIDs = response.data;
+                        
+                        window.hWin.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                
+                                window.hWin.HEURIST4.terms = response.data.terms;
+                                top.HEURIST.terms = response.data.terms;
+                                $dlg.dialog('close');
+                                window.hWin.HEURIST4.msg.showMsgErr(recIDs.length+' new term'
+                                    +((recIDs.length==1)?'was':'s were')+' imported. Please repeat "Prepare" action');
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
+                            }
+                        });
+                        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
         
     }
         

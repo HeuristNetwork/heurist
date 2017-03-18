@@ -78,8 +78,6 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
             html_thumb = '<a href="#" class="bor-stop-image bor-stop-image-placeholder"></a>';
         }
    
-console.log(fld('rec_ThumbnailURL'));   
-
         var html = 
                 '<div class="bor-search-result bor-stop bor-stop-large">'
                 + html_thumb

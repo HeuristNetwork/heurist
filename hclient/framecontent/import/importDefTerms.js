@@ -56,6 +56,8 @@ function hImportDefTerms(_trm_ParentTermID) {
             }else{
                 trm_ParentDomain = 'enum';
             }
+
+            //todo use window.hWin.HEURIST4.ui.getChildrenLabels
                 
             //get list of children labels
             function __getSiblings(children){

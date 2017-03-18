@@ -1280,6 +1280,7 @@
 					$query = "update defTerms set ".$query." where trm_ID = $trmID";
 				}
 
+
 				$rows = execSQL($ext_db, $query, $parameters, true);
 
 				if ($rows==0 || is_string($rows) ) {      //ERROR
