@@ -92,7 +92,12 @@ $(document).ready(function() {
         //rectype to be related (constraint for pointers and relmarker target rectype)
         target_ID = top.HEURIST4.util.getUrlParameter("target_ID", document.location.search);
 
+        var fidx = top.HEURIST.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
+        
         $('#source_rectype').text(top.HEURIST.rectypes.names[rty_ID]);
+        $('#source_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+rty_ID+'")');
+        $('#source_rectype_desc').text( top.HEURIST.rectypes.typedefs[rty_ID].commonFields[fidx] );
+        
         
         var rt_selector = $('#sel_target_rectype_id');
         top.HEURIST4.ui.createRectypeSelect(rt_selector[0],null,'Select target record type');
@@ -121,13 +126,26 @@ $(document).ready(function() {
                         top.HEURIST4.util.setDisabled($('#btnSelect'), false);
                         $('#btnSelect').css('color','black');
                     }
+                    //static 
+                    sDialogTitle = 'Add new link or create a relationship between records';
+                    
                     $(window.frameElement).parents('.ui-dialog').find('.ui-dialog-title').text(sDialogTitle);
-
+                    
+                    $('#target_rectype_desc').text( top.HEURIST.rectypes.typedefs[target_ID].commonFields[fidx] );
                 }
         );
         if(target_ID){
-            rt_selector.val(target_ID);  
-        } 
+            rt_selector.val(target_ID); 
+            
+            $('#target_rectype').text(top.HEURIST.rectypes.names[target_ID]);
+            $('#target_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+target_ID+'")');
+            $('#target_rectype_desc').text( top.HEURIST.rectypes.typedefs[target_ID].commonFields[fidx] );
+            $('#target_rectype_div').css('display', 'inline-block');
+            rt_selector.hide(); 
+        } else {
+            $('#target_rectype_div').hide();
+            rt_selector.show(); 
+        }
         rt_selector.change();
 
         if(!top.HEURIST4.rectypes.typedefs[rty_ID]){

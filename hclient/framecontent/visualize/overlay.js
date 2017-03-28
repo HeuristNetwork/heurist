@@ -696,7 +696,7 @@ function removeOverlays() {
 function _addNewLinkField(source_ID, target_ID){
     
             var body = $(this.document).find('body');
-            var dim = { h:480, w:500 };//Math.max(900, body.innerWidth()-10) };                
+            var dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
             
             //ar target_ID = 10;
             

@@ -1519,8 +1519,8 @@ function onGroupChange() {
 
 function _refreshClientStructure(context){
     top.HEURIST.rectypes = context.rectypes;
-    if(window.hWin && window.hWin.HEURIST4){
-        window.hWin.HEURIST4.rectypes = context.rectypes;
+    if(top.hWin && top.hWin.HEURIST4){
+        top.hWin.HEURIST4.rectypes = context.rectypes;
     }
 }
 

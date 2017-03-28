@@ -72,6 +72,11 @@
 				margin-bottom:2em;
                 margin-left:5ex;
         	}
+            .truncate {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         </style>
     </head>
 
@@ -82,11 +87,33 @@
 		<div style="width:100%;height:90%;padding:10px 10px 10px 0;overflow:none">
 
 			<div class="ft_col">
+                
+                <label>Choose the field(s) on wich to create the link(s)</label>
 
                 <div class="ft_preview">
-                    <label>From:</label><h4 id="source_rectype" style="display:inline-block;margin-left: 10px;"></h4>
+                    <label style="vertical-align: top; padding-top:4px">Source:</label>
+                    <div style="display:inline-block;">
+                        <img src='../../../hclient/assets/16x16.gif' id="source_rectype_img" 
+                            style="vertical-align:top;margin-left:10px;margin-top:4px;" />
+                    
+                        <h2 id="source_rectype" class="truncate" 
+                            style="max-width:550px;display:inline-block;margin-left: 10px;"></h2>
+                    </div>    
+                    <div  id="source_rectype_desc" style="max-width:550px;margin-left:80px;"></div>
                     <br>
-                    <label>To:</label><select id="sel_target_rectype_id" style="margin-left: 25px;"></select>
+                    
+                    <label style="vertical-align: top; padding-top:4px">Target:</label>
+                    <div id="target_rectype_div" style="display:inline-block;">
+                        <img src='../../../hclient/assets/16x16.gif' id="target_rectype_img" 
+                            style="vertical-align:top;margin-left:10px;margin-top:4px;" />
+                    
+                        <h2 id="target_rectype" class="truncate" 
+                            style="max-width:550px;display:inline-block;margin-left: 10px;"></h2>
+                    </div>    
+                    
+                    <select id="sel_target_rectype_id" style="margin-left: 25px;"></select>
+                    <div  id="target_rectype_desc" style="max-width:550px;margin-left:80px;"></div>
+                    
                 </div>
                 <br>
             

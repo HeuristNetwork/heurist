@@ -172,7 +172,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, d.rty_Name as title, count(r.rec_ID) as count 
 FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
 defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID 
- GROUP BY id ORDER BY grp, title ASC";
+ GROUP BY id ORDER BY rtg_Order, title ASC";
                         // Put record types & counts in the table
                         $res = $system->get_mysqli()->query($query);
                         $count = 0; 
@@ -216,7 +216,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                             echo "<td align='center'>" .$row["count"]. "</td>";
 
                             // Show
-                            if($row["count"]>0 && $count < 10) {
+                            if($row["count"]>0 && $count < 10) {  //this record type has records
                                 echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
                                 $count++;
                             }else{
@@ -346,8 +346,9 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                     /** RECORD FILTERING */
                     // Set filtering settings in UI
                     <?php
-                        if($count>0){ //restore setting for non empty db
+                        if(true || $count>0){ //restore setting for non empty db
                     ?>
+                        var at_least_one_marked = false;
                         $(".show-record").each(function() {
                         var name = $(this).attr("name");
                         var record = localStorage.getItem(name);
@@ -356,9 +357,16 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                             var obj = JSON.parse(record);
                             if("checked" in obj) {
                                $(this).prop("checked", obj.checked);
+                               at_least_one_marked = true;
                             }
                         }
                         });
+                        
+                        if(!at_least_one_marked)
+                        $(".first_grp").each(function() {
+                            $(this).prop("checked", true);
+                        });
+                        
                     <?php }else{ ?>
                         $(".first_grp").each(function() {
                             $(this).prop("checked", true);

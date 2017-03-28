@@ -632,6 +632,11 @@ function EditRecStructure() {
 
                         top.HEURIST.rectypes = context.rectypes;
                         top.HEURIST.detailTypes = context.detailTypes;
+                        
+                        if(top.hWin && top.hWin.HEURIST4){
+                            top.hWin.HEURIST4.rectypes = context.rectypes;
+                            top.hWin.HEURIST4.detailtypes = context.detailTypes;
+                        }
 
                         if(_myDataTable.getRecordSet().getLength()<1){
                             $("#recStructure_toolbar").show();
@@ -1638,6 +1643,11 @@ function EditRecStructure() {
                 if(!Hul.isnull(context)){
                     top.HEURIST.rectypes = context.rectypes;
                     top.HEURIST.detailTypes = context.detailTypes;
+                        if(top.hWin && top.hWin.HEURIST4){
+                            top.hWin.HEURIST4.rectypes = context.rectypes;
+                            top.hWin.HEURIST4.detailtypes = context.detailTypes;
+                        }
+                    
                     _structureWasUpdated = true;
                 }
                 _isServerOperationInProgress = false;
@@ -2811,6 +2821,9 @@ function onEditRecordType(){
 
                      //refresh the local heurist
                      top.HEURIST.rectypes = context.rectypes;
+                        if(top.hWin && top.hWin.HEURIST4){
+                            top.hWin.HEURIST4.rectypes = context.rectypes;
+                        }
                      //var _rtyID = Number(context.result[0]);
                 }
                 //refresh icon, title, mask
