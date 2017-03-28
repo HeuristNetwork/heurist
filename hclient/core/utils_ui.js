@@ -349,7 +349,7 @@ window.hWin.HEURIST4.ui = {
                     if(supressTermCode || window.hWin.HEURIST4.util.isempty(termCode)){
                         termCode = '';
                     }else{
-                        termCode = " ("+termCode+")";
+                        termCode = " [code "+termCode+"]";
                     }
                 }
 

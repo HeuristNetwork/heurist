@@ -1701,13 +1701,13 @@ function EditRecStructure() {
                 var ele = document.getElementById("dlgWrongTitleMask");
 
 
-                var $dlg = Hul.popupTinyElement(window, ele,
+                var $dlg_warn = Hul.popupTinyElement(window, ele,
                     { "no-titlebar": false, "no-close": false, width: 400, height:160 });
 
                 $(ele).find("#dlgWrongTitleMask_closeBtn").click(function(){
-                    /*if($dlg!=null){
-                    $dlg.dialog('close');
-                    }*/
+                    if($dlg_warn!=null){
+                        $dlg_warn.dialog('close');
+                    }
                     _doEditTitleMask(true);
                 });
 

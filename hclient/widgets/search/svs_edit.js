@@ -42,7 +42,7 @@ function hSvsEdit(args) {
     *
     * return false if saved search and true if rules
     */
-    function _fromDataToUI(svsID, squery, groupID){
+    function _fromDataToUI(svsID, squery, groupID, allowChangeGroupID){
 
         var $dlg = edit_dialog;
         if($dlg){
@@ -128,7 +128,7 @@ function hSvsEdit(args) {
                     svs_ugrid.val(domain);
                 }*/
                 //svs_ugrid.parent().show();
-                svs_ugrid.attr('disabled', !window.hWin.HEURIST4.util.isempty(groupID));
+                svs_ugrid.attr('disabled', !(allowChangeGroupID || window.hWin.HEURIST4.util.isempty(groupID)) );
             }
 
             var isRules = window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val());
@@ -215,8 +215,14 @@ function hSvsEdit(args) {
                 return;
             }
         }
-
-
+        
+        //if not defined get last used
+        var allowChangeGroupID = false;
+        if(window.hWin.HEURIST4.util.isempty(groupID)){
+              groupID = window.hWin.HAPI4.get_prefs('last_savedsearch_groupid');
+              allowChangeGroupID = true;
+        }
+        
         if(callback){
             callback_method = callback;
         }
@@ -290,7 +296,7 @@ function hSvsEdit(args) {
                 var allFields = $dlg.find('input, textarea');
 
                 //that.
-                var isRules = _fromDataToUI(svsID, squery, groupID);
+                var isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
 
                 function __doSave(){   //save search
 
@@ -359,6 +365,8 @@ function hSvsEdit(args) {
                                     }
 
                                     window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
+                                    
+                                    window.hWin.HAPI4.save_pref('last_savedsearch_groupid', request.svs_UGrpID);
 
                                     $dlg.dialog( "close" );
 
@@ -479,7 +487,7 @@ function hSvsEdit(args) {
             });
         }else{
             //show dialogue
-            var isRules = _fromDataToUI(svsID, squery, groupID);
+            var isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
             edit_dialog.dialog("option",'title', window.hWin.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
             edit_dialog.dialog("open");
         }

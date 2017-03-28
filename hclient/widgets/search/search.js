@@ -876,7 +876,7 @@ $.widget( "heurist.search", {
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
                         window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, 
-                                            allTerms, disabledTerms, null, window.hWin.HR('n/a'));
+                                            allTerms, disabledTerms, null, window.hWin.HR('<blank>'));
                     } else {
                         $dlg.find("#fld_contain").show();
                         $dlg.find("#fld_enum").hide();
