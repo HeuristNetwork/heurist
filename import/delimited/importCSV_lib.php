@@ -1559,7 +1559,7 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
                     {//not found
                         $is_error = true;
                         array_push($newvalue, "<font color='red'>".$r_value."</font>");
-                        if(array_search($r_value, $wrong_values)==false){
+                        if(array_search($r_value, $wrong_values)===false){
                                 array_push($wrong_values, $r_value);
                         }
                     }else{

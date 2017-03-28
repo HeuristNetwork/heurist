@@ -3356,9 +3356,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         var s;
         if(newvalues.length>5){
-            s = newvalues.slice(0,5).join(',') + ' and '+(newvalues.length-5)+ ' more';
+            s = newvalues.slice(0,5).join(', ') + ' and '+(newvalues.length-5)+ ' more';
         }else{
-            s = newvalues.join(',');
+            s = newvalues.join(', ');
         }
                 
         window.hWin.HEURIST4.msg.showMsgDlg(
@@ -3440,9 +3440,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 
                                 window.hWin.HEURIST4.terms = response.data.terms;
                                 top.HEURIST.terms = response.data.terms;
-                                $dlg.dialog('close');
-                                window.hWin.HEURIST4.msg.showMsgErr(recIDs.length+' new term'
-                                    +((recIDs.length==1)?'was':'s were')+' imported. Please repeat "Prepare" action');
+                                
+                                var cnt = $dlg.find('.add_terms').length;
+                                var s = recIDs.length+' new term'
+                                        +((recIDs.length==1)?' was':'s were')+' imported. ';
+                                if(cnt==1){
+                                    $dlg.dialog('close');
+                                    window.hWin.HEURIST4.msg.showMsgErr(s+'Please repeat "Prepare" action'); 
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(s+'Check other "error" tabs '
+                                    +'to add missed terms for other enumeration fields. '
+                                    +'And finally close this dialog and repeat "Prepare" action'); 
+                                }
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
                             }
@@ -3584,7 +3593,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
         $('#prepareErrors').hide();
-        $('#prepareWarnings').hide();
+        if(!(page==4 || page==5)) $('#prepareWarnings').hide();
         //$('#mr_cnt_disamb').parent().hide();
         
         if(page==1){
