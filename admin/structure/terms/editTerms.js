@@ -1698,11 +1698,19 @@ function EditTerms() {
         var sel = Dom.get('resSearch');
         if(sel.selectedIndex>=0){
             var nodeid = sel.options[sel.selectedIndex].value;
-            var node = _findNodeById(nodeid, true);
+            var node = _findNodeById(nodeid, true); 
 
             if(!Hul.isnull(node)){
-                node.setFocus(true);
-                _onNodeClick(node);
+                //scroll does not work 
+                //node.makeVisible();//{noAnimation: true, noEvents: true, scrollIntoView: true}); 
+                setTimeout(function(){
+                  $(node.li).get(0).scrollIntoView();  
+                },500);
+                
+                //term_tree
+                //old 
+                //node.setFocus(true);
+                //_onNodeClick(node);
             }
         }
     }
@@ -2319,7 +2327,7 @@ function EditTerms() {
                 },
                 extensions:['dnd','themeroller'],
                 dnd: {
-                    autoExpandMS: 400,
+                    autoExpandMS: 1000, //it does not work - we expand manually in dragEnter
                     //focusOnClick: true,
                     preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
                     preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
@@ -2341,7 +2349,7 @@ function EditTerms() {
 
 
                         if (data.otherNode.getLevel()>1 && node.getLevel()===1){
-                            node.setExpanded(true);
+                            setTimeout(function(){node.setExpanded(true);},1000);
                             return false;
                         }
 
@@ -2437,29 +2445,26 @@ function EditTerms() {
                        }else if($(event.target).hasClass('fancytree-node')){
                           node =  $(event.target);
                        }else{
+                          //hide icon for parent 
                           node = $(event.target).parents('.fancytree-node');
+                          if(node) node = $(node[0]);
                        }
                        var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
                        ele.css('visibility','hidden');
                }               
                
-
-               $(item).parents('li').hover(
+               $(item).hover(
                    function(event){
                        var node;
-                       if($(event.target).is('li')){
-                          node = $(event.target).find('.fancytree-node');
-                         if(node.length>0) node = $(node[0]);
-                       }else if($(event.target).hasClass('fancytree-node')){
+                       if($(event.target).hasClass('fancytree-node')){
                           node =  $(event.target);
                        }else{
                           node = $(event.target).parents('.fancytree-node');
                        }
                        var ele = $(node).find('.svs-contextmenu3');
                        ele.css('visibility','visible');
-               }).mouseleave(
-                   _onmouseexit
-               );
+                   }
+               );               
                $(item).mouseleave(
                    _onmouseexit
                );

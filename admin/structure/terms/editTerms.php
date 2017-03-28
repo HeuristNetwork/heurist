@@ -109,6 +109,7 @@ if(isForAdminOnly("to modify database structure")){
                 /*color: white !important;*/
                 visibility: hidden;
                 padding-left:10px;
+                padding-top: 3px;
             }
             span.fancytree-node{
                 min-width: 300px;
