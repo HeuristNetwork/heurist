@@ -504,6 +504,17 @@ var lines = svg.append("svg:g").selectAll("path")
             +($('#list_rectypes').is(':visible')?'n':'s')   }});
     }
     
+    $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
+    function(){
+         zoomBtn(true);
+    }
+    );
+
+    $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
+    function(){
+         zoomBtn(false);
+    }
+    );
     
 } //end visualizeData
 
@@ -592,20 +603,13 @@ console.log('B '+d3.event.translate);
             //((d3.event.translate==undefined)?d3.event.translate
             //                            :(translateXY[0]+','+translateXY[1]))
                                         +")scale("+scale+")";
+    onZoom(transform);
+}  
+
+function onZoom( transform ){
     d3.select("#container").attr("transform", transform);
     
-    //d3.selectAll(".node").select(".icon").attr('transform',"scale("+(1/d3.event.scale)+")");
-    /*
-    d3.selectAll(".node").attr('transform',
-    function(d) { 
-        //keep zoomed position 
-        var tr = "translate(" + d.x + "," + d.y + ")";
-        //however restore scale
-        tr = tr+"scale("+(1/scale)+")";
-        
-        return tr; 
-    });
-    */
+    var scale = this.zoomBehaviour.scale();
     
     d3.selectAll(".bottom-lines").style("stroke-width", 
             function(d) { 
@@ -619,7 +623,41 @@ console.log('B '+d3.event.translate);
             });
 
     updateOverlays();
-}  
+}
+
+//handle the zoom buttons
+function zoomBtn(zoom_in){
+    var zoom = this.zoomBehaviour; 
+    
+    var scale = zoom.scale(),
+        extent = zoom.scaleExtent(),
+        translate = zoom.translate(),
+        x = translate[0], y = translate[1],
+        factor = zoom_in ? 1.3 : 1/1.3,
+        target_scale = scale * factor;
+
+    // If we're already at an extent, done
+    if (target_scale === extent[0] || target_scale === extent[1]) { return false; }
+    // If the factor is too much, scale it down to reach the extent exactly
+    var clamped_target_scale = Math.max(extent[0], Math.min(extent[1], target_scale));
+    if (clamped_target_scale != target_scale){
+        target_scale = clamped_target_scale;
+        factor = target_scale / scale;
+    }
+
+    var width = $("#divSvg").width();
+    var height = $("#divSvg").height();
+    var center = [width / 2, height / 2];
+    // Center each vector, stretch, then put back
+    x = (x - center[0]) * factor + center[0];
+    y = (y - center[1]) * factor + center[1];
+
+    zoom.scale(target_scale)
+        .translate([x,y]);    
+   
+    var transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
+    onZoom(transform);
+}
 
 /********************************************* FORCE ***************************************/
 /**
