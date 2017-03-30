@@ -67,9 +67,11 @@ function onPageInit(success) //callback function of hAPI initialization
                 var recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
 
                 rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
-                $('#rec0_title').html(
-                    'Source ['+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'] <h2 style="padding-top:5px">'+sSourceName+'</h2>'
-                );                                
+                $('#rec0_title').text(sSourceName);
+                
+                $('#source_rectype').text(window.hWin.HEURIST4.rectypes.names[recRecTypeID]);
+                $('#source_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
+                
                 //recordsPair[recID] = recRecTypeID;
                 opposites.push( { recID:source_ID, recRecTypeID:recRecTypeID} );
 
@@ -78,9 +80,10 @@ function onPageInit(success) //callback function of hAPI initialization
                 recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
 
                 rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
-                $('#rec1_title').html(
-                    'Target ['+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'] <h2 style="padding-top:5px">'+sTargetName+'</h2>'
-                );                                
+                $('#rec1_title').text(sTargetName);                                
+                $('#target_rectype').text(window.hWin.HEURIST4.rectypes.names[recRecTypeID]);
+                $('#target_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
+                
                 //recordsPair[recID] = recRecTypeID;
                 opposites.push( { recID:target_ID, recRecTypeID:recRecTypeID} );
                     
@@ -139,6 +142,9 @@ function onPageInit(success) //callback function of hAPI initialization
                                 //already linked for resource field type
                                 var isAlready = (field_type=='resource') && $.isArray(values) && (values.indexOf(oppositeRecID)>=0);
                                 
+                                if(index==1)
+                                 dtyName = dtyName + ' [ reverse link, target to source ]';
+                                
                                 //add UI elements
                     $('<div style="line-height:2.5em;padding-left:20px"><input type="checkbox" id="cb'+recID+'_cb_'+dty+'" '
                     +(isAlready?'disabled checked="checked"'
@@ -174,7 +180,7 @@ function onPageInit(success) //callback function of hAPI initialization
                     }
                 }//for
                 
-                if(!hasSomeLinks){
+                if(!hasSomeLinks){  //no suitable links
                     
                     var rectypeID =(opposites[0]['recID']==source_ID)
                                         ?opposites[0]['recRecTypeID']
@@ -189,10 +195,16 @@ function onPageInit(success) //callback function of hAPI initialization
                     $('#btn_save').hide();
                     $('#mainForm').hide();
                     $('#infoForm').show();
-                }else{    
+                }else{ 
                     $('.cb_addlink').click(function(){
                         window.hWin.HEURIST4.util.setDisabled($('#btn_save'), !$('.cb_addlink').is(':checked'));
                     });
+                    //auto mark the single field
+                    if($('.cb_addlink').length==1){
+                        $('.cb_addlink').prop('checked', true);
+                        window.hWin.HEURIST4.util.setDisabled($('#btn_save'), false);
+                    }
+                   
                 }
 
             }else{

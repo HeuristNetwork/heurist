@@ -43,29 +43,51 @@ require_once(dirname(__FILE__)."/initPage.php");
 <body style="overflow:hidden">
 
         <div id="mainForm" class="popup_content_div" class="ui-widget-content">
-            <label>Choose the link(s) to create:</label><br><br>
-            <div>
-                <div class="header" id="rec0_title" style="vertical-align:top; margin-top:5px;">
-                </div>
-                <div id="rec0">
-                </div>
-            </div>
+            <label>Choose the field(s) on wich to create the link(s)</label>
             <br><br>
-            <div>
-                <div class="header" id="rec1_title" style="vertical-align:top; margin-top:5px;">
+            
+            <label style="vertical-align: top; padding-top:4px">Source:</label>
+            <div style="display:inline-block;"">
+                <img src='../assets/16x16.gif' id="source_rectype_img" 
+                    style="vertical-align:top;margin-left:10px;" />
+            
+                <h2 id="source_rectype" class="truncate" 
+                    style="max-width:400px;display:inline-block;margin-left:5px;"></h2>
+                    
+                <h2 class="header truncate" id="rec0_title" 
+                    style="max-width:400px;color:black;vertical-align:top; margin-top:5px;margin-left:35px">
+                </h2>
+                    
+            </div>    
+                <div id="rec0" style="padding-top:10px;padding-bottom:20px">
                 </div>
+
+            <label style="vertical-align: top; padding-top:4px">Target:</label>
+            <div style="display:inline-block;">
+                <img src='../assets/16x16.gif' id="target_rectype_img" 
+                    style="vertical-align:top;margin-left:10px;" />
+            
+                <h2 id="target_rectype" class="truncate" 
+                    style="max-width:400px;display:inline-block;margin-left:5px;"></h2>
+                    
+                    
+                <h2 class="header truncate" id="rec1_title" 
+                    style="max-width:400px;color:black;vertical-align:top; margin-top:5px;margin-left:35px">
+                </h2>
+            </div>    
                 
+                <!-- 
                 <div id="rec1_hint" style="display:none;padding-top:15px">
                     <hr>
                     <div style="padding-top:15px">
                     You may also create a link in the reverse direction with one of the following fields in the target record:
                     </div>
                 </div>
+                -->
                 
-                <div id="rec1">
+                <div id="rec1" style="padding-top:10px">
                 </div>
-            </div>
-        
+                    
         </div>
         
         <div  id="infoForm" class="popup_content_div ui-widget-content" style="display:none;font-size:1.2em;padding:30px 5px">

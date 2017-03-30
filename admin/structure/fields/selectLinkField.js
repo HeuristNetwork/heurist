@@ -126,8 +126,6 @@ $(document).ready(function() {
                         top.HEURIST4.util.setDisabled($('#btnSelect'), false);
                         $('#btnSelect').css('color','black');
                     }
-                    //static 
-                    sDialogTitle = 'Add new link or create a relationship between records';
                     
                     $(window.frameElement).parents('.ui-dialog').find('.ui-dialog-title').text(sDialogTitle);
                     
