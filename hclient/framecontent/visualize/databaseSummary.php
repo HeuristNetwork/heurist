@@ -345,52 +345,45 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
 
                     /** RECORD FILTERING */
                     // Set filtering settings in UI
+                    var isfirst_time = false;
+                    var at_least_one_marked = false;
                     <?php
-                        if(true || $count>0){ //restore setting for non empty db
+                        if($count==0){ //reset setting for empty db (only once)
                     ?>
-                        var at_least_one_marked = false;
+                            isfirst_time = !(getSetting('hdb_'+window.hWin.HAPI4.database)>0);
+                            putSetting('hdb_'+window.hWin.HAPI4.database, 1);
+                    <?php  
+                        }
+                    ?>
+
+                    if(!isfirst_time){
+                        //restore setting for non empty db
                         $(".show-record").each(function() {
-                        var name = $(this).attr("name");
-                        var record = localStorage.getItem(name);
-                        if(record) {
-                            // Update checked attribute
-                            var obj = JSON.parse(record);
-                            if("checked" in obj) {
-                               $(this).prop("checked", obj.checked);
-                               at_least_one_marked = true;
+                            var name = $(this).attr("name");
+                            var record = getSetting(name); //@todo - change to recordtype ID
+                            if(record>0) {
+                                at_least_one_marked = true;   
+                                $(this).prop("checked", true);
+                            }else{
+                                $(this).prop("checked", false);
                             }
                         }
-                        });
+                        );
+                    }
                         
-                        if(!at_least_one_marked)
+                    if(isfirst_time || !at_least_one_marked){
                         $(".first_grp").each(function() {
                             $(this).prop("checked", true);
+                            putSetting($(this).attr("name"), 1);
                         });
-                        
-                    <?php }else{ ?>
-                        $(".first_grp").each(function() {
-                            $(this).prop("checked", true);
-                        });
-                    <?php } ?>
-
-                    
-
+                    }
                     
                     // Listen to 'show-record' checkbox changes
                     $(".show-record").change(function(e) {
                         // Update record field 'checked' value in localstorage
                         var name = $(this).attr("name");
-                        var record = localStorage.getItem(name);
-                        var obj;
-                        if(record === null) {
-                            obj = {};
-                        }else{
-                            obj = JSON.parse(record);
-                        }
-
                         // Set 'checked' attribute and store it
-                        obj.checked = $(this).prop('checked');
-                        localStorage.setItem(name, JSON.stringify(obj));
+                        putSetting(name, $(this).prop('checked')?1:0);
 
                         // Update visualisation
                         filterData();
@@ -405,17 +398,8 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         // Update localstorage
                         $(".show-record").each(function(e) {
                             var name = $(this).attr("name");
-                            var record = localStorage.getItem(name);
-                            var obj;
-                            if(record === null) {
-                                obj = {};
-                            }else{
-                                obj = JSON.parse(record);
-                            }
-
                             // Set 'checked' attribute and store it
-                            obj.checked = checked;
-                            localStorage.setItem(name, JSON.stringify(obj));
+                            putSetting(name, checked?1:0);
                         });
 
                         filterData();
