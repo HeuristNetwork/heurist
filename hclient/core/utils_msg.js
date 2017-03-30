@@ -604,6 +604,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
                         //functions in internal document
                         //content.close = $dosframe[0].close;    // make window.close() do what we expect
+                        
                         content.close = function() {
                             var did = $dlg.attr('id');
 
@@ -703,6 +704,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             var dim = { h: (options.height>0?options.height:400), 
                         w: (options.width>0?options.width:690) };
             
+            var onCloseCalback = opts.close;
+            
             var opts = {
                     autoOpen: true,
                     width : dim.w,
@@ -713,7 +716,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     title: options["title"],
                     buttons: options["buttons"],
                     close: function(event, ui){
-
+                        
+                        if($.isFunction(onCloseCalback)){
+                             onCloseCalback.call(this, event, ui);
+                        }
                         //var element = popup.element.parentNode.removeChild(popup.element);
                         element.style.display = "none";
                         originalParentNode.appendChild(element);

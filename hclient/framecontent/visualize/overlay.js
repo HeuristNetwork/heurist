@@ -450,10 +450,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                  .on("dragend", function(){
                      if(drag_link_source_id!=null && drag_link_target_id!=null){
                             _addNewLinkField(drag_link_source_id, drag_link_target_id);  
+                            setTimeout(function(){drag_link_line.attr("stroke","#00ff00");}, 500);
+                     }else{
+                        drag_link_source_id = null;
+                        if(drag_link_line) drag_link_line.remove();
+                        drag_link_line = null;
                      }
-                     drag_link_source_id = null;
-                     if(drag_link_line) drag_link_line.remove();
-                     drag_link_line = null;
                  }
                  );
 
@@ -693,6 +695,9 @@ function removeOverlays() {
     });
 }
 
+//
+// open popup dialog to define new link or relationship
+//
 function _addNewLinkField(source_ID, target_ID){
     
             var body = $(this.document).find('body');
@@ -717,6 +722,8 @@ function _addNewLinkField(source_ID, target_ID){
                     + '&source_ID='+source_ID;
                     
                dlg_title = 'Add new link or create a relationship between records'; 
+               dim.w = 550;
+               dim.h = 380;
             }
                    
             if(target_ID>0){
@@ -733,7 +740,14 @@ function _addNewLinkField(source_ID, target_ID){
                     title: dlg_title,
                     height: dim.h,
                     width: dim.w,
+                    afterclose: function(){
+                        //remove link line
+                        drag_link_source_id = null;
+                        if(drag_link_line) drag_link_line.remove();
+                        drag_link_line = null;
+                    },
                     callback: function(context) {
+                        
                         if(context!="" && context!=undefined) {
                             var sMsg = (context==true)?'Link created...':context;
                             hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
