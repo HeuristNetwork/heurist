@@ -77,11 +77,13 @@ function EditRecStructure() {
         'title="Add a new section heading, to break the data entry form up into groups of related fields. Heading is inserted at bottom, drag up into required position." class="add"/>'+
         '</div>'+
 
-        '<span style="float:right; text-align:right;">'+ 
+        '<span style="padding-left:20px">'+   //style="float:right; text-align:right;"
         '<span id="div_rty_ID" style="font-size:11px;font-weight:normal;"></span>&nbsp;'+
-        '<span id="div_rty_ConceptID" style="font-size:11px;font-weight:normal;"></span>&nbsp;&nbsp;'+
+        '<span id="div_rty_ConceptID" style="font-size:11px;font-weight:normal;"></span>&nbsp;&nbsp;</span>'+
+        '<span style="display:none;">'+
         '<a href="#" onclick="{onEditRecordType();}">edit general description<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;'+
-        '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;&nbsp;&nbsp;'+
+        '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;&nbsp;&nbsp;</span>'+
+        '<span style="float:right; text-align:right;">'+ 
         '<input type="button" value="Save/Close" onClick="editStructure.closeWin();"/>'+
         '</span>'+
         
@@ -2088,6 +2090,7 @@ function EditRecStructure() {
         var rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
 
         document.getElementById('rty_TitleMask').value = rectype[fi.rty_TitleMask];
+        document.getElementById('rty_Description').innerHTML = rectype[fi.rty_Description];
 
         document.getElementById("div_rty_ID").innerHTML = 'Local ID: '+rty_ID;
         
