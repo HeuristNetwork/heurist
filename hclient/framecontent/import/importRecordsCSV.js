@@ -3453,7 +3453,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                     +'And finally close this dialog and repeat "Prepare" action'); 
                                 }
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
+                                window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain term definitions to support import, possible database corruption, please consult Heurist developers');
                             }
                         });
                         

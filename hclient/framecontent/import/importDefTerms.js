@@ -489,7 +489,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                                 */    
                                     window.close( {result:recIDs, parent:trm_ParentTermID, terms:response.data.terms } );
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
+                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain term definitions, possible database corruption, please consult Heurist developers');
                                 }
                             });
                             
