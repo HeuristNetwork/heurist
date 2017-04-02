@@ -704,7 +704,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             var dim = { h: (options.height>0?options.height:400), 
                         w: (options.width>0?options.width:690) };
             
-            var onCloseCalback = opts.close;
+            var onCloseCalback = (options['close'])?options.close:null;
             
             var opts = {
                     autoOpen: true,
