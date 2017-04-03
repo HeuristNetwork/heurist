@@ -2695,6 +2695,10 @@ function EditTerms() {
                 $("#moveText").html("Insert "+ "&#60;" +data.otherNode.data.label+"&#62; under " + "&#60;"+node.data.label
                     +"&#62;");
                 $("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
+                
+                var isVocabulary = (node === _findTopLevelForId(node.data.id));
+                    
+                $('#divInsertAsChild').css('display', (isVocabulary)?'none':'block');
                 //show confirmation dialog
                 $_dialogbox = Hul.popupElement(top, ele,
                     {

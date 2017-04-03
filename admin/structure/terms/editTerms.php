@@ -562,7 +562,7 @@ if(isForAdminOnly("to modify database structure")){
                     title=""  style="width:70px; padding-left:10px"/>
             </div>
 
-            <div>
+            <div id="divInsertAsChild">
                 <br/> <br/><hr style="border-top: dotted 1px;"/>
                 <h2>Insert as child</h2>
                 <div>
