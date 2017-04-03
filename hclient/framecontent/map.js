@@ -270,6 +270,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 
                 var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
 
+                var pnt_counts = 0; //in case MarkerClusterer we have to increase the delay
+                
                 dataset.loadItems(mapdata.options.items);
                 dataset.each(function(item){
                     item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection
@@ -291,6 +293,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                                     if (point.lat() > maxLat) maxLat = point.lat();
                                     if (point.lng() < minLng) minLng = point.lng();
                                     if (point.lng() > maxLng) maxLng = point.lng();
+                                    pnt_counts++;
                                 }
                         }
                     }
@@ -315,7 +318,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 dataset.show();
                 
                 if(forceZoom){
-                    setTimeout( function(){ _zoomDataset( dataset_id );}, 500 );
+                    setTimeout( function(){ _zoomDataset( dataset_id );}, pnt_counts>1000?2000:500 );
                 }
     }
 
@@ -888,7 +891,9 @@ console.log('tileloaded 2');
         //timemap is already inited
         if(that.map_control!=null){
 
-                $( document ).bubble('closeAll');  //close all popups
+                if($.isFunction($( document ).bubble)){
+                    $( document ).bubble('closeAll');  //close all popups    
+                }
 
                 if(__startup_mapdocument>0)
                     that.map_control.loadMapDocumentById(__startup_mapdocument);    //see map_overlay.js
@@ -907,6 +912,36 @@ console.log('tileloaded 2');
             if(!_mapdata){
                 _mapdata = [{id: "main", type: "basic", options: { items: [] }}];
             }
+            
+            var useMarkerClusterer = window.hWin.HEURIST4.util.getUrlParameter('mapcluster');
+            var markerClustererOpts = {};
+            
+            if(!window.hWin.HEURIST4.util.isempty(useMarkerClusterer)){ //take all MarkerClusterer options from URL
+            
+                if(useMarkerClusterer=='off'){
+                   useMarkerClusterer = false; 
+                }else{
+                    var params = useMarkerClusterer.split(',');
+                    if(params.length>0 && params[0]>0){
+                        markerClustererOpts['gridSize'] = parseInt(params[0]);
+                    }
+                    if(params.length>1 && params[1]>0){
+                        markerClustererOpts['minimumClusterSize'] = parseInt(params[1]);
+                    }
+                    if(params.length>2 && params[2]>0 && params[2]<17){
+                        markerClustererOpts['maxZoom'] = parseInt(params[2]);
+                    }
+                }
+                
+            }else{
+                //MarkerClusterer options
+                useMarkerClusterer = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)==1);
+                markerClustererOpts = 
+                    { gridSize: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 25)), //The grid size of a cluster in pixels.
+                      minimumClusterSize: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_count', 2)), //The minimum number of markers to be in a cluster before the markers are hidden and a count is shown.
+                      maxZoom: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 15))};   //The maximum zoom level that a marker can be part of a cluster.
+            }
+            
 
             // Initialize TimeMap
             tmap = TimeMap.init({
@@ -917,7 +952,9 @@ console.log('tileloaded 2');
                 options: {
                     mapZoom: defaultZoom,
                     theme: customTheme,
-                    eventIconPath: window.hWin.HAPI4.iconBaseURL
+                    eventIconPath: window.hWin.HAPI4.iconBaseURL,
+                    useMarkerClusterer: useMarkerClusterer,
+                    markerClustererOpts: markerClustererOpts
                 }
                 , dataLoadedFunction: __onDataLoaded
                 }, tmap);

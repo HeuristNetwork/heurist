@@ -901,7 +901,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                                          layout_theme: 'heurist',
                 search_result_pagesize:100,
                 search_detail_limit: 2000, 'help_on':'0', 
-                userCompetencyLevel: 'beginner'};
+                userCompetencyLevel: 'beginner',
+                mapcluster_on: false};
             }
             if(window.hWin.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];
@@ -923,6 +924,14 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
                 return res;
             }
+        },
+        
+        get_prefs_def: function(name, defvalue){
+               var res = window.hWin.HAPI4.get_prefs(name);
+               if(window.hWin.HEURIST4.util.isempty(res)){
+                   res = defvalue;
+               }
+               return res;
         },
 
         //
