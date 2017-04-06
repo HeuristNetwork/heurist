@@ -72,8 +72,9 @@ function hmanageMenu() {
         _initLinks(parentdiv);
 
         //$('#frame_container').attr('src', window.hWin.HAPI4.baseURL+'admin/structure/rectypes/manageRectypes.php?db='+window.hWin.HAPI4.database);           }
+        // defaults to open the record type editing (config/build structure) when Manage tab is selected
         $(parentdiv[1]).accordion('option', 'active', 0); //STRUCTURE
-        $('#linkDatabaseSummary').click();
+        $('#linkEditRectypes').click();
     }
     
     

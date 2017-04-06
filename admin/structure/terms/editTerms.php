@@ -162,17 +162,17 @@ if(isForAdminOnly("to modify database structure")){
         <div id="page-inner" style="top:0px">
             <div id="pnlLeft" style="position:absolute; top:25;bottom:0;width:350; max-width:350; padding-right:5px; overflow: hidden;">
 
-                <div style="margin-left:10px; xpadding-top:35px;">
+                <div style="margin-left:10px; margin-top:15px; xpadding-top:35px;">
                     <input id="btnAddRoot1" type="button"
                         value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
-                    <span style="margin-top:5px; margin-left:10px;"> Adds a new root to the tree</span>
+                    <span style="margin-top:5px; margin-left:10px;"> (adds a new root to the tree)</span>
                 </div>
 
             
                 <!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
                 <div id="tabContainer"
                     class="yui-navset yui-navset-top" 
-                    style="position:absolute;bottom:120; top:25; width:350; max-width:350; overflow:hidden;">
+                    style="position:absolute;bottom:120; top:50; width:350; max-width:350; overflow:hidden;">
                 </div><br/>
 
                 <!-- Navigation: Search form to do partial match search on terms in the tree -->
@@ -189,18 +189,18 @@ if(isForAdminOnly("to modify database structure")){
             </div>
 
             <div id="formContainer" style="position:absolute;left:353px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
-                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">
+                <h2 id="formMessage" style="margin-left:10px; margin-top:90px; border-style:none;display:block;text-align:left;width:400px;">
                     Rollover terms in the tree to show available actions<br>
                     Drag terms to reposition or merge <br/> Select term to edit label and description
-                </h3>
+                </h2>
                 <h3 id="formMessage" style="margin-left:10px; border-style:none;display:none;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
                 </h3>
 
-                <div style="margin-left:10px; padding-top:15px;display:none">
+                <div style="margin-left:10px; padding-top:35px;display:none">
                     <input id="btnAddRoot2" type="button"
                         value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
-                    <span style="margin-top:5px; margin-left:10px; display:none" > Adds a new root to the tree</span>
+                    <span style="margin-top:5px; margin-left:10px; display:none" > (add a new root to the tree)</span>
                 </div>
 
                 <div id="deleteMessage" style="display:none;width:500px;">
@@ -208,8 +208,8 @@ if(isForAdminOnly("to modify database structure")){
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" class="form_editor" style="display:none;width:600px;">
-                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block"><br/><br/>Edit selected term / vocabulary</h3>
+                <div id="formEditor" class="form_editor" style="display:none;width:600px;margin-top:80px;">
+                    <h2 style="margin-left:10px; margin-top:0px; margin-bottom:10px;border-style:none;display:inline-block">Edit selected term / vocabulary</h2>
                     <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
                         <b>term saved successfully!</b>
                     </div>

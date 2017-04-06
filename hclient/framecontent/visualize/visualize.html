@@ -24,7 +24,15 @@
 
 <!-- Network diagram HTML -->
 
-<div class="ent_header" style="height:9.5em;border:none;padding-top: 10px;display:table-row">
+    <div id="divHint" style="display:none;font-weight:normal;padding:4px; margin-left:10px;">
+    <br>Choose entities in dropdown below. Entities can be dragged to position them. Drag background to reposition, mousewheel or +/- buttons to zoom.
+    <br>Layout is remembered across sessions if gravity is OFF (recommended). 
+    <br>Drag link icon to another node to create a linking field (record pointer or relationship marker).
+    </div>
+
+
+<div class="ent_header" style="height:9.5em;border:none;padding-top: 10px;margin-top:50px;display:table-row">
+
 
    <div id="rectypeSelector" class="toolbar-section" style="width:25ex;display:none;vertical-align:top;">
             <label>&nbsp;</label><br>
@@ -137,9 +145,7 @@
 
     </div> <!-- end of toolbar -->
 
-    <div id="divHint" style="display:none;color:darkgreen;font-weight:bold;padding:4px;">Choose entities in dropdown above. Turn gravity OFF for more control. Entities can be dragged to position them.<br>Layout is remembered across sessions if gravity is off.
-    Drag background to reposition, mousewheel to zoom.</div>
-</div>
+    </div>
 
 <div id="divSvg" class="ent_content_full" style="top:10em;">
             <!-- SVG -->

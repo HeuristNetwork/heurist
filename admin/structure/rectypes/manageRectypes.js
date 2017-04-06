@@ -181,7 +181,7 @@ function RectypeManager() {
                     id: grpID,
                     label: "<label title='Drag tab to reposition. Use [+/-] tab to add, rename or delete tabs'>"+grpName+"</label>",
                     content:
-                    ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
+                    ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + 
                         '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
 
                         // These are useless clutter. Filter by name was text, active only was checkbox
@@ -193,25 +193,19 @@ function RectypeManager() {
 
                         '</div>'+
                         '<div>'+
-                        // TODO: remove old code - orginally had to manually save changes
-                        // '<label id="lblNoticeAboutChanges'+grpID+'" '+
-                        // 'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
-                        // '&nbsp;&nbsp;&nbsp;'+
-                        // '<input id="btnSave'+grpID+'" type="button" value="Save order" '+
-                        // 'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
                         
-                        //Remarked temporarely 2016-05-11 '<input type="button" id="btnImportFromTemplate'+grpID+'" value="From templates" class="add"/>'+
-                        '<input type="button" id="btnImportFromDb'+grpID+'" value="From databases" class="import" style="margin-right:1em"/>'+
-                        '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add" style="margin-right:1em"/>'+
+                        '<input type="button" id="btnImportFromDb'+grpID+
+                        '" value="Get from templates" class="import" style="margin-right:1em; margin-bottom:10px;"/>'+
+                        '<input type="button" id="btnAddRecordType'+grpID+
+                        '" value="Add new record type" class="add" style="margin-right:1em; margin-bottom:10px;"/>'+
 
                         //'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
                         '</div></div>'+
                         '<div id="tabContainer'+grpID+'"></div>'+
                         '<div style="position:absolute;bottom:8px;right:425px;">'+
 
-                        //Remarked temporarely 2016-05-11 '<input type="button" id="btnImportFromTemplate'+grpID+'_2" value="From templates" class="add"/>'+
-                        '<input type="button" id="btnImportFromDb'+grpID+'_2" value="From databases" class="import" style="margin-right:1em"/>'+
-                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add" style="margin-right:1em"/>'+
+                        // '<input type="button" id="btnImportFromDb'+grpID+'_2" value="Get from templates" class="import" style="margin-right:1em"/>'+
+                        // '<input type="button" id="btnAddRecordType'+grpID+'_2" value="Add new record type" class="add" style="margin-right:1em"/>'+
                         '</div>'+
                         '</div>')
 
@@ -711,7 +705,10 @@ function RectypeManager() {
 
             var btnAddRecordType = Dom.get('btnAddRecordType'+grpID);
             btnAddRecordType.onclick = function (e) {
-                if(confirm('Before defining new record types we suggest importing suitable definitions\nfrom Heurist databases registered in the Heurist clearinghouse\n\n(Database menu > Structure > Acquire from databases)')){
+                if(confirm('Before defining new record (entity) types we suggest importing suitable '+
+                'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
+                'Those with registration IDs less than 1000 are templates curated by the Heurist team. '+
+                '\n\nUse:  Manage tab > Structure > Import templates')){
                     var currentTabIndex = tabView.get('activeIndex');
                     var grpID = tabView.getTab(currentTabIndex).get('id');
                     _onAddEditRecordType(0, grpID);

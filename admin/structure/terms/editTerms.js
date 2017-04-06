@@ -109,7 +109,7 @@ function EditTerms() {
 
                 }));
 
-                $(".banner h2").text("Manage terms for list fields");
+                $(".banner h2").text("Manage terms used by term-list (category/dropdown) fields");
             }
 
             if (treetype == "relationships")
@@ -120,7 +120,7 @@ function EditTerms() {
                     content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
 
                 }));
-                $(".banner h2").html("Manage terms for relationship types");
+                $(".banner h2").html("Manage terms used for relationship type in relationship records");
             }
         }
 
