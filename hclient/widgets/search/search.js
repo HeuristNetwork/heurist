@@ -658,6 +658,8 @@ $.widget( "heurist.search", {
             var select_fieldvalue = $("#sa_fieldvalue");
             var select_sortby = $("#sa_sortby");
             var select_terms = $("#sa_termvalue");
+            var select_coord1 = $("#sa_coord1");
+            var select_coord2 = $("#sa_coord2");
             var sortasc =  $('#sa_sortasc');
 
             if( (select_rectype && select_rectype.val()) || 
@@ -824,11 +826,17 @@ $.widget( "heurist.search", {
             allowed.splice(allowed.indexOf("relmarker"),1);
 
 
+            //change list of field types on rectype change
             that._on( select_rectype, {
                 change: function (event){
 
                     var rectype = (event)?Number(event.target.value):0;
-                    window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), rectype, allowed, window.hWin.HR('Any field type'));
+                    
+                    var topOptions2 = [{key:'',title:window.hWin.HR('Any field type')},
+                                       {key:'latitude',title:window.hWin.HR('Latitude')},
+                                       {key:'longitude',title:window.hWin.HR('Longitude')}];
+                    window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), 
+                                rectype, allowed, topOptions2);
 
                     var topOptions = [{key:'t', title:window.hWin.HR("record title")},
                         {key:'id', title:window.hWin.HR("record id")},
@@ -857,29 +865,43 @@ $.widget( "heurist.search", {
                     this.calcShowSimpleSearch();
                 }
             });
+            
+            //change compare option according to selected field type
+            // enum, geocoord, others
             that._on( select_fieldtype, {
                 change: function(event){
 
-                    var dtID = Number(event.target.value);
+                    if(event.target.value=='longitude' || event.target.value=='latitude'){
 
-                    var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
-                    var detailType = '';
-
-                    if(Number(dtID)>0){
-                        detailType = detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
-                    }
-                    if(detailType=='enum'  || detailType=='relationtype'){
                         $dlg.find("#fld_contain").hide();
-                        $dlg.find("#fld_enum").show();
-                        //fill terms
-                        var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
-                        disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
-
-                        window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, 
-                                            allTerms, disabledTerms, null, window.hWin.HR('<blank>'));
-                    } else {
-                        $dlg.find("#fld_contain").show();
                         $dlg.find("#fld_enum").hide();
+                        $dlg.find("#fld_coord").show();
+                        
+                    }else{
+                        var dtID = Number(event.target.value);
+                        
+                        $dlg.find("#fld_coord").hide();
+                    
+                        var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
+                        var detailType = '';
+
+                        if(Number(dtID)>0){
+                            detailType = detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
+                        }
+                        if(detailType=='enum'  || detailType=='relationtype'){
+                            $dlg.find("#fld_contain").hide();
+                            $dlg.find("#fld_enum").show();
+                            //fill terms
+                            var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
+                            disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
+
+                            window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, 
+                                                allTerms, disabledTerms, null, window.hWin.HR('<blank>'));
+                        } else {
+                            $dlg.find("#fld_contain").show();
+                            $dlg.find("#fld_enum").hide();
+                        }
+                        
                     }
 
                     this.calcShowSimpleSearch();
@@ -928,26 +950,50 @@ $.widget( "heurist.search", {
     // recalculate search query value
     ,calcShowSimpleSearch: function (e) {
 
-        var isEnum = this.search_assistant.find("#fld_enum").is(':visible');
+        
         
         var q = this.search_assistant.find("#sa_rectype").val(); if(q) q = "t:"+q;
-        var fld = this.search_assistant.find("#sa_fieldtype").val(); if(fld) fld = "f:"+fld+":";
-        var ctn =  isEnum?this.search_assistant.find("#sa_termvalue").val()
-        :this.search_assistant.find("#sa_fieldvalue").val();
+        var fld = this.search_assistant.find("#sa_fieldtype").val(); 
+        var ctn = '';
         
-        if(this.search_assistant.find("#sa_negate"+(isEnum?'2':'')).is(':checked')){
-            fld  = '-'+fld;
+        if(fld=='latitude' || fld=='longitude'){
+            var coord1 = $("#sa_coord1").val();
+            var coord2 = $("#sa_coord2").val();
+            
+            var morethan = !isNaN(parseFloat(coord1));
+            var lessthan = !isNaN(parseFloat(coord2));
+            
+            if(morethan && lessthan){
+                fld = fld+':'+coord1+'<>'+coord2;
+            }else if(morethan){
+                fld = fld+'>'+coord1;
+            }else if(lessthan){
+                fld = fld+'<'+coord2;
+            }else{
+                fld = '';
+            }
+        }else{
+            
+            var isEnum = this.search_assistant.find("#fld_enum").is(':visible');
+            
+            if(fld) fld = "f:"+fld+":";
+            
+            ctn =  isEnum?this.search_assistant.find("#sa_termvalue").val()
+                         :this.search_assistant.find("#sa_fieldvalue").val();
+            
+            if(this.search_assistant.find("#sa_negate"+(isEnum?'2':'')).is(':checked')){
+                fld  = '-'+fld;
+            }
         }
 
         var asc = ($("#sa_sortasc").val()==1?"-":'') ; //($("#sa_sortasc:checked").length > 0 ? "" : "-");
         var srt = $("#sa_sortby").val();
         srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
 
-        q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn? (isNaN(Number(ctn))?'"'+ctn+'"':ctn):"") + (srt? " " + srt : "");
+        q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn?(isNaN(Number(ctn))?'"'+ctn+'"':ctn):"") + (srt? " " + srt : "");
         if(!q){
             q = "sortby:t";
         }
-
 
         this.input_search.val(q);
         this.input_search.change();
