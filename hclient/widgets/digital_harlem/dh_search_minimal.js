@@ -203,6 +203,7 @@ function hSearchMinimalDigitalHarlem() {
     RT_EVENT = 14,
     RT_PERSON = 10,
     RT_PLACE_FUNCTION = 16,
+    RT_GEOPLACE = 27,
     RT_RELATION = 1;
     DT_TARGET_RESOURCE = 5,
     DT_RELATION_TYPE = 6,
@@ -262,6 +263,9 @@ function hSearchMinimalDigitalHarlem() {
             //take primary type from first record
             var rec = recordset.getFirstRecord();
             primary_rt = Number(recordset.fld(rec, 'rec_RecTypeID'));
+            if(primary_rt==RT_GEOPLACE){
+                  primary_rt = RT_ADDRESS;
+            }
         } 
 console.log('primary '+primary_rt);
 
@@ -280,8 +284,13 @@ console.log('primary '+primary_rt);
                 
                 var record_result = null;
                 
-                
-                if(primary_rt==RT_PLACE_FUNCTION){
+                if(recTypeID == RT_GEOPLACE){
+                   
+                    recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); 
+                    res_records[recID] = record;
+                    res_orders.push(recID);
+                    
+                }else if(primary_rt==RT_PLACE_FUNCTION){
                      
                      if(recTypeID == RT_PLACE_FUNCTION){
                             
