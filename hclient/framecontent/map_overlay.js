@@ -1479,6 +1479,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         var legend = document.getElementById('map_legend');
         map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend);
         
+        var warning = document.getElementById('map_warning');
+        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(warning);
+        
         //$(legend).css('top','60px');
         
         // Legend collapse listener

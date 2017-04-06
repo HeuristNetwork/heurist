@@ -182,8 +182,16 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
                 _updateLayout();   //show hide panels
 
+var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
+var ele_warn = $('#map_warning');
+if(_mapdata.mapenabled==MAXITEMS){
+    //cnt = _mapdata.options.items.length;
+    ele_warn.html('Map limited to '+MAXITEMS+' items - reset in Profile > Preferences').show().fadeOut(10000);
+}else{
+    ele_warn.hide();
+}
 //console.log('add dataset '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
-//console.log('map: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
+//console.log('map cnt: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
                 window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
                 _reloadDataset( dataset_id );
