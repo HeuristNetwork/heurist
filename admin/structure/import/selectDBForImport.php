@@ -303,7 +303,7 @@
         <div id="page-inner" style="overflow:auto;top:20;">
 
 
-           <h4>Use the filter to locate a specific term in the name or title. Click the database icon on the left to view, and import if desired, available record types in that database.</h4> 
+           <h4>Use the filter to locate a specific term in the name or description. Click the database icon on the left to view available record types in that database and select them for addition to this database (including all related record types, fields and terms).</h4> 
             
 <!--            
             

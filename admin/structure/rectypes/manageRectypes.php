@@ -95,7 +95,11 @@ if(@$_REQUEST['popup']!=1){
 <?php
 }
 ?>    
-            <div id="page-inner">
+            <div id="page-inner" style="top:20;">
+            
+                <h4>Use this function to build and extend your database by adding and modifying record (entity) types. 
+                <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
+                <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>
                 <!--
                 <div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"
                 style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>
