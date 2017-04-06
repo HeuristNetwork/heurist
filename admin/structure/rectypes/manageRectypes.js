@@ -377,6 +377,7 @@ function RectypeManager() {
             });
 
             var myColumnDefs = [
+               /*
                 { key: "id", label: "Code", sortable:true, minWidth:30, maxAutoWidth:30, width:30, className:'right',
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
@@ -393,8 +394,23 @@ function RectypeManager() {
                         + oRecord.getData("name")+' records">'+ rectypeID + '</a>';
                     },
                 },
-                // 8/10/12 Concept ID hidden by Ian to make space, shoudl show on rollover of local code
-                { key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right', hidden:true },
+                */
+                { key: "id", label: "Add", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'right',
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = 
+                            '<a href="#addrec" title="Click this button to insert a new '+oRecord.getData("name")+'">'
+                            +'<img src="../../../common/images/add-record-small.png" ' // style="cursor:pointer;"
+                            +'title=""></a>';
+                    }
+                },
+                { key: "conceptid", label: "Filter", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'right', 
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = 
+                            '<a href="#search" title="Click to launch search for '+oRecord.getData("name")+' records">'
+                            +'<img src="../../../common/images/tool_filter.png" ' // style="cursor:pointer;"
+                            +'title=""></a>';
+                    }
+                },
 
                 { key: "icon", label: "Icon", className:'center', sortable:false,   width:40,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
@@ -520,6 +536,8 @@ function RectypeManager() {
 
                     if(elLink.hash === "#search") {
                         window.open(top.HEURIST.baseURL+'?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
+                    }else if(elLink.hash === "#addrec") {
+                        window.open(top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&db='+db+'&rec_rectype='+rectypeID,'_blank');
                     }else if(elLink.hash === "#edit_rectype") {
                         _editRecStructure(rectypeID);
                         //2016-06-14 Ian req _onAddEditRecordType(rectypeID, 0);
