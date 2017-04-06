@@ -25,11 +25,16 @@
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
+    require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
     if(isForAdminOnly("to import structural elements")){
         return;
     }
 
+    if(checkSmtp()){
+        $email_text = 'Opened Templates list from "'.HEURIST_DBNAME.'" at '.HEURIST_SERVER_URL;
+        $rv = sendEmail(HEURIST_MAIL_TO_INFO, "Open templates", $email_text, null);
+    }
 ?>
 <html>
     <head>
