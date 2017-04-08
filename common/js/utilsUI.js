@@ -2026,7 +2026,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     showError: function(msg){
         if(top.HEURIST.util.isempty(msg)){
             msg = "Incorrect response from server. Please contact development team if this error persists";
-        }else if (Number(msg)===-1){
+        }else if (Number(msg)===-1 || typeof msg !== 'string'){
             msg = "No response from server, please try again later";
         }else if (msg.toLowerCase().indexOf("error")<0){
             msg = "Error occurred: " + msg;

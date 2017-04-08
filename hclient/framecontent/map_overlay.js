@@ -391,6 +391,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
         + overlay_idx+'" id="chbox-'+legendid+'" class="overlay-legend" '
         + (overlay.visible?'checked="checked">':'>')
+        + '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif" id="loading-'+overlay_idx+'" '
+        + ' style="display:none;margin-right:2px;vertical-align: text-top;background:url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif) no-repeat center center">'
         + ((ismapdoc && icon_bg)
             ? ('<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif"'
                 + ' align="top" class="rt-icon" ' + icon_bg     
@@ -473,16 +475,31 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _showHideOverlay(event){
         // Hide or display the layer
-        var overlay_idx = $(this).prop("value");
-        var checked = $(this).prop("checked");
-
+        var ele_cbox = $(this);
+        var overlay_idx = ele_cbox.prop("value");
+        var checked = ele_cbox.prop("checked");
+        
         // Update overlay
         var overlay = overlays[overlay_idx] ?overlays[overlay_idx] :overlays_not_in_doc[overlay_idx];  //overlays[index]
         if(overlay){
-            overlay.setVisibility(checked);
-            overlay.visible = checked;
+            ele_cbox.hide();
+            $('#loading-'+overlay_idx).show();
+            
+            setTimeout(function(){
+                overlay.setVisibility(checked);
+                overlay.visible = checked;
+                $('#loading-'+overlay_idx).hide();
+                ele_cbox.show();
+            },200);
+            
         }
+       
+        
     }
+    
+    //
+    //
+    ///
     function _showHideLayer(event){
         var mapdata_id = $(this).attr('data-mapdataid');
         var checked = $(this).prop("checked");
@@ -912,7 +929,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     }
 
     //set of color for Digital Harlem dynamically added layers (or if color is not defined for layer in map document )
-    var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,127,39)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)'];
+    var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)','rgb(255,127,39)'];
     var colors_idx = -1;
 
     /**
@@ -1072,7 +1089,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 setVisibility: function(checked) {
                     this.visible = checked;
                     mapping.showDataset(this.id, checked); //mapdata.id
-
                     var idx;
                     for (idx in this.dependent_layers){
                         var mapdata_id = this.dependent_layers[idx].key;
