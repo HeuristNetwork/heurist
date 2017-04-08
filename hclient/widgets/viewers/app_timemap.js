@@ -162,6 +162,16 @@ $.widget( "heurist.app_timemap", {
         }
 
     },
+    
+    _reload_frame: function(){
+        if(this.element.is(':visible')){
+            
+            window.hWin.HEURIST4.msg.showMsgFlash('Reloading map to apply new settings', 2000);
+            
+            this.recordset_changed = true;
+            this.mapframe.attr('src', null);
+        }
+    },
 
     _initmap: function(){
 
@@ -180,7 +190,7 @@ $.widget( "heurist.app_timemap", {
             // all this is now done in addRecordsetLayer
             // var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
 
-//console.log('ini map from app_timemap');
+//console.log('init map from app_timemap');
             
             mapping.load( null, //mapdataset,
                 this.options.selection,  //array of record ids
@@ -244,6 +254,10 @@ $.widget( "heurist.app_timemap", {
     * public method
     */
 
+    , reloadMapFrame: function(){
+        this._reload_frame();    
+    }
+    
     , getMapDocumentDataById: function(mapdocument_id){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){

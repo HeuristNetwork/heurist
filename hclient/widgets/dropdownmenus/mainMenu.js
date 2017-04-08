@@ -826,6 +826,11 @@ $.widget( "heurist.mainMenu", {
                     }
                 };
             });
+            
+            var ele = $dlg.find('#mapcluster_on');
+            $dlg.find('#mapcluster_grid').change(function(){ ele.prop('checked', true)});
+            $dlg.find('#mapcluster_count').change(function(){ ele.prop('checked', true)});
+            $dlg.find('#mapcluster_zoom').change(function(){ ele.prop('checked', true)});
 
             //save to preferences
             function __doSave(){
@@ -866,6 +871,12 @@ $.widget( "heurist.mainMenu", {
                                 prefs['layout_theme'] != request['layout_theme'] ||
                                 prefs['layout_id'] != request['layout_id']);
 
+                            var reload_map = (prefs['mapcluster_grid'] != request['mapcluster_grid'] ||    
+                                prefs['mapcluster_on'] != request['mapcluster_on'] || 
+                                prefs['search_detail_limit'] != request['search_detail_limit'] ||
+                                prefs['mapcluster_count'] != request['mapcluster_count'] ||   
+                                prefs['mapcluster_zoom'] != request['mapcluster_zoom']);
+                                
                             //check help toggler and bookmark search - show/hide
                             if(prefs['help_on'] != request['help_on']){
                                 that._toggleHelp(request['help_on']);
@@ -884,10 +895,21 @@ $.widget( "heurist.mainMenu", {
                             $dlg.dialog( "close" );
 
                             if(ask_reload){
-                                window.hWin.HEURIST4.msg.showMsgDlg('Reload page to apply new settings?',
+                                window.hWin.HEURIST4.msg.showMsgFlash('Reloading page to apply new settings', 2000);
+                                setTimeout(function(){
+                                        window.location.reload();
+                                    },2100);
+
+                                /*window.hWin.HEURIST4.msg.showMsgDlg('Reload page to apply new settings?',
                                     function(){
                                         window.location.reload();
-                                    }, 'Confirmation');
+                                    }, 'Confirmation');*/
+                            }else if(reload_map){
+                                //reload map frame forcefully
+                                var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
+                                if(app && app.widget){
+                                    $(app.widget).app_timemap('reloadMapFrame'); //call method
+                                }
                             }
 
                         }else{

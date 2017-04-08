@@ -549,7 +549,7 @@ $.widget( "heurist.profile", {
     },
 
     /**
-    * Open Edit Preferences dialog
+    * Open Edit Preferences dialog    - duplication in mainMenu - remove this, use that
     */
     editPreferences: function()
     {
