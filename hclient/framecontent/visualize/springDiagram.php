@@ -110,7 +110,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
             
             function onVisualizeResize(){
                     var width = $(window).width();
-                    var supw = (width<690)?5:0; //1120
+                    var supw = (width<744)?3.8:0; //1120
                     $('#divSvg').css('top', 5+supw+'em');
             }
             

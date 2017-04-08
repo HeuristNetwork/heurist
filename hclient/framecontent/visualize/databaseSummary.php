@@ -476,7 +476,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 
                     var width = $(window).width();
               
-                    var supw = (width<841)?4:0; //1120
+                    var supw = (width<890)?4:0; //1120
 
                     var dbkey = 'db'+window.hWin.HAPI4.database;
 
@@ -485,7 +485,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 // intention                           
                 //if(getSetting(dbkey)==null){ //new databse - show hint
                     putSetting(dbkey, '1');
-                    $('#divSvg').css('top', 8+supw+'em');
+                    $('#divSvg').css('top', 9+supw+'em');
                     $('#divHint').show();
                     /*}else{
                         $('#divSvg').css('top', 5+supw+'em');
