@@ -107,7 +107,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                     {   "close-on-blur": false,
                         "no-resize": false,
                         height: 680,
-                        width: 700,
+                        width: 840,
                         callback: function(context) {
                         }
                 });

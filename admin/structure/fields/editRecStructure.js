@@ -2271,7 +2271,7 @@ function onDefineNewType(index_toinsert){
                 "no-resize": false,
                 title: 'Edit field type',
                 height: 700,
-                width: 700,
+                width: 840,
                 callback: function(context) {
 
                     if(!Hul.isnull(context)){
@@ -2753,7 +2753,7 @@ function _onAddEditFieldType(dty_ID, rty_ID){
         {   "close-on-blur": false,
             "no-resize": false,
             height: 680,
-            width: 700,
+            width: 840,
             callback: function(context) {
                 if(!Hul.isnull(context)){
 

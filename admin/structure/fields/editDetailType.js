@@ -120,6 +120,18 @@ function DetailTypeEditor() {
             _addOptionReserved();
         }
 
+        
+        $('input[name="enumType"]').change(
+            function(event){
+                if($(event.target).val()=='individual'){
+                    $('#enumIndividual').css('display','inline-block');//show();
+                    $('#enumVocabulary').hide();
+                }else{
+                    $('#enumIndividual').hide();
+                    $('#enumVocabulary').css('display','inline-block');//show();
+                }
+            }
+        );
 
 
         //creates new empty field type in case ID is not defined
@@ -249,8 +261,8 @@ function DetailTypeEditor() {
     */
     function _recreateTermsVocabSelector(datatype, toselect)  {
 
-        var prev = Dom.get("termsVocab");
-        prev.innerHTML = "";
+//        var prev = Dom.get("termsVocab");
+//        prev.innerHTML = "";
 
         if(Hul.isempty(datatype)) return;
 
@@ -267,8 +279,8 @@ function DetailTypeEditor() {
         termTree = top.HEURIST.terms.treesByDomain[dom],
         terms = top.HEURIST.terms.termsByDomainLookup[dom];
 
-        var el_sel = document.createElement("select");
-        el_sel.id = "selVocab";
+        var el_sel = $('#selVocab').get(0);
+        $(el_sel).empty();
 
         Hul.addoption(el_sel, -1, 'select...');
         
@@ -292,15 +304,13 @@ function DetailTypeEditor() {
             }
         }
 
-        Hul.addoption(el_sel, 0, 'Individual selection (advanced)');
         if(sel_index<0) {
             sel_index = (Dom.get("dty_JsonTermIDTree").value!='' && vocabId==0)?el_sel.length-1:0;
         }
         el_sel.selectedIndex = sel_index;
 
         el_sel.onchange =  _changeVocabulary;
-        el_sel.style.maxWidth = '165px';
-        prev.appendChild(el_sel);
+        el_sel.style.maxWidth = '120px';
 
         _changeVocabulary(null);
     }
@@ -318,31 +328,14 @@ function DetailTypeEditor() {
             el_sel = Dom.get("selVocab");
         }
 
-        var	btn_addsel = Dom.get("btnAddSelTerm"),
+        var    btn_addsel = Dom.get("btnAddSelTerm"),
         editedTermTree = "",
         divAddSelTerm = Dom.get("divAddSelTerm"),
         divAddVocab = Dom.get("divAddVocab"),
         divAddVocab2 = Dom.get("divAddVocab2");
-
-        //btn_addsel.disabled = false;
-
+  
         if(el_sel.value > 0){ //individual selection
-            btn_addsel.value = "Add  terms";
             editedTermTree = el_sel.value;
-            divAddSelTerm.style.display = "inline-block";
-            divAddVocab.style.display = "inline-block";
-            divAddVocab2.style.display = "inline-block";
-        }else if(el_sel.value < 0){
-            //btn_addsel.disabled = true;
-            //btn_addsel.value = "";
-            divAddSelTerm.style.display = "none";
-            divAddVocab.style.display = "inline-block";
-            divAddVocab2.style.display = "inline-block";
-        }else{
-            btn_addsel.value = "Select terms";
-            divAddSelTerm.style.display = "inline-block";
-            divAddVocab.style.display = "none";
-            divAddVocab2.style.display = "none";
         }
 
         if(event){
@@ -369,27 +362,24 @@ function DetailTypeEditor() {
             disabledTerms = disabledTerms.join(",");
         }
 
-        //remove old combobox
-        var prev = Dom.get("termsPreview"),
+        //remove old selector
+        var prev = Dom.get("termsPreview1"),
         i;
-        //for (i = 1; i < prev.children.length; i++) {
-        while(prev.childNodes.length>1) {
-            if(prev.childNodes.length>0){
-                prev.removeChild(prev.childNodes[1]);
-            }
-        }
+        
+        $(prev).empty();
+        $('#termsPreview2').empty();
 
         if(!Hul.isempty(allTerms)) {
-            //$('<label>Preview</label>').appendTo($(prev));
-            prev.appendChild(document.createTextNode('Preview: '));
             var el_sel = Hul.createTermSelect(allTerms, disabledTerms, datatype, null);
             el_sel.style.backgroundColor = "#cccccc";
             el_sel.onchange =  _preventSel;
-            el_sel.style.maxWidth = '120px';
+            $(el_sel).addClass('sel_width');
+            $(prev).append($('<label style="width:60px;min-width:60px">Preview</label>'));                            
             prev.appendChild(el_sel);
-            $(prev).css('display','inline-block');
+            $('#termsPreview2').append($('<label style="width:60px;min-width:60px">Preview</label>'));
+            $('#termsPreview2').append($(el_sel).clone());
         }else{
-            $(prev).css('display','none');
+            //$(prev).css('display','none');
         }
     }
 
@@ -445,12 +435,11 @@ function DetailTypeEditor() {
     }
 
     /**
-    * onSelectTerms
+    * _onAddVocabOrTerms
     *
-    * listener of "Change vocabulary" button
-    * Shows a popup window where user can select terms to create a term tree as wanted
+    * Add new vocavulary or add child to currently selected
     */
-    function _onAddSelectTerms(is_add_vocab){
+    function _onAddVocabOrTerms(is_add_vocab){
 
         var type = Dom.get("dty_Type").value;
         var allTerms = Dom.get("dty_JsonTermIDTree").value;
@@ -461,11 +450,10 @@ function DetailTypeEditor() {
         }
 
         var el_sel = Dom.get("selVocab");
-        if(is_add_vocab || (el_sel && el_sel.value>0)){ //add term to vocabulary
         
-            var vocab_id =  el_sel.value>0?el_sel.value:''; //keep value
+        var vocab_id =  el_sel.value>0?el_sel.value:''; //keep value
 
-            Hul.popupURL(top, top.HEURIST.baseURL +
+        Hul.popupURL(top, top.HEURIST.baseURL +
                 "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
                 {
                     "close-on-blur": false,
@@ -492,8 +480,24 @@ function DetailTypeEditor() {
                     }
             });
 
-        }else{ //select terms (advanced)
+    }
 
+    /**
+    * onSelectTerms
+    *
+    * Shows a popup window where user can select terms to create a term tree as wanted
+    */
+    function _onSelectTerms(){
+        
+        var type = Dom.get("dty_Type").value;
+        var allTerms = Dom.get("dty_JsonTermIDTree").value;
+        var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
+
+        if(type!="enum"){
+            type="relation";
+        }
+        
+        
             Hul.popupURL(top, top.HEURIST.baseURL +
                 "admin/structure/terms/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
                 {
@@ -511,8 +515,6 @@ function DetailTypeEditor() {
                         }
                     }
             });
-
-        }
 
     }
 
@@ -656,7 +658,9 @@ function DetailTypeEditor() {
         _onChangeType(null);
 
         // create preview for Terms Tree and record pointer
-
+        var vocabId = Hul.isempty(Dom.get("dty_JsonTermIDTree").value)?0:Number(Dom.get("dty_JsonTermIDTree").value);
+        $('input[name="enumType"][value="'+(isNaN(vocabId)?'individual':'vocabulary')+'"]').attr('checked',true).change();
+        
         _recreateTermsVocabSelector(_detailType[fi.dty_Type], null);
         _recreateTermsPreviewSelector(
             _detailType[fi.dty_Type],
@@ -1100,10 +1104,12 @@ function DetailTypeEditor() {
         /**
         *	handles change status event
         */
-        onAddSelectTerms : function() { _onAddSelectTerms(false); },
+        onAddTermsToVocab : function() { _onAddVocabOrTerms(false); },
 
-        onAddVocabulary : function() { _onAddSelectTerms(true); },
+        onAddVocabulary : function() { _onAddVocabOrTerms(true); },
 
+        onSelectTerms : function() { _onSelectTerms(); },
+        
         /**
         *	handles change status event
         */

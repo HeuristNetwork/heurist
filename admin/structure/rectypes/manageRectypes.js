@@ -392,17 +392,17 @@ function RectypeManager() {
                 { key: "id", label: "Add", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'right',
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = 
-                            '<a href="#addrec" title="Click this button to insert a new '+oRecord.getData("name")+'">'
+                            '<a href="#addrec">'
                             +'<img src="../../../common/images/add-record-small.png" ' // style="cursor:pointer;"
-                            +'title=""></a>';
+                            +' title="Click this button to insert a new '+oRecord.getData("name")+'"></a>';
                     }
                 },
                 { key: "conceptid", label: "Filter", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'right', 
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = 
-                            '<a href="#search" title="Click to launch search for '+oRecord.getData("name")+' records">'
+                            '<a href="#search">'
                             +'<img src="../../../common/images/tool_filter.png" ' // style="cursor:pointer;"
-                            +'title=""></a>';
+                            +'title="Click to launch search for '+oRecord.getData("name")+' records"></a>';
                     }
                 },
 
@@ -1027,7 +1027,7 @@ function RectypeManager() {
                 "close-on-blur": false,
                 "no-resize": false,
                 height: 700,
-                width: 700,
+                width: 840,
                 title: 'Edit field type',
                 callback: function(changedValues) {
                     if(Hul.isnull(changedValues)) {
@@ -1136,7 +1136,7 @@ function RectypeManager() {
     {   "close-on-blur": false,
     "no-resize": false,
     height: 430,
-    width: 650,
+    width: 840,
     callback: function(context) {
     // NO ACTION REQUIRED HERE
     }

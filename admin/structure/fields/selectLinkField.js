@@ -258,7 +258,7 @@ $(document).ready(function() {
                     "no-resize": false,
                     title: 'Edit field type',
                     height: 700,
-                    width: 700,
+                    width: 840,
                     callback: function(context) {
 
                         if(!top.HEURIST4.util.isnull(context)){

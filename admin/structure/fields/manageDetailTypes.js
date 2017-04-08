@@ -975,7 +975,7 @@ function DetailTypeManager() {
             {   "close-on-blur": false,
                 "no-resize": false,
                 height: 680,
-                width: 700,
+                width: 840,
                 callback: function(context) {
                     if(!Hul.isnull(context)){
 

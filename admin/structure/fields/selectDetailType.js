@@ -562,7 +562,7 @@ function SelectDetailType() {
 				"no-resize": false,
                 title: 'Define new field type',
 			height: 700,
-			width: 700,
+			width: 840,
 				callback: function(context) {
 
 					if(!Hul.isnull(context)){
