@@ -505,6 +505,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('record_details', request, callback);
             }
             
+//@TODO - need to implement queue for record_search, otherwise sometimes we get conflict on simultaneous requests            
+            
             /**
             * Search for records via global events
             * to search directly use SearchMgr
@@ -532,6 +534,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
                     }
 
+                            
                     callback = function(response)
                     {
                         var resdata = null;

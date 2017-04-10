@@ -887,6 +887,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
             $('#mapping').css('cursor','progress');
 
+            
             // Retrieve records for this request
             window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
 
@@ -904,7 +905,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 $('#mapping').css('cursor','auto');
 
             });
-
+            
             /*
             window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
@@ -1495,7 +1496,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         var legend = document.getElementById('map_legend');
         map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend);
         
-        var warning = document.getElementById('map_warning');
+        var warning = document.getElementById('map_limit_warning');
         map.controls[google.maps.ControlPosition.RIGHT_TOP].push(warning);
         
         //$(legend).css('top','60px');

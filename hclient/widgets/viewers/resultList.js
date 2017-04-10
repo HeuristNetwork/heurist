@@ -1557,7 +1557,7 @@ $.widget( "heurist.resultList", {
             }else{
 
                 var ids = rec_toload.join(',');
-                var request = { q: 'ids:'+ ids,
+                var request = { q: '{"ids":"'+ ids+'"}',
                     w: 'a',
                     detail: 'header',
                     id: that.current_page,

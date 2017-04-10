@@ -183,10 +183,10 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 _updateLayout();   //show hide panels
 
 var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
-var ele_warn = $('#map_warning');
+var ele_warn = $('#map_limit_warning');
 if(_mapdata.mapenabled==MAXITEMS){
     //cnt = _mapdata.options.items.length;
-    ele_warn.html('Map limited to '+MAXITEMS+' items - reset in Profile > Preferences').show().fadeOut(10000);
+    ele_warn.html('Map limited to '+MAXITEMS+' items - reset in Profile > Preferences').show().delay(2000).fadeOut(10000);
 }else{
     ele_warn.hide();
 }

@@ -92,9 +92,6 @@ var svg;        // The SVG where the visualisation will be executed on
             
             showCounts: true,
             
-            // Limits tha maximum results whichg can be plotted to avoid overloading the browser - user will get warning message
-            limit: 2000,
-            
             // UI setting controls
             showLineSettings: true,
             showLineType: true,
@@ -154,11 +151,15 @@ var svg;        // The SVG where the visualisation will be executed on
 
         // Check visualisation limit
         var amount = Object.keys(settings.data.nodes).length;
-        if(amount > settings.limit) {
-             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set to ' +settings.limit+ ' records to avoid overloading the browser. You are trying to visualize ' +amount+ ' records. Please refine your filter to reduce the number of results.</text>');  
-             return; 
+        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+        
+        visualizeData();    
+
+        var ele_warn = $('#net_limit_warning');
+        if(amount >= MAXITEMS) {
+            ele_warn.html('Visualization limited to '+MAXITEMS+' items - reset in Profile > Preferences').show().delay(2000).fadeOut(10000);
         }else{
-            visualizeData();    
+            ele_warn.hide();
         }
  
         return this;

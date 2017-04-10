@@ -56,8 +56,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <!-- Call from parent iframe -->
         <script>
             /** Shows data visually */
-            var limit = 2000; // TO DO : remove. this does not appear to be used, there is a limit variable in visualize.js which IS used
-
             function showSelection( selectedRecordsIds ){
                  visualizeSelection( selectedRecordsIds );
             }

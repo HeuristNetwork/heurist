@@ -499,8 +499,8 @@ class System {
                     "baseURL"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
                     "dbrecent"=>$dbrecent,
-                    'max_post_size'=>$this->_get_config_bytes(ini_get('post_max_size')),
-                    'max_file_size'=>$this->_get_config_bytes(ini_get('upload_max_filesize'))
+                    'max_post_size'=>$this->get_php_bytes('post_max_size'),
+                    'max_file_size'=>$this->get_php_bytes('upload_max_filesize')
                     )
             );
 
@@ -914,6 +914,16 @@ class System {
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
     }
 
+    //
+    //
+    //
+    public function get_php_bytes($php_var ){
+        
+        $value = ini_get($php_var);
+        return $this->_get_config_bytes($value);
+        
+    }
+    
     //
     // convert php.ini config value to valid integer
     //

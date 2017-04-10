@@ -152,8 +152,10 @@ $.widget( "heurist.connections", {
                         this._getRelations(this.options.recordset);
                         
                     }else{
+                        
+                        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                     
-                        var records_ids = this.options.recordset.getIds(2000);
+                        var records_ids = this.options.recordset.getIds(MAXITEMS);
                         var relations = this.options.relations;
                         
                         // Parse response to spring diagram format
@@ -210,8 +212,10 @@ $.widget( "heurist.connections", {
         }
         
         var that = this; 
-        //get first 2000 records and send their IDS to server to get related record IDS
-        var records_ids = recordset.getIds(2000);
+        //get first MAXITEMS records and send their IDS to server to get related record IDS
+        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+        var records_ids = recordset.getIds(MAXITEMS);
+//console.log('was '+recordset.getIds().length+'  send for '+records_ids.length);        
         if(records_ids.length>0){
             
             var callback = function(response)

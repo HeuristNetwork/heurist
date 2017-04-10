@@ -330,7 +330,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 //$(".show").slideToggle(500);
                 //$("#visualisation-column").slideToggle(500);
 
-                // VISUALISATION CALL  @todo - use abs path from HAPI4.baseURL
+                // VISUALISATION CALL
                 var url = window.hWin.HAPI4.baseURL+"hserver/controller/rectype_relations.php" + window.location.search;
 //DEBUG                console.log("Loading data from: " + url);
                 d3.json(url, function(error, json_data) {
