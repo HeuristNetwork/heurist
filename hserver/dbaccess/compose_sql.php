@@ -1376,7 +1376,8 @@ class FieldPredicate extends Predicate {
         
         $match_pred = $this->get_field_value();
 
-        if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+        if (!array_diff($a = explode(',', $this->value), array_map('intval', $a))) {  
+        //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { it does not work for more than 500 entries
             $isnumericvalue = false;
             $isin = true;
         }else{
@@ -1524,7 +1525,8 @@ class FieldPredicate extends Predicate {
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
         }else 
-        if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+        if (!array_diff($a = explode(',', $this->value), array_map('intval', $a))) {  
+        //  if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {  not work for >500 entries
             // comma-separated list of ids
             $match_pred = ' in ('.$this->value.')';
             
@@ -1694,7 +1696,8 @@ class BibIDPredicate extends Predicate {
             $vals = explode("<>", $this->value);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
-        }else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+        }else if (!array_diff($a = explode(',', $this->value), array_map('intval', $a))) {  
+        //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
             // comma-separated list of ids
             $not = ($this->parent->negate)? ' not' : '';
             $match_pred = $not.' in ('.join(',', array_map('intval', explode(',', $this->value))).')';

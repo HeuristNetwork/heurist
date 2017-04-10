@@ -1090,7 +1090,7 @@ class HPredicate {
             $res = (($this->negate)?' not':'').$res;
             
         }else
-        if (($this->field_type=='float' || $this->field_type=='inbteger' || $this->field_type == 'link') && is_numeric($this->value)) {
+        if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type == 'link') && is_numeric($this->value)) {
             if($this->field_type == "link"){
                 $res = " $eq ".intval($this->value);  //no quotes
             }else{
@@ -1098,7 +1098,9 @@ class HPredicate {
             }
             $this->field_list = true;
         }
-        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+        else if (!array_diff($a = explode(',', $this->value), array_map('intval', $a))) {  
+        //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
+                            
             // comma-separated list of defRecTypes ids
             $in = ($this->negate)? 'not in' : 'in';
             $res = " $in (" . $this->value . ")";
