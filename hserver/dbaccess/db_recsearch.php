@@ -860,7 +860,8 @@
                     $rectypes = array();
                     $records = array();
                     $order = array();
-                    $limit_warning = null;
+                    $memory_warning = null;
+                    $limit_warning = false;
                     
                     /*if($istimemap_request){ //special case need to scan all result set and pick up only timemap enabled
                     
@@ -997,9 +998,10 @@ $loop_cnt++;
                                                 $tm_records[$recID] = $record;        
                                                 array_push($order, $recID);
                                                 $rectypes[$record[4]]=1; 
-                                                $records[$recID] = null; //unset
-                                                unset($records[$recID]);
+                                                //$records[$recID] = null; //unset
+                                                //unset($records[$recID]);
                                             }else{
+                                                $limit_warning = true;
                                                 break;
                                             }
                                             $istimemap_counter++;
@@ -1019,15 +1021,15 @@ $loop_cnt++;
                                                 $sliced_records[$recID] = $tm_records[$recID]; 
                                             }
                                             $tm_records = $sliced_records;
-                                            $limit_warning = '';
+                                            $memory_warning = '';
                                         }else{
                                             foreach ($order as $recID) {
                                                 $sliced_records[$recID] = $records[$recID]; 
                                             }
                                             $records = $sliced_records;
-                                            $limit_warning = 'Search query produces '.$res_count.' records. ';
+                                            $memory_warning = 'Search query produces '.$res_count.' records. ';
                                         }
-                                        $limit_warning = $limit_warning.'The result is limited to '.count($sliced_records).' records due to server limitations.'
+                                        $memory_warning = $memory_warning.'The result is limited to '.count($sliced_records).' records due to server limitations.'
                                         .' Please filter to a smaller set of results.';
                                         break;
                                     }
@@ -1064,7 +1066,8 @@ $loop_cnt++;
                                 'records'=>$records,
                                 'order'=>$order,
                                 'rectypes'=>$rectypes,
-                                'limit_warning'=>$limit_warning));
+                                'limit_warning'=>$limit_warning,
+                                'memory_warning'=>$memory_warning));
                         if($fieldtypes_ids){
                               $response['data']['fields_detail'] =  explode(',', $fieldtypes_ids);
                         }

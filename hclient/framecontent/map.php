@@ -542,7 +542,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 </div>
                 <div class="content"></div>
             </div>
-            <div id="map_limit_warning" style="background-color: rgba(200, 200, 200, 0.5); color:red; padding:8px; display:none;">
+            <div id="map_limit_warning" style="border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold; color:red; padding:8px; display:none;">
             </div>
         </div>
 

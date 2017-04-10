@@ -43,6 +43,8 @@ function hRecordSet(initdata) {
     structures = null,  //record structure definitions for all rectypes in this record set
     relationship = null; //relationship records within this recordset
     
+    limit_warning = null;
+    
     var _progress = null,
         _isMapEnabled = false,
         _request = null;
@@ -58,6 +60,10 @@ function hRecordSet(initdata) {
             queryid = response.queryid;
             total_count = Number(response.count);
             offset = Number(response.offset);
+            
+            if(response['limit_warning']){
+                limit_warning = response.limit_warning;    
+            }
             
             if( !$.isEmptyObject(response.mainset) ){
                 mainset = response.mainset;
@@ -315,7 +321,7 @@ function hRecordSet(initdata) {
                         };  
                                           
                 if(shapes.length>0){
-                    if(mapenabled<MAXITEMS){
+                    if(mapenabled<=MAXITEMS){
                         item.placemarks = shapes;
                         item.options.places = shapes;
                     }
@@ -339,7 +345,8 @@ function hRecordSet(initdata) {
                 visible: true, 
                 mapenabled: mapenabled,
                 options: { items: aitems },
-                timeline:{ items:titems } //, start: min_date  ,end: max_date  }
+                timeline:{ items:titems }, //, start: min_date  ,end: max_date  }
+                limit_warning:limit_warning
             };
 
 //console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length+' of '+timeenabled);            

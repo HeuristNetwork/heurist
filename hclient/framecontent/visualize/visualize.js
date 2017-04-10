@@ -157,7 +157,7 @@ var svg;        // The SVG where the visualisation will be executed on
 
         var ele_warn = $('#net_limit_warning');
         if(amount >= MAXITEMS) {
-            ele_warn.html('Visualization limited to '+MAXITEMS+' items - reset in Profile > Preferences').show().delay(2000).fadeOut(10000);
+            ele_warn.html('These results are limited to '+MAXITEMS+' records<br>(limit set in your profile Preferences)<br>Please filter to a smaller set of results').show();//.delay(2000).fadeOut(10000);
         }else{
             ele_warn.hide();
         }
