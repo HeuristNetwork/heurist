@@ -447,7 +447,30 @@ class Query {
             }
         }
     }
+    /*
+    function makeJSON() {
 
+        $where_clause = '';
+        $and_clauses = array();
+        for ($i=0; $i < count($this->top_limbs); ++$i) {
+
+
+            $or_clauses = array();
+            $or_limbs = $this->top_limbs[$i];
+            for ($j=0; $j < count($or_limbs); ++$j) {
+                $new_sql = $or_limbs[$j]->makeSQL();
+                array_push($or_clauses, '(' . $new_sql . ')');
+            }
+            sort($or_clauses);    // alphabetise
+            $where_clause = join(' or ', $or_clauses);
+            if(count($or_clauses)>1) $where_clause = '(' . $where_clause . ')';
+            array_push($and_clauses, $where_clause);
+        }
+        sort($and_clauses);
+        $this->where_clause = join(' and ', $and_clauses);
+        
+    } */   
+    
     function makeSQL() {
 
         //WHERE
@@ -1429,10 +1452,16 @@ class FieldPredicate extends Predicate {
             
         }else if($this->field_type_value){ 
 
+            if($this->field_type_value=='file'){
+                $fieldname = 'rd.dtl_UploadedFileID';
+            }else{
+                $fieldname = 'rd.dtl_Value';
+            }
+    
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
             . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
-            . ' and rd.dtl_Value ' . $match_pred. ')';
+            . ' and ' . $fieldname . ' ' . $match_pred. ')';
             
         }else{
         

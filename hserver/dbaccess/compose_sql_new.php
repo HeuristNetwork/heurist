@@ -729,6 +729,8 @@ class HPredicate {
             if($this->field_type == 'date' && trim($this->value)!='') { //false && $this->isDateTime()){
                 $field_name = 'getTemporalDateString('.$p.'dtl_Value) ';
                 //$field_name = 'str_to_date(getTemporalDateString('.$p.'dtl_Value), "%Y-%m-%d %H:%i:%s") ';
+            }else if($this->field_type == 'file'){
+                $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values
             }else{
                 $field_name = $p."dtl_Value ";
             }
@@ -1065,9 +1067,9 @@ class HPredicate {
         }
         $this->value = $this->cleanQuotedValue($this->value);
 
-        if(trim($this->value)=='') return "!=''";
+        if(trim($this->value)=='') return "!=''";   //find any non empty value
 
-            $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
+        $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
         
         if($this->field_type=='enum' || $this->field_type=='relationtype'){
             
