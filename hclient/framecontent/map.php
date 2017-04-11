@@ -176,8 +176,21 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                         // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                         var recset = new hRecordSet(response.data);
-                        var mapdataset = recset.toTimemap();
-                        mapping.load(mapdataset);
+                        
+                        //var mapdataset = recset.toTimemap();
+                        //mapping.load([mapdataset]);
+                        
+                        mapping.load( null, //mapdataset,
+                            null,  //array of record ids                                               
+                            null,    //map document on load
+                            function(selected){  //callback if something selected on map
+                            },
+                            function(){ //callback function on native map init completion
+                                var params = {id:'main', recordset:recset, title:'Current query' };
+                                mapping.map_control.addRecordsetLayer(params);
+                            }
+                        );                        
+                                    
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -227,7 +240,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         .click(mapping.printMap);
 
         $("#btnEmbed").button({text:false, icons: {
-            primary: "ui-icon-gear"
+            primary: "ui-icon-globe-b"
         }})
         .click(showEmbedDialog);
 

@@ -199,8 +199,8 @@ $.widget( "heurist.app_timemap", {
                     $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
                         { selection:selected, source:that.element.attr('id') } );
                 },
-                function(){ //callback function
-                    var params = {id:'main', recordset:that.options.recordset, title:'Current query'  }
+                function(){ //callback function on native map init completion
+                    var params = {id:'main', recordset:that.options.recordset, title:'Current query'};
                     that.addRecordsetLayer(params, -1);
                 }
             );
