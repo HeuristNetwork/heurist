@@ -102,7 +102,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a href="admin/structure/import/selectDBForImport.php" name="auto-popup" class="verylarge h3link refresh_structure"
                             onClick="{return false;}" data-logaction="stAcquire"
                             title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
-                            Import templates</a>
+                            Browse templates</a>
                     </li>
 
                     <!-- Remarked temporarely 2016-05-11
@@ -141,14 +141,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
 
                     <li>
-                        <a href="admin/verification/listDatabaseErrors.php" name="auto-popup" class="verylarge h3link"
-                            data-logaction="stVerify"
-                            onClick="{return false;}"
-                            title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
-                            Verify</a>
-                    </li>
-
-                    <li>
                         <a href="admin/verification/recalcTitlesAllRecords.php" name="auto-popup" class="verylarge h3link"
                             data-logaction="stRebuildTitles"
                             onClick="{return false;}"
@@ -156,6 +148,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             Rebuild record titles</a>
                     </li>
                     
+                    <li>
+                        <a href="admin/verification/listDatabaseErrors.php" name="auto-popup" class="verylarge h3link"
+                            data-logaction="stVerify"
+                            onClick="{return false;}"
+                            title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
+                            Verify</a>
+                    </li>
+
                     <li id="menu-database-refresh">
                         <a href="#" id="menulink-database-refresh"
                             data-logaction="stRefresh"

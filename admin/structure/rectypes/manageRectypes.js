@@ -708,7 +708,7 @@ function RectypeManager() {
                 if(confirm('Before defining new record (entity) types we suggest importing suitable '+
                 'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
                 'Those with registration IDs less than 1000 are templates curated by the Heurist team. '+
-                '\n\nUse:  Manage tab > Structure > Import templates')){
+                '\n\nUse:  Manage tab > Structure > Browse templates')){
                     var currentTabIndex = tabView.get('activeIndex');
                     var grpID = tabView.getTab(currentTabIndex).get('id');
                     _onAddEditRecordType(0, grpID);

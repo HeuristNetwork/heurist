@@ -1040,8 +1040,8 @@ $loop_cnt++;
                     }//while offset
                     
                             if($istimemap_request){
-//error_log('found count '.count($records));                                   
-//error_log('maptime. total '.count($records).'  toclnt='.count($tm_records).' tot_tm='.$istimemap_counter);                                   
+                            //error_log('found count '.count($records));                                   
+                            //error_log('maptime. total '.count($records).'  toclnt='.count($tm_records).' tot_tm='.$istimemap_counter);                                   
                                    $records = $tm_records;
                                    $total_count_rows = $istimemap_counter;
                             }
