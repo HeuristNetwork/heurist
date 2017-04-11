@@ -642,7 +642,7 @@ function EditRectypeTitle() {
             if(node.children.length===0 && node.highlightState===1){
                 node.highlightState=0;
 
-                _text = _text + '['+node.data.full_path+']';
+                _text = _text + ' ['+node.data.full_path+'] ';
             }
             return false;
         }
