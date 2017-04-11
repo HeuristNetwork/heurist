@@ -321,8 +321,8 @@ if (array_key_exists('mode', $_REQUEST)) {
                         menuEntry('','Find duplicate records','verification/listDuplicateRecords.php?fuzziness=10&amp;db='.HEURIST_DBNAME,
                             'Fuzzy search to identify records which might contain duplicate data');
  
-                        menuEntry('','Rebuild record titles','verification/recalcTitlesAllRecords.php?db='.HEURIST_DBNAME,
-                            'Rebuilds the constructed record titles listed in search results, for all records');
+                        //menuEntry('','Rebuild record titles','verification/recalcTitlesAllRecords.php?db='.HEURIST_DBNAME,
+                        //    'Rebuilds the constructed record titles listed in search results, for all records');
                         // We also have function for specific records and rectypes
 
                         if (!$indexServerAddress == "") { // Elastic server address set

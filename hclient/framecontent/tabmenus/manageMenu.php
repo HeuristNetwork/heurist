@@ -148,6 +148,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             Verify</a>
                     </li>
 
+                    <li>
+                        <a href="admin/verification/recalcTitlesAllRecords.php" name="auto-popup" class="verylarge h3link"
+                            data-logaction="stRebuildTitles"
+                            onClick="{return false;}"
+                            title="Rebuilds the constructed record titles listed in search results, for all records">
+                            Rebuild record titles</a>
+                    </li>
+                    
                     <li id="menu-database-refresh">
                         <a href="#" id="menulink-database-refresh"
                             data-logaction="stRefresh"
