@@ -98,9 +98,15 @@ function getDetailTypes(){
 
     //add option for each detail type where the value=index into g_detailTypes and text=detail name (record type specific)
     var l = g_detailTypes.length;
+    var dt_idx = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
     g_recDetailSelect.size = l>15?15:l;
     for (var d = 0; d < l; ++d) {
-        addOpt(g_recDetailSelect, d, HDetailManager.getDetailNameForRecordType(g_recType, g_detailTypes[d]));
+        //var baseType = g_detailTypes[d].getVariety();
+        var dtyID = g_detailTypes[d].getID();
+        var baseType = top.HEURIST4.detailtypes.typedefs[dtyID].commonFields[dt_idx];
+        if(baseType!='separator'){
+            addOpt(g_recDetailSelect, d, HDetailManager.getDetailNameForRecordType(g_recType, g_detailTypes[d]));    
+        }
     }
 
     updateExportMap();
@@ -381,6 +387,8 @@ function showRecordData(hRecords) {
                 }else if (baseType == HVariety.ENUMERATION || baseType == HVariety.RELATIONTYPE ) { //enum or relation
                     var termDetail = hRecords[i].getDetail(hDty);
                     line += (termDetail ? csv_escape(termDetail) : '') +strDelim;
+                }else if (baseType == HVariety.BLOCKTEXT){
+                    line += dblquote_escape(crlf_escape(hRecords[i].getDetail(hDty)))+strDelim;
                 }else{//general case
                     line += dblquote_escape(hRecords[i].getDetail(hDty))+strDelim;
                 }
@@ -389,8 +397,14 @@ function showRecordData(hRecords) {
         lines += line.slice(0,-1) + strRowTerm;  //remove last delimiter and terminate line
     }
     recDisplay.value = lines;
-}
+}     
 
+function crlf_escape(str) {
+    if (!str) {
+        return '';
+    }
+    return str.replace(/\r\n/g, '\\r\\n');
+}
 
 function dblquote_escape(str) {
     if (!str) {
@@ -633,11 +647,17 @@ function _showRecordDataH4(recordset, reference_recordset) {
                             }
                         }
                         
+                        
                         if(top.HEURIST4.util.isArrayNotEmpty(val)){
                             field = val.join('|');
                         }else{
                             field = val;
                         }
+                        if (baseType == HVariety.BLOCKTEXT){
+                            field = crlf_escape(field); 
+                        }
+                        
+                        
                         line += ((!top.HEURIST4.util.isempty(field))?dblquote_escape(field):'') + strDelim;
                         
                     }
