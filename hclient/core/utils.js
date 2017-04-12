@@ -210,22 +210,47 @@ window.hWin.HEURIST4.util = {
     },
 
     //
-    // both paramater should be JSON array or Object
+    // both parameter should be JSON array or Object
     //
     mergeHeuristQuery: function(query1, query2){
-        //JSON.parse
+        
         if(jQuery.type(query1) === "string"){
+            var notJson = true;
             try{
-                query1 = JSON.parse(query1);
+                //query1 = JSON.parse(query1);
+                var query1a = $.parseJSON(query1);
+                if(window.hWin.HEURIST4.util.isJSON(query1a)){
+                    query1 = query1a;
+                    notJson = false;
+                }
             }catch (ex2){
-                query1 = {};
+            }
+            if(notJson){
+                if(window.hWin.HEURIST4.util.isempty(query1)){
+                    query1 = {};    
+                }else{
+                    query1 = {plain: encodeURIComponent(query1)}; //query1.split('"').join('\\\"')};    
+                }
             }
         }
+        
         if(jQuery.type(query2) === "string"){
+            var notJson = true;
             try{
-                query2 = JSON.parse(query2);
+                //query2 = JSON.parse(query2);
+                var query2a = $.parseJSON(query2);
+                if(window.hWin.HEURIST4.util.isJSON(query2a)){
+                    query2 = query2a;
+                    notJson = false;
+                }
             }catch (ex2){
-                query2 = {};
+            }
+            if(notJson){
+                if(window.hWin.HEURIST4.util.isempty(query2)){
+                    query2 = {};    
+                }else{
+                    query2 = {plain: encodeURIComponent(query2)}; //query2.split('"').join('\\\"')};    
+                }
             }
         }
         if(window.hWin.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
@@ -262,6 +287,23 @@ window.hWin.HEURIST4.util = {
 
     //
     //
+    //
+    isJSON: function(value){
+        
+            try {
+                var r = $.parseJSON(value);
+                if($.isArray(r) || $.isPlainObject(r)){
+                    return true;
+                }
+            }
+            catch (err) {
+            } 
+            
+            return false;       
+    },
+    
+    //
+    // get combination query and rules as json array for map query layer
     //    
     getJSON_HeuristQueryAndRules: function(filter, rules){
 
@@ -270,15 +312,10 @@ window.hWin.HEURIST4.util = {
             
             var hasRules = !window.hWin.HEURIST4.util.isempty(rules);
 
-            try {
-                var r = $.parseJSON(filter);
-                if($.isArray(r) || $.isPlainObject(r)){
-                    res = (hasRules?'{"q":':'')+filter;
-                }
-            }
-            catch (err) {
-            }
-            if(res==''){
+            if(window.hWin.HEURIST4.util.isJSON(filter)){
+                res = (hasRules?'{"q":':'')+filter;
+            }else{
+                //this is not json query
                 //escape backslash to avoid errors
                 res = hasRules?('{"q":"'+filter.split('"').join('\\\"')+'"'):filter;
             }

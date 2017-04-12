@@ -19,6 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+require_once (dirname(__FILE__).'/compose_sql.php');
 
 /*
 
@@ -33,8 +34,9 @@ predicate:   keyword:value
 
 KEYWORDS
 
-url, u:           url
-notes, n:        description
+plain            query in old plain text format
+url, u:          url
+notes, n:        record heder notes (scratchpad)
 title:           title contains
 addedby:         added by specified user
 added:           creation date
@@ -100,6 +102,7 @@ $publicOnly = false;
 
 //keep params for debug only!
 $params_global;
+$top_query;
 
 /*
 
@@ -120,7 +123,7 @@ $params_global;
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
-    global $mysqli, $wg_ids, $publicOnly, $params_global;
+    global $mysqli, $wg_ids, $publicOnly, $params_global, $top_query;
     
     $params_global = $params;
 
@@ -161,8 +164,9 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $query_json = json_decode(@$params['q'], true);
     }
 
-
+    
     $query = new HQuery( "0", $query_json, $search_domain, $currUserID );
+    $top_query = $query;
     $query->makeSQL();
 
     //1. create tree of predicates
@@ -561,16 +565,18 @@ class HPredicate {
     var $lessthan = false;
     var $greaterthan = false;
 
-    var $allowed = array("title","t","type","ids","id","f","field","linked_to","linkedfrom","related_to","relatedfrom","links");
+    var $allowed = array('title','t','url','notes','type','ids','id',
+            'f','field','linked_to','linkedfrom','related_to','relatedfrom','links','plain');
     /*
-    url, u:           url
-    notes, n:        description
+    notes, n:        record heder notes (scratchpad)
     title:           title contains
+    url              record header url (rec_URL)
     addedby:         added by specified user
     added:           creation date
     date, modified:  edition date
     after, since:
     before:
+    plain            query in old plain text format
 
     workgroup,wg,owner:
 
@@ -609,10 +615,18 @@ class HPredicate {
         }
 
     }
+    
+    function getTopLevelQuery(){
+        if($this->parent->level==0){
+            return $this->parent;
+        }else{
+            return getTopLevelQuery($parent->parent);
+        }
+    }
 
     function makeSQL(){
 
-        global $mysqli;
+        global $mysqli, $top_query;
 
         /*if(false && $this->query){
 
@@ -622,6 +636,19 @@ class HPredicate {
         }*/
 
         switch (strtolower($this->pred_type)) {
+            case 'plain':            //query in old plain text format
+
+//error_log($this->value);
+            
+                $query = parse_query($top_query->search_domain, urldecode($this->value), null, null, $top_query->currUserID);
+
+                $where_clause = $query->where_clause;
+                $where_clause = str_replace('TOPBIBLIO','r0',$where_clause);
+                $where_clause = str_replace('TOPBKMK','b',$where_clause);
+                
+//error_log($where_clause);
+            
+                return array("where"=>$where_clause);
             case 'type':
             case 't':
 
@@ -723,7 +750,15 @@ class HPredicate {
         }else if($this->field_id=="modified"){
 
             $res = "(r".$this->qlevel.".rec_Modified ".$val.")";
+            
+        }else if($this->field_id=='url'){
+            
+            $res = "(r".$this->qlevel.".rec_URL ".$val.")";
 
+        }else if($this->field_id=='notes'){
+            
+            $res = "(r".$this->qlevel.".rec_ScratchPad ".$val.")";
+            
         }else{
             
             if($this->field_type == 'date' && trim($this->value)!='') { //false && $this->isDateTime()){
@@ -746,11 +781,32 @@ class HPredicate {
 
     }
 
+    //
+    //
+    //
     function predicateAnyField(){
+        global $mysqli;
+        
+        $p = "rd".$this->qlevel.".";
+        $p = "";
 
+        $this->field_type = 'freetext';
+        $val = $this->getFieldValue();
+        if(!$val) return null;
 
+        $res = 'exists (select dtl_ID from recDetails '.$p
+        . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+        . ' left join Records link on rd.dtl_Value=link.rec_ID '
+        .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID '
+        .'  and if(dty_Type != "resource", '.$p.'dtl_Value'.$val
+        .' , link.rec_Title like "%'.$mysqli->real_escape_string($this->value).'%"))';
+
+        return array("where"=>$res);
     }
 
+    //
+    //
+    //
     function predicateRecIds(){
 
         $this->field_type = "link";
