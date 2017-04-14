@@ -1156,43 +1156,48 @@ class HPredicate {
             }
             $this->field_list = true;
         }
-        else if (!array_diff($a = explode(',', $this->value), array_map('intval', $a))) {  
-        //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
-                            
-            // comma-separated list of defRecTypes ids
-            $in = ($this->negate)? 'not in' : 'in';
-            $res = " $in (" . $this->value . ")";
+        else {
+        
+            $cs_ids = getCommaSepIds($this->value);
+            if ($cs_ids) {  
+            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
+                                
+                // comma-separated list of defRecTypes ids
+                $in = ($this->negate)? 'not in' : 'in';
+                $res = " $in (" . $cs_ids . ")";
 
-            $this->field_list = true;
+                $this->field_list = true;
 
-        } else if($this->field_type =='date'){ //$this->isDateTime()){
-            //
-            $res = $this->makeDateClause();
+            } else if($this->field_type =='date'){ //$this->isDateTime()){
+                //
+                $res = $this->makeDateClause();
 
-        } else {
+            } else {
 
-            if (strpos($this->value,"<>")>0) {
-                $vals = explode("<>", $this->value);
+                if (strpos($this->value,"<>")>0) {
+                    $vals = explode("<>", $this->value);
 
-                $between = (($this->negate)?" not":"")." between ";
-                if(is_numeric($vals[0]) && is_numeric($vals[1])){
-                    $res = $between.$vals[0]." and ".$vals[1];
-                }else{
-                    $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
-                }
-
-            }else{
-
-                if($eq=='=' && !$this->exact){
-                    $eq = 'like';
-                    $k = strpos($this->value,"%");
-                    if($k===false || ($k>0 && $k+1<strlen($this->value))){
-                        $this->value = '%'.$this->value.'%';
+                    $between = (($this->negate)?" not":"")." between ";
+                    if(is_numeric($vals[0]) && is_numeric($vals[1])){
+                        $res = $between.$vals[0]." and ".$vals[1];
+                    }else{
+                        $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
                     }
-                }
 
-                $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
+                }else{
+
+                    if($eq=='=' && !$this->exact){
+                        $eq = 'like';
+                        $k = strpos($this->value,"%");
+                        if($k===false || ($k>0 && $k+1<strlen($this->value))){
+                            $this->value = '%'.$this->value.'%';
+                        }
+                    }
+
+                    $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
+                }
             }
+            
         }
 
         return $res;

@@ -1496,8 +1496,10 @@ class FieldPredicate extends Predicate {
         }
         
         $match_pred = $this->get_field_value();
+        
+        $cs_ids = getCommaSepIds($this->value);
 
-        if (!array_diff($a = explode(',', $this->value), array_map('intval', $a))) {  
+        if ($cs_ids) {  
         //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { it does not work for more than 500 entries
             $isnumericvalue = false;
             $isin = true;
@@ -1651,33 +1653,36 @@ class FieldPredicate extends Predicate {
             $vals = explode("<>", $this->value);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
-        }else 
-        if (!array_diff($a = explode(',', $this->value), array_map('intval', $a))) {  
-        //  if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {  not work for >500 entries
-            // comma-separated list of ids
-            $match_pred = ' in ('.$this->value.')';
-            
-        }else{
-            
-            $isnumericvalue = is_numeric($this->value);
+        }else {
+            $cs_ids = getCommaSepIds($this->value);
+            if ($cs_ids) {  
+            //  if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {  not work for >500 entries
+                // comma-separated list of ids
+                $match_pred = ' in ('.$cs_ids.')';
+                
+            }else{
+                
+                $isnumericvalue = is_numeric($this->value);
 
-            $match_value = '"' . ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) ) . '"';
+                $match_value = '"' . ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) ) . '"';
 
-            if ($this->parent->exact  ||  $this->value === "") {    // SC100
-                $match_pred = ' = '.$match_value; //for unknown reason comparison with numeric takes ages
-            } else if ($this->parent->lessthan) {
-                $match_pred = " < $match_value";
-            } else if ($this->parent->greaterthan) {
-                $match_pred = " > $match_value";
-            } else {
-                if(($this->field_type_value=='float' || $this->field_type_value=='inbteger') && $isnumericvalue){
-                    $match_pred = " = $match_value";
-                }else if(strpos($this->value,"%")===false){
-                    $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";
-                }else{
-                    $match_pred = " like '".$mysqli->real_escape_string($this->value)."'";
+                if ($this->parent->exact  ||  $this->value === "") {    // SC100
+                    $match_pred = ' = '.$match_value; //for unknown reason comparison with numeric takes ages
+                } else if ($this->parent->lessthan) {
+                    $match_pred = " < $match_value";
+                } else if ($this->parent->greaterthan) {
+                    $match_pred = " > $match_value";
+                } else {
+                    if(($this->field_type_value=='float' || $this->field_type_value=='inbteger') && $isnumericvalue){
+                        $match_pred = " = $match_value";
+                    }else if(strpos($this->value,"%")===false){
+                        $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";
+                    }else{
+                        $match_pred = " like '".$mysqli->real_escape_string($this->value)."'";
+                    }
                 }
             }
+            
         }
 
         return $match_pred;
@@ -1839,33 +1844,38 @@ class BibIDPredicate extends Predicate {
     }
     
     function get_field_value(){
-
+        
         if (strpos($this->value,"<>")>0) { 
 
             $vals = explode("<>", $this->value);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
-        }else if (!array_diff($a = explode(',', $this->value), array_map('intval', $a))) {  
-        //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
-            // comma-separated list of ids
-            $not = ($this->parent->negate)? ' not' : '';
-            $match_pred = $not.' in ('.join(',', array_map('intval', explode(',', $this->value))).')';
         }else{
             
-            $value = intval($this->value);
+            $cs_ids = getCommaSepIds($this->value);
+            if ($cs_ids) {  
+            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
+                // comma-separated list of ids
+                $not = ($this->parent->negate)? ' not' : '';
+                $match_pred = $not.' in ('.$cs_ids.')';
+            }else{
+                
+                $value = intval($this->value);
 
-            if ($this->parent->lessthan) {
-                $match_pred = " < $value";
-            } else if ($this->parent->greaterthan) {
-                $match_pred = " > $value";
-            } else {
-                if($this->parent->negate){
-                    $match_pred = ' <> '.$value;
-                }else{
-                    $match_pred = '='.$value;
+                if ($this->parent->lessthan) {
+                    $match_pred = " < $value";
+                } else if ($this->parent->greaterthan) {
+                    $match_pred = " > $value";
+                } else {
+                    if($this->parent->negate){
+                        $match_pred = ' <> '.$value;
+                    }else{
+                        $match_pred = '='.$value;
+                    }
                 }
             }
-        }
+            
+        } 
 
         return $match_pred;
     }
@@ -2716,4 +2726,23 @@ $_REQUEST['q'] = $q;
 }
 */
 
+function getCommaSepIds($value)
+{
+    if(substr($value, -1) === ','){
+        //remove last comma
+        $value = substr($value,0,-1);
+    }
+
+    $a = explode(',', $value);
+    $n = array_map('intval', $a);
+    
+    if(!array_diff($a, $n)){
+        //join(',', array_map('intval', explode(',', $this->value)))
+        return $value;
+    }else{
+        return null;
+    }
+    
+    
+}
 ?>
