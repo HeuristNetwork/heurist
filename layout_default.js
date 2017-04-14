@@ -23,8 +23,6 @@
 * @type Array layouts - list of layouts
 */
 
-var version_in_cache = '4.2.18';
-
 /**
 * List of applications (widgets)
 *  id - unique identificator
