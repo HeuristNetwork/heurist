@@ -122,7 +122,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <!-- os, browser detector -->
         <script type="text/javascript" src="ext/js/platform.js"></script>
-        
+
         <script type="text/javascript">
 
            function onPageInit(success){
@@ -204,6 +204,28 @@ _time_debug = new Date().getTime() / 1000;
                 }else if(db_total_records<1){
                     showTipOfTheDay(false);
                 }
+                
+                
+                //
+                // version to compare with server provided - to avoid caching issue
+                //
+                if(version_in_cache && window.hWin.HAPI4.sysinfo['version']){
+                        var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, window.hWin.HAPI4.sysinfo['version']);   
+                        if(res<0){
+                            // show lock popup that forces to clear cache
+                            window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
+                            {}/* no buttons */,null,
+                            {options:{hideTitle:true, closeOnEscape:false,
+                                open:function( event, ui ) {
+                                    console.log('opebed');
+                                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                    $dlg.find('#version_cache').text(version_in_cache);
+                                    $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
+                                }}});
+
+                        }
+                }
+                
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
                 if(db_total_records>0 && !window.hWin.HEURIST4.util.isempty(qsearch)){
@@ -297,5 +319,6 @@ var fin_time = new Date().getTime() / 1000;
 
         <div id="heurist-dialog">
         </div>
+        
     </body>
 </html>

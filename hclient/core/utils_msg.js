@@ -107,12 +107,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     // loads content url into dialog (getMsgDlg) and show it (showMsgDlg)
     //
-    showMsgDlgUrl: function(url, buttons, title){
+    showMsgDlgUrl: function(url, buttons, title, options){
 
         if(url){
             var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             $dlg.load(url, function(){
-                window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title);
+                window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options);
             });
         }
     },
@@ -314,6 +314,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         $dlg.dialog(options);
         //$dlg.dialog('option','buttons',buttons);
 
+        if(options.hideTitle){
+            $dlg.parent().find('.ui-dialog-titlebar').hide();
+        }else{
+            $dlg.parent().find('.ui-dialog-titlebar').show();
+        }
+        
         return $dlg;
         //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});

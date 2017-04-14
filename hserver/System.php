@@ -351,7 +351,7 @@ class System {
         if(folderCreate($folder, true)){
             define('HEURIST_SETTING_DIR', $folder);
         }
-
+        
         return true;
     }
 

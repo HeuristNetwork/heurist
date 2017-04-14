@@ -172,7 +172,6 @@ $.widget( "heurist.help_tips", {
 
 });
 
-
 /**
 * Show Tip of the Day/Getting strated dialog
 *
