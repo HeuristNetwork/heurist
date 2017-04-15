@@ -214,7 +214,7 @@ _time_debug = new Date().getTime() / 1000;
                 if(window.hWin.HAPI4.is_logged() && window.hWin.HAPI4.sysinfo['version']){
                     if(version_in_cache){
                             var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, window.hWin.HAPI4.sysinfo['version']);   
-                            if(res<0){
+                            if(res<0){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
                                 // show lock popup that forces to clear cache
                                 window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
                                 {}/* no buttons */,null,
