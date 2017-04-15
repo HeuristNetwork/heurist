@@ -31,6 +31,24 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once('valueVerification.php');
+
+require_once('getFieldTypeDefinitionErrors.php');
+
+if(@$_REQUEST['data']){
+    $lists = json_decode($_REQUEST['data'], true);
+}else{
+    $lists = getInvalidFieldTypes(@$_REQUEST['rt']);
+    if(!@$_REQUEST['show']){
+        if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0 && count($lists["rt_contraints"])==0){
+            $lists = array();
+        }
+    }
+}
+
+$dtysWithInvalidTerms = @$lists["terms"];
+$dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
+$dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
+
 ?>
 
 <html>
@@ -78,7 +96,7 @@ require_once('valueVerification.php');
 
             function onEditFieldType(dty_ID){
 
-                var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
+                var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
                 if(dty_ID>0){
                     url = url + "&detailTypeID="+dty_ID; //existing
                 }else{
@@ -89,7 +107,7 @@ require_once('valueVerification.php');
                     {   "close-on-blur": false,
                         "no-resize": false,
                         height: 680,
-                        width: 700,
+                        width: 840,
                         callback: function(context) {
                         }
                 });
@@ -126,7 +144,7 @@ require_once('valueVerification.php');
         <hr>
 
 
-        <div id="page-inner">
+        <div id="page-inner" style="top:80px">
 
 
             <!-- CHECK FOR FIELD TYPE ERRORS -->
@@ -136,18 +154,14 @@ require_once('valueVerification.php');
 
 
             <?php
-            if (count(@$dtysWithInvalidTerms)>0 || count(@$dtysWithInvalidNonSelectableTerms)>0 || count(@$dtysWithInvalidRectypeConstraint)>0){
+            if (count(@$dtysWithInvalidTerms)>0 || 
+                count(@$dtysWithInvalidNonSelectableTerms)>0 || 
+                count(@$dtysWithInvalidRectypeConstraint)>0){
                 ?>
                 <script>
                     function repairFieldTypes(){
 
-                        function _callback(context){
-                            if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
-                                top.HEURIST.util.showError(null);
-                            }else{
-                                alert(context['result']);
-                            }
-                        }
+                        
 
                         var dt = [
                             <?php
@@ -168,10 +182,21 @@ require_once('valueVerification.php');
 
                         var str = JSON.stringify(dt);
 
-                        var baseurl = top.HEURIST.baseURL_V3 + "admin/verification/repairFieldTypes.php";
-                        var callback = _callback;
+                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairFieldTypes.php";
+                        //var callbackFunc = _callback;
                         var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
-                        top.HEURIST.util.getJsonData(baseurl, callback, params);
+                        top.HEURIST.util.getJsonData(baseurl, function(context){
+                            //console.log('result '+context);
+                            if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
+                                top.HEURIST.util.showError(null);
+                            }else{
+                                if(top.HEURIST4 && top.HEURIST4.msg){
+                                    top.HEURIST4.msg.showMsgDlg(context['result'], null, 'Auto repair');
+                                }else{
+                                    alert(context['result']);    
+                                }
+                            }
+                        }, params);
                     }
                 </script>
 

@@ -57,7 +57,7 @@ $.widget( "heurist.search", {
 
 
         /*if(!$.isFunction( hSearchIncremental )){        //jquery.fancytree-all.min.js
-        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
         this.element.css({'height':'6.88em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
@@ -360,7 +360,7 @@ $.widget( "heurist.search", {
             .button()
             .click(function(){ 
                 window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
-                    window.hWin.HEURIST4.msg.showDialog(window.HAPI4.basePathV3 + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+window.hWin.HAPI4.database,
+                    window.hWin.HEURIST4.msg.showDialog(window.HAPI4.baseURL + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+window.hWin.HAPI4.database,
                     { width:1200, height:600, title:'Manage Structure', 
                       afterclose: function(){window.hWin.HAPI4.SystemMgr.get_defs_all( false, that.document)}})
                 });
@@ -429,13 +429,15 @@ $.widget( "heurist.search", {
 
         // bind click events
         this._on( this.btn_search_as_user, {
-            click: "_doSearch"
+            click:  function(){
+                //that.option("search_domain", "a");
+                that._doSearch(true);}
         });
 
         this._on( this.btn_search_as_guest, {
             click: function(){
                 that.option("search_domain", "a");
-                that._doSearch();
+                that._doSearch(true);
             }
         });
 
@@ -445,7 +447,7 @@ $.widget( "heurist.search", {
                 if (code == 13) {
                     window.hWin.HEURIST4.util.stopEvent(e);
                     e.preventDefault();
-                    that._doSearch();
+                    that._doSearch(true);
                 }
             }
         });
@@ -544,7 +546,7 @@ $.widget( "heurist.search", {
             q ="&q=" + encodeURIComponent(this.query_request.q);
         }
 
-        var url = window.hWin.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
+        var url = window.hWin.HAPI4.baseURL+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
 
         window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
             function(res){
@@ -642,16 +644,41 @@ $.widget( "heurist.search", {
     //
     // search from input - query is defined manually
     //
-    _doSearch: function(){
+    _doSearch: function(fl_btn){
 
         //if(!window.hWin.HEURIST4.util.isempty(search_query)){
         //    this.input_search.val(search_query);
         //}
 
-        var qsearch = this.input_search.val();
-        if( this.select_rectype && this.select_rectype.val()){
-            qsearch = qsearch + ' t:'+this.select_rectype.val();
+        var qsearch;
+        if(!fl_btn){
+
+            var select_rectype = $("#sa_rectype");
+            var select_fieldtype = $("#sa_fieldtype");
+            var select_fieldvalue = $("#sa_fieldvalue");
+            var select_sortby = $("#sa_sortby");
+            var select_terms = $("#sa_termvalue");
+            var select_coord1 = $("#sa_coord1");
+            var select_coord2 = $("#sa_coord2");
+            var sortasc =  $('#sa_sortasc');
+
+            if( (select_rectype && select_rectype.val()) || 
+                (select_fieldtype && select_fieldtype.val()) || 
+                (select_fieldvalue && select_fieldvalue.val())){
+               
+                this.calcShowSimpleSearch();
+                qsearch = this.input_search.val();
+            }
+                
+        }else{
+            qsearch = this.input_search.val();
         }
+
+
+        qsearch = qsearch.replace(/,\s*$/, "");
+
+
+
 
         if ( qsearch ) {
 
@@ -729,7 +756,7 @@ $.widget( "heurist.search", {
         var that = this;
 
         //load template
-        $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/search/search_quick.html?t="+(new Date().getTime()), function(){
+        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_quick.html?t="+(new Date().getTime()), function(){
 
 
             var search_quick_close = $( "<button>", {
@@ -799,11 +826,17 @@ $.widget( "heurist.search", {
             allowed.splice(allowed.indexOf("relmarker"),1);
 
 
+            //change list of field types on rectype change
             that._on( select_rectype, {
                 change: function (event){
 
                     var rectype = (event)?Number(event.target.value):0;
-                    window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), rectype, allowed, window.hWin.HR('Any field type'));
+                    
+                    var topOptions2 = [{key:'',title:window.hWin.HR('Any field type')},
+                                       {key:'latitude',title:window.hWin.HR('Latitude')},
+                                       {key:'longitude',title:window.hWin.HR('Longitude')}];
+                    window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), 
+                                rectype, allowed, topOptions2);
 
                     var topOptions = [{key:'t', title:window.hWin.HR("record title")},
                         {key:'id', title:window.hWin.HR("record id")},
@@ -826,33 +859,49 @@ $.widget( "heurist.search", {
 
                     $("#sa_fieldvalue").val("");
                     $("#sa_negate").prop("checked",'');
+                    $("#sa_negate2").prop("checked",'');
                     $dlg.find("#fld_contain").show();
                     $dlg.find("#fld_enum").hide();
                     this.calcShowSimpleSearch();
                 }
             });
+            
+            //change compare option according to selected field type
+            // enum, geocoord, others
             that._on( select_fieldtype, {
                 change: function(event){
 
-                    var dtID = Number(event.target.value);
+                    if(event.target.value=='longitude' || event.target.value=='latitude'){
 
-                    var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
-                    var detailType = '';
-
-                    if(Number(dtID)>0){
-                        detailType = detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
-                    }
-                    if(detailType=='enum'  || detailType=='relationtype'){
                         $dlg.find("#fld_contain").hide();
-                        $dlg.find("#fld_enum").show();
-                        //fill terms
-                        var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
-                        disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
-
-                        window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, allTerms, disabledTerms, null, false);
-                    } else {
-                        $dlg.find("#fld_contain").show();
                         $dlg.find("#fld_enum").hide();
+                        $dlg.find("#fld_coord").show();
+                        
+                    }else{
+                        var dtID = Number(event.target.value);
+                        
+                        $dlg.find("#fld_coord").hide();
+                    
+                        var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
+                        var detailType = '';
+
+                        if(Number(dtID)>0){
+                            detailType = detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
+                        }
+                        if(detailType=='enum'  || detailType=='relationtype'){
+                            $dlg.find("#fld_contain").hide();
+                            $dlg.find("#fld_enum").show();
+                            //fill terms
+                            var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
+                            disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
+
+                            window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, 
+                                                allTerms, disabledTerms, null, window.hWin.HR('<blank>'));
+                        } else {
+                            $dlg.find("#fld_contain").show();
+                            $dlg.find("#fld_enum").hide();
+                        }
+                        
                     }
 
                     this.calcShowSimpleSearch();
@@ -878,6 +927,12 @@ $.widget( "heurist.search", {
                     this.calcShowSimpleSearch();
                 }
             });
+            that._on( $("#sa_negate2"), {
+                change: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
+            
             that._on( sortasc, {
                 click: function(event){
                     //window.hWin.HEURIST4.util.stopEvent(event);
@@ -895,24 +950,50 @@ $.widget( "heurist.search", {
     // recalculate search query value
     ,calcShowSimpleSearch: function (e) {
 
-        var q = this.search_assistant.find("#sa_rectype").val(); if(q) q = "t:"+q;
-        var fld = this.search_assistant.find("#sa_fieldtype").val(); if(fld) fld = "f:"+fld+":";
-        var ctn = this.search_assistant.find("#fld_enum").is(':visible') ?this.search_assistant.find("#sa_termvalue").val()
-        :this.search_assistant.find("#sa_fieldvalue").val();
         
-        if(this.search_assistant.find("#sa_negate").is(':checked')){
-            fld  = '-'+fld;
+        
+        var q = this.search_assistant.find("#sa_rectype").val(); if(q) q = "t:"+q;
+        var fld = this.search_assistant.find("#sa_fieldtype").val(); 
+        var ctn = '';
+        
+        if(fld=='latitude' || fld=='longitude'){
+            var coord1 = $("#sa_coord1").val();
+            var coord2 = $("#sa_coord2").val();
+            
+            var morethan = !isNaN(parseFloat(coord1));
+            var lessthan = !isNaN(parseFloat(coord2));
+            
+            if(morethan && lessthan){
+                fld = fld+':'+coord1+'<>'+coord2;
+            }else if(morethan){
+                fld = fld+'>'+coord1;
+            }else if(lessthan){
+                fld = fld+'<'+coord2;
+            }else{
+                fld = '';
+            }
+        }else{
+            
+            var isEnum = this.search_assistant.find("#fld_enum").is(':visible');
+            
+            if(fld) fld = "f:"+fld+":";
+            
+            ctn =  isEnum?this.search_assistant.find("#sa_termvalue").val()
+                         :this.search_assistant.find("#sa_fieldvalue").val();
+            
+            if(this.search_assistant.find("#sa_negate"+(isEnum?'2':'')).is(':checked')){
+                fld  = '-'+fld;
+            }
         }
 
         var asc = ($("#sa_sortasc").val()==1?"-":'') ; //($("#sa_sortasc:checked").length > 0 ? "" : "-");
         var srt = $("#sa_sortby").val();
         srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
 
-        q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn? (isNaN(Number(ctn))?'"'+ctn+'"':ctn):"") + (srt? " " + srt : "");
+        q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn?(isNaN(Number(ctn))?'"'+ctn+'"':ctn):"") + (srt? " " + srt : "");
         if(!q){
             q = "sortby:t";
         }
-
 
         this.input_search.val(q);
         this.input_search.change();
@@ -952,12 +1033,12 @@ $.widget( "heurist.search", {
     , _addNewRecord: function(){
 
 
-        var url = window.hWin.HAPI4.basePathV3+ "records/add/addRecordPopup.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "records/add/addRecordPopup.php?db=" + window.hWin.HAPI4.database;
 
         window.hWin.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record',
             callback:function(responce) {
                 /*
-                var sURL = window.hWin.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
+                var sURL = window.hWin.HAPI4.baseURL + "common/php/reloadCommonInfo.php";
                 top.HEURIST.util.getJsonData(
                 sURL,
                 function(responce){
@@ -979,7 +1060,7 @@ $.widget( "heurist.search", {
             doLogin(this.options.isloginforced);
         }else{
             //var that = this;
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_login.js', this._doLogin );
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doLogin );
         }
 
 
@@ -989,7 +1070,7 @@ $.widget( "heurist.search", {
 
         if(false && !$.isFunction(doLogin)){  // already loaded in index.php
             //var that = this;
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_login.js', this._doRegister );
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doRegister );
         }else{
             doRegister();
         }
@@ -1004,7 +1085,7 @@ $.widget( "heurist.search", {
 
         }else{
         var that = this;
-        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
         if($.isFunction($('body').profile_edit)){
         that._doRegister();
         }else{

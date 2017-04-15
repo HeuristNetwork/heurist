@@ -34,7 +34,10 @@ regional['en'] = {
     'Error_Mail_Recovery':'Your password recovery email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation',
     'Error_Mail_Registration':'Your registration info is added to database. However, it is not possible to approve it since registration email cannot be sent.',
     'Error_Mail_Approvement':'Cannot send registration approvement email.',
-    'Error_Connection_Reset':'No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
+    'Error_Connection_Reset':'Timeout on response from Heurist server<br><br>'
++'This may be due to server load or to requesting too large a result set, or a query that fails to resolve. If the problem persists, please email a bug report to the Heurist team so we can investigate.',
+    
+//OLD VERSION    No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
 
     'mailto_fail': 'You have not set an email handler for mailto: links. <br/>Please set this in your  browser (it is normally in the content settings under Privacy)',
 

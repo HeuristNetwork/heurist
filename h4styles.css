@@ -859,6 +859,11 @@ Allow use of icon-large to be properly aligned
     width:1em;
 }
 
+span.fancytree-node:hover{
+    background: #95A7B7 !important;
+    color: white !important;
+}
+
 ul > li:hover > div.svs-contextmenu{ /*, ul > li.leaves:hover > div.svs-contextmenu2*/
     display: inline-block;
 } 
@@ -874,7 +879,7 @@ ul > li > .svs-contextmenu {
     /*width:15px;
     padding-right:2px;*/
 }
-ul > li > .svs-contextmenu2 {
+ul > li > .fancytree-node > .svs-contextmenu2 {
     display: none;
     cursor: pointer;
     float:right;
@@ -1099,7 +1104,7 @@ background: #8ea9b9
 .detail a, .detail {
     text-wrap: normal;
     word-wrap: break-word;
-    white-space: nowrap;
+    /*white-space: nowrap;*/
     word-break: break-word;
     min-width: 300px;
     max-width: 300px;

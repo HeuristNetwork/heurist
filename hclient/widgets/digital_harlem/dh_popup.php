@@ -57,7 +57,7 @@
     if($eventID) { array_push($ids, $eventID); $need_cnt++;}
     $addrID = @$_REQUEST['addrID'];
     if($addrID) { array_push($ids, $addrID);  $need_cnt++;}
-
+    
     //find record and details
 
     $records = recordSearch_2('ids:'.implode(',',$ids));
@@ -133,10 +133,14 @@
     if($recTypeID==RT_PLACE_ROLE){
 
             if( @$_REQUEST['full']==1 ){
+            
+                $recTypeID = RT_ADDRESS;
+                $recID = $addrID;
+
                 require ('dh_popup_place.php');
             }
 
-            $comment = getFieldValue($relation2, 0, DT_EXTENDED_DESCRIPTION);
+            $comment = getFieldValue($records, $recID, DT_EXTENDED_DESCRIPTION);
             //date
             $date_out = composeDates( $records, $recID, '<b>Date: </b>');
 ?>
@@ -146,7 +150,7 @@
         <p><b><?php echo getTermById(getFieldValue($records, $recID, DT_PLACE_USAGE_TYPE)) ?> </b></p>
 
         <?php echo getFieldValue($records, $addrID, 'rec_Title'); ?></p>
-        <p><?php echo $comment; ?></p>
+        <p><?php echo @$comment?$comment:''; ?></p>
 
         <p>
             <?php echo $date_out; ?>&nbsp;

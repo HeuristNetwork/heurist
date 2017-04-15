@@ -62,9 +62,11 @@ mysql_connection_overwrite(DATABASE);
     <script type="text/javascript">
             
             function deleteSubmit(){
-                if(window.hWin && window.hWin.HEURIST4.msg){
+                var hWin = window.hWin?window.hWin:top.hWin;
+                
+                if(hWin && hWin.HEURIST4.msg){
                     
-                    window.hWin.HEURIST4.msg.showMsgDlg('<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'+
+                    hWin.HEURIST4.msg.showMsgDlg('<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'+
                     'Please confirm that you really wish to delete the selected records, <br/>along with all associated bookmarks?', function(){
                         document.forms[0].submit();
                         $(document.forms[0]).hide();
@@ -218,6 +220,7 @@ if(document.getElementById('spSelected')){
 }
 </script>
 <form method="post">
+<!-- input type=text name="DBGSESSID" value="424657986609500001;d=1,p=0,c=0" -->
 <div>
     <input type="checkbox" name="delfile" id="delfile" value="1" checked />&nbsp;&nbsp;<label for="delfile">Delete uploaded associated files</label>
 </div>

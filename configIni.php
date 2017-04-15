@@ -62,8 +62,10 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.2.16"; // sets current program version number, determined by Heurist development lead
+$version = "4.2.18"; // sets current program version number, determined by Heurist development lead
 
+// Vsn 4.2.18 12 Apr 2017  Lots of incremental improvements and bug fixes inclding large query handling, better network vis
+// Vsn 4.2.17 2 Feb 2017  Improvements to structure visualisation, Digital Harlem fixes
 // Vsn 4.2.16 15 Jan 2017  Small menu tweaks, improved structure import & cosmetics, improvements to structure visualisation
 // Vsn 4.2.15 4 Jan 2017  Lots of small fixes, Digital Harlem fixes, rework structure visualisation to become effective structure editor 
 // Vsn 4.2.14 10 Dec 2016  Fixes - Gephi export, exporter, new map record popup, resolver, better structure verify, memory problems etc, 
@@ -97,12 +99,20 @@ $dbReadonlyUsername = "";
 $dbReadonlyPassword = "";
 //$serverName = "null";
 $dbPrefix = "";
+
+// Elastic Search (Lucene) server
+$indexServerAddress = ""; 
+$indexServerPort = "";
+
 $httpProxy = "";
 $httpProxyAuth = "";
 $indexServerAddress="";
 $indexServerPort="";
+
 $passwordForDatabaseCreation="";
 $passwordForDatabaseDeletion="";
+$passwordForReservedChanges="";
+
 $defaultRootFileUploadPath ="";
 $defaultRootFileUploadURL = "";
 $sysAdminEmail = "";
@@ -120,6 +130,9 @@ $websiteThumbnailPassword = "";
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
 $defaultFaimsModulesPath = ""; // FAIMS only: the location where FAIMS module files will be written
+
+//action passwords
+$passwordForReservedChanges = "SpeakEasy1935";
 
 // parent directory configuration file is optional, hence include not require
 if (is_file($parentIni)){

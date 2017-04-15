@@ -44,7 +44,7 @@ $.widget( "heurist.app_timemap", {
 
         this.framecontent = $('<div>').addClass('frame_container')
         //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-        //     'background':'url('+window.hWin.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center'})
+        //     'background':'url('+window.hWin.HAPI4.baseURL+'assets/loading-animation-white.gif) no-repeat center center'})
         .appendTo( this.element );
 
         if($(".header"+that.element.attr('id')).length===0){
@@ -149,7 +149,7 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap()
             }else {
-                var url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/map.php?db='+window.hWin.HAPI4.database;
+                var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/map.php?db='+window.hWin.HAPI4.database;
                 if(this.options.layout){
                     if( this.options.layout.indexOf('timeline')<0 )
                         url = url + '&notimeline=1';
@@ -161,6 +161,16 @@ $.widget( "heurist.app_timemap", {
             }
         }
 
+    },
+    
+    _reload_frame: function(){
+        if(this.element.is(':visible')){
+            
+            window.hWin.HEURIST4.msg.showMsgFlash('Reloading map to apply new settings', 2000);
+            
+            this.recordset_changed = true;
+            this.mapframe.attr('src', null);
+        }
     },
 
     _initmap: function(){
@@ -180,7 +190,7 @@ $.widget( "heurist.app_timemap", {
             // all this is now done in addRecordsetLayer
             // var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
 
-//console.log('ini map from app_timemap');
+//console.log('init map from app_timemap');
             
             mapping.load( null, //mapdataset,
                 this.options.selection,  //array of record ids
@@ -189,8 +199,8 @@ $.widget( "heurist.app_timemap", {
                     $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
                         { selection:selected, source:that.element.attr('id') } );
                 },
-                function(){ //callback function
-                    var params = {id:'main', recordset:that.options.recordset, title:'Current query'  }
+                function(){ //callback function on native map init completion
+                    var params = {id:'main', recordset:that.options.recordset, title:'Current query'};
                     that.addRecordsetLayer(params, -1);
                 }
             );
@@ -232,7 +242,7 @@ $.widget( "heurist.app_timemap", {
     , loadanimation: function(show){
        
         if(show){
-            this.mapframe.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.mapframe.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
             //this.mapframe.css('cursor', 'progress');
         }else{
             //this.framecontent.css('cursor', 'auto');
@@ -244,6 +254,19 @@ $.widget( "heurist.app_timemap", {
     * public method
     */
 
+    , reloadMapFrame: function(){
+        this._reload_frame();    
+    }
+    
+    , getMapDocumentDataById: function(mapdocument_id){
+        var mapping = this.mapframe[0].contentWindow.mapping;
+        if(mapping && mapping.map_control){
+            return mapping.map_control.getMapDocumentDataById(mapdocument_id);
+        }else{
+            return null;
+        }
+    }
+    
     , loadMapDocumentById: function(recId){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){

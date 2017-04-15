@@ -33,7 +33,7 @@
     require_once (dirname(__FILE__).'/db_searchfacets.php');
 
     require_once ( dirname(__FILE__).'/../../common/php/Temporal.php');
-
+    
     /**
     * Find minimal and maximal values for given detail type and record type
     *
@@ -114,6 +114,7 @@
             $dt_type     = @$params['type'];
             $step_level  = @$params['step'];
             $fieldid     = $params['field'];
+            $facet_type =  @$params['facet_type'];
 
             //do not include bookmark join
             if(!(strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0)){
@@ -161,7 +162,7 @@
                     $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
 
             }
-            else if($dt_type=="integer" || $dt_type=="float" || $dt_type=="year"){
+            else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==1) || $dt_type=="year"){
 
                     //if ranges are not defined there are two steps 1) find min and max values 2) create select case
                     $select_field = "cast($select_field as DECIMAL)";
@@ -171,7 +172,11 @@
             }
             else { //freetext and other if($dt_type==null || $dt_type=="freetext")
 
-                if($step_level>0 || !($dt_type=="freetext" || $dt_type=="integer" || $dt_type=="float")){
+                if($dt_type=="integer" || $dt_type=="float"){
+
+                    $select_field = "cast($select_field as DECIMAL)";
+                    
+                }else if($step_level>0 || !($dt_type=="freetext" || $dt_type=="integer" || $dt_type=="float")){
 
                 }else{
                     $select_field = "SUBSTRING(trim(".$select_field."), 1, 1)";
@@ -208,17 +213,18 @@
 
             //
 //DEBUG
-if(@$params['debug']) echo $query."<br>";
+//if(@$params['debug']) echo $query."<br>";
 
             $res = $mysqli->query($query);
             if (!$res){
-                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName."Facet query error", $mysqli->error);
+                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName
+                        .'Facet query error. Parameters:'.print_r($params, true), $mysqli->error);
             }else{
                 $data = array();
 
                 while ( $row = $res->fetch_row() ) {
 
-                    if($dt_type=="integer" || $dt_type=="float" || $dt_type=="year" || $dt_type=="date"){
+                    if((($dt_type=="integer" || $dt_type=="float") && $facet_type==1)   || $dt_type=="year" || $dt_type=="date"){
                         $third_element = $row[2];
                     }else if($step_level>0 || $dt_type!='freetext'){
                         $third_element = $row[0];
@@ -418,6 +424,8 @@ if(@$params['debug']) echo $query."<br>";
     function recordSearch($system, $params)
     {
 
+        $memory_limit = $system->get_php_bytes('memory_limit');
+        
         //for error message
         $savedSearchName = @$params['qname']?"Saved search: ".$params['qname']."<br>":"";
 
@@ -437,6 +445,8 @@ if(@$params['debug']) echo $query."<br>";
                 $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE); //9,10,11,28';    
              }
              $fieldtypes_ids = implode(',', $fieldtypes_ids);
+             
+//DEBUG error_log('timemap fields '.$fieldtypes_ids);
              
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
             //specific set of detail fields
@@ -634,7 +644,8 @@ if(@$params['debug']) echo $query."<br>";
                                         $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records']));
                             }
 
-                            if($is_get_relation_records && (strpos($params3['q'],"related_to")>0 || strpos($params3['q'],"relatedfrom")>0) ){ //find relationship records (recType=1)
+                            if($is_get_relation_records && 
+                            (strpos($params3['q'],"related_to")>0 || strpos($params3['q'],"relatedfrom")>0) ){ //find relationship records (recType=1)
 
                                 //create query to search related records
                                 if (strcasecmp(@$params3['w'],'B') == 0  ||  strcasecmp(@$params3['w'], 'bookmark') == 0) {
@@ -726,7 +737,7 @@ if(@$params['debug']) echo $query."<br>";
             return $fin_result;
         }//END RULES
 
-        $chunk_size = PHP_INT_MAX;
+        $search_detail_limit = PHP_INT_MAX;
 
         if(@$params['sql']){
              $query = $params['sql'];
@@ -757,12 +768,15 @@ if(@$params['debug']) echo $query."<br>";
             }else{
                 $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL OR compose_sql_query at once
             }
+            
+
+            
 
             if($is_count_only || ($is_ids_only && @$params['needall'])){
-                $chunk_size = PHP_INT_MAX;
+                $search_detail_limit = PHP_INT_MAX;
                 $aquery["limit"] = '';
             }else{
-                $chunk_size = $system->user_GetPreference('search_detail_limit'); //limit for map/timemap output
+                $search_detail_limit = $system->user_GetPreference('search_detail_limit'); //limit for map/timemap output
             }
 
 
@@ -771,16 +785,19 @@ if(@$params['debug']) echo $query."<br>";
             }
 
             $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
-         
+
         }
         
+//error_log($istimemap_request.' Q='.$query);                
 
+//error_log($istimemap_request.' limit '.$aquery["limit"]);
 
         $res = $mysqli->query($query);
         if (!$res){
             
-error_log('params '.print_r($params, true));            
-            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.' Search query error on saved search. Query '.$query, $mysqli->error);
+//error_log('params '.print_r($params, true));            
+            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.
+            ' Search query error on saved search. Parameters:'.print_r($params, true).' Query '.$query, $mysqli->error);
         }else if($is_count_only){
         
                 $total_count_rows = $res->fetch_row();
@@ -794,7 +811,6 @@ error_log('params '.print_r($params, true));
                 
         }else{
             
-
             $fres = $mysqli->query('select found_rows()');
             if (!$fres)     {
                 $response = $system->addError(HEURIST_DB_ERROR, 
@@ -804,6 +820,13 @@ error_log('params '.print_r($params, true));
                 $total_count_rows = $fres->fetch_row();
                 $total_count_rows = $total_count_rows[0];
                 $fres->close();
+                
+                if($total_count_rows*10>$memory_limit){
+                    return $system->addError(HEURIST_SYSTEM_CONFIG, 
+                        'Search query produces '.$total_count_rows.' records. Memory limit does not allow to retrieve all of them.'
+                         .' Please filter to a smaller set of results.');
+                }
+                
 
                 if($is_ids_only)
                 { //------------------------  LOAD and RETURN only IDS
@@ -833,6 +856,18 @@ error_log('params '.print_r($params, true));
 
                 }else{ //----------------------------------
 
+                    $rectype_structures  = array();
+                    $rectypes = array();
+                    $records = array();
+                    $order = array();
+                    $memory_warning = null;
+                    $limit_warning = false;
+                    
+                    /*if($istimemap_request){ //special case need to scan all result set and pick up only timemap enabled
+                    
+                        $tm_records = _getTimemapRecords($res);    
+                        
+                    }else{ */
 
                     // read all field names
                     $_flds =  $res->fetch_fields();
@@ -843,13 +878,9 @@ error_log('params '.print_r($params, true));
                     array_push($fields, 'rec_ThumbnailURL');
                     //array_push($fields, 'rec_Icon'); //last one -icon ID
 
-                    $rectype_structures  = array();
-                    $rectypes = array();
-                    $records = array();
-                    $order = array();
                     
                     // load all records
-                    while ($row = $res->fetch_row()) {  //3000 maximal allowed chunk
+                    while ($row = $res->fetch_row()) {
                         array_push( $row, ($fieldtypes_ids)?'':fileGetThumbnailURL($system, $row[2]) );
                         //array_push( $row, $row[4] ); //by default icon if record type ID
                         $records[$row[2]] = $row;
@@ -860,21 +891,45 @@ error_log('params '.print_r($params, true));
                     }
                     $res->close();
                     
-                        if(($istimemap_request ||
-                            $params['detail']=='detail' ||
-                            $params['detail']=='structure') && count($records)>0){
+                    if(($istimemap_request ||
+                        $params['detail']=='detail' ||
+                        $params['detail']=='structure') && count($records)>0){
+                                
+                                
+                            $all_rec_ids = array_keys($records); 
+                            $res_count = count($all_rec_ids);
+                            //split to 2500 to use in detail query
+                            $offset = 0;
+                            
+                            if($istimemap_request){
+                                    $tm_records = array();
+                                    $order = array();
+                                    $rectypes = array();
+                                    $istimemap_counter = 0;
+                            }
+                     
+                     
+//error_log('total '.$res_count.'  '.$istimemap_request);                     
+$loop_cnt=1;                            
+                    while ($offset<$res_count){   
+                            
+//here was as problem, since chunk size for mapping can be 5000 or more we got memory overflow here
+//resaon the list of ids in SELECT is bigger than mySQL limit
+//solution - we perfrom the series of request for details by 1000 records
+                            $chunk_rec_ids = array_slice($all_rec_ids, $offset, 1000); 
+                            $offset = $offset + 1000;
 
                             //search for specific details
-                            if(!$fieldtypes_ids && $fieldtypes_ids!=''){
+                            if($fieldtypes_ids!=null && $fieldtypes_ids!=''){
 
                                 $detail_query =  'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
                                 .'AsWKT(dtl_Geo), 0, 0, 0 '
                                 .'from recDetails
-                                where dtl_RecID in (' . join(',', array_keys($records)) . ') '
+                                where dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
                                 .' and dtl_DetailTypeID in ('.$fieldtypes_ids.')';
-
+                                
                             }else{
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
@@ -885,11 +940,11 @@ error_log('params '.print_r($params, true));
                                 .'recUploadedFiles.ulf_Parameters '         // 5
                                 .'from recDetails
                                   left join recUploadedFiles on ulf_ID = dtl_UploadedFileID
-                                where dtl_RecID in (' . join(',', array_keys($records)) . ')';
+                                where dtl_RecID in (' . join(',', $chunk_rec_ids) . ')';
 
                             }
 
-                          
+$loop_cnt++;                          
                             // @todo - we may use getAllRecordDetails
                             $res_det = $mysqli->query( $detail_query );
 
@@ -926,34 +981,71 @@ error_log('params '.print_r($params, true));
                                     }
                                 }//while
                                 $res_det->close();
+     
 
-///@todo
-// 1. optimize loop - include into main detail loop
-// 2. exit loop if more than 5000 geo enabled
-// 3. return geojson and timeline items
+///@todo optionally return geojson and timeline items
+
                                 //additional loop for timemap request 
                                 //1. exclude records without timemap data
-                                //2. limit to $chunk_size
+                                //2. limit to $search_detail_limit from preferences 'search_detail_limit'
                                 if($istimemap_request){
-                                    $tm_records = array();
-                                    $order = array();
-                                    $rectypes = array();
-                                    foreach ($records as $recID => $record) {
+                                    
+                                    foreach ($chunk_rec_ids as $recID) {
+                                        $record = $records[$recID];
                                         if(is_array(@$record['d']) && count($record['d'])>0){
                                             //this record is time enabled 
-                                            if($istimemap_counter<$chunk_size){
+                                            if($istimemap_counter<$search_detail_limit){
                                                 $tm_records[$recID] = $record;        
                                                 array_push($order, $recID);
                                                 $rectypes[$record[4]]=1; 
+                                                //$records[$recID] = null; //unset
+                                                //unset($records[$recID]);
+                                            }else{
+                                                $limit_warning = true;
+                                                break;
                                             }
                                             $istimemap_counter++;
                                         }
                                    }
+                                }//$istimemap_request
+                                
+                          
+                                if($res_count>5000){
+                                    $mem_used = memory_get_usage();
+                                    if($mem_used>$memory_limit-52428800){ //50M
+                                        //cut off exceed records
+                                        $order = array_slice($order, 0, $offset);
+                                        $sliced_records = array();
+                                        if($istimemap_request){
+                                            foreach ($order as $recID) {
+                                                $sliced_records[$recID] = $tm_records[$recID]; 
+                                            }
+                                            $tm_records = $sliced_records;
+                                            $memory_warning = '';
+                                        }else{
+                                            foreach ($order as $recID) {
+                                                $sliced_records[$recID] = $records[$recID]; 
+                                            }
+                                            $records = $sliced_records;
+                                            $memory_warning = 'Search query produces '.$res_count.' records. ';
+                                        }
+                                        $memory_warning = $memory_warning.'The result is limited to '.count($sliced_records).' records due to server limitations.'
+                                        .' Please filter to a smaller set of results.';
+                                        break;
+                                    }
+                                }                                 
+                                
+                            }
+                            
+                    }//while offset
+                    
+                            if($istimemap_request){
+                            //error_log('found count '.count($records));                                   
+                            //error_log('maptime. total '.count($records).'  toclnt='.count($tm_records).' tot_tm='.$istimemap_counter);                                   
                                    $records = $tm_records;
                                    $total_count_rows = $istimemap_counter;
-                                }//$istimemap_request
                             }
-                        }//$need_details
+                    }//$need_details
 
                         $rectypes = array_keys($rectypes);
                         if( $params['detail']=='structure' && count($rectypes)>0){ //rarely used in editing.js
@@ -969,11 +1061,13 @@ error_log('params '.print_r($params, true));
                                 'count'=>$total_count_rows,
                                 'offset'=>get_offset($params),
                                 'reccount'=>count($records),
+                                'tmcount'=>$istimemap_counter,
                                 'fields'=>$fields,
                                 'records'=>$records,
                                 'order'=>$order,
                                 'rectypes'=>$rectypes,
-                                'structures'=>$rectype_structures));
+                                'limit_warning'=>$limit_warning,
+                                'memory_warning'=>$memory_warning));
                         if($fieldtypes_ids){
                               $response['data']['fields_detail'] =  explode(',', $fieldtypes_ids);
                         }
@@ -1052,4 +1146,13 @@ error_log('params '.print_r($params, true));
     function _loadRecordDetails( $system, $record_ids){
 
     }
+    
+    //
+    // pickup only timemap enabled records
+    //
+    function _getTimemapRecords($res){
+        
+        
+    }
+    
 ?>

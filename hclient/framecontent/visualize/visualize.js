@@ -85,14 +85,12 @@ var svg;        // The SVG where the visualisation will be executed on
             getLineLength: function() { return getSetting(setting_linelength); },
             
             selectedNodeIds: [],
+            onRefreshData: function(){},
             triggerSelection: function(selection){}, 
             
             isDatabaseStructure: false,
             
             showCounts: true,
-            
-            // Limits tha maximum results whichg can be plotted to avoid overloading the browser - user will get warning message
-            limit: 2000,
             
             // UI setting controls
             showLineSettings: true,
@@ -153,11 +151,15 @@ var svg;        // The SVG where the visualisation will be executed on
 
         // Check visualisation limit
         var amount = Object.keys(settings.data.nodes).length;
-        if(amount > settings.limit) {
-             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set to ' +settings.limit+ ' records to avoid overloading the browser. You are trying to visualize ' +amount+ ' records. Please refine your filter to reduce the number of results.</text>');  
-             return; 
+        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+        
+        visualizeData();    
+
+        var ele_warn = $('#net_limit_warning');
+        if(amount >= MAXITEMS) {
+            ele_warn.html('These results are limited to '+MAXITEMS+' records<br>(limit set in your profile Preferences)<br>Please filter to a smaller set of results').show();//.delay(2000).fadeOut(10000);
         }else{
-            visualizeData();    
+            ele_warn.hide();
         }
  
         return this;
@@ -186,6 +188,18 @@ function determineMaxCount(data) {
         }
     }
     //console.log("Max count: " + maxCount);
+}
+
+function getNodeDataById(id){
+    if(data && data.nodes.length > 0) {
+        for(var i = 0; i < data.nodes.length; i++) {
+            //console.log(data.nodes[i]);
+            if(data.nodes[i].id==id) {
+                return data.nodes[i];
+            } 
+        }
+    }
+    return null;
 }
 
 /** Calculates log base 10 */
@@ -270,7 +284,9 @@ function getLineLength(record) {
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
-    var maxWidth = getSetting(setting_linewidth);
+
+    count = Number(count);
+    var maxWidth = Number(getSetting(setting_linewidth));
     
     if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
     else if(maxWidth<1) {maxSize = 1;}
@@ -326,7 +342,7 @@ var force;
 
 function getDataFromServer(){
 
-    var url = window.hWin.HAPI4.basePathV4+"hserver/controller/rectype_relations.php" + window.location.search;
+    var url = window.hWin.HAPI4.baseURL+"hserver/controller/rectype_relations.php" + window.location.search;
     d3.json(url, function(error, json_data) {
         // Error check
         if(error) {
@@ -363,6 +379,9 @@ function filterData(json_data) {
             return false;
         });
 
+        
+//console.log(json_data.links);        
+        
         // Filter links
         var links = [];
         json_data.links.filter(function(d) {
@@ -405,9 +424,32 @@ function visualizeData() {
 
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
-    addLines("bottom-lines", getSetting(setting_linecolor), 0.5);
-    //addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5);
+    addLines("bottom-lines", getSetting(setting_linecolor), 0);
+    
+    addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5); //tick transparent line to catch mouse over
 
+/*    
+svg.append("svg:defs").selectAll("marker")
+    .data(data.links)
+  .enter().append("svg:marker")
+    .attr("id", 'marker')
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 5)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+  .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5");    
+var lines = svg.append("svg:g").selectAll("path")
+    .data(data.links)
+    .enter().append("svg:path")
+    .attr("marker-mid", "url(#marker)")
+    .style("stroke-width", 2)
+    .attr("stroke", '#ff0000');    
+  lines.attr("class", function(d) {
+            return "bottom-lines link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+         });
+*/    
     // Nodes
     addNodes();
     //addTitles();
@@ -463,9 +505,19 @@ function visualizeData() {
             +($('#list_rectypes').is(':visible')?'n':'s')   }});
     }
     
+    $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
+    function(){
+         zoomBtn(true);
+    }
+    );
+
+    $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
+    function(){
+         zoomBtn(false);
+    }
+    );
     
 } //end visualizeData
-
 
 /****************************************** CONTAINER **************************************/
 /**
@@ -496,14 +548,13 @@ function addContainer() {
     var container = svg.append("g")
                        .attr("id", "container")
                        .attr("transform", s);
-                       
     // Zoom behaviour                   
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
                            .scaleExtent([0.05, 10]) //settings.isDatabaseStructure?[0.75,1.5]:
                            .on("zoom", zoomed);
-                      
+                    
     return container;
 }
 
@@ -512,6 +563,7 @@ function addContainer() {
 */
 function zoomed() { 
     //keep current setting Translate   
+    var translateXY = [];
     if(d3.event.translate !== undefined) {
         if(!isNaN(d3.event.translate[0])) {           
             putSetting(setting_translatex, d3.event.translate[0]); 
@@ -519,42 +571,94 @@ function zoomed() {
         if(!isNaN(d3.event.translate[1])) {    
             putSetting(setting_translatey, d3.event.translate[1]);
         }
+/*    
+        if(prev_translate!=null && !isNaN(prev_translate[0]) && !isNaN(prev_translate[1])){
+            translateXY[0] = prev_translate[0] + 
+                        (d3.event.translate[0]==prev_translate[0])?0:Math.pow(d3.event.translate[0]-prev_translate[0], 0.5);
+            translateXY[1] = prev_translate[1] + 
+                        (d3.event.translate[1]==prev_translate[1])?0:Math.pow(d3.event.translate[1]-prev_translate[1], 0.5);
+            prev_translate = [translateXY[0], translateXY[1]];
+        }else{
+            prev_translate = d3.event.translate;
+            translateXY[0] = d3.event.translate[0];
+            translateXY[1] = d3.event.translate[1];
+        }
+console.log('A '+translateXY[0]+','+translateXY[1]);        
+console.log('B '+d3.event.translate);    
+*/    
     }
     
-    //keep current setting Scale
-    if(!isNaN(d3.event.scale)) {
-        putSetting(setting_scale, d3.event.scale);
-    }   
+    var scale = d3.event.scale; //Math.pow(d3.event.scale,0.75);
     
+    //keep current setting Scale
+    if(!isNaN(d3.event.scale)){
+        putSetting(setting_scale, scale);
+    }
+   
     
 //console.log( 'trans='+d3.event.translate );
-//console.log( 'scale='+d3.event.scale );
+//console.log( 'scale='+scale );
     
-    // Transform  
-    var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
+    // Transform  d3.event.translate  d3.event.translate
+    var transform = "translate("+d3.event.translate
+            //((d3.event.translate==undefined)?d3.event.translate
+            //                            :(translateXY[0]+','+translateXY[1]))
+                                        +")scale("+scale+")";
+    onZoom(transform);
+}  
+
+function onZoom( transform ){
     d3.select("#container").attr("transform", transform);
     
-    //d3.selectAll(".node").select(".icon").attr('transform',"scale("+(1/d3.event.scale)+")");
-    d3.selectAll(".node").attr('transform',
-    function(d) { 
-        //keep zoomed position 
-        var tr = "translate(" + d.x + "," + d.y + ")";
-        //however restore scale
-        tr = tr+"scale("+(1/d3.event.scale)+")";
-        
-        return tr; 
-    });
+    var scale = this.zoomBehaviour.scale();
     
-    d3.selectAll("path").style("stroke-width", function(d) { return getLineWidth(d.targetcount); });
-    
-    //.attr("d", d3.svg.symbol().type(function (d) { return d.Shape; }).size(1/d3.event.scale));
-    
-    //d3.selectAll(".node").attr('transform',"translate(0,0)scale("+(1/d3.event.scale)+")"); //translate("+d3.event.translate+")
-    //d3.selectAll("path").attr("transform", transform); //"scale("+d3.event.scale+")");
-    //updateNodes();
+    d3.selectAll(".bottom-lines").style("stroke-width", 
+            function(d) { 
+                var w = getLineWidth(d.targetcount); //width for scale 1
+                return  (scale>1)?w:(w/scale);
+            });
+    d3.selectAll(".top-lines").style("stroke-width", 
+            function(d) { 
+                var w = getLineWidth(d.targetcount)+8.5; //width for scale 1
+                return  (scale>1)?w:(w/scale);
+            });
 
     updateOverlays();
-}  
+}
+
+//handle the zoom buttons
+function zoomBtn(zoom_in){
+    var zoom = this.zoomBehaviour; 
+    
+    var scale = zoom.scale(),
+        extent = zoom.scaleExtent(),
+        translate = zoom.translate(),
+        x = translate[0], y = translate[1],
+        factor = zoom_in ? 1.3 : 1/1.3,
+        target_scale = scale * factor;
+
+    // If we're already at an extent, done
+    if (target_scale === extent[0] || target_scale === extent[1]) { return false; }
+    // If the factor is too much, scale it down to reach the extent exactly
+    var clamped_target_scale = Math.max(extent[0], Math.min(extent[1], target_scale));
+    if (clamped_target_scale != target_scale){
+        target_scale = clamped_target_scale;
+        factor = target_scale / scale;
+    }
+
+    var width = $("#divSvg").width();
+    var height = $("#divSvg").height();
+    var center = [width / 2, height / 2];
+    // Center each vector, stretch, then put back
+    x = (x - center[0]) * factor + center[0];
+    y = (y - center[1]) * factor + center[1];
+
+    zoom.scale(target_scale)
+        .translate([x,y]);    
+   
+    var transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
+    onZoom(transform);
+}
 
 /********************************************* FORCE ***************************************/
 /**
@@ -580,7 +684,6 @@ function addForce() {
     return force;
 }  
 
-
 /*************************************************** MARKERS ******************************************/
 /**
 * Adds marker definitions to a container
@@ -591,13 +694,14 @@ function addMarkerDefinitions() {
     var markercolor = getSetting(setting_markercolor);
     
     
+    
     var markers = d3.select("#container")
                     .append("defs")
                     .selectAll("marker")
                     .data(data.links)
                     .enter()
                     .append("svg:marker")    
-                    .attr("id", function(d) {
+                    .attr("id", function(d) {  //use this id to connect markers to the appropriate link
                         return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
                     })
                     .attr("markerWidth", function(d) {    
@@ -609,7 +713,7 @@ function addMarkerDefinitions() {
                     .attr("refX", function(d) {
                         // Move markers to display a pointer on a straight line
                         if(linetype=="straight" && d.relation.pointer) {
-                           return linelength*-0.2;
+                           return linelength*0.5;
                         }
                         return -1;
                     })
@@ -617,11 +721,26 @@ function addMarkerDefinitions() {
                     .attr("viewBox", "0 -5 10 10")
                     .attr("markerUnits", "userSpaceOnUse")
                     .attr("orient", "auto")
-                    .attr("fill", markercolor) // color of arrows on links (Using the markercolor setting)
+                    .attr("fill", markercolor)// color of arrows on links (Using the markercolor setting)
+                    //.attr("stroke", markercolor)
+                    //.attr("stroke-width", 2)
                     .attr("opacity", "0.6")
-                    .append("path")                                                      
-                    .attr("d", "M0,-5L10,0L0,5");
+                    .append("path")                
+                    .attr("d",
+                        function(d) { 
+                            return d.relation.type=='resource' 
+                                            ?'M0,-5 L10,0 L0,5' 
+                                            :'M0,-5 L5,0 L0,5 M5,-5 L10,0 L5,5'});  //double arrow
+                                            
      return markers;
+/*     
+CROSS  M 3,3 L 7,7 M 3,7 L 7,3
+
+    { id: 0, name: 'circle', path: 'M 0, 0  m -5, 0  a 5,5 0 1,0 10,0  a 5,5 0 1,0 -10,0', viewbox: '-6 -6 12 12' }
+  , { id: 1, name: 'square', path: 'M 0,0 m -5,-5 L 5,-5 L 5,5 L -5,5 Z', viewbox: '-5 -5 10 10' }
+  , { id: 2, name: 'arrow', path: 'M 0,0 m -5,-5 L 5,0 L -5,5 Z', viewbox: '-5 -5 10 10' }
+  , { id: 2, name: 'stub', path: 'M 0,0 m -1,-5 L 1,-5 L 1,5 L -1,5 Z', viewbox: '-1 -5 2 10' }     
+*/  
 }
 
 /************************************ LINES **************************************/      
@@ -633,7 +752,9 @@ function addLines(name, color, thickness) {
     // Add the chosen lines [using the linetype setting]
     var lines;
     
-    if(getSetting(setting_linetype) == "curved") {
+    var linetype = getSetting(setting_linetype);
+    
+    if(true){ //getSetting(setting_linetype) != "straight"){//} == "curved") {
         // Add curved lines
          lines = d3.select("#container")
                    .append("svg:g")
@@ -651,14 +772,12 @@ function addLines(name, color, thickness) {
                   .append("svg:polyline");
     }    
 
-    var thickness = parseInt(getSetting(setting_linewidth))+1;
-
+    //var thickness = parseInt(getSetting(setting_linewidth))+1;
+    var scale = this.zoomBehaviour.scale(); //current scale
+    
     // Adding shared attributes
     lines.attr("class", function(d) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-         }) 
-         .attr("marker-mid", function(d) {
-            return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")";
          })
          .attr("stroke", color)
          .style("stroke-dasharray", (function(d) {
@@ -666,17 +785,28 @@ function addLines(name, color, thickness) {
                 return "3, 3"; 
              } 
          })) 
+         .style("stroke-width", function(d) { 
+             var w = getLineWidth(d.targetcount)+thickness; //width for scale 1
+             return  (scale>1)?w:(w/scale);
+         });
          
-         
-         .style("stroke-width", function(d) { return getLineWidth(d.targetcount); })
-         .on("click", function(d) {
-             // Close all overlays and create a line overlay
-             /* 2016-12-15 it works, however we do not need info for links anymore
-             removeOverlays();
+    if(name=='bottom-lines' && linetype != "stepped"){
+         lines.attr("marker-mid", function(d) {
+            return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")"; //reference to marker id
+         });
+    }
+    
+    if(name=='top-lines'){
+         lines.on("mouseover", function(d) {
+//console.log(d.relation.id);  //field type id           
              var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
-             */
+         })
+         .on("mouseout", function(d) {
+             var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+             removeOverlay(selector, 0);
          });
+    }
          
     return lines;
 }
@@ -686,17 +816,24 @@ function addLines(name, color, thickness) {
 */
 function tick() {
     
-    //not used anymore var topLines = d3.selectAll(".top-lines"); 
+    //not used anymore 
+    var topLines = d3.selectAll(".top-lines"); 
     var bottomLines = d3.selectAll(".bottom-lines");
     
     var linetype = getSetting(setting_linetype);
     if(linetype == "curved") {
-        //updateCurvedLines(topLines);
+        updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);     
+    }else if(linetype == "stepped") {
+        updateSteppedLines(topLines, 'top');
+        updateSteppedLines(bottomLines,'bottom'); //with marker
     }else{
-        //updateStraightLines(topLines);
+        updateStraightLines(topLines);
         updateStraightLines(bottomLines);   
     }
+    
+    // Update node locations
+    updateNodes();
     
     // Update overlay
     updateOverlays(); 
@@ -720,22 +857,40 @@ function updateCurvedLines(lines) {
            pairs[key] = pairs[key]+0.25;
        } 
        var k = pairs[d.source.id+'_'+d.target.id];
+       
+       var target_x = d.target.x,
+           target_y = d.target.y;
+       if(d.target.id==d.source.id){
+           //link to itself
+           target_x = d.source.x+100;
+           target_y = d.source.y-100;
+       }
         
-        var dx = d.target.x - d.source.x,
-            dy = d.target.y - d.source.y,
+        var dx = target_x - d.source.x,
+            dy = target_y - d.source.y,
             dr = Math.sqrt(dx * dx + dy * dy)/k,
             mx = d.source.x + dx,
             my = d.source.y + dy;
+
+       if(d.target.id==d.source.id){
+
+            return [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              "A",dr,dr,0,0,1,target_x,target_y,
+              "A",dr,dr,0,0,1,d.source.x,d.source.y
+            ].join(" ");
+           
+       }else{
             
-        return [
-          "M",d.source.x,d.source.y,
-          "A",dr,dr,0,0,1,mx,my,
-          "A",dr,dr,0,0,1,d.target.x,d.target.y
-        ].join(" ");
+            return [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              "A",dr,dr,0,0,1,target_x,target_y
+            ].join(" ");
+       }
     });
 
-    // Update node locations
-    updateNodes();
 }
 
 /**
@@ -746,25 +901,237 @@ function updateStraightLines(lines) {
     
     var pairs = {};
     
+    $(".icon_self").each(function() {
+            $(this).remove();
+    });
+
+    
+    // Calculate the straight points
+    lines.attr("d", function(d) {
+        
+       var key = d.source.id+'_'+d.target.id,
+           indent = 30;
+       
+       if(pairs[d.target.id+'_'+d.source.id]){
+           key = d.target.id+'_'+d.source.id;
+       }else if(!pairs[key]){
+           indent = 0;
+       }
+       
+       if(indent>0){
+           pairs[key] = pairs[key]+20;
+       }else{
+           pairs[key] = 1;
+       } 
+       var R = pairs[key];
+       var pnt = [];
+       var target_x = d.target.x,
+           target_y = d.target.y;
+           
+       if(d.target.id==d.source.id){
+           //link to itself
+           target_x = d.source.x+100;
+           target_y = d.source.y-100;
+           
+           var dx = target_x - d.source.x,
+               dy = target_y - d.source.y,
+               dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+               mx = d.source.x + dx,
+               my = d.source.y + dy;
+           
+            pnt = [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              //"A",dr,dr,0,0,1,target_x,target_y,
+              "L",d.source.x+50,d.source.y-50,
+              "L",d.source.x,d.source.y
+              //"A",dr,dr,0,0,1,d.source.x,d.source.y
+            ];
+           
+       }else{
+       
+           var dx = (target_x-d.source.x)/2;
+           var dy = (target_y-d.source.y)/2;
+
+           var tg = (dx!=0)?Math.atan(dy/dx):0;
+           
+           var dx2 = dx-R*Math.sin(tg);
+           var dy2 = dy+R*Math.cos(tg);
+      
+           pnt = [
+                  "M", d.source.x, d.source.y,
+                  "L", (d.source.x + dx-R*Math.sin(tg)), (d.source.y + dy+R*Math.cos(tg)),
+                  "L", target_x, target_y ];
+  
+       }
+       
+       return pnt.join(' '); 
+  
+       //for polyline
+       /*return d.source.x + "," + d.source.y + " " +
+              //(d.source.x + dx/2-R*Math.sin(tg)) + "," + 
+              //(d.source.y + dy/2+R*Math.cos(tg)) + " " +  
+              (d.source.x + dx-R*Math.sin(tg)) + "," + 
+              (d.source.y + dy+R*Math.cos(tg)) + " " +  
+              target_x + "," + target_y;
+       */
+    });
+    
+}
+
+function updateSteppedLines(lines, type){
+    var pairs = {};
+    
+    
+    $(".hidden_line_for_markers").remove();
+    
+    var mode = 0; //
+    
+    // Calculate the straight points
+    lines.attr("d", function(d) {
+        
+       var dx = (d.target.x-d.source.x)/2,
+           dy = (d.target.y-d.source.y)/2;
+       
+       var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
+       
+       var key = d.source.id+'_'+d.target.id;
+       if(pairs[d.target.id+'_'+d.source.id]){
+           key = d.target.id+'_'+d.source.id;
+       }else if(!pairs[key]){
+           pairs[key] = 1-indent;
+       }
+       
+       pairs[key] = pairs[key]+indent;
+       var k = pairs[key];
+       
+       var target_x = d.target.x,
+           target_y = d.target.y;
+       var res = [];    
+           
+       if(d.target.id==d.source.id){
+           //link to itself
+           target_x = d.source.x+65;
+           target_y = d.source.y-65;
+           
+           var dx = target_x - d.source.x,
+               dy = target_y - d.source.y,
+               dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+               mx = d.source.x + dx,
+               my = d.source.y + dy;
+           
+            res = [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              //"A",dr,dr,0,0,1,target_x,target_y,
+              "L",d.source.x+35,d.source.y-35,
+              "L",d.source.x,d.source.y
+              //"A",dr,dr,0,0,1,d.source.x,d.source.y
+            ];
+            
+            if($.isFunction($(this).attr))
+            $(this).attr("marker-mid", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+           
+       }else{  
+      
+           var dx2 = 45*(dx==0?0:((dx<0)?-1:1));
+           var dy2 = 45*(dy==0?0:((dy<0)?-1:1));
+
+           //path
+           res = [
+                  "M",d.source.x,d.source.y,
+                  "L",(d.source.x + dx2),(d.source.y + dy2 ),
+                  "L",(d.source.x + dx2 + dx + k),(d.source.y + dy2),
+                  "L",(d.source.x + dx2 + dx + k),target_y,
+                  "L",target_x,target_y
+                ];
+           
+           
+           if(type=='bottom'){
+                //add 3 lines - specially for markers
+                var g = d3.select("#container").append("svg:g").attr("class", "hidden_line_for_markers");
+                
+                var pnt = [
+                  "M",(d.source.x + dx2),(d.source.y + dy2 ),
+                  "L",(d.source.x + dx2 + dx/2 + k),(d.source.y + dy2)];
+                
+                g.append("svg:path")
+                        .attr("d", pnt.join(' '))
+                        //reference to marker id
+                        .attr("marker-end", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+
+                pnt = [
+                  "M",(d.source.x + dx2 + dx + k), (d.source.y + dy2),
+                  "L",(d.source.x + dx2 + dx + k), d.source.y + dy2 + (target_y - d.source.y - dy2)/2 ];
+                        
+                g.append("svg:path")
+                        //.attr("class", "hidden_line_for_markers")
+                        .attr("d", pnt.join(' '))
+                        //reference to marker id
+                        .attr("marker-end", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+
+           }
+           dx = dx + k;
+           
+       }
+       
+       return res.join(' ');      
+    });
+    
+}
+
+function updateSteppedLines_OLD(lines){
+    var pairs = {};
+    
+    var mode = 0; //
+    
     // Calculate the straight points
     lines.attr("points", function(d) {
         
-       var key = d.source.id+'_'+d.target.id; 
-       if(!pairs[key]){
-           pairs[key] = 1;
+       var dx = (d.target.x-d.source.x)/(mode==1?1:2),
+           dy = (d.target.y-d.source.y)/(mode==1?1:2);
+       
+       var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
+       
+       var key = d.source.id+'_'+d.target.id;
+       if(pairs[d.target.id+'_'+d.source.id]){
+           key = d.target.id+'_'+d.source.id;
+       }else if(!pairs[key]){
+           pairs[key] = 1-indent;
+       }
+       
+       pairs[key] = pairs[key]+indent;
+       var k = pairs[key];
+       
+       var target_x = d.target.x,
+           target_y = d.target.y;
+       if(d.target.id==d.source.id){
+           //link to itself
+           target_x = d.source.x+100;
+           target_y = d.source.y-100;
+       }
+       
+       var res = [d.source.x + "," + d.source.y];
+       
+       if(Math.abs(dx)>Math.abs(dy)) {
+           dx = dx + k;
+           res.push((d.source.x + dx) + ',' + (d.source.y));
+           res.push((d.source.x + dx) + ',' + (target_y));
        }else{
-           pairs[key] = pairs[key]+30;
-       } 
-       var k = pairs[d.source.id+'_'+d.target.id];
-        
-       return d.source.x + "," + d.source.y + " " +
-              (d.source.x + (d.target.x-d.source.x)/2+k) + "," + 
-              (d.source.y + (d.target.y-d.source.y)/2-k) + " " +  
-              d.target.x + "," + d.target.y;
+           dy = dy + k;
+           res.push((d.source.x) + ',' + (d.source.y+dy));
+           res.push((target_x) + ',' + (d.source.y+dy));
+       }
+
+       res.push(target_x + "," + target_y);
+       if(d.target.id==d.source.id){
+           res.push((d.source.x - dx) + ',' + target_y);
+           res.push(d.source.x  + ',' + d.source.y);
+       }
+       
+       return res.join(' ');
     });
     
-    // Update node locations
-    updateNodes();
 }
 
 

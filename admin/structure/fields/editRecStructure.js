@@ -41,6 +41,8 @@ DDM = YAHOO.util.DragDropMgr,
 Hul = top.HEURIST.util;
 
 
+top.HEURIST.database.id = 1; //temp
+
 function EditRecStructure() {
 
     var _className = "EditRecStructure",
@@ -59,7 +61,7 @@ function EditRecStructure() {
     db,
     warningPopupID = null,
     _structureWasUpdated = false;
-    
+
     // buttons on top and bottom of design tab
     var hToolBar = '<div style=\"display:none;\">'+
         //<div style="display:inline-block; text-align:left">
@@ -75,11 +77,13 @@ function EditRecStructure() {
         'title="Add a new section heading, to break the data entry form up into groups of related fields. Heading is inserted at bottom, drag up into required position." class="add"/>'+
         '</div>'+
 
-        '<span style="float:right; text-align:right;">'+ 
+        '<span style="padding-left:20px">'+   //style="float:right; text-align:right;"
         '<span id="div_rty_ID" style="font-size:11px;font-weight:normal;"></span>&nbsp;'+
-        '<span id="div_rty_ConceptID" style="font-size:11px;font-weight:normal;"></span>&nbsp;&nbsp;'+
+        '<span id="div_rty_ConceptID" style="font-size:11px;font-weight:normal;"></span>&nbsp;&nbsp;</span>'+
+        '<span style="display:none;">'+
         '<a href="#" onclick="{onEditRecordType();}">edit general description<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;'+
-        '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;&nbsp;&nbsp;'+
+        '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;&nbsp;&nbsp;</span>'+
+        '<span style="float:right; text-align:right;">'+ 
         '<input type="button" value="Save/Close" onClick="editStructure.closeWin();"/>'+
         '</span>'+
         
@@ -283,10 +287,13 @@ function EditRecStructure() {
                 {
                     key:"rst_DisplayName", label: "Field prompt in form", width:120, sortable:false,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
+                        var ccode = oRecord.getData("conceptCode");
                         elLiner.innerHTML = oData;
                         elLiner.title = "Base field type: "+oRecord.getData("dty_Name")+"\n\n"+
                         "Help: "+oRecord.getData("rst_DisplayHelpText")+"\n\n"+
-                        "For non owner: " + oRecord.getData("rst_NonOwnerVisibility");
+                        "For non owner: " + oRecord.getData("rst_NonOwnerVisibility")+
+                        (ccode?("\n\nConcept code:"+ccode):'');
+                        
                         var type = oRecord.getData("dty_Type");
                         if(type=='separator'){
                             $(elLiner).css({'font-size':'1.2em','font-weight':'bold'});
@@ -382,8 +389,9 @@ function EditRecStructure() {
                         var status = oRecord.getData('rst_Status');
                         var isRequired = (oRecord.getData('rst_RequirementType')==='required');
                         if ( (_isReserved && isRequired) || status === "reserved"){ // || status === "approved"
-                            statusLock  = '<img src="../../../common/images/lock_bw.png" '+
-                            'title="This field is locked against deletion due to its status value" />';
+                            //before it was "lock" icon
+                            statusLock  ='<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" '+
+                            'title="Click to remove field from this record type" /><\/a>';
                         }else{
                             statusLock = '<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" '+
                             'title="Click to remove field from this record type" /><\/a>';
@@ -422,6 +430,7 @@ function EditRecStructure() {
                     function ( obj ) {
                         var rst_ID = obj.data.getData('rst_ID');
                         //var rst_values = obj.data.getData('rst_values');
+                        var ccode = obj.data.getData("conceptCode");
                         
                         var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
                         var allowEditBaseFieldType = (fieldType=='enum' || fieldType=='resource' || fieldType=='relmarker' || fieldType=='relationtype');
@@ -569,8 +578,11 @@ function EditRecStructure() {
                         '<option value="viewable">viewable</option>'+
                         '<option value="public">public</option>'+
                         '<option value="pending">pending</option></select></span>'+
+                        
                         '</div></div>'+
 
+                        (ccode?'<div class="input-row"><div class="input-header-cell">Concept code:</div><div style="display:table-cell">'+ccode+'</div></div>':'')+
+                        
                         '</div></div>'
 
                     }
@@ -622,6 +634,11 @@ function EditRecStructure() {
 
                         top.HEURIST.rectypes = context.rectypes;
                         top.HEURIST.detailTypes = context.detailTypes;
+                        
+                        if(top.hWin && top.hWin.HEURIST4){
+                            top.hWin.HEURIST4.rectypes = context.rectypes;
+                            top.hWin.HEURIST4.detailtypes = context.detailTypes;
+                        }
 
                         if(_myDataTable.getRecordSet().getLength()<1){
                             $("#recStructure_toolbar").show();
@@ -634,8 +651,22 @@ function EditRecStructure() {
                     _onAddEditFieldType(rst_ID, 0); //NOT USED
                 }else */
                 if(elLink.hash === "#delete"){
+                    
+                    if(oRecord.getData("rst_Status") === 'reserved')
+                    {
+                        var isRequired = (oRecord.getData('rst_RequirementType')==='required');
+                        
+                        alert("This is a reserved field, which may be required for correct operation of a specific function, "
+                           + "such as Zotero import or mapping.\n"
+                           + "It cannot therefore be deleted. If you do not need to use the field we suggest "
+                           + (isRequired?'making it "optional" and ':'') + "dragging it to "
+                           + "the end of the form under a heading 'Unused' or 'Ignore'.\n"
+                           + "Empty fields do not affect performance or take up any space in the database.");
+                           
+                           return;
+                    }
 
-                    var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 
                     function _onCheckEntries(context)
                     {
@@ -741,16 +772,15 @@ function EditRecStructure() {
 
 
 
-                    var record_id;
-                    var oRecord;
-                    if(Dom.hasClass( oArgs.target, 'yui-dt-expandablerow-trigger' )){
-                        record_id = oArgs.target;
-                        oRecord = _myDataTable.getRecord(record_id);
-                    }else{
-                        oRecord = _myDataTable.getRecord(oArgs.target);
-                        record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
-                    }
-
+        var record_id;
+        var oRecord;
+        if(Dom.hasClass( oArgs.target, 'yui-dt-expandablerow-trigger' )){
+            record_id = oArgs.target;
+            oRecord = _myDataTable.getRecord(record_id);
+        }else{
+            oRecord = _myDataTable.getRecord(oArgs.target);
+            record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
+        }
 
                     // after expansion - fill input values from HEURIST db
                     // after collapse - save data on server
@@ -830,7 +860,7 @@ function EditRecStructure() {
             //save all changes
             _doExpliciteCollapse(null, true);
 
-            var url = top.HEURIST.baseURL_V3 +
+            var url = top.HEURIST.baseURL +
             "admin/structure/fields/editRecStructurePreview.html?rty_ID="+editStructure.getRty_ID()+"&db="+db;
 
             window.open(url,'','scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,location=no,status=no');
@@ -1060,8 +1090,14 @@ function EditRecStructure() {
             }else{
                 _optionReserved(selstatus, false);
             }
-            selstatus.disabled = ((status === "reserved") && (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001));
+            //2017-02-09 no more restrictions for reserved fields
+            //selstatus.disabled = ((status === "reserved") && (original_dbId!==dbId) && 
+            //                      (original_dbId>0) && (original_dbId<1001));
         }
+        
+        //store to show warning for reserved field
+        $('#ed'+rst_ID+'_rst_RequirementType').attr('data-original', values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType]);
+        $(selstatus).attr('data-original', status);
 
         var k;
         for(k=0; k<fieldnames.length; k++){
@@ -1182,6 +1218,9 @@ function EditRecStructure() {
             }else if(maxval>1){
                 res = 'limited';
             }
+            
+            $(sel).attr('data-original', res);
+            
             sel.value = res;
             onRepeatChange(Number(rst_ID));
 
@@ -1302,7 +1341,7 @@ function EditRecStructure() {
             }
 
             //
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _addNewSeparator;
             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -1606,6 +1645,11 @@ function EditRecStructure() {
                 if(!Hul.isnull(context)){
                     top.HEURIST.rectypes = context.rectypes;
                     top.HEURIST.detailTypes = context.detailTypes;
+                        if(top.hWin && top.hWin.HEURIST4){
+                            top.hWin.HEURIST4.rectypes = context.rectypes;
+                            top.hWin.HEURIST4.detailtypes = context.detailTypes;
+                        }
+                    
                     _structureWasUpdated = true;
                 }
                 _isServerOperationInProgress = false;
@@ -1613,7 +1657,7 @@ function EditRecStructure() {
                     window.close(_structureWasUpdated);
                 }
             };
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
             var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
             _isServerOperationInProgress = true;
@@ -1655,7 +1699,7 @@ function EditRecStructure() {
         var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
         var maskvalue = typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
 
-        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -1669,13 +1713,13 @@ function EditRecStructure() {
                 var ele = document.getElementById("dlgWrongTitleMask");
 
 
-                var $dlg = Hul.popupTinyElement(window, ele,
+                var $dlg_warn = Hul.popupTinyElement(window, ele,
                     { "no-titlebar": false, "no-close": false, width: 400, height:160 });
 
                 $(ele).find("#dlgWrongTitleMask_closeBtn").click(function(){
-                    /*if($dlg!=null){
-                    $dlg.dialog('close');
-                    }*/
+                    if($dlg_warn!=null){
+                        $dlg_warn.dialog('close');
+                    }
                     _doEditTitleMask(true);
                 });
 
@@ -1694,7 +1738,7 @@ function EditRecStructure() {
         var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
         var maskvalue = typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
 
-        Hul.popupURL(top, top.HEURIST.baseURL_V3 +
+        Hul.popupURL(top, top.HEURIST.baseURL +
             "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
             {
                 "close-on-blur": false,
@@ -2046,6 +2090,7 @@ function EditRecStructure() {
         var rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
 
         document.getElementById('rty_TitleMask').value = rectype[fi.rty_TitleMask];
+        document.getElementById('rty_Description').innerHTML = rectype[fi.rty_Description];
 
         document.getElementById("div_rty_ID").innerHTML = 'Local ID: '+rty_ID;
         
@@ -2179,7 +2224,7 @@ function onAddNewDetail(index_toinsert){
         var dim = top.HEURIST.util.innerDimensions(top);
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
-        popupSelect = Hul.popupURL(window, top.HEURIST.baseURL_V3 +
+        popupSelect = Hul.popupURL(window, top.HEURIST.baseURL +
             "admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
             {	"close-on-blur": false,
                 "no-resize": false,
@@ -2197,8 +2242,6 @@ function onAddNewDetail(index_toinsert){
                     popupSelect = null;
                 }
         });
-
-        //alert("111");
 
     }
 }
@@ -2221,14 +2264,14 @@ function onDefineNewType(index_toinsert){
 
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
-        var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
+        var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db;
 
         popupSelect = Hul.popupURL(top, url,
             {	"close-on-blur": false,
                 "no-resize": false,
                 title: 'Edit field type',
                 height: 700,
-                width: 700,
+                width: 840,
                 callback: function(context) {
 
                     if(!Hul.isnull(context)){
@@ -2273,7 +2316,12 @@ function onUpdateStructureOnServer(needClose)
 *
 */
 function onStatusChange(evt){
-    var name;
+    
+    var dbId = Number(top.HEURIST.database.id);
+    
+    if(dbId>=1000) return;
+
+    var name, el;
 
     if(typeof evt === 'number'){
         name = 'ed'+evt;
@@ -2281,9 +2329,38 @@ function onStatusChange(evt){
         var el = evt.target;
         name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
     }
+    
+    el = Dom.get(name+"_rst_Status");
 
+    var curr_value = $(el).attr('data-original');
+    var new_value = el.value;
+        
+    if(curr_value=='reserved' && new_value!=curr_value){ //value was changed - confirm
+            el.value = curr_value; //restore
+            //show prompt
+            window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                function(value){
+                    
+                    window.hWin.HAPI4.SystemMgr.action_password({action:'ReservedChanges', password:value},
+                        function(response){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK && response.data=='ok'){
+                                $(el).attr('data-original', ''); //reset to warining once
+                                el.value = new_value;
+                            }else{
+                                alert('Wrong password');
+                            }
+                        }
+                    );
+                    
+                },
+            'To reset field status from "reserved"');
+    
+    }
+    
+    
+    //2017-02-09 no more restrictions for reserved fields
+    /*
     //If reserved, requirements can only be increased, nor can you change min or max values
-    var status = Dom.get(name+"_rst_Status").value;
     var isReserved = (status === "reserved"); // || status === "approved");
     Dom.get(name+"_rst_MinValues").disabled = isReserved;
     Dom.get(name+"_rst_MaxValues").disabled = isReserved;
@@ -2292,6 +2369,7 @@ function onStatusChange(evt){
 
     sel = Dom.get(name+"_rst_RequirementType");
     sel.disabled = (isReserved && (sel.value==='required'));
+    */
 }
 
 function onIncrementModeChange(rst_ID){
@@ -2308,15 +2386,71 @@ function onIncrementModeChange(rst_ID){
 * Listener of requirement type selector (combobox)
 */
 function onReqtypeChange(evt){
-    var el, name;
+    var el, name, rst_ID;
 
     if(typeof evt === 'number'){
         el = Dom.get("ed"+evt+"_rst_RequirementType")
         name = 'ed'+evt;
+        rst_ID = evt;
     }else{
         el = evt.target;
         name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+        rst_ID = Number(name.substring(2));
     }
+    
+    //in case of reserved field show warning
+    var status = Dom.get(name+"_rst_Status").value;
+    if (status === "reserved"){
+        
+        /*var rty_ID = editStructure.getRty_ID();
+        var values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID];    
+        var curr_value = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType];     */
+        var curr_value = $(el).attr('data-original');
+        var new_value = el.value;
+        if(new_value=='forbidden'){
+            el.value = curr_value; //restore
+            return;
+        }
+
+        
+        if(curr_value=='required' && new_value!=curr_value){ //value was changed - confirm
+        
+            el.value = curr_value; //restore
+            
+            var ele = document.getElementById("change_Req");
+            $("#change_Req").css("display","block");
+            $("#reqText").text("This is a reserved field which may be required by a specific function such as Zotero import or mapping. "+
+                "Reserved fields can be marked as Recommended or Optional rather than Required, however we recommend thinking " +
+                "carefully about whether the value is required before changing this setting.")
+
+            $("#change_Btn").click(function(){
+                $(el).attr('data-original', new_value); //reset - to show this warning once only
+                el.value = new_value;
+                ___onReqtypeChange_continue();
+                $_dialogbox.dialog($_dialogbox).dialog("close");
+            });
+            $("#cancel_Btn").click(function(){
+                $_dialogbox.dialog($_dialogbox).dialog("close");
+            });
+            //show confirmation dialog
+            $_dialogbox = Hul.popupElement(top, ele,
+                {
+                    "close-on-blur": false,
+                    "no-resize": true,
+                    title: '',
+                    height: 140,
+                    width: 600
+            });
+            
+            
+        }
+    }//approve change of "requirement" for reserved field
+    else{
+        ___onReqtypeChange_continue();    
+    }
+
+    
+    function ___onReqtypeChange_continue(){
 
     var rep_el =  Dom.get(name+'_Repeatability');
 
@@ -2351,6 +2485,8 @@ function onReqtypeChange(evt){
         //rep_el.disabled = false;
         onRepeatChange(evt);
     }
+    
+    }  //___onReqtypeChange_continue
 }
 
 /**
@@ -2363,10 +2499,60 @@ function onRepeatChange(evt){
     if(typeof evt === 'number'){
         el = Dom.get("ed"+evt+"_Repeatability")
         name = 'ed'+evt;
+        rst_ID = evt;
     }else{
         el = evt.target;
-        name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+        name = el.id.substring(0,el.id.indexOf("_")); 
+        rst_ID = Number(name.substring(2));
     }
+    
+    
+    //in case of reserved field show warning
+    var status = Dom.get(name+"_rst_Status").value;
+    if (status === "reserved"){
+        
+        var curr_value = $(el).attr('data-original');
+        var new_value = el.value;
+        
+        // empty curr_value means that user already changed repeatability
+        if(curr_value!='' && new_value!=curr_value){ //value was changed - confirm
+        
+            el.value = curr_value;
+            
+            var ele = document.getElementById("change_Req");
+            $("#change_Req").css("display","block");
+            $("#reqText").text("This is a reserved field which may be required by a specific function such as Zotero import or mapping."
+            +" Please think carefully before changing between a single value and repeating value field for a reserved field, "
+            +"as this could affect the way that the field");
+
+            $("#change_Btn").click(function(){
+                el.value = new_value;
+                $(el).attr('data-original',''); //reset
+                ___onRepeatChange_continue();
+                $_dialogbox.dialog($_dialogbox).dialog("close");
+            });
+            $("#cancel_Btn").click(function(){
+                $_dialogbox.dialog($_dialogbox).dialog("close");
+            });
+            //show confirmation dialog
+            $_dialogbox = Hul.popupElement(top, ele,
+                {
+                    "close-on-blur": false,
+                    "no-resize": true,
+                    title: '',
+                    height: 140,
+                    width: 600
+            });
+            
+            
+        }
+    }//approve change of "requirement" for reserved field
+    else{
+        ___onRepeatChange_continue();    
+    }
+
+    
+    function ___onRepeatChange_continue(){    
 
     var el =  Dom.get(name+'_rst_RequirementType');
     if(el.value !== "forbidden"){
@@ -2393,6 +2579,8 @@ function onRepeatChange(evt){
             //TEMP Dom.setStyle(span_max, "visibility", "visible");
         }
 
+    }
+    
     }
 }
 
@@ -2559,13 +2747,13 @@ function _onAddEditFieldType(dty_ID, rty_ID){
     
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
         (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
+    var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
 
     top.HEURIST.util.popupURL(top, url,
         {   "close-on-blur": false,
             "no-resize": false,
             height: 680,
-            width: 700,
+            width: 840,
             callback: function(context) {
                 if(!Hul.isnull(context)){
 
@@ -2617,7 +2805,7 @@ function onEditRecordType(){
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
             
-        var url = top.HEURIST.baseURL_V3 
+        var url = top.HEURIST.baseURL 
                     + "admin/structure/rectypes/editRectype.html?supress=1&db="
                     + db+"&rectypeID="+editStructure.getRty_ID();
 
@@ -2636,6 +2824,9 @@ function onEditRecordType(){
 
                      //refresh the local heurist
                      top.HEURIST.rectypes = context.rectypes;
+                        if(top.hWin && top.hWin.HEURIST4){
+                            top.hWin.HEURIST4.rectypes = context.rectypes;
+                        }
                      //var _rtyID = Number(context.result[0]);
                 }
                 //refresh icon, title, mask

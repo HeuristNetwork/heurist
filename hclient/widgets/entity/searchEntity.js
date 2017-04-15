@@ -54,7 +54,7 @@ $.widget( "heurist.searchEntity", {
             var that = this;
             
             if(this._need_load_content && this.options.entity.searchFormContent){        
-                this.element.load(window.hWin.HAPI4.basePathV4+'hclient/widgets/entity/'+this.options.entity.searchFormContent+'?t'+window.hWin.HEURIST4.util.random(), 
+                this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/entity/'+this.options.entity.searchFormContent+'?t'+window.hWin.HEURIST4.util.random(), 
                 function(response, status, xhr){
                     that._need_load_content = false;
                     if ( status == "error" ) {
@@ -116,7 +116,7 @@ $.widget( "heurist.searchEntity", {
             // help buttons
             window.hWin.HEURIST4.ui.initHintButton(this.element.find('#btn_help_hints'));
             window.hWin.HEURIST4.ui.initHelper(this.element.find('#btn_help_content'),'Help',
-                window.hWin.HAPI4.basePathV4+'context_help/'+this.options.entity.helpContent+' #content');
+                window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
             
             var right_padding = window.hWin.HEURIST4.util.getScrollBarWidth()+4;
             this.element.find('#div-table-right-padding').css('min-width',right_padding);

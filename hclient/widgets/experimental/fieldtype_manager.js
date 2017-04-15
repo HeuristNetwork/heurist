@@ -389,7 +389,7 @@ $.widget( "heurist.fieldtype_manager", {
 
             //record type icon
             $('<img>',{
-                src:  window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+                src:  window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
             })
             .css('background-image', 'url('+ window.hWin.HAPI4.iconBaseURL + entryID + '.png)')
             .appendTo($iconsdiv);

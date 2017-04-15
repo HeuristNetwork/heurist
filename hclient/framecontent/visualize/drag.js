@@ -25,6 +25,7 @@
 * Appends nodes to the visualisation
 */
 function addNodes() {
+    
     // Append nodes
     var nodes = d3.select("#container")
                   .selectAll(".node")
@@ -103,9 +104,21 @@ function addNodes() {
                   .attr("x", -iconSize/2)
                   .attr("y", -iconSize/2)
                   .attr("height", iconSize)
-                  .attr("width", iconSize);
-
-
+                  .attr("width", iconSize)
+        .on("mouseover", function(d) {
+            if(drag_link_source_id!=null){
+                drag_link_target_id = d.id;
+                drag_link_line.attr("stroke","#00ff00");
+            }            
+        })
+        .on("mouseout", function(d) {
+            if(drag_link_source_id!=null){
+            setTimeout(function(){
+                drag_link_target_id = null;
+                if(drag_link_line) drag_link_line.attr("stroke","#ff0000");
+            },200);
+            }            
+        });
                            
         var gravity = getSetting(setting_gravity);
         
@@ -125,6 +138,8 @@ function addNodes() {
               return false;
           })    
          .on("click", function(d) {
+             
+              closeRectypeSelector();
               // Check if it's not a click after dragging
               if(!d3.event.defaultPrevented) {
                   // Remove all overlays and create a record overlay for selected node
@@ -173,6 +188,7 @@ function dragstart(d, i) {
 
 /** Caled when a dragging move event occurs */
 function dragmove(d, i) {  
+    
     // Update all selected nodes. A node is selected when the .foreground color is 190,228,248
     svg.selectAll(".node").each(function(d, i) {
         var color = d3.select(this).select(".foreground").style("fill");
@@ -210,6 +226,7 @@ function dragmove(d, i) {
 
 /** Called when a dragging event ends */
 function dragend(d, i) {
+    
     // Update nodes & lines
     var gravity = getSetting(setting_gravity);
     d.fixed = ( gravity !== "aggressive");

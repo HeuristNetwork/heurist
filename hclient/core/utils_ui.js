@@ -26,6 +26,7 @@ addoption - helper function to add option to select element
 createSelector - create SELECT element (if selObj is null) and fill with given options
 
 getChildrenTerms - returns entire terms tree or only part of it for selected termID
+getChildrenLabels - returns all tems labels of children terms for given term
 createTermSelectExt   - create/fill SELECT for terms or returns JSON array 
 createTermSelectExt2  - the same but parameters are passed as options object
 
@@ -130,6 +131,45 @@ window.hWin.HEURIST4.ui = {
         return selObj;
     },    
     
+    //
+    // return list of all children for given trm_ParentTermID in lower case
+    //
+    getChildrenLabels: function(trm_ParentDomain, trm_ParentTermID){
+        
+            var trm_ParentChildren = [];
+        
+            //get list of children labels
+            function __getSiblings(children){
+                for(trmID in children){
+                    if(children.hasOwnProperty(trmID)){
+                        if(trmID==trm_ParentTermID){
+                            for(var id in children[trmID]){
+                                if(children[trmID].hasOwnProperty(id)){
+                                    var term = allterms.termsByDomainLookup[trm_ParentDomain][id];
+                                    if(term && term[0])
+                                        trm_ParentChildren.push(term[0].toLowerCase());
+                                }
+                            }
+                            break;
+                        }else{
+                            __getSiblings(children[trmID]);
+                        }
+                    }
+                }
+            }
+            
+            var allterms;
+            if(top.HEURIST && top.HEURIST.terms){
+                allterms = top.HEURIST.terms;
+            }else if(window.hWin.HEURIST4 && window.hWin.HEURIST4.terms){
+                allterms = window.hWin.HEURIST4.terms;
+            }            
+            
+            var trmID, tree = allterms.treesByDomain[trm_ParentDomain];
+            __getSiblings(tree);  
+              
+            return trm_ParentChildren;
+    },
     //
     // Returns label and code for term by id
     //
@@ -309,7 +349,7 @@ window.hWin.HEURIST4.ui = {
                     if(supressTermCode || window.hWin.HEURIST4.util.isempty(termCode)){
                         termCode = '';
                     }else{
-                        termCode = " ("+termCode+")";
+                        termCode = " [code "+termCode+"]";
                     }
                 }
 

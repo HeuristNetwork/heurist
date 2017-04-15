@@ -216,7 +216,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
                 //open import dialog
                 window.hWin.HEURIST4.msg.showDialog(
-                    window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/importDefTerms.php?db='
+                    window.hWin.HAPI4.baseURL + 'hclient/framecontent/importDefTerms.php?db='
                             +window.hWin.HAPI4.database
                             +'&trm_ID='+this._currentParentID,
                   {
@@ -229,7 +229,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
             }else if(action=='merge'){
                 
-                var url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='
+                var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='
                         +window.hWin.HAPI4.database+'&action=merge_term&value='+encodeURIComponent();
 
                 window.hWin.HEURIST4.msg.showDialog(url, {height:450, width:700,

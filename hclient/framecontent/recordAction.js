@@ -413,14 +413,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         var tag_link = '';
                         if(response[key+'_tag']){
                             tag_link = '<span><a href="'+
-                            encodeURI(window.hWin.HAPI4.basePathV4+'?db='+window.hWin.HAPI4.database
+                            encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=tag:"'+response[key+'_tag']+'"')+
                             '" target="_blank">view</a></span>';
                         }else if(response[key+'_tag_error']){
                             tag_link = '<span>'+response[key+'_tag_error']+'</span>';
                         }else if(key=="processed"){
                             tag_link = '<span><a href="'+
-                            encodeURI(window.hWin.HAPI4.basePathV4+'?db='+window.hWin.HAPI4.database
+                            encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=sortby:-m after:"5 minutes ago"')+
                             '" target="_blank">view recent changes</a></span>';
                         }

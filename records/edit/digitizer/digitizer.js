@@ -2393,7 +2393,7 @@ function closeWithValue() {
  */
 function _load_layers(mode) {
 
-  var baseurl = top.HEURIST.baseURL_V3 + "viewers/map/showMap.php";
+  var baseurl = top.HEURIST.baseURL + "viewers/map/showMap.php";
   var callback = _updateLayersList;
   var params =  "ver=1&layers="+mode+"&db="+top.HEURIST.database.name;
   top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -2421,7 +2421,7 @@ function _updateLayersList(context){
         geoobj = context.geoObjects[ind];
         if(geoobj.type === "kmlfile"){
 
-          var url = top.HEURIST.baseURL_V3;
+          var url = top.HEURIST.baseURL;
           url += "records/files/downloadFile.php?db=" + top.HEURIST.database.name + "&ulf_ID="+geoobj.fileid;
           geoobj.url = url;
 

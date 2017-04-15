@@ -103,21 +103,23 @@
 
             // Fills the YUI Datatable with all recordtypes from the temp DB
             <?php
-                $groups = mysql_query("select rtg_ID, rtg_Name from ".$tempDBName.".defRecTypeGroups order by rtg_Name");
+            $groups = mysql_query("select rtg_ID, rtg_Name, rtg_Description from ".$tempDBName.".defRecTypeGroups order by rtg_Name");
 
-                $rectypeGroups = array();
-                $rectypeGroups2 = array();
-                while($group = mysql_fetch_assoc($groups)) {
-                    array_push($rectypeGroups, array('id'=>$group["rtg_ID"], 'name' => $group["rtg_Name"]));
-                    $rectypeGroups2[$group["rtg_ID"]] = $group["rtg_Name"];
-                }
+            $rectypeGroups = array();
+            $rectypeGroups2 = array();
+            $rectypeGroups3 = array();
+            while($group = mysql_fetch_assoc($groups)) {
+                array_push($rectypeGroups, array('id'=>$group["rtg_ID"], 'name' => $group["rtg_Name"]));
+                $rectypeGroups2[$group["rtg_ID"]] = $group["rtg_Name"];
+                $rectypeGroups3[$group["rtg_ID"]] = $group["rtg_Description"];
+            }
 
                 //$rectypes = mysql_query("select * from ".$tempDBName.".defRecTypes order by rty_RecTypeGroupID, rty_Name");
                 
                 $query = "select rt.*"  //, rtg.rtg_Name
                     ." from $tempDBName.defRecTypes as rt, $tempDBName.defRecTypeGroups as rtg"
                     ." where rtg_ID = rty_RecTypeGroupID"
-                    ." order by rtg.rtg_Name, rty_Name";                
+                    ." order by rtg.rtg_Order, rty_Name";                
                 $rectypes = mysql_query($query);
                 
                 
@@ -221,10 +223,6 @@
                         return $a[6] < $b[6]?-1:1;
                 });
                 */
-                
-
-                echo "var approxRectypes = ".json_format($approxMatches,true). ";\n";
-                echo "var tableDataByGrp = ".json_format($tableRows,true). ";\n\n";
 
                $rectypeStructures = array();
                
@@ -307,9 +305,9 @@
                 }
                     
             }//count($rectypesToImport)
-                
-                
 
+                echo "var approxRectypes = ".json_format($approxMatches,true). ";\n";
+                echo "var tableDataByGrp = ".json_format($tableRows,true). ";\n\n";
                 echo "var rectypeStructures = ".json_format($rectypeStructures,true). ";\n";
                 echo 'var tempDBName = "'.$tempDBName.'";'. "\n";
                 echo 'var sourceDBName = "'.$source_db_name.'";'. "\n";
@@ -318,9 +316,12 @@
                 echo 'var importTargetDBFullName = "'.DATABASE.'";'. "\n";
                 echo "var rectypeGroups = ".json_format($rectypeGroups,true). ";\n";
                 echo "var rectypeGroups2 = ".json_format($rectypeGroups2,true). ";\n";
+                echo "var rectypeGroups3 = ".json_format($rectypeGroups3,true). ";\n";
                 echo "var rectypesToImport = ".json_format($rectypesToImport,true). ";\n"; 
                 echo "var dtlookups = ".json_format(getDtLookups(),true). ";\n";
             ?>
+            
+            
 
             var myDataTables = {};
             var myDataSources = {};
@@ -342,7 +343,16 @@
                          width:24, sortable:false, resizeable:false },
                         { key:"import", label:"Import", sortable:false, resizeable:false, width:24 },
                         { key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>",
-                            sortable:true, resizeable:true, width:150 },
+                            sortable:true, resizeable:true, width:150,
+                        
+                            formatter:function(elLiner, oRecord, oColumn, oData) {
+                                var rt_name = oRecord.getData("rectype");
+                                var rtyID = oRecord.getData("rtyID");
+                                //description as rollover
+                                elLiner.innerHTML = '<span title="'+rectypeStructures[rtyID][0][4]+'">'+rt_name+'</span>';
+                            }
+                        
+                        },
                         { key:"linked_rt", label:"Linked record types", 
                             sortable:false, resizeable:false, hidden:false,width:300,
                             formatter:function(elLiner, oRecord, oColumn, oData) {
@@ -388,9 +398,10 @@
                     }
 
                     //myDataSource = new YAHOO.util.DataSource();
-                    var  grpID;
-                    for (grpID in tableDataByGrp){
-                        if(grpID>0){
+                    var index, grpID;
+                    for (index in rectypeGroups) {
+                        if(index>0 && tableDataByGrp[rectypeGroups[index].id]){
+                            grpID = rectypeGroups[index].id;
                             
                             var tableData = tableDataByGrp[grpID];
                             
@@ -430,29 +441,31 @@
                                     return res;
                                 }
                             });
-                            
-                            
-                            
-                    YAHOO.widget.DataTable.MSG_EMPTY = "There are no new record types to import from this database (all types already exist in the target)";
-                    
-                    $('<div id="header'+grpID+'" style="padding-top:5px"></div>').addClass('rtgroup')
-                        .html('<h3>'+rectypeGroups2[grpID]+'</h3>').appendTo($('#crosswalkTable'));
-                    $('<div id="table'+grpID+'"></div>').addClass('rtgroup').appendTo($('#crosswalkTable'));
-                    
-                    
-                    // Create the RowExpansionDataTable
-                    myDataTable = new YAHOO.widget.RowExpansionDataTable(
-                        'table'+grpID, //"crosswalkTable",
-                        myColumnDefs,
-                        myDataSource,
-                        {
-                            // Create the expansion for every recordtype, showing all it's recstructure,
-                            // and the detailtype name and type the recstructures point to
-                            rowExpansionTemplate:
-                            function(obj) {
-                                var rty_ID = obj.data.getData('rtyID');
 
-                                var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";
+
+
+                            YAHOO.widget.DataTable.MSG_EMPTY = "There are no new record types to import from this database (all types already exist in the target)";
+
+                            $('<div id="header'+grpID+'" style="padding-top:5px"></div>').addClass('rtgroup')
+                            .html('<h3>'+rectypeGroups2[grpID]+'</h3>').appendTo($('#crosswalkTable'));
+                            $('<div id="label'+grpID+'" style="margin-bottom:10px;font-weight:bold"></div>')
+                            .html(rectypeGroups3[grpID]).appendTo($('#header'+grpID));
+                            $('<div id="table'+grpID+'"></div>').addClass('rtgroup').appendTo($('#crosswalkTable'));
+
+
+                            // Create the RowExpansionDataTable
+                            myDataTable = new YAHOO.widget.RowExpansionDataTable(
+                                'table'+grpID, //"crosswalkTable",
+                                myColumnDefs,
+                                myDataSource,
+                                {
+                                    // Create the expansion for every recordtype, showing all it's recstructure,
+                                    // and the detailtype name and type the recstructures point to
+                                    rowExpansionTemplate:
+                                    function(obj) {
+                                        var rty_ID = obj.data.getData('rtyID');
+
+                                var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";   //description
                                 info += '<table style="text-align: left;"><tr>';
                                 info += '<th  style="padding-left:10px;" class=\"status\"><b>Already in DB?</b></th>';
                                 info += '<th style="padding-left:10px;"><b>Field name (used for this record type)</b></th>';
@@ -728,6 +741,7 @@
         <script src="../../../common/js/utilsUI.js"></script>
 
         <div id="page-inner" style="overflow:auto">
+            
 
             <!--<button id="finish1" onClick="dropTempDB(true)" class="button">Back to databases</button>
             -->
@@ -806,7 +820,7 @@
 
             <script type="text/javascript">
                 var detailedImportLog = "";
-                var logHeader = ""
+                var logHeader = "", logHeader2 = '';
                 var shortImportLog = "";
                 var result = "";
                 var imported_rty_ID;
@@ -846,6 +860,7 @@
                         importPending = true;
                         document.getElementById("importIcon"+rtyID).src = "../../../common/images/mini-loading.gif";
                         curTime = new Date();
+                        logHeader2 = rectypeName;
                         logHeader = "Importing record type " + '<p style="color:green; font-weight:bold">' + rectypeName + " at "+ curTime +"</p>";
                     }
                     strictImport = $("#strict").attr("checked");
@@ -881,6 +896,8 @@
                                 changeDuplicateEntryName(rtyID, rectypeName);
                             } else if(response.substring(0,5) == "Error") {
 
+                                response = response.substring(6);
+                                
                                 detailedImportLog = '<p style="color:red">'+ logHeader+response+"</p>" + detailedImportLog;
 
                                 document.getElementById("log").innerHTML='<p style="color:red">'+response+"</p>";
@@ -894,7 +911,23 @@
                                     }
                                 }
 
-                                alert("Import error. Check log for details at the end of page");
+                                //alert("Import error. Check log for details at the end of page");
+                                
+                                var sMsg =
+                                'Sorry, we were unable to import <b>'+logHeader2+'</b> due to errors in the source database.<br><br>'
+                                +'All changes for this record type have been rolled back - nothing was imported.<br><br><hr><br>'
+                                +'The following error log has been sent to the owner of the source database.'
+                                +'They can use the Structure > Verify function to fix the problem.<br><br>'
+                                +'<p style="color:red;max-height:300px;overflow:auto;">'
+                                +tempLog+'</p>';
+                                
+                                if(window.hWin.HEURIST4 && window.hWin.HEURIST4.msg){
+                                    //window.hWin
+                                    window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 'Importing record type: '+logHeader2);
+                                }else{
+                                    alert(sMasg);
+                                }
+                                
 
                                 shortImportLog = logHeader+'<p style="color:red">'+tempLog+"</p><br />"+shortImportLog;
                                 document.getElementById("detailedLog").innerHTML = "Show detailed log";

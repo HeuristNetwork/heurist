@@ -72,6 +72,7 @@ if ($isExistingDB) {
 }
 
 require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
 global $errorCreatingTables;
 $errorCreatingTables = FALSE;
@@ -84,6 +85,7 @@ if($isNewDB) { // For new database, insert coreDefinitions.txt directly into tab
     $dbname = $newname;
 } // New database
 else { // existing database needs temporary database to store data read and allow selection
+
     $dbname = DATABASE;
     $isNewDB = false;
     $tempDBName = "temp_".$dbname;
@@ -185,6 +187,12 @@ else
         $source_db_name = $_REQUEST["dbName"];
         $source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
 
+        
+        if(checkSmtp()){
+            $email_text = 'Read database #'.$source_db_id.' "'.$source_db_name.'" as template from "'.HEURIST_DBNAME.'" at '.HEURIST_SERVER_URL;
+            $rv = sendEmail(HEURIST_MAIL_TO_INFO, "Read database as template", $email_text, null);
+        }
+        
 
         $regurl = $_REQUEST['dbURL'];
 

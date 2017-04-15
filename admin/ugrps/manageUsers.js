@@ -130,7 +130,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 		Dom.get("dbOwnerInfo").style.display = (filter_group==top.HEURIST.grpDbOwners)?"block":"none";
 
-		var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/loadUserGrps.php";
+		var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
 		var callback = _updateUserList;
 		var params = "method=searchuser&db=" + _db +
 							"&nogrpID=" + filter_nogroup +
@@ -545,7 +545,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 								}
 							}
 
-							var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
+							var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deleteUser&db=" + _db + "&recID=" + recID;
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -621,7 +621,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 					//keep the track of changes in special object
 					//TODO _updateUser(record);
-					var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
+					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
 								"&oldrole=" + oldValue+
 								"&role=" + newValue+"&recIDs="+encodeURIComponent(data.id);
@@ -657,7 +657,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 			}
 
 			//__showCoverall();
-			var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
+			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 //console.log('uupdate rol '+params);
 			//DOES NOT WORK top.HEURIST.util.getJsonData(baseurl, __onUpdateRoles, params);
 
@@ -810,7 +810,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 			filterByGroup = Dom.get('inputFilterByGroup');
 
-			var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/loadUserGrps.php";
+			var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
 			var callback = _updateGroupList;
 			var params = "method=searchgroup&db=" + _db;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -955,7 +955,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 		var userID = (!Hul.isnull(user))?Number(user):0;
 
 		if(userID>0) {
-			URL = top.HEURIST.baseURL_V3 + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID+(isApproval?"&approve=1":"");
+			URL = top.HEURIST.baseURL + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID+(isApproval?"&approve=1":"");
 		}
 		else if(!top.HEURIST.is_admin()){
 			return; //IJ req 27-09-12 - only dbowner is able to create new users
@@ -968,7 +968,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 				groupToBeUpdated = "&recID=-1";
 			}
 
-			URL = top.HEURIST.baseURL_V3 + "admin/ugrps/editUser.html?db=" + _db + groupToBeUpdated;
+			URL = top.HEURIST.baseURL + "admin/ugrps/editUser.html?db=" + _db + groupToBeUpdated;
 		}
 		top.HEURIST.util.popupURL(top, URL, {
 			"close-on-blur": false,
@@ -996,7 +996,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 		var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
 
-		var url = top.HEURIST.baseURL_V3 + "admin/ugrps/selectUsers.php?db=" +
+		var url = top.HEURIST.baseURL + "admin/ugrps/selectUsers.php?db=" +
 										_db + "&selection=1&popup=yes&grpID="+groupToBeUpdated;
 
 		function __onUserSelection(usersSelected){

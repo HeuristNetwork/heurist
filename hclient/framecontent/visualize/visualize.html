@@ -23,15 +23,21 @@
 -->
 
 <!-- Network diagram HTML -->
+<div class="ent_header" style="height:9.5em;border:none;display:table-row">
 
-<div class="ent_header" style="height:9.5em;border:none;padding-top: 10px;">
+    <div id="divHint" style="display:none;font-weight:normal;padding:4px; margin-left:10px;">
+        <br>Choose entities in dropdown below. Entities can be dragged to position them. Drag background to reposition, mousewheel or +/- buttons to zoom.
+        <br>Layout is remembered across sessions if gravity is OFF (recommended). 
+        <br>Drag link icon to another node to create a linking field (record pointer or relationship marker).
+    </div>
 
-    <div id="toolbar" style="height:4em;display:none">
-
-        <div id="rectypeSelector" class="toolbar-section" style="width:25ex;display:none;">
+   <div id="rectypeSelector" class="toolbar-section" style="width:25ex;display:none;vertical-align:top;">
             <label>&nbsp;</label><br>
             <button id="showRectypeSelector" style="min-width:15ex">Showing</button>
-        </div>
+   </div>
+
+   <div id="toolbar" style="display:none">
+
 
         <div id="setSelectMode" class="toolbar-section" style="min-width:40px">
             <label>&nbsp;</label><br>
@@ -39,6 +45,9 @@
             <label for="btnSingleSelect">Select and drag nodes</label>
             <input type="radio" id="btnMultipleSelect" name="selectMode">
             <label for="btnMultipleSelect">Select multiple nodes</label>
+            
+            <button id="btnZoomIn" style="width:20px">Zoom In</button>
+            <button id="btnZoomOut" style="width:20px">Zoom In</button>
         </div>
 
         <div id="setViewMode" class="toolbar-section" style="padding-right:10px;min-width:40px">
@@ -50,17 +59,19 @@
             <label for="btnViewModeInfo">Info</label>
         </div>
 
-        <div id="setDivGravity" class="toolbar-section" style="border-left: solid 1px gray; padding-right:10px; min-width:150px">
+        <div id="setDivGravity" class="toolbar-section" 
+            style="border-left: solid 1px gray; padding-right:10px; min-width:90px">
             <label>Gravity</label>
             <div id="setGravityMode" style="padding-left:10px">
                 <input type="radio" id="gravityMode0" name="gravityMode" value="off">
                 <label for="gravityMode0">off</label>
 
-                <input type="radio" id="gravityMode1" name="gravityMode" value="touch" checked="checked">
-                <label for="gravityMode1">weak</label>
-
+                <input type="radio" id="gravityMode1" name="gravityMode" value="touch">
+                <label for="gravityMode1">on</label>
+<!-- 2017-02-02
                 <input type="radio" id="gravityMode2" name="gravityMode" value="aggressive">
                 <label for="gravityMode2">strong</label>
+-->                
             </div>
         </div>
 
@@ -85,7 +96,8 @@
         </div>
 
         <!-- -->
-        <div id="setDivLinks" class="toolbar-section" style="border-left: solid 1px gray; min-width:214px">
+        <div id="setDivLinks" class="toolbar-section" 
+            style="border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
             <label>Links</label><br>
 
             <div id="linksPathColor" class="colorblock" title="Color of links" style="margin-left:10px">/</div>
@@ -99,6 +111,10 @@
                 <input type="radio" id="linksMode1" name="linksMode" value="curved" checked="checked" 
                     title="link shape is curved">
                 <label for="linksMode1">curved</label>
+                
+                <input type="radio" id="linksMode2" name="linksMode" value="stepped"
+                    title="link shape is stepped">
+                <label for="linksMode2">stepped</label>
             </div>
 
             <input id="linksLength" title="Links Length" class="number-input medium" type="number" min="1" step="25" />
@@ -106,27 +122,26 @@
             <input id="linksWidth" title="Links Thickness" class="number-input small" type="number" min="1" max="25" step="1" />
         </div>
 
-        <div id="setDivLabels" class="toolbar-section" style="border-left: solid 1px gray; padding-left: 10px; min-width:140px">
+        <div id="setDivLabels" class="toolbar-section" style="border-left: solid 1px gray; padding-left: 10px; min-width:140px;display:none">
             <label>Labels</label><br>
 
-            <input type="checkbox" id="textOnOff" value="on" title="Show labels when infobox is hidden">
+            <input type="checkbox" id="textOnOff" value="on" title="Show labels when infobox is hidden" style="margin: 5px;">
             <div id="textColor" class="xcolorblock" title="Text color">Text</div>
 
-            <input id="textLength" title="Labels Length" class="number-input medium" type="number" min="50" step="250" />
+            <input id="textLength" title="Labels Length" class="number-input medium" type="number" min="50" max="250" step="10" />
             x
             <input id="fontSize" title="Font Size" class="number-input small" type="number" min="8" max="25" step="1" />
         </div>
         
         
-        <div id="setDivExport" class="toolbar-section" style="border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px">
+        <div id="setDivExport" class="toolbar-section" 
+        style="border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px;display:none">
             <label>&nbsp;</label><br>
             <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
         </div>
 
     </div> <!-- end of toolbar -->
 
-    <div id="divHint" style="display:none;color:darkgreen;font-weight:bold;padding:4px; margin-top: 10px;">Choose entities in dropdown above. Turn gravity OFF for more control. Entities can be dragged to position them; layout is remembered across sessions if gravity is off.
-    Drag background to reposition, mousewheel to zoom.</div>
 </div>
 
 <div id="divSvg" class="ent_content_full" style="top:10em;">
@@ -134,4 +149,8 @@
             <svg id="d3svg" class="fullscreen">
                 <text x="25" y="25" fill="black">Building graph ...</text>
             </svg>  
+            
+            <div id="net_limit_warning" 
+                style="z-index:2000;position:absolute;top:0;right:0;border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold;color:red; padding:8px; display:none;">
+            </div>
 </div>

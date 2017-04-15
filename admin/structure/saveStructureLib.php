@@ -1137,7 +1137,8 @@
 				if($rows == "1062"){
 					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
 				}else if ($rows==0 || is_string($rows) ) {
-					$ret = "AAA SQL error updating field type $dtyID in updateDetailType: ".htmlspecialchars($query)."  type=".$parameters[0]." values=".@$parameters[1];//.$mysqli->error;
+					$ret = "AAA SQL error updating field type $dtyID in updateDetailType: "
+                        .htmlspecialchars($query)."  type=".$parameters[0]." values=".@$parameters[1].'   '.$mysqli->error;
 				} else {
 					$ret = $dtyID;
 				}
@@ -1278,6 +1279,7 @@
 					$query = $query.", trm_LocallyModified=IF(trm_OriginatingDBID>0,1,0)";
 					$query = "update defTerms set ".$query." where trm_ID = $trmID";
 				}
+
 
 				$rows = execSQL($ext_db, $query, $parameters, true);
 

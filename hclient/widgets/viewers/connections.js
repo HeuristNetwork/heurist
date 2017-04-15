@@ -39,7 +39,7 @@ $.widget( "heurist.connections", {
         this.framecontent = $('<div>')
                    .css({
                         position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-                        'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
+                        'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
                    .appendTo( this.element );
                    
         this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.framecontent );
@@ -135,7 +135,7 @@ $.widget( "heurist.connections", {
         
             if(this.dosframe.attr('src')!==this.options.url){
                 
-                this.options.url = window.hWin.HAPI4.basePathV4 + 'hclient/framecontent/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
+                this.options.url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
                 this.dosframe.attr('src', this.options.url);
               
             // Content loaded already    
@@ -152,8 +152,10 @@ $.widget( "heurist.connections", {
                         this._getRelations(this.options.recordset);
                         
                     }else{
+                        
+                        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                     
-                        var records_ids = this.options.recordset.getIds(2000);
+                        var records_ids = this.options.recordset.getIds(MAXITEMS);
                         var relations = this.options.relations;
                         
                         // Parse response to spring diagram format
@@ -185,7 +187,7 @@ $.widget( "heurist.connections", {
     loadanimation: function(show){
         if(show){
             //this.dosframe.hide();
-            this.framecontent.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.framecontent.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.framecontent.css('background','none');
             //this.dosframe.show();
@@ -210,8 +212,10 @@ $.widget( "heurist.connections", {
         }
         
         var that = this; 
-        //get first 2000 records and send their IDS to server to get related record IDS
-        var records_ids = recordset.getIds(2000);
+        //get first MAXITEMS records and send their IDS to server to get related record IDS
+        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+        var records_ids = recordset.getIds(MAXITEMS);
+//console.log('was '+recordset.getIds().length+'  send for '+records_ids.length);        
         if(records_ids.length>0){
             
             var callback = function(response)
@@ -219,7 +223,7 @@ $.widget( "heurist.connections", {
                 var resdata = null;
                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                     // Store relationships
-                    console.log("Successfully retrieved relationship data!", response.data);
+//console.log("Successfully retrieved relationship data!", response.data);
                     that.option("relations", response.data);
                     
                     // Parse response to spring diagram format
@@ -301,7 +305,8 @@ $.widget( "heurist.connections", {
                                     target: nodes[target],
                                     targetcount: 1,
                                     relation: {id: dtID>0?dtID:trmID, 
-                                               name: relationName} 
+                                               name: relationName,
+                                               type: dtID>0?'resource':'relationship'} 
                                    };
                         links.push(link); 
                     }      
@@ -335,8 +340,11 @@ $.widget( "heurist.connections", {
                     function(selected){
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         { selection:selected, source:that.element.attr('id') } );
-                    }            
-            
+                    },
+                    function(selected){
+                        that._getRelations(that.options.recordset);
+                        //$(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null);
+                    }
             );
             this.recordset_changed = false;
         }

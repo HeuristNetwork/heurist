@@ -56,6 +56,8 @@ function hImportDefTerms(_trm_ParentTermID) {
             }else{
                 trm_ParentDomain = 'enum';
             }
+
+            //todo use window.hWin.HEURIST4.ui.getChildrenLabels
                 
             //get list of children labels
             function __getSiblings(children){
@@ -125,7 +127,7 @@ function hImportDefTerms(_trm_ParentTermID) {
     
     
             uploadWidget.fileupload({
-    url: window.hWin.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
+    url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php', 
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:'temp'}, //to place file into scratch folder
                 {name:'max_file_size', value:'1024*1024'}],
@@ -144,7 +146,8 @@ function hImportDefTerms(_trm_ParentTermID) {
                         $('#sourceContent').val(file.error);
                     }else{
                         
-                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')+'&db='+window.hWin.HAPI4.database;
+                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
+                            +'&encoding='+$('#csv_encoding').val()+'&&db='+window.hWin.HAPI4.database;
                         
                         $('#sourceContent').load(url_get, function(){
                             _setCurtain( 2 );
@@ -486,7 +489,7 @@ url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
                                 */    
                                     window.close( {result:recIDs, parent:trm_ParentTermID, terms:response.data.terms } );
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
+                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain term definitions, possible database corruption, please consult Heurist developers');
                                 }
                             });
                             

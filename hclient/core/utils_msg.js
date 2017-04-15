@@ -15,6 +15,7 @@ showMsgWorkInProgress - shows standard work in progress message
 showPrompt    - show simple input value dialog with given prompt message
     
 showMsgFlash - show buttonless dialog with given timeout
+showHintFlash
 checkLength  - fill given element with error message and highlight it
 checkLength2 - get message if input value beyound given ranges
 
@@ -106,12 +107,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     // loads content url into dialog (getMsgDlg) and show it (showMsgDlg)
     //
-    showMsgDlgUrl: function(url, buttons, title){
+    showMsgDlgUrl: function(url, buttons, title, options){
 
         if(url){
             var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             $dlg.load(url, function(){
-                window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title);
+                window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options);
             });
         }
     },
@@ -141,21 +142,21 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     // show simple input value dialog with given message
     //
-    showPrompt: function(message, callbackFunc){
+    showPrompt: function(message, callbackFunc, sTitle, ext_options){
         
         if(message.indexOf('dlg-prompt-value')<0){
             message = message+'<input id="dlg-prompt-value" class="text ui-corner-all" '
                 + ' style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/>';    
         }
         
-        window.hWin.HEURIST4.msg.showMsgDlg( message,
+        return window.hWin.HEURIST4.msg.showMsgDlg( message,
         function(){
             if($.isFunction(callbackFunc)){
                 var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                 callbackFunc.call(this, $dlg.find('#dlg-prompt-value').val());
             }
         },
-        'Specify value');
+        window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle,ext_options);
         
     },
     
@@ -308,15 +309,65 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
            }
         }
+        
 
         $dlg.dialog(options);
         //$dlg.dialog('option','buttons',buttons);
 
+        if(options.hideTitle){
+            $dlg.parent().find('.ui-dialog-titlebar').hide();
+        }else{
+            $dlg.parent().find('.ui-dialog-titlebar').show();
+        }
+        
         return $dlg;
         //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
         //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
+    },
+    
+    //
+    //
+    //
+    showTooltipFlash: function(message, timeout, to_element){
+        
+        if(!$.isFunction(window.hWin.HR)){
+            alert(message);
+            return;
+        }
+        
+        if(window.hWin.HEURIST4.util.isempty(message) ||  window.hWin.HEURIST4.util.isnull(to_element)){
+            return;   
+        }
+        
+        var position;
+        
+        if($.isPlainObject(to_element)){
+                position = { my:to_element.my, at:to_element.at};
+                to_element =  to_element.of;
+        }else{
+                position = { my: "left top", at: "left bottom", of: $(to_element) };    
+        }
+
+        if (!(timeout>200)) {
+            timeout = 1000;
+        }
+        
+        $( to_element ).attr('title',window.hWin.HR(message));
+        $( to_element ).tooltip({
+            position: position,
+            //content: '<span>'+window.hWin.HR(message)+'</span>',
+            hide: { effect: "explode", duration: 500 }
+        });
+
+        $( to_element ).tooltip('open');
+        
+        setTimeout(function(){
+            $( to_element ).tooltip('close');
+            $( to_element ).attr('title',null);
+        }, timeout);
+        
     },
 
     //
@@ -559,6 +610,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
                         //functions in internal document
                         //content.close = $dosframe[0].close;    // make window.close() do what we expect
+                        
                         content.close = function() {
                             var did = $dlg.attr('id');
 
@@ -658,6 +710,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             var dim = { h: (options.height>0?options.height:400), 
                         w: (options.width>0?options.width:690) };
             
+            var onCloseCalback = (options['close'])?options.close:null;
+            
             var opts = {
                     autoOpen: true,
                     width : dim.w,
@@ -668,7 +722,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     title: options["title"],
                     buttons: options["buttons"],
                     close: function(event, ui){
-
+                        
+                        if($.isFunction(onCloseCalback)){
+                             onCloseCalback.call(this, event, ui);
+                        }
                         //var element = popup.element.parentNode.removeChild(popup.element);
                         element.style.display = "none";
                         originalParentNode.appendChild(element);

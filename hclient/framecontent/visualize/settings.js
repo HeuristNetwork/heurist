@@ -57,7 +57,9 @@ function getURL() {
  */
 function getSetting(key, defvalue) {
     var value = localStorage.getItem(getURL()+key);
-    if((window.hWin.HEURIST4.util.isnull(value) || isNaN(value)) && !window.hWin.HEURIST4.util.isnull(defvalue)){
+    
+    if ((isNaN(value) && $.isNumeric(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
+        (window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue))){
         value = defvalue;
         putSetting(key, value);
     }
@@ -117,6 +119,7 @@ function handleSettingsInUI() {
     $( "#setViewMode" ).buttonset();    
 
     //
+    if(setting_gravity=='agressive') setting_gravity='touch';
     $("input[name='gravityMode'][value='" +getSetting(setting_gravity)+ "']").attr("checked", true);
     
     $('#gravityMode0').button() //{icons: { primary: 'ui-icon-gravity0' }, text:false})
@@ -173,6 +176,9 @@ function handleSettingsInUI() {
         .click( setLinkMode );
     $('#linksMode1').button({icons: { primary: 'ui-icon-link-curved' }, text:false})
         .click( setLinkMode );
+    $('#linksMode2').button({icons: { primary: 'ui-icon-link-stepped' }, text:false})
+        .click( setLinkMode );
+        
     $( "#setLinksMode" ).buttonset();    
     
 
@@ -235,16 +241,22 @@ function handleSettingsInUI() {
 
     //------------ LABELS ----------
     
+    putSetting(setting_labels, 'on'); //always on
     var isLabelVisible = (getSetting(setting_labels, 'on')=='on');
     
     $('#textOnOff').attr('checked',isLabelVisible).change(function(){
         
         var newval = $(event.target).is(':checked')?'on':'off';
         putSetting(setting_labels, newval);
-        
+
         if(currentMode=='icons'){
             var isLabelVisible = (newval=='on');
-            d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
+            //d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
+            if(isLabelVisible) {
+                visualizeData();
+            }else{
+                d3.selectAll(".nodelabel").style('display', 'none');
+            }
         }
         // visualizeData();
     });
@@ -253,7 +265,8 @@ function handleSettingsInUI() {
     $('#textLength').val(textLength).change(function(){
         var newval = $(event.target).val();
         putSetting(setting_textlength, newval);
-        visualizeData();    
+        var isLabelVisible = (currentMode!='icons' || (getSetting(setting_labels, 'on')=='on'));
+        if(isLabelVisible) visualizeData();    
     });
     
     
@@ -265,7 +278,8 @@ function handleSettingsInUI() {
     function(){
         var newval = $(event.target).val();
         putSetting(setting_fontsize, newval);
-        visualizeData();    
+        var isLabelVisible = (currentMode!='icons' || (getSetting(setting_labels, 'on')=='on'));
+        if(isLabelVisible) visualizeData();    
     });    
 
     $("#textColor")
@@ -290,10 +304,10 @@ function handleSettingsInUI() {
     
     if(settings.isDatabaseStructure){
         initRecTypeSelector();    
+        $('#setDivExport').hide();
+    }else{
+        $('#gephi-export').button();
     }
-    
-
-    $('#gephi-export').button();
     
     tBar.show();
  /*   OLD JJ CODE

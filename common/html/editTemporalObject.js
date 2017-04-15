@@ -464,7 +464,7 @@ var TemporalPopup = (function () {
                     {picker: $.calendars.picker.defaultRenderer.picker.
                         replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                         replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-            showTrigger: '<img src="'+top.HEURIST.baseURL_V3+'common/images/cal.gif" alt="Popup" class="trigger">'}
+            showTrigger: '<img src="'+top.HEURIST.baseURL+'common/images/cal.gif" alt="Popup" class="trigger">'}
         );
 
         //change current calendar

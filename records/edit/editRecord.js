@@ -402,7 +402,7 @@ if (! top.HEURIST.edit) {
                 top.HEURIST.edit.modules.personal.disabledFunction = null;
 
                 // add the bookmark, patch the record structure, and view the personal tab
-                top.HEURIST.util.getJsonData(top.HEURIST.baseURL_V3 + "records/bookmarks/addBookmark.php?recID="
+                top.HEURIST.util.getJsonData(top.HEURIST.baseURL + "records/bookmarks/addBookmark.php?recID="
                     + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
                         for (var i in vals) {
                             top.HEURIST.edit.record[i] = vals[i];
@@ -467,10 +467,24 @@ if (! top.HEURIST.edit) {
         */
         duplicate_record: function(){
 
-                window.open(top.HEURIST.baseURL_V3 +"records/edit/duplicateRecordInfo.php?mode=edit&recID=" 
+                window.open(top.HEURIST.baseURL +"records/edit/duplicateRecordInfo.php?mode=edit&recID=" 
                     + top.HEURIST.edit.record.bibID
                     + "&db="+top.HEURIST.database.name,'_blank');
           
+        },
+        
+        /**
+        * save current record and add new one - edit in current window
+        * 
+        */
+        save_record_and_add_newone: function(){
+            
+            var rt = top.HEURIST.edit.record.rectypeID;
+            
+            top.HEURIST.edit.save_record(function(){ //callback is called in case of success
+               window.document.location = top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&db='
+                    + top.HEURIST.database.name+'&rec_rectype='+rt; 
+            })
         },
 
         /**
@@ -500,7 +514,7 @@ if (! top.HEURIST.edit) {
                     {
                         callback.call(this);
 
-                    } else if(callback){ //force close
+                    } else if(callback==true){ //force close
 
                         top.HEURIST.edit.closeEditWindow();
 
@@ -525,6 +539,7 @@ if (! top.HEURIST.edit) {
         *
         */
         save: function(callback) {
+            
             // Attempt to save all the modules that need saving
             // Display a small saving window
             /* TODO: ? remove
@@ -541,7 +556,7 @@ if (! top.HEURIST.edit) {
                 personalWindow.tagCheckDone = true;
 
                 if(top.HEURIST.util.getDisplayPreference('tagging-popup') !== "false"){
-                    top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3
+                    top.HEURIST.util.popupURL(top, top.HEURIST.baseURL
                         + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", {
                             title: 'Add tags',
                             height:400, width:550,
@@ -558,6 +573,11 @@ if (! top.HEURIST.edit) {
                 }
             }
 
+            
+            top.HEURIST.util.bringCoverallToFront();
+            top.HEURIST.util.coverallDiv.style.cursor = "wait";
+            top.HEURIST.util.coverallDiv.style.backgroundImage = "url(../../common/images/loading-animation-black.gif)";
+            
             for (var moduleName in top.HEURIST.edit.modules) {
                 var module = top.HEURIST.edit.modules[moduleName];
 
@@ -575,6 +595,10 @@ if (! top.HEURIST.edit) {
                 top.HEURIST.deregisterEvent(module.frame, "load", moduleUnchangeFunction);
                 if (module.changed) { // don't bother saving unchanged tabs
                     if (form.onsubmit  &&  ! form.onsubmit()) {
+                        //top.HEURIST.util.finishLoadingPopup();
+                        top.HEURIST.util.sendCoverallToBack();
+                        top.HEURIST.util.coverallDiv.style.backgroundImage = "none";  // get rid of "saving" animation
+                        top.HEURIST.util.coverallDiv.style.cursor = "default";
                         top.HEURIST.edit.showModule(moduleName);
                         return;    // submit failed ... up to the individual form handlers to display messages
                     }
@@ -607,6 +631,10 @@ if (! top.HEURIST.edit) {
             
             
             setTimeout(function() {
+                top.HEURIST.util.sendCoverallToBack();
+                top.HEURIST.util.coverallDiv.style.backgroundImage = "none";  // get rid of "saving" animation
+                top.HEURIST.util.coverallDiv.style.cursor = "default";
+                
                 document.getElementById("popup-saved").style.display = "block";
                 setTimeout(function() {
                     document.getElementById("popup-saved").style.display = "none";
@@ -620,7 +648,7 @@ if (! top.HEURIST.edit) {
 
                     if(callback && typeof(callback)==="function"){
                         callback.call(this);
-                    }else if (callback){
+                    }else if (callback==true){
                         top.HEURIST.edit.closeEditWindow();
                     }
                     }, 1000);
@@ -686,7 +714,7 @@ if (! top.HEURIST.edit) {
             $("#close-button").hide();
             $("#save-record-buttons").show();
             $("#close-button2").hide();
-            $("#save-record-buttons2").show();
+            $("#save-record-buttons2").css('display','table-row');//show();
 
         },
 
@@ -947,7 +975,6 @@ if (! top.HEURIST.edit) {
         createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
 
             if(!top || !window) {
-console.log('top not defined');    
 				return;            
                 window.top = window.self;    
             }
@@ -1153,7 +1180,7 @@ console.log('heurist not defined');
             var thisRef = this;
             var element = fileInput.parentNode;
             //call thumbnail maker
-            top.HEURIST.util.getJsonData(top.HEURIST.baseURL_V3 + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database,
+            top.HEURIST.util.getJsonData(top.HEURIST.baseURL + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database,
                 function(vals) {
                     top.HEURIST.edit.fileInputURLsaved.call(thisRef, element, vals);
             });
@@ -1797,7 +1824,7 @@ console.log('heurist not defined');
                         {picker: $.calendars.picker.defaultRenderer.picker.
                             replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-                showTrigger: '<img src="'+top.HEURIST.baseURL_V3+'common/images/cal.gif" '+
+                showTrigger: '<img src="'+top.HEURIST.baseURL+'common/images/cal.gif" '+
                  'style="margin-left:10px;cursor:pointer !important" alt="Popup" class="trigger">'}
             );            
                 
@@ -1892,7 +1919,7 @@ console.log('heurist not defined');
                     popupOptions.y = 0;
                 }*/
 
-                top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + "common/html/editTemporalObject.html?"
+                top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL + "common/html/editTemporalObject.html?"
                     + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
             }
 
@@ -1976,7 +2003,7 @@ console.log('heurist not defined');
 
         if (this.repeatable) {
             var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
-            dupImg.src = top.HEURIST.baseURL_V3 + "common/images/duplicate.gif";
+            dupImg.src = top.HEURIST.baseURL + "common/images/duplicate.gif";
             dupImg.className = "duplicator";
             dupImg.alt = dupImg.title = "Add another " + recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + " value";
             top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
@@ -2004,18 +2031,21 @@ console.log('heurist not defined');
             for (var i=0; i < fieldValues.length; ++i) {
                 var ele = this.addInput( fieldValues[i] )
 
-                if(!this.repeatable && i>0){
-                    $(ele).after('<div class="prompt" style="color:red">Repeated value for a single value field - please correct</div>');
-                }
                 //nonsense typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
             }
+            
+            if(!this.repeatable && this.inputs.length>1){ //fieldValues.length>1 && i==fieldValues.length-1){
+                var sWarning = '<div class="prompt" style="color:red">Repeated value for a single value field - please correct</div>';
+                $(this.promptDiv).before(sWarning);
+            }
+            
             if (fieldValues.length == 0) {   //add default value for first element of repeatable field
             
                 if(defaultValue=='increment_new_values_by_1'){
 
                     var inputEl = this.addInput({"value" :''});
                     //find incremented value on server side
-                    var baseurl = top.HEURIST.baseURL_V3 + "records/edit/getIncrementedValue.php",
+                    var baseurl = top.HEURIST.baseURL + "records/edit/getIncrementedValue.php",
                     params = 'db='+HAPI.database+'&dtyID='
                                 + detailType[0]
                                 + '&rtyID='+windowRef.parent.HEURIST.edit.record.rectypeID,
@@ -2150,7 +2180,7 @@ console.log('heurist not defined');
                 var span = this.document.createElement("span");
                 span.style.paddingLeft = "20px";
                 span.style.lineHeight = "16px";
-                span.style.backgroundImage = "url("+top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif)";
+                span.style.backgroundImage = "url("+top.HEURIST.baseURL+"common/images/external_link_16x16.gif)";
                 span.style.backgroundRepeat = "no-repeat";
                 span.style.backgroundPosition = "center left";
                 span.appendChild(this.document.createTextNode("look up"));
@@ -2377,7 +2407,7 @@ console.log('heurist not defined');
         top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
         
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
         removeImg.className = "delete-resource";
         removeImg.title = "Clear this date";
         
@@ -2540,7 +2570,7 @@ console.log('heurist not defined');
         newDiv.appendChild(hiddenElt);    // have to do this AFTER the type is set
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
         removeImg.className = "delete-resource";
         removeImg.title = "Remove this record pointer";
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -2552,27 +2582,27 @@ console.log('heurist not defined');
         });
 
         var editImg = newDiv.appendChild(this.document.createElement("img"));
-        editImg.src = top.HEURIST.baseURL_V3 +"common/images/edit-pencil.png";
+        editImg.src = top.HEURIST.baseURL +"common/images/edit-pencil.png";
         editImg.className = "edit-resource";
         editImg.title = "Edit this record (opens in a new tab)";
 
         top.HEURIST.registerEvent(editImg, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
-                window.open(top.HEURIST.baseURL_V3 +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
+                window.open(top.HEURIST.baseURL +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
                     (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
             }
         });
 
         // TO DO: We really want this record view popping up in a popup window rather than a new tab
         var ViewRec = newDiv.appendChild(this.document.createElement("img"));
-        ViewRec.src = top.HEURIST.baseURL_V3 +"common/images/magglass_15x14.gif";
+        ViewRec.src = top.HEURIST.baseURL +"common/images/magglass_15x14.gif";
         ViewRec.className = "view-resource";
         ViewRec.title = "View the record linked via this pointer field (opens in a new tab)";
 
         top.HEURIST.registerEvent(ViewRec, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
 
-                var url = top.HEURIST.baseURL_V3 +"records/view/renderRecordData.php?recID=" + hiddenElt.value  +
+                var url = top.HEURIST.baseURL +"records/view/renderRecordData.php?recID=" + hiddenElt.value  +
                         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
 
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
@@ -2611,7 +2641,7 @@ console.log('heurist not defined');
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
         if (! searchValue) searchValue = element.textElt.value;
-        var url = top.HEURIST.baseURL_V3+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
+        var url = top.HEURIST.baseURL+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
         if (windowRef.parent.HEURIST.edit.record)   //0317 top
             url += "&target_recordtype="+windowRef.parent.HEURIST.edit.record.rectypeID; //0317 top
@@ -2768,7 +2798,7 @@ console.log('heurist not defined');
 
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = function(bdValue, needClear){
 
-        var bd_Values = [];
+        var bd_Values = []; //keep existing values
         
         if(needClear){
             //find and remove previous selector
@@ -2778,7 +2808,7 @@ console.log('heurist not defined');
             var nodes = parent.childNodes;
             while(i<nodes.length) {
                 var ele = nodes[i];
-                if(ele.className == "repeat-separator"){
+                if(ele.className == "repeat-separator" || ele.className == "delete-resource" || ele.className == 'warning-wrong-term'){
                     parent.removeChild(ele);
                 }else{
                     i++;
@@ -2792,11 +2822,17 @@ console.log('heurist not defined');
             
             $(parent).find('a[id^="term_by_image"]').remove();
             
-            this.inputs = [];
+            this.inputs = []; //clear all inputs
+        }else if(bdValue && bdValue.value){
+            bd_Values.push(bdValue.value)
+        }else{
+            bd_Values.push(null);
         }
-
+        
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
         var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
+        var domain = this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']];
 
         var sAllTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
         var sDisTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']];
@@ -2807,7 +2843,7 @@ console.log('heurist not defined');
         var    allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) : null;
         if(allTerms==null){
             
-            if(this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum"){
+            if(domain == "enum"){
                 //2016-03-25 vocabulary must be defined! top.HEURIST.terms.treesByDomain['enum']
                 allTerms = -1;
             }else{
@@ -2822,16 +2858,50 @@ console.log('heurist not defined');
             allTerms = 0;
             disabledTerms = "";
         }
+          
+        //-----
+        function __getTermLabel(term_id){
+            var term = null;
+            if(term_id>0){
+                term = top.HEURIST.terms.termsByDomainLookup['enum'][term_id];
+                if(!term){
+                    term = top.HEURIST.terms.termsByDomainLookup['relation'][term_id];
+                }
+            }
+            if(term){
+                s = term[top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
+                if(s=='') {s = 'Term label for #'+term_id+' is empty. Please edit and correct';}
+                else {s = 'Invalid value: '+s;}
+                return s;
+            }else{
+                return null; //'Undefined value '+term_id;
+            }
+        } 
+        //-----
         
-        var newInput;
+        var newInput = null;
 
         if(bd_Values.length>0){
         
             for (var k = 0; k < bd_Values.length; k++) {
+                
+                    var wrongValue = null;
+                
                     newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
                             this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
                             bd_Values[k], true);
-
+                                                          
+                    if(bd_Values[k] && newInput.value!=bd_Values[k]){
+                        var term = __getTermLabel(bd_Values[k]);
+                        if(term) {
+                            wrongValue = term;
+                        } else if(this.inputs.length>0) {
+                            newInput = null; //do not add repeatable empty or non-existing term id
+                            continue;   
+                        }
+                    }
+                            
+                   //add select to input div
                     this.addInputHelper.call(this, {value:bd_Values[k]}, newInput);
                     newInput.style.width = "auto";         
                     
@@ -2841,26 +2911,43 @@ console.log('heurist not defined');
                             br.className = "repeat-separator";
                             this.inputCell.insertBefore(br, newInput);
                     }
-            }
-            
-        }else{
-        
-            newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
-                    this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
-                    (bdValue && bdValue.value ? bdValue.value : null), true);
-
-            this.addInputHelper.call(this, bdValue, newInput);
-            newInput.style.width = "auto";
-
+                    //add clear image
+                    var removeImg = this.document.createElement("img"); //newDiv.appendChild();
+                    removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
+                    removeImg.className = "delete-resource";
+                    removeImg.title = "Remove this value";
+                    removeImg['data-idx'] = (this.inputs.length-1);
+                    
+                    $(newInput).after(removeImg);
+                    //this.inputCell.insertBefore(removeImg, this.promptDiv);
+                    
+                    var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+                    var thatRef = this;
+                    top.HEURIST.registerEvent(removeImg, "click", function( event ) {
+                        var idx = event.target['data-idx'];
+                        if(thatRef.inputs && thatRef.inputs[idx]){
+                            var inpt = thatRef.inputs[idx];
+                            if (!inpt.readOnly) {
+                                inpt.selectedIndex = -1;
+                                if (windowRef.changed) windowRef.changed();
+                            }
+                        }
+                    });
+                    
+                    if(wrongValue){
+                        $(removeImg).after('<div style="color:red" class="warning-wrong-term">'
+                            + wrongValue //'Invalid value'+(wrongValues.length>1?'s':'')+': '+ wrongValues.join(',')
+                            +'</div>');
+                    }
+                    
+                    if(this.linkSpan && this.inputs.length==1){ //after first remove image
+                        $(removeImg).after($(this.linkSpan));
+                    }
+                    
+                    this.createSelectTermsByImage(newInput);
+            }//for
         }
-
-        //move span before prompt div
-        if(this.linkSpan){
-            this.inputCell.removeChild(this.linkSpan);
-            this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
-        }
         
-        this.createSelectTermsByImage(newInput);
 /*        
         if(this.selectSpan){
             this.inputCell.removeChild(this.selectSpan);
@@ -2871,6 +2958,9 @@ console.log('heurist not defined');
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector
 
 
+    //
+    // create edit link to manage vocabulary
+    //
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = function(bdValue){
 
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
@@ -2892,7 +2982,7 @@ console.log('heurist not defined');
         urlSpan.style.cursor = "pointer";
         var editImg = urlSpan.appendChild(this.document.createElement("img"));
         //var viewRec = urlSpan.appendChild(this.document.createElement("img"));
-        editImg.src = top.HEURIST.baseURL_V3+"common/images/edit-pencil.png";
+        editImg.src = top.HEURIST.baseURL+"common/images/edit-pencil.png";
         urlSpan.appendChild(editImg);
         urlSpan.appendChild(this.document.createTextNode("edit")); //isVocabulary?"add":"list"));
 
@@ -2937,7 +3027,7 @@ console.log('heurist not defined');
                     type="relation";
                 }
 
-                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL +
                     "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+Number(sAllTerms)+"&db="+db,
                     {
                         "close-on-blur": false,
@@ -2956,7 +3046,7 @@ console.log('heurist not defined');
                 );
 
             }else{
-                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL +
                     "admin/structure/terms/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
                     {//options
                         "close-on-blur": false,
@@ -2970,9 +3060,7 @@ console.log('heurist not defined');
             }
         }; // urlSpan.onclick
 
-        this.inputCell.insertBefore(urlSpan, this.promptDiv);
-        //this.inputCell.appendChild(urlSpan);
-
+        
         this.linkSpan = urlSpan;
 
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms
@@ -2997,7 +3085,7 @@ console.log('heurist not defined');
         //        urlSpan.style['float'] = "right";
         urlSpan.style.cursor = "pointer";
         var editImg = urlSpan.appendChild(this.document.createElement("img"));
-        editImg.src = top.HEURIST.baseURL_V3+"common/images/icon_picture.png";
+        editImg.src = top.HEURIST.baseURL+"common/images/icon_picture.png";
         urlSpan.appendChild(editImg);
         urlSpan.appendChild(document.createTextNode('visual'));
 
@@ -3013,7 +3101,7 @@ console.log('heurist not defined');
             
             var allTerms = $.map($(selector).find('option'), function(e) { return e.value; });
 
-            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
+            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL +
                     "admin/structure/terms/selectTermsByImage.php?db="+db+"&ids="+allTerms.join(','),
                     {
                         "close-on-blur": false,
@@ -3041,18 +3129,29 @@ console.log('heurist not defined');
 
         var newInput = this.recreateSelector(bdValue, false);
 
-        if(this.inputs.length>1){
-            var br = this.document.createElement("div");
-            br.style.height = "3px";
-            br.className = "repeat-separator";
-            this.inputCell.insertBefore(br, newInput);
-            //br = this.document.createElement("br");
-            //this.inputCell.insertBefore(br, newInput);
-        }
-        
-        if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
+        if(newInput){
+            if(this.inputs.length>1){
+                var br = this.document.createElement("div");
+                br.style.height = "3px";
+                br.className = "repeat-separator";
+                this.inputCell.insertBefore(br, newInput);
+                //br = this.document.createElement("br");
+                //this.inputCell.insertBefore(br, newInput);
+            }
+            
+            
+            if($(this.inputCell).find('.warning-wrong-term').length==1){
+                $(this.promptDiv).after(
+                '<div class="prompt warning-wrong-term" style="color:blue">Please edit the field definition to include these values or select new values from the dropdown</div>');
+            }
+            
+            if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
 
-        this.createSpanLinkTerms();
+            this.createSpanLinkTerms(); //for admin only - place it after FIRST remove link/image
+            //add after FIRST clear image
+            $(this.inputs[0]).next().after($(this.linkSpan));
+            
+        }
         return newInput;
     }; //top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput
 
@@ -3137,7 +3236,7 @@ console.log('heurist not defined');
             var link = inputDiv.appendChild(this.document.createElement("a"));
             if (bdValue.file.nonce) {
                 //not used anymore   @todo - remove
-                link.href = top.HEURIST.baseURL_V3+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
+                link.href = top.HEURIST.baseURL+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
                 "?ulf_ID=" + encodeURIComponent(bdValue.file.nonce)+
                 (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
             } else if (bdValue.file.URL) {
@@ -3149,7 +3248,7 @@ console.log('heurist not defined');
             link.appendChild(this.document.createTextNode(bdValue.file.origName));    //saw TODO: add a title to this which is the bdValue.file.description
 
             var linkImg = link.appendChild(this.document.createElement("img"));
-            linkImg.src = top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif";
+            linkImg.src = top.HEURIST.baseURL+"common/images/external_link_16x16.gif";
             linkImg.className = "link-image";
 
             var fileSizeSpan = inputDiv.appendChild(this.document.createElement("span"));
@@ -3157,7 +3256,7 @@ console.log('heurist not defined');
             fileSizeSpan.appendChild(this.document.createTextNode("[" + bdValue.file.fileSize + "]"));
 
             var removeImg = inputDiv.appendChild(this.document.createElement("img"));
-            removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
+            removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
             removeImg.className = "delete-file";
             removeImg.title = "Remove this file";
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -3175,7 +3274,7 @@ console.log('heurist not defined');
         } else {
             if (top.HEURIST.browser.isEarlyWebkit) {    // old way of doing things
                 var newIframe = this.document.createElement("iframe");
-                newIframe.src = top.HEURIST.baseURL_V3+"records/files/uploadFileForm.php?recID="
+                newIframe.src = top.HEURIST.baseURL+"records/files/uploadFileForm.php?recID="
                 + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
                 newIframe.frameBorder = 0;
                 newIframe.style.width = "90%";
@@ -3395,7 +3494,7 @@ console.log('heurist not defined');
         newDiv.input = input;
 
         var geoImg = this.document.createElement("img");
-        geoImg.src = top.HEURIST.baseURL_V3+"common/images/16x16.gif";
+        geoImg.src = top.HEURIST.baseURL+"common/images/16x16.gif";
         geoImg.className = "geo-image";
         geoImg.onmouseout = function(e) { mapViewer.hide(); };
 
@@ -3422,7 +3521,7 @@ console.log('heurist not defined');
                 }
             });*/
 
-                    var sURL = top.HEURIST.baseURL_V3+"records/edit/digitizer/index.html";
+                    var sURL = top.HEURIST.baseURL+"records/edit/digitizer/index.html";
                      //+ (response.success ? "edit" : encodeURIComponent(input.value))
                     top.HEURIST.util.popupURL(
                         windowRef,
@@ -3446,7 +3545,7 @@ console.log('heurist not defined');
         editSpan.appendChild(editLink);
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
         newDiv.removeImg = removeImg;
         removeImg.className = "delete-geo";
         removeImg.title = "Remove this geographic object";
@@ -3599,7 +3698,7 @@ console.log('heurist not defined');
         }
         
         if (cmd == "delete") {
-            var fakeForm = { action: top.HEURIST.baseURL_V3+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
+            var fakeForm = { action: top.HEURIST.baseURL+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
                 elements: [ { name: "delete[]", value: relID },
                     { name: "recID", value: this.recID } ] };
             var thisRef = this;
@@ -3698,7 +3797,7 @@ console.log('heurist not defined');
         }
 
         var removeImg = this.reminderDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.baseURL_V3+"common/images/cross.png";
+        removeImg.src = top.HEURIST.baseURL+"common/images/cross.png";
         removeImg.title = "Remove this reminder";
         var thisRef = this;
         removeImg.onclick = function() { if (confirm("Remove this reminder?")) thisRef.remove(); };
@@ -3715,7 +3814,7 @@ console.log('heurist not defined');
     */
     top.HEURIST.edit.Reminder.prototype.remove = function() {
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-        var fakeForm = { action: top.HEURIST.baseURL_V3+"records/reminders/saveReminder.php",
+        var fakeForm = { action: top.HEURIST.baseURL+"records/reminders/saveReminder.php",
             elements: [ { name: "rem_ID", value: this.reminderID },
                 { name: "recID", value: windowRef.parent.HEURIST.edit.record.bibID },
                 { name: "save-mode", value: "delete" } ] };
@@ -4070,7 +4169,7 @@ console.log('heurist not defined');
             urlOutput.href = defaultValue;
 
             var linkImg = urlOutput.appendChild(this.document.createElement("img"));
-            linkImg.src = top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif";
+            linkImg.src = top.HEURIST.baseURL+"common/images/external_link_16x16.gif";
             linkImg.className = "link-image";
             if(!displayValue) displayValue =  defaultValue;
             displayValue = (displayValue.length>60)? displayValue.substr(0, 60)+'...':displayValue;
@@ -4086,11 +4185,11 @@ console.log('heurist not defined');
                 urlSpan.style.color = "blue";
                 urlSpan.style.cursor = "pointer";
                 var editImg = urlSpan.appendChild(this.document.createElement("img"));
-                editImg.src = top.HEURIST.baseURL_V3+"common/images/edit-pencil.png";
+                editImg.src = top.HEURIST.baseURL+"common/images/edit-pencil.png";
                 urlSpan.appendChild(editImg);
                 urlSpan.appendChild(this.document.createTextNode("edit"));
                 var viewRec = urlSpan.appendChild(this.document.createElement("img"));
-                viewRec.src = top.HEURIST.baseURL_V3+"common/images/magglass_15x14.gif";
+                viewRec.src = top.HEURIST.baseURL+"common/images/magglass_15x14.gif";
                 urlSpan.appendChild(viewRec);
                 urlSpan.appendChild(this.document.createTextNode("view"));
 
@@ -4163,7 +4262,7 @@ console.log('heurist not defined');
 
         var valueVisible = "";
         var valueHidden = "";
-        var thumbUrl = top.HEURIST.baseURL_V3+"common/images/icon_file.jpg";
+        var thumbUrl = top.HEURIST.baseURL+"common/images/icon_file.jpg";
 
         if(bdValue){
             if(bdValue.file){
@@ -4250,7 +4349,7 @@ console.log('heurist not defined');
 
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL+"common/images/12x12.gif";
         removeImg.className = "delete-resource";
         removeImg.title = "Clear";
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -4285,7 +4384,7 @@ console.log('heurist not defined');
             recID = "&recid="+top.HEURIST.edit.record.bibID;
         }
 
-        var url = top.HEURIST.baseURL_V3+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
+        var url = top.HEURIST.baseURL+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
         /*if (element.input.constrainrectype){
         url += "&t="+element.input.constrainrectype;
         }*/

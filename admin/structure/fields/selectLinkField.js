@@ -77,22 +77,27 @@ $(document).ready(function() {
 
         top.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
                             'Field data type: Record pointer', 
-                            top.HAPI4.basePathV3+'context_help/field_data_types.html #resource',
+                            top.HAPI4.baseURL+'context_help/field_data_types.html #resource',
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
         top.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
                             'Field data type: Relationship marker', 
-                            top.HAPI4.basePathV3+'context_help/field_data_types.html #relmarker',
+                            top.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
 	    
         $('#btnSelect').click( editDetailType );
     
 
         //rectype new field to be added to
-        rty_ID = top.HEURIST4.util.getUrlParameter("rty_ID", document.location.search);
+        rty_ID = top.HEURIST4.util.getUrlParameter("source_ID", document.location.search);
         //rectype to be related (constraint for pointers and relmarker target rectype)
         target_ID = top.HEURIST4.util.getUrlParameter("target_ID", document.location.search);
 
+        var fidx = top.HEURIST.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
+        
         $('#source_rectype').text(top.HEURIST.rectypes.names[rty_ID]);
+        $('#source_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+rty_ID+'")');
+        $('#source_rectype_desc').text( top.HEURIST.rectypes.typedefs[rty_ID].commonFields[fidx] );
+        
         
         var rt_selector = $('#sel_target_rectype_id');
         top.HEURIST4.ui.createRectypeSelect(rt_selector[0],null,'Select target record type');
@@ -121,13 +126,24 @@ $(document).ready(function() {
                         top.HEURIST4.util.setDisabled($('#btnSelect'), false);
                         $('#btnSelect').css('color','black');
                     }
+                    
                     $(window.frameElement).parents('.ui-dialog').find('.ui-dialog-title').text(sDialogTitle);
-
+                    
+                    $('#target_rectype_desc').text( top.HEURIST.rectypes.typedefs[target_ID].commonFields[fidx] );
                 }
         );
         if(target_ID){
-            rt_selector.val(target_ID);  
-        } 
+            rt_selector.val(target_ID); 
+            
+            $('#target_rectype').text(top.HEURIST.rectypes.names[target_ID]);
+            $('#target_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+target_ID+'")');
+            $('#target_rectype_desc').text( top.HEURIST.rectypes.typedefs[target_ID].commonFields[fidx] );
+            $('#target_rectype_div').css('display', 'inline-block');
+            rt_selector.hide(); 
+        } else {
+            $('#target_rectype_div').hide();
+            rt_selector.show(); 
+        }
         rt_selector.change();
 
         if(!top.HEURIST4.rectypes.typedefs[rty_ID]){
@@ -231,7 +247,7 @@ $(document).ready(function() {
 
         }else{ //create new field type
 
-            var url = top.HAPI4.basePathV3 
+            var url = top.HAPI4.baseURL 
             + "admin/structure/fields/editDetailType.html?db="
             + top.HAPI4.database 
             + '&dty_Type='+dt_type
@@ -242,7 +258,7 @@ $(document).ready(function() {
                     "no-resize": false,
                     title: 'Edit field type',
                     height: 700,
-                    width: 700,
+                    width: 840,
                     callback: function(context) {
 
                         if(!top.HEURIST4.util.isnull(context)){
@@ -321,7 +337,7 @@ $(document).ready(function() {
             window.close(_structureWasUpdated);
         };
 
-        var baseurl = top.HAPI4.basePathV3 + "admin/structure/saveStructure.php";
+        var baseurl = top.HAPI4.baseURL + "admin/structure/saveStructure.php";
         var callback = updateResult;
         var params = "method=saveRTS&db="+top.HAPI4.database+"&data=" + encodeURIComponent(str);
 

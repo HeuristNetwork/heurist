@@ -19,6 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+require_once (dirname(__FILE__).'/compose_sql.php');
 
 /*
 
@@ -33,8 +34,9 @@ predicate:   keyword:value
 
 KEYWORDS
 
-url, u:           url
-notes, n:        description
+plain            query in old plain text format
+url, u:          url
+notes, n:        record heder notes (scratchpad)
 title:           title contains
 addedby:         added by specified user
 added:           creation date
@@ -100,6 +102,7 @@ $publicOnly = false;
 
 //keep params for debug only!
 $params_global;
+$top_query;
 
 /*
 
@@ -120,7 +123,7 @@ $params_global;
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
-    global $mysqli, $wg_ids, $publicOnly, $params_global;
+    global $mysqli, $wg_ids, $publicOnly, $params_global, $top_query;
     
     $params_global = $params;
 
@@ -161,8 +164,9 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $query_json = json_decode(@$params['q'], true);
     }
 
-
+    
     $query = new HQuery( "0", $query_json, $search_domain, $currUserID );
+    $top_query = $query;
     $query->makeSQL();
 
     //1. create tree of predicates
@@ -561,16 +565,18 @@ class HPredicate {
     var $lessthan = false;
     var $greaterthan = false;
 
-    var $allowed = array("title","t","type","ids","id","f","field","linked_to","linkedfrom","related_to","relatedfrom","links");
+    var $allowed = array('title','t','url','notes','type','ids','id',
+            'f','field','linked_to','linkedfrom','related_to','relatedfrom','links','plain');
     /*
-    url, u:           url
-    notes, n:        description
+    notes, n:        record heder notes (scratchpad)
     title:           title contains
+    url              record header url (rec_URL)
     addedby:         added by specified user
     added:           creation date
     date, modified:  edition date
     after, since:
     before:
+    plain            query in old plain text format
 
     workgroup,wg,owner:
 
@@ -609,10 +615,18 @@ class HPredicate {
         }
 
     }
+    
+    function getTopLevelQuery(){
+        if($this->parent->level==0){
+            return $this->parent;
+        }else{
+            return getTopLevelQuery($parent->parent);
+        }
+    }
 
     function makeSQL(){
 
-        global $mysqli;
+        global $mysqli, $top_query;
 
         /*if(false && $this->query){
 
@@ -622,6 +636,19 @@ class HPredicate {
         }*/
 
         switch (strtolower($this->pred_type)) {
+            case 'plain':            //query in old plain text format
+
+//error_log($this->value);
+            
+                $query = parse_query($top_query->search_domain, urldecode($this->value), null, null, $top_query->currUserID);
+
+                $where_clause = $query->where_clause;
+                $where_clause = str_replace('TOPBIBLIO','r0',$where_clause);
+                $where_clause = str_replace('TOPBKMK','b',$where_clause);
+                
+//error_log($where_clause);
+            
+                return array("where"=>$where_clause);
             case 'type':
             case 't':
 
@@ -634,7 +661,7 @@ class HPredicate {
                 if (is_numeric($this->value)) {
                     $res = "$eq ".intval($this->value);
                 }
-                else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+                else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
                     // comma-separated list of defRecTypes ids
                     $in = ($this->negate)? 'not in' : 'in';
                     $res = "$in (" . $this->value . ")";
@@ -723,12 +750,22 @@ class HPredicate {
         }else if($this->field_id=="modified"){
 
             $res = "(r".$this->qlevel.".rec_Modified ".$val.")";
+            
+        }else if($this->field_id=='url'){
+            
+            $res = "(r".$this->qlevel.".rec_URL ".$val.")";
 
+        }else if($this->field_id=='notes'){
+            
+            $res = "(r".$this->qlevel.".rec_ScratchPad ".$val.")";
+            
         }else{
             
             if($this->field_type == 'date' && trim($this->value)!='') { //false && $this->isDateTime()){
                 $field_name = 'getTemporalDateString('.$p.'dtl_Value) ';
                 //$field_name = 'str_to_date(getTemporalDateString('.$p.'dtl_Value), "%Y-%m-%d %H:%i:%s") ';
+            }else if($this->field_type == 'file'){
+                $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values
             }else{
                 $field_name = $p."dtl_Value ";
             }
@@ -744,11 +781,32 @@ class HPredicate {
 
     }
 
+    //
+    //
+    //
     function predicateAnyField(){
+        global $mysqli;
+        
+        $p = "rd".$this->qlevel.".";
+        $p = "";
 
+        $this->field_type = 'freetext';
+        $val = $this->getFieldValue();
+        if(!$val) return null;
 
+        $res = 'exists (select dtl_ID from recDetails '.$p
+        . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+        . ' left join Records link on rd.dtl_Value=link.rec_ID '
+        .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID '
+        .'  and if(dty_Type != "resource", '.$p.'dtl_Value'.$val
+        .' , link.rec_Title like "%'.$mysqli->real_escape_string($this->value).'%"))';
+
+        return array("where"=>$res);
     }
 
+    //
+    //
+    //
     function predicateRecIds(){
 
         $this->field_type = "link";
@@ -988,7 +1046,7 @@ class HPredicate {
         return ($timestamp0  &&  $timestamp1);
     }
 
-    function    makeDateClause() {
+    function makeDateClause() {
 
         if (strpos($this->value,"<>")) {
 
@@ -1065,13 +1123,13 @@ class HPredicate {
         }
         $this->value = $this->cleanQuotedValue($this->value);
 
-        if(trim($this->value)=='') return "!=''";
+        if(trim($this->value)=='') return "!=''";   //find any non empty value
 
-            $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
+        $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
         
         if($this->field_type=='enum' || $this->field_type=='relationtype'){
             
-            if (preg_match('/^\d+(?:,\d+)+$/', $this->value)){   //numeric comma separated
+            if (preg_match('/^\d+(?:,\d*)+$/', $this->value)){   //numeric comma separated
                 $res = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
             }else if(intval($this->value)>0){
@@ -1090,49 +1148,56 @@ class HPredicate {
             $res = (($this->negate)?' not':'').$res;
             
         }else
-        if (is_numeric($this->value)) {
+        if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type == 'link') && is_numeric($this->value)) {
             if($this->field_type == "link"){
                 $res = " $eq ".intval($this->value);  //no quotes
             }else{
-                $res = " $eq '".intval($this->value)."'"; //floatval
+                $res = " $eq '".($this->field_type=='float'?floatval($this->value):intval($this->value))."'";
             }
             $this->field_list = true;
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
-            // comma-separated list of defRecTypes ids
-            $in = ($this->negate)? 'not in' : 'in';
-            $res = " $in (" . $this->value . ")";
+        else {
+        
+            $cs_ids = getCommaSepIds($this->value);
+            if ($cs_ids) {  
+            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
+                                
+                // comma-separated list of defRecTypes ids
+                $in = ($this->negate)? 'not in' : 'in';
+                $res = " $in (" . $cs_ids . ")";
 
-            $this->field_list = true;
+                $this->field_list = true;
 
-        } else if($this->field_type =='date'){ //$this->isDateTime()){
-            //
-            $res = $this->makeDateClause();
+            } else if($this->field_type =='date'){ //$this->isDateTime()){
+                //
+                $res = $this->makeDateClause();
 
-        } else {
+            } else {
 
-            if (strpos($this->value,"<>")>0) {
-                $vals = explode("<>", $this->value);
+                if (strpos($this->value,"<>")>0) {
+                    $vals = explode("<>", $this->value);
 
-                $between = (($this->negate)?" not":"")." between ";
-                if(is_numeric($vals[0]) && is_numeric($vals[1])){
-                    $res = $between.$vals[0]." and ".$vals[1];
-                }else{
-                    $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
-                }
-
-            }else{
-
-                if($eq=='=' && !$this->exact){
-                    $eq = 'like';
-                    $k = strpos($this->value,"%");
-                    if($k===false || ($k>0 && $k+1<strlen($this->value))){
-                        $this->value = '%'.$this->value.'%';
+                    $between = (($this->negate)?" not":"")." between ";
+                    if(is_numeric($vals[0]) && is_numeric($vals[1])){
+                        $res = $between.$vals[0]." and ".$vals[1];
+                    }else{
+                        $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
                     }
-                }
 
-                $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
+                }else{
+
+                    if($eq=='=' && !$this->exact){
+                        $eq = 'like';
+                        $k = strpos($this->value,"%");
+                        if($k===false || ($k>0 && $k+1<strlen($this->value))){
+                            $this->value = '%'.$this->value.'%';
+                        }
+                    }
+
+                    $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
+                }
             }
+            
         }
 
         return $res;

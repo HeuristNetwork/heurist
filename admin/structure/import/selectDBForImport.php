@@ -25,11 +25,16 @@
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
+    require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
     if(isForAdminOnly("to import structural elements")){
         return;
     }
 
+    if(checkSmtp()){
+        $email_text = 'Opened Templates list from "'.HEURIST_DBNAME.'" at '.HEURIST_SERVER_URL;
+        $rv = sendEmail(HEURIST_MAIL_TO_INFO, "Open templates", $email_text, null);
+    }
 ?>
 <html>
     <head>
@@ -69,9 +74,9 @@
 
         var params = top.HEURIST.parseParams(location.search);
         if(params && params['popup']){
-                $('.banner').hide();
+                //$('.banner').hide();
         }
-        document.getElementById("statusMsg").innerHTML = "";
+        //document.getElementById("statusMsg").innerHTML = "";
         document.getElementById("filterDiv").style.display = "block";
 
 
@@ -145,14 +150,25 @@
                         var str = oRecord.getData("name");
                         var id = oRecord.getData("id");
                         if(id=='XXX'){
-                            elLiner.innerHTML = '<h2 style="padding-top:10px">'+str+'</h2>';
+                            var str2 = oRecord.getData('description');
+                            elLiner.innerHTML = '<h2 style="padding-top:3px">'+str+
+                                '</h2><div>&nbsp;</div><div style="position: absolute;margin-top: -12px;"><i>'+
+                                str2+'</i></div>';
                         }else if(Number(id)<21){
                             elLiner.innerHTML = '<b>'+str+'</b>';
                         }else{
                             elLiner.innerHTML = str;
                         }
                     }},
-                    {key:"description", label:"Description", sortable:false, resizeable:true},
+                    {key:"description", label:"Description", sortable:false, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
+                        var id = oRecord.getData("id");
+                        if(id!='XXX'){
+                            var str = oRecord.getData("description");
+                            elLiner.innerHTML = '<span title="'+str+'">'+str+'</span>';
+                        }else{
+                            elLiner.innerHTML = '';
+                        }
+                    }},
                     // Currently no useful data in popularuity value
                     //{key:"popularity", label:"Popularity", formatter:YAHOO.widget.DataTable.formatNumber,sortable:true, resizeable:true, hidden:true }
                     {key:"URL", label:"Server URL",sortable:false, resizeable:true}
@@ -163,13 +179,13 @@
 
                 // Add databases to an array that YUI DataTable can use. Do not show URL for safety
                 dataArray = [
-                    ['XXX','Curated templates','','','']
+                    ['XXX','Curated templates','Databases curated by the Heurist team as a source of useful entity types for new databases','','']
                 ];
                 var notAdded = true;
                 for(dbID in registeredDBs) {
                     if(notAdded && Number(dbID)>21){
                         notAdded = false;
-                        dataArray.push(['XXX','User databases','','','']);
+                        dataArray.push(['XXX','User databases','Databases registered by Heurist users - use with care, look for entity types with good internal documentation','','']);
                     }else{
                         db = registeredDBs[dbID];
                         dataArray.push([db[0],db[2],db[3],
@@ -255,7 +271,8 @@
                     setTimeout(updateFilter,600);
                 });
 
-                $('#divLoading').hide()
+                //$('#statusMsg').hide();
+                $('#divLoading').hide();
                 
         }//  initDbTable
         // Enter information about the selected database to an invisible form, and submit to the crosswalk page, to start crosswalking
@@ -267,6 +284,8 @@
             document.getElementById("dbTitle").value = db[3];
             document.getElementById("dbPrefix").value = db[5]?db[5]:"";
             document.forms["crosswalkInfo"].submit();
+            document.getElementById('divLoading').style.display = 'inline-block';
+            document.getElementById('divLoadingMsg').innerHTML = 'Loading record types'
             document.getElementById('page-inner').style.display = 'none';
         }
 
@@ -280,12 +299,16 @@
 
         <script src="../../../common/php/loadCommonInfo.php"></script>
 
-        <div class="banner"><h2>Import structural definitions into current database</h2></div>
+        <div class="banner">
+            <h2 style="display:inline-block">Import structural definitions into current database</h2>
+        
+            <div id="divLoading" style="display:inline-block">&nbsp;<img src="../../../common/images/mini-loading.gif" width="16" height="16" />&nbsp;&nbsp;<span id="divLoadingMsg">Loading databases ...   (Please be patient - this may take several seconds on slow connections)</span></div>
+        
+        </div>
         <div id="page-inner" style="overflow:auto;top:20;">
 
-            <div id="statusMsg"><img src="../../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
 
-           <h4>Use the filter to locate a specific term in the name or title. Click the database icon on the left to view, and import if desired, available record types in that database.</h4> 
+           <h4>Use the filter to locate a specific term in the name or description. Click the database icon on the left to view available record types in that database and select them for addition to this database (including all related record types, fields and terms).</h4> 
             
 <!--            
             
@@ -306,8 +329,6 @@
             <div class="markup" id="filterDiv" style="display:none">
                 <label for="filter">Filter:</label> <input type="text" id="filter" value="">
                 <div id="tbl"></div>
-
-                <div id="divLoading">Loading databases ...   (Please be patient - this may take several seconds on slow connections)</div>
             </div>
             <div id="topPagination"></div>
             <div id="selectDB"></div>

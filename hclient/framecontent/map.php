@@ -17,14 +17,20 @@
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
-*/
+*/  
 
+//&callback=initMap" async defer  for gmap
+//<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+//
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
 <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk&libraries=drawing"></script>
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 <!-- Timemap -->
 <!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
+  
 <script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
 <!-- script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
@@ -58,7 +64,6 @@ require_once(dirname(__FILE__)."/initPage.php");
 <link href="<?php echo PDIR;?>ext/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <!-- Mapping -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/map.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/map_overlay.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/map_bubble.js"></script>
@@ -68,7 +73,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     .ui-map-document { background-image: url('<?php echo PDIR;?>hclient/assets/mapdocument.png') !important;}
     .ui-map-layer { background-image: url('<?php echo PDIR;?>hclient/assets/maplayer.png') !important;}
 
-    /*
+    /*   
     .vis-item-overflow{
     position:absolute;
     }
@@ -129,7 +134,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         };
 
         // Setting layout
-        layout_opts.center__minHeight = 100;
+        layout_opts.center__minHeight = 30;
         layout_opts.center__minWidth = 200;
         layout_opts.north__size = 30;
         layout_opts.north__spacing_open = 0;
@@ -156,7 +161,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         // Mapping data
         var mapdata = [];
-        mapping = new hMapping("map", "timeline", window.hWin.HAPI4.basePathV4, mylayout);
+        mapping = new hMapping("map", "timeline", window.hWin.HAPI4.baseURL, mylayout);
 
         var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
         //t:26 f:85:3313  f:1:building
@@ -171,8 +176,21 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                         // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                         var recset = new hRecordSet(response.data);
-                        var mapdataset = recset.toTimemap();
-                        mapping.load(mapdataset);
+                        
+                        //var mapdataset = recset.toTimemap();
+                        //mapping.load([mapdataset]);
+                        
+                        mapping.load( null, //mapdataset,
+                            null,  //array of record ids                                               
+                            null,    //map document on load
+                            function(selected){  //callback if something selected on map
+                            },
+                            function(){ //callback function on native map init completion
+                                var params = {id:'main', recordset:recset, title:'Current query' };
+                                mapping.map_control.addRecordsetLayer(params);
+                            }
+                        );                        
+                                    
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -203,6 +221,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                     $("#map-doc-select-lbl").show();
                 }
             }
+            
+            mapping.onWinResize();
         });
 
         $( "#timeline" ).mousedown(function(){
@@ -220,7 +240,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         .click(mapping.printMap);
 
         $("#btnEmbed").button({text:false, icons: {
-            primary: "ui-icon-gear"
+            primary: "ui-icon-globe-b"
         }})
         .click(showEmbedDialog);
 
@@ -232,7 +252,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 $helper.dialog( "open" );
             }
         });
-        $( "#helper" ).load(window.hWin.HAPI4.basePathV4+'context_help/mapping_overview.html #content');
+        $( "#helper" ).load(window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content');
         //$( "#helper" ).find('p').css('padding','10px');
         $( "#helper" ).dialog({
             autoOpen: false, //(window.hWin.HAPI4.get_prefs('help_on')=='1'),
@@ -355,7 +375,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         setTimeout(function(){
             var legend = document.getElementById('map_legend');
-            var ch = $("#map_legend .content").height()+70;
+            var ch = $("#map_legend .content").height()+65;
 
             var nt = parseInt($(legend).css('bottom'), 10);
             var mh = $('#map').height();
@@ -363,11 +383,11 @@ require_once(dirname(__FILE__)."/initPage.php");
             var is_collapsed = ($(legend).find('#collapse').text() == "+");
             
             if(is_collapsed===true){
-                $(legend).css('top', mh-nt-60);   
+                $(legend).css('top', mh-nt-50);   
             }else{
             
             if(mh-nt-ch < 70){
-                $(legend).css('top', 60);
+                $(legend).css('top', 50);
             }else{
                 $(legend).css('top', mh-nt-ch);        
             }
@@ -386,7 +406,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-        var url = window.hWin.HAPI4.basePathV4+'hclient/framecontent/map.php' + query;
+        var url = window.hWin.HAPI4.baseURL+'hclient/framecontent/map.php' + query;
 
         //document.getElementById("linkTimeline").href = url;
 
@@ -414,7 +434,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
         }else{
             query = query + '&a=1&depth=1&db='+window.hWin.HAPI4.database;
-            var url_kml = window.hWin.HAPI4.basePathV3+"export/xml/kml.php" + query;
+            var url_kml = window.hWin.HAPI4.baseURL+"export/xml/kml.php" + query;
 
             var win = window.open(url_kml, "_new");
         }
@@ -431,14 +451,14 @@ require_once(dirname(__FILE__)."/initPage.php");
     function mapEdit(){
         var recID = $("#map-doc-select").val();
         if(recID>0){
-            window.open(window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
+            window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
         }
     }
     function addNewRecord(rt){
 
 
         if(parseInt(rt)>0){
-            window.open(window.hWin.HAPI4.basePathV3 + 'records/add/addRecord.php?addref=1&db='+window.hWin.HAPI4.database+'&rec_rectype='+rt);
+            window.open(window.hWin.HAPI4.baseURL + 'records/add/addRecord.php?addref=1&db='+window.hWin.HAPI4.database+'&rec_rectype='+rt);
         }else{
             window.hWin.HEURIST4.msg.showMsgDlg(
                 "The required record type "+rt+" has not been defined.<br><br>"+
@@ -484,7 +504,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         <!-- Map -->
         <div class="ui-layout-center">
             <div id="map" style="width:100%; height:100%">Mapping</div>
-            <div id="map_empty_message" style="width:100%; height:100%;display: none;">There are no spatial objects to plot on map</div>
+            <div id="map_empty_message" style="width:100%; height:100%;margin:7px;display: none;">There are no spatial objects to plot on map</div>
         </div>
 
         <!-- Toolbar -->
@@ -526,14 +546,16 @@ require_once(dirname(__FILE__)."/initPage.php");
 
             <!-- Legend overlay -->
             <div id="map_legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; overflow-y:auto; display:none;">
-                <div>
+                <div id="map_extents"  style="font-size: 0.9em;display:inline-block;visibility:hidden;padding-bottom:1em;">Zoom to:&nbsp;
+                        <select id="selMapBookmarks" style="font-size:1.0em;"></select>
+                </div>
+                <div style="float:right;">
                     <span style="font-size: 1.25em">&nbsp;</span>
                     <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
                 </div>
-                <div id="map_extents"  style="font-size: 0.9em;display:none; padding-bottom:1em;">Zoom to:&nbsp;
-                        <select id="selMapBookmarks" style="font-size:1.0em;"></select>
-                </div>
                 <div class="content"></div>
+            </div>
+            <div id="map_limit_warning" style="border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold; color:red; padding:8px; display:none;">
             </div>
         </div>
 

@@ -56,13 +56,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <!-- Call from parent iframe -->
         <script>
             /** Shows data visually */
-            var limit = 2000; // TO DO : remove. this does not appear to be used, there is a limit variable in visualize.js which IS used
-
             function showSelection( selectedRecordsIds ){
                  visualizeSelection( selectedRecordsIds );
             }
 
-            function showData(data, selectedRecordsIds, onSelectEvent) {
+            function showData(data, selectedRecordsIds, onSelectEvent, onRefreshData) {
                 // Processing...
                 if(data && data.nodes && data.links)
                 console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
@@ -82,6 +80,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     }
                     return length;
                 }
+                
+                $(window).resize(onVisualizeResize);
+                onVisualizeResize();
 
                 $("#visualize").visualize({
                     data: data,
@@ -90,6 +91,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     selectedNodeIds: selectedRecordsIds,   //assign current selection
                     triggerSelection: onSelectEvent,
+                    onRefreshData: onRefreshData,
                     /*function(selection){
                         //parentDocument    top.window.document
                         $(parentDocument).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );
@@ -103,6 +105,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     showFormula: false
                 });
             }
+            
+            function onVisualizeResize(){
+                    var width = $(window).width();
+                    var supw = (width<744)?3.8:0; //1120
+                    $('#divSvg').css('top', 5+supw+'em');
+            }
+            
 
         </script>
     </body>

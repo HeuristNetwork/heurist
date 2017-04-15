@@ -447,7 +447,30 @@ class Query {
             }
         }
     }
+    
+    function makeJSON() {
 
+        $this->where_json = array(); //reset
+        
+        $where_clauses = array();
+
+        for ($i=0; $i < count($this->top_limbs); ++$i) {
+
+            $or_clauses = array();
+            $or_limbs = $this->top_limbs[$i];
+            for ($j=0; $j < count($or_limbs); ++$j) {
+                $new_json = $or_limbs[$j]->makeJSON();
+                array_push($or_clauses, $new_json);
+            }
+            
+            if(count($or_clauses)>1){
+                array_push($this->where_json, array('any'=>$or_clauses));
+            }else if(count($or_clauses)>0){
+                array_push($this->where_json, $or_clauses);    
+            }
+        }
+    }   
+    
     function makeSQL() {
 
         //WHERE
@@ -537,6 +560,18 @@ class OrLimb {
         $this->and_limbs[] = new AndLimb($this, $text);
     }
 
+    function makeJSON() {
+        $sql = '';
+
+        $and_clauses = array();
+        for ($i=0; $i < count($this->and_limbs); ++$i) {
+            $new_sql = $this->and_limbs[$i]->pred->makeJSON();
+            if (strlen($new_sql) > 0) {
+                array_push($and_clauses, $new_sql);
+            }
+        }
+        return $and_clauses;
+    }
 
     function makeSQL() {
         $sql = '';
@@ -665,7 +700,8 @@ class AndLimb {
 
             case 'any':
             case 'all':
-                return new AnyPredicate($this, $pred_val);
+                $value = $this->cleanQuotedValue($pred_val);
+                return new AnyPredicate($this, $value);
 
             case 'id':
             case 'ids':
@@ -681,9 +717,11 @@ class AndLimb {
                         else if (($colon_pos = strpos($raw_pred_val, '>'))) $this->greaterthan = true;
                 }
                 if ($colon_pos === FALSE){
-                    return new AnyPredicate($this, $raw_pred_val);
+                    $value = $this->cleanQuotedValue($raw_pred_val);
+                    return new AnyPredicate($this, $value);
                 } else if ($colon_pos == 0){
-                    return new AnyPredicate($this, substr($raw_pred_val, 1));
+                    $value = $this->cleanQuotedValue($raw_pred_val);
+                    return new AnyPredicate($this, substr($value, 1));
                 }else{
                     //field id is defined
 
@@ -920,6 +958,10 @@ class Predicate {
         $this->query = NULL;
     }
 
+    function makeJSON() {
+        return array();   
+    }
+    
     //$table_name=null
     function makeSQL() { return '1'; }
     
@@ -1013,6 +1055,22 @@ class Predicate {
 
 
 class TitlePredicate extends Predicate {
+    
+    function makeJSON($isTopRec=true) {
+        
+            $not = ($this->parent->negate)? '-' : '';
+            
+            $compare = '';
+            if ($this->parent->exact)
+                $compare = '=';
+            else if ($this->parent->lessthan)
+                $compare = '<';
+            else if ($this->parent->greaterthan)
+                $compare = '>';
+            
+            return array('f:title'=> $not.$compare.$this->value);
+    }
+
     function makeSQL($isTopRec=true) {
         global $mysqli;
 
@@ -1031,9 +1089,9 @@ class TitlePredicate extends Predicate {
             return $not . $topbiblio.'rec_Title = "'.$evalue.'"';
         else if ($this->parent->lessthan)
             return $not . $topbiblio.'rec_Title < "'.$evalue.'"';
-            else if ($this->parent->greaterthan)
+        else if ($this->parent->greaterthan)
                 return $not . $topbiblio.'rec_Title > "'.$evalue.'"';
-                else
+        else
                     if(strpos($this->value,"%")===false){
                         return $topbiblio.'rec_Title ' . $not . 'like "%'.$evalue.'%"';
                     }else{
@@ -1044,6 +1102,13 @@ class TitlePredicate extends Predicate {
 }
 
 class TypePredicate extends Predicate {
+    
+    
+    function makeJSON($isTopRec=true) {
+            $not = ($this->parent->negate)? '-' : '';
+            return array('t'=> $not.$this->value);
+    }
+    
     function makeSQL($isTopRec=true) {
         global $mysqli;
 
@@ -1051,7 +1116,7 @@ class TypePredicate extends Predicate {
         if (is_numeric($this->value)) {
             $res = "rec_RecTypeID $eq ".intval($this->value);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             // comma-separated list of defRecTypes ids
             $in = ($this->parent->negate)? 'not in' : 'in';
             $res = "rec_RecTypeID $in (" . $this->value . ")";
@@ -1069,6 +1134,12 @@ class TypePredicate extends Predicate {
 
 
 class URLPredicate extends Predicate {
+    
+    function makeJSON() {
+            $not = ($this->parent->negate)? '-' : '';
+            return array('f:url'=> $not.$this->value);
+    }
+    
     function makeSQL() {
         global $mysqli;
 
@@ -1079,8 +1150,14 @@ class URLPredicate extends Predicate {
     }
 }
 
-
+                                
 class NotesPredicate extends Predicate {
+
+    function makeJSON() {
+            $not = ($this->parent->negate)? '-' : '';
+            return array('f:notes'=> $not.$this->value);
+    }
+
     function makeSQL() {
         global $mysqli;
 
@@ -1096,6 +1173,12 @@ class NotesPredicate extends Predicate {
 
 
 class UserPredicate extends Predicate {
+    
+    //@todo - user/groups search is not implement for json
+    function makeJSON() {
+            return array();
+    }
+    
     function makeSQL() {
         global $mysqli;
 
@@ -1104,7 +1187,7 @@ class UserPredicate extends Predicate {
             return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
             . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . ')';
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
             . ' and bkmk.bkm_UGrpID in (' . $this->value . '))';
         }
@@ -1124,6 +1207,12 @@ class UserPredicate extends Predicate {
 
 
 class AddedByPredicate extends Predicate {
+    
+    //@todo - user/groups search is not implement for json
+    function makeJSON() {
+        return array();
+    }
+    
     function makeSQL() {
         global $mysqli;
 
@@ -1131,7 +1220,7 @@ class AddedByPredicate extends Predicate {
         if (is_numeric($this->value)) {
             return "TOPBIBLIO.rec_AddedByUGrpID $eq " . intval($this->value);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             $not = ($this->parent->negate)? "not" : "";
             return "TOPBIBLIO.rec_AddedByUGrpID $not in (" . $this->value . ")";
         }
@@ -1144,18 +1233,34 @@ class AddedByPredicate extends Predicate {
 }
 
 class AnyPredicate extends Predicate {
+    
+    function makeJSON() {
+            $compare = '';
+            if ($this->parent->exact)
+                $compare = '=';
+            else if ($this->parent->lessthan)
+                $compare = '<';
+            else if ($this->parent->greaterthan)
+                $compare = '>';
+            
+            return array('f'=> $not.$compare.$this->value);
+    }
+    
     function makeSQL() {
         global $mysqli;
 
+        
+        $val = $mysqli->real_escape_string($this->value);
+        
         $not = ($this->parent->negate)? 'not ' : '';
         return $not . ' (exists (select rd.dtl_ID from recDetails rd '
         . 'left join defDetailTypes on dtl_DetailTypeID=dty_ID '
         . 'left join Records link on rd.dtl_Value=link.rec_ID '
         . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
         . '  and if(dty_Type != "resource", '
-        .'rd.dtl_Value like "%'.$mysqli->real_escape_string($this->value).'%", '
-        .'link.rec_Title like "%'.$mysqli->real_escape_string($this->value).'%"))'
-        .' or TOPBIBLIO.rec_Title like "%'.$mysqli->real_escape_string($this->value).'%") ';
+        .'rd.dtl_Value like "%'.$val.'%", '
+        .'link.rec_Title like "%'.$val.'%"))'
+        .' or TOPBIBLIO.rec_Title like "%'.$val.'%") ';
     }
 }
 
@@ -1204,6 +1309,22 @@ class FieldPredicate extends Predicate {
         */
     }
 
+    function makeJSON() {
+            $compare = '';
+            if ($this->parent->exact)
+                $compare = '=';
+            else if ($this->parent->lessthan)
+                $compare = '<';
+            else if ($this->parent->greaterthan)
+                $compare = '>';
+            
+            $res = array();
+            $res['f:'.$this->field_type] = $not.$compare.$this->value;
+            return $res;
+            //@todo implement nested values
+    }
+    
+    
     function makeSQL() {
         global $mysqli;
         
@@ -1375,8 +1496,11 @@ class FieldPredicate extends Predicate {
         }
         
         $match_pred = $this->get_field_value();
+        
+        $cs_ids = getCommaSepIds($this->value);
 
-        if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        if ($cs_ids) {  
+        //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { it does not work for more than 500 entries
             $isnumericvalue = false;
             $isin = true;
         }else{
@@ -1428,10 +1552,16 @@ class FieldPredicate extends Predicate {
             
         }else if($this->field_type_value){ 
 
+            if($this->field_type_value=='file'){
+                $fieldname = 'rd.dtl_UploadedFileID';
+            }else{
+                $fieldname = 'rd.dtl_Value';
+            }
+    
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
             . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
-            . ' and rd.dtl_Value ' . $match_pred. ')';
+            . ' and ' . $fieldname . ' ' . $match_pred. ')';
             
         }else{
         
@@ -1466,7 +1596,7 @@ class FieldPredicate extends Predicate {
 
     function get_field_type_clause(){
         global $mysqli;
-        
+
         if(trim($this->value)==''){
             
             $rd_type_clause = "!=''";
@@ -1475,7 +1605,7 @@ class FieldPredicate extends Predicate {
             /* handle the easy case: user has specified a (single) specific numeric type */
             $rd_type_clause = '= ' . intval($this->field_type);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->field_type)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->field_type)) {
             /* user has specified a list of numeric types ... match any of them */
             $rd_type_clause = 'in (' . $this->field_type . ')';
         }
@@ -1491,13 +1621,13 @@ class FieldPredicate extends Predicate {
     function get_field_value(){
         global $mysqli;
 
-        if(trim($this->value)==''){
+        if(trim($this->value)=='' || $this->value==false){   //if value is not defined find any non empty value
             
             $match_pred = " !='' ";
         
         }else if($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
             
-            if(preg_match('/^\d+(?:,\d+)+$/', $this->value)){
+            if(preg_match('/^\d+(?:,\d*)+$/', $this->value)){
                 $match_pred = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
             }else if(intval($this->value)>0){
@@ -1523,32 +1653,36 @@ class FieldPredicate extends Predicate {
             $vals = explode("<>", $this->value);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
-        }else 
-        if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
-            // comma-separated list of ids
-            $match_pred = ' in ('.$this->value.')';
-            
-        }else{
-            
-            $isnumericvalue = is_numeric($this->value);
+        }else {
+            $cs_ids = getCommaSepIds($this->value);
+            if ($cs_ids) {  
+            //  if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {  not work for >500 entries
+                // comma-separated list of ids
+                $match_pred = ' in ('.$cs_ids.')';
+                
+            }else{
+                
+                $isnumericvalue = is_numeric($this->value);
 
-            $match_value = '"' . ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) ) . '"';
+                $match_value = '"' . ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) ) . '"';
 
-            if ($this->parent->exact  ||  $this->value === "") {    // SC100
-                $match_pred = ' = '.$match_value; //for unknown reason comparison with numeric takes ages
-            } else if ($this->parent->lessthan) {
-                $match_pred = " < $match_value";
-            } else if ($this->parent->greaterthan) {
-                $match_pred = " > $match_value";
-            } else {
-                if($isnumericvalue){
-                    $match_pred = " = $match_value";
-                }else if(strpos($this->value,"%")===false){
-                    $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";
-                }else{
-                    $match_pred = " like '".$mysqli->real_escape_string($this->value)."'";
+                if ($this->parent->exact  ||  $this->value === "") {    // SC100
+                    $match_pred = ' = '.$match_value; //for unknown reason comparison with numeric takes ages
+                } else if ($this->parent->lessthan) {
+                    $match_pred = " < $match_value";
+                } else if ($this->parent->greaterthan) {
+                    $match_pred = " > $match_value";
+                } else {
+                    if(($this->field_type_value=='float' || $this->field_type_value=='inbteger') && $isnumericvalue){
+                        $match_pred = " = $match_value";
+                    }else if(strpos($this->value,"%")===false){
+                        $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";
+                    }else{
+                        $match_pred = " like '".$mysqli->real_escape_string($this->value)."'";
+                    }
                 }
             }
+            
         }
 
         return $match_pred;
@@ -1584,6 +1718,12 @@ class TagPredicate extends Predicate {
         if (! $any_wg_values) $this->wg_value = array();
         $this->query = NULL;
     }
+
+    //@todo - not supported in json    
+    function makeJSON() {
+            return array();
+    }
+    
 
     function makeSQL() {
         global $mysqli;
@@ -1682,38 +1822,60 @@ class TagPredicate extends Predicate {
 
 
 class BibIDPredicate extends Predicate {
+    
+    function makeJSON() {
+        
+        $not = ($this->parent->negate)? '-' : '';
+        
+        $compare = '';
+        if ($this->parent->exact)
+            $compare = '=';
+        else if ($this->parent->lessthan)
+            $compare = '<';
+        else if ($this->parent->greaterthan)
+            $compare = '>';
+        
+        return array('ids'=> $not.$compare.$this->value);
+    }
+    
     function makeSQL() {
         $res = "TOPBIBLIO.rec_ID ".$this->get_field_value();
         return $res;
     }
     
     function get_field_value(){
-
+        
         if (strpos($this->value,"<>")>0) { 
 
             $vals = explode("<>", $this->value);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
-        }else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
-            // comma-separated list of ids
-            $not = ($this->parent->negate)? ' not' : '';
-            $match_pred = $not.' in ('.join(',', array_map('intval', explode(',', $this->value))).')';
         }else{
             
-            $value = intval($this->value);
+            $cs_ids = getCommaSepIds($this->value);
+            if ($cs_ids) {  
+            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
+                // comma-separated list of ids
+                $not = ($this->parent->negate)? ' not' : '';
+                $match_pred = $not.' in ('.$cs_ids.')';
+            }else{
+                
+                $value = intval($this->value);
 
-            if ($this->parent->lessthan) {
-                $match_pred = " < $value";
-            } else if ($this->parent->greaterthan) {
-                $match_pred = " > $value";
-            } else {
-                if($this->parent->negate){
-                    $match_pred = ' <> '.$value;
-                }else{
-                    $match_pred = '='.$value;
+                if ($this->parent->lessthan) {
+                    $match_pred = " < $value";
+                } else if ($this->parent->greaterthan) {
+                    $match_pred = " > $value";
+                } else {
+                    if($this->parent->negate){
+                        $match_pred = ' <> '.$value;
+                    }else{
+                        $match_pred = '='.$value;
+                    }
                 }
             }
-        }
+            
+        } 
 
         return $match_pred;
     }
@@ -2296,6 +2458,12 @@ class RelationsForPredicate extends Predicate {
 
 
 class AfterPredicate extends Predicate {
+    
+    function makeJSON(){
+            $not = ($this->parent->negate)? '-' : '';
+            return array('f:modified'=>(($this->parent->negate)?'<':'>').$this->value);
+    }
+    
     function makeSQL() {
         
          try{   
@@ -2315,6 +2483,12 @@ class AfterPredicate extends Predicate {
 
 
 class BeforePredicate extends Predicate {
+
+    function makeJSON(){
+            $not = ($this->parent->negate)? '-' : '';
+            return array('f:modified'=>(($this->parent->negate)?'>':'<').$this->value);
+    }
+
     function makeSQL() {
          try{   
             $timestamp = new DateTime($this->value);
@@ -2338,6 +2512,12 @@ class DatePredicate extends Predicate {
     function DatePredicate(&$parent, $col, $value) {
         $this->col = $col;
         parent::Predicate($parent, $value);
+    }
+    
+    
+    function makeJSON(){
+            $not = ($this->parent->negate)? '-' : '';
+            return array('f:modified'=>$not.$this->value);
     }
 
     function makeSQL() {
@@ -2377,7 +2557,7 @@ class WorkgroupPredicate extends Predicate {
         if (is_numeric($this->value)) {
             return "TOPBIBLIO.rec_OwnerUGrpID $eq ".intval($this->value);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
             $in = ($this->parent->negate)? 'not in' : 'in';
             return "TOPBIBLIO.rec_OwnerUGrpID $in (" . $this->value . ")";
         }
@@ -2389,21 +2569,23 @@ class WorkgroupPredicate extends Predicate {
 
 
 class LatitudePredicate extends Predicate {
+    
     function makeSQL() {
         $op = '';
+
         if ($this->parent->lessthan) {
             $op = ($this->parent->negate)? '>=' : '<';
         } else if ($this->parent->greaterthan) {
             $op = ($this->parent->negate)? '<=' : '>';
         }
-
-        if ($op[0] == '<') {
+                
+        if ($op!='' && $op[0] == '<') {
             // see if the northernmost point of the bounding box lies south of the given latitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and y( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
         }
-        else if ($op[0] == '>') {
+        else if ($op!='' && $op[0] == '>') {
             // see if the SOUTHERNmost point of the bounding box lies north of the given latitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
@@ -2418,11 +2600,21 @@ class LatitudePredicate extends Predicate {
             and y(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
         }
         else {
-            // see if this latitude passes through the bounding box
+            //Envelope - Bounding rect
+            //ExteriorRing - exterior ring for polygone
+            
+            if (strpos($this->value,"<>")>0) {
+                $vals = explode("<>", $this->value);
+                $match_pred = 'y( Centroid( Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).' and '.floatval($vals[1]).' ';
+            }else{
+                // see if this latitude passes through the bounding box
+                $match_pred = floatval($this->value)." between y( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) )
+                        and y( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) )";
+            }
+            
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ".floatval($this->value)." between y( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) )
-            and y( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) ) limit 1)";
+            and ".$match_pred." limit 1)";
         }
     }
 }
@@ -2437,13 +2629,13 @@ class LongitudePredicate extends Predicate {
             $op = ($this->parent->negate)? '<=' : '>';
         }
 
-        if ($op[0] == '<') {
+        if ($op!='' && $op[0] == '<') {
             // see if the westernmost point of the bounding box lies east of the given longitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and x( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
         }
-        else if ($op[0] == '>') {
+        else if ($op!='' && $op[0] == '>') {
             // see if the EASTERNmost point of the bounding box lies west of the given longitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
@@ -2458,11 +2650,19 @@ class LongitudePredicate extends Predicate {
             and x(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
         }
         else {
-            // see if this longitude passes through the bounding box
+            
+            if (strpos($this->value,"<>")>0) {
+                $vals = explode("<>", $this->value);
+                $match_pred = 'x( Centroid( Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).' and '.floatval($vals[1]).' ';
+            }else{
+                // see if this longitude passes through the bounding box
+                $match_pred = floatval($this->value)." between x( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) )
+                        and x( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 2 ) )";
+            }
+            
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ".floatval($this->value)." between x( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) )
-            and x( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 2 ) ) limit 1)";
+            and ".$match_pred." limit 1)";
         }
     }
 }
@@ -2526,4 +2726,23 @@ $_REQUEST['q'] = $q;
 }
 */
 
+function getCommaSepIds($value)
+{
+    if(substr($value, -1) === ','){
+        //remove last comma
+        $value = substr($value,0,-1);
+    }
+
+    $a = explode(',', $value);
+    $n = array_map('intval', $a);
+    
+    if(!array_diff($a, $n)){
+        //join(',', array_map('intval', explode(',', $this->value)))
+        return $value;
+    }else{
+        return null;
+    }
+    
+    
+}
 ?>

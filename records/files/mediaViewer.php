@@ -161,16 +161,11 @@ if (@$_REQUEST['ulf_ID']){
 		params['db'] = '';
 	}
 
-	//var HEURIST = {tmap:null};
-
-	var installDir = window.location.protocol+"//"+window.location.host+
-		window.location.pathname.replace(/(((admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
 	var HRST = {
 		VERSION: "<?=HEURIST_VERSION?>",
 		parameters: params,
-		baseURL: '',
-		basePath: installDir,
-		iconBaseURL: installDir + "/HEURIST_FILESTORE/" + params['db'] + "/rectype-icons/",
+		baseURL: "<?=HEURIST_BASE_URL?>",
+		iconBaseURL: "<?=HEURIST_ICON_URL?>",
 		external_publish: true,
 		database: {
 			name: params['db']
@@ -187,7 +182,7 @@ if (@$_REQUEST['ulf_ID']){
 	sendRequest: function(url,callback,postData) {
 		// if we don't have a fully formed or root URL then prepend the base path
 		if ( !(url.match(/^http:/) || url.match(/^https:/))  &&  ! url.match(/^\//))
-			url = HRST.baseURL_V3 + url;
+			url = HRST.baseURL + url;
 		var file = url;
 		var req = HRST.util.createXMLHTTPObject();
 		if (!req) return;

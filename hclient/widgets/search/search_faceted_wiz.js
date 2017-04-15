@@ -301,11 +301,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 var that = this;
                 var $dlg = this.step0.find("#facets_options");
                 if($dlg.html()==''){
-                    $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
+                    $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
 
-                        $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
-
+                        $dlg.find("#svs_btnset")
+                                .css({'width':'20px'})
+                                .position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
+                                
                         $dlg.find("#svs_Rules_edit")
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
                         .attr('title', window.hWin.HR('Edit RuleSet'))
@@ -323,6 +325,24 @@ $.widget( "heurist.search_faceted_wiz", {
                             $dlg.find('#svs_Rules').val('');
                         });
 
+                                
+                        $dlg.find("#svs_btnset2")
+                                .css({'width':'20px'})
+                                .position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Query') });
+
+                        $dlg.find("#svs_getCurrentFilter")
+                        .button({icons: {primary: "ui-icon-search"}, text:false})
+                        .attr('title', window.hWin.HR('Get current query'))
+                        .css({'height':'16px', 'width':'16px'})
+                        .click(function( event ) {
+                            
+                                var filter = window.hWin.HEURIST4.current_query_request.q;
+                                var rules = window.hWin.HEURIST4.current_query_request.rules;
+                                
+                                var res = window.hWin.HEURIST4.util.getJSON_HeuristQueryAndRules(filter, rules);
+                                
+                                $dlg.find('#svs_Query').val(res);
+                        });
 
                         var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
                         $dlg.find('.heurist-helper1').css('display',ishelp_on?'block':'none');
@@ -626,7 +646,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var that = this;
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
         if(!Hul.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
@@ -968,10 +988,17 @@ $.widget( "heurist.search_faceted_wiz", {
                 +'</div>';
 
                 var sTypeLabel = '<div class="ent_search_cb" style="font-size:smaller;font-style:italic; margin-bottom:5px;"><div class="header_narrow"><label></label></div>';
-                if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
+                if(facets[k].type=='freetext'){
                     sContent = sContent +
                     sTypeLabel
                     +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>first char</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
+                    +'</div>';
+                }else if(facets[k].type=='float' || facets[k].type=='integer'){
+                    sContent = sContent +
+                    sTypeLabel
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>slider</label>'
                     +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
                     +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
                     +'</div>';
@@ -1146,10 +1173,10 @@ $.widget( "heurist.search_faceted_wiz", {
 function showSearchFacetedWizard( params ){
 
     if(!$.isFunction($('body').rectype_manager)){ //@todo - replace to new entity/rectypes as soon as it will be implemented
-        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
     }else if(!$.isFunction($('body').fancytree)){
 
-        $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
 
     }else{
 

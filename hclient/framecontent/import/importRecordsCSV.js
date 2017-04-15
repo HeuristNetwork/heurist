@@ -78,7 +78,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                 
                 uploadWidget.fileupload({
-        url: window.hWin.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
+        url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php', 
         formData: [ {name:'db', value: window.hWin.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
                     {name:'max_file_size', value: _max_upload_size},
                     {name:'entity', value:'temp'}],  //just place file into scratch folder
@@ -290,6 +290,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     .button({label: window.hWin.HR('Show'), icons:{primary: "ui-icon-alert"}})
                     .click(function(e) {
                             _showRecords('error');
+                        });
+        $('#btnShowWarnings')
+                    .css({'font-weight':'bold'})
+                    .button({label: window.hWin.HR('Show'), icons:{primary: "ui-icon-alert"}})
+                    .click(function(e) {
+                            _showRecords('warning');
                         });
 
         $('#btnPrepareStart')
@@ -1320,7 +1326,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                        
                        var field_title = window.hWin.HEURIST4.util.trim_IanGt(field.title); 
                        
-                       var ids = field.rt_ids.split(',');
+                       var ids = (field.rt_ids)?field.rt_ids.split(','):[];
                        var field_id = field['key'];
                        field_id = field_id.substr(2);//remove prefix "f:"
                       
@@ -2581,14 +2587,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             recid_field: 'field_'+key_idx //imp_session['columns'][key_idx]
         };
 
-        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
+//request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
         
         
         _showStep(0);
     
         //window.hWin.HAPI4.parseCSV(request, 
         
-        var url = window.hWin.HAPI4.basePathV3 + 'import/delimited/importCSV.php';
+        var url = window.hWin.HAPI4.baseURL + 'import/delimited/importCSV.php';
         
         window.hWin.HEURIST4.util.sendRequest(url, request, null, 
                 function(response){
@@ -2614,6 +2620,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             $('.mr_insert').show();                                     
                         }else{
                             $('.mr_insert').hide();                                     
+                        }
+
+                        if(res['count_warning']>0){
+
+                            $('#mrr_warning').text('Warnings: '+res['count_warning']);
+                            $('#prepareWarnings').show();//.css('display','inline-block');
+                            
+                            window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
+                            +' missing values for fields set to Required.<br><br> '
+                            +' You can find and correct these values using Manage > Structure > Verify<br><br>'
+                            + 'Click "Show" button  for a list of rows with missing values');                            
+                        }else{
+                            $('#prepareWarnings').css('display','none');    
                         }
                         
                         if(res['count_error']>0){
@@ -2700,12 +2719,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             sa_upd2: $("input[name='sa_upd2']:checked"). val()
         };
         
-        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
+//        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
         
         _showStep(0);
     
         //window.hWin.HAPI4.parseCSV(request, 
-        var url = window.hWin.HAPI4.basePathV3 + 'import/delimited/importCSV.php';
+        var url = window.hWin.HAPI4.baseURL + 'import/delimited/importCSV.php';
         
         window.hWin.HEURIST4.util.sendRequest(url, request, null, 
                 function(response){
@@ -2905,7 +2924,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                            }
                        }
                        var params = params.join('&');
-                       var url = window.hWin.HAPI4.basePathV4 + 'hserver/controller/fileParse.php?'+params;
+                       var url = window.hWin.HAPI4.baseURL + 'hserver/controller/fileParse.php?'+params;
                         
                        window.hWin.HEURIST4.util.downloadURL(url);
                         
@@ -3018,7 +3037,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
                 s = s + '<option value="-1">[create new record] None of these</option>';
                 s = s + '</select>&nbsp;'
-                + '<a href="#" onclick="{window.open(\''+window.hWin.HAPI4.basePathV4+'?db='+window.hWin.HAPI4.database
+                + '<a href="#" onclick="{window.open(\''+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records</a></td></tr>';
             }
             
@@ -3026,11 +3045,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             +'<div>Please select from the possible matches in the dropdowns. You may not be able to determine the correct records'
             +' if you have used an incomplete set of fields for matching.</div>';
         
-        }else if(mode=='error'){    //------------------------------------------------------------------------------------------- 
+        }else if(mode=='error' || mode=='warning'){    //------------------------------------------------------------------------------------------- 
 
                 var is_missed = false;
-                var tabs = res['error'];
+                var tabs = res[mode];
                 var k = 0;
+                
+                var dt_to_col = {};
 
                 if(tabs.length>1){
 
@@ -3044,7 +3065,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     }
                     s = s + '</ul>';
                 }
-
+                
+                
                 for (k=0;k<tabs.length;k++){
                     var rec_tab = tabs[k];
                     s = s + '<div id="rec__'+k+'">'
@@ -3061,9 +3083,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     var ismultivalue = checked_field && imp_session['multivals'][checked_field.substr(6)];//highlight errors individually
                     
                     s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br/><br/></div>";
-
+                    
                     var is_missed = (rec_tab['err_message'].indexOf('a value must be supplied')>0);
-
 
                     //all this code only for small asterics
                     var rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
@@ -3123,6 +3144,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
         }//end find distinct terms values
     */
+    
+    
+                    var colname = imp_session['columns'][checked_field.substr(6)];
+                    var dt_id = res['mapped_fields'][checked_field]; //from validation
+                
+                        
+                    if(dt_id>0 && detDefs[dt_id]['commonFields'][idx_dt_type]=='enum'){ //button to add terms
+                        s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" '
+                        +'title="Adds the unrecognised terms below to the field definition">'
+                        +'Add unrecognised terms</button><br><br>';     
+                    }
+    
+    
                 s = s + '<table class="tbmain" width="100%"><thead><tr>' 
                         + '<th width="20px">Line #</th>';
 
@@ -3136,9 +3170,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                     
                     if(fieldnames[i] == checked_field){
-                        
-                        var colname = imp_session['columns'][fieldnames[i].substr(6)];
-                        var dt_id = res['mapped_fields'][fieldnames[i]]; //from validation
                         
                         if(recStruc[dt_id][idx_reqtype] == "required"){
                             colname = colname + "*";
@@ -3162,6 +3193,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                              + '</th>';
                              
                         err_col = i;
+                        
+                        if(dt_id>0) dt_to_col[dt_id] = (err_col+1);
+                        
                         break;
                     }
                 }
@@ -3172,13 +3206,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 for(i=0;i<records.length;i++){
 
                     var row = records[i];
-                    s = s + '<tr><td class="truncate">'+(row[0]+1)+'</td>'; //line#
+                    s = s + '<tr><td class="truncate">'+(Number(row[0]))+'</td>'; //line#
                     if(is_missed){
                         s = s + "<td style='color:red'>&lt;missing&gt;</td>";
                     } else if(ismultivalue){
                         s = s + "<td class='truncate'>"+row[err_col+1]+"</td>";
                     } else {
-                        s = s + "<td class='truncate' style='color:red'>"+row[err_col+1]+"</td>";
+                        s = s + "<td class='truncate'>"+row[err_col+1]+"</td>";     //style='color:red'
                     }
                     //TODO - print row content of line
                     /*
@@ -3192,6 +3226,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 s = s + '</table></div>';
                 
             }//tabs
+            
 
             if(tabs.length>1){
                 s = s + '</div>';
@@ -3245,9 +3280,190 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             }
             
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
+            
+            //activate add terms buttons
+            $dlg.find('.add_terms').click(function(event){
+                
+                var ele = $(event.target);
+                var tab_idx = ele.attr('tab_id');
+                var dt_id = ele.attr('dt_id');
+                var wrong_values = tabs[tab_idx]['values_error'];
+                _importNewTerms($dlg, dt_id, wrong_values, -1, '');
+                //alert('add '+wrong_values.join(',')); 
+            });
+            
+            
         }
         
     } 
+    
+    
+    //
+    // add new terms
+    //
+    function _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, trm_ParentLabel){
+        
+        if(window.hWin.HEURIST4.util.isempty(newvalues)) return;
+
+        var label_idx = window.hWin.HEURIST4.terms.fieldNamesToIndex['trm_Label'];
+        
+        if(!(trm_ParentTermID>0)){
+        //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
+        
+            var fi_term =  window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_JsonTermIDTree'];
+            var terms = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_term];
+
+            if(window.hWin.HEURIST4.util.isNumber(terms)){ //this is vocabulary
+                trm_ParentTermID = Number(terms);
+            }else{
+                //this is a set of terms - find special vocabulary  'Auto-added terms'
+                for (trmID in window.hWin.HEURIST4.terms.termsByDomainLookup['enum']){
+                    if(trmID>0)
+                     if(window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][trmID][label_idx]=='Auto-added terms'){
+                            trm_ParentTermID = trmID;
+                            break;
+                     }
+                }
+                if(!(trm_ParentTermID>0)){ //add new vocabulary to root
+                    
+                    var request = {
+                        'a'          : 'save',
+                        'entity'     : 'defTerms',
+                        'request_id' : window.hWin.HEURIST4.util.random(),
+                        'fields'     : [{trm_Label:'Auto-added terms', trm_ParentTermID:'', trm_Depth:0, trm_Domain:'enum'}]                     
+                        };
+                
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            var recIDs = response.data;
+                            trm_ParentTermID = Number(recIDs[0]);
+                            _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, 'Auto-added terms');
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });                    
+                    
+                    return;
+                }
+            }
+        }//find parent term id
+        
+        if(trm_ParentLabel==''){
+            trm_ParentLabel = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][trm_ParentTermID][label_idx];
+        }
+        
+        
+        var s;
+        if(newvalues.length>5){
+            s = newvalues.slice(0,5).join(', ') + ' and '+(newvalues.length-5)+ ' more';
+        }else{
+            s = newvalues.join(', ');
+        }
+                
+        window.hWin.HEURIST4.msg.showMsgDlg(
+                'Terms ' + s +' will be added to the vocabulary "'
+                + trm_ParentLabel +'"'
+                , function(){
+                    _importNewTerms_continue($dlg, newvalues, trm_ParentTermID);
+                }); 
+    }
+    
+    //
+    //  continue addition of new terms
+    //            
+    function _importNewTerms_continue($dlg, newvalues, trm_ParentTermID){    
+        
+        var _prepareddata = [], record;
+        
+        var skip_dup=0, skip_long=0, skip_long=0, skip_na=0;
+        
+        var trm_ParentChildren = window.hWin.HEURIST4.ui.getChildrenLabels('enum', trm_ParentTermID);
+        
+        for(var i=0;i<newvalues.length;i++){
+                
+                var lbl = null;
+                
+                if(!window.hWin.HEURIST4.util.isempty(newvalues[i])){
+                    lbl = newvalues[i].trim();
+                }
+                
+                if(!window.hWin.HEURIST4.util.isempty(lbl)){
+                    
+                    //verify duplication in parent term and in already added
+                    if(trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
+                    {
+                        skip_dup++;
+                        continue;
+                    }
+                    
+                    
+                    if(lbl.length>500){
+                        skip_long++;
+                        continue;
+                    }
+                   
+                    _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
+                    
+                }else{
+                    skip_na++;
+                }
+        }//for    
+        
+        if(_prepareddata.length==0){
+            var s = 'Nothing to import. Validation reports that among proposed terms<br>'
+                +((skip_dup>0)?skip_dup+' already exist; ':' ')
+                +((skip_long>0)?skip_long+' have too long label; ':' ')
+                +((skip_na>0)?skip_na+' label is empty':'');
+            setTimeout(function(){window.hWin.HEURIST4.msg.showMsgErr(s);}, 1000);
+            return;
+        }
+        
+    
+        var request = {
+            'a'          : 'save',
+            'entity'     : 'defTerms',
+            'request_id' : window.hWin.HEURIST4.util.random(),
+            'fields'     : _prepareddata                     
+            };
+                
+            var that = this;                                                
+            //that.loadanimation(true);
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+                        var recIDs = response.data;
+                        
+                        window.hWin.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                
+                                window.hWin.HEURIST4.terms = response.data.terms;
+                                top.HEURIST.terms = response.data.terms;
+                                
+                                var cnt = $dlg.find('.add_terms').length;
+                                var s = recIDs.length+' new term'
+                                        +((recIDs.length==1)?' was':'s were')+' imported. ';
+                                if(cnt==1){
+                                    $dlg.dialog('close');
+                                    window.hWin.HEURIST4.msg.showMsgErr(s+'Please repeat "Prepare" action'); 
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(s+'Check other "error" tabs '
+                                    +'to add missed terms for other enumeration fields. '
+                                    +'And finally close this dialog and repeat "Prepare" action'); 
+                                }
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain term definitions to support import, possible database corruption, please consult Heurist developers');
+                            }
+                        });
+                        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+        
+    }
+        
 
     //
     // get import line on server and show it on popup
@@ -3377,6 +3593,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
         $('#prepareErrors').hide();
+        if(!(page==4 || page==5)) $('#prepareWarnings').hide();
         //$('#mr_cnt_disamb').parent().hide();
         
         if(page==1){

@@ -101,9 +101,15 @@ $.widget( "heurist.editing_input", {
 
             var repeatable = (this.f('rst_MaxValues') != 1)? true : false; //saw TODO this really needs to check many exist
 
-            //multiplier button
-            if(repeatable){
+            
+            if(!repeatable || this.options.suppress_repeat){
 
+                $( "<span>")
+                .addClass('editint-inout-repeat-button')
+                .css({width:'16px', display:'table-cell'})
+                .appendTo( this.element );
+                
+            }else{ //multiplier button
                 this.btn_add = $( "<button>")
                 .addClass("smallbutton editint-inout-repeat-button")
                 //.css('display','table-cell')
@@ -120,13 +126,6 @@ $.widget( "heurist.editing_input", {
                         }
                     }
                 });
-
-            }else{
-                $( "<span>")
-                .addClass('editint-inout-repeat-button')
-                .css({width:'16px', display:'table-cell'})
-                .appendTo( this.element );
-
             }
         }
 
@@ -399,6 +398,7 @@ $.widget( "heurist.editing_input", {
                     if(!valid){
                         window.hWin.HEURIST4.util.stopEvent(e);
                         e.preventDefault();
+                        window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
                     }
 
                 });
@@ -426,6 +426,7 @@ $.widget( "heurist.editing_input", {
                         if(!valid){
                             window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
+                            window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
                         }
 
                     });
@@ -492,7 +493,7 @@ $.widget( "heurist.editing_input", {
                             __show_select_dialog = function __show_select_dialog(event){
                                 event.preventDefault();
 
-                                var url = window.hWin.HAPI4.basePathV4 +
+                                var url = window.hWin.HAPI4.baseURL +
                                 'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
                                 window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:600,
@@ -637,7 +638,7 @@ $.widget( "heurist.editing_input", {
                         
                         //init upload widget
                         $input.fileupload({
-    url: window.hWin.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
+    url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},

@@ -142,7 +142,7 @@ $.widget( "heurist.help_tips", {
                 }
                 
                 $.ajax( {
-                    url: window.hWin.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php?check=context_help/tips/tip'+(idx+1)+'.html',
+                    url: window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php?check=context_help/tips/tip'+(idx+1)+'.html',
                     })
                     .error(function() {
                     })
@@ -171,7 +171,6 @@ $.widget( "heurist.help_tips", {
     }
 
 });
-
 
 /**
 * Show Tip of the Day/Getting strated dialog

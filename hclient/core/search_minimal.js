@@ -46,6 +46,11 @@ function hSearchMinimal() {
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    
+                    if(response.data  && response.data.memory_warning){
+                           window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
+                    }
+                    
                     callback( hRecordSet(response.data) );
                 }else{
                     callback( null );
@@ -109,6 +114,10 @@ function hSearchMinimal() {
 
                 if(_query_request!=null && response.data.queryid==_query_request.id) {
 
+                    if(response.data  && response.data.memory_warning){
+                           window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
+                    }
+                    
                     recordset = new hRecordSet(response.data);
                     
                     recordset.setRequest( window.hWin.HEURIST4.util.cloneJSON(_query_request) );

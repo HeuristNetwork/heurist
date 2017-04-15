@@ -209,6 +209,7 @@ text.shadow {
     fill: #000;
     /*font-size: 20px;*/
     font-weight: bold;
+    cursor: pointer;
 }
 
 /** Selection */
@@ -223,6 +224,7 @@ text.shadow {
 
 .toolbar-section{
     padding:0 4px;
+    margin-bottom: 5px;
 }
 .toolbar-section > label{
     font-size:0.8em;
@@ -230,6 +232,7 @@ text.shadow {
 #toolbar{
     line-height: 10px;    
     display:table-cell;
+    height:auto;
     /*border: solid 1px gray;*/
 }
 #toolbar > div{
@@ -264,6 +267,11 @@ text.shadow {
 }
 .ui-icon-link-curved{
     background-image: url(link_curved.png) !important; 
+    width: 16;
+    height: 16;
+}
+.ui-icon-link-stepped{
+    background-image: url(link_stepped.png) !important; 
     width: 16;
     height: 16;
 }

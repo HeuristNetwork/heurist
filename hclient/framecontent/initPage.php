@@ -155,7 +155,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 }else{
     ?>
     <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.fileupload.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.iframe-transport.min.js"></script>
     <?php
@@ -255,7 +255,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
+                        window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions in get_defs, possible database corruption, please consult Heurist developers');
                         success = false;
                     }
 
@@ -318,8 +318,11 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
             if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
-                $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
+                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
                     window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
+                });
+                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/google_analytics.js').fail(function(){
+                    window.hWin.HEURIST4.msg.showMsgErr('Cannot include Google Analtyics script');
                 });
             }
         }
@@ -331,3 +334,4 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     }
 
 </script>
+

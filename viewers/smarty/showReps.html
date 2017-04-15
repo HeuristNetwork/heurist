@@ -465,7 +465,9 @@
 
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
-                Hul.popupURL(this, top.HEURIST.baseURL_V3 + 'viewers/smarty/repMenu.html?template_file='+template_file,
+                Hul.popupURL(this, top.HEURIST.baseURL 
+                            + 'viewers/smarty/repMenu.html?template_file='
+                            + encodeURIComponent(template_file),
                     {   title: 'Publish report',
                         callback: function(filename){
                             if(!Hul.isnull(filename)) {
@@ -518,7 +520,7 @@
                     var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
                     var currentSearchQuery = top.HEURIST.currentQuery_all.replace('"','%22');
-                    var surl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php?"+
+                    var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
                         currentSearchQuery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
                         
                         
@@ -704,15 +706,15 @@
             }
 
             if(!top.HEURIST.rectypes){
-                top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/php/loadCommonInfo.php")
+                top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadCommonInfo.php")
             }
 
             YAHOO.util.Event.addListener(window, "load", loadHandler );
 
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            $.getScript( top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php?db="+_db, onLoadUserInfoHandler);
+            $.getScript( top.HEURIST.baseURL+"common/php/loadUserInfo.php?db="+_db, onLoadUserInfoHandler);
             //YAHOO.util.Event.addListener(window, "heurist-obj-user-loaded", loadUserInfoHandler );
-            //top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php");
+            //top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadUserInfo.php");
 
 
             $(function () {

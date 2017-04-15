@@ -250,7 +250,7 @@ body {
 	var installDir = window.location.protocol+"//"+window.location.host+
 		window.location.pathname.replace(/(((admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
 	var HRST = {
-		baseURL_V3: installDir,
+		baseURL: installDir,
 		iconBaseURL: installDir + "/HEURIST_FILESTORE/" + params['db'] + "/rectype-icons/",
 		external_publish: true,
 
@@ -277,7 +277,7 @@ body {
 	sendRequest: function(url,callback,postData) {
 		// if we don't have a fully formed or root URL then prepend the base path
 		if ( !(url.match(/^http:/) || url.match(/^https:/))  &&  ! url.match(/^\//))
-			url = HRST.baseURL_V3 + url;
+			url = HRST.baseURL + url;
 		var file = url;
 		var req = HRST.util.createXMLHTTPObject();
 		if (!req) return;
@@ -404,11 +404,11 @@ body {
 
         }else{
 
-		    RelBrowser.baseURL = HRST.baseURL_V3;
+		    RelBrowser.baseURL = HRST.baseURL;
 		    RelBrowser.iconBaseURL =  HRST.iconBaseURL;
 		    RelBrowser.database = HRST.database.name;
 
-		    //Timeline_urlPrefix = HRST.baseURL_V3 + "external/timemap.2.0/lib/";
+		    //Timeline_urlPrefix = HRST.baseURL + "external/timemap.2.0/lib/";
 
 		    window.showMap = new ShowMap();
         }

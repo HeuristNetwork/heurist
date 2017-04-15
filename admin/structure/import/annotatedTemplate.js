@@ -76,7 +76,7 @@ function receiveMessage(event)
 
             var rectype = event.data.substr(event.data.lastIndexOf(':')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var url = top.HEURIST.baseURL_V3 + "admin/structure/import/importRectype.php?db=" + _db+"&code="+rectype;
+            var url = top.HEURIST.baseURL + "admin/structure/import/importRectype.php?db=" + _db+"&code="+rectype;
 
             top.HEURIST.util.popupURL(top, url,
                 {   "close-on-blur": true,
@@ -94,7 +94,7 @@ function receiveMessage(event)
 
             var rectype = event.data.substr(event.data.lastIndexOf(':')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var _url = top.HEURIST.baseURL_V3 + "admin/structure/import/importRectype.php?db=" + _db+"&output=json&checkid="+rectype;
+            var _url = top.HEURIST.baseURL + "admin/structure/import/importRectype.php?db=" + _db+"&output=json&checkid="+rectype;
 
             $.ajax({
                 url: _url,

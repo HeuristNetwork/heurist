@@ -115,6 +115,7 @@ class System {
                     define('HEURIST_DBNAME', $this->dbname);
                     define('HEURIST_DBNAME_FULL', $this->dbname_full);
                 }
+
                 //@todo  - test upload and thumb folder exist and writeable
                 if(!$this->initPathConstants()){
                     $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
@@ -338,6 +339,8 @@ class System {
         define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
         define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
 
+        define('HEURIST_ICON_SCRIPT', HEURIST_BASE_URL.'hserver/dbaccess/rt_icon.php?db='.$dbname.'&id=');
+        
         define('HEURIST_TERM_ICON_DIR', HEURIST_FILESTORE_DIR . 'term-icons/');
         define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
 
@@ -348,7 +351,7 @@ class System {
         if(folderCreate($folder, true)){
             define('HEURIST_SETTING_DIR', $folder);
         }
-
+        
         return true;
     }
 
@@ -493,11 +496,11 @@ class System {
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
-                    "basePathV3"=>HEURIST_BASE_URL,
+                    "baseURL"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
                     "dbrecent"=>$dbrecent,
-                    'max_post_size'=>$this->_get_config_bytes(ini_get('post_max_size')),
-                    'max_file_size'=>$this->_get_config_bytes(ini_get('upload_max_filesize'))
+                    'max_post_size'=>$this->get_php_bytes('post_max_size'),
+                    'max_file_size'=>$this->get_php_bytes('upload_max_filesize')
                     )
             );
 
@@ -509,7 +512,7 @@ class System {
                     "help"=>HEURIST_HELP,
                     "version"=>HEURIST_VERSION,
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
-                    "basePathV3"=>HEURIST_BASE_URL)
+                    "baseURL"=>HEURIST_BASE_URL)
             );
 
         }
@@ -669,7 +672,6 @@ class System {
             //session_id(sha1(rand()));
             @session_start();
             $session_id = session_id();
-
             setcookie('heurist-sessionid', $session_id, 0, '/');//, HEURIST_SERVER_NAME);
         }
 
@@ -912,6 +914,16 @@ class System {
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
     }
 
+    //
+    //
+    //
+    public function get_php_bytes($php_var ){
+        
+        $value = ini_get($php_var);
+        return $this->_get_config_bytes($value);
+        
+    }
+    
     //
     // convert php.ini config value to valid integer
     //

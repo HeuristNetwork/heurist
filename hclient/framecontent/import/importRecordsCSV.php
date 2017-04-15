@@ -527,12 +527,13 @@ If you have missing data for Required fields, you may find it convenient to set 
                                         <td rowspan="2" width="250">
                                             <h2 id="mrr_big">Existing: 586  New: 100</h2>
                                         </td>
-                                        <td width="50" align=left style="padding-left:30px">Existing:</td>
-                                        <td width="50" id="mrr_cnt_update"></td>
-                                        <td width="50" class="mrr_update">rows:</td>
-                                        <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
-                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
-                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
+                                        <td rowspan="2">
+                                            <div id="prepareWarnings" 
+                                                style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
+                                                <h2 id="mrr_warning" style="display:inline-block;margin:0 10px;">Warnings: 0</h2>
+                                                <div id="btnShowWarnings"></div>
+                                            </div>
+                                        </td>
                                         <td rowspan="2">
                                             <div id="prepareErrors" 
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
@@ -540,6 +541,12 @@ If you have missing data for Required fields, you may find it convenient to set 
                                                 <div id="btnShowErrors"></div>
                                             </div>
                                         </td>
+                                        <td width="50" align=left style="padding-left:30px">Existing:</td>
+                                        <td width="50" id="mrr_cnt_update"></td>
+                                        <td width="50" class="mrr_update">rows:</td>
+                                        <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
+                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
+                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
                                     </tr>
                                     <tr><td align=left style="padding-left:30px">New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>

@@ -1166,7 +1166,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 }
             }
             if (prefString){
-                top.HEURIST.loadScript(top.HEURIST.baseURL_V3+'common/php/displayPreferences.php?'+
+                top.HEURIST.loadScript(top.HEURIST.baseURL+'common/php/displayPreferences.php?'+
                     'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
                         : top.HEURIST.parameters.db ? top.HEURIST.parameters.db:"")+
                     prefString);
@@ -1215,7 +1215,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     sendRequest: function(url,callback,postData) {
         // if we don't have a fully formed or root URL then prepend the base path
         if ( !(url.match(/^http:/) || url.match(/^https:/))  &&  ! url.match(/^\//))
-            url = top.HEURIST.baseURL_V3 + url;
+            url = top.HEURIST.baseURL + url;
             
         var file = url;
         var req = top.HEURIST.util.createXMLHTTPObject();
@@ -1380,7 +1380,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
 
         var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-        var baseurl = top.HEURIST.baseURL_V3 + "common/php/reloadCommonInfo.php";
+        var baseurl = top.HEURIST.baseURL + "common/php/reloadCommonInfo.php";
         var callback = _updateHEURIST;
         var params = "db="+_db;
         top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -1487,12 +1487,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         var confirmOption = confirmList.appendChild(this.document.createElement("li"));
         confirmOption.className = "option";
         //            confirmOption.style.top = "2px";
-        confirmOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL_V3+"common/images/tick-grey.gif'></div>Confirm New Tag";
+        confirmOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL+"common/images/tick-grey.gif'></div>Confirm New Tag";
         confirmOption.onmousedown = function() { top.HEURIST.util.autocompleteConfirm.call(that); return false; };
         var changeOption = confirmList.appendChild(this.document.createElement("li"));
         changeOption.className = "option";
         //            changeOption.style.top = "14px";
-        changeOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL_V3+"common/images/cross.png'></div>Change Tag";
+        changeOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL+"common/images/cross.png'></div>Change Tag";
         changeOption.onmousedown = function() { top.HEURIST.util.autocompleteChange.call(that); return false; };
 
 
@@ -1846,7 +1846,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 termCode = "";
 
                 if(localLookup[termID]){
-                    if(depth<1){
+                    if(true){ //2017-02-28 no more hierarchy in list  was (depth<1){
                         termName = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
                     }else{
                         termName = getFullTermLabel(localLookup[termID], datatype, false);
@@ -1883,7 +1883,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
                     //for non mozilla add manual indent
                     var a = new Array(depth*2);
-                    termName = a.join('. ') + termName;
+                    termName = a.join('…') + termName; //was '. '
                 }
 
                 var isDisabled = (disabledTerms[termID]? true:false);
@@ -2026,7 +2026,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     showError: function(msg){
         if(top.HEURIST.util.isempty(msg)){
             msg = "Incorrect response from server. Please contact development team if this error persists";
-        }else if (Number(msg)===-1){
+        }else if (Number(msg)===-1 || typeof msg !== 'string'){
             msg = "No response from server, please try again later";
         }else if (msg.toLowerCase().indexOf("error")<0){
             msg = "Error occurred: " + msg;
@@ -2235,7 +2235,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     getRectypeIconAndName: function(recTypeID)
     {
         if(recTypeID && top.HEURIST.rectypes && top.HEURIST.rectypes.names[recTypeID]){
-            return "<img src=\""+top.HEURIST.baseURL_V3+"common/images/16x16.gif\" "+
+            return "<img src=\""+top.HEURIST.baseURL+"common/images/16x16.gif\" "+
             "style=\"background-image: url('"+top.HEURIST.iconBaseURL+recTypeID+"');\" /> "+top.HEURIST.rectypes.names[recTypeID];
         }else{
             return "";
@@ -2318,7 +2318,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             return;
         }
         // workgroup data not loaded so make asynch call to load it.
-        top.HEURIST.util.getJsonData(top.HEURIST.baseURL_V3+"common/php/loadGroupSavedSearches.php?"+
+        top.HEURIST.util.getJsonData(top.HEURIST.baseURL+"common/php/loadGroupSavedSearches.php?"+
                                         "db="+(top.HEURIST.database.name ? top.HEURIST.database.name: "") +
                                         "&wg_id="+wg_id,
                                         function(obj) {//callback

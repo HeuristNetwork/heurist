@@ -113,8 +113,10 @@ if($recTypeID==RT_PERSON){
                     <ul>
                         <?php
 
-                        // find Reports related to Person
-                        $records_reports = recordSearch_2('[{"t":"15"},{"related_to:10":"'. $recID .'" }]');
+                        // fi1nd Reports related to Person
+                            $records_reports = recordSearch_2(
+                            '{"any":[{"all":[{"t":"15"},{"related_to:10":"'. $recID .'"}]},'.
+                                    '{"all":[{"t":"15"},{"relatedfrom:10":"'. $recID .'"}]}]}');
 
                         if(@$records_reports['reccount']>0){
                             foreach($records_reports['order'] as $repID){

@@ -88,7 +88,7 @@ $.widget( "heurist.rec_actions", {
                     if($.isFunction($('body').tag_manager)){ //already loaded
                         this._initTagMenu();
                     }else{
-                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/tag_manager.js', function(){ that._initTagMenu(); } );
+                        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/tag_manager.js', function(){ that._initTagMenu(); } );
                     }
 
                 }
@@ -158,7 +158,7 @@ $.widget( "heurist.rec_actions", {
                     if($.isFunction($('body').tag_rating)){ //already loaded
                         showRatingTags();
                     }else{
-                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/tag_rating.js', function(){ showRatingTags(); } );
+                        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/tag_rating.js', function(){ showRatingTags(); } );
                     }
 
                 }else if(action == "menu-more-merge"){

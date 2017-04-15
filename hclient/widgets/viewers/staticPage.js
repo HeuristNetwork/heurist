@@ -35,10 +35,10 @@ $.widget( "heurist.staticPage", {
 
         var that = this;
 
-        this.div_content = $('<div>')  //.css('overflow','auto')
+        this.div_content = $('<div>').css({width:'100%', height:'100%'})  //.css('overflow','auto')
         /*.css({
         position:'absolute', top:(this.options.title==''?0:'2.5em'), bottom:0, left:0, right:0,
-        'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})*/
+        'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center'})*/
         .appendTo( this.element );
 
         this.element.on("myOnShowEvent", function(event){
@@ -67,7 +67,7 @@ $.widget( "heurist.staticPage", {
     /*
     _setOption: function( key, value ) {
     if(key=='url'){
-    value = window.hWin.HAPI4.basePathV3 + value;
+    value = window.hWin.HAPI4.baseURL + value;
     }else if (key=='title'){
     var id = this.element.attr('id');
     $(".header"+id).html(value);
@@ -96,7 +96,7 @@ $.widget( "heurist.staticPage", {
             var url = this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
             url = url.replace("[layout]",  window.hWin.HAPI4.sysinfo['layout']);
             if(this.options.url.indexOf('http://')<0){
-                this.options.url = window.hWin.HAPI4.basePathV4 + url;
+                this.options.url = window.hWin.HAPI4.baseURL + url;
             }
 
             
@@ -129,7 +129,7 @@ $.widget( "heurist.staticPage", {
 
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }

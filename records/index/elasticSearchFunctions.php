@@ -1,13 +1,14 @@
 <?php
 
     /**
-    * elasticSearchFunctions.php: Functions to index and search for records using Elastic Search
+    * elasticSearchFunctions.php: Functions to interact with ElasticSearch
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2017 University of Sydney
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -36,52 +37,29 @@
 
     Call deleteRecordIndexEntry whenever a record is deleted (Search Actions)
 
+
+    FUNCTION CALLS:
+    updateRecordIndexEntry()
+    - saveRecord.php
+    - saveRecordDetails.php
+
+    deleteRecordIndexEntry()
+    - deleteRecordInfo.php
+
+    deleteIndexForDatabase
+    - clearCurrentDB.php
+    - deleteCurrentDB.php
+
+    buildAllIndices()
+    - uses deleteIndexForRectype()
+    - uses buildAllIndices()
+    - cloneDatabase.php
+    - rebuildLuceneIndices.php
+
     */
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    $elasticSearch = false;
-
-    // ****************************************************************************************************************
-    /**
-    * Test whether Elastic Search is installed/operational
-    * @returns  Returns CURL result code, 0 if OK, >0 indicates error
-    */
-    function testElasticSearchOK () {
-        global $elasticSearch;
-        if($elasticSearch) {
-            global $indexServerAddress, $indexServerPort;
-            $url="$indexServerAddress:$indexServerPort"; // Set in configIni.php, address can be blank (not set), default port is 9200
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_GET, true);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $data = curl_exec($ch);
-            $error = curl_error($ch);
-            if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-                curl_close($ch);
-                return($code);
-            }
-        }
-        return(0);
-    } //testElasticSearchOK
-
-
-
-    // ****************************************************************************************************************
-    /**
-    * Remove uppercase letters from database name (Elastic Search rejects uppercase)
-    * @param    $dbname - the database name to be converted to lower case
-    * @returns  Returns corrected database name
-    */
-    function sanitiseForES ($dbname) {
-        $dbname_new=strtolower($dbname);
-        if ($dbname == $dbname_new) {
-            return($dbname); // no change
-        } else {
-            $dbname_new = $dbname_new."_nocaps"; // disambiguate eg. MyDB and mydb
-            return($dbname_new);
-        }
-    } //sanitiseForES
+    require_once('elasticSearchHelper.php');
 
 
 
@@ -91,90 +69,83 @@
     * By reading record from database we ensure that we are indexing only records which have been successfully written
     * @param $dbName        The name of the Heurist database, excluding prefix
     * @param $recTypeID     The record type ID of the record being indexed
-    * @return               curl return code, 0 = success
+    * @return               True if successful
     */
     function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
-        global $elasticSearch;
-        if($elasticSearch) {
-            global $indexServerAddress, $indexServerPort;
+//DEBUG        error_log("[elasticSearchFunctions.php] updateRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
 
-            $jsonData = "{";
+        if(isElasticEnabled()) {
+            $record = new stdClass();
 
-            // Add the record level data:
-            // DO NOT CHANGE ORDER unless changing JSON construction below
+            // Retrieve record level data
             $query="SELECT rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,rec_AddedByUGrpID,rec_AddedByImport,rec_Popularity,".
             "rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLLastVerified,rec_URLErrorMessage,rec_URLExtensionForMimeType ".
             "from Records where rec_ID=$recID"; // omits scratchpad
             $res = mysql_query($query);
 
-            if (($res) && ($row[3] != $recTypeID)) {// record type has changed
-
-                // TODO: Delete index for old record type before updating index for new record type
-                //print "<br />TODO: Delete index for old record type before updating index for new record type<br />";
-            } // change of record type / delete existing index entry
-
-            if ($res) { // add record level data to json
-                $row = mysql_fetch_array($res); // fetch Record data
-                $jsonData .= '"URL":"'          .$row[0].'"';
-                $jsonData .= ',"Added":"'       .$row[1].'"';
-                $jsonData .= ',"Modified":"'    .$row[2].'"';
-                $jsonData .= ',"Title":"'       .$row[3].'"';
-                $jsonData .= ',"RecTypeID":"'   .$row[4].'"';
-                $jsonData .= ',"AddedBy":"'     .$row[5].'"';
-                $jsonData .= ',"Imported":"'    .$row[6].'"';
-                $jsonData .= ',"Popularity":"'  .$row[7].'"';
-                $jsonData .= ',"Temporary":"'   .$row[8].'"';
-                $jsonData .= ',"OwnerUGrpID":"' .$row[9].'"';
-                $jsonData .= ',"NonOwnerVis":"' .$row[10].'"';
-                $jsonData .= ',"URLLastVerif":"'.$row[11].'"';
-                $jsonData .= ',"URLErrMsg":"'   .$row[12].'"';
-                $jsonData .= ',"URLExtMimeType":"'.$row[13].'"';
-            } else {
-                // TODO: Should really check and warn and exit if bad query
-                // Also exit if record marked as temporary
-                //print "<br />Query $query has failed";
-            }
-
-            // Add the detail level data
-            $queryDtl="SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo from recDetails where dtl_RecID=$recID";
-            $res = mysql_query($queryDtl);
+            // Check if query has succeed
             if ($res) {
-                while (($row = mysql_fetch_array($res))) { // fetch detail data
-                    $jsonData .= ',"' .$row[0]. '":"'.$row[1].$row[2].$row[3].'"';
-                    // numeric detail ID is used as the key for the index, so no namespace conflict
-                    // with textual keys from the Record itself
-                    // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
-                    // Curent code makes the simplistic assumption that only one of these three
-                    // fields is set or the cioncat is useful. TODO: Verify if this is the case
+                $row = mysql_fetch_array($res); // Fetch record data
+
+                // Construct record
+                $record->URL            = $row[0];
+                $record->Added          = $row[1];
+                $record->Modified       = $row[2];
+                $record->Title          = $row[3];
+                $record->RecTypeID      = $row[4];
+                $record->AddedBy        = $row[5];
+                $record->Imported       = $row[6];
+                $record->Popularity     = $row[7];
+                $record->Temporary      = $row[8];
+                $record->OwnerUGrpID    = $row[9];
+                $record->NonOwnerVis    = $row[10];
+                $record->URLLastVerif   = $row[11];
+                $record->URLErrMsg      = $row[12];
+                $record->URLExtMimeType = $row[13];
+
+                // Check if recTypeID has changed
+                if($record->RecTypeID != $recTypeID) {
+                    // Delete index for old record type before updating index for new record type
+
+                    deleteRecordIndexEntry($dbName, $recTypeID, $recID);
                 }
+            } else {
+                error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> record query failed: $query");
+                return false;
             }
 
-            // Terminate the json data
-            $jsonData .= '}';
-            $dbnameLoc=sanitiseForES($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
+            // Retrieve detail level data
+            $query = "SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo from recDetails where dtl_RecID=$recID";
+            $res = mysql_query($query);
 
-            // PUT request to Elasticsearch
-            $url = "$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID";
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+            // Check if query has succeeded
+            if ($res) {
+                // Append detail level data to record
+                while (($row = mysql_fetch_array($res))) {
+                    // Detail ID is used as key, together with dtl_Value, dtl_UploadedFileID and dtl_Geo
+                    // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
+                    $record->$row[0] = $row[1].$row[2].$row[3];
+                }
+            }else{
+                error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> details query failed: $query");
+                return false;
+            }
 
-            $data = curl_exec($ch);
-            $error = curl_error($ch);
-            if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-                //print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code) & url = $url & data = $jsonData";
-                curl_close($ch);
-                return $code;
-            } else {
-                //print "<br />SUCCESS: updateRecordIndexEntry indexed: $url with $jsonData";
-                curl_close(ch); // is this necessary?
+            // PUT data to ElasticSearch
+            $address = getElasticAddress($dbName, $recTypeID, $recID);
+            $json = putElastic($address, $record);
+//DEBUG error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> indexed in elastic: $json");
+
+            // Check if created property exists and is true
+            if($json!=null){ //without check it ruins main save function
+                $response = json_decode($json);
+                return property_exists($response, 'created') && $response->created;
+            }
+            else{
+                return false;
             }
         }
-        return(0);
+        return false;
     } // addUpdateRecordIndex
 
 
@@ -191,29 +162,29 @@
     * @param $dbName        The name of the Heurist databasem, excluding prefix
     * @param $recTypeID     The record type ID of the record being deleted from the index
     * @param $recID         The record to be deleted from the index
-    * @return               curl return code, 0 = success
+    * @return               True if successful
     */
     function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
-        global $elasticSearch;
-        if($elasticSearch) {
-            global $indexServerAddress, $indexServerPort;
+//DEBUG        error_log("[elasticSearchFunctions.php] deleteRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
 
-            $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID/$recID";
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $data = curl_exec($ch);
-            $error = curl_error($ch);
-            if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-                //print "<br />ERROR: deleteRecordIndexEntry: $error ($code)" . " url = ". $url;
-                curl_close($ch);
-                return $code;
-            } else {
-                curl_close(ch); // is this necessary?
+        if(isElasticEnabled()) {
+            // Delete record from ElasticSearch
+            $address = getElasticAddress($dbName, $recTypeID, $recID);
+            $query = new stdClass();
+            $json = deleteElastic($address, $query);
+//DEBUGG error_log("[elasticSearchFunctions.php] deleteRecordIndexEntry --> deleted record from elastic: $json");
+
+            // Check if acknowledged property exists and is true
+            if($json!=null){ //without check it ruins delete function
+                $response = json_decode($json);
+                return property_exists($response, 'acknowledged') && $response->acknowledged;
+            }
+            else{
+                return false;
             }
         }
-        return(0);
+
+        return false;
     } // deleteRecordIndex
 
 
@@ -224,27 +195,21 @@
     *  @param $recTypeID    The record type ID of the record being deleted from the index
     */
     function deleteIndexForRectype ($dbName, $recTypeID) {
-        global $elasticSearch;
-        if($elasticSearch) {
-            // TODO: check that this is correct spec for deletion of the index for a record type
-            global $indexServerAddress, $indexServerPort;
+//DEBUG        error_log("[elasticSearchFunctions.php] deleteIndexForRectype for database $dbName recTypeID=$recTypeID");
 
-            $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID";
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $data = curl_exec($ch);
-            $error = curl_error($ch);
-            if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-                //print "<br />ERROR: deleteIndexForRectype: $error ($code)" . " url = ". $url;
-                curl_close($ch);
-                return $code;
-            } else {
-                curl_close(ch); // is this necessary?
-            }
+        if(isElasticEnabled()) {
+            // Delete record from ElasticSearch
+            $address = getElasticAddress($dbName, $recTypeID);
+            $query = new stdClass();
+            $json = deleteElastic($address, $query);
+//DEBUG            error_log("[elasticSearchFunctions.php] deleteIndexForRectype --> deleted rectype from elastic: $json");
+
+            // Check if acknowledged property exists and is true
+            $response = json_decode($json);
+            return property_exists($response, 'acknowledged') && $response->acknowledged;
         }
-        return(0);
+
+        return false;
     } // deleteIndexForRectype
 
 
@@ -254,29 +219,21 @@
     * @param $dbName       The name of the Heurist databasem, excluding prefix
     */
     function deleteIndexForDatabase ($dbName) {
-        global $elasticSearch;
-        if($elasticSearch) {
-            // TODO: check that this is correct spec for deletion of the index for a database
-            global $indexServerAddress, $indexServerPort;
+//DEBUG        error_log("[elasticSearchFunctions.php] deleteIndexForDatabase for database $dbName");
 
-            $url="$indexServerAddress:$indexServerPort/$dbName";
-            print "Deleting all Elasticsearch indices for $dbName at $url<br />";
+        if(isElasticEnabled()) {
+            // Delete record from ElasticSearch
+            $address = getElasticAddress($dbName);
+            $query = new stdClass();
+            $json = deleteElastic($address, $query);
+//DEBUG            error_log("[elasticSearchFunctions.php] deleteIndexForDatabase --> deleted index from elastic: $json");
 
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $data = curl_exec($ch);
-            $error = curl_error($ch);
-            if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-                //print "<br />ERROR: deleteIndexForDatabase: $error ($code)" . " url = ". $url;
-                curl_close($ch);
-                return($code);
-            } else {
-                curl_close(ch); // is this necessary?
-            }
+            // Check if acknowledged property exists and is true
+            $response = json_decode($json);
+            return property_exists($response, 'acknowledged') && $response->acknowledged;
         }
-        return(0);
+
+        return false;
     } // deleteIndexForDatabase
 
 
@@ -284,29 +241,32 @@
     /**
     * Rebuild the index for a specified record type
     * @param $dbName       The name of the Heurist databasem, excluding prefix
-    * @param
-    * @returns 0 = OK, any other = error
+    * @param $recTypeID    The record type to rebuild for
+    * @returns True if successful
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
-        global $elasticSearch;
-        if($elasticSearch) {
-            //print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
+//DEBUG        error_log("[elasticSearchFunctions.php] buildIndexForRectype for database $dbName recTypeID=$recTypeID");
+
+        if(isElasticEnabled()) {
             deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
 
-            $query="Select rec_ID from Records where rec_RecTypeID = $recTypeID";
+            $query = "SELECT rec_ID FROM Records WHERE rec_RecTypeID = $recTypeID";
             $res = mysql_query($query);
+
             if ($res) {
                 while (($row = mysql_fetch_array($res))) { // fetch records
-                    $code = updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/);
-                    if($code != 0) {
-                        //print "<br />ERROR while updating record index; code = $code, dbName = $dbname, rectypeID = $recTypeID, row = " + $row[0] + "<br />";
-                        return($code); // curl error code
+                    // Update all records while successful
+                    if(!updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/)) {
+                        return false;
                     }
                 }
-                return(0);
+                return true;
+            }else{
+                error_log("[elasticSearchFunctions.php] buildIndexForRectype --> invalid query: $query");
             }
         }
-        return(-1);
+
+        return false;
     } // buildIndexForRectype
 
 
@@ -317,27 +277,33 @@
     * @returns  0 = OK, 1 = error
     */
     function buildAllIndices ($dbName) {
-        global $elasticSearch;
-        if($elasticSearch) {
+//DEBUG        error_log("[elasticSearchFunctions.php] buildAllIndices for database $dbName");
+
+        if(isElasticEnabled()) {
             print "Building all Elasticsearch indices for: $dbName<br />";
 
-            $query="Select MAX(rec_RecTypeID) from Records where 1";
+            $query = "SELECT MAX(rec_RecTypeID) FROM Records WHERE 1";
             $res = mysql_query($query);
+            $count = 0;
+
             if ($res) {
                 $row = mysql_fetch_array($res);
                 $maxRecTypeID = $row[0];
-                //print "<br />MaxRecTypeID = $maxRecTypeID<br />";
-                for ($i = 1; $i <= $maxRecTypeID; $i++) { // call index function for each record type
-                    $code = buildIndexForRectype ($dbName, $i);
-                    if($code != 0) {
-                        //print "<br />ERROR while building index for rectype; code = $code, dbName = $dbName, i = $i<br />";
-                        return($code);
+
+                // Index all record types that exist
+                for ($i = 1; $i <= $maxRecTypeID; $i++) {
+                    if(buildIndexForRectype ($dbName, $i)) {
+                        $count++;
                     }
                 }
-                return(0);
+
+                print "ElasticSearch indices have successfully been built for $count record types.";
+                return true;
+            }else{
+                error_log("[elasticSearchFunctions.php] buildAllIndices --> invalid query: $query");
             }
         }
-        return(-1);
+        return false;
     } // buildAllIndices
 
 ?>

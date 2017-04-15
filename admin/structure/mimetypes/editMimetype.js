@@ -249,7 +249,7 @@ function MimetypeEditor() {
 		if(!Hul.isempty(str)) {
 
 			// 3. sends data to server
-			var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/mimetypes/srvMimetypes.php";
+			var baseurl = top.HEURIST.baseURL + "admin/structure/mimetypes/srvMimetypes.php";
 			var callback = _updateResult;
 			var params = "method=save&db=" + _db + "&data=" + encodeURIComponent(str);
 			Hul.getJsonData(baseurl, callback, params);

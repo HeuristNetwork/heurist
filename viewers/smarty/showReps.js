@@ -200,7 +200,7 @@ function ShowReps() {
     * loads list of templates
     */
     function _reload_templates(){
-        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
+        var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php";
         var callback = _updateTemplatesList;
         Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
     }
@@ -251,7 +251,7 @@ function ShowReps() {
     */
     function _reload(template_file) {
 
-        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
+        var baseurl = top.HEURIST.baseURL + "viewers/smarty/showReps.php";
         var squery = null;
         var request_query = {};
         var session_id = Math.round((new Date()).getTime()/1000);
@@ -331,7 +331,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     function _showProgress( session_id ){
 
         var progressCounter = 0;        
-        var progress_url = top.HEURIST.baseURL_V3 + "viewers/smarty/reportProgress.php";
+        var progress_url = top.HEURIST.baseURL + "viewers/smarty/reportProgress.php";
 
         $('#toolbardiv').hide();
         $('#progressbar_div').show();
@@ -561,12 +561,12 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         }
 
         var ele = $('#rectype_selector');
-        ele.load( top.HEURIST.baseURL_V3 + "common/php/recordTypeSelect.php?db="+_db,
+        ele.load( top.HEURIST.baseURL + "common/php/recordTypeSelect.php?db="+_db,
             function(){
                 ele.find('#rectype_elt').on('change', function(event){
                     var selel = $(event.target).val();
                     if(selel>0){
-                        var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
+                        var baseurl = top.HEURIST.baseURL + "common/php/recordTypeTree.php";
                         Hul.getJsonData(baseurl, __onRectypeTree, 'db='+_db+'&mode=list&rty_id='+selel);
                     }
                 });
@@ -628,7 +628,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             _initEditorMode(template_file, context);
         }
 
-        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
+        var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php";
 
         _originalFileName = template_file;
 
@@ -654,7 +654,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
         if(Number(top.HEURIST.database.id)>0){
 
-            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
+            var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php";
 
             var squery = 'db='+_db+'&mode=serve&dir=0&template='+template_file;
 
@@ -693,7 +693,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
         if(mode>0){
 
-            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php",
+            var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php",
             squery = 'db='+_db+'&mode=',
             template_file = null;
 
@@ -856,7 +856,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             var squery;
 
-            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
+            var baseurl = top.HEURIST.baseURL + "viewers/smarty/showReps.php";
 
             if(_currentRecordset!=null){
                 squery =  'db='+_db+'&recordset='+JSON.stringify(_currentRecordset);
@@ -2087,7 +2087,7 @@ this_id       : "term"
 
         if(q==null) return;
 
-        var url = top.HEURIST.baseURL_V3 + "export/publish/manageReports.html?"+q+"&db="+_db;
+        var url = top.HEURIST.baseURL + "export/publish/manageReports.html?"+q+"&db="+_db;
 
         var dim = Hul.innerDimensions(top);
 
@@ -2238,7 +2238,7 @@ this_id       : "term"
         },
 
         baseURL:  function (){
-            return top.HEURIST.baseURL_V3;
+            return top.HEURIST.baseURL;
         },
 
         originalFileName:  function (val){

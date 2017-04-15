@@ -36,14 +36,18 @@ $.widget( "heurist.dh_search", {
     _currentRequest:null,
     _currentRecordset:null,
 
-
+   _isDigitalHarlem:true,
 
     // the constructor
     _create: function() {
 
         // important - it overwrite default search manager - we use special one
         // it adds some parameters to search request and postprocess the result
-        window.hWin.HAPI4.SearchMgr = new hSearchMinimalDigitalHarlem();
+        this._isDigitalHarlem = (window.hWin.HAPI4.sysinfo['layout'].indexOf('DigitalHarlem')==0);
+        if(this._isDigitalHarlem){
+                window.hWin.HAPI4.SearchMgr = new hSearchMinimalDigitalHarlem();
+        }
+                
 
 
         var that = this;
@@ -59,14 +63,17 @@ $.widget( "heurist.dh_search", {
         .appendTo(this.search_pane).hide();
         this.res_lbl = $('<label>').css('padding','0.4em').appendTo(this.res_div);
         //this.res_name = $('<input>').appendTo(this.res_div);
-        this.res_btn_add = $('<button>', {text:window.hWin.HR('Keep On Map')})
-        .button({icons:{primary:'ui-icon-circle-plus'}})
-        .on("click", function(event){ that._onAddLayer(); } )
-        .appendTo(this.res_div);
+        
+        if(this._isDigitalHarlem){
+            this.res_btn_add = $('<button>', {text:window.hWin.HR('Keep On Map')})
+            .button({icons:{primary:'ui-icon-circle-plus'}})
+            .on("click", function(event){ that._onAddLayer(); } )
+            .appendTo(this.res_div);
+        }
 
         this.res_div_progress = $('<div>')
         .css({'height':'60px',
-            'background':'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
+            'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
         .appendTo(this.search_pane).hide();
 
 
@@ -81,85 +88,96 @@ $.widget( "heurist.dh_search", {
         this._refresh();
 
         //find Map Documents (19) for featured individuals ---------------------------------------
-        
-        var query;
-        // "Featured Individuals"
-        if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
-            query = {"t":"19","f:144":"4749,4819","sortby":"f:94"};
-        }else{
-            query = {"t":"19","f:144":"4801,4819","sortby":"f:94"};
-        }
-        
-        var request = { q: query,
-            w: 'a',
-            detail: 'header',
-            source:this.element.attr('id') };
-        //perform search
-        window.hWin.HAPI4.RecordMgr.search(request, function(response){
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                var resdata = new hRecordSet(response.data);
-                //add SELECT and fill it with values
-                var smenu = '', idx;
-                var records = resdata.getRecords();
-                for(idx in records){
-                    if(idx)
-                    {
-                        var record = records[idx];
-                        var recID  = resdata.fld(record, 'rec_ID'),
-                            recName = resdata.fld(record, 'rec_Title');
-                        smenu = smenu + '<li id="fimap'+recID+'"><a href="#">'+recName+'</a></li>';
-                    }
-                }
-                if(smenu=='') return;
-
-                that.btn_fi_menu = $( "<button>", {
-                    text: window.hWin.HR('select a person ')+'...'
-                })
-                .css({'width':'100%','margin-top':'0.4em'})
-                .appendTo(  that.search_list )
-                .button({icons: {
-                    secondary: "ui-icon-triangle-1-s"
-                }});
-
-                that.menu_fi = $('<ul>'+smenu+'</ul>')   //<a href="#">
-                .zIndex(9999)
-                .css({'position':'absolute', 'width':that.btn_fi_menu.width() })
-                .appendTo( that.document.find('body') )
-                .menu({
-                    select: function( event, ui ) {
-                        var map_rec_id =  Number(ui.item.attr('id').substr(5));
-
-                        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
-                        if(app && app.widget){
-                            //switch to Map Tab
-                            window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
-
-                            //load Map Document
-                            $(app.widget).app_timemap('loadMapDocumentById', map_rec_id);
-                        }
-
-
-                }})
-                .hide();
-
-                that._on( that.btn_fi_menu, {
-                    click: function() {
-                        $('.ui-menu').not('.horizontalmenu').hide(); //hide other
-                        var menu = $( that.menu_fi )
-                        //.css('min-width', '80px')
-                        .show()
-                        .position({my: "right top", at: "right bottom", of: that.btn_fi_menu });
-                        menu.width( that.btn_fi_menu.width() );
-                        $( document ).one( "click", function() { menu.hide(); });
-                        return false;
-                }});
-
-
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+        if(this._isDigitalHarlem){
+            
+            var query = null;
+            // "Featured Individuals"
+            if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
+                query = {"t":"19","f:144":"4749,4819","sortby":"f:94"};
+            }else if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem') {
+                query = {"t":"19","f:144":"4801,4819","sortby":"f:94"};
             }
-        });
+            
+            var request = { q: query,
+                w: 'a',
+                detail: 'header',
+                source:this.element.attr('id') };
+            //perform search
+            
+            window.hWin.HAPI4.RecordMgr.search(request, function(response){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    var resdata = new hRecordSet(response.data);
+                    //add SELECT and fill it with values
+                    var smenu = '', idx;
+                    var records = resdata.getRecords();
+                    for(idx in records){
+                        if(idx)
+                        {
+                            var record = records[idx];
+                            var recID  = resdata.fld(record, 'rec_ID'),
+                                recName = resdata.fld(record, 'rec_Title');
+                            smenu = smenu + '<li id="fimap'+recID+'"><a href="#">'+recName+'</a></li>';
+                        }
+                    }
+                    if(smenu=='') return;
 
+                    that.btn_fi_menu = $( "<button>", {
+                        text: window.hWin.HR('select a person ')+'...'
+                    })
+                    .css({'width':'100%','margin-top':'0.4em'})
+                    .appendTo(  that.search_list )
+                    .button({icons: {
+                        secondary: "ui-icon-triangle-1-s"
+                    }});
+
+                    that.menu_fi = $('<ul>'+smenu+'</ul>')   //<a href="#">
+                    .zIndex(9999)
+                    .css({'position':'absolute', 'width':that.btn_fi_menu.width() })
+                    .appendTo( that.document.find('body') )
+                    .menu({
+                        select: function( event, ui ) {
+                            var map_rec_id =  Number(ui.item.attr('id').substr(5));
+                            
+                            var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_maps');
+                            if(app && app.widget){
+                                $(app.widget).dh_maps('loadMapDocument', map_rec_id);
+                            }
+
+    /*    
+                            var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
+                            if(app && app.widget){
+                                //switch to Map Tab
+                                window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
+
+                                //load Map Document
+                                $(app.widget).app_timemap('loadMapDocumentById', map_rec_id);
+                            }
+    */
+
+                    }})
+                    .hide();
+
+                    that._on( that.btn_fi_menu, {
+                        click: function() {
+                            $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                            var menu = $( that.menu_fi )
+                            //.css('min-width', '80px')
+                            .show()
+                            .position({my: "right top", at: "right bottom", of: that.btn_fi_menu });
+                            menu.width( that.btn_fi_menu.width() );
+                            $( document ).one( "click", function() { menu.hide(); });
+                            return false;
+                    }});
+
+
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+
+            
+            
+        }//_isDigitalHarlem
         
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
             function(e, data) {
@@ -237,7 +255,7 @@ $.widget( "heurist.dh_search", {
 
         this.search_list.empty();
 
-        var that = this, facet_params = null, isfaceted = false;
+        var that = this, facet_params = null, isfaceted = false, cnt = 0;
 
 
         for (var svsID in this.usr_SavedSearch)
@@ -262,7 +280,12 @@ $.widget( "heurist.dh_search", {
                     that._doSearch2( $(this).attr('data-svs-id') );
                 })
                 .appendTo(this.search_list);
+                cnt++;
             }
+        }
+        
+        if(cnt==1){ //launch faceted search in case the only button
+             this.search_list.find('button').click();
         }
 
         //add featured maps
@@ -330,8 +353,6 @@ $.widget( "heurist.dh_search", {
 
     },
 
-
-
     //
     // this is public method, it is called on search complete - see dh_search_minimal._doSearch
     //
@@ -342,13 +363,13 @@ $.widget( "heurist.dh_search", {
 
         if(count_total>0){
             this.res_lbl.html('Found '+count_total+' matches....'); //<br>Provide a layer name<br>
-            this.res_btn_add.show();
+            if(this.res_btn_add) this.res_btn_add.show();
 
             this._currentRequest = request;
             this._currentRecordset = recordset;
         }else{
             this.res_lbl.html('Found no matches....');
-            this.res_btn_add.hide();
+            if(this.res_btn_add) this.res_btn_add.hide();
 
             this._currentRequest = null;
         }

@@ -177,7 +177,7 @@ function hEditing() {
         $('<div>')
         .css('display','inline-block')
         .append( $('<img>',{
-            src:  window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif',
+            src:  window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
             })
             .css({'background-image':'url('+ window.hWin.HAPI4.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))

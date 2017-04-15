@@ -97,7 +97,7 @@
 						(top.HEURIST.database.name?top.HEURIST.database.name:''));
 			var _recID = top.HEURIST.parameters.recID;
 
-			var _url = top.HEURIST.baseURL_V3 +'admin/structure/mimetypes/srvMimetypes.php?method=get&db='+_db;
+			var _url = top.HEURIST.baseURL +'admin/structure/mimetypes/srvMimetypes.php?method=get&db='+_db;
 
 			if(Hul.isnull(_recID)) { _recID = 0; }
 			_url = _url + "&recID="+_recID;

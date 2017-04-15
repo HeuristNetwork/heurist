@@ -179,7 +179,7 @@
 
             var URL;
             var args = $("#rt_selected").val();
-            var URL =  top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=select&db="+_db;
+            var URL =  top.HEURIST.baseURL + "admin/structure/rectypes/selectRectype.html?type=select&db="+_db;
 
             if(args) {
                 URL =  URL + "&ids=" + args;

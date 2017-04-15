@@ -195,7 +195,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
 
             var request = { a:'minmax', db: database, rt:recordtype , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
 
-            var baseurl = top.HEURIST.baseURL_V3 + "viewers/crosstab/crosstabs_srv.php";
+            var baseurl = top.HEURIST.baseURL + "viewers/crosstab/crosstabs_srv.php";
             var params = "a=minmax&db=" + database+'&rt='+recordtype+'&dt='+detailid;
             
             /*
@@ -266,7 +266,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
 
             var request = { a:'pointers', db: database, rt:recordtype , dt:detailid };
 
-            var baseurl = top.HEURIST.baseURL_V3 + "viewers/crosstab/crosstabs_srv.php";
+            var baseurl = top.HEURIST.baseURL + "viewers/crosstab/crosstabs_srv.php";
             var params = "a=pointers&db=" + database+'&rt='+recordtype+'&dt='+detailid+"&q="+query_main+"&w="+query_domain;
             
             if(_currentRecordset!=null){
@@ -492,9 +492,9 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
 
             /*
             var editbuttons = '<div class="saved-search-edit">'+
-            '<img title="edit" src="' +top.HEURIST.baseURL_V3+'common/images/edit_pencil_9x11.gif" '+
+            '<img title="edit" src="' +top.HEURIST.baseURL+'common/images/edit_pencil_9x11.gif" '+
             'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
-            editbuttons += '<img  title="delete" src="'+top.HEURIST.baseURL_V3+'common/images/delete6x7.gif" '+
+            editbuttons += '<img  title="delete" src="'+top.HEURIST.baseURL+'common/images/delete6x7.gif" '+
             'onclick="{top.HEURIST.search.savedSearchDelete('+sid+');}"></div>';
             $intdiv.append(editbuttons);
             */
@@ -503,7 +503,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
             .attr('intid', idx)
             //.button({icons: {primary: "ui-icon-pencil"}, text: false })
             .addClass('crosstab-interval-edit')
-            .css({'background-image': 'url('+top.HEURIST.baseURL_V3+'common/images/edit_pencil_9x11.gif)'})
+            .css({'background-image': 'url('+top.HEURIST.baseURL+'common/images/edit_pencil_9x11.gif)'})
             .click(function( event ) {
                 editInterval( name,  $(this).attr('intid') );
             })
@@ -513,7 +513,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
             //.button({icons: {primary: "ui-icon-close"}, text: false })
             .attr('intid', idx)
             .addClass('crosstab-interval-edit')
-            .css({'background-image': 'url('+top.HEURIST.baseURL_V3+'common/images/delete6x7.gif)'})
+            .css({'background-image': 'url('+top.HEURIST.baseURL+'common/images/delete6x7.gif)'})
             .click(function( event ) {
                 removeInterval( name, $(this).attr('intid') );
             })
@@ -835,7 +835,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
                 inProgress = false;
            }                     
                 
-            var baseurl = top.HEURIST.baseURL_V3 + "viewers/crosstab/crosstabs_srv.php";
+            var baseurl = top.HEURIST.baseURL + "viewers/crosstab/crosstabs_srv.php";
 
             /*  OLD
                 top.HEURIST.util.getJsonData(baseurl,

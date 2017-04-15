@@ -63,6 +63,10 @@
             #info_div > p{
                 font-size: 11px;line-height: 21px;
             }
+            .sel_width{
+                min-width:120px;
+                max-width:120px !important;
+            }
         </style>
     </head>
 
@@ -126,31 +130,39 @@
             </div>
 
             <div id="pnl_enum" class="input-row" style="display:block;">
-                <div class="input-header-cell">Vocabulary (terms):
-                </div>
+                <div class="input-header-cell">Vocabulary (terms):</div>
+                
                 <div class="input-cell">
-                    <div id="defineTerms">
-                        <span class="dtyValue" id="termsVocab"></span>
-                        <!-- ARTEM TODO: This displays the preview but doubles up the first time -->
-                        <span class="dtyValue" id="termsPreview" style="display:inline-block;margin-left: 1em;">
-                        </span>
-                        <span id="divAddVocab2" style="display:none; margin-left: 1em;">
-                            <input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/>
-                        </span>    
-                        
-                        <div class="help prompt">The set of terms which may be selected for this field (for enumerated values and relationships)</div>
-                        <div>&nbsp;</div>
-                        <span id="divAddSelTerm" style="display:inline-block; margin-bottom: 10px;">
-                            <input type="submit" value="Select term" id="btnAddSelTerm" style="max-width:100px;" onClick="window.detailTypeEditor.onAddSelectTerms()"/></span>
-                        <span id="divAddVocab" style="display:none; margin-left: 10px; margin-right: 10px;">
-                            <!-- input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/ -->
-                            <input type="submit" value="Edit terms tree" style="margin-left: 10px;"  onClick="{window.detailTypeEditor.showOtherTerms();}"/>
-                        </span>
+                    <div>
+                        <label style="text-align:left;vertical-align: top;">
+                        <input type="radio" value="vocabulary" name="enumType">Use a vocabulary</label> 
+                        <div id="enumVocabulary" style="display:inline-block">
+                            <select id="selVocab" class="sel_width"></select>
+                            <span id="termsPreview1"></span>
+                            <div>
+                            <a href="#" onClick="window.detailTypeEditor.onAddVocabulary()">add a vocabulary</a>
+                            <a href="#" onClick="window.detailTypeEditor.onAddTermsToVocab()">add terms to vocabulary</a>
+                            <a href="#" onClick="window.detailTypeEditor.showOtherTerms()">edit terms tree</a>
+                            </div>
+                        </div>
                     </div>
-
+                    <div>
+                        <label style="text-align:left;vertical-align:top;">
+                        <input type="radio" value="individual" name="enumType">Select terms individually</label> 
+                        <div  id="enumIndividual" style="display:none">
+                            <input type="submit" value="Select terms" id="btnAddSelTerm" 
+                                    class="sel_width" onClick="window.detailTypeEditor.onSelectTerms()"/>                    
+                            <span id="termsPreview2"></span>
+                            <a href="#" onClick="window.detailTypeEditor.showOtherTerms()">edit terms tree</a>
+                        </div>
+                        <div style="font-style:italic;">Warning: Advanced users only - list must be updated manually if relevant new terms added</div>
+                    </div>
+                    
+                    <div class="help prompt">The set of terms which may be selected for this field (for enumerated values and relationships)</div>
+                
                 </div>
             </div>
-
+            
             <div id="pnl_relmarker" class="input-row" style="display:block;">
                 <div class="input-header-cell">Target record types:</div>
                 <div class="input-cell">

@@ -84,6 +84,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <!-- database name is appended automatically by auto-popup -->
 
                     <li>
+                        <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
+                            onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
+                            title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
+                            Build</a>
+                    </li>
+
+                    <li>
                         <a href="hclient/framecontent/visualize/databaseSummary.php" name="auto-popup" class="large h3link"
                             data-logaction="stVis"
                             onClick="{return false;}"  id="linkDatabaseSummary"
@@ -92,17 +99,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
                     
                     <li>
-                        <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
-                            onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
-                            title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
-                            Organise</a>
-                    </li>
-
-                    <li>
                         <a href="admin/structure/import/selectDBForImport.php" name="auto-popup" class="verylarge h3link refresh_structure"
                             onClick="{return false;}" data-logaction="stAcquire"
                             title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
-                            Templates</a>
+                            Browse templates</a>
                     </li>
 
                     <!-- Remarked temporarely 2016-05-11
@@ -129,7 +129,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             name="auto-popup" class="verylarge h3link refresh_structure info_link"
 
                             title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
-                            Terms</a>
+                            Manage terms</a>
                     </li>
 
                     <!-- Adding Manage relation types menu -->
@@ -137,9 +137,17 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a  href="admin/structure/terms/editTerms.php?treetype=relation" name="auto-popup" class="verylarge h3link refresh_structure info_link"
                             data-logaction="stRelations"
                             title="Browse and edit the relationship types"  onclick= "{return false;}">
-                            Relations</a>
+                            Manage relationship types</a>
                     </li>
 
+                    <li>
+                        <a href="admin/verification/recalcTitlesAllRecords.php" name="auto-popup" class="verylarge h3link"
+                            data-logaction="stRebuildTitles"
+                            onClick="{return false;}"
+                            title="Rebuilds the constructed record titles listed in search results, for all records">
+                            Rebuild record titles</a>
+                    </li>
+                    
                     <li>
                         <a href="admin/verification/listDatabaseErrors.php" name="auto-popup" class="verylarge h3link"
                             data-logaction="stVerify"
@@ -185,7 +193,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <li class="admin-only">
                         <a  href="#" id="menulink-database-admin"
                             data-logaction="adminFull"
-                            onclick="{window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
+                            onclick="{window.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
                             Advanced functions &amp; utilities</a>
                     </li>

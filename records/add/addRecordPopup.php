@@ -48,12 +48,14 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
         <link rel=stylesheet href="<?=HEURIST_BASE_URL?>common/css/admin.css">
         <title>Add new record</title>
 
-        <script src="<?=HEURIST_BASE_URL?>external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>common/js/utilsUI.js"></script>
 
         <script>
             //		rt, wg_id,vis, kwd, tags, restrict Access;
             var defaults = <?php echo json_format($addRecDefaults);?>;
             var usrID = <?php echo get_user_id();?>;
+            
             $(document).ready(function() {
                 $("#show-adv-link").click(function() {
                     $(this).hide();
@@ -62,7 +64,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 });
 
                 // assign onchange handle to update_link for values used in link
-                $("#rectype_elt, #restrict_elt, #rec_OwnerUGrpID, #tag, #rec_NonOwnerVisibility, #add-link-title, #add-link-tags").
+                $("#rectype_elt,  #rec_OwnerUGrpID, #tag, #rec_NonOwnerVisibility, #add-link-title, #add-link-tags").
                 change(update_link);
                 
                 if(defaults && defaults.length > 0){
@@ -71,16 +73,6 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                     $("#rec_NonOwnerVisibility").val(defaults[2]);
                     buildworkgroupTagselect(defaults[1] ? parseInt(defaults[1]) : null, defaults[3] ? defaults[3] : null );
                     $("#add-link-tags").val(defaults[4]);
-                    //show advanced params
-                    if(defaults.length > 4 && defaults[5]){
-                        if(navigator.userAgent.indexOf('Safari')>0){
-                            var event = document.createEvent("HTMLEvents");
-                            event.initEvent("click", true, true);
-                            document.getElementById("restrict_elt").dispatchEvent(event);
-                        }else{
-                            $("#restrict_elt").click();
-                        }
-                    }
                 }else{
                     //from page params
                     var matches = location.search.match(/wg_id=(\d+)/);
@@ -89,6 +81,18 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 update_link();
 
                 showCurrentAccessSettings();
+                
+                
+                window.hWin = detectHeurist(window);
+                if(hasH4()){
+                    console.log('>>> init handler');
+                        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE,
+                        function(e, data) { 
+                            console.log('update selector');
+                        });    
+                }
+                
+                
             });
 
             function buildworkgroupTagselect(wgID, keyword) {
@@ -141,13 +145,15 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 if ($("#tag").val()) {
                     $("#broken-kwd-link").show()[0].href =
                     "<?=HEURIST_BASE_URL?>?w=all&q=tag:\"" + encodeURIComponent($("#tag").val().replace(/\\/, "")) + "\"" +
-                    " -tag:\"" + encodeURIComponent($("#tag").val()) + "\"";
+                    " -tag:\"" + encodeURIComponent($("#tag").val()) + "\"";                           
                 }
+                
+                
             }
 
             function compute_args() {
                 var extra_parms = '';
-                if (document.getElementById('restrict_elt').checked) {
+                
                     var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
                     if (!isNaN(wg_id)) {
                         if ( wg_id != usrID) { //by default we use current user
@@ -161,7 +167,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                             extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
                         }
                     }
-                }
+                
 
                 rt = parseInt(document.getElementById('rectype_elt').value);
 
@@ -181,13 +187,13 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 var vis = document.getElementById('rec_NonOwnerVisibility').value;
                 if(vis=='') vis = 'viewable';
                 var kwdList = document.getElementById('tag');
-                var cbShowAccessRights = document.getElementById('restrict_elt');
+                var cbShowAccessRights = true;
                 var tags = $("#add-link-tags").val();
                 extra_parms = '&rec_owner=' + wg_id;
                 extra_parms += '&rec_visibility=' + vis;
                 var sError2 = '',
                 sError1 = '';
-                if (true || cbShowAccessRights.checked) {
+                if (true || cbShowAccessRights) {
                     if (wg_id>=0) {
 
                         if (wg_id != usrID && kwdList.selectedIndex > 0) {
@@ -239,7 +245,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
 
                 if (true || document.getElementById('defaults_elt').checked) {  //always save
                     defaults = [ rt, wg_id, vis , kwdList.options[kwdList.selectedIndex].value,
-                        $("#add-link-tags").val().replace(/,/g,'|'), document.getElementById('restrict_elt').checked?1:0];
+                        $("#add-link-tags").val().replace(/,/g,'|'), 1];
 
                     top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults);
                     top.HEURIST.util.setDisplayPreference('record-add-showaccess', cbShowAccessRights.checked?"true":"false" );
@@ -317,12 +323,6 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
 
                 <div class="input-header-cell" style="padding-top: 20px;"><b>Access settings</b>
                 </div>
-                <!-- TODO: removed: Checkbox no longer displayed, less complex simply to default to checked -->
-                <div class="input-cell" >
-                    <input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1" style="display: none;"
-                        onclick="showHideAccessSettings(this);"
-                        style="vertical-align: middle; margin: 0; padding: 0;"<?= (@$_REQUEST['wg_id']>0 || $showAccessRights) ? " checked" : ""?>>
-                </div>
 
                 <div class="resource workgroup" style="margin:10px 0">
                     <div class="input-row workgroup">
@@ -332,6 +332,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                             <select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;"
                                 onChange="buildworkgroupTagselect(options[selectedIndex].value)">
                                 <?php
+                                
                                 // Add the currently logged in user as first option
                                 print "<option value=".get_user_id().(@$_REQUEST['wg_id']==get_user_id() ? " selected" : "").
                                 ">".htmlspecialchars(get_user_name())." </option>\n";
@@ -347,6 +348,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                                     htmlspecialchars($row[1])." </option>\n";
                                     array_push($wgs, $row[0]);
                                 }
+                                
                                 ?>
                                 <option value="0">Everyone (any logged-in user)</option>
                             </select>

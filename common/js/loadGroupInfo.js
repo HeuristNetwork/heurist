@@ -40,7 +40,7 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			return;
 		}
 		// workgroup data not loaded so make asynch call to load it.
-		top.HEURIST.util.getJsonData(top.HEURIST.baseURL_V3+"common/php/loadGroupSavedSearches.php?"+
+		top.HEURIST.util.getJsonData(top.HEURIST.baseURL+"common/php/loadGroupSavedSearches.php?"+
 										"db="+(top.HEURIST.database.name ? top.HEURIST.database.name: "") +
 										"&wg_id="+wg_id,
 										function(obj) {//callback

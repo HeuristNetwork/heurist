@@ -44,7 +44,7 @@ function getRecordOverlayData(record) {
     // Header
     var header = {text: truncateText(record.name, maxLength), 
                   count: record.count,  
-                  size: "11px", style: "bold", height: 15,
+                  size: "11px", style: "bold", height: 15, indent:false,
                                  enter: true, image:record.image}; 
     if(settings.showCounts) {
         header.text += ", n=" + record.count;  
@@ -107,21 +107,35 @@ function getRecordOverlayData(record) {
 
         // Convert map to array
         for(key in map) {                                   
-            array.push({text: truncateText(key, maxLength), size: "8px", style:"italic", height: fontSize, enter: true}); // Heading
+            array.push({text: truncateText(key, maxLength), size: "8px", 
+                    style:"italic", height: fontSize, indent:true, enter: true}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
         }
     }
 
+    return array;                                                                                
+}
+
+/** get info about particular relation */
+function getRelationOverlayData(line) {
+    var array = [];
+    var maxLength = getSetting(setting_textlength);
+    var relation = {type: line.relation.type, cnt: line.targetcount, text: 
+            truncateText(line.relation.name, maxLength), size: "9px", height: 11};
+    if(true || settings.showCounts) {
+            relation.text = relation.text + ", n=" + line.targetcount;
+    }
+    array.push(relation);  
     return array;
 }
 
 /** Finds all relationships between the source and target */
-function getRelationOverlayData(line) {
-    //console.log(line);
+function getRelationOverlayData_old(line) {
     var array = [];
     var maxLength = getSetting(setting_textlength);
+    var linetype = getSetting(setting_linetype);
     
     // Header
     var header1 = truncateText(line.source.name, maxLength);
@@ -139,20 +153,20 @@ function getRelationOverlayData(line) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
-            //console.log(link);
+            
             
             // Pointing to target
             if(link.source.id == line.source.id && link.target.id == line.target.id) {
-                var relation = {text: "➜ " + truncateText(link.relation.name, maxLength), size: "9px", height: 11}; 
+                var relation = {text: '-> '+ truncateText(link.relation.name, maxLength), size: "9px", height: 11}; //"➜ " 
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
                 array.push(relation);  
             }
    
-           // Pointing to source 
-           if(link.source.id == line.target.id && link.target.id == line.source.id) {
-                var relation = {text: "← "+ truncateText(link.relation.name, maxLength), size: "9px", height: 11}; 
+            // Pointing to source 
+            if(link.source.id == line.target.id && link.target.id == line.source.id) {
+                var relation = {text: '<- '+ truncateText(link.relation.name, maxLength), size: "9px", height: 11}; //"← "
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -161,9 +175,10 @@ function getRelationOverlayData(line) {
         }
     }
     
-    //console.log("Line overlay data", array);
     return array;
 }
+
+var drag_link_source_id, drag_link_target_id, drag_link_line, drag_link_timer; 
 
 /**
 * Creates an overlay over the node / on the location that the user has clicked on.
@@ -198,24 +213,53 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             overlay  = parent_node.append("g")
                      .attr("transform", "translate(" +(x-iconSize/2-6)+ "," +(y-iconSize/2-6)+ ")");
         }else{
-        
             overlay = svg.append("g")
                          .attr("class", "overlay "+type+ " " + selector)      
-                         .attr("transform", "translate(" +(x-iconSize/2-3)+ "," +(y-iconSize/2-3)+ ")"); //was shifted  +5
+                         .attr("transform", "translate(" +x +','+y+')');
         }
-        var rty_ID = '';                 
+        var rty_ID = '', rec_ID = '';                 
         // Title
         var rollover = info[0].text;
+
         //var title = overlay.append("title").text(info[0].text+' rollover?');
-        if(settings.isDatabaseStructure && type=='record'){
-            rty_ID = selector.substr(2);
-            if(window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
-                var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
-                rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
+        if(type=='record'){
+            if(settings.isDatabaseStructure){
+                rty_ID = selector.substr(2);
+                if(window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
+                    var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
+                    rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
+                }else{
+                    console.log('rectype not found '+rty_ID);
+                }
             }else{
-                console.log('rectype not found '+rty_ID);
+                rec_ID = selector.substr(2);
             }
+                
         }
+    
+    if(parent_node){
+        parent_node.on("mouseover", function(d) {
+            if(drag_link_source_id!=null){
+                //cancel timer
+                if(drag_link_timer>0){
+                    clearTimeout(drag_link_timer);
+                    drag_link_timer = 0;
+                }
+                drag_link_target_id = d.id;
+                drag_link_line.attr("stroke","#00ff00");
+            }            
+        })
+        .on("mouseout", function(d) {
+            if(drag_link_source_id!=null){
+            drag_link_timer = setTimeout(function(){
+                drag_link_target_id = null;
+                if(drag_link_line) drag_link_line.attr("stroke","#ff0000");
+            },500);
+            }            
+        });
+    }
+
+    
     
         // Draw a semi transparant rectangle       
         var rect = overlay.append("rect")
@@ -227,7 +271,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .style('stroke','#ff0000')
                           .style("stroke-width", 0.5)
                           .style("filter", "url(#drop-shadow)");
-                          //.on("drag", overlayDrag);
+                          
                                     
         //rect.append("title").text(rollover);       
         
@@ -257,10 +301,14 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         icon.append("title").text(rollover);         
         */
         // Adding text 
-        var offset = 26;  
+        var offset = (type=='record')?26:6;  
         var indent = 5;
         var position = 2;
-        var text = overlay.selectAll("text")
+        
+
+        var text;
+        if(type=='record'){        
+            text = overlay.selectAll("text")
                           .data(info)
                           .enter()
                           .append("text")
@@ -280,7 +328,6 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .attr("y", function(d, i) {
                               // Multiline check
                               if(!d.multiline) {
-//console.log(d.text + '  ' + position+'  '+d.height);                               
                                   position += (d.height*1.2);
                               }
                               return position; // Position calculation
@@ -298,10 +345,52 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                               return fontSize;//d.size;
                           }, "important");
                           
-                      
+        }else{
+            // links info needs icon
+            var k, text = [[]];
+            for(k=0;k<info.length;k++){
+                
+                var linkicon = overlay.append("svg:image")
+                  .attr("class", 'icon info-mode')
+                  .attr("xlink:href", function(d) {
+                        return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_'+(info[k].type=='resource'?1:2)+'.png';
+                  })
+                  //.attr("transform", "translate("+offset+","+(maxHeight-iconSize-3)+")")
+                  .attr("x", 2) 
+                  .attr("y", function(d, i) {
+                        return iconSize/2;//position;
+                  })
+                  .attr("height", iconSize)
+                  .attr("width", iconSize)
+                  
+                text[0].push(linkicon[0][0]);
+                          
+                var linkline = overlay.append("text")
+                          .text(info[k].text)
+                          .attr("class", 'info-mode')
+                          .attr("x", iconSize+2)
+                          .attr("y", function(d, i) {
+                              //position += (info[k].height*1.2);
+                              position += (iconSize*1.2);
+                              return position; // Position calculation
+                          })
+                          .attr("fill", fontColor)
+                          .attr("font-weight", info[k].style)
+                          .style("font-style", info[k].style, "important")
+                          .style("font-size", fontSize, "important");
+                          
+                          
+                text[0].push(linkline[0][0]);
+            }
+            
+        }      
+        
+        
+        
         // Calculate optimal rectangle size
         var maxWidth = 1;
         var maxHeight = 10;                              
+        var widthTitle = 1;
         for(var i = 0; i < text[0].length; i++) {
             var bbox = text[0][i].getBBox();
 
@@ -311,88 +400,193 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 maxWidth = width;
             }
             
+            if(i==0) widthTitle = maxWidth;
+            
             // Height
             var y = bbox.y*1.1;
             if(y > maxHeight) {
                 maxHeight = y;
             }
         }
-        maxWidth  += offset*2.5;//*3.5;
-        maxHeight = maxHeight + fontSize*1 + offset*1;//offset*1.1;// offset*1.2;//*2; 
+        maxWidth  += ((type=='record')?(offset):10)*2;//*3.5;
+        maxHeight = maxHeight + offset*1;//fontSize*1 + 
       
-      if(settings.isDatabaseStructure && type=='record'){
+      //drag and edit icons and actions
+      if(type=='record'){
+                   
+        var drag2 = d3.behavior.drag()
+                 .on("dragstart", function(d, i){
+                    d3.event.sourceEvent.stopPropagation();
+
+                    drag_link_source_id = d.id;
+                   
+                    var bbox = $(".node.id"+d.id + " .foreground")[0].getBoundingClientRect();
+                    var svgPos = $("svg").position();
+                    var x = bbox.left + bbox.width/2 - svgPos.left;
+                    var y = bbox.top + bbox.height/2 - svgPos.top;  
+                    
+                    drag_link_line = svg.append("svg:line")
+                       .attr("stroke","#ff0000")
+                       .attr("stroke-width",4)
+                       .attr("x1", x).attr("y1", y)
+                       .attr("x2", event.clientX - svgPos.left).attr("y2", event.clientY - svgPos.top);
+                    
+                 })
+                 .on("drag", 
+                 function(){
+                    if(drag_link_line){
+                        //drag_link_line
+                        //.attr("x2", Number(drag_link_line.attr("x2"))+d3.event.dx)
+                        //.attr("y2", Number(drag_link_line.attr("y2"))+d3.event.dy); //scale is not used
+                    
+                        var svgPos = $("svg").position();
+                        drag_link_line
+                            .attr("x2", event.clientX - svgPos.left)
+                            .attr("y2", event.clientY - svgPos.top);
+                        
+                    }
+                    
+                 })
+                 .on("dragend", function(){
+                     if(drag_link_source_id!=null && drag_link_target_id!=null){
+                            _addNewLinkField(drag_link_source_id, drag_link_target_id);  
+                            setTimeout(function(){drag_link_line.attr("stroke","#00ff00");}, 500);
+                     }else{
+                        drag_link_source_id = null;
+                        if(drag_link_line) drag_link_line.remove();
+                        drag_link_line = null;
+                     }
+                 }
+                 );
+
+/*
+        var bbox = btnEdit[0][0].getBBox();
+        var width = bbox.x + bbox.width*1.1;
+                  if(width > maxWidth) {
+                      maxWidth = width;
+                  }
+*/                  
+
+        var icons_cnt = settings.isDatabaseStructure?3:2;
+
+        widthTitle = widthTitle+(iconSize+3)*(icons_cnt+2);
+        if(widthTitle>maxWidth) maxWidth = widthTitle;
+        
+        //link button      
+        var btnAddLink = overlay
+                  .append("svg:image")
+                  .attr("class", "icon info-mode")
+                  .attr("xlink:href", function(d) {
+                        return window.hWin.HAPI4.baseURL+'hclient/assets/edit-link.png';
+                  })
+                  .attr("transform", "translate("+(maxWidth-icons_cnt*iconSize-3)+",3)")
+//on bottom                  .attr("transform", "translate("+(maxWidth-2*iconSize-3)+","+(maxHeight-iconSize-3)+")")
+                  .attr("height", iconSize)
+                  .attr("width", iconSize)
+                  .on("mousedown", function(d) {
+                      
+                      var svgPos = $("svg").position();
+                      var x = event.clientX - svgPos.left;
+                      var y = event.clientY + 26 - svgPos.top 
+                      
+                      var hintoverlay = svg.append("g")
+                        .attr("class", "hintoverlay")
+                         .attr("transform", "translate(" +x +','+y+')');
+                      
+                      var hintrect = hintoverlay.append("rect")
+                          .attr("class", "semi-transparant")              
+                          .attr("x", 0)
+                          .attr("y", 0)
+                          .attr("rx", 0)
+                          .attr("ry", 0)
+                          .style('stroke','#000000')
+                          .style("stroke-width", 0.5);
+                         
+                      var hinttext = hintoverlay.append("text")
+                      .text('drag me to another node …')
+                      .attr('x',3)
+                      .attr('y',10)
+                      .attr("fill", fontColor)
+                      .style("font-style", 'italic', "important")
+                      .style("font-size", 10, "important");
+                      
+                      var bbox = hinttext[0][0].getBBox();
+                      
+                      hintrect.attr("width", bbox.width+6)
+                            .attr("height", bbox.height+4);      
+
+
+                      $('.hintoverlay').fadeOut(3000, function() {
+                            $(this).remove();
+                      });    
+                  })
+                  .call(drag2);
+                  
+                  
+        btnAddLink.append("title")
+                   .text(function(d) {
+                        return 'Click and drag to another node to create link';
+                   });
+
+
         //edit button
         var btnEdit = overlay
                   .append("svg:image")
                   .attr("class", "icon info-mode")
                   .attr("xlink:href", function(d) {
-                        return window.hWin.HAPI4.basePathV4+'hclient/assets/edit-pencil.png';
+                        return window.hWin.HAPI4.baseURL+'hclient/assets/edit-pencil.png';
                   })
-                  .attr("transform", "translate("+offset+","+(maxHeight-iconSize-3)+")")
+                  .attr("transform", "translate("+(maxWidth-(icons_cnt-1)*iconSize-3)+",3)")
+//                  .attr("transform", "translate("+(maxWidth-iconSize)+","+(maxHeight-iconSize-3)+")")
                   /*.attr("x", 2)
                   .attr("y", 2) */
                   .attr("height", iconSize)
                   .attr("width", iconSize)
                   .on("mouseup", function(d) {
                       event.preventDefault();
-                      _editRecStructure(rty_ID);
+                      
+                      if(settings.isDatabaseStructure){
+                            _editRecStructure(rty_ID);    
+                      }else{
+                            window.open(window.hWin.HAPI4.baseURL
+                                +'records/edit/editRecord.html?db='
+                                +window.hWin.HAPI4.database+'&recID='+rec_ID, '_new');
+                      }
+                      
+                      
                   });  
                   
         btnEdit.append("title")
                    .text(function(d) {
                         return 'Click to edit the entity / record type structure';
                    });
-      
-        //link button      
-        var btnAddLink = overlay
-                  .append("g")
-                  .attr("class", "addlink info-mode")
-                  .attr("transform", "translate("+(offset+iconSize+5)+","+(maxHeight-iconSize-3)+")")
-                  .attr("height", iconSize)
-                  .attr("width", 30)
-                  .on("mouseup", function(d) {
-                      event.preventDefault();
-                      //_editRecStructure(rty_ID);
-                      
-                      _addNewLinkField(rty_ID);
-                  });;  
                   
-        // add link text        
-        var textAddLink = btnAddLink.append("text")
-                  .attr("class", "addlink-text")
-                  .text("add link")
-                  .attr("x", 2)
-                  .attr("y", iconSize*0.75);
 
+        if(settings.isDatabaseStructure){
+            // Close button
+            var close = overlay.append("g")
+                               .attr("class", "close info-mode")
+                               .attr("transform", "translate("+(maxWidth-iconSize)+",3)")
+                               .on("mouseup", function(d) {
+                                   $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();                                              });
+                               
+            // Close rectangle                                                                     
+            close.append("rect")
+                   .attr("class", "close-button")
+                   .attr("width", iconSize)
+                   .attr("height", iconSize)
 
-        var bbox = textAddLink[0][0].getBBox();
-        var width = bbox.x + bbox.width*1.1;
-                  if(width > maxWidth) {
-                      maxWidth = width;
-                  }      
+            // Close text        
+            close.append("text")
+                 .attr("class", "close-text")
+                 .text("X")
+                 .attr("x", iconSize/4)
+                 .attr("y", iconSize*0.75);
+                 
+        }
+                  
       }else{
-        /* Close button
-        var buttonSize = 15;
-        var close = overlay.append("g")
-                           .attr("class", "close")
-                           .attr("transform", "translate("+(maxWidth-buttonSize)+",0)")
-                           .on("mouseup", function(d) {
-                               removeOverlay(selector);                
-                           });
-                           
-        // Close rectangle                                                                     
-        close.append("rect")
-               .attr("class", "close-button")
-               .attr("width", buttonSize)
-               .attr("height", buttonSize)
-
-        // Close text        
-        close.append("text")
-             .attr("class", "close-text")
-             .text("X")
-             .attr("x", buttonSize/4)
-             .attr("y", buttonSize*0.75);
-       */      
+          maxHeight = maxHeight + fontSize*1;
       }
       
       
@@ -410,8 +604,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
              
         /** Handles dragging events on overlay */
         function overlayDrag(d) { //NOT USED
-console.log('overlay drag '+d);            
-            overlay.attr("transform", "translate("+d.x+","+d.y+")");
+            //overlay.attr("transform", "translate("+d.x+","+d.y+")");
             //"translate(" +(d.x-iconSize/2)+ "," +(d.y-iconSize/2)+ ")");
         }
         
@@ -426,7 +619,7 @@ console.log('overlay drag '+d);
 //
 function _editRecStructure(rty_ID) {
 
-    var URL = window.hWin.HAPI4.basePathV4 + "admin/structure/fields/editRecStructure.html?db="
+    var URL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="
             +  window.hWin.HAPI4.database+ '&rty_ID='+rty_ID;
 
     //var dim = Hul.innerDimensions(top);
@@ -452,7 +645,6 @@ function updateOverlays() {
         var pieces = $(this).attr("class").split(" ");
         var type = pieces[1];
         var id = pieces[2];
-        //console.log("Type: " + type + ", id:" + id);
         
         // Select element to align to
         var bbox;
@@ -462,6 +654,7 @@ function updateOverlays() {
             bbox = $(".link."+id)[0].getBoundingClientRect();
         }
         //console.log(bbox);
+        
         
         // Update position 
         var svgPos = $("svg").position();
@@ -486,8 +679,9 @@ function updateOverlays() {
 }
 
 /** Removes the overlay with the given ID */
-function removeOverlay(selector) {
-    $(".overlay."+selector).fadeOut(300, function() {
+function removeOverlay(selector, delay) {
+    if(!(delay>=0)) delay = 1000;
+    $(".overlay."+selector).fadeOut(delay, function() {
         $(this).remove();
    }); 
 }
@@ -501,30 +695,69 @@ function removeOverlays() {
     });
 }
 
-function _addNewLinkField(rty_ID, target_ID){
+//
+// open popup dialog to define new link or relationship
+//
+function _addNewLinkField(source_ID, target_ID){
     
             var body = $(this.document).find('body');
-            var dim = { h:480, w:500 };//Math.max(900, body.innerWidth()-10) };                
+            var dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
             
-            var target_ID = 10;
+            //ar target_ID = 10;
             
-            var url = window.hWin.HAPI4.basePathV3 +
-                "admin/structure/fields/selectLinkField.html?&db="+window.hWin.HAPI4.database
-                   +'&rty_ID='+rty_ID;
-                   //+'&target_ID='+target_ID;
+            var url = window.hWin.HAPI4.baseURL;
+            var dlg_title = '';
+            
+            if(settings.isDatabaseStructure){
+            
+                url = url + "admin/structure/fields/selectLinkField.html?&db="
+                    + window.hWin.HAPI4.database
+                    + '&source_ID='+source_ID;
+               
+               dlg_title = 'Select or Create new link field type';   
+            }else{
+
+                url = url + "hclient/framecontent/recordAddLink.php?&db="
+                    + window.hWin.HAPI4.database
+                    + '&source_ID='+source_ID;
+                    
+               dlg_title = 'Add new link or create a relationship between records'; 
+               dim.w = 550;
+               dim.h = 380;
+            }
+                   
+            if(target_ID>0){
+                url = url +'&target_ID='+target_ID;
+            }
+            
+            var hWin = window.hWin?window.hWin:top;
                 
-            window.hWin.HEURIST4.msg.showDialog(url, 
+            hWin.HEURIST4.msg.showDialog(url, 
                 {
                     "close-on-blur": false,
                     //"no-resize": true,
                     //"no-close": true, //hide close button
-                    title: 'Select or Create new link field type',
+                    title: dlg_title,
                     height: dim.h,
                     width: dim.w,
+                    afterclose: function(){
+                        //remove link line
+                        drag_link_source_id = null;
+                        if(drag_link_line) drag_link_line.remove();
+                        drag_link_line = null;
+                    },
                     callback: function(context) {
+                        
                         if(context!="" && context!=undefined) {
-                            top.HEURIST4.msg.showMsgFlash("Link created...", 2000);
-                            getDataFromServer();
+                            var sMsg = (context==true)?'Link created...':context;
+                            hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
+                            if(settings.isDatabaseStructure){
+                                getDataFromServer();    
+                            }else{
+                                // Trigger refresh
+                                settings.onRefreshData.call(this);
+                            }
+                            
                         }
                     }
               });

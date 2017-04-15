@@ -87,7 +87,8 @@ function RectypeManager() {
                 _addNewTab(ind,
                     top.HEURIST.rectypes.groups[index].id,
                     top.HEURIST.rectypes.groups[index].name,
-                    top.HEURIST.rectypes.groups[index].description);
+                    top.HEURIST.rectypes.groups[index].description
+                    );
                 ind++;
             }
         }//for groups
@@ -178,9 +179,9 @@ function RectypeManager() {
 
         tabView.addTab(new YAHOO.widget.Tab({
                     id: grpID,
-                    label: "<label title='"+grpDescription+"'>"+grpName+"</label>",
+                    label: "<label title='Drag tab to reposition. Use [+/-] tab to add, rename or delete tabs'>"+grpName+"</label>",
                     content:
-                    ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
+                    ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + 
                         '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
 
                         // These are useless clutter. Filter by name was text, active only was checkbox
@@ -192,25 +193,19 @@ function RectypeManager() {
 
                         '</div>'+
                         '<div>'+
-                        // TODO: remove old code - orginally had to manually save changes
-                        // '<label id="lblNoticeAboutChanges'+grpID+'" '+
-                        // 'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
-                        // '&nbsp;&nbsp;&nbsp;'+
-                        // '<input id="btnSave'+grpID+'" type="button" value="Save order" '+
-                        // 'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
                         
-                        //Remarked temporarely 2016-05-11 '<input type="button" id="btnImportFromTemplate'+grpID+'" value="From templates" class="add"/>'+
-                        '<input type="button" id="btnImportFromDb'+grpID+'" value="From databases" class="add" style="margin-right:1em"/>'+
-                        '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add" style="margin-right:1em"/>'+
+                        '<input type="button" id="btnImportFromDb'+grpID+
+                        '" value="Get from templates" class="import" style="margin-right:1em; margin-bottom:10px;"/>'+
+                        '<input type="button" id="btnAddRecordType'+grpID+
+                        '" value="Add new record type" class="add" style="margin-right:1em; margin-bottom:10px;"/>'+
 
                         //'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
                         '</div></div>'+
                         '<div id="tabContainer'+grpID+'"></div>'+
                         '<div style="position:absolute;bottom:8px;right:425px;">'+
 
-                        //Remarked temporarely 2016-05-11 '<input type="button" id="btnImportFromTemplate'+grpID+'_2" value="From templates" class="add"/>'+
-                        '<input type="button" id="btnImportFromDb'+grpID+'_2" value="From databases" class="add" style="margin-right:1em"/>'+
-                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add" style="margin-right:1em"/>'+
+                        // '<input type="button" id="btnImportFromDb'+grpID+'_2" value="Get from templates" class="import" style="margin-right:1em"/>'+
+                        // '<input type="button" id="btnAddRecordType'+grpID+'_2" value="Add new record type" class="add" style="margin-right:1em"/>'+
                         '</div>'+
                         '</div>')
 
@@ -376,6 +371,7 @@ function RectypeManager() {
             });
 
             var myColumnDefs = [
+               /*
                 { key: "id", label: "Code", sortable:true, minWidth:30, maxAutoWidth:30, width:30, className:'right',
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
@@ -392,8 +388,23 @@ function RectypeManager() {
                         + oRecord.getData("name")+' records">'+ rectypeID + '</a>';
                     },
                 },
-                // 8/10/12 Concept ID hidden by Ian to make space, shoudl show on rollover of local code
-                { key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right', hidden:true },
+                */
+                { key: "id", label: "Add", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'right',
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = 
+                            '<a href="#addrec">'
+                            +'<img src="../../../common/images/add-record-small.png" ' // style="cursor:pointer;"
+                            +' title="Click this button to insert a new '+oRecord.getData("name")+'"></a>';
+                    }
+                },
+                { key: "conceptid", label: "Filter", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'right', 
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = 
+                            '<a href="#search">'
+                            +'<img src="../../../common/images/tool_filter.png" ' // style="cursor:pointer;"
+                            +'title="Click to launch search for '+oRecord.getData("name")+' records"></a>';
+                    }
+                },
 
                 { key: "icon", label: "Icon", className:'center', sortable:false,   width:40,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
@@ -518,7 +529,9 @@ function RectypeManager() {
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
                     if(elLink.hash === "#search") {
-                        window.open(top.HEURIST.baseURL_V4+'?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
+                        window.open(top.HEURIST.baseURL+'?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
+                    }else if(elLink.hash === "#addrec") {
+                        window.open(top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&db='+db+'&rec_rectype='+rectypeID,'_blank');
                     }else if(elLink.hash === "#edit_rectype") {
                         _editRecStructure(rectypeID);
                         //2016-06-14 Ian req _onAddEditRecordType(rectypeID, 0);
@@ -530,7 +543,7 @@ function RectypeManager() {
                         _upload_icon(rectypeID,1);
                         /*var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
-                        var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&rty_ID="+rectypeID;
+                        var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&rty_ID="+rectypeID;
                         top.HEURIST.util.popupURL(top, sURL, {
                         "close-on-blur": false,
                         "no-resize": false,
@@ -559,7 +572,7 @@ function RectypeManager() {
                                 }
 
 
-                                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+                                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                                 var callback = _updateAfterDelete;
                                 var params = "method=deleteRT&db=" + db + "&rtyID=" + rectypeID;
                                 Hul.getJsonData(baseurl, callback, params);
@@ -692,7 +705,10 @@ function RectypeManager() {
 
             var btnAddRecordType = Dom.get('btnAddRecordType'+grpID);
             btnAddRecordType.onclick = function (e) {
-                if(confirm('Before defining new record types we suggest importing suitable definitions\nfrom Heurist databases registered in the Heurist clearinghouse\n\n(Database menu > Structure > Acquire from databases)')){
+                if(confirm('Before defining new record (entity) types we suggest importing suitable '+
+                'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
+                'Those with registration IDs less than 1000 are templates curated by the Heurist team. '+
+                '\n\nUse:  Manage tab > Structure > Browse templates')){
                     var currentTabIndex = tabView.get('activeIndex');
                     var grpID = tabView.getTab(currentTabIndex).get('id');
                     _onAddEditRecordType(0, grpID);
@@ -706,7 +722,7 @@ function RectypeManager() {
 
             btnAddRecordType = Dom.get('btnImportFromDb'+grpID);
             btnAddRecordType.onclick = function(){
-                var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/selectDBForImport.php?popup=1&db="+ db +
+                var sURL = top.HEURIST.baseURL + "admin/structure/import/selectDBForImport.php?popup=1&db="+ db +
                 "&grpId="+grpID;
 
                 Hul.popupURL(top, sURL, {
@@ -727,7 +743,7 @@ function RectypeManager() {
 /*Remarked temporarely 2016-05-11
             btnAddRecordType = Dom.get('btnImportFromTemplate'+grpID);
             btnAddRecordType.onclick = function(){
-                var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/annotatedTemplate.php?popup=1&db="+ db +
+                var sURL = top.HEURIST.baseURL + "admin/structure/import/annotatedTemplate.php?popup=1&db="+ db +
                 "&grpId="+grpID;
 
                 Hul.popupURL(top, sURL, {
@@ -856,7 +872,7 @@ function RectypeManager() {
             //_updateResult(""); //debug
             //return;//debug
 
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -999,10 +1015,10 @@ function RectypeManager() {
     function _editDetailType(detailTypeID) {
         var URL = "";
         if(detailTypeID) {
-            URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db+"&detailTypeID="+detailTypeID;
+            URL = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db+"&detailTypeID="+detailTypeID;
         }
         else {
-            URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
+            URL = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db;
         }
 
         var dim = Hul.innerDimensions(top);
@@ -1011,7 +1027,7 @@ function RectypeManager() {
                 "close-on-blur": false,
                 "no-resize": false,
                 height: 700,
-                width: 700,
+                width: 840,
                 title: 'Edit field type',
                 callback: function(changedValues) {
                     if(Hul.isnull(changedValues)) {
@@ -1057,7 +1073,7 @@ function RectypeManager() {
                 }
 
 
-                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/duplicateRectype.php";
+                var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/duplicateRectype.php";
                 var callback = _editAfterDuplicate;
                 var params = "db=" + db + "&rtyID=" + rectypeID;
                 Hul.getJsonData(baseurl, callback, params);
@@ -1071,7 +1087,7 @@ function RectypeManager() {
     //
     function _editRecStructure(rty_ID) {
 
-        var URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
+        var URL = top.HEURIST.baseURL + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
         //this.location.replace(URL);
 
         var dim = Hul.innerDimensions(top);
@@ -1097,7 +1113,7 @@ function RectypeManager() {
 
     //art 2014-05-26 - NOT USED ANYMORE now it updates in editRectypeTitle
     function _updateTitleMask(rty_ID){
-        var URL = top.HEURIST.baseURL_V3 + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+db+"&recTypeIDs="+rty_ID;
+        var URL = top.HEURIST.baseURL + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+db+"&recTypeIDs="+rty_ID;
 
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
@@ -1114,13 +1130,13 @@ function RectypeManager() {
     // listener of add button
     //
     function _onAddFieldType(){
-    var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
+    var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db;
 
     Hul.popupURL(top, url,
     {   "close-on-blur": false,
     "no-resize": false,
     height: 430,
-    width: 650,
+    width: 840,
     callback: function(context) {
     // NO ACTION REQUIRED HERE
     }
@@ -1134,7 +1150,7 @@ function RectypeManager() {
 
         if(_needToSaveFirst()) { return; }
 
-        var url = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectype.html?db="+db;
+        var url = top.HEURIST.baseURL + "admin/structure/rectypes/editRectype.html?db="+db;
         if(rty_ID>0){
             url = url + "&rectypeID="+rty_ID; //existing
         }else{
@@ -1317,7 +1333,7 @@ function RectypeManager() {
 
         if(!Hul.isnull(str)){
 
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateOnSaveGroup;
             var params = "method=saveRTG&db="+db+"&data=" + encodeURIComponent(str);
 
@@ -1368,7 +1384,7 @@ function RectypeManager() {
         var str = YAHOO.lang.JSON.stringify(orec);
 
         if(!Hul.isnull(str)) {
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = null;//_updateOnSaveGroup;
             var params = "method=saveRTG&db="+db+"&data=" + encodeURIComponent(str);
 
@@ -1427,7 +1443,7 @@ function RectypeManager() {
                 for (ind in _groups){
                     if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
 
-                        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+                        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                         var callback = _updateAfterDeleteGroup;
                         var params = "method=deleteRTG&db="+db+"&rtgID=" + grpID;
                         Hul.getJsonData(baseurl, callback, params);
@@ -1517,10 +1533,9 @@ function onGroupChange() {
 }
 
 function _refreshClientStructure(context){
-console.log('refresh rectypes');
     top.HEURIST.rectypes = context.rectypes;
-    if(window.hWin && window.hWin.HEURIST4){
-        window.hWin.HEURIST4.rectypes = context.rectypes;
+    if(top.hWin && top.hWin.HEURIST4){
+        top.hWin.HEURIST4.rectypes = context.rectypes;
     }
 }
 
@@ -1532,7 +1547,7 @@ function _upload_icon(rectypeID,mode) {
     rt_name =  top.HEURIST.rectypes.names[rectypeID];
 
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID+"&rty_Name=" + rt_name;
+    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID+"&rty_Name=" + rt_name;
     top.HEURIST.util.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,

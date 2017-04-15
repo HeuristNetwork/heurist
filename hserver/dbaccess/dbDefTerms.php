@@ -162,8 +162,6 @@ class DbDefTerms extends DbEntityBase
          $query = $query.$this->searchMgr->getOffset()
                         .$this->searchMgr->getLimit();
         
-//error_log($query);     
-
         $res = $this->searchMgr->execute($query, $is_ids_only, 'defTerms');
         return $res;
 

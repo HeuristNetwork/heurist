@@ -61,7 +61,7 @@ $.widget( "heurist.profile_edit", {
 
             var that = this;
 
-            this.edit_form.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/profile/profile_edit.html?t="+(new Date().getTime()),
+            this.edit_form.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_edit.html?t="+(new Date().getTime()),
                 function(){
                     
                     that.edit_form.css('overflow','hidden');
@@ -249,7 +249,7 @@ $.widget( "heurist.profile_edit", {
         var $dd = that.edit_form.find('#imgdiv');
         var id = window.hWin.HEURIST4.util.random();
         if(true){
-            $dd.load(window.hWin.HAPI4.basePathV4+'hserver/utilities/captcha.php?id='+id);
+            $dd.load(window.hWin.HAPI4.baseURL+'hserver/utilities/captcha.php?id='+id);
         }else{
             $dd.empty(); //find("#img").remove();
             $('<img id="img" src="hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
@@ -361,7 +361,7 @@ $.widget( "heurist.profile_edit", {
                             if(that.options.isdialog){
                                 that.edit_form.dialog("close");
                                 if(that.options.isregistration){
-                                    window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.basePathV4+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                    window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgDlg("User information saved");
                                 }

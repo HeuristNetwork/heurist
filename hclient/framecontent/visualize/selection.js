@@ -141,6 +141,16 @@ function preventMenu(event) {
     event.preventDefault();
 }
 
+function closeRectypeSelector(){     
+    if(settings.isDatabaseStructure){
+            var ele = $('#list_rectypes');
+            if(ele.is(':visible')){
+                ele.hide();     
+                $('#showRectypeSelector').button({icons:{secondary:'ui-icon-carat-1-s'}});
+            }
+    }
+}
+
 /**
 * Function called on mouse down:
 * Deselects all selected nodes 
@@ -148,6 +158,9 @@ function preventMenu(event) {
 */
 function onMouseDown() {
 //console.log("Mouse down");
+
+    closeRectypeSelector();
+
     rightClicked = (selectionMode=='multi');
     if(rightClicked) {
         d3.event.preventDefault();

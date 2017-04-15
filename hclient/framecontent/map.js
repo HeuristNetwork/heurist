@@ -123,7 +123,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
             //mylayout.changeOption('center','minSize',300);
             //$(".ui-layout-resizer-south").css('height',7);
 
-            var tha = $('#mapping').height();
+            var tha = $('#mapping').height();    //entire height of layout
             var th = Math.floor(tha*0.2);
             th = th>200?200:th;
 
@@ -139,7 +139,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 if(ismap){
                     mylayout.sizePane('south', th);
                 }else{
-                    mylayout.sizePane('south', tha-40);
+                    mylayout.sizePane('south', tha-30);  //center panel with map - reduced to minimum (30px)
                 }
             }
             if(ismap || !istime){
@@ -182,8 +182,17 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
                 _updateLayout();   //show hide panels
 
+var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
+var ele_warn = $('#map_limit_warning');
+console.log(_mapdata.limit_warning+'  '+_mapdata.mapenabled+'  '+MAXITEMS);
+if(_mapdata.limit_warning){
+    //cnt = _mapdata.options.items.length;
+    ele_warn.html('These results are limited to '+MAXITEMS+' records<br>(limit set in your profile Preferences)<br>Please filter to a smaller set of results').show();//.delay(2000).fadeOut(10000);
+}else{
+    ele_warn.hide();
+}
 //console.log('add dataset '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
-//console.log('map: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
+//console.log('map cnt: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
                 window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
                 _reloadDataset( dataset_id );
@@ -270,6 +279,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 
                 var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
 
+                var pnt_counts = 0; //in case MarkerClusterer we have to increase the delay
+                
                 dataset.loadItems(mapdata.options.items);
                 dataset.each(function(item){
                     item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection
@@ -291,6 +302,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                                     if (point.lat() > maxLat) maxLat = point.lat();
                                     if (point.lng() < minLng) minLng = point.lng();
                                     if (point.lng() > maxLng) maxLng = point.lng();
+                                    pnt_counts++;
                                 }
                         }
                     }
@@ -315,7 +327,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 dataset.show();
                 
                 if(forceZoom){
-                    setTimeout( function(){ _zoomDataset( dataset_id );}, 500 );
+                    setTimeout( function(){ _zoomDataset( dataset_id );}, pnt_counts>1000?2000:500 );
                 }
     }
 
@@ -888,7 +900,9 @@ console.log('tileloaded 2');
         //timemap is already inited
         if(that.map_control!=null){
 
-                $( document ).bubble('closeAll');  //close all popups
+                if($.isFunction($( document ).bubble)){
+                    $( document ).bubble('closeAll');  //close all popups    
+                }
 
                 if(__startup_mapdocument>0)
                     that.map_control.loadMapDocumentById(__startup_mapdocument);    //see map_overlay.js
@@ -907,6 +921,36 @@ console.log('tileloaded 2');
             if(!_mapdata){
                 _mapdata = [{id: "main", type: "basic", options: { items: [] }}];
             }
+            
+            var useMarkerClusterer = window.hWin.HEURIST4.util.getUrlParameter('mapcluster');
+            var markerClustererOpts = {};
+            
+            if(!window.hWin.HEURIST4.util.isempty(useMarkerClusterer)){ //take all MarkerClusterer options from URL
+            
+                if(useMarkerClusterer=='off'){
+                   useMarkerClusterer = false; 
+                }else{
+                    var params = useMarkerClusterer.split(',');
+                    if(params.length>0 && params[0]>0){
+                        markerClustererOpts['gridSize'] = parseInt(params[0]);
+                    }
+                    if(params.length>1 && params[1]>0){
+                        markerClustererOpts['minimumClusterSize'] = parseInt(params[1]);
+                    }
+                    if(params.length>2 && params[2]>0 && params[2]<17){
+                        markerClustererOpts['maxZoom'] = parseInt(params[2]);
+                    }
+                }
+                
+            }else{
+                //MarkerClusterer options
+                useMarkerClusterer = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)==1);
+                markerClustererOpts = 
+                    { gridSize: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 25)), //The grid size of a cluster in pixels.
+                      minimumClusterSize: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_count', 2)), //The minimum number of markers to be in a cluster before the markers are hidden and a count is shown.
+                      maxZoom: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 15))};   //The maximum zoom level that a marker can be part of a cluster.
+            }
+            
 
             // Initialize TimeMap
             tmap = TimeMap.init({
@@ -917,7 +961,9 @@ console.log('tileloaded 2');
                 options: {
                     mapZoom: defaultZoom,
                     theme: customTheme,
-                    eventIconPath: window.hWin.HAPI4.iconBaseURL
+                    eventIconPath: window.hWin.HAPI4.iconBaseURL,
+                    useMarkerClusterer: useMarkerClusterer,
+                    markerClustererOpts: markerClustererOpts
                 }
                 , dataLoadedFunction: __onDataLoaded
                 }, tmap);
@@ -1416,7 +1462,7 @@ console.log('tileloaded 2');
                 if(item.opts.info && item.opts.info.indexOf('http://')==0){
                     popupURL =  item.opts.info; //load content from url
                 }else{
-                    popupURL = window.hWin.HAPI4.basePathV4 + 'records/view/renderRecordData.php?mapPopup=1&recID='
+                    popupURL = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='
                             +item.opts.recid+'&db='+window.hWin.HAPI4.database;
                     
                     //html =  bubble_header + item.opts.info + '</div>'; //predefined content
@@ -1437,14 +1483,14 @@ console.log('tileloaded 2');
 
                 ed_html = bubble_header
             +   '<div style="display:inline-block;">'
-            +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+window.hWin.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
-            +     '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+window.hWin.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
+            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
             +   '</div>'
             +  ((window.hWin.HAPI4.currentUser.ugr_ID>0)?
                 '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" >'
               /*  '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" '
             + 'class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
-            //+ ' onclick={event.preventDefault(); window.open("'+(window.hWin.HAPI4.basePathV3+'records/edit/editRecord.html?db='+window.hWin.HAPI4.database+'&recID='+recID)+'", "_new");} >'
+            //+ ' onclick={event.preventDefault(); window.open("'+(window.hWin.HAPI4.baseURL+'records/edit/editRecord.html?db='+window.hWin.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'*/
             +   '</div>':'')
             + '</div>';
@@ -1551,8 +1597,8 @@ ed_html +
                         }, text:false})
                      .click(function( event ) {
                 event.preventDefault();
-                //window.open(window.hWin.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
-                window.open(window.hWin.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
+                //window.open(window.hWin.HAPI4.baseURL + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
+                window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
                     });
             }
 
@@ -1686,8 +1732,9 @@ ed_html +
 
         onWinResize: function(){
             _onWinResize();
-            if(tmap && tmap.map){ //fix google map bug
-                tmap.map.resizeTo(0,0)
+            if(tmap && tmap.map){ //fix google map bug to force redraw on previously hidden area
+                    var ele = $("#mapping");
+                    tmap.map.resizeTo(ele.width(),ele.height());
             }
         },
 

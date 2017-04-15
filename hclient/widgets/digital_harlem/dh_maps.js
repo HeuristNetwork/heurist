@@ -218,15 +218,35 @@ $.widget( "heurist.dh_maps", {
         var recId = $rdiv.attr('recid');
 
         //hack $('#map-doc-select').click();
+        this.loadMapDocument(recId);
+    },
+    
+
+    loadMapDocument: function(recId){
+        
         var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
         if(app && app.widget){
             //switch to Map Tab
             window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
 
-            //load Map Document
-            $(app.widget).app_timemap('loadMapDocumentById', recId);
+            var doc = $(app.widget).app_timemap('getMapDocumentDataById', recId);
+            
+            if(window.hWin.HEURIST4.util.isnull(doc)){
+                //load Map Document
+                $(app.widget).app_timemap('loadMapDocumentById', recId);
+            }else{
+                    if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
+                        
+                        var ele = $(top.document.body).find('#dh_search_2');
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
+                        {options:{resizable:true, modal:false, width:ele.width(), height:ele.height()-100}, 
+                            my:'left top', at:'left top', of:ele}, false);
+                    }
+            }            
+            
         }
-
+        
     }
 
 });

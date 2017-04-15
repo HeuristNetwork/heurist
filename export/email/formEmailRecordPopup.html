@@ -132,9 +132,9 @@ window.HEURIST.edit = {
 			if(form.setAttribute){
                 //DBGSESSID=425944380594800002;d=1,p=0,c=07&
 			 	form.setAttribute("jsonAction", 
-                    top.HEURIST.baseURL_V3+'export/email/emailRecordDetails.php?db='+db);
+                    top.HEURIST.baseURL+'export/email/emailRecordDetails.php?db='+db);
 			}
-			form.action = top.HEURIST.baseURL_V3+'export/email/emailRecordDetails.php?db='+db;
+			form.action = top.HEURIST.baseURL+'export/email/emailRecordDetails.php?db='+db;
 
 			if (form.onsubmit  &&  ! form.onsubmit()) {
                 var ele = document.getElementById('btnSubmit');
@@ -159,7 +159,7 @@ window.HEURIST.edit = {
 
 	if(!top.HEURIST.edit){
 		//for admin part - editRecord.js is not loaded initially
-		top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"records/edit/editRecord.js");		// edit-specific HEURIST functions
+		top.HEURIST.loadScript(top.HEURIST.baseURL+"records/edit/editRecord.js");		// edit-specific HEURIST functions
 	}
 
 //"../../common/php/loadHAPI.php"

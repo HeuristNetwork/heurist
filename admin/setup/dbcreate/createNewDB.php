@@ -226,7 +226,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
 
                     }else{
-                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
+                        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
                             if($.isFunction($('body').profile_edit)){
                                 doRegister();
                             }else{

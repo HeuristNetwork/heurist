@@ -737,7 +737,7 @@ echo '</div>';
             ' and rec_RecTypeID = '.$relRT.
             ' and dtl_Value = ' . $bib['rec_ID']);          //linked resource
 
-        if (mysql_num_rows($from_res) <= 0  &&  mysql_num_rows($to_res) <= 0) return;
+        if (($from_res==false || mysql_num_rows($from_res) <= 0)  &&  ($to_res==false || mysql_num_rows($to_res) <= 0)) return;
 
         if($is_map_popup){
            print '<div>';
@@ -824,16 +824,16 @@ function print_linked_details($bib) {
     'and dtl_Value = ' . $bib['rec_ID'].' '.
     'and rec_RecTypeID != '.$relRT.' '.
     'and '.(count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
-    (is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")');
+    ((is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")').
+    ' ORDER BY rec_RecTypeID, rec_Title');
     $res = mysql_query($query);
 
-    if (mysql_num_rows($res) <= 0) return;
+    if ($res==false || mysql_num_rows($res) <= 0) return;
     
         if($is_map_popup){
            print '<div>';
         }else{
            print '<div class=detailRowHeader>Linked from'; 
-        
     ?>
         <div class=detailRow>
             <div class=detailType>Referencing records</div>
@@ -863,15 +863,19 @@ function print_linked_details($bib) {
         $cmts = getAllComments($bib["rec_ID"]);
         $result = loadWoot(array("title" => "record:".$bib["rec_ID"]));
         if (! $result["success"] && count($cmts) == 0) return;
-        ?>
-    </div>
-    <div class=detailRowHeader>Text
+        
+        $content = "";
+        $woot = $result["woot"];
+        foreach ($woot["chunks"] as $chunk) {
+            $content .= $chunk["text"] . " ";
+        }
+        if (strlen($content) == 0 && count($cmts) == 0) return;
 
-        <?php
-
-        print_woot_precis($result["woot"],$bib);
+        
+        print '<div class=detailRowHeader>Text';
+        print_woot_precis($content, $bib);
         print_threaded_comments($cmts);
-        print '<br>&nbsp;'; // avoid ugly spacing
+        print '</div><br>&nbsp;'; // avoid ugly spacing
     }
 
 
@@ -931,12 +935,7 @@ function print_linked_details($bib) {
     [groupId] =>
     [groupName] => ) ) ) ) )
     */
-    function print_woot_precis($woot,$bib) {
-
-        $content = "";
-        foreach ($woot["chunks"] as $chunk) {
-            $content .= $chunk["text"] . " ";
-        }
+    function print_woot_precis($content,$bib) {
         if (strlen($content) == 0) return;
         ?>
         <div class=detailRow>
@@ -976,7 +975,6 @@ function print_linked_details($bib) {
                 ?>
             </div>
         </div>
-    </div>
     <?php
 }
 

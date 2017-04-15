@@ -43,7 +43,7 @@ function doLogin(isforsed){
         var $dlg = login_dialog;
 
         //load login dialogue
-        $dlg.load(window.hWin.HAPI4.basePathV4 + "hclient/widgets/profile/profile_login.html?t="+window.hWin.HEURIST4.util.random(), function(){ 
+        $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profile_login.html?t="+window.hWin.HEURIST4.util.random(), function(){ 
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){
@@ -57,7 +57,7 @@ function doLogin(isforsed){
                     var $dd = $dlg.find('#imgdiv');
                     var id = window.hWin.HEURIST4.util.random();
                     if(true){
-                        $dd.load(window.hWin.HAPI4.basePathV4+'hserver/utilities/captcha.php?id='+id);
+                        $dd.load(window.hWin.HAPI4.baseURL+'hserver/utilities/captcha.php?id='+id);
                     }else{
                         $dd.empty(); //find("#img").remove();
                         $('<img id="img" src="hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
@@ -172,7 +172,7 @@ function doLogin(isforsed){
                     allFields.val( "" ).removeClass( "ui-state-error" );
                     if( isforsed && !window.hWin.HAPI4.is_logged() ){
                         //redirect to select database
-                        window.location  = window.HAPI4.basePathV4; //+ "hserver/utilities/list_databases.php";
+                        window.location  = window.HAPI4.baseURL; //+ "hserver/utilities/list_databases.php";
                     }
                 },
                 open: function() {
@@ -214,7 +214,7 @@ function doRegister(){
         profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID});
 
     }else{
-        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
             if($.isFunction($('body').profile_edit)){
                 doRegister();
             }else{

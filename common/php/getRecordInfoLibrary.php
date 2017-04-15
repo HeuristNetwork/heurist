@@ -375,22 +375,26 @@ function getAllReminders($recID) {
 function getAllComments($recID) {
     $res = mysql_query("select cmt_ID, cmt_Deleted, cmt_Text, cmt_ParentCmtID, cmt_Added, cmt_Modified, cmt_OwnerUgrpID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from recThreadedComments left join " . USERS_DATABASE . ".sysUGrps usr on cmt_OwnerUgrpID=usr.ugr_ID where cmt_RecID = $recID order by cmt_Added");
     $comments = array();
-    while ($cmt = mysql_fetch_assoc($res)) {
-        if ($cmt["cmt_Deleted"]) {
-            /* indicate that the comments exists but has been deleted */
+    if($res==false){
+        
+    }else{
+        while ($cmt = mysql_fetch_assoc($res)) {
+            if ($cmt["cmt_Deleted"]) {
+                /* indicate that the comments exists but has been deleted */
+                $comments[$cmt["cmt_ID"]] = array("id" => $cmt["cmt_ID"],
+                    "owner" => $cmt["cmt_ParentCmtID"],
+                    "deleted" => true);
+                continue;
+            }
             $comments[$cmt["cmt_ID"]] = array("id" => $cmt["cmt_ID"],
-                "owner" => $cmt["cmt_ParentCmtID"],
-                "deleted" => true);
-            continue;
-        }
-        $comments[$cmt["cmt_ID"]] = array("id" => $cmt["cmt_ID"],
-            "text" => $cmt["cmt_Text"],
-            "owner" => $cmt["cmt_ParentCmtID"], /* comments that owns this one (i.e. parent, just like in Dickensian times) */
-            "added" => $cmt["cmt_Added"],
-            "modified" => $cmt["cmt_Modified"],
-            "user" => $cmt["Realname"],
-            "userID" => $cmt["cmt_OwnerUgrpID"],
-            "deleted" => false);
+                "text" => $cmt["cmt_Text"],
+                "owner" => $cmt["cmt_ParentCmtID"], /* comments that owns this one (i.e. parent, just like in Dickensian times) */
+                "added" => $cmt["cmt_Added"],
+                "modified" => $cmt["cmt_Modified"],
+                "user" => $cmt["Realname"],
+                "userID" => $cmt["cmt_OwnerUgrpID"],
+                "deleted" => false);
+        }//while
     }
     return $comments;
 }
@@ -837,16 +841,20 @@ function getAllRectypeConstraint() {
 * @param     boolean $getAllDescentTerms determines whether to recurse and retrieve children of children (default = true)
 * @return    array  of term IDs
 */
-function getTermOffspringList($termID, $getAllDescentTerms = true) {
+function getTermOffspringList($termID, $parentlist = null) {
+    if($parentlist==null) $parentlist = array($termID);
     $offspring = array();
     if ($termID) {
         $res = mysql_query("select * from defTerms where trm_ParentTermID=$termID");
         if ($res && mysql_num_rows($res)) { //child nodes exist
             while ($row = mysql_fetch_assoc($res)) { // for each child node
                 $subTermID = $row['trm_ID'];
-                array_push($offspring, $subTermID);
-                if (true){ //ARTEM: trm_ChildCount is not reliable   }$row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
-                    $offspring = array_merge($offspring, getTermOffspringList($subTermID));
+                if(array_search($subTermID, $parentlist)===false){
+                    array_push($offspring, $subTermID);
+                    array_push($parentlist, $subTermID);
+                    $offspring = array_merge($offspring, getTermOffspringList($subTermID, $parentlist));
+                }else{
+                    error_log('Database '.DATABASE.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
                 }
             }
         }
@@ -869,6 +877,33 @@ function getTermListAll($termDomain) {
         }
         return $terms;
 }
+
+function getTermCodes($termIDs) {
+    $labels = array();
+    if ($termIDs) {
+        $res = mysql_query("select trm_ID, LOWER(trm_Code) from defTerms where trm_ID in (".implode(",", $termIDs).")");
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_row($res)) {
+                $labels[$row[0]] = $row[1];
+            }
+        }
+    }
+    return $labels;
+}
+
+function getTermByCode($code){
+
+    if ($label) {
+        $res = mysql_query("select trm_ID from defTerms where LOWER(trm_Code) = '".mysql_real_escape_string($code)."'" );
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_row($res)) {
+                return $row[0];
+            }
+        }
+    }
+    return false;
+}
+
 
 function getTermLabels($termIDs) {
     $labels = array();

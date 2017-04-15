@@ -33,7 +33,8 @@ $.widget( "heurist.svs_list", {
 
         buttons_mode: false,
         allowed_UGrpID: [], // allowed groups
-        allowed_svsIDs: []   // allowed searches
+        allowed_svsIDs: [], // allowed searches
+        init_svsID:null    // launch search on init
     },
 
     allowed_svsIDs: null,
@@ -271,7 +272,7 @@ $.widget( "heurist.svs_list", {
 
             //new
             var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="'+this._HINT_FACETED+'">'
-            //+'<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+window.hWin.HAPI4.basePathV4+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
+            //+'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
             +'<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
             +'&nbsp;Faceted search</div>'
 
@@ -375,14 +376,14 @@ $.widget( "heurist.svs_list", {
 
         //verify that all required libraries have been loaded
         if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
-            $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
+            $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
             return;
         }else if(!islogged){
 
             window.hWin.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();
 
         }else if(!$.ui.fancytree._extensions["dnd"]){
-            //    $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
+            //    $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
             alert('drag-n-drop extension for tree not loaded')
             return;
         }else if(!window.hWin.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded - load from sysUgrGrps.ugr_NavigationTree
@@ -783,7 +784,7 @@ $.widget( "heurist.svs_list", {
                         //vertical-align:top;
 
                         //$span.find("> span.fancytree-icon").addClass("ui-icon-folder-open ui-icon").css('display','inline-block');
-                        //s = '<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+window.hWin.HAPI4.basePathV4+'hclient/assets/fa-cubes.png&quot;);">';
+                        //s = '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);">';
                     }else{
 
                         var s_hint = '';  //NOT USED this hint shows explanatory text about mode of search:faceted,with rules,rules only
@@ -1139,10 +1140,16 @@ $.widget( "heurist.svs_list", {
                 }
             });
 
-            $.each( tree.find('li'), function( idx, item ){
-                $('<div class="svs-contextmenu2 ui-icon ui-icon-pencil"></div>')
+            $.each( tree.find('span.fancytree-node'), function( idx, item ){
+
+                var ele = $(item); //.find('span.fancytree-node');
+                ele.css({display: 'block', width:'99%'});         
+                
+                ele.find('.fancytree-title').css({display: 'inline-block', width:'80%'}).addClass('truncate');
+                
+                $('<div class="svs-contextmenu2 ui-icon ui-icon-menu"></div>')
                 .click(function(event){ tree.contextmenu("open", $(event.target) ); window.hWin.HEURIST4.util.stopEvent(event); return false;})
-                .appendTo(item);
+                .appendTo(ele);
 
                 if($(item).find('span.fancytree-folder').length==0)
                 {
@@ -1151,10 +1158,12 @@ $.widget( "heurist.svs_list", {
                     $(item).mouseenter(
                         function(event){
                             var ele = $(item).find('.svs-contextmenu2');
-                            ele.css('display','inline-block');
+                            //ele.css('color','red');
+                            ele.show();//css('display','inline-block');
                     }).mouseleave(
                         function(event){
                             var ele = $(item).find('.svs-contextmenu2');
+                            //ele.css('color','black');
                             ele.hide();
                     });
                     /*
@@ -1166,8 +1175,8 @@ $.widget( "heurist.svs_list", {
                     $(event.target).find('.svs-contextmenu2').hide();
                     });*/
                 }
-            })
-
+            });
+            
 
             var context_opts = this._getAddContextMenu(groupID);
 
@@ -1551,7 +1560,7 @@ $.widget( "heurist.svs_list", {
             this.edit_dialog.show( mode, groupID, svsID, squery, callback );
 
         }else{
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/search/svs_edit.js',
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_edit.js',
                 function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
         }
 
@@ -1581,7 +1590,7 @@ $.widget( "heurist.svs_list", {
 
     , _showDbSummary: function(){
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
 
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};

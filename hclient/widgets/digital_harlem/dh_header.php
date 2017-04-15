@@ -27,86 +27,15 @@ $statistics = "";
 $system = new System();
 // connect to given database
 if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
-
+    //include('dh_stats.php');
     $appcode = @$_REQUEST['app'];
     if($appcode=='DigitalHarlem1935'){
         $appcode = 4800; //4751;
-        $date_filter = '1934-12-31T23:59:59.999Z<>1936-01-01';
-        $explanation = '1935';
     }else if($appcode=='DigitalHarlem'){
         $appcode = 4799; //4750
-        $date_filter = '1914-12-31T23:59:59.999Z<>1931-01-01';
-        $explanation = '1915-1930';
+    }else{
+        $appcode = 0;
     }  
-
-
-    $stats = array();
-
-    //search for PERSONS INVOLVED INTO EVENTS
-    $records = recordSearch($system, array(
-        'q'=>'[{"t":"10"},{"relatedfrom:14":[{"t":"14"},{"f:10":"'.$date_filter.'"}]}]',
-        'detail'=>'count'));
-    //"1914-12-31T23:59:59.999Z<>1931-01-01"
-
-    if(@$records['status']!='ok'){
-        $stats['10'] = 'XXX';
-    }else{
-        $stats['10'] = $records['data']['count'];
-    }
-
-
-    //EVENTS
-    $records = recordSearch($system, array(
-        'q'=>'[{"t":"14"},{"f:10":"'.$date_filter.'"}]',
-        'detail'=>'count'));
-
-    if(@$records['status']!='ok'){
-        $stats['14'] = 'XXX';
-    }else{
-        $stats['14'] = $records['data']['count'];
-    }
-
-
-    list($dmin, $dmax) = explode('<>',$date_filter);
-
-    $query = "SELECT count(distinct d2.dtl_Value) as count 
-    FROM Records, recDetails d1, recDetails d2 WHERE rec_RecTypeID=16 and 
-    d1.dtl_RecID = rec_ID and d2.dtl_RecID = rec_ID and     
-    d1.dtl_DetailTypeID=10 and d1.dtl_Value between '$dmin' and '$dmax' and
-    d2.dtl_DetailTypeID=90 ";
-
-    /* alternative query          
-    "SELECT count(distinct rl_TargetID) as count 
-    FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and 
-    rl_SourceID = rec_ID and rl_DetailTypeID=90 and
-    dtl_RecID = rec_ID and     
-    dtl_DetailTypeID=10 and dtl_Value between '1934-12-31' and '1936-01-01'"          
-    */        
-    $res = $system->get_mysqli()->query($query);
-    if($res){
-        $row = $res->fetch_assoc();
-        $stats['16']= $row["count"];   //USED ADDRESSES (PLACE FUNCTIONS)
-    }
-
-
-    //DOCUMENTS
-    $records = recordSearch($system, array(
-        'q'=>'[{"t":"15"},{"f:9":"'.$date_filter.'"}]',
-        'detail'=>'count'));
-
-    if(@$records['status']!='ok'){
-        $stats['15'] = 'XXX';
-    }else{
-        $stats['15'] = $records['data']['count'];
-    }
-
-    $statistics = '<p>Currently presenting '// .'<b title="Number of people">'.@$stats[10].'</b> people, 
-    .'<b title="Number of events">'.@$stats[14]
-    .'</b> events, <b title="Number of addresses">'.@$stats[16]
-    .'</b> addresses and <b title="Number of documents">'.@$stats[15]
-    .'</b> documentary sources related to Harlem, '.$explanation.'</p>';
-
-
 }
 ?>
 <html>

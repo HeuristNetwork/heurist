@@ -42,7 +42,7 @@ function hSvsEdit(args) {
     *
     * return false if saved search and true if rules
     */
-    function _fromDataToUI(svsID, squery, groupID){
+    function _fromDataToUI(svsID, squery, groupID, allowChangeGroupID){
 
         var $dlg = edit_dialog;
         if($dlg){
@@ -128,7 +128,7 @@ function hSvsEdit(args) {
                     svs_ugrid.val(domain);
                 }*/
                 //svs_ugrid.parent().show();
-                svs_ugrid.attr('disabled', !window.hWin.HEURIST4.util.isempty(groupID));
+                svs_ugrid.attr('disabled', !(allowChangeGroupID || window.hWin.HEURIST4.util.isempty(groupID)) );
             }
 
             var isRules = window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val());
@@ -154,7 +154,7 @@ function hSvsEdit(args) {
         if($.isFunction($('body').search_faceted_wiz)){ //already loaded
             showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
         }
 
     }
@@ -166,7 +166,7 @@ function hSvsEdit(args) {
 
        var that = this;
 
-        var url = window.hWin.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
         if(!window.hWin.HEURIST4.util.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
@@ -215,8 +215,14 @@ function hSvsEdit(args) {
                 return;
             }
         }
-
-
+        
+        //if not defined get last used
+        var allowChangeGroupID = false;
+        if(window.hWin.HEURIST4.util.isempty(groupID)){
+              groupID = window.hWin.HAPI4.get_prefs('last_savedsearch_groupid');
+              allowChangeGroupID = true;
+        }
+        
         if(callback){
             callback_method = callback;
         }
@@ -254,7 +260,7 @@ function hSvsEdit(args) {
             var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
-            $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
+            $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
@@ -280,48 +286,17 @@ function hSvsEdit(args) {
                     $dlg.find('#svs_Rules').val('');
                 });
 
+                /* this button is moved to bottom panel
                 $dlg.find("#svs_GetQuery").button({
                         label:'Get filter + rules as string',
                         title:'Gety query string for Mappable Query'})
-                .click(function( event ) {
-
-                    var filter = $dlg.find('#svs_Query').val();
-                    if(filter.trim()!=''){
-                        var rules = $dlg.find('#svs_Rules').val();
-
-                        var res = '';
-
-                        try {
-                            var r = $.parseJSON(filter);
-                            if($.isArray(r) || $.isPlainObject(r)){
-                                res = '{"q":'+filter;
-                            }
-                        }
-                        catch (err) {
-                        }
-                        if(res==''){
-                            res = '{"q":"'+filter+'"';
-                        }
-
-                        if(rules!=''){
-                            res = res + ',"rules":'+rules+'}';
-                        } else{
-                            res = res + '}';
-                        }
-                        window.hWin.HEURIST4.msg.showPrompt(
-                        '<label>Edit and copy it to paste in Mappable Query filter field</label>'
-                        + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
-                        + ' style="min-width: 400px; margin-left:0.2em" rows="4" cols="80">'
-                        +res
-                        +'</textarea>'
-                        );
-                    }
-                });
+                .click(__getFilterString);
+                */
 
                 var allFields = $dlg.find('input, textarea');
 
                 //that.
-                var isRules = _fromDataToUI(svsID, squery, groupID);
+                var isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
 
                 function __doSave(){   //save search
 
@@ -390,6 +365,8 @@ function hSvsEdit(args) {
                                     }
 
                                     window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
+                                    
+                                    window.hWin.HAPI4.save_pref('last_savedsearch_groupid', request.svs_UGrpID);
 
                                     $dlg.dialog( "close" );
 
@@ -411,6 +388,71 @@ function hSvsEdit(args) {
                     }
                 }
 
+                
+                function __getFilterString(){
+                    var filter = $dlg.find('#svs_Query').val();
+                    if(filter.trim()!=''){
+                        var rules = $dlg.find('#svs_Rules').val();
+
+                        var res = '';
+
+                        try {
+                            var r = $.parseJSON(filter);
+                            if($.isArray(r) || $.isPlainObject(r)){
+                                res = '{"q":'+filter;
+                            }
+                        }
+                        catch (err) {
+                        }
+                        if(res==''){
+                            //escape backslash to avoid errors
+                            res = '{"q":"'+filter.split('"').join('\\\"')+'"';
+                        }
+
+                        if(rules!=''){
+                            res = res + ',"rules":'+rules+'}';
+                        } else{
+                            res = res + '}';     
+                        }
+                        
+                        
+                        var buttons = {};
+                        buttons[window.hWin.HR('Copy')]  = function() {
+                            
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                            var target = $dlg.find('#dlg-prompt-value')[0];
+                            target.focus();
+                            target.setSelectionRange(0, target.value.length);
+                            var succeed;
+                            try {
+                                succeed = document.execCommand("copy");
+                                
+                                $dlg.dialog( "close" );
+                            } catch(e) {
+                                succeed = false;
+                                alert('Browser does not support');
+                            }                            
+                            
+                        }; 
+                        buttons[window.hWin.HR('Close')]  = function() {
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                            $dlg.dialog( "close" );
+                        };
+                        
+                        //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                        window.hWin.HEURIST4.msg.showPrompt(
+                        '<label>Edit and copy the string and paste into the Mappable Query filter field</label>'
+                        + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
+                        + ' style="min-width: 200px; margin-left:0.2em" rows="4" cols="50">'
+                        +res
+                        +'</textarea>',null,null,
+                        {options:{width:450, buttons:buttons},
+                        my:'center bottom', at:'center bottom', of: $dlg}
+                        );
+                    }
+                }
+                
+                
                 allFields.on("keypress",function(event){
                     var code = (event.keyCode ? event.keyCode : event.which);
                     if (code == 13) {
@@ -428,6 +470,7 @@ function hSvsEdit(args) {
                     resizable: false,
                     title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
                     buttons: [
+                        {text:window.hWin.HR('Get filter + rules as string'), click: __getFilterString},  //svs_GetQuery
                         {text:window.hWin.HR('Save'), click: __doSave},
                         {text:window.hWin.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );
@@ -444,7 +487,7 @@ function hSvsEdit(args) {
             });
         }else{
             //show dialogue
-            var isRules = _fromDataToUI(svsID, squery, groupID);
+            var isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
             edit_dialog.dialog("option",'title', window.hWin.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
             edit_dialog.dialog("open");
         }

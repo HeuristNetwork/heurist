@@ -55,6 +55,7 @@ function haddDataMenu() {
 
         $(parentdiv[0]).accordion('option', 'active', 0); //KEYBOARD
         $('#menulink-add-record').click();
+
     }
     
     
@@ -68,7 +69,7 @@ function haddDataMenu() {
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
 
                 if(ele.hasClass('h3link')){
-                    href = window.hWin.HAPI4.basePathV3 + href;
+                    href = window.hWin.HAPI4.baseURL + href;
                     //h3link class on menus implies location of older (vsn 3) code
                 }
                 
@@ -97,7 +98,7 @@ function haddDataMenu() {
                 
                 window.hWin.HAPI4.SystemMgr.is_logged(
                 function(){
-                   var url = window.hWin.HAPI4.basePathV4 + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
+                   var url = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
                    
                    var body = $(this.document).find('body');
                    var dim = {h:body.innerHeight(), w:body.innerWidth()};
@@ -106,7 +107,7 @@ function haddDataMenu() {
                         title: 'Import Records from CSV/TSV',
                         height: dim.h-5,
                         width: dim.w-5,
-                        'context_help':window.hWin.HAPI4.basePathV4+'context_help/importRecordsCSV.html #content'
+                        'context_help':window.hWin.HAPI4.baseURL+'context_help/importRecordsCSV.html #content'
                         //callback: _import_complete
                     });
                 

@@ -256,7 +256,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 				    <script  type="text/javascript">
 
 				    function backToGroup(){
-					    window.location.href = top.HEURIST.baseURL_V3 + "admin/ugrps/manageGroups.php?db=<?=$_REQUEST['db']?>&popup=<?=@$_REQUEST['popup']?>";
+					    window.location.href = top.HEURIST.baseURL + "admin/ugrps/manageGroups.php?db=<?=$_REQUEST['db']?>&popup=<?=@$_REQUEST['popup']?>";
 					    //window.history.go(-1);
 				    }
 

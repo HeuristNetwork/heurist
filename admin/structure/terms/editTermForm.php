@@ -41,7 +41,7 @@
     $term_name = @$_REQUEST['name'];
     $term_desc = @$_REQUEST['description'];
     $term_code = @$_REQUEST['code'];
-    $return_res = @$_REQUEST['return_res']?$_REQUEST['return_res']:"";
+    $return_res = @$_REQUEST['return_res']?$_REQUEST['return_res']:""; //keep added vocabulary id
     $need_close = false;
 
     $local_message = "";
@@ -121,7 +121,7 @@
             var context_return_res = "<?=$return_res ?>";
 
             function showOtherTerms(){
-                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL +
                     "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&treetype=<?=$_REQUEST['treetype'] ?>&db=<?=$_REQUEST['db'] ?>",
                     {
                         "close-on-blur": false,
@@ -129,7 +129,9 @@
                         height:750,     // height and width of term tree editing popup
                         width: 1200,
                         callback: function(needTreeReload) {
-                            context_return_res = 'ok';
+                            if(!(context_return_res>0)){
+                                context_return_res = 'ok';
+                            }
                         }
                 });
             }

@@ -52,8 +52,8 @@ function onDocumentReady(){
 //
 function onScriptsReady() {
 
-    if (!top.HEURIST.baseURL_V3) {
-        top.HEURIST.baseURL_V3 = location.protocol + "//" + location.hostname + top.HEURIST.baseURL_V3;
+    if (!top.HEURIST.baseURL) {
+        top.HEURIST.baseURL = location.protocol + "//" + location.hostname + top.HEURIST.baseURL;
     }
     
     //var dbname = top.HEURIST.getQueryVar("db");
@@ -65,9 +65,9 @@ function onScriptsReady() {
             dbname = "db="+dbname+"&";
         }
         //redirect to login
-        top.location.replace(top.HEURIST.baseURL_V3 +
+        top.location.replace(top.HEURIST.baseURL +
         "common/connect/login.php?"+dbname+
-        "last_uri=" + escape(top.HEURIST.baseURL_V3 + "records/edit/editRecord.html" + lsearch ));
+        "last_uri=" + escape(top.HEURIST.baseURL + "records/edit/editRecord.html" + lsearch ));
         return;
     }
 
@@ -84,7 +84,7 @@ function onScriptsReady() {
     }
 
     top.HEURIST.util.setDBName();
-    document.getElementById("home-link").href = top.HEURIST.baseURL_V3 + "?db=" +dbname;
+    document.getElementById("home-link").href = top.HEURIST.baseURL + "?db=" +dbname;
     
     document.getElementById("version").innerHTML = 'v'+top.HEURIST.VERSION;
 
@@ -125,7 +125,7 @@ function onScriptsReady() {
     //            
     //
     //
-    bugReportURL = top.HEURIST.baseURL_V3 + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+dbname;
+    bugReportURL = top.HEURIST.baseURL + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+dbname;
 
     var queryStr = "",
     recordEvent = "record";
@@ -137,8 +137,8 @@ function onScriptsReady() {
         queryStr += "bkmk_id="+top.HEURIST.parameters["bkmk_id"];
     }
     if ( queryStr) {
-        //0318 top.HEURIST.loadScript(top.HEURIST.baseURL_V3 +"common/php/loadRecordData.php?db="+dbname+"&"+queryStr,true);
-        $.getScript(top.HEURIST.baseURL_V3 +"common/php/loadRecordData.php?db="+dbname+"&"+queryStr,
+        //0318 top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?db="+dbname+"&"+queryStr,true);
+        $.getScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?db="+dbname+"&"+queryStr,
             function(){
                   top.HEURIST.edit.loadAllModules();
                   onRecordDataLoaded();
@@ -172,12 +172,12 @@ function onRecordDataLoaded(){
         var rec = (top && top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record ? top.HEURIST.edit.record:null);
         var recID =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["recID"]:0) || (top.HEURIST ? top.HEURIST.parameters["recID"]:0));
         if (! rec) {
-            //                    window.location.replace(top.HEURIST.baseURL_V3 +"common/html/msgInvalidRecID.html"+ (recID ? "?" + recID : ""));
+            //                    window.location.replace(top.HEURIST.baseURL +"common/html/msgInvalidRecID.html"+ (recID ? "?" + recID : ""));
              top.HEURIST.util.showError('Cannot load record '+recID);
              return;
         }
         if (rec.denied) {
-            //                    window.location.replace(window.HEURIST.baseURL_V3 +"common/html/msgAccessDenied.html"+ (recID ? "?" + recID : ""));
+            //                    window.location.replace(window.HEURIST.baseURL +"common/html/msgAccessDenied.html"+ (recID ? "?" + recID : ""));
         }
         if (rec.replacedBy) {
             // This record has been deprecated in favour of another ...
@@ -207,28 +207,28 @@ function onRecordDataLoaded(){
                 "<div>" +
                 (idx>0 ? "<a class=\"button\" style=\"height:18px !important\" title='It will save changes' "
                 +"onclick='{top.HEURIST.edit.navigate_torecord(null, "+order[idx-1]+
-                "); return false;}'><img src=\""+top.HEURIST.baseURL_V3+"/common/images/nav_prev.png\">previous</a>" : "") +
+                "); return false;}'><img src=\""+top.HEURIST.baseURL+"/common/images/nav_prev.png\">previous</a>" : "") +
                 (idx<order.length-1 ? "<a class=\"button\" style=\"float:right; height:18px !important\" title='It will save changes' "
                 +"onclick='{top.HEURIST.edit.navigate_torecord(null,"+order[idx+1]+");"
-                +" return false;}'>next<img src=\""+top.HEURIST.baseURL_V3+"/common/images/nav_next.png\"></a>" : "") +
+                +" return false;}'>next<img src=\""+top.HEURIST.baseURL+"/common/images/nav_next.png\"></a>" : "") +
                 "<div style=\"clear:both\"></div></div>";
             
         }else if (top.HEURIST.parameters["sid"]) {
-            var surl = top.HEURIST.baseURL_V3+"records/edit/setResultsNavigation.php?db="+dbname+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID;
+            var surl = top.HEURIST.baseURL+"records/edit/setResultsNavigation.php?db="+dbname+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID;
             top.HEURIST.util.getJsonData(surl, function(context) {
                 if (!context || context.count<1) return;
                 document.getElementById("search-nav").innerHTML =
                 "<div style=\"padding:10px 0;\">Record "+context.pos+" of "+context.count+" search results</div>" +
                 "<div>" +
                 (context.prev ? "<a class=\"button\" style=\"height:18px !important\" title='It will save changes' onclick='{top.HEURIST.edit.navigate_torecord(\""+top.HEURIST.parameters["sid"]+
-                '",'+context.prev+"); return false;}'><img src=\""+top.HEURIST.baseURL_V3+"/common/images/nav_prev.png\">previous</a>" : "") +
+                '",'+context.prev+"); return false;}'><img src=\""+top.HEURIST.baseURL+"/common/images/nav_prev.png\">previous</a>" : "") +
                 (context.next ? "<a class=\"button\" style=\"float:right; height:18px !important\" title='It will save changes' onclick='{top.HEURIST.edit.navigate_torecord(\""+
-                top.HEURIST.parameters["sid"]+'",'+context.next+"); return false;}'>next<img src=\""+top.HEURIST.baseURL_V3+"/common/images/nav_next.png\"></a>" : "") +
+                top.HEURIST.parameters["sid"]+'",'+context.next+"); return false;}'>next<img src=\""+top.HEURIST.baseURL+"/common/images/nav_next.png\"></a>" : "") +
 
                 //(context.prev ? "<a class=\"button\" style=\"height:18px !important\" href=?db="+dbname+"&sid="+top.HEURIST.parameters["sid"]+"&recID="
-                // +context.prev+"><img src=\""+top.HEURIST.baseURL_V3+"/common/images/nav_prev.png\">previous</a>" : "") +
+                // +context.prev+"><img src=\""+top.HEURIST.baseURL+"/common/images/nav_prev.png\">previous</a>" : "") +
                 //(context.next ? "<a class=\"button\" style=\"float:right; height:18px !important\" href=?db="+dbname+"&sid="+top.HEURIST.parameters["sid"]+
-                // "&recID="+context.next+">next<img src=\""+top.HEURIST.baseURL_V3+"/common/images/nav_next.png\"></a>" : "") +
+                // "&recID="+context.next+">next<img src=\""+top.HEURIST.baseURL+"/common/images/nav_next.png\"></a>" : "") +
                 "<div style=\"clear:both\"></div></div>";
             });
         }
@@ -239,10 +239,10 @@ function onRecordDataLoaded(){
         top.document.getElementById("contact-link").href += "?subject=" + encodeURIComponent(contactLinkSubject);
         
         
-        var surl = top.HEURIST.baseURL_V3+"admin/verification/listFieldTypeDefinitionErrorsCompact.php?db="+dbname+"&rt="+top.HEURIST.edit.record.rectypeID;
+        var surl = top.HEURIST.baseURL+"admin/verification/listFieldTypeDefinitionErrorsCompact.php?db="+dbname+"&rt="+top.HEURIST.edit.record.rectypeID;
         top.HEURIST.util.getJsonData(surl, function(context) {
             if( !top.HEURIST.util.isEmptyVar(context) ){
-                var surl = top.HEURIST.baseURL_V3+"admin/verification/listFieldTypeDefinitionErrorsCompact.php?db="+dbname+"&data="+ JSON.stringify(context);
+                var surl = top.HEURIST.baseURL+"admin/verification/listFieldTypeDefinitionErrorsCompact.php?db="+dbname+"&data="+ JSON.stringify(context);
                 top.HEURIST.util.popupURL(top, surl, {width:480, height:420});
             }
 
@@ -337,7 +337,7 @@ function editRecordType(){
     }
 
 
-    var URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+
+    var URL = top.HEURIST.baseURL + "admin/structure/fields/editRecStructure.html?db="+
                 top.HEURIST.database.name+
                 "&rty_ID="+top.HEURIST.edit.record.rectypeID;
     //this.location.replace(URL);

@@ -53,7 +53,7 @@ $.widget( "heurist.searchForm", {
             var that = this;
             
             if(this._need_load_content){        
-                this.element.load(window.hWin.HAPI4.basePathV4+'hclient/widgets/entity/searchForm.html', 
+                this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/entity/searchForm.html', 
                 function(response, status, xhr){
                     that._need_load_content = false;
                     if ( status == "error" ) {

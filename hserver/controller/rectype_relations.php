@@ -69,7 +69,8 @@
             $rectype->id = intval($row["id"]);
             $rectype->name = $row["name"];
             $rectype->count = intval($row["count"]);
-            $rectype->image = HEURIST_ICON_URL . $row["id"] . ".png";
+            $rectype->image = HEURIST_ICON_SCRIPT.$row["id"];
+            //was HEURIST_ICON_URL . $row["id"] . ".png";
             
             //print_r($rectype);
             array_push($rectypes, $rectype);
@@ -81,25 +82,29 @@
     /**
     * Retrieve all detail types of a record type that point to other records
     * 
+    * Find all constrined resource and relmarker fields
+    * 
     * @param mixed $system   System reference
     * @param mixed $rectype  Record type
     */
-    function getRelations($system, $rectype) {
+    function getConstrainedResourceAndRelmarkerFields($system, $rectype) {
         $relations = array();
         
         // Select all relation details that have "dty_PtrTargetRectypeIDs" defined.  The defRecStructure table is used to determine the structure of a record. The defDetailTypes and recDetails tabes are used to ultimately get access to the "dty.dty_PtrTargetRectypeIDs" field. This field stores a comma seperated links of record types where this record points to. 
-        $query = "SELECT rst_DetailTypeID as id, rst_DisplayName as name, COUNT(rd.dtl_ID) as count, dty.dty_Type as reltype, "
+        //COUNT(rd.dtl_ID) as count, 
+        $query = "SELECT rst_DetailTypeID as id, rst_DisplayName as name, dty.dty_Type as reltype, "
         ."dty.dty_PtrTargetRectypeIDs as ids FROM defRecStructure rst INNER JOIN defDetailTypes dty ON rst.rst_DetailTypeID=dty.dty_ID "
         ."LEFT JOIN recDetails rd ON rd.dtl_DetailTypeID=rst.rst_DetailTypeID "
         ."WHERE rst.rst_RectypeID=" .$rectype->id. " AND NOT (dty.dty_PtrTargetRectypeIDs IS NULL OR dty.dty_PtrTargetRectypeIDs='') "
         ."GROUP BY rst.rst_DetailTypeID;";
         
+        
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) { 
             $relation = new stdClass();
-            $relation->id = intval($row["id"]);
+            $relation->id = intval($row["id"]); //detail type id
             $relation->name = $row["name"];
-            $relation->count = intval($row["count"]);
+            $relation->count = 0;//intval($row["count"]);
             $relation->type = $row["reltype"];
             $relation->ids = $row["ids"];
             
@@ -111,7 +116,7 @@
     }
     
     /**
-    * Retrieves all record types that the relationship object points to
+    * Find count of links/relation by pair of source->target rectypes
     * 
     * @param mixed $system   System reference
     * @param mixed $rectype  Parent rectype
@@ -122,14 +127,19 @@
         
         // Go through all ID's
         //echo "\nID's for relation #" . $relation->id . ": " . $relation->ids;
-        $ids = explode(",", $relation->ids); //targer record types ids
+        $ids = explode(",", $relation->ids); //target record types ids (constraints from field type definitions)
         foreach($ids as $id) {
             if($relation->type=='relmarker'){
+                
+                //find allowed relation types (terms) for fieldtype
+                
                 
                 $query = "SELECT COUNT(r2.rec_ID) as count, rl.rl_DetailTypeID, r1.rec_Title, r1.rec_RecTypeID, r2.rec_Title, r2.rec_RecTypeID "
                 ."FROM recLinks rl INNER JOIN Records r1 ON r1.rec_ID=rl.rl_SourceID "
                 ."INNER JOIN Records r2 ON r2.rec_ID=rl.rl_TargetID "
                 ."WHERE rl.rl_DetailTypeID IS NULL AND r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
+
+                
             }else{
                 // Count how many times the $relation points to this id. The recLinks table is used to determine record links. 
                 // rl_sourceID and rl_targetID details are looked up in the Records table. 
@@ -138,7 +148,8 @@
                 $query = "SELECT COUNT(r2.rec_ID) as count, rl.rl_DetailTypeID, r1.rec_Title, r1.rec_RecTypeID, r2.rec_Title, r2.rec_RecTypeID "
                 ."FROM recLinks rl INNER JOIN Records r1 ON r1.rec_ID=rl.rl_SourceID "
                 ."INNER JOIN Records r2 ON r2.rec_ID=rl.rl_TargetID "
-                ."WHERE rl.rl_DetailTypeID=" .$relation->id. " AND r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
+                ."WHERE rl.rl_DetailTypeID=" .$relation->id
+                . " AND r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
             }
            
             if($res = $system->get_mysqli()->query($query)) {
@@ -183,8 +194,8 @@
         
         // Go through all rectypes
         for($i = 0; $i < sizeof($rectypes); $i++) {
-            // Find relations
-            $relations = getRelations($system, $rectypes[$i]); 
+            // Find all constrined and relarion fields
+            $relations = getConstrainedResourceAndRelmarkerFields($system, $rectypes[$i]); 
 
             // Find all targets for each relation
             foreach($relations as $relation) {
@@ -205,6 +216,13 @@ source:1
 target:9
 targetcount:0                    
 */
+
+//@TODO - FIX count for relationships. It returns count of links disregard detail type id
+// This issue is a bit more complex than I’d expected. At the moment we have no data to 
+// restore what relmarker was an originator of relationship.
+
+
+
                     // Records
                     $link->source = $i;
                     $link->target = getIndex($rectypes, $target);

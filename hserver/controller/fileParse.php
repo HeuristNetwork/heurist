@@ -1040,7 +1040,8 @@ function findRecordIds($imp_session, $params){
                 if( $dt_type == "enum" ||  $dt_type == "relationtype") {
 
                     //if fieldname is numeric - compare it with dtl_Value directly
-                    $where = $where."( d".$index.".dtl_Value=t".$index.".trm_ID and t".$index.".trm_Label=?)";
+                    $where = $where."( d".$index.".dtl_Value=t".$index.".trm_ID "
+                    ."and (? in (t".$index.".trm_Label, t".$index.".trm_Code)))";
                     //." if(concat('',? * 1) = ?,d".$index.".dtl_Value=?,t".$index.".trm_Label=?) ";
 
                     array_push($select_query_update_from, "defTerms t".$index);
@@ -1074,6 +1075,7 @@ function findRecordIds($imp_session, $params){
     $search_stmt = $mysqli->prepare($search_query);
 
     $params_dt = str_repeat('s',count($sel_fields));
+    
     //$search_stmt->bind_param('s', $field_value);
     $search_stmt->bind_result($rec_ID, $rec_Title);
 
@@ -1806,7 +1808,7 @@ function validateImport($params){
                 array_push($query_enum, $field_name);
                 $trm1 = "trm".count($query_enum);
                 array_push($query_enum_join,
-                    " defTerms $trm1 on $trm1.trm_Label=$field_name ");
+                    " defTerms $trm1 on ($trm1.trm_Label=$field_name OR $trm1.trm_Code=$field_name)");
                 array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name=''))");
 
             }else if($ft_vals[$idx_fieldtype] == "resource"){

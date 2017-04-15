@@ -81,7 +81,8 @@ if($system->get_mysqli()!=null) { //server is connected
             if(isset($list)){
                 ?>
                 <div style="padding: 0.5em;">Please select a database from the list (^F to find a database by name):</div>
-                <ul class="db-list" style="overflow-y:auto;position:absolute;top:<?php echo $list_top;?>;bottom:0.5em;left:1em;right:0.5em">
+                <div style="overflow-y:auto;position:absolute;top:<?php echo $list_top;?>;bottom:0.5em;left:1em;right:0.5em">
+                <ul class="db-list">
                     <?php
                     /* DEBUG for($i=0;$i<100;$i++) {
                     array_push($list, "database".$i);
@@ -92,7 +93,7 @@ if($system->get_mysqli()!=null) { //server is connected
 
                     ?>
                 </ul>
-
+                </div>
                 <?php
             }
             ?>

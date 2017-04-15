@@ -23,7 +23,7 @@
 if(!defined('PDIR')) define('PDIR','../../../');
 require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
         <style>
             #rectypes {
                 height: 100%;
@@ -119,7 +119,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
             function onrowclick(rt_ID, innewtab){
                 var query = "w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
-                    window.open(window.hWin.HAPI4.basePathV4+"?"+query, "_blank");
+                    window.open(window.hWin.HAPI4.baseURL+"?"+query, "_blank");
                     return false;
                 }else{
        
@@ -172,7 +172,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, d.rty_Name as title, count(r.rec_ID) as count 
 FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
 defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID 
- GROUP BY id ORDER BY grp, title ASC";
+ GROUP BY id ORDER BY rtg_Order, title ASC";
                         // Put record types & counts in the table
                         $res = $system->get_mysqli()->query($query);
                         $count = 0; 
@@ -197,8 +197,9 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                             echo "<tr class='row'>";
                             echo "<td align='center'>$rt_ID</td>";
 
+                            //HAPI4.iconBaseURL
                             // Image
-                            $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
+                            $rectypeImg = "style='background-image:url(".HEURIST_ICON_SCRIPT.$rt_ID.")'";
                             $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
@@ -215,7 +216,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                             echo "<td align='center'>" .$row["count"]. "</td>";
 
                             // Show
-                            if($row["count"]>0 && $count < 10) {
+                            if($row["count"]>0 && $count < 10) {  //this record type has records
                                 echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
                                 $count++;
                             }else{
@@ -329,8 +330,8 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 //$(".show").slideToggle(500);
                 //$("#visualisation-column").slideToggle(500);
 
-                // VISUALISATION CALL  @todo - use abs path from HAPI4.basePathV4
-                var url = window.hWin.HAPI4.basePathV4+"hserver/controller/rectype_relations.php" + window.location.search;
+                // VISUALISATION CALL
+                var url = window.hWin.HAPI4.baseURL+"hserver/controller/rectype_relations.php" + window.location.search;
 //DEBUG                console.log("Loading data from: " + url);
                 d3.json(url, function(error, json_data) {
                     // Error check
@@ -344,41 +345,45 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
 
                     /** RECORD FILTERING */
                     // Set filtering settings in UI
+                    var isfirst_time = false;
+                    var at_least_one_marked = false;
                     <?php
-                        if($count>0){ //restore setting for non empty db
+                        if($count==0){ //reset setting for empty db (only once)
                     ?>
+                            isfirst_time = !(getSetting('hdb_'+window.hWin.HAPI4.database)>0);
+                            putSetting('hdb_'+window.hWin.HAPI4.database, 1);
+                    <?php  
+                        }
+                    ?>
+
+                    if(!isfirst_time){
+                        //restore setting for non empty db
                         $(".show-record").each(function() {
-                        var name = $(this).attr("name");
-                        var record = localStorage.getItem(name);
-                        if(record) {
-                            // Update checked attribute
-                            var obj = JSON.parse(record);
-                            if("checked" in obj) {
-                               $(this).prop("checked", obj.checked);
+                            var name = $(this).attr("name");
+                            var record = getSetting(name); //@todo - change to recordtype ID
+                            if(record>0) {
+                                at_least_one_marked = true;   
+                                $(this).prop("checked", true);
+                            }else{
+                                $(this).prop("checked", false);
                             }
                         }
-                        });
-                    <?php }else{ ?>
+                        );
+                    }
+                        
+                    if(isfirst_time || !at_least_one_marked){
                         $(".first_grp").each(function() {
                             $(this).prop("checked", true);
+                            putSetting($(this).attr("name"), 1);
                         });
-                    <?php } ?>
-
+                    }
+                    
                     // Listen to 'show-record' checkbox changes
                     $(".show-record").change(function(e) {
                         // Update record field 'checked' value in localstorage
                         var name = $(this).attr("name");
-                        var record = localStorage.getItem(name);
-                        var obj;
-                        if(record === null) {
-                            obj = {};
-                        }else{
-                            obj = JSON.parse(record);
-                        }
-
                         // Set 'checked' attribute and store it
-                        obj.checked = $(this).prop('checked');
-                        localStorage.setItem(name, JSON.stringify(obj));
+                        putSetting(name, $(this).prop('checked')?1:0);
 
                         // Update visualisation
                         filterData();
@@ -393,17 +398,8 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                         // Update localstorage
                         $(".show-record").each(function(e) {
                             var name = $(this).attr("name");
-                            var record = localStorage.getItem(name);
-                            var obj;
-                            if(record === null) {
-                                obj = {};
-                            }else{
-                                obj = JSON.parse(record);
-                            }
-
                             // Set 'checked' attribute and store it
-                            obj.checked = checked;
-                            localStorage.setItem(name, JSON.stringify(obj));
+                            putSetting(name, checked?1:0);
                         });
 
                         filterData();
@@ -467,22 +463,35 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                     if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
                         //localStorage.clear();    
                     }
-                    var dbkey = 'db'+window.hWin.HAPI4.database;
-                    // For the moment - Jan 2017 - it is useful to show the hint at all times.
-                    // for some reason it disappears after first display even though database is still empty, which was not the intention
-                    // if(getSetting(dbkey)==null){ //new databse - show hint
-                        putSetting(dbkey, '1');7
-                        $('#divSvg').css('top','12em');//7em
-                        $('#divHint').show();
-                    /* }else{
-                        $('#divSvg').css('top','10em');//5em
-                        $('#divHint').hide();
-                    }*/
                     
+                    $(window).resize(onVisualizeResize)
+                    
+                    onVisualizeResize();
                     initVisualizeData();
 
                 });
             });
+            
+            function onVisualizeResize(){
+                
+                    var width = $(window).width();
+              
+                    var supw = (width<890)?4:0; //1120
+
+                    var dbkey = 'db'+window.hWin.HAPI4.database;
+
+                // For the moment - Jan 2017 - it is useful to show the hint at all times.
+                // for some reason it disappears after first display even though database is still empty, which was not the
+                // intention                           
+                //if(getSetting(dbkey)==null){ //new databse - show hint
+                    putSetting(dbkey, '1');
+                    $('#divSvg').css('top', 9+supw+'em');
+                    $('#divHint').show();
+                    /*}else{
+                        $('#divSvg').css('top', 5+supw+'em');
+                        $('#divHint').hide();
+                    }*/
+            }
 
         </script>
     </body>

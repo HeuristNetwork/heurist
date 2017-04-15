@@ -126,7 +126,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         console.log('load '+current_map_document_id);    
 
         // Clean old data
-        $('#map_extents').hide();
+        $('#map_extents').css('visibility','hidden');
         _removeMapDocumentOverlays();
         var selBookmakrs = document.getElementById('selMapBookmarks');
         $(selBookmakrs).empty();
@@ -139,7 +139,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(current_map_document_id>0)
         {
 
-            var api = window.hWin.HAPI4.basePathV4 + "hserver/controller/map_data.php?db=" + window.hWin.HAPI4.database+'&id='+current_map_document_id;
+            var api = window.hWin.HAPI4.baseURL + "hserver/controller/map_data.php?db=" + window.hWin.HAPI4.database+'&id='+current_map_document_id;
             $.getJSON(api, function(_data) {
                 map_data = _data;
                 // define bookmark by default
@@ -162,25 +162,29 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
     }
 
+    function _getMapDocumentDataById(mapdocument_id) {    
+        //find mapdoc data
+        if(mapdocument_id>0 && map_data)
+            for(var i=0;i<map_data.length;i++){
+                if(mapdocument_id==map_data[i].id){
+                    return map_data[i];
+                }
+            }
+        return null;
+        
+    }
+
     function _loadMapDocumentById_continue() {    
 
         var mapdocument_id =  current_map_document_id;
 
         //find mapdoc data
-        var index = -1;
-        if(mapdocument_id>0 && map_data)
-            for(var i=0;i<map_data.length;i++){
-                if(mapdocument_id==map_data[i].id){
-                    index = i;
-                    break;
-                }
-            }
+        var doc = _getMapDocumentDataById(mapdocument_id);
 
         var selBookmakrs = document.getElementById('selMapBookmarks');
         var btnMapRefresh = $("#btnMapRefresh");
         var btnMapEdit = $("#btnMapEdit");
-        if(index >= 0) {
-            var doc = map_data[index];
+        if( !window.hWin.HEURIST4.util.isnull(doc) ) {
 
             var bounds = null, err_msg_all = '';
 
@@ -247,18 +251,21 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map-zoom bookmark following the instructions in the field help.</div>'
                 );
             }else{
+                
                 //show info popup
                 var lt = window.hWin.HAPI4.sysinfo['layout'];   
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
                     if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
                         
-                        var ele = $(top.document.body).find('#dh_search_2');
+                        var ele = $(window.hWin.document.body).find('#dh_search_2');
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
                         {options:{resizable:true, modal:false, width:ele.width(), height:ele.height()-100}, 
                             my:'left top', at:'left top', of:ele}, false);
+                            
                     }
                 }
+                
             }
 
 
@@ -273,7 +280,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         mapping.timelineZoomToRange(map_bookmarks[val]['tmin'],map_bookmarks[val]['tmax']);
                 }
             }
-            $('#map_extents').show();
+            $('#map_extents').css('visibility','visible');
             selBookmakrs.selectedIndex = 1;
             $(selBookmakrs).change();
 
@@ -358,7 +365,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             rectypeID = rectypeID_or_color;
 
             if(rectypeID==RT_SHP_SOURCE && overlay.visible){
-                icon_bg = 'url('+window.hWin.HAPI4.basePathV4+'hclient/assets/loading-animation-white20.gif);'
+                icon_bg = 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif);'
                 + 'background-position: center; background-repeat: no-repeat;"'            
                 + ' data-icon="'+window.hWin.HAPI4.iconBaseURL + rectypeID + '.png"';
             } else if(Number.isInteger(rectypeID)){
@@ -384,8 +391,10 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
         + overlay_idx+'" id="chbox-'+legendid+'" class="overlay-legend" '
         + (overlay.visible?'checked="checked">':'>')
+        + '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif" id="loading-'+overlay_idx+'" '
+        + ' style="display:none;margin-right:2px;vertical-align: text-top;background:url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif) no-repeat center center">'
         + ((ismapdoc && icon_bg)
-            ? ('<img src="'+window.hWin.HAPI4.basePathV4+'hclient/assets/16x16.gif"'
+            ? ('<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif"'
                 + ' align="top" class="rt-icon" ' + icon_bg     
                 + '>')
             : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+rectypeID_or_color+'" />')
@@ -466,16 +475,31 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _showHideOverlay(event){
         // Hide or display the layer
-        var overlay_idx = $(this).prop("value");
-        var checked = $(this).prop("checked");
-
+        var ele_cbox = $(this);
+        var overlay_idx = ele_cbox.prop("value");
+        var checked = ele_cbox.prop("checked");
+        
         // Update overlay
         var overlay = overlays[overlay_idx] ?overlays[overlay_idx] :overlays_not_in_doc[overlay_idx];  //overlays[index]
         if(overlay){
-            overlay.setVisibility(checked);
-            overlay.visible = checked;
+            ele_cbox.hide();
+            $('#loading-'+overlay_idx).show();
+            
+            setTimeout(function(){
+                overlay.setVisibility(checked);
+                overlay.visible = checked;
+                $('#loading-'+overlay_idx).hide();
+                ele_cbox.show();
+            },200);
+            
         }
+       
+        
     }
+    
+    //
+    //
+    ///
     function _showHideLayer(event){
         var mapdata_id = $(this).attr('data-mapdataid');
         var checked = $(this).prop("checked");
@@ -692,7 +716,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 preserveViewport: is_mapdoc,
                 map: map,
                 status_changed: function(){
-                    console.log('status: '+kmlLayer.getStatus());
+                    //console.log('status: '+kmlLayer.getStatus());
                 }
             });
         }
@@ -850,7 +874,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             request['detail'] = 'timemap';
 
             if(loadingbar==null){
-                var image = window.hWin.HAPI4.basePathV4+'hclient/assets/loading_bar.gif';
+                var image = window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif';
                 loadingbar = new google.maps.Marker({
                     icon: image,
                     optimized: false
@@ -863,6 +887,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
             $('#mapping').css('cursor','progress');
 
+            
             // Retrieve records for this request
             window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
 
@@ -880,7 +905,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 $('#mapping').css('cursor','auto');
 
             });
-
+            
             /*
             window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
@@ -905,7 +930,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     }
 
     //set of color for Digital Harlem dynamically added layers (or if color is not defined for layer in map document )
-    var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,127,39)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)'];
+    var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)','rgb(255,127,39)'];
     var colors_idx = -1;
 
     /**
@@ -1029,13 +1054,16 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
 
-                    if(recset.count_total()>recset.length()){
-                        var s = '<p>The map and timeline are limited to display a maximum of <b>'+recset.length()+'</b> results to avoid overloading your browser.</p>'
+                    if(recset['limit_warning']){
+                        /* @todo - show individual warning per layer
+                        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+                        var s = '<p>The map and timeline are limited to display a maximum of <b>'+MAXITEMS+'</b> results to avoid overloading your browser.</p>'
                         +'<br/><p>There are <b>'+recset.count_total()+'</b> records with spatial and temporal data in the current results set. Please refine your filter to reduce the number of results.</p><br/>'
                         +'<p>The map/timeline limit can be reset in Profile > Preferences.</p>';                        
 
                         mapdata.title = {title:mapdata.title,
                             warning:'<div class="ui-icon ui-icon-alert" style="display:inline-block;width:20px" onclick="{window.hWin.HEURIST4.msg.showMsgDlg(\''+s+'\')}">&nbsp;</div>'};
+                        */    
                     }
                 }
             }
@@ -1065,7 +1093,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 setVisibility: function(checked) {
                     this.visible = checked;
                     mapping.showDataset(this.id, checked); //mapdata.id
-
                     var idx;
                     for (idx in this.dependent_layers){
                         var mapdata_id = this.dependent_layers[idx].key;
@@ -1472,6 +1499,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         var legend = document.getElementById('map_legend');
         map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend);
         
+        var warning = document.getElementById('map_limit_warning');
+        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(warning);
+        
         //$(legend).css('top','60px');
         
         // Legend collapse listener
@@ -1516,6 +1546,10 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             _loadMapDocumentById_init(mapdocument_id);
         },
 
+        getMapDocumentDataById: function(mapdocument_id){
+            return _getMapDocumentDataById(mapdocument_id);
+        },
+        
         addQueryLayer: function(params){
             _addQueryLayer(params, -1);   
         },

@@ -40,6 +40,7 @@ if(isForOwnerOnly("to delete a database")){
     <body class='popup'>
         <div class='banner'><h2>Delete Current Heurist Database</h2></div>
         <div id='page-inner' style='overflow:auto'>
+            <<<<<<< HEAD
             <?php
             $dbname = $_REQUEST['db'];
 
@@ -75,11 +76,6 @@ if(isForOwnerOnly("to delete a database")){
                             echo ("<p>Please ask your system adminstrator to delete this folder if it exists.<br></p>");
                             echo($output2);
                         }
-
-
-                        //$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
-                        //$output2 = exec($cmdline . ' 2>&1', $output, $res2); // this is the one we really care about
-
                         if (!db_drop(HEURIST_DB_PREFIX.$dbname, false)) {
                             echo ("<h2>Warning:</h2> Unable to delete <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                             echo ("<p>Check that the database still exists. Consult Heurist helpdesk if needed<br></p>");
@@ -96,10 +92,12 @@ if(isForOwnerOnly("to delete a database")){
                             <?php
                         }
                     }
-                } else { // didn't request properly
+                } // delete database
+
+                else { // didn't request properly
                     print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Database <b>$dbname</b> was not deleted</p>";
                 }
-            }
+            } // request mode 2
             ?>
         </div>
     </body>

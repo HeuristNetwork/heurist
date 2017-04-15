@@ -1,7 +1,7 @@
-<!--
+<?php
+
 /**
-*
-* filename: explanation
+* dh_footer.php (Digital Harlem): Writes the footer with statistical information about the database
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -19,10 +19,17 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
--->
 
-<!-- TODO: why is there an <a href ... reference to /hclient/widgets/digital_harlem etc. This should not work -->
+require_once(dirname(__FILE__)."/../../../hserver/System.php");
+require_once(dirname(__FILE__)."/../../../hserver/dbaccess/db_recsearch.php");
 
+$statistics = "";
+$system = new System();
+// connect to given database
+if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
+    include('dh_stats.php');
+}
+?>
 <style>
     #footer {
         margin: 0px;
@@ -66,8 +73,11 @@
 </style>
 
 <div id="footer">
-    <div class="copyright">Copyright &copy; University of Sydney 2007 - 2016. Design Damian Evans 2007, redeveloped Ian Johnson & Artem Osmakov 2015. <a href="http://heuristnetwork.org/" target="_blank">Powered by
-        <img src="hclient/assets/h4logo16_small.png" alt="Heurist" align="absmiddle"></a>.<!--Admin log in/out <a href="login.php"> here</a>.--></div>
+    <div class="copyright">
+    License: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">Creative Commons (CC BY-NC-SA 4.0)</a>. Design Damian Evans 2007, redeveloped Ian Johnson & Artem Osmakov 2015. <a href="http://heuristnetwork.org/" target="_blank">Powered by
+        <img src="hclient/assets/h4logo16_small.png" alt="Heurist Academic Knowledge Management System" align="absmiddle"></a>.<!--Admin log in/out <a href="login.php"> here</a>.--></div>
 </div>
+
+
 
 

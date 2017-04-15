@@ -148,6 +148,8 @@ window.hWin.HEURIST4.util = {
         
     },
 
+    //--- HEURIST QUERY ROUTINE -------
+    
     //
     // from object to query string
     //
@@ -208,22 +210,47 @@ window.hWin.HEURIST4.util = {
     },
 
     //
-    // both paramater should be JSON array or Object
+    // both parameter should be JSON array or Object
     //
     mergeHeuristQuery: function(query1, query2){
-        //JSON.parse
+        
         if(jQuery.type(query1) === "string"){
+            var notJson = true;
             try{
-                query1 = JSON.parse(query1);
+                //query1 = JSON.parse(query1);
+                var query1a = $.parseJSON(query1);
+                if(window.hWin.HEURIST4.util.isJSON(query1a)){
+                    query1 = query1a;
+                    notJson = false;
+                }
             }catch (ex2){
-                query1 = {};
+            }
+            if(notJson){
+                if(window.hWin.HEURIST4.util.isempty(query1)){
+                    query1 = {};    
+                }else{
+                    query1 = {plain: encodeURIComponent(query1)}; //query1.split('"').join('\\\"')};    
+                }
             }
         }
+        
         if(jQuery.type(query2) === "string"){
+            var notJson = true;
             try{
-                query2 = JSON.parse(query2);
+                //query2 = JSON.parse(query2);
+                var query2a = $.parseJSON(query2);
+                if(window.hWin.HEURIST4.util.isJSON(query2a)){
+                    query2 = query2a;
+                    notJson = false;
+                }
             }catch (ex2){
-                query2 = {};
+            }
+            if(notJson){
+                if(window.hWin.HEURIST4.util.isempty(query2)){
+                    query2 = {};    
+                }else{
+                    query2 = {plain: encodeURIComponent(query2)}; //query2.split('"').join('\\\"')};    
+                }
             }
         }
         if(window.hWin.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
@@ -258,6 +285,54 @@ window.hWin.HEURIST4.util = {
         return {q:qsearch, w:domain, rules:rules, notes:notes};
     },
 
+    //
+    //
+    //
+    isJSON: function(value){
+        
+            try {
+                var r = $.parseJSON(value);
+                if($.isArray(r) || $.isPlainObject(r)){
+                    return true;
+                }
+            }
+            catch (err) {
+            } 
+            
+            return false;       
+    },
+    
+    //
+    // get combination query and rules as json array for map query layer
+    //    
+    getJSON_HeuristQueryAndRules: function(filter, rules){
+
+        var res = '';
+        if(!window.hWin.HEURIST4.util.isempty(filter.trim())){
+            
+            var hasRules = !window.hWin.HEURIST4.util.isempty(rules);
+
+            if(window.hWin.HEURIST4.util.isJSON(filter)){
+                res = (hasRules?'{"q":':'')+filter;
+            }else{
+                //this is not json query
+                //escape backslash to avoid errors
+                res = hasRules?('{"q":"'+filter.split('"').join('\\\"')+'"'):filter;
+            }
+
+            if(hasRules){
+                res = res + ',"rules":'+rules+'}';
+            } else{
+                //res = res + '}';     
+            }
+        }
+        
+        return res;
+    },
+    
+    //
+    //
+    //
     getUrlParameter: function getUrlParameter(name, query){
 
         if(!query){
@@ -713,7 +788,57 @@ window.hWin.HEURIST4.util = {
          }
       }
       return null;
-    }
+    },
+    
+     versionCompare: function(v1, v2, options) {
+         // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
+         // used to detect change in version so that user is prompted to clear cache and reload
+         // returns -1 if cached version is older, -2 if cached version is newer, +1 if they are the same
+        var lexicographical = options && options.lexicographical,
+            zeroExtend = options && options.zeroExtend,
+            v1parts = v1.split('.'),
+            v2parts = v2.split('.');
+
+        function isValidPart(x) {
+            return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
+        }
+
+        if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) {
+            return NaN;
+        }
+
+        if (zeroExtend) {
+            while (v1parts.length < v2parts.length) v1parts.push("0");
+            while (v2parts.length < v1parts.length) v2parts.push("0");
+        }
+
+        if (!lexicographical) {
+            v1parts = v1parts.map(Number);
+            v2parts = v2parts.map(Number);
+        }
+
+        for (var i = 0; i < v1parts.length; ++i) {
+            if (v2parts.length == i) {
+                return 1; // versions are the saame
+            }
+
+            if (v1parts[i] == v2parts[i]) {
+                continue; // sub elements are the same, continue compare
+            }
+            else if (v1parts[i] > v2parts[i]) {
+                return -2; // cached version is newer, we will still need to clear cache and reload
+            }
+            else {
+                return -1; // cached version is older, we will need to clear cache and reload
+            }
+        }
+
+        if (v1parts.length != v2parts.length) {
+            return -1;
+        }
+
+        return 0;
+    }    
 
 }//end util
 

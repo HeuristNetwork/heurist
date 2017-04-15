@@ -312,12 +312,12 @@ console.log("sections: " + sections.toSource());
 				var a = document.createElement("a");
 				a.className = (section.refCount > 1 ? "annotation multiple" : "annotation");
 				//a.href = "#ref" + ref.recordID;
-				//a.href = top.HEURIST.baseURL_V4+"?q=ids:"+ref.recordID+"&db="+((top.HEURIST.database) ? top.HEURIST.database.name : "");
+				//a.href = top.HEURIST.baseURL+"?q=ids:"+ref.recordID+"&db="+((top.HEURIST.database) ? top.HEURIST.database.name : "");
 				if (ref.linkhref && ref.linkhref != "") {
 					if ( ref.popup && ref.popup != "") {
-						a.href = "javascript:top.HEURIST.util.popupURL(window,\""+top.HEURIST.baseURL_V3+ref.linkhref+"\","+ref.popup+")";
+						a.href = "javascript:top.HEURIST.util.popupURL(window,\""+top.HEURIST.baseURL+ref.linkhref+"\","+ref.popup+")";
 					}else{
-						a.href = top.HEURIST.baseURL_V3+ref.linkhref;
+						a.href = top.HEURIST.baseURL+ref.linkhref;
 						a.target = "_blank";
 					}
 				}else{

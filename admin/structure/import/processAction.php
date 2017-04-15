@@ -101,8 +101,8 @@ function import() {
 					"importRtyID={numeric ID of record type} tempDBName={temp db name where source DB type data are held}");
 		$error = true;
 	}
-
-
+   
+    
     $startedTransaction = false;
 
 	if(!$error) {
@@ -215,32 +215,32 @@ function sendReportEmail($importRty, $localRtyID){
 }
 
 
-function importDetailType($importDty) {
-	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID, $fields_correspondence;
-	static $importDtyGroupID;
-	$importDtyID = $importDty["dty_ID"];
-	if (!$importDtyGroupID) {
-		// Create new group with todays date, which all detailtypes that the recordtype uses will be added to
-		$dtyGroup = mysql_query("select dtg_ID from ".$targetDBName.".defDetailTypeGroups where dtg_Name = 'Imported'");
-		if(mysql_num_rows($dtyGroup) == 0) {
-			mysql_query("INSERT INTO ".$targetDBName.".defDetailTypeGroups ".
-						"(dtg_Name,dtg_Order, dtg_Description) ".
-						"VALUES ('Imported', '255',".
-								" 'This group contains all detailtypes that were imported from external databases')");
-			// Write the insert action to $logEntry, and set $error to true if one occurred
-			if(mysql_error()) {
-				$error = true;
-				makeLogEntry("<b>Error</b> Creating Field-type Group", -1, ". Unable to find field type group 'Imported' - ".mysql_error());
-			} else {
-				$importDtyGroupID = mysql_insert_id();
-				makeLogEntry("Creating Field-type Group", -1, " 'Imported' as #$importDtyGroupID");
-			}
-		} else {
-			$row = mysql_fetch_row($dtyGroup);
-			$importDtyGroupID = $row[0];
-			makeLogEntry("Using Field-type Group", -1, " 'Imported' as #$importDtyGroupID");
-		}
-	}
+function importDetailType($importDty,$rtyGroup_src) {
+    global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID, $fields_correspondence;
+    static $importDtyGroupID;
+    $importDtyID = $importDty["dty_ID"];
+    if (!$importDtyGroupID) {
+        // Create new group with todays date, which all detailtypes that the recordtype uses will be added to
+        $dtyGroup = mysql_query("select dtg_ID from ".$targetDBName.".defDetailTypeGroups where dtg_Name = '".$rtyGroup_src['rtg_Name']."'");
+        if(mysql_num_rows($dtyGroup) == 0) {
+            mysql_query("INSERT INTO ".$targetDBName.".defDetailTypeGroups ".
+                "(dtg_Name,dtg_Order, dtg_Description) ".
+                "VALUES ('".$rtyGroup_src['rtg_Name']."','255',".
+                " '".$rtyGroup_src['rtg_Description']."')");
+            // Write the insert action to $logEntry, and set $error to true if one occurred
+            if(mysql_error()) {
+                $error = true;
+                makeLogEntry("<b>Error</b> Creating Field-type Group", -1, ". Unable to find field type group 'Imported' - ".mysql_error());
+            } else {
+                $importDtyGroupID = mysql_insert_id();
+                makeLogEntry("Creating Field-type Group", -1, " 'Imported' as #$importDtyGroupID");
+            }
+        } else {
+            $row = mysql_fetch_row($dtyGroup);
+            $importDtyGroupID = $row[0];
+            makeLogEntry("Using Field-type Group", -1, " 'Imported' as #$importDtyGroupID");
+        }
+    }
 
 
 	if(!$error && @$importDty['dty_JsonTermIDTree'] && $importDty['dty_JsonTermIDTree'] != '') {
@@ -372,9 +372,9 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 }
 
 function importRectype($importRty, $alreadyImported) {
-	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID;
-	//was static $importRtyGroupID;
-	$importRtyID = $importRty['rty_ID'];
+    global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID,$rtyGroup_src;
+    //was static $importRtyGroupID;
+    $importRtyID = $importRty['rty_ID'];
 
 	// Get Imported  rectypeGroupID
 	if(!$error && !$alreadyImported){ // && !$importRtyGroupID) {
@@ -524,8 +524,8 @@ function importRectype($importRty, $alreadyImported) {
 
 				// Detailtype is not in target DB so import it
                 $existingDtyID = null;
-				if(mysql_num_rows($resExistingDty) == 0) {
-					$rtsFieldDef["rst_DetailTypeID"] = importDetailType($importDty);
+                if(mysql_num_rows($resExistingDty) == 0) {
+                    $rtsFieldDef["rst_DetailTypeID"] = importDetailType($importDty,$rtyGroup_src);
                     if($rtsFieldDef["rst_DetailTypeID"]==null) return null;
 				} else {
 					$existingDtyID = mysql_fetch_array($resExistingDty);

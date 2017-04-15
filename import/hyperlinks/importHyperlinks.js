@@ -195,7 +195,7 @@ function lookupTitle(button) {
 //
 function doBookmark(dbname){
 
-   top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3+'records/tags/addTagsPopup.html?db='+dbname,
+   top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+'records/tags/addTagsPopup.html?db='+dbname,
    				{   
                     title: 'Add tags',
                     height: '360px', width:'450px',

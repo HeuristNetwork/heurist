@@ -122,7 +122,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <!-- os, browser detector -->
         <script type="text/javascript" src="ext/js/platform.js"></script>
-        
+
         <script type="text/javascript">
 
            function onPageInit(success){
@@ -130,9 +130,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 if(!success) return;
                 
                 // OLD H3 stuff
-                if(window.HEURIST){
-                    window.HEURIST.baseURL_V3  = window.HAPI4.basePathV3;
-                    window.HEURIST.loadScript(window.HAPI4.basePathV3+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
+                if(window.HEURIST && window.HAPI4.baseURL){
+                    window.HEURIST.baseURL  = window.HAPI4.baseURL;
+                    window.HEURIST.loadScript(window.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
                     window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
                     window.HEURIST.database = {  name: window.HAPI4.database };
                 }
@@ -200,9 +200,39 @@ _time_debug = new Date().getTime() / 1000;
                     }else{
                         window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
                     }
+                    
                 }else if(db_total_records<1){
                     showTipOfTheDay(false);
                 }
+                
+               
+                var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
+                
+                //
+                // version to compare with server provided - to avoid caching issue
+                //
+                if(window.hWin.HAPI4.is_logged() && window.hWin.HAPI4.sysinfo['version']){
+                    if(version_in_cache){
+                            var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, window.hWin.HAPI4.sysinfo['version']);   
+                            if(res<0){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
+                                // show lock popup that forces to clear cache
+                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
+                                {}/* no buttons */,null,
+                                {options:{hideTitle:true, closeOnEscape:false,
+                                    open:function( event, ui ) {
+                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                        $dlg.find('#version_cache').text(version_in_cache);
+                                        $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
+                                    }}});
+
+                            }
+                    }
+                    window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']); 
+                }
+                
+                
+                
+                
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
                 if(db_total_records>0 && !window.hWin.HEURIST4.util.isempty(qsearch)){
@@ -255,7 +285,7 @@ var fin_time = new Date().getTime() / 1000;
     <body style="background-color:#c9c9c9">
 
 
-    <?php if(@$_REQUEST['ll']!='WebSearch'){?>
+    <?php if(!(@$_REQUEST['ll']=='WebSearch' || @$_REQUEST['ll']=='boro')){?>
         <!-- These are old H3 stuff - needed to support existing features in popups -->
         <script>top.installDirFromH4="<?=HEURIST_BASE_URL?>";</script>
         <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
@@ -296,5 +326,6 @@ var fin_time = new Date().getTime() / 1000;
 
         <div id="heurist-dialog">
         </div>
+        
     </body>
 </html>

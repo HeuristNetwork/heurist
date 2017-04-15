@@ -1,3 +1,4 @@
+
 /**
 * editTerms.js: Support file for editTerms.php
 *
@@ -20,6 +21,7 @@
 */
 
 
+var TAB_WIDTH = 350;
 // EditTerms object
 var editTerms;
 
@@ -27,10 +29,11 @@ var editTerms;
 * create composed label with all parents
 */
 function getParentLabel(_node){
-    if(_node.parent._type==="RootNode"){
-        return _node.label;
+    //if(_node.parent._type==="RootNode"){
+    if(_node.parent.isRootNode()){
+        return _node.data.label;
     }else{
-        return getParentLabel(_node.parent)+" > "+_node.label;
+        return getParentLabel(_node.parent)+" > "+_node.data.label;
     }
 }
 
@@ -62,12 +65,14 @@ function EditTerms() {
     _isWindowMode=false,
     _isSomethingChanged=false,
     _affectedVocabs = [],
-    keep_target_newparent_id = null;
-    tab_view = 0;// variable to selct vwhich tab to fill with treeview
+    keep_target_newparent_id = null,
+    $top_ele,
+    $treediv;
+
 
 
     /**
-    *	Initialization of tabview with 2 tabs with treeviews
+    *    Initialization of tabview with 2 tabs with treeviews
     */
     function _init (){
 
@@ -78,14 +83,14 @@ function EditTerms() {
         _isWindowMode = !Hul.isnull(top.HEURIST.parameters.popup);
 
         _vocabulary_toselect = top.HEURIST.parameters.vocabid;
-        
+
         treetype = top.HEURIST.parameters.treetype;
         if (!top.HEURIST.util.isempty(treetype)){
             treetype = (treetype == 'enum')?'terms':'relationships';
         }
 
         var initdomain = 0;
-        
+
         if(top.HEURIST.parameters.domain=='relation' && top.HEURIST.util.isempty(treetype)) {
             if(top.HEURIST.util.isempty(treetype)) initdomain  = 1;
         }
@@ -99,17 +104,24 @@ function EditTerms() {
                 _tabView.addTab(new YAHOO.widget.Tab({
                     id: 'enum',
                     label: 'Terms',
-                    content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
-                }));}
+                    content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+
+
+                }));
+
+                $(".banner h2").text("Manage terms used by term-list (category/dropdown) fields");
+            }
 
             if (treetype == "relationships")
             {
                 _tabView.addTab(new YAHOO.widget.Tab({
                     id: 'relation',
                     label: 'Relationship types',
-                    content: '<div style="height:90%; max-width:300; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+                    content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
 
-                }));}
+                }));
+                $(".banner h2").html("Manage terms used for relationship type in relationship records");
+            }
         }
 
         else
@@ -118,14 +130,14 @@ function EditTerms() {
             _tabView.addTab(new YAHOO.widget.Tab({
                 id: 'enum',
                 label: 'Terms',
-                content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+                content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
             }));
 
             tab_view = 1;
             _tabView.addTab(new YAHOO.widget.Tab({
                 id: 'relation',
                 label: 'Relationship types',
-                content: '<div style="height:90%; max-width:300; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+                content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
 
             }));
 
@@ -165,7 +177,8 @@ function EditTerms() {
                     if(Hul.isnull(_termTree1)){
                         _termTree1 = new YAHOO.widget.TreeView("termTree1");
                         //fill treeview with content
-                        _fillTreeView(_termTree1);
+                        // _fillTreeView(_termTree1);
+                        _defineContentTreeView();
                     }
                     _currTreeView = _termTree1;
 
@@ -175,7 +188,8 @@ function EditTerms() {
                     if(Hul.isnull(_termTree2)){
                         _termTree2 = new YAHOO.widget.TreeView("termTree2");
                         //fill treeview with content
-                        _fillTreeView(_termTree2);
+                        //_fillTreeView(_termTree2);
+                        _defineContentTreeView();
                     }
                     _currTreeView = _termTree2;
                 }
@@ -210,7 +224,7 @@ function EditTerms() {
 
 
     /**
-    *	Fills the given treeview with the appropriate content
+    *    Fills the given treeview with the appropriate content
     */
     function _fillTreeView (tv) {
 
@@ -318,27 +332,10 @@ function EditTerms() {
                 }, 1000);
             //_onNodeClick(node);
         }
-        //Add_dragAndDrop();
-    }
-
-    function Add_dragAndDrop()
-    {
-    // $("#termTree1").hide();
-
-    //alert('drag-n-drop extension for tree not loaded');
-    $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js').done(function() {
-    });
-
-      /*  if(!$.ui.fancytree._extensions["dnd"]){
-            alert('drag-n-drop extension for tree not loaded');
-            return;
-        } */
-
-
-
-        // $("#termTree1").fancytree({});
 
     }
+
+
 
     //
     // find node(s) by name in current treeview
@@ -347,13 +344,18 @@ function EditTerms() {
     function _findNodes(sSearch) {
 
         function __doSearchByName(node){
-            return (node && node.label && (node.label.toLowerCase().indexOf(sSearch)>=0));
+            return (node && node.data.label && (node.data.label.toLowerCase().indexOf(sSearch)>=0));
         }
-
         sSearch = sSearch.toLowerCase();
-        var nodes = _currTreeView.getNodesBy(__doSearchByName);
+        var tree = $treediv.fancytree("getTree");
+        var nodes=[];
 
-        //alert("search "+sSearch);
+        tree.visit(function(node){
+            if(__doSearchByName(node))
+                nodes.push(node);
+
+        });
+
         return nodes;
     }
     //
@@ -365,16 +367,29 @@ function EditTerms() {
 
         function __doSearchById(node){
             return (node.data.id===nodeid);
-        }
 
-        var nodes = _currTreeView.getNodesBy(__doSearchById);
+        }
+        //var nodes = _currTreeView.getNodesBy(__doSearchById);
+        var tree = $treediv.fancytree("getTree");
+        var nodes=[];
+
+        tree.visit(function(node){
+            if(__doSearchById(node))
+                nodes.push(node);
+
+        });
+
 
         //select and expand the node
         if(nodes){
             var node = nodes[0];
             if(needExpand) {
-                node.focus();
-                node.toggle();
+                //node.focus();
+                //node.toggle();
+                
+                node.setFocus(true);
+                node.setActive(true);
+                node.setExpanded(true);
             }
             return node;
         }else{
@@ -405,22 +420,31 @@ function EditTerms() {
         var ischanged = false;
 
         if(_currentNode!=null){
+            
+            var termName = Dom.get('edName').value.trim();
 
+            var iInverseId = Number(Dom.get('edInverseTermId').value);
+            iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
+            var iInverseId_prev = Number(_currentNode.data.inverseid);
+            iInverseId_prev = (iInverseId_prev>0)?iInverseId_prev:null;
+            
             ischanged =
-            Dom.get('edName').value.trim() != _currentNode.label ||
+            termName != _currentNode.data.label ||
             Dom.get('edDescription').value.trim() != _currentNode.data.description ||
             Dom.get('edCode').value.trim() != _currentNode.data.termcode ||
             Dom.get("trm_Status").value != _currentNode.data.status ||
-            Dom.get('edInverseTermId').value != _currentNode.data.inverseid;
+            iInverseId != iInverseId_prev;
         }
 
         var ele = $('#btnSave');
-        if (ischanged) {
+        if (ischanged && termName!='') {
+            //ele.prop('disabled', 'disabled');
+            //ele.css('color','lightgray');
             ele.removeProp('disabled');
-            ele.css('color','black');
+            $(ele).removeClass('save-disabled');
         }else{
             ele.prop('disabled', 'disabled');
-            ele.css('color','lightgray');
+            $(ele).addClass('save-disabled');
         }
 
     }
@@ -430,6 +454,9 @@ function EditTerms() {
     * Loads values to edit form
     */
     function _onNodeClick(obj){
+
+
+
 
         var node = null;
         if(obj){
@@ -449,7 +476,7 @@ function EditTerms() {
                 _doSave(true, false);
             }
             _currentNode = node;
-
+            // alert(_currentNode.data.label);
             var disable_status = false,
             disable_fields = false,
             add_reserved = false,
@@ -457,7 +484,16 @@ function EditTerms() {
 
             if(!Hul.isnull(node)){
                 Dom.get('formMessage').style.display = "none";
-                Dom.get('formEditor').style.display = "block";
+                $("#btnMerge").css("display", "none");
+                if (node.isActive())
+
+                {
+                    //$("#formEditor").show();
+                    Dom.get('formEditor').style.display = "block";
+                    // $(".form_editor ").hide();
+
+
+                }
 
                 if (Hul.isempty( node.data.conceptid)){
                     Dom.get('div_ConceptID').innerHTML = '';
@@ -466,12 +502,12 @@ function EditTerms() {
                 }
 
 
-                //	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
+                //    alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
                 Dom.get('edId').value = node.data.id;
                 Dom.get('edParentId').value = node.data.parent_id;
                 var edName = Dom.get('edName');
-                edName.value = node.label;
-                if(node.label==="new term"){
+                edName.value = node.data.label;
+                if(node.data.label==="new term"){
                     //highlight all text
                     edName.selectionStart = 0;
                     edName.selectionEnd = 8;
@@ -494,9 +530,13 @@ function EditTerms() {
                     '<img id="imgThumb" style="max-width: 380px;" src="'+
                     top.HEURIST.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
                     '"></a>';
-                    Dom.get('termImage').style.display = 'block';
+                    Dom.get('termImage').style.display = 'inline-block';
+                    Dom.get('btnClearImage').style.display = 'inline-block';
+                    Dom.get('termImageForNew').style.display = 'none';
                 }else{
                     Dom.get('termImage').style.display = 'none';
+                    Dom.get('btnClearImage').style.display = 'none';
+                    Dom.get('termImageForNew').style.display = 'inline-block';
                 }
 
 
@@ -568,15 +608,16 @@ function EditTerms() {
         if(Hul.isnull(node)){
             Dom.get('formEditor').style.display = "none";
             Dom.get('formMessage').style.display = "block";
+
         }
 
-        if(node){ //obj && obj.event){
-            var ind = _tabView.get("activeIndex");
-            var tv = (ind===0)?_termTree1:_termTree2;
-            tv.onEventToggleHighlight(node);
-        }
+        /* if(node){ //obj && obj.event){
+        var ind = _tabView.get("activeIndex");
+        var tv = (ind===0)?_termTree1:_termTree2;
+        tv.onEventToggleHighlight(node);
+        } */
 
-        _isNodeChanged();
+        ///();
     }
 
     /**
@@ -634,8 +675,98 @@ function EditTerms() {
     }
 
     function _setOrclearInverseTermId2(){
-        Dom.get('formInverse').style.display = "block";
-        Dom.get('edInverseTerm').value = "";
+        // Dom.get('formInverse').style.display = "block";
+        //Dom.get('edInverseTerm').value = "";
+
+        function _doSearch(event){
+
+            var el = event.target;
+
+            var sel = $(top.document).find("#resSearchInverse").get(0); //(el.id === 'edSearch')? $(top.document).get('resSearch'):$
+            //var sel = (el.id === 'edSearch')?Dom.get('resSearch'):Dom.get('resSearchInverse');
+
+            //remove all
+            while (sel.length>0){
+                sel.remove(0);
+            }
+
+
+            //el = Dom.get('edSeartch');
+            if(el.value && el.value.length>2){
+
+                //fill selection element with found nodes
+                var nodes = editTerms.findNodes(el.value),
+                ind;
+                for (ind in nodes)
+                {
+                    if(!Hul.isnull(ind)){
+                        var node = nodes[ind];
+
+                        var option = Hul.addoption(sel, node.data.id, getParentLabel(node));
+                        option.title = option.text;
+                    }
+                }//for
+
+            }
+        }
+
+
+        function _SelectInverse(){
+            var sel = $(top.document).find('#resSearchInverse').get(0);
+            if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
+
+                var nodeid = sel.options[sel.selectedIndex].value;
+                var node = _findNodeById(nodeid, false);
+                if(false && _currentNode.data.id===nodeid){
+                    alert("Not possible to inverse on itself");
+                }
+                else if(_currentNode === _findTopLevelForId(_currentNode.data.id))
+                {
+                    alert("you can't set inverse on top level vocabulary");
+
+                }
+                else if( node === _findTopLevelForId(nodeid) ){
+                    alert("you can't make top level vocabulary an inverse");
+                }else{
+
+                    Dom.get('edInverseTerm').value = sel.options[sel.selectedIndex].text;
+                    Dom.get('edInverseTermId').value = nodeid;
+                    Dom.get('btnInverseSetClear').value = 'clear';
+                    //Dom.get('formInverse').style.display = "none";
+                    _doSave(true, false);
+
+                }
+            }
+
+
+        }
+
+        var $_dialogbox = "";
+        var ele = document.getElementById('formInverse');
+        //var _originalParentNode ;
+
+
+
+        $("#edSearchInverse").keyup(function(event){_doSearch(event)});
+        $("#btnSelect2").click(function(){
+            _SelectInverse();$_dialogbox.dialog($_dialogbox ).dialog('close');
+
+            //ele.style.display = "none";
+            //_originalParentNode.appendChild(ele)
+
+        });
+        //$("#resSearchInverse").dblclick(_SelectInverse());
+        //show confirmation dialog
+        $_dialogbox = Hul.popupElement(top, ele,
+            {
+                "close-on-blur": false,
+                "no-resize": true,
+                title: 'Set As Inverse',
+                height: 310,
+                width: 560
+        });
+
+        // _originalParentNode  = ele.parentNode;
     }
 
     /**
@@ -644,19 +775,26 @@ function EditTerms() {
     function _setOrclearInverseTermId(){
         if(Dom.get('btnInverseSetClear').value==='cancel'){
             Dom.get('btnInverseSetClear').value = (Dom.get('edInverseTermId').value!=="0")?'clear':'set';
-            Dom.get('formInverse').style.display = "block";
+            //Dom.get('formInverse').style.display = "block"; Popup is being used instead rather than displaying in the current Html page
+            Dom.get('formInverse').style.display = "none";
+            _setOrclearInverseTermId2()
         }else if(Dom.get('edInverseTermId').value==="0"){
             //show inverse div
             Dom.get('btnInverseSetClear').value = 'cancel';
-            Dom.get('formInverse').style.display = "block";
+            //Dom.get('formInverse').style.display = "block";
+            Dom.get('formInverse').style.display = "none";
+
             //clear search result - since some terms may be removed/renamed
             Dom.get('resSearchInverse').innerHTML = "";
+            _setOrclearInverseTermId2()
 
         }else{
             Dom.get('btnInverseSetClear').value = 'set';
-            Dom.get('formInverse').style.display = "block";
+            //Dom.get('formInverse').style.display = "block";
+            Dom.get('formInverse').style.display = "none";
             Dom.get('edInverseTerm').value = "";
             Dom.get('edInverseTermId').value = "0";
+            _setOrclearInverseTermId2()
         }
     }
 
@@ -706,48 +844,49 @@ function EditTerms() {
                 setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);*/
 
                 var ind = _tabView.get("activeIndex");
+                // _fillTreeView((ind===0)?_termTree1:_termTree2); FillTreeView only called for Yui tree
                 _fillTreeView((ind===0)?_termTree1:_termTree2);
             }
         };
 
-        var _updateOnServer = function(){
+        // var _updateOnServer = function(){
 
-            var trmLabel = $(top.document).find('#lblMergeLabel1').text();// $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
+        var trmLabel = $(top.document).find('#lblMergeLabel1').text();// $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
 
-            var retain_nodeid = $(top.document).find('#lblRetainId').html();
-            var nodeid = $(top.document).find('#lblMergeId').html();
-
-
-            if(Hul.isempty(trmLabel)){
-                alert('Term label cannot be empty');
-                return;
-            }
-
-            var oTerms = {terms:{
-                colNames:['trm_Label','trm_Description','trm_Code'],
-                defs: {}
-            }};
-            oTerms.terms.defs[retain_nodeid] = [
-                trmLabel,
-                $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
-                $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
-
-            var str = YAHOO.lang.JSON.stringify(oTerms);
-
-            //alert(str);
-
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
-            var callback = _updateResult;
-            var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
-            Hul.getJsonData(baseurl, callback, params);
+        var retain_nodeid = $(top.document).find('#lblRetainId').html();
+        var nodeid = $(top.document).find('#lblMergeId').html();
 
 
-            if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);
-            $_dialogbox = null;
-        };
+        if(Hul.isempty(trmLabel)){
+            alert('Term label cannot be empty');
+            return;
+        }
+
+        var oTerms = {terms:{
+            colNames:['trm_Label','trm_Description','trm_Code'],
+            defs: {}
+        }};
+        oTerms.terms.defs[retain_nodeid] = [
+            trmLabel,
+            $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
+            $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
+
+        var str = YAHOO.lang.JSON.stringify(oTerms);
+
+        //alert(str);
+
+        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+        var callback = _updateResult;
+        var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
+        Hul.getJsonData(baseurl, callback, params);
 
 
-        var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+        if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);
+        $_dialogbox = null;
+        //};
+
+
+        /*var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
         fi = top.HEURIST.terms.fieldNamesToIndex;
 
         var arTerm = termsByDomainLookup[nodeid];
@@ -757,8 +896,8 @@ function EditTerms() {
         $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
 
         $('#lblMergeLabel1').text(arTerm2[fi.trm_Label]);
-        
-        
+
+
         /*  if(Hul.isempty(arTerm[fi.trm_Label])){
         $('#mergeLabel2').hide();
         }else{
@@ -772,73 +911,73 @@ function EditTerms() {
         if "One" - select the one and disable the other and show <none> in the empty one
         if "Both" - Select the first one and the other
 
-        ***/
-        if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  && 
-            (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
-            $('#mergeCode1').show();
-            $('#mergeCode2').show();
-            $('#mergeDescr1').show();
-            $('#mergeDescr2').show();
-            $('input[name ="rbMergeCode"]').attr('disabled', 'disabled');
-            $('input[name ="rbMergeDescr"]').attr('disabled', 'disabled' );
-            $('#lblMergeCode2').html('&#60;none&#62;');
-            $('#rbMergeCode2').val('&#60;none&#62;');
-            $('#lblMergeCode1').html('&#60;none&#62;');
-            $('#rbMergeCode1').val('&#60;none&#62;');
-            $('#lblMergeDescr1').html('&#60;none&#62;');
-            $('#rbMergeDescr1').val('&#60;none&#62;');
-            $('#lblMergeDescr2').html('&#60;none&#62;');
-            $('#rbMergeDescr2').val('&#60;none&#62;');
+
+        if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
+        (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
+        $('#mergeCode1').show();
+        $('#mergeCode2').show();
+        $('#mergeDescr1').show();
+        $('#mergeDescr2').show();
+        $('input[name ="rbMergeCode"]').attr('disabled', 'disabled');
+        $('input[name ="rbMergeDescr"]').attr('disabled', 'disabled' );
+        $('#lblMergeCode2').html('&#60;none&#62;');
+        $('#rbMergeCode2').val('&#60;none&#62;');
+        $('#lblMergeCode1').html('&#60;none&#62;');
+        $('#rbMergeCode1').val('&#60;none&#62;');
+        $('#lblMergeDescr1').html('&#60;none&#62;');
+        $('#rbMergeDescr1').val('&#60;none&#62;');
+        $('#lblMergeDescr2').html('&#60;none&#62;');
+        $('#rbMergeDescr2').val('&#60;none&#62;');
         }
         else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Code])))
         {
-            $('#mergeCode1').show();
-            $('#mergeCode2').show();
-            $('#mergeDescr1').show();
-            $('#mergeDescr2').show();
-            $('#rbMergeCode1').attr('disabled', 'disabled');
-            $("#rbMergeCode2").attr('checked', 'checked');
-            $('#rbMergeDescr1').attr('disabled', 'disabled');
-            $("#rbMergeDescr2").attr('checked', 'checked');
-            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
-            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-            $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
+        $('#mergeCode1').show();
+        $('#mergeCode2').show();
+        $('#mergeDescr1').show();
+        $('#mergeDescr2').show();
+        $('#rbMergeCode1').attr('disabled', 'disabled');
+        $("#rbMergeCode2").attr('checked', 'checked');
+        $('#rbMergeDescr1').attr('disabled', 'disabled');
+        $("#rbMergeDescr2").attr('checked', 'checked');
+        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+        $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
         }
-        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code])) 
-                && (!Hul.isempty(arTerm2[fi.trm_Description])))
+        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code]))
+        && (!Hul.isempty(arTerm2[fi.trm_Description])))
         {
-            $('#mergeCode1').show();
-            $('#mergeCode2').show();
-            $('#mergeDescr1').show();
-            $('#mergeDescr2').show();
-            $('#rbMergeCode2').attr('disabled', 'disabled');
-            $("rbMergeCode1").attr('checked', 'checked');
-            $('#rbMergeDescr2').attr('disabled', 'disabled');
-            $("#rbMergeDescr1").attr('checked', 'checked');
-            $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-            $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
-            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-            $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+        $('#mergeCode1').show();
+        $('#mergeCode2').show();
+        $('#mergeDescr1').show();
+        $('#mergeDescr2').show();
+        $('#rbMergeCode2').attr('disabled', 'disabled');
+        $("rbMergeCode1").attr('checked', 'checked');
+        $('#rbMergeDescr2').attr('disabled', 'disabled');
+        $("#rbMergeDescr1").attr('checked', 'checked');
+        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+        $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+        $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
         }
         else
         {
-            $('#mergeCode1').show();
-            $('#mergeCode2').show();
-            $('#mergeDescr1').show();
-            $('#mergeDescr2').show();
-            $('input[name ="rbMergeCode"]').removeAttr( "disabled" );
-            $('input[name ="rbMergeCode"]').attr('checked', 'checked');
-            $('input[name ="rbMergeDescr"]').removeAttr( "disabled" );
-            $('input[name ="rbMergeDescr"]').attr('checked', 'checked');
-            $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-            $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
-            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
-            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-            $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
-            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-            $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
+        $('#mergeCode1').show();
+        $('#mergeCode2').show();
+        $('#mergeDescr1').show();
+        $('#mergeDescr2').show();
+        $('input[name ="rbMergeCode"]').removeAttr( "disabled" );
+        $('input[name ="rbMergeCode"]').attr('checked', 'checked');
+        $('input[name ="rbMergeDescr"]').removeAttr( "disabled" );
+        $('input[name ="rbMergeDescr"]').attr('checked', 'checked');
+        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+        $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+        $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+        $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
         }
 
 
@@ -886,7 +1025,7 @@ function EditTerms() {
         }else{
         $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
         $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
-        } */
+        } *
 
 
         $('#lblRetainId').html(retain_nodeid);
@@ -902,13 +1041,13 @@ function EditTerms() {
 
         //show confirmation dialog
         $_dialogbox = Hul.popupElement(top, ele,
-            {
-                "close-on-blur": false,
-                "no-resize": true,
-                title: 'Select values to be retained',
-                height: 310,
-                width: 560
-        });
+        {
+        "close-on-blur": false,
+        "no-resize": true,
+        title: 'Select values to be retained',
+        height: 310,
+        width: 560
+        }); */
 
 
     }
@@ -918,6 +1057,7 @@ function EditTerms() {
     * Saves the term on server side
     */
     function _doSave(needConfirm, noValidation){
+
 
         var sName = Dom.get('edName').value.trim().replace(/\s+/g,' ');
         Dom.get('edName').value = sName;
@@ -937,7 +1077,7 @@ function EditTerms() {
         var iParentId_prev = Number(_currentNode.data.parent_id);
         iParentId_prev = (iParentId_prev>0)?iParentId_prev:null;
 
-        var wasChanged = ((_currentNode.label !== sName) ||
+        var wasChanged = ((_currentNode.data.label !== sName) ||
             (_currentNode.data.description !== sDesc) ||
             (_currentNode.data.termcode !== sCode) ||
             (_currentNode.data.status !== sStatus) ||
@@ -946,18 +1086,20 @@ function EditTerms() {
 
 
         if(wasChanged){
-            $('#btnSave').removeProp('disabled');
-            $('#btnSave').css('color','black');
+            var ele = $('#btnSave');
+            ele.removeProp('disabled');
+            $(ele).removeClass('save-disabled');
         }
 
         //( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
-        //	Number(_currentNode.data.inverseid) !== iInverseId));
+        //    Number(_currentNode.data.inverseid) !== iInverseId));
+
 
         if(wasChanged || !isExistingNode(_currentNode) ){
 
             var swarn = "";
             if(Hul.isempty(sName)){
-                swarn = "Term (label) is mandatory - terms must have a term / label"
+                swarn = "The term cannot be blank (the standard code, description and image are optional)"
             }else {
                 //IJ 2014-04-09 swarn = Hul.validateName(sName, "Field 'Display Name'");
             }
@@ -971,36 +1113,72 @@ function EditTerms() {
                 Dom.get('edInverseTermId').setFocus();
                 return;
             }
+            
+            //keep node, since current node can be changed while this async action
+            var nodeForAction = _currentNode;
 
             if(needConfirm){
-                var r=confirm("Term was modified. Save it?");
-                if (!r) {
-                    //if new - remove from tree
-                    if( isNaN(Number(_currentNode.data.id)) ){
-                        _doDelete(false);
+                
+                if(hasH4()){
+                    
+                     var buttons = {};
+                     buttons['Yes'] = function() {
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog( "close" );
+                            __doSave_continue();
+                     };
+                     buttons['No'] = function() {
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog( "close" );
+                            if( !isExistingNode(nodeForAction) ){
+                                _doDelete2(nodeForAction, false);           //@todo - to fix - not removed from fancytree
+                            }
+                     };
+                    
+                     window.hWin.HEURIST4.msg.showMsgDlg("Term was modified. Save it?", buttons, "");
+                }else{
+                    var r = confirm("Term was modified. Save it?");
+                    if (!r) {
+                        //if new - remove from tree
+                        if( !isExistingNode(nodeForAction) ){
+                            _doDelete2(nodeForAction, false);           //@todo - not removed from fancytree
+                        }
+                        return;
+                    }else{
+                        __doSave_continue();
                     }
-                    return;
                 }
+            }else{
+                __doSave_continue();
             }
 
-            if(noValidation || _validateDups(_currentNode, sName, sCode)){
+            function __doSave_continue(){
+            
+                if(noValidation || _validateDups(nodeForAction, sName, sCode)){
 
-                var needReload = (_currentNode.data.parent_id != iParentId || _currentNode.data.inverseid != iInverseId);
+                    var needReload = (nodeForAction.data.parent_id != iParentId || nodeForAction.data.inverseid != iInverseId);
 
-                _currentNode.label = sName;
-                _currentNode.data.description = sDesc;
-                _currentNode.data.termcode = sCode;
-                _currentNode.data.status = sStatus;
+                    nodeForAction.data.label = sName;
+                    nodeForAction.data.description = sDesc;
+                    nodeForAction.data.termcode = sCode;
+                    nodeForAction.data.status = sStatus;
 
-                _currentNode.data.inverseid = iInverseId;
-                _currentNode.title = _currentNode.data.description;
+                    nodeForAction.data.inverseid = iInverseId;
+                    nodeForAction.data.title = _currentNode.data.description;
 
-                _currentNode.data.parent_id = iParentId;
+                    nodeForAction.data.parent_id = iParentId;
 
-                _currTreeView.render();
 
-                _updateTermsOnServer(_currentNode, needReload);
-                //alert("TODO SAVE ON SERVER");
+                    //_currTreeView.render
+                    //var tree = $treediv.fancytree("getTree");
+                    //tree.reload();
+                    // _currentNode.load();
+                    //_defineContentTreeView();
+
+                    _updateTermsOnServer(nodeForAction, needReload);
+
+                    //alert("TODO SAVE ON SERVER");
+                }
             }
         }
     }
@@ -1010,7 +1188,8 @@ function EditTerms() {
     */
     function _validateDups(node, new_name, new_code){
 
-        var sibs = node.getSiblings();
+        // var sibs = node.getSiblings(); //getSiblings is a function for YuI, we updated the tree to fancyTree
+        var sibs = node.getChildren();
         var ind;
         for (ind in sibs){
             if(!Hul.isnull(ind)){
@@ -1050,6 +1229,9 @@ function EditTerms() {
     {
 
         var term = node.data;
+        var current_id = node.data.id;
+        var wasExpanded = node.isExpanded();
+        var parent_id = null;
 
         /*
         var sibs = node.getSiblings();
@@ -1070,12 +1252,13 @@ function EditTerms() {
 
 
         var needReload = _needReload;
-
         var oTerms = {terms:{
             colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'],
             defs: {}
         }};
-        oTerms.terms.defs[term.id] = [node.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
+
+        //PLEASE NOTE use "node.label' for YUI TREE INSTEAD OF 'term.label'
+        oTerms.terms.defs[term.id] = [term.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
 
         var str = YAHOO.lang.JSON.stringify(oTerms);
 
@@ -1098,11 +1281,11 @@ function EditTerms() {
                                 error = true;
                             }else{
 
-                                if(node.data.id != item){ //new term
-                                    node.data.id = item;
+                                if(term.id != item){ //new term
+                                    term.id = item;
                                     //find vocab term (top level)
                                     //top.HEURIST.treesByDomain
-                                    var topnode = _findTopLevelForId(node.data.parent_id);
+                                    var topnode = _findTopLevelForId(term.parent_id);
                                     if (!Hul.isnull(topnode)) {
                                         var vocab_id = topnode.data.id;
                                         if(_affectedVocabs.indexOf(vocab_id)<0){
@@ -1112,6 +1295,11 @@ function EditTerms() {
                                             Dom.get('formAffected').style.display = 'block';
                                             }*/
                                         }
+                                    }
+                                    if(_parentNode){
+                                        //reselect parent node
+                                        parent_id = _parentNode.data.id;
+                                        wasExpanded = true;
                                     }
                                 }
 
@@ -1134,9 +1322,15 @@ function EditTerms() {
                                 if(_currentNode ===  node){
                                     Dom.get('edId').value = item;
                                 }
+                                /*
                                 if(_parentNode){
-                                    _onNodeClick(_parentNode);
+                                    //reselect parent node
+                                    var parent_id = _parentNode.data.id;
+                                    _findNodeById(parent_id, true);
+                                    wasExpanded = true;
+                                    //_parentNode.setExpanded(true);
                                 }
+                                */
                             }
                         }
                     }//for
@@ -1147,21 +1341,68 @@ function EditTerms() {
                         _isSomethingChanged = true;
                         Dom.get('div_btnAddChild').style.display = "inline-block";
                         Dom.get('btnDelete').value = "Delete";
-                        Dom.get('btnSave').value = "Save";
-                        Dom.get('div_SaveMessage').style.display = "inline-block";
-                        setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);
-                        //alert("Term was succesfully saved");
+
+                        /* var $_dialogbox;
+                        var ele = document.getElementById('div_SaveMessage');
+                        $_dialogbox = Hul.popupElement(top, ele,
+                        {
+                        "close-on-blur": false,
+                        "no-resize": true,
+                        title: '',
+                        height: 100,
+                        width: 200
+                        });*/
+
+
+                        //Dom.get('div_SaveMessage').style.display = "inline-block";
+                        $("#Saved" ).css("display","inline-block");
+                        setTimeout(function(){$("#Saved" ).css("display","none")}, 1000);
+                        $("#btnSave" ).prop('disabled', 'disabled');
+                        $('#btnSave').addClass('save-disabled');
+
+                        /*FancyTree needs to be reinitialised manually when terms are modified*/
+
+                        
+                        $treediv.remove();
+                        _defineContentTreeView();
+                        
+                        var term_id;
+                        if(parent_id){
+                            term_id = parent_id;
+                        }else if(_currentNode){
+                            term_id = _currentNode.data.id;
+                        }else{
+                            term_id = current_id;    
+                        }
+                        
+                        var node = _findNodeById(term_id, wasExpanded);
+                        node.setFocus(true);    
+                        
+                        
+                        //_currentNode.setExpanded(true);
+                        
+                        /*_currentNode.setFocus(true);
+                        _currentNode.setActive(true);*/
+
 
                         if(needReload){
-                            var ind = _tabView.get("activeIndex");
-                            _fillTreeView((ind===0)?_termTree1:_termTree2);
+                            // var ind = _tabView.get("activeIndex");
+                            //_fillTreeView((ind===0)?_termTree1:_termTree2);//; calll fillTreview for only YuI tree
+
+
+                            //_defineContentTreeView();
+
+                            //$treediv.remove();
+                            //_defineContentTreeView();
+
+
                         }
                     }
                 }
             };
 
             //
-            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveTerms&data=" + encodeURIComponent(str)+"&db="+_db;
             Hul.getJsonData(baseurl, callback, params);
@@ -1169,7 +1410,7 @@ function EditTerms() {
     }
 
     /**
-    * new of existing node
+    * new of existing nodeF
     */
     function isExistingNode(node){
         return ((typeof node.data.id === "number") || node.data.id.indexOf("-")<0);
@@ -1179,13 +1420,18 @@ function EditTerms() {
     * Deletes current term
     */
     function _doDelete(needConfirm){
-        if(_currentNode===null) return;
-        var isExistingTerm = isExistingNode(_currentNode),
+        _doDelete2(_currentNode, needConfirm);
+    }
+
+    function _doDelete2(nodeToDelete, needConfirm){
+        
+        if(nodeToDelete===null) return;
+        var isExistingTerm = isExistingNode(nodeToDelete),
         sMessage = "";
 
         if(isExistingTerm){
-            sMessage = "Delete term '"+_currentNode.label+"'?";
-            if(_currentNode.children.length>0){
+            sMessage = "Delete term '"+nodeToDelete.data.label+"'?";
+            if(nodeToDelete.countChildren()>0){
                 sMessage = sMessage + "\nWarning: All child terms will be deleted as well";
             }
         }else{
@@ -1209,10 +1455,18 @@ function EditTerms() {
 
                         top.HEURIST.terms = context.terms;
                         //remove from tree
-                        _currTreeView.popNode(_currentNode);
-                        _currTreeView.render();
-                        _currentNode = null;
-                        _onNodeClick(null);
+                        //_currTreeView.popNode(_currentNode);
+                        //  _currTreeView.render();
+                        var term_id = _currentNode?_currentNode.data.id:0;
+                        var term_id2 = nodeToDelete.data.id;
+                        
+                        nodeToDelete.remove();
+                        nodeToDelete = null;
+                        if(term_id2==term_id){
+                            _currentNode = null;    
+                            _onNodeClick(null);
+                        }
+                        
                         _isSomethingChanged = true;
                     }else{
                         Dom.get('formEditor').style.display = "block";
@@ -1220,15 +1474,22 @@ function EditTerms() {
                     Dom.get('deleteMessage').style.display = "none";
                 }
 
-                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                 var callback = __updateAfterDelete;
                 var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
                 Hul.getJsonData(baseurl, callback, params);
             }else{
-                _currTreeView.popNode(_currentNode);
-                _currTreeView.render();
-                _currentNode = null;
-                _onNodeClick(null);
+                
+                        var term_id = _currentNode?_currentNode.data.id:0;
+                        var term_id2 = nodeToDelete.data.id;
+                        
+                        nodeToDelete.remove();
+                        nodeToDelete = null;
+                        if(term_id2==term_id){
+                            _currentNode = null;    
+                            _onNodeClick(null);
+                        }
+                
                 Dom.get('deleteMessage').style.display = "none";
             }
         }
@@ -1242,7 +1503,7 @@ function EditTerms() {
         if(_currentNode===null) return;
         if (_currentNode === _findTopLevelForId(_currentNode.data.id))
         {
-            alert("You can't move top vocabulary");
+            alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms).Vocabularies cannot be moved or merged");
             return;
         }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1253,7 +1514,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.baseURL_V3 +
+        var url = top.HEURIST.baseURL +
         "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
         if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
@@ -1273,6 +1534,7 @@ function EditTerms() {
                             Dom.get('edParentId').value = newparent_id;
                         }
                         _doSave(false, true);
+
 
                         keep_target_newparent_id = newparent_id;
 
@@ -1303,7 +1565,7 @@ function EditTerms() {
         if(_currentNode===null) return;
         if (_currentNode === _findTopLevelForId(_currentNode.data.id))
         {
-            alert("you can't merge top vocabulary");
+            alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms).Vocabularies cannot be moved or merged.");
             return;
         }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1314,7 +1576,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.baseURL_V3 +
+        var url = top.HEURIST.baseURL +
         "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
         /*if(keep_target_newparent_id){
         url = url + "&parent=" + keep_target_newparent_id;
@@ -1348,6 +1610,7 @@ function EditTerms() {
     */
     function _doAddChild(isRoot, value)
     {
+        var tree = $treediv.fancytree("getTree");
         var term;
         if(value==null){
             if (isRoot){
@@ -1359,47 +1622,72 @@ function EditTerms() {
 
         if(isRoot){
 
-            var rootNode = _currTreeView.getRoot();
+            //var rootNode = _currTreeView.getRoot(); YUI tree
+            var rootNode =   $treediv.fancytree("getRootNode");
+
 
             term = {}; //new Object();
-            term.id = (value.id)?value.id:"0-" + (rootNode.getNodeCount()); //correct
-            term.parent_id = null;
-            term.conceptid = null;
-            term.domain = _currentDomain;
-            term.label = value.label;
-            term.description = value.description;
-            term.termcode = value.termcode;
-            term.inverseid = null;
+            //term.id = (value.id)?value.id:"0-" + (rootNodet.getNodeCount()); //correct
+            var newNode= rootNode.addChildren({
 
-            rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node
-            _currTreeView.render();
 
-            rootNode.focus(); //expand
+                id: (value.id)?value.id:"0-" + (tree.count()),
+                parent_id: null,
+                conceptid: null,
+                domain:_currentDomain,
+                label: value.label,
+                description:value.description,
+                termcode : value.termcode,
+                inverseid: null,
+                folder:true,
+                title:value.label});
 
-            _onNodeClick(rootNode);
 
-        }else if(!Hul.isnull(_currentNode))
-        {
-            term = {}; //new Object();
-            term.id = (value.id)?value.id:_currentNode.data.id+"-" + (_currentNode.getNodeCount());  //correct
-            term.parent_id = _currentNode.data.id;
-            term.conceptid = null;
-            term.domain = _currentDomain;
-            term.label = value.label;
-            term.description = value.description;
-            term.termcode = value.termcode;
-            term.inverseid = null;
 
-            var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
-            _currTreeView.render();
 
-            var _temp = _currentNode;
+            //rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node
+            //  _currTreeView.render();
+            //$treediv.remove();
+            //_defineContentTreeView();
 
-            newNode.focus(); //expand
+
+
+            // rootNode.setFocus(true); //expand
+            // rootNode.setExpanded(true);
+
+            newNode.setActive(true);
 
             _onNodeClick(newNode);
 
-            _parentNode = _temp;
+        }else if(!Hul.isnull(_currentNode))
+        {
+
+            var _temp = _currentNode;
+            var newNode= _currentNode.addChildren({
+
+
+                id: (value.id)?value.id:"0-" + (tree.count()),
+                parent_id: null,
+                conceptid: null,
+                domain:_currentDomain,
+                label: value.label,
+                description:value.description,
+                termcode : value.termcode,
+                inverseid: null,
+                folder:true,
+                title:value.label});
+
+
+            // var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
+            // _currTreeView.render();
+
+
+
+            newNode.setActive(true); //expand
+            _currentNode.setExpanded(true);
+            //_onNodeClick(newNode);
+            _parentNode = newNode.getParent();
+            Dom.get('edParentId').value = _parentNode.data.id;
         }
     }
 
@@ -1410,13 +1698,23 @@ function EditTerms() {
         var sel = Dom.get('resSearch');
         if(sel.selectedIndex>=0){
             var nodeid = sel.options[sel.selectedIndex].value;
-            var node = _findNodeById(nodeid, true);
+            var node = _findNodeById(nodeid, true); 
+
             if(!Hul.isnull(node)){
-                _onNodeClick(node);
+                //scroll does not work 
+                //node.makeVisible();//{noAnimation: true, noEvents: true, scrollIntoView: true}); 
+                setTimeout(function(){
+                  $(node.li).get(0).scrollIntoView();  
+                },500);
+                
+                //term_tree
+                //old 
+                //node.setFocus(true);
+                //_onNodeClick(node);
             }
         }
     }
-    function _doSelectInverse(){
+    function _doSelectInverse(){ // This Function may not be necessary as internal function (_Select inverse) has been defined in _setOrclearInverseTermId2 for PopUp
         var sel = Dom.get('resSearchInverse');
         if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
 
@@ -1456,7 +1754,7 @@ function EditTerms() {
                 term_ID = _currentNode.data.parent_id;
             }
 
-            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/printVocabulary.php?db="+ _db
+            var sURL = top.HEURIST.baseURL + "admin/structure/terms/printVocabulary.php?db="+ _db
             + '&domain=' + _currentDomain + '&trm_ID=' + term_ID;
 
             window.open(sURL, '_blank');
@@ -1472,15 +1770,15 @@ function EditTerms() {
         if(isRoot || !Hul.isnull(_currentNode)){
 
             var term_id = (isRoot)?0:_currentNode.data.id;
-            var term_label = (isRoot)?'root vocabulary':_currentNode.label;
+            var term_label = (isRoot)?'root vocabulary':_currentNode.data.label;
 
             /* old way
-            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/editTermsImport.php?db="+ _db +
+            var sURL = top.HEURIST.baseURL + "admin/structure/terms/editTermsImport.php?db="+ _db +
             "&parent="+term_id+
             "&domain="+_currentDomain;
             */
 
-            var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/import/importDefTerms.php?db="+ _db +
+            var sURL = top.HEURIST.baseURL + "hclient/framecontent/import/importDefTerms.php?db="+ _db +
             "&trm_ID="+term_id;
 
             Hul.popupURL(top, sURL, {
@@ -1491,7 +1789,7 @@ function EditTerms() {
                 //width: 500,
                 height: 460,
                 width: 800,
-                'context_help':top.HEURIST.baseURL_V3+'context_help/defTerms.html #import',
+                'context_help':top.HEURIST.baseURL+'context_help/defTerms.html #import',
                 callback: _import_complete
             });
 
@@ -1509,6 +1807,7 @@ function EditTerms() {
                     + ' term'
                     + (context.result.length>1?'s were':' was')
                     + ' added.', null, 'Terms imported');
+                window.hWin.HEURIST4.terms = context.terms;
             }
 
 
@@ -1532,6 +1831,8 @@ function EditTerms() {
                                 var term = {}; //new Object();
                                 term.id = termid;
                                 term.label = arTerm[fi.trm_Label];
+                                term.title = arTerm[fi.trm_Label];
+                                term.folder = false;
                                 term.conceptid = null;
                                 term.description = arTerm[fi.trm_Description];
                                 term.termcode = "";
@@ -1539,13 +1840,18 @@ function EditTerms() {
                                 term.domain = _currentDomain;
                                 term.inverseid = null;
 
-                                var newNode = new YAHOO.widget.TextNode(term, parentNode, false);
+                                var newNode= parentNode.addChildren(term);    
+                                
+                                //OLD var newNode = new YAHOO.widget.TextNode(term, parentNode, false);
                             }
                         }
                     }
                 }//for
-                _currTreeView.render();
-                parentNode.focus(); //expand
+                
+            
+                parentNode.setExpanded(true);    
+                //_currTreeView.render();
+                //parentNode.focus(); //expand
                 /*var _temp = _currentNode;
                 _onNodeClick(_currentNode);
                 _parentNode = _temp;
@@ -1700,7 +2006,7 @@ function EditTerms() {
         var disTerms = deftype[fi.dty_TermIDTreeNonSelectableIDs];
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        Hul.popupURL(top, top.HEURIST.baseURL_V3 +
+        Hul.popupURL(top, top.HEURIST.baseURL +
             "admin/structure/terms/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
             {
                 "close-on-blur": false,
@@ -1755,7 +2061,7 @@ function EditTerms() {
 
                         if(!Hul.isnull(str)) {
 
-                            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
+                            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                             var callback = _updateResult;
                             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
                             Hul.getJsonData(baseurl, callback, params);
@@ -1775,7 +2081,7 @@ function EditTerms() {
         Hul.getJsonData(baseurl, function(context){
             if(!Hul.isnull(context) && !context.error){
                 if(context.res=='ok'){
-                    $('#termImage').find('img').prop('src', top.HEURIST.baseURL_V3 + 'hclient/assets/100x100click.png');
+                    $('#termImage').find('img').prop('src', top.HEURIST.baseURL + 'hclient/assets/100x100click.png');
                 }
             }
             }, null);
@@ -1788,7 +2094,7 @@ function EditTerms() {
         var $input_img = $('#termImage');
 
         $input.fileupload({
-            url: top.HEURIST.baseURL_V3 +  'hserver/utilities/fileUpload.php',
+            url: top.HEURIST.baseURL +  'hserver/utilities/fileUpload.php',
             formData: [ {name:'db', value: _db},
                 {name:'entity', value:'terms'},
                 {name:'newfilename', value: Dom.get('edId').value }],
@@ -1823,6 +2129,620 @@ function EditTerms() {
         });
 
     }
+
+    function _doMerge(retain_node, node){
+
+        var merge_term = node.data;
+        var retain_term =retain_node.data;
+        var $_dialogbox;
+
+        var _updateResult = function(context){
+            if(!Hul.isnull(context) && !context.error){
+
+                top.HEURIST.terms = context.terms;
+
+                /*_isSomethingChanged = true;
+                Dom.get('div_btnAddChild').style.display = "inline-block";
+                Dom.get('btnDelete').value = "Delete";
+                Dom.get('btnSave').value = "Save";
+                Dom.get('div_SaveMessage').style.display = "inline-block";
+                setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);*/
+
+                // var ind = _tabView.get("activeIndex");
+                // _fillTreeView((ind===0)?_termTree1:_termTree2); FillTreeView only called for Yui tree
+                // _fillTreeView((ind===0)?_termTree1:_termTree2);
+            }
+        };
+
+        // var _updateOnServer = function(){
+
+        var trmLabel = retain_term.label;// $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
+
+        var retain_nodeid = retain_term.id
+        var nodeid = merge_term.id
+
+
+        if(Hul.isempty(trmLabel)){
+            alert('Term label cannot be empty');
+            return;
+        }
+
+        var oTerms = {terms:{
+            colNames:['trm_Label','trm_Description','trm_Code'],
+            defs: {}
+        }};
+        oTerms.terms.defs[retain_nodeid] = [
+            trmLabel,
+            $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
+            $(top.document).find('input:radio[name="rbMergeCode"]:checked').val()];
+
+        var str = YAHOO.lang.JSON.stringify(oTerms);
+
+        //alert(str);
+
+        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+        var callback = _updateResult;
+        var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
+        Hul.getJsonData(baseurl, callback, params);
+
+
+        if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);
+        $_dialogbox = null;
+
+    }
+
+    function verifyLibrariesLoaded()
+    {
+        //verify that all required libraries have been loaded
+        if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
+            $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js');
+            return;
+        }
+        else if(!$.ui.fancytree._extensions["dnd"]){
+            alert('drag-n-drop extension for tree not loaded')
+            return;
+        }
+        return;
+    }
+
+    //
+    //Method to define the content of fancyTreeView
+    function  _defineContentTreeView(){
+        //
+
+        verifyLibrariesLoaded();
+
+        var  treedata = [];
+        var termid,
+        first_node,
+        treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
+        termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+        fi = top.HEURIST.terms.fieldNamesToIndex;
+
+        //first level terms
+        for (termid in treesByDomain)
+        {
+
+            if(!Hul.isnull(termid)){
+
+                //var nodeIndex = tv.getNodeCount()+1;
+
+                var arTerm = termsByDomainLookup[termid];
+
+                var term = {};//new Object();
+                term.id = termid;
+                term.parent_id = null;
+                term.conceptid = arTerm[fi.trm_ConceptID];
+                term.domain = _currentDomain;
+                term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
+                term.description = arTerm[fi.trm_Description];
+                term.termcode  = arTerm[fi.trm_Code];
+                term.inverseid = arTerm[fi.trm_InverseTermID];
+                term.status = arTerm[fi.trm_Status];
+                term.original_db = arTerm[fi.trm_OriginatingDBID];
+
+
+                function __createChildren(parentNode, parent_id) { // Recursively get all children
+                    var _term,
+                    childNode,
+                    nodeIndex,
+                    child;
+                    var children  = []
+
+                    for(child in parentNode)
+                    {
+                        if(!Hul.isnull(child)){
+                            var _arTerm = termsByDomainLookup[child];
+
+                            if(!Hul.isnull(_arTerm)){
+
+                                _term = {};
+
+                                _term.id = child;
+                                _term.parent_id = parent_id;
+                                _term.conceptid = _arTerm[fi.trm_ConceptID];
+                                _term.domain = _currentDomain;
+                                _term.label = Hul.isempty(_arTerm[fi.trm_Label])?'ERROR N/A':_arTerm[fi.trm_Label];
+                                _term.description =_arTerm[fi.trm_Description];
+                                _term.termcode  =  _arTerm[fi.trm_Code];
+                                _term.inverseid = _arTerm[fi.trm_InverseTermID];
+                                _term.status = _arTerm[fi.trm_Status];
+                                _term.original_db = _arTerm[fi.trm_OriginatingDBID];
+
+
+                                // childNode = parentEntry.addNode(term);
+
+                                children.push({id:child,parent_id:parent_id,conceptid:_arTerm[fi.trm_ConceptID],domain:_currentDomain, label:_term.label, description:_arTerm[fi.trm_Description],termcode:_arTerm[fi.trm_Code],inverseid:_arTerm[fi.trm_InverseTermID],status:_arTerm[fi.trm_Status],original_db:_arTerm[fi.trm_OriginatingDBID], title:_term.label,folder:true,children: __createChildren(parentNode[child], _term.id)});
+
+
+                            }
+                        }
+                    }
+
+                    return children;
+                }
+
+
+                var parentNode = treesByDomain[termid];
+                //all: { title: window.hWin.HR('My Searches'), folder: true,
+                treedata.push({id:termid,parent_id:term.parent_id,conceptid:term.conceptid,domain:term.domain, label:term.label, description:term.description,termcode:term.termcode,inverseid:term.inverseid,status:term.status,original_db:term.original_db,title:term.label,folder:true,children:__createChildren(parentNode, termid)});
+
+
+
+                // Look for children of the node
+
+            }
+        }
+
+        if (treetype == "terms"){
+            top_ele = document.getElementById("termTree1");
+        }
+        else if (treetype ="relationships"){
+            top_ele = document.getElementById("termTree2");
+        }
+        $treediv = $('<div>').attr('id','term_tree').appendTo(top_ele);
+
+        $treediv.fancytree(
+            {
+                activeVisible:true,
+                checkbox: false,
+                //titlesTabbable: false,     // Add all node titles to TAB chain
+                //selectMode: 1,
+                source:treedata,
+                activate: function(event, data){
+                    // A node was activated: display its details
+                    _onNodeClick(data);
+                },
+                click: function(event, data){
+                  if(data.targetType=='expander'){
+                      
+                   setTimeout(function(){
+                    $.each( $('.fancytree-node'), function( idx, item ){
+                        __defineActionIcons(item);
+                    });
+                    }, 500);  
+                      
+                      
+                  }  
+                },
+                extensions:['dnd','themeroller'],
+                dnd: {
+                    autoExpandMS: 1000, //it does not work - we expand manually in dragEnter
+                    //focusOnClick: true,
+                    preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
+                    preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
+                    dragStart: function(node, data) {
+                        /*if(node.getLevel()===1){
+                        return false;
+                        }*/
+
+                        _onNodeClick(node);
+                        return true;
+                    },
+                    dragEnter: function(node, data) {
+                        if (data.otherNode.getLevel()===1){
+                            if(node.getLevel()>1)
+                                return false;
+
+                            return "over";
+                        }
+
+
+                        if (data.otherNode.getLevel()>1 && node.getLevel()===1){
+                            setTimeout(function(){node.setExpanded(true);},1000);
+                            return false;
+                        }
+
+
+                        return true;
+
+                    },
+                    dragDrop: function(node, data) {
+                        _onNodeClick(data.otherNode);
+
+                        if(data.otherNode.getLevel()===1){
+                            if(node.getLevel()!=1)
+                                return false;
+                            else{
+                                showMergePopUp(node,data);
+                            }
+
+                        }else if((data.otherNode.hasChildren()) && (data.otherNode.getLevel()!=1)){
+                            showMergePopUp(node,data);
+                        }
+                        else{
+                            showMergePopUp(node,data);
+                        }
+                    }
+
+                },
+                themeroller: {
+                    activeClass: "ui-state-active"
+                }
+        });
+        
+        
+//console.log('found '+$('.fancytree-node').length);
+        
+       setTimeout(function(){
+        $.each( $('.fancytree-node'), function( idx, item ){
+            __defineActionIcons(item);
+        });
+        }, 500);  
+
+       function __defineActionIcons(item){ 
+           if($(item).find('.svs-contextmenu3').length==0){
+
+               var actionspan = $('<div class="svs-contextmenu3">'
+                   +'<span class="ui-icon ui-icon-plus" title="Add a child term (a term hierarchichally below the current vocabulary or term)"></span>'
+                   +((_currTreeView === _termTree2)
+                      ?'<span class="ui-icon ui-icon-reload" title="Set the inverse term for this term"></span>' //for relations only
+                      :'')
+                   +'<span class="ui-icon ui-icon-close" title="Delete this term (if unused in database)"></span>'
+                   //+'<span class="ui-icon ui-icon-image" title="Add an image which illustrates this term"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-w" title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-e" title="EXPORT this vocabulary to a text file"></span>'
+                   +'</div>').appendTo(item);
+                   
+                   
+               actionspan.find('.ui-icon').click(function(event){
+                    var ele = $(event.target);
+                    
+                    //timeour need to activate current node    
+                    setTimeout(function(){                         
+                    if(ele.hasClass('ui-icon-plus')){
+                        _doAddChild(false);
+                    }else if(ele.hasClass('ui-icon-reload')){
+                         $("#btnInverseSetClear").click();
+                         //_setOrclearInverseTermId();
+                    }else if(ele.hasClass('ui-icon-close')){
+                        $("#btnDelete").click();
+                        //_doDelete();
+                    }else if(ele.hasClass('ui-icon-arrowthick-1-w')){
+                        _import(false)
+                    }else if(ele.hasClass('ui-icon-arrowthick-1-e')){
+                        _export(false);
+                    }else if(ele.hasClass('ui-icon-image')){
+                         that.showFileUploader();
+                    }
+                    },500);
+                    //window.hWin.HEURIST4.util.stopEvent(event); 
+                    //return false;
+               });
+               /*
+               $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
+               .click(function(event){ 
+               //tree.contextmenu("open", $(event.target) ); 
+               
+               ).appendTo(actionspan);
+               */
+
+               //hide icons on mouse exit
+               function _onmouseexit(event){
+                       var node;
+                       if($(event.target).is('li')){
+                          node = $(event.target).find('.fancytree-node');
+                       }else if($(event.target).hasClass('fancytree-node')){
+                          node =  $(event.target);
+                       }else{
+                          //hide icon for parent 
+                          node = $(event.target).parents('.fancytree-node');
+                          if(node) node = $(node[0]);
+                       }
+                       var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
+                       ele.css('visibility','hidden');
+               }               
+               
+               $(item).hover(
+                   function(event){
+                       var node;
+                       if($(event.target).hasClass('fancytree-node')){
+                          node =  $(event.target);
+                       }else{
+                          node = $(event.target).parents('.fancytree-node');
+                       }
+                       var ele = $(node).find('.svs-contextmenu3');
+                       ele.css('visibility','visible');
+                   }
+               );               
+               $(item).mouseleave(
+                   _onmouseexit
+               );
+           }
+       }
+
+                    
+        function showMergePopUp(node,data)
+        {
+
+            if(data.hitMode==='over'){
+
+
+                if(!data.otherNode.hasChildren()){
+
+                    $("#btnMergeOK").click(function(){
+
+                        // data.otherNode.moveTo(node,data.hitMode);
+                        //   $_dialogbox.dialog($_dialogbox).dialog("close");
+
+
+
+                        /* if (node.data.id){
+
+
+                        if(node.data.id === "root") {
+                        Dom.get('edParentId').value = "";
+                        }else{
+                        Dom.get('edParentId').value = node.data.id;
+
+                        }
+                        // alert($('#edParentId').val());
+
+                        // _updateTermsOnServer(_currentNode,false);
+                        //_doSave(false,true);
+                        } */
+                        // data.otherNode.moveTo(node,data.hitMode);
+                        _doMerge(node,data.otherNode);
+                        $(data.otherNode.span).hide();
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                        // _doMerge(node,data.otherNode);
+                        // $treediv.remove();
+                        //_defineContentTreeView();
+                        //alert(node.data.label)
+
+                    });
+                    $("#moveBtn").click(function(){
+
+                        if(node.data.id)
+                        {
+                            if(node.data.id === "root") {
+                                Dom.get('edParentId').value = "";
+                            }else{
+                                Dom.get('edParentId').value = node.data.id;
+
+                            }
+                            // alert($('#edParentId').val());
+
+                            // _updateTermsOnServer(_currentNode,false);
+                            _doSave(false,true);
+                        }
+
+                        data.otherNode.moveTo(node,data.hitMode);
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                    });
+
+                }
+                else{
+
+                    $("#btnMergeOK").click(function(){
+                        while(data.otherNode.hasChildren())
+                        {
+                            data.otherNode.getFirstChild().moveTo(node, data.hitMode);
+
+                        }
+
+                        _doMerge(node,data.otherNode);
+                        $(data.otherNode.span).hide();
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                    });
+
+
+                    $("#moveBtn").click(function(){
+
+
+                        if(node.data.id)
+                        {
+                            if(node.data.id === "root") {
+                                Dom.get('edParentId').value = "";
+                            }else{
+                                Dom.get('edParentId').value = node.data.id;
+
+                            }
+                            // alert($('#edParentId').val());
+
+                            // _updateTermsOnServer(_currentNode,false);
+                            _doSave(false,true);
+                        }
+
+                        data.otherNode.moveTo(node,data.hitMode);
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                        //var iInverseId = Number(Dom.get('edInverseTermId').value);
+                        //alert(iInverseId);
+                    });
+
+
+                }
+
+                function displayPopUpContents(cbCode1,cbCode2,cbDescr1,cbDescr2){
+                    if(cbCode1){
+                        $('#rbMergeCode1').attr('checked', 'checked');
+                        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+                    }
+                    else{
+                        $('#rbMergeCode1').attr('disabled', 'disabled');
+                        $('#lblMergeCode1').html('&#60;none&#62;');
+                    }
+                    if(cbCode2){
+                        $("#rbMergeCode2").attr('checked', 'checked');
+                        $('#lblMergeCode2').html((arTerm[fi.trm_Code]));
+                    }
+                    else{
+                        $("#rbMergeCode2").attr('disabled', 'disabled');
+                        $('#lblMergeCode2').html('&#60;none&#62;');
+                    }
+                    if(cbDescr1)
+                    {
+                        $('#rbMergeDescr1').attr('checked', 'checked');
+                        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+                    }
+                    else{
+                        $('#rbMergeDescr1').attr('disabled', 'disabled');
+                        $('#lblMergeDescr1').html('&#60;none&#62;');
+                    }
+                    if(cbDescr2){
+                        $("#rbMergeDescr2").attr('checked', 'checked');
+                        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+                    }
+                    else{
+                        $("#rbMergeDescr2").attr('disabled', 'disabled');
+                        $('#lblMergeDescr2').html('&#60;none&#62;');
+                    }
+
+                }
+
+
+                var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+                fi = top.HEURIST.terms.fieldNamesToIndex;
+                var merge_node = data.otherNode.data;
+                var retain_node = node.data;
+
+                var arTerm = termsByDomainLookup[merge_node.id];
+                $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['.fontsize(1)+arTerm[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+
+                var arTerm2 = termsByDomainLookup[retain_node.id];
+                $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
+
+                $('#lblMergeLabel1').text(arTerm2[fi.trm_Label]);
+
+                /***  Check and Description Buttons-- if "Neither" - disable both buttons and show <none> in both
+                if "One" - select the one and disable the other and show <none> in the empty one
+                if "Both" - Select the first one and the other
+
+                ***/
+                if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
+                    (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
+                    displayPopUpContents(false,false,false,false);
+                }
+                else if((!Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
+                    && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                    {
+                        displayPopUpContents(true,false,false,false);
+
+                    }
+                    else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                        && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                        {
+                            displayPopUpContents(true,false,true,false);
+
+                        }
+                        else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                            && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                            {
+                                displayPopUpContents(true,true,true,false);
+                            }
+                            else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                                && (Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                                {
+                                    displayPopUpContents(false,false,true,false);
+
+                                }
+                                else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                                    && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                                    {
+                                        displayPopUpContents(false,true,true,false);
+                                    }
+                                    else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                                        && (Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
+                                        {
+                                            displayPopUpContents(false,false,true,true);
+                                        }
+                                        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description]))
+                                            && (!Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
+                                            {
+                                                displayPopUpContents(false,true,true,true);
+                                            }
+                                            else if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
+                                                && (!Hul.isempty(arTerm2[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Description])))
+                                                {
+                                                    displayPopUpContents(false,false,true,true);
+                                                }
+                                                else if((!Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
+                                                    && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                                                    {
+                                                        displayPopUpContents(true,true,false,false);
+                                                    }
+                                                    else if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm[fi.trm_Description]))
+                                                        && (!Hul.isempty(arTerm2[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Description])))
+                                                        {
+                                                            displayPopUpContents(false,true,false,false);
+                                                        }
+                                                        else
+                                                        {
+                                                            displayPopUpContents(false,false,false,true);
+                                                        }
+
+                var ele = document.getElementById('divTermMergeConfirm');
+                $("#moveText").html("Insert "+ "&#60;" +data.otherNode.data.label+"&#62; under " + "&#60;"+node.data.label
+                    +"&#62;");
+                $("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
+                
+                var isVocabulary = (node === _findTopLevelForId(node.data.id));
+                    
+                $('#divInsertAsChild').css('display', (isVocabulary)?'none':'block');
+                //show confirmation dialog
+                $_dialogbox = Hul.popupElement(top, ele,
+                    {
+                        "close-on-blur": false,
+                        "no-resize": true,
+                        title: 'Select values to be retained',
+                        height: 440,
+                        width: 600
+                });
+
+
+            }
+            else if (data.hitMode==='before' || data.hitMode==='after'){
+
+                var parentNode = node.getParent();
+
+                if (parentNode.data.id){
+
+
+                    if(parentNode.data.id === "root") {
+                        Dom.get('edParentId').value = "";
+                    }else{
+                        Dom.get('edParentId').value = parentNode.data.id;
+                    }
+
+                    _doSave(false, true);
+
+                    // _updateTermsOnServer(_currentNode,false);
+                }
+                data.otherNode.moveTo(node,data.hitMode);
+
+            }
+
+        }
+
+    }
+
+
+
+
+
+
+
+
 
     //
     //public members
@@ -1903,11 +2823,16 @@ function EditTerms() {
 */
 function doSearch(event){
 
+
+
     var el = event.target;
+
+    // var sel = (el.id === 'edSearch')? $(top.document).find('#resSearch'):$(top.document).find('#resSearchInverse');
     var sel = (el.id === 'edSearch')?Dom.get('resSearch'):Dom.get('resSearchInverse');
 
     //remove all
     while (sel.length>0){
+
         sel.remove(0);
     }
 
@@ -1929,3 +2854,32 @@ function doSearch(event){
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

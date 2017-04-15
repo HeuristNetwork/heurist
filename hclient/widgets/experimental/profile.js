@@ -111,13 +111,13 @@ $.widget( "heurist.profile", {
                 }else if(action == "menu-options-help"){
                     window.open(window.hWin.HAPI4.sysinfo.help, '_blank');
                 }else if(action == "menu-options-db-design"){
-                    window.open(window.hWin.HAPI4.basePathV3+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank');
+                    window.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank');
                 }else if(action == "menu-options-db-summary"){
 
                     if($.isFunction($('body').rectype_manager)){ //already loaded
                         showManageRecordTypes();
                     }else{
-                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showManageRecordTypes(); } );
+                        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/structure/rectype_manager.js', function(){ showManageRecordTypes(); } );
                     }
 
                 }else if(action == "menu-options-import-faims"){
@@ -231,25 +231,25 @@ $.widget( "heurist.profile", {
                     if($.isFunction($('body').tag_manager)){ //already loaded
                         showManageTags();
                     }else{
-                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/tag_manager.js', function(){ showManageTags(); } );
+                        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/tag_manager.js', function(){ showManageTags(); } );
                     }
                 }else if(action == "menu-user-faceted"){
                     if($.isFunction($('body').search_faceted_wiz)){ //already loaded
                         showSearchFacetedWizard();
                     }else{
-                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/ssearch/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
+                        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/ssearch/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
                     }
                 }else if(action == "menu-user-svs"){
                     if($.isFunction($('body').svs_manager)){ //already loaded
                         showManageSavedSearches();
                     }else{
-                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/svs_manager.js', function(){ showManageSavedSearches(); } );
+                        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/svs_manager.js', function(){ showManageSavedSearches(); } );
                     }
                 }else if(action == "menu-user-files"){
                     if($.isFunction($('body').file_manager)){ //already loaded
                         showManageFiles();
                     }else{
-                        $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile/file_manager.js', function(){ showManageFiles(); } );
+                        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/file_manager.js', function(){ showManageFiles(); } );
                     }
                 }
 
@@ -302,7 +302,7 @@ $.widget( "heurist.profile", {
                 .position({my: "right top", at: "right bottom", of: that.btn_record });
                 $( document ).one( "click", function() { that.select_rectype.hide(); });
                 return false;
-                //window.open(window.hWin.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database, "_blank");
+                //window.open(window.hWin.HAPI4.baseURL + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database, "_blank");
             }
         });
         this._on( this.select_rectype, {
@@ -317,7 +317,7 @@ $.widget( "heurist.profile", {
                 window.hWin.HEURIST4.editing.add(recordtype);
 
                 /* open in new window
-                window.open(window.hWin.HAPI4.basePathV4 + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&rt="+recordtype, "_blank");
+                window.open(window.hWin.HAPI4.baseURL + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&rt="+recordtype, "_blank");
                 */
             }
         });
@@ -409,7 +409,7 @@ $.widget( "heurist.profile", {
             var $dlg = this.login_dialog;
 
             //load login dialogue
-            $dlg.load(window.hWin.HAPI4.basePathV4 + "hclient/widgets/profile/profile_login.html?t="+(new Date().getTime()), function(){
+            $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profile_login.html?t="+(new Date().getTime()), function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
@@ -537,7 +537,7 @@ $.widget( "heurist.profile", {
 
         }else{
             var that = this;
-            $.getScript(window.hWin.HAPI4.basePathV4+'hclient/widgets/profile_edit.js', function() {
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile_edit.js', function() {
                 if($.isFunction($('body').profile_edit)){
                     that.editProfile();
                 }else{
@@ -549,14 +549,14 @@ $.widget( "heurist.profile", {
     },
 
     /**
-    * Open Edit Preferences dialog
+    * Open Edit Preferences dialog    - duplication in mainMenu - remove this, use that
     */
     editPreferences: function()
     {
         var $dlg = $("#heurist-dialog");
         $dlg.empty();
 
-        $dlg.load(window.hWin.HAPI4.basePathV4+"hclient/widgets/profile_preferences.html", function(){
+        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile_preferences.html", function(){
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){
