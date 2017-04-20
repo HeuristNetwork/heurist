@@ -26,10 +26,12 @@
     // ElasticSearch index helpers
     //****************************************************************************************************************
 
-    // Enable or disable ElasticSearch indexing
+    $isElasticUp = NULL; // Cache whether or not Elastic indexing is enabled & operational
+
+    // Checks if ElasticSearch indexing is enabled in configIni.php
     function isElasticEnabled() {
-//DEBUG        error_log("[elasticSearchHelper.php] isElasticEnabled");
-        return true;
+        global $indexServerAddress, $indexServerPort; // Set in configIni.php
+        return !empty($indexServerAddress) && !empty($indexServerPort);
     }
 
     /**
@@ -39,7 +41,7 @@
      */
     function getElasticIndex($dbName) {
         $elasticIndex = strtolower($dbName); // Must be lowercase
-        preg_replace("/[^A-Za-z0-9 ]/", '_', $elasticIndex); // Replace non-alphanumeric with underscore
+        preg_replace('/[^A-Za-z0-9 ]/', '_', $elasticIndex); // Replace non-alphanumeric with underscore
         return $elasticIndex;
     }
 
@@ -51,8 +53,8 @@
      * @return The ElasticSearch address for the given parameters
      */
     function getElasticAddress($dbName=null, $recTypeID=null, $recID=null) {
-        global $indexServerAddress, $indexServerPort;
-        $url = $indexServerAddress .':'. $indexServerPort; // Set in configIni.php
+        global $indexServerAddress, $indexServerPort; // Set in configIni.php
+        $url = $indexServerAddress .':'. $indexServerPort;
 
         // dbName check
         if(!empty($dbName)) {
@@ -73,25 +75,32 @@
     }
 
     /**
-     * Test whether ElasticSearch is installed/operational
-     * @returns  Returns true if ElasticSearch is operational
+     * Checks if ElasticSearch is running
+     * @returns  Returns true if ElasticSearch is running
      */
-    function testElasticOK() {
-//DEBUG        error_log("[elasticSearchHelper.php] testElasticSearchOK");
+    function isElasticRunning() {
+        $address = getElasticAddress();
+        $query = new stdClass();
+        $json = getElastic($address, $query);
 
-        if(isElasticEnabled()) {
-            $address = getElasticAddress();
-            $query = new stdClass();
-            $json = getElastic($address, $query);
-
-            // Check if the response contains ElasticSearch its version number
-            if(!empty($json)) {
-                $object = json_decode($json);
-                return !empty($object->version);
-            }
+        // Check if the response contains ElasticSearch its version number
+        if(!empty($json)) {
+            $object = json_decode($json);
+            return !empty($object->version);
         }
-
         return false;
+    }
+
+    /**
+     * Checks if ElasticSearch indexing is enabled and if ElasticSearch is running
+     * @returns  Returns true if ElasticSearch enabled & running
+     */
+    function isElasticUp() {
+        global $isElasticUp;
+        if($isElasticUp == NULL) {
+            $isElasticUp = isElasticEnabled() && isElasticRunning();
+        }
+        return $isElasticUp;
     }
 
 
@@ -142,6 +151,7 @@
 
         $json = curl_exec($curl);
         curl_close($curl);
+        //error_log("[elasticSearchHelper.php] Query $query --> resulted in $json");
 
         return $json;
     }

@@ -72,9 +72,7 @@
     * @return               True if successful
     */
     function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
-//DEBUG        error_log("[elasticSearchFunctions.php] updateRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
-
-        if(isElasticEnabled()) {
+        if(isElasticUp()) {
             $record = new stdClass();
 
             // Retrieve record level data
@@ -106,7 +104,6 @@
                 // Check if recTypeID has changed
                 if($record->RecTypeID != $recTypeID) {
                     // Delete index for old record type before updating index for new record type
-
                     deleteRecordIndexEntry($dbName, $recTypeID, $recID);
                 }
             } else {
@@ -134,14 +131,12 @@
             // PUT data to ElasticSearch
             $address = getElasticAddress($dbName, $recTypeID, $recID);
             $json = putElastic($address, $record);
-//DEBUG error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> indexed in elastic: $json");
 
             // Check if created property exists and is true
             if($json!=null){ //without check it ruins main save function
                 $response = json_decode($json);
                 return property_exists($response, 'created') && $response->created;
-            }
-            else{
+            }else{
                 return false;
             }
         }
@@ -165,25 +160,20 @@
     * @return               True if successful
     */
     function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
-//DEBUG        error_log("[elasticSearchFunctions.php] deleteRecordIndexEntry for database $dbName recTypeID=$recTypeID recID=$recID");
-
-        if(isElasticEnabled()) {
+        if(isElasticUp()) {
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName, $recTypeID, $recID);
             $query = new stdClass();
             $json = deleteElastic($address, $query);
-//DEBUGG error_log("[elasticSearchFunctions.php] deleteRecordIndexEntry --> deleted record from elastic: $json");
 
             // Check if acknowledged property exists and is true
             if($json!=null){ //without check it ruins delete function
                 $response = json_decode($json);
                 return property_exists($response, 'acknowledged') && $response->acknowledged;
-            }
-            else{
+            }else{
                 return false;
             }
         }
-
         return false;
     } // deleteRecordIndex
 
@@ -191,24 +181,20 @@
     // ****************************************************************************************************************
     /**
     * Delete the index for a specified record type
-    * @param $dbName       The name of the Heurist databasem, excluding prefix
+    * @param $dbName       The name of the Heurist database, excluding prefix
     *  @param $recTypeID    The record type ID of the record being deleted from the index
     */
     function deleteIndexForRectype ($dbName, $recTypeID) {
-//DEBUG        error_log("[elasticSearchFunctions.php] deleteIndexForRectype for database $dbName recTypeID=$recTypeID");
-
-        if(isElasticEnabled()) {
+        if(isElasticUp()) {
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName, $recTypeID);
             $query = new stdClass();
             $json = deleteElastic($address, $query);
-//DEBUG            error_log("[elasticSearchFunctions.php] deleteIndexForRectype --> deleted rectype from elastic: $json");
 
             // Check if acknowledged property exists and is true
             $response = json_decode($json);
             return property_exists($response, 'acknowledged') && $response->acknowledged;
         }
-
         return false;
     } // deleteIndexForRectype
 
@@ -219,20 +205,16 @@
     * @param $dbName       The name of the Heurist databasem, excluding prefix
     */
     function deleteIndexForDatabase ($dbName) {
-//DEBUG        error_log("[elasticSearchFunctions.php] deleteIndexForDatabase for database $dbName");
-
-        if(isElasticEnabled()) {
+        if(isElasticUp()) {
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName);
             $query = new stdClass();
             $json = deleteElastic($address, $query);
-//DEBUG            error_log("[elasticSearchFunctions.php] deleteIndexForDatabase --> deleted index from elastic: $json");
 
             // Check if acknowledged property exists and is true
             $response = json_decode($json);
             return property_exists($response, 'acknowledged') && $response->acknowledged;
         }
-
         return false;
     } // deleteIndexForDatabase
 
@@ -245,9 +227,7 @@
     * @returns True if successful
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
-//DEBUG        error_log("[elasticSearchFunctions.php] buildIndexForRectype for database $dbName recTypeID=$recTypeID");
-
-        if(isElasticEnabled()) {
+        if(isElasticUp()) {
             deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
 
             $query = "SELECT rec_ID FROM Records WHERE rec_RecTypeID = $recTypeID";
@@ -265,7 +245,6 @@
                 error_log("[elasticSearchFunctions.php] buildIndexForRectype --> invalid query: $query");
             }
         }
-
         return false;
     } // buildIndexForRectype
 
@@ -277,9 +256,7 @@
     * @returns  0 = OK, 1 = error
     */
     function buildAllIndices ($dbName) {
-//DEBUG        error_log("[elasticSearchFunctions.php] buildAllIndices for database $dbName");
-
-        if(isElasticEnabled()) {
+        if(isElasticUp()) {
             print "Building all Elasticsearch indices for: $dbName<br />";
 
             $query = "SELECT MAX(rec_RecTypeID) FROM Records WHERE 1";
