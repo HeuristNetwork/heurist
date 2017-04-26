@@ -104,7 +104,7 @@ function EditTerms() {
                 _tabView.addTab(new YAHOO.widget.Tab({
                     id: 'enum',
                     label: 'Terms',
-                    content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+                    content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;overflow:hidden;"></div></div>'
 
 
                 }));
@@ -117,7 +117,7 @@ function EditTerms() {
                 _tabView.addTab(new YAHOO.widget.Tab({
                     id: 'relation',
                     label: 'Relationship types',
-                    content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+                    content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;overflow:hidden;"></div></div>'
 
                 }));
                 $(".banner h2").html("Manage terms used for relationship type in relationship records");
@@ -130,14 +130,14 @@ function EditTerms() {
             _tabView.addTab(new YAHOO.widget.Tab({
                 id: 'enum',
                 label: 'Terms',
-                content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+                content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
             }));
 
             tab_view = 1;
             _tabView.addTab(new YAHOO.widget.Tab({
                 id: 'relation',
                 label: 'Relationship types',
-                content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:auto"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
+                content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
 
             }));
 
@@ -1056,7 +1056,7 @@ function EditTerms() {
     /**
     * Saves the term on server side
     */
-    function _doSave(needConfirm, noValidation){
+    function _doSave(needConfirm, noValidation, callback){
 
 
         var sName = Dom.get('edName').value.trim().replace(/\s+/g,' ');
@@ -1175,7 +1175,7 @@ function EditTerms() {
                     // _currentNode.load();
                     //_defineContentTreeView();
 
-                    _updateTermsOnServer(nodeForAction, needReload);
+                    _updateTermsOnServer(nodeForAction, needReload, callback);
 
                     //alert("TODO SAVE ON SERVER");
                 }
@@ -1225,7 +1225,7 @@ function EditTerms() {
     /**
     * Sends data to server
     */
-    function _updateTermsOnServer(node, _needReload)
+    function _updateTermsOnServer(node, _needReload, main_callback)
     {
 
         var term = node.data;
@@ -1336,6 +1336,7 @@ function EditTerms() {
                     }//for
 
                     if(!error) {
+                        
                         top.HEURIST.terms = context.terms;
 
                         _isSomethingChanged = true;
@@ -1397,6 +1398,10 @@ function EditTerms() {
 
 
                         }
+                        
+                    }
+                    if($.isFunction(main_callback)){
+                        main_callback.call(this, !error);    
                     }
                 }
             };
@@ -2195,7 +2200,7 @@ function EditTerms() {
     {
         //verify that all required libraries have been loaded
         if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
-            $.getScript(window.hWin.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js');
+            $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js');
             return;
         }
         else if(!$.ui.fancytree._extensions["dnd"]){
@@ -2329,6 +2334,12 @@ function EditTerms() {
                 dnd: {
                     autoExpandMS: 1000, //it does not work - we expand manually in dragEnter
                     //focusOnClick: true,
+                    draggable: { // modify default jQuery draggable options
+                        zIndex: 10000,
+                        scroll: true,
+                        scrollSpeed: 7,
+                        scrollSensitivity: 10
+                    },
                     preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
                     preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
                     dragStart: function(node, data) {
@@ -2358,7 +2369,8 @@ function EditTerms() {
 
                     },
                     dragDrop: function(node, data) {
-                        _onNodeClick(data.otherNode);
+                        
+                        //_onNodeClick(data.otherNode);
 
                         if(data.otherNode.getLevel()===1){
                             if(node.getLevel()!=1)
@@ -2381,8 +2393,6 @@ function EditTerms() {
                 }
         });
         
-        
-//console.log('found '+$('.fancytree-node').length);
         
        setTimeout(function(){
         $.each( $('.fancytree-node'), function( idx, item ){
@@ -2472,7 +2482,7 @@ function EditTerms() {
        }
 
                     
-        function showMergePopUp(node,data)
+        function showMergePopUp(node, data)
         {
 
             if(data.hitMode==='over'){
@@ -2513,8 +2523,13 @@ function EditTerms() {
                     });
                     $("#moveBtn").click(function(){
 
+                        _findNodeById(data.otherNode.data.id, true);
+                        
                         if(node.data.id)
                         {
+//console.log('AAAAAsave  '+data.otherNode.data.id); 
+                            
+                            var prev_parent = Dom.get('edParentId').value;
                             if(node.data.id === "root") {
                                 Dom.get('edParentId').value = "";
                             }else{
@@ -2524,10 +2539,27 @@ function EditTerms() {
                             // alert($('#edParentId').val());
 
                             // _updateTermsOnServer(_currentNode,false);
-                            _doSave(false,true);
-                        }
 
-                        data.otherNode.moveTo(node,data.hitMode);
+//console.log('save  '+data.otherNode.data.id); 
+
+                            _doSave(false, true);
+                            data.otherNode.moveTo(node, data.hitMode);
+
+                            /*
+                            _doSave(false, true, function(is_success){
+//console.log('callback '+is_success);
+                                if(is_success){
+                                    data.otherNode.moveTo(node, data.hitMode);        
+                                }else{
+//console.log('restore '+prev_parent);                                    
+                                    Dom.get('edParentId').value = prev_parent;
+                                }
+                            });
+                            */
+                            
+                            
+                        }
+                        
                         $_dialogbox.dialog($_dialogbox).dialog("close");
                     });
 

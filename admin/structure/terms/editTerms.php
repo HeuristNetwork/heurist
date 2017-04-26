@@ -88,6 +88,12 @@ if(isForAdminOnly("to modify database structure")){
                 color:lightgray !important;
             }
 
+            /* it allows scroll on DnD */
+            ul.fancytree-container {
+                position: relative;
+                height: 100%;
+                overflow-y: auto !important;
+            }            
             ul.fancytree-container li {
                 width:100%;
             }
