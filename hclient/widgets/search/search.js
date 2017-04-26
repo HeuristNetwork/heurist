@@ -150,6 +150,7 @@ $.widget( "heurist.search", {
         .css({'color':'gray','font-size':'0.8em', 'margin': '0.2em 0 0 0.5em',
               'position': 'absolute'})
         .appendTo( this.div_search_input );
+        this._on( this.input_search_prompt, {click: function(){this.input_search.focus()}} );
 
         
         this.input_search = $( "<textarea>" )
