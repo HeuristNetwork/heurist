@@ -168,4 +168,117 @@ function deleteRecord($id, $needDeleteFile=true) {
 		}
 }
 
+/**
+* Find all related record IDs for given set record IDs     - see analog in H4 db_recsearch.php 
+*
+* @param mixed $system
+* @param mixed $ids -
+* @param mixed $direction -  1 direct/ -1 reverse/ 0 both
+*
+* @return array of direct and reverse links (record id, relation type (termid), detail id)
+*/
+function recordSearchRelated($ids, $ids_only=false, $direction=0){
+
+    if(!@$ids){
+        return null;
+    }
+    if(is_array($ids)){
+        $ids = implode(",", $ids);
+    }
+    if(!($direction==1||$direction==-1)){
+        $direction = 0;
+    }
+
+    $direct = array();
+    $reverse = array();
+    $headers = array(); //record title and type for main record
+
+    //find all rectitles and record types for main recordset
+    if(!$ids_only){
+        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records where rec_ID in ('.$ids.')';
+        $res = mysql_query($query);
+        if (!$res){
+            return null;//$system->addError(HEURIST_DB_ERROR, "Search query error on search related. Query ".$query, $mysqli->error);
+        }else{
+                while ($row = mysql_fetch_row($res)) {
+                    $headers[$row[0]] = array($row[1], $row[2]);   
+                }
+        }
+    }
+    
+    
+    if($direction>=0){
+        //find all target related records
+        if($ids_only){
+            $query = 'SELECT DISTINCT rl_TargetID';    
+        }else{
+            $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID';
+        }
+        $query = $query.' FROM recLinks '
+            .'where rl_SourceID in ('.$ids.') order by rl_SourceID';
+
+        $res = mysql_query($query);
+        if (!$res){
+            return null;// $system->addError(HEURIST_DB_ERROR, "Search query error on related records. Query ".$query, $mysqli->error);
+        }else{
+            if($ids_only){
+                while ($row = mysql_fetch_row($res)) {
+                    array_push($direct, $row[0]);
+                }
+            }else{
+                while ($row = mysql_fetch_row($res)) {
+                    $relation = new stdClass();
+                    $relation->recID = intval($row[0]);
+                    $relation->targetID = intval($row[1]);
+                    $relation->trmID = intval($row[2]);
+                    $relation->dtID  = intval($row[3]);
+                    $relation->relationID  = intval($row[4]);
+                    array_push($direct, $relation);
+                }
+            }
+        }
+    }
+
+    if($direction<=0){
+        //find all reverse related records
+        if($ids_only){
+            $query = 'SELECT rl_TargetID, rl_SourceID';    
+        }else{
+            $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID';
+        }
+        $query = $query.' FROM recLinks '
+            .'where rl_TargetID in ('.$ids.') order by rl_TargetID';
+
+
+        $res = mysql_query($query); //$res = $mysqli->query
+        if (!$res){
+            return null; //$system->addError(HEURIST_DB_ERROR, "Search query error on reverse related records. Query ".$query, $mysqli->error);
+        }else{
+            if($ids_only){
+                $reverse = array('source'=>array(),'target'=>array());
+                while ($row = mysql_fetch_row($res)) {
+                    array_push($reverse['source'], $row[0]);
+                    array_push($reverse['target'], $row[1]);
+                }
+            }else{
+                while ($row = mysql_fetch_row($res)) {
+                        $relation = new stdClass();
+                        $relation->recID = intval($row[0]);
+                        $relation->sourceID = intval($row[1]);
+                        $relation->trmID = intval($row[2]);
+                        $relation->dtID  = intval($row[3]);
+                        $relation->relationID  = intval($row[4]);
+                    array_push($reverse, $relation);
+                }
+            }
+        }
+    }
+
+    $response = array("direct"=>$direct, "reverse"=>$reverse, "headers"=>$headers);
+
+
+    return $response;
+
+}
+
 ?>

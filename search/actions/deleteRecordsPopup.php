@@ -74,7 +74,7 @@ mysql_connection_overwrite(DATABASE);
                     
                     
                 }else{
-                   if(confirm('Are you sure you wish to delete the selected records, along with alll associated bookmarks?')){
+                   if(confirm('Are you sure you wish to delete the selected records, along with all associated bookmarks?')){
                         document.forms[0].submit();   
                    }
                 }
@@ -106,7 +106,7 @@ mysql_connection_overwrite(DATABASE);
 
 	    print '<form method="post"><input id="ids" name="ids" type="hidden" /></form>';
 
-	}else if (@$_REQUEST['delete'] == 1) {
+	}else if (@$_REQUEST['delete'] == 1) { //ACTION!!!!
 
 		$recs_count = 0;
 		$bkmk_count = 0;
@@ -144,36 +144,40 @@ print '<div><span id=errors>0</span> errors</div>';
 
         $needDeleteFile = (@$_REQUEST['delfile']=="1");
 
-        if($total_cnt>0)
-		foreach ($_REQUEST['bib'] as $rec_id) {
+        if($total_cnt>0){
+            
+		    foreach ($_REQUEST['bib'] as $rec_id) {
 
-			mysql_query("start transaction");
+			    mysql_query("start transaction");
 
-			$res = deleteRecord($rec_id, $needDeleteFile);
-			//$res = array("bkmk_count"=>0, "rel_count"=>0);
+			    $res = deleteRecord($rec_id, $needDeleteFile);
+			    //$res = array("bkmk_count"=>0, "rel_count"=>0);
 
-			if( array_key_exists("error", $res) ){
+			    if( array_key_exists("error", $res) ){
 
-				mysql_query("rollback");
+				    mysql_query("rollback");
 
-				array_push($errors, "Rec#".$rec_id."  ".$res["error"]);
+				    array_push($errors, "Rec#".$rec_id."  ".$res["error"]);
 
-			}else{
-				mysql_query("commit");
+			    }else{
+				    mysql_query("commit");
 
-				$recs_count++;
-				$bkmk_count += $res["bkmk_count"];
-				$rels_count += $res["rel_count"];
-			}
+				    $recs_count++;
+				    $bkmk_count += $res["bkmk_count"];
+				    $rels_count += $res["rel_count"];
+			    }
 
-			$processed_count++;
+			    $processed_count++;
 
-			if ($rec_id % 10 == 0) {
-				print '<script type="text/javascript">update_counts('.$processed_count.','.$recs_count.','.$rels_count.','.$bkmk_count.','.count($errors).')</script>'."\n";
-				@ob_flush();
-				@flush();
-			}
-		}
+			    if ($rec_id % 10 == 0) {
+				    print '<script type="text/javascript">update_counts('.$processed_count.','.$recs_count.','.$rels_count.','.$bkmk_count.','.count($errors).')</script>'."\n";
+				    @ob_flush();
+				    @flush();
+			    }
+		    }//for
+            
+        
+        }   // $total_cnt>0
 
 		print '<script type="text/javascript">update_counts('.$processed_count.','.$recs_count.','.$rels_count.','.$bkmk_count.','.count($errors).')</script>'."\n";
 
@@ -226,7 +230,8 @@ if(document.getElementById('spSelected')){
 </div>
 <?php
 	$bib_ids = explode(',', $_REQUEST['ids']);
-	if(count($bib_ids)>8){
+    $cnt_bibs = count($bib_ids);
+	if($cnt_bibs > 8){
 ?>
 <div style="height:45px;">
 This is a fairly slow process, taking several minutes per 1000 records, please be patient…
@@ -234,6 +239,40 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 </div>
 <?php
 	}
+    
+//We have to verify that records to be deleted have any back reference and show warning in this case
+    if($cnt_bibs >0){
+        $res = recordSearchRelated($bib_ids, true, -1);
+        
+        if(is_array($res) && count(@$res['reverse']['source'])>0){
+      
+            $cnt_target = count(@$res['reverse']['target']);
+            $cnt_source = count(@$res['reverse']['source']);
+            $merged_ids = array_unique(array_merge($res['reverse']['target'], $res['reverse']['source']), SORT_NUMERIC);
+        
+            if($cnt_bibs==1){
+                $sMsg = 'This record is';
+            }else if($cnt_target==1){
+                $sMsg = 'One of '.$cnt_bibs.' selected records is';
+            }else if($cnt_target<$cnt_bibs){
+                $sMsg = $cnt_target.' records of '.$cnt_bibs.' selected records are';
+            }else{
+                $sMsg = 'These '.$cnt_bibs.' selected records are';
+            }
+            $sMsg = '<div style="color:red">'.$sMsg
+            .' pointed to by '.$cnt_source.' other records. If you delete '.($cnt_target==1?'it':'them')
+            .' you will leave '.(($cnt_source>1)?'these records':'this record').' with invalid data. '
+            .'Invalid records can be found through the Manage > Structure > Verify function.</div>';
+
+            print $sMsg;
+            print '<div style="padding-bottom:10px">You may look at relationships '
+            .'<a target=_new href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
+            .'&tab=connections&q=ids:'.implode(',',$merged_ids).'">here.<img src='.HEURIST_BASE_URL.'common/images/external_link_16x16.gif></a></div>';
+        
+        }
+    }
+    
+    
 	if(count($bib_ids)>3){
 ?>
 	<div>Total count of records: <b><?=count($bib_ids)?></b>.   Selected to be deleted <span id="spSelected">0</span>.<br/><br/><input id="cbToggle" checked type="checkbox" onclick="toggleSelection(this)" />&nbsp;<label for="cbToggle">Select All/None</label></div>
