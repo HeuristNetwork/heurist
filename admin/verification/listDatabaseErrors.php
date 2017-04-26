@@ -319,6 +319,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                             <td><a target=_new
                                     href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                     <?= $row['dtl_RecID'] ?>
+                                    <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </a></td>
                             <td><?= $row['rec_Title'] ?></td>
                             <td><?= $row['dty_Name'] ?></td>
@@ -373,6 +374,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                                 <td><a target=_new
                                         href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=
                                         <?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
+                                        <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                     </a></td>
                                 <td><?= $row['dty_Name'] ?></td>
                                 <td>points to</td>
@@ -460,6 +462,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                         <td><a target=_new
                                 href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
+                                <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
                         <td><?= substr($row['rec_Title'],0,50) ?></td>
                         <td><?= $row['dty_Name'] ?></td>
@@ -557,6 +560,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                         <td><a target=_new
                                 href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
+                                <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
                         <td><?= substr($row['rec_Title'],0,50) ?></td>
                         <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
@@ -642,6 +646,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                         <td><a target=_new
                                 href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
+                                <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
                         <td><?= substr($row['rec_Title'],0,50) ?></td>
                         <td><?= $row['dty_Name'] ?></td>
@@ -699,7 +704,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                     ?>
                         <tr>
                             <td style="width:50px; padding-left: 5px;">
-                                <a target=_new
+                                <a target=_new  title='Click to edit record'
                                     href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
 <img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" 
 title="<?php echo $row['rty_Name']?>" 
@@ -783,6 +788,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                 <td>
                                     <a target=_blank href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                     <?= $row['dtl_RecID'] ?></a>
+                                    <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </td>
                                 <td><?= $row['rec_Title'] ?>
                                 </td>
@@ -859,6 +865,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                     <a target=_new
                                         href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                         <?= $row['rec_ID'] ?>
+                                        <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                     </a>
                                 </td>
                                 <td>
@@ -933,6 +940,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                         <a target=_new
                                             href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                             <?= $row['rec_ID'] ?>
+                                            <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                         </a>
                                     </td>
                                     <!-- td><?= $row['rec_RecTypeID'] ?></td -->
