@@ -104,11 +104,13 @@ $.widget( "heurist.search_faceted", {
 
         this.div_header = $( "<div>" ).appendTo( this.element );
         
-        if(!this.options.ispreview){
-            this.div_title = $("<div style='text-align:left;padding-top:1.4em;padding-left:1em;display:inline-block;width:70%'></div").addClass('truncate').appendTo( this.div_header );
+        if(!this.options.ispreview){                       //padding-top:1.4em;
+            this.div_title = $("<h4 style='text-align:left;margin-top:20px;padding-left:1em;display:inline-block;width:70%'></h4")
+                    .addClass('truncate').appendTo( this.div_header );
         }
 
-        this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","float":"right","padding-top":"1.8em","padding-right":"0.6em"}).appendTo( this.div_header );
+        this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","float":"right","padding-top":"1.8em","padding-right":"0.6em"})
+                .appendTo( this.div_header );
 
         this.btn_submit = $( "<button>", { text: window.hWin.HR("Submit") })
         .appendTo( this.div_toolbar )
@@ -206,8 +208,8 @@ $.widget( "heurist.search_faceted", {
               }
          }
         
-
-        if(this.div_title) this.div_title.html("<b>"+this.options.query_name+"</b>");
+        if(this.div_title) this.div_title.html(this.options.params.ui_title
+                            ?this.options.params.ui_title:this.options.query_name);
 
         if(this.options.ispreview){
             this.btn_save.hide(); 
@@ -269,7 +271,7 @@ $.widget( "heurist.search_faceted", {
                
                field['id']   = code[code.length-1];
                field['rtid'] = code[code.length-2];
-               if(field['isfacet']>0){
+               if(field['isfacet']!=0){
                
                        //create query to search facet values
                        function __crt( idx ){
@@ -402,6 +404,7 @@ $.widget( "heurist.search_faceted", {
                 facets[facet_index].history = [];
                 facets[facet_index].selectedvalue = null;
                 
+                //support old format
                 if(window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet) || 
                         facets[facet_index].isfacet==true || facets[facet_index].isfacet==1){
                             facets[facet_index].isfacet=1;
@@ -435,7 +438,8 @@ $.widget( "heurist.search_faceted", {
             this.btn_close.show(); 
         }
         if(this.div_title) {
-            this.div_title.html("<b>"+this.options.query_name+"</b>");
+            this.div_title.html(this.options.params.ui_title
+                            ?this.options.params.ui_title:this.options.query_name);
             this.div_title.css('width','70%');    
         }
         this.btn_reset.hide()   
@@ -457,21 +461,27 @@ $.widget( "heurist.search_faceted", {
                j = j + 2;
           }
           
-          harchy = "<span>"+ harchy.join(" &gt; ") + "</span><br/>&nbsp;&nbsp;&nbsp;";
+          harchy = '<span class="truncate" style="display:inline-block;width:99%;font-weight:normal !important">'
+                + harchy.join(" &gt; ") + "</span><br/>&nbsp;&nbsp;&nbsp;";
            
            if(!window.hWin.HEURIST4.util.isnull(field['var']) && field['code'] ){
                
              if(!field['help']) field['help'] = '';
                
-             if(field['isfacet']>0){
+             if(field['isfacet']!=0){
                     
                     //inpt.find('.input-div').hide();
                     //inpt.find('.header').css({'background-color': 'lightgray', 'padding': '5px', 'width': '100%'});
                     //inpt.find('.editint-inout-repeat-button').hide();
                     
-                    $("<div>",{id: "fv_"+field['var'] }).html(
-                        '<div class="header" title="'+field['help']+'">'+   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
-                            '<label>'+harchy + "<span style='font-weight:bold'>" + field['title'] + '</span></label>'+
+                    $("<div>",{id: "fv_"+field['var'] }).html(      //!!!!
+                        '<div class="header" title="'+field['help']+'">'   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
+                              +(that.options.params.title_hierarchy?harchy:'')
+                              +'<h4 style="display:inline-block;">'
+                              + field['title'] + '</h4>'+  //field['order']+'  '+
+                              ((field['help'])?'<span class="bor-tooltip ui-icon ui-icon-circle-help" '
+                              +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
+                              +field['help']+'"></span>':'')+
                         '</div>'+
                         '<div class="input-cell"></div>').appendTo($fieldset);
                   
@@ -486,7 +496,8 @@ $.widget( "heurist.search_faceted", {
                                 rectypes: window.hWin.HEURIST4.rectypes,
                                 values: '',
                                 readonly: false,
-                                title:  harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
+                                title:  (that.options.params.title_hierarchy?harchy:'')
+                                        + "<span style='font-weight:bold'>" + field['title'] + "</span>",
                                 detailtype: field['type'],  //overwrite detail type from db (for example freetext instead of memo)
                                 showclear_button: false,
                                 suppress_prompts: true,  //supress help, error and required features
@@ -577,6 +588,16 @@ $.widget( "heurist.search_faceted", {
        
        $fieldset.find('.header').css({width: '100%', 'background-color': 'lightgray', padding: '5px', width:'100%'})
        $fieldset.find('.input-cell').css({ 'padding':'5px' });
+       
+       $fieldset.find('.bor-tooltip').tooltip({
+            position: { my: "center bottom", at: "center top-5" },
+            /* does not work
+            classes: {
+                "ui-tooltip": "ui-corner-all tooltip-inner"
+            },*/
+            tooltipClass:"tooltip-inner",
+            hide: { effect: "explode", duration: 500 }
+        });
        
        this._isInited = true;
        //get empty query
@@ -704,7 +725,7 @@ $.widget( "heurist.search_faceted", {
 
             //this approach adds supplemntary(preliminary) filter to every request 
             //it works however 
-            //1) it requires that this filter must be a valid json
+            //1) it requires that this filter must be a valid json  - FIXED
             //2) it makes whole request heavier
             //add additional/supplementary filter
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
@@ -758,16 +779,18 @@ $.widget( "heurist.search_faceted", {
         for(;i< this.options.params.facets.length; i++)
         {
             var field = this.options.params.facets[i];
-            if(i>field_index && field['isfacet']>0 && field['facet']){
+            if(i>field_index && field['isfacet']!=0 && field['facet']){
                 
                 var subs_value = null;
                 
                 if(this._isInited){
                     //replace with current query   - @todo check for empty 
-                    subs_value =  this._first_query;
+                    subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query, 
+                                    this.options.params.sup_filter);
                 }else{
                     //replace with list of ids
-                    subs_value = this._currentRecordset.getMainSet().join(',');
+                    subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query,
+                                    {ids:this._currentRecordset.getMainSet().join(',')});
                 }
                 
                 //
@@ -865,7 +888,7 @@ $.widget( "heurist.search_faceted", {
                 
                 
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
-                if(field['isfacet']==2){
+                if(field['isfacet']!=1 && field['type']!='freetext'){
                     step_level = 1; //always full value for this type of facet
                 }
                 
@@ -874,7 +897,7 @@ $.widget( "heurist.search_faceted", {
                                      field:  field['id'],
                                      type:   field['type'],
                                      step:   step_level,
-                                     facet_type: field['isfacet'], //0 search, 1 - first char/slider, 2 - list
+                                     facet_type: field['isfacet'], //0 search, 1 - first char/slider, 2 - list inline, 2b - list column
                                      needcount: needcount,
                                      qname:this.options.query_name, 
                                      source:this.element.attr('id') }; //, facets: facets
@@ -976,14 +999,16 @@ $.widget( "heurist.search_faceted", {
                         
                         //{id:null, text:window.hWin.HR('all'), children:termtree}
                         //draw terms and all its parents    
-                        function __drawTerm(term, level, $container, as_list){
+                        //2 - inline list, 2b - column list
+                        function __drawTerm(term, level, $container, as_list_type){
                             
                                 //draw itslef - draw children
                                 if(term.value){
                                     
-                                        if(as_list){                                    
+                                        if(as_list_type=='2' || as_list_type=='2b'){                                    
                                             f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count} );
-                                            $("<div>").css({"display":"inline-block","padding":"0 "+(level*5)+"px"})
+                                            $("<div>").css({'display':(as_list_type=='2b')?'block':'inline-block',
+                                                            'padding':"0 "+(level*5)+"px"})
                                                     .append(f_link)
                                                     .appendTo($container);
                                         }else{
@@ -992,7 +1017,7 @@ $.widget( "heurist.search_faceted", {
                                 }
                                 if(term.children)
                                 for (var k=0; k<term.children.length; k++){
-                                    __drawTerm(term.children[k], level+1, $container, as_list);
+                                    __drawTerm(term.children[k], level+1, $container, as_list_type);
                                 }
                         }//__drawTerm
                         
@@ -1056,7 +1081,7 @@ $.widget( "heurist.search_faceted", {
                        
                         //calculate the total number of terms with value
                         var tot_cnt = __calcTerm(term, 0, null);
-                        var as_list = ( field['isfacet']==1 );    //is list
+                        var as_list = ( field['isfacet']=='2' || field['isfacet']=='2b');    //is list
                                             //is dropdown but too many entries
 //this feature is remarked on 2017-01-26 || (field['isfacet']==2 && tot_cnt > that._MIN_DROPDOWN_CONTENT)); 
 
@@ -1068,8 +1093,9 @@ $.widget( "heurist.search_faceted", {
                         }                        
 
                         if(as_list){
-                                __drawTerm(term, 0, $facet_values, true);
+                                __drawTerm(term, 0, $facet_values, field['isfacet']);
                         }else{
+                            //as dropdown
                                 var $sel = $('<select>').css({"font-size": "0.6em !important", "width":"180px"});
                                 $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
                                 
@@ -1354,7 +1380,7 @@ $.widget( "heurist.search_faceted", {
                             var cterm = response.data[i];
 
                             var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]});
-                            $("<div>").css({"display":(i>50?'none':"inline-block"),"padding":"0 3px"})
+                            $("<div>").css({"display":(i>50?'none': (field['isfacet']=='2b'?'block':'inline-block') ),"padding":"0 3px"})
                                                 .append(f_link).appendTo($facet_values);
                             if(i==51){
                                  $("<div>").css({"display":"inline-block","padding":"0 3px",'cursor':'pointer'})

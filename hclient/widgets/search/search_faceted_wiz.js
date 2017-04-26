@@ -216,7 +216,9 @@ $.widget( "heurist.search_faceted_wiz", {
         .appendTo(this.element);
 
         var header = $("<div>").css('font-size','0.8em').appendTo(this.step3);
-        header.html("<label>"+window.hWin.HR("Define titles, help tips and facet type")+"</label>");
+        header.html("<label>"+window.hWin.HR("Define titles, help tips and facet type")+"</label>"
+        +'<br><br><label><input type="checkbox" id="cbShowHierarchy" style="vertical-align: middle;">'
+            +window.hWin.HR("Show entity hierarchy above facet type")+"</label>");
 
         $("<fieldset>",{id:'facets_list'}).appendTo(this.step3);
         this.step_panels.push(this.step3);
@@ -368,7 +370,17 @@ $.widget( "heurist.search_faceted_wiz", {
                     message.empty();
                     svs_name.removeClass( "ui-state-error" );
                 }
-
+                
+                var svs_title = this.step0.find('#svs_Title');
+                bValid = window.hWin.HEURIST4.msg.checkLength( svs_title, 'Title', message, 0, 30 );
+                if(!bValid){
+                    svs_title.focus();                
+                    return;
+                }else{
+                    message.empty();
+                    svs_title.removeClass( "ui-state-error" );
+                }
+                this.options.params.ui_title =  svs_title.val();
 
                 if(this.isversion==2){
                     this.step = 1;
@@ -942,7 +954,8 @@ $.widget( "heurist.search_faceted_wiz", {
                             title: old_facet.title,
                             help: old_facet.help,
                             isfacet: old_facet.isfacet,
-                            type:node.data.type
+                            type: node.data.type,
+                            order: old_facet.order>=0?old_facet.order:0
                         } );
 
                     }else{
@@ -951,11 +964,16 @@ $.widget( "heurist.search_faceted_wiz", {
                             'var': facets.length,
                             code:node.data.code,
                             title:(node.data.name?node.data.name:node.title),
-                            type:node.data.type
+                            type:node.data.type,
+                            order: 0
                         } );
                     }
                 }
             }
+            
+            facets.sort(function(a,b){
+                return a.order<=b.order?-1:1;
+            });
 
 
             this.options.params.facets = facets;
@@ -966,7 +984,9 @@ $.widget( "heurist.search_faceted_wiz", {
             }
 
             //-----------------------------------------------------------
-
+            $(this.step3).find("#cbShowHierarchy").attr('checked', this.options.params.title_hierarchy);
+            
+            
             var listdiv = $(this.step3).find("#facets_list");
             listdiv.empty();
 
@@ -977,8 +997,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 //type of facet (radio group)
 
                 var sContent =
-                '<div>'
-                +'<div class="header_narrow"><label for="facet_Title'+k+'">Facet</label></div>'
+                '<div id="facet'+k+'">'
+                +'<div class="header_narrow"><span class="ui-icon ui-icon-up-down span_for_radio"></span><label for="facet_Title'+k+'">Facet</label></div>'
                 +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" '
                 +' style="font-weight:bold" class="text ui-widget-content ui-corner-all" />'
                 +' <label for="facet_Help'+k+'">&nbsp;&nbsp;Rollover (optional)&nbsp;</label>'
@@ -991,31 +1011,26 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(facets[k].type=='freetext'){
                     sContent = sContent +
                     sTypeLabel
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>first char</label>'
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
-                    +'</div>';
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/><span title="first char" class="ui-icon ui-icon-aa span_for_radio"></span></label>';
                 }else if(facets[k].type=='float' || facets[k].type=='integer'){
                     sContent = sContent +
                     sTypeLabel
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>slider</label>'
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
-                    +'</div>';
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/><span title="slider" class="ui-icon ui-icon-input-slider span_for_radio"></span></label>';
                 }else if(facets[k].type=='date' || facets[k].type=='year'){
                     sContent = sContent +
                     sTypeLabel
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>slider</label>'
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
-                    +'</div>';
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/><span title="slider" class="ui-icon ui-icon-input-slider span_for_radio"></span></label>';
                 }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                     sContent = sContent +
                     sTypeLabel
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>list</label>'
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>dropdown</label>'
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
-                    +'</div>';
+                                //!!!!!! dropdown was 2 - to correct
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/><span title="dropdown" class="ui-icon ui-icon-input-dropdown span_for_radio"></span></label>';
                 }
+                    sContent = sContent
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="2b"/><span title="list as column" class="ui-icon ui-icon-list-column span_for_radio"></span></label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="2"/><span title="list" class="ui-icon ui-icon-list-inline span_for_radio"></span></label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/><span title="search" class="ui-icon ui-icon-input span_for_radio"></span></label>'
+                    +'</div>';  //+facets[k].order
 
                 listdiv.append($(sContent));
 
@@ -1030,6 +1045,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 listdiv.find('#facet_Help'+k).val(facets[k].help);
                 listdiv.find('input:radio[name="facet_Type'+k+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
             }
+            
+            
+            listdiv.sortable();
+            listdiv.disableSelection();
 
             return true;
         }else{
@@ -1040,6 +1059,8 @@ $.widget( "heurist.search_faceted_wiz", {
     , _assignFacetParams: function(){
         if( window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
 
+            this.options.params.title_hierarchy  = $(this.step3).find("#cbShowHierarchy").is(':checked');
+            
             var listdiv = $(this.step3).find("#facets_list");
 
             var k, len = this.options.params.facets.length;
@@ -1048,7 +1069,14 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(title!='') this.options.params.facets[k].title = title;
                 this.options.params.facets[k].help = listdiv.find('#facet_Help'+k).val();
                 this.options.params.facets[k].isfacet = listdiv.find('input:radio[name="facet_Type'+k+'"]:checked').val();
+                this.options.params.facets[k].order = $('#facet'+k).index();
+//console.log( k+'  '+this.options.params.facets[k].order );                
             }
+            //sort according to order in UI list
+            
+            this.options.params.facets.sort(function(a,b){
+                return a.order<b.order?-1:1;
+            });
         }
         return null;
     }

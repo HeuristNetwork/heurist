@@ -163,7 +163,7 @@
 
             }
             else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==1) || $dt_type=="year"){
-
+                    // slider
                     //if ranges are not defined there are two steps 1) find min and max values 2) create select case
                     $select_field = "cast($select_field as DECIMAL)";
 
@@ -189,20 +189,21 @@
                             $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field";
                     }
 
-                }else if($params['needcount']==2){ //count for related
+                }else{ //count for related  if($params['needcount']==2)
 
-                    $select_clause = "SELECT $select_field as rng, count(distinct r0.rec_ID) as cnt ";
+                    $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
                     if($grouporder_clause==""){
                             $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field";
                     }
 
-                }else{ //for fields from related records - search distinc values only
+                }
+                /*else{ //for fields from related records - search distinc values only
 
                     $select_clause = "SELECT DISTINCT $select_field as rng, 0 as cnt ";
                     if($grouporder_clause==""){
                             $grouporder_clause = " ORDER BY $select_field";
                     }
-                }
+                }*/
 
             }
 
@@ -214,6 +215,7 @@
             //
 //DEBUG
 //if(@$params['debug']) echo $query."<br>";
+//error_log($query);
 
             $res = $mysqli->query($query);
             if (!$res){
@@ -225,7 +227,7 @@
                 while ( $row = $res->fetch_row() ) {
 
                     if((($dt_type=="integer" || $dt_type=="float") && $facet_type==1)   || $dt_type=="year" || $dt_type=="date"){
-                        $third_element = $row[2];
+                        $third_element = $row[2];          //slider
                     }else if($step_level>0 || $dt_type!='freetext'){
                         $third_element = $row[0];
                     }else{
@@ -251,17 +253,22 @@
     *
     * @param mixed $system
     * @param mixed $ids -
+    * @param mixed $direction -  1 direct/ -1 reverse/ 0 both
     *
     * @return array of direct and reverse links (record id, relation type (termid), detail id)
     */
-    function recordSearchRelated($system, $ids){
+    function recordSearchRelated($system, $ids, $direction=0){
 
         if(!@$ids){
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
         }
         if(is_array($ids)){
-            $ids = explode(",", $ids);
+            $ids = implode(",", $ids);
         }
+        if(!($direction==1||$direction==-1)){
+            $direction = 0;
+        }
+        
 
         $direct = array();
         $reverse = array();

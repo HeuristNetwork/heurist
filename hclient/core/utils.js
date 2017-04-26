@@ -291,8 +291,10 @@ window.hWin.HEURIST4.util = {
     isJSON: function(value){
         
             try {
-                var r = $.parseJSON(value);
-                if($.isArray(r) || $.isPlainObject(r)){
+                if(typeof value === 'string'){
+                    value = $.parseJSON(value);    
+                }
+                if($.isArray(value) || $.isPlainObject(value)){
                     return true;
                 }
             }

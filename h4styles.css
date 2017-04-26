@@ -1076,18 +1076,6 @@ background: #8ea9b9
     padding-left:35px;
 }
     
-.ui-icon-filter { 
-    background-image: url(hclient/assets/filter_icon24.png) !important; 
-    width: 24;
-    height: 24;
-    margin-top: -0.8em !important;
-    margin-left: -0.3em;
-}
-
-.ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon.png) !important; }
-
-.ui-iconalign { display: inline-block; vertical-align: text-bottom; padding-right:1em }
-
 /* for popup on map for renderRecordData.php */
 #recID {
     float: right;
@@ -1123,3 +1111,63 @@ background: #8ea9b9
     margin-left: 80px;
 }
 /*end for map popup*/
+
+
+.span_for_radio{
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.ui-iconalign { display: inline-block; vertical-align: text-bottom; padding-right:1em }
+
+.ui-icon-filter { 
+    background-image: url(hclient/assets/filter_icon24.png) !important; 
+    width: 24;
+    height: 24;
+    margin-top: -0.8em !important;
+    margin-left: -0.3em;
+}
+
+.ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon.png) !important; }
+
+.ui-icon-aa { 
+    background-image: url(hclient/assets/Aa.png) !important; 
+    width: 18;
+    height: 18;
+}
+
+.ui-icon-input-slider { 
+    background-image: url(hclient/assets/input_slider.png) !important; 
+    width: 18;
+    height: 18;
+}
+
+.ui-icon-input-dropdown { 
+    background-image: url(hclient/assets/input_dropdown.png) !important; 
+    width: 18;
+    height: 18;
+}
+
+.ui-icon-list-column { 
+    background-image: url(hclient/assets/list_column.png) !important; 
+    width: 18;
+    height: 18;
+}
+
+.ui-icon-list-inline { 
+    background-image: url(hclient/assets/list_inline.png) !important; 
+    width: 18;
+    height: 18;
+}
+
+.ui-icon-up-down { 
+    background-image: url(common/images/up-down-arrow.png) !important; 
+    width: 24;
+    height: 24;
+}
+
+.tooltip-inner{
+    /*background:black;
+    color:white;*/
+    text-align:center;
+}
