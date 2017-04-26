@@ -1425,7 +1425,9 @@
 
         //find possible entries in defDetailTypes dty_JsonTermIDTree
         foreach ($children as $termID) {
-            $query = "select dty_ID, dty_Name from defDetailTypes where (FIND_IN_SET($termID, dty_JsonTermIDTree)>0)";
+            $query = 'select dty_ID, dty_Name from defDetailTypes where dty_JsonTermIDTree like \'%"'.$termID.'"%\' '
+                      .'and (dty_Type=\'enum\' or dty_Type=\'relationtype\')';
+            //OLD does not work (FIND_IN_SET($termID, dty_JsonTermIDTree)>0)";
             $res = $mysqli->query($query);
             if ($mysqli->error) {
                 $ret['error'] = "SQL error in deleteTerms retreiving field types which use term $termID: ".$mysqli->error;
