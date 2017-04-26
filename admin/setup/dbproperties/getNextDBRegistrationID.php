@@ -151,7 +151,7 @@ if(mysql_num_rows($res) == 0) { // new registration
     $res = mysql_query("insert into Records
         (rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility,rec_Popularity)
         VALUES  ('".mysql_real_escape_string($serverURL)."', now(), '".mysql_real_escape_string($dbTitle).
-        "', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, $indexdb_user_id, 'viewable', 99)");
+        "', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, $indexdb_user_id, 'public', 99)"); //visibility was 'viewable'
     if (!$res) { // Unable to allocate a new ID
         $error = "Cannot write record in Heurist master index database\nThe URL may have been registered with a previous database.\n" . "Please contact <a href=mailto:info@heuristNetwork.org>Heurist developers</a> for advice";
         $returnData = $dbID . "," . $error;

@@ -82,6 +82,7 @@
 
         // request for server side
         var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
+        
         var params = "db="+top.HEURIST.database.name+"&public=1&named=1&exclude="+top.HEURIST.database.id; //HEURIST_DBNAME, HEURIST_DBID
         top.HEURIST.util.getJsonData(baseurl,
             // fillRegisteredDatabasesTable

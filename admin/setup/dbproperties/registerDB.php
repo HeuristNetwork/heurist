@@ -304,6 +304,8 @@ if($sError){
                     "Database description (updated):</div><div class='input-cell'>". $dbDescription."</div></div>";
                 } else
                 { // We have got a new dbID, set the assigned dbID in sysIdentification
+                    mysql_connection_insert(DATABASE);
+                
                     $res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$dbID', ".
                         "`sys_dbDescription`='".mysql_real_escape_string($dbDescription)."' where 1");
                     if($res) {
