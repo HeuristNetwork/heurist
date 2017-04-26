@@ -198,7 +198,13 @@ _time_debug = new Date().getTime() / 1000;
                     if(db_total_records<1){
                         showTipOfTheDay(false);   
                     }else{
+                        
                         window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
+                        
+                        var active_tab = '<?php echo str_replace("'","\'",@$_REQUEST['tab']);?>';
+                        if(active_tab){
+                            window.hWin.HAPI4.LayoutMgr.putAppOnTop(active_tab);
+                        }
                     }
                     
                 }else if(db_total_records<1){
