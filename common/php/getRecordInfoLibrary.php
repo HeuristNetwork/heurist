@@ -46,6 +46,7 @@
 * - getTermTree()
 * - updateTermData()
 * - getChildTerms()
+* - getAllChildren()
 * - setChildDepth()
 * - getTermColNames()
 * - getTerms()
@@ -478,6 +479,26 @@ function getTermTree($termDomain, $matching = 'exact') { // termDomain can be em
     }
     return $terms;
 }
+
+// 
+//  return all term children as plain array
+//
+function getAllChildren($parentID){
+    
+        $children = array();
+    
+        $res = mysql_query("select trm_ID from trm_ParentTermID = " . $parentID);
+        if ($res) {
+            while ($row = mysql_fetch_row($res)) {
+                array_push($children, $row[0]);
+                $children = array_merge($children, getAllChildren($row[0]));
+            }
+        }
+        
+        return $children;
+}
+
+
 /**
 * calculate depth and child count for each term
 */

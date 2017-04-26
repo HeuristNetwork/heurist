@@ -344,17 +344,38 @@ else
                     !array_key_exists('defs',$data['terms'])) {
                     error_exit("Invalid data structure sent with saveTerms method call to saveStructure.php");
                 }
+                
                 $colNames = $data['terms']['colNames'];
                 $rv['result'] = array(); //result
-
+                $parent_is_valid = true;
+                /*  TO DO
+                $idx = array_search('trm_ParentTermID', $colNames);
+                //verify that there is not recursion in parent-child
                 foreach ($data['terms']['defs'] as $trmID => $dt) {
-                    $res = updateTerms($colNames, $trmID, $dt, null);
-                    array_push($rv['result'], $res);
+                    $new_parent_ID = $dt[$idx];
+                    $all_children = getAllChildren($trmID);
+                    
+error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));                    
+                    
+                    if(true || array_search($new_parent_ID, $all_children, true)!==false){
+                        array_push($rv['result'], "Proposed new parent term ID $new_parent_ID is among children of term to be updated (#$trmID  ). Can't proceed");    
+                        $parent_is_valid = false;
+                        break;
+                    }
                 }
+                */
+                
+                if($parent_is_valid){
 
-                // slows down the performance, but we need the updated terms because Ian wishes to update terms
-                // while selecting terms while editing the field type
-                $rv['terms'] = getTerms();
+                    foreach ($data['terms']['defs'] as $trmID => $dt) {
+                        $res = updateTerms($colNames, $trmID, $dt, null);
+                        array_push($rv['result'], $res);
+                    }
+                    // slows down the performance, but we need the updated terms because Ian wishes to update terms
+                    // while selecting terms while editing the field type
+                    $rv['terms'] = getTerms();
+                }
+                
                 break;
 
             case 'mergeTerms':

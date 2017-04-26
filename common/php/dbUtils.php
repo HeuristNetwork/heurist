@@ -879,6 +879,11 @@ function db_register($db_name, $dbID){
                     "where (trm_IDInOriginatingDB = '0') OR (trm_IDInOriginatingDB IS NULL) ");
                 if (!$res) {$result = 1; }
 
+                
+                if (!$res){
+                    error_log('Error on database registration '.$db_name.'  '.$mysqli->error);
+                }
+                
                 $res = ($result==0);
             }
         }
