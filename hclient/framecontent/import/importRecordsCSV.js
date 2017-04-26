@@ -156,7 +156,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             'Sorry, this file exceeds the upload '
                             //+ ((max_file_size<max_post_size)?'file':'(post data)')
                             + ' size limit set for this server ('
-                            + Math.round(max_size/1024/1024) + ' MBytes). '
+                            + Math.round(_max_upload_size/1024/1024) + ' MBytes). '
                             +'Please reduce the file size, or ask your system administrator to increase the upload limit.'
                             );
                     }else if(!pbar_div.is(':visible')){
