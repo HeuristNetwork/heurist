@@ -384,22 +384,34 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             ,get_defs_all: function(is_message, document){
+                
+                window.hWin.HEURIST4.msg.bringCoverallToFront();
+                
 
                 this.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                    
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        
                         window.hWin.HEURIST4.rectypes = response.data.rectypes;
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-
+                        
+                        if(top && top==window && top.HEURIST){
+                            top.HEURIST.rectypes = response.data.rectypes;
+                            top.HEURIST.terms = response.data.terms;
+                            top.HEURIST.detailTypes = response.data.detailtypes;
+                        }
+                             
                         if(window.hWin.HEURIST && window.hWin.HEURIST.rectypes){
                             window.hWin.HEURIST.util.reloadStrcuture( is_message ); //relaod H3 structure
                         }else if (is_message==true) {
                             window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
-                        }
+                        }      
 
                         $(document).trigger(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-
                     }
                 });
 

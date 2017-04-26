@@ -747,6 +747,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 '<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'+
                                 msg+'</div>';
     },
-
+    
+    bringCoverallToFront: function() {
+        if (!  window.hWin.HEURIST4.msg.coverall ) {
+            window.hWin.HEURIST4.msg.coverall = 
+                $('<div>').addClass('coverall-div').css('zIndex',99999999999).appendTo('body');
+        }
+        $(window.hWin.HEURIST4.msg.coverall).show();
+    },    
+    
+    sendCoverallToBack: function() {
+        $(window.hWin.HEURIST4.msg.coverall).hide();//.style.visibility = "hidden";
+    },
     
 };
