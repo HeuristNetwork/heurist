@@ -151,11 +151,14 @@ $.widget( "heurist.resultList", {
                         that._clearAllRecordDivs('');
                         //that.loadanimation(true);
                     }
+                    
+                    that._renderSearchInfoMsg(null);
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
                     that._showHideOnWidth();
                     that._renderPagesNavigator();
+                    that._renderSearchInfoMsg(data);
                     
                     if(data==null){
                         var empty_message = window.hWin.HR('No filter defined');
@@ -1164,7 +1167,16 @@ $.widget( "heurist.resultList", {
     },
 
     //
+    // alternative info function that is invoked ONLY ONCE on search finish
+    //
+    _renderSearchInfoMsg: function(){
+        
+        
+    },
+    
+    //
     // number of records in result set (query total count) and number of selected records
+    // this function is invoked many times (depends on width, page, selection etc)
     //
     _updateInfo: function(){
 

@@ -228,14 +228,17 @@ var cfg_layouts = [
     */
 
     {id:'boro', name:'Beyond 1914 - Book of Rememberance', theme:'heurist', type:'free', 
-                cssfile:'hclient/widgets/boro/256dd9d.css', template: 'hclient/widgets/boro/boro_main.html'
-       ,search_pane:{dropable:false,css:{},
-                apps:[                           //18
-                {appid:'dh_search', options:{UGrpID:48}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
+                cssfile:'hclient/widgets/boro/beyond1914.css', template: 'hclient/widgets/boro/boro_main.html'
        ,result_pane:{dropable:false,css:{},
                 apps:[{appid:'boro_results', options:{
                     view_mode:'list', hide_view_mode: true, select_mode:'select_single', multiselect:false, showmenu: false
                 }, hasheader:true, css:{border:'none', 'background':'none'} }]}
+       ,search_pane:{dropable:false,css:{},
+                apps:[                           
+                //prod 
+                {appid:'dh_search', options:{UGrpID:48, search_at_init:152}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
+                //dev
+                // {appid:'dh_search', options:{UGrpID:18, search_at_init:110}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
 /*       ,search_pane:{dropable:false,apps:[{appid:'boro_search', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
     },
