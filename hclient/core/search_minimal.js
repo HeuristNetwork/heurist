@@ -93,6 +93,7 @@ function hSearchMinimal() {
             
             //clone - to use mainMenu.js
             window.hWin.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
+
             window.hWin.HAPI4.currentRecordset = null;
             if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
                 $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
@@ -122,7 +123,7 @@ function hSearchMinimal() {
                     
                     recordset.setRequest( window.hWin.HEURIST4.util.cloneJSON(_query_request) );
                     
-                    
+
                     window.hWin.HAPI4.currentRecordset = recordset;
                     _searchCompleted( false );
                 }

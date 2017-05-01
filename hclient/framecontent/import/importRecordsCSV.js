@@ -3439,7 +3439,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                 
                                 window.hWin.HEURIST4.terms = response.data.terms;
-                                top.HEURIST.terms = response.data.terms;
+                                window.hWin.terms = response.data.terms;
                                 
                                 var cnt = $dlg.find('.add_terms').length;
                                 var s = recIDs.length+' new term'

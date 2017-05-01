@@ -38,8 +38,8 @@ function hImportDefTerms(_trm_ParentTermID) {
         if(trm_ParentTermID>0){
             //find parent entry
             var allterms;
-            if(top.HEURIST && top.HEURIST.terms){
-                allterms = top.HEURIST.terms;
+            if(window.hWin.HEURIST && window.hWin.HEURIST.terms){
+                allterms = window.hWin.HEURIST.terms;
             }else if(window.hWin.HEURIST4 && window.hWin.HEURIST4.terms){
                 allterms = window.hWin.HEURIST4.terms;
             }
