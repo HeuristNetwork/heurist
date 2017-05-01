@@ -149,7 +149,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
                     
                     <li>
-                        <a href="admin/verification/listDatabaseErrors.php" name="auto-popup" class="verylarge h3link"
+                        <a href="admin/verification/listDatabaseErrorsInit.php" name="auto-popup" class="verylarge h3link"
                             data-logaction="stVerify"
                             onClick="{return false;}"
                             title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
