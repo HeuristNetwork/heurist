@@ -191,6 +191,30 @@
         global $mysqli;
 
 		$ret = array();
+        
+        
+        $query = 'SELECT dty_ID, dty_Name FROM defDetailTypes where FIND_IN_SET('.$rtyID.', dty_PtrTargetRectypeIDs)>0';
+        $res = $mysqli->query($query);
+        if ($mysqli->error) {
+            $ret['error'] = "SQL error in deleteRecType retreiving field types which use rectype $rtyID: ".$mysqli->error;
+            return $ret;
+        }else{
+            $dtCount = $res->num_rows;
+            if ($dtCount>0) { // there are fields that use this rectype, need to return error and the dty_IDs
+                $ret['error'] = "Error: You cannot delete record type $rtyID. "
+                            ." It is referenced in $dtCount base field defintions "
+                            ."- please delete field definitions or remove rectype from pointer constraints to allow deletion of this record type.<div style='text-align:left'><ul>";
+                $ret['dtyIDs'] = array();
+                while ($row = $res->fetch_row()) {
+                    array_push($ret['dtyIDs'], $row[0]);
+                    $ret['error'] = $ret['error'].("<li>".$row[0]."&nbsp;".$row[1]."</li>");
+                }
+                $ret['error'] = $ret['error']."</ul></div>";
+                return $ret;
+            }
+        }
+        
+        
 		$query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=0 limit 1";
 		$res = $mysqli->query($query);
         $error = $mysqli->error;
