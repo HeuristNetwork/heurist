@@ -212,6 +212,11 @@ _time_debug = new Date().getTime() / 1000;
                 }
                 
                
+               //@todo define parameter in layout "production=true"
+               if(!(window.hWin.HAPI4.sysinfo['layout']=='boro' ||
+                      window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' || 
+                         window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
+               
                 var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
                 
                 //
@@ -235,8 +240,7 @@ _time_debug = new Date().getTime() / 1000;
                     }
                     window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']); 
                 }
-                
-                
+                }
                 
                 
                 //perform search in the case that parameter "q" is defined
@@ -250,7 +254,9 @@ _time_debug = new Date().getTime() / 1000;
                     setTimeout(function(){
                             window.hWin.HAPI4.SearchMgr.doSearch(document, request);
                     }, 3000);
-                }else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
+                }
+                
+                else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
                         || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
                             
                     var init_search = window.hWin.HEURIST?window.hWin.HEURIST.displayPreferences['defaultSearch']:'';
