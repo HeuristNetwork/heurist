@@ -70,7 +70,18 @@ search: [t:10 f:1]
 
 
 NOTE - to make search for facet value faster we may try to omit current search in query and search for entire database
-            
+  
+facet search general parameters are the same to saved search plus several special
+
+domain
+rules
+ui_title - title in user interface
+title_hierarchy - show hierarchy in facet header
+sup_filter - suplementary filter that is set in design time
+add_filter - additional filter that can be set in run time 
+search_on_reset - search for empty form (on reset and on init)
+
+rectypes[0] 
 */
 
 
@@ -146,9 +157,6 @@ $.widget( "heurist.search_faceted", {
         .css({"overflow-y":"auto","overflow-x":"hidden","height":"100%"}) //"font-size":"0.9em",
         .appendTo( this.facets_list_container );
 
-        //this._refresh();
-        this.doReset();
-        
         var that = this;
         var current_query_request_id;
         
@@ -179,6 +187,8 @@ $.widget( "heurist.search_faceted", {
             }
         });
 
+        //this._refresh();
+        this.doReset();
     }, //end _create
 
     // Any time the widget is called with no arguments or with only an option hash, 
@@ -186,6 +196,14 @@ $.widget( "heurist.search_faceted", {
     _init: function() {
     },
 
+    _setOption: function( key, value ) {
+        this._super( key, value );
+        if(key=='add_filter'){
+            this.options.params.add_filter = value;
+            this.doSearch();
+        }
+    },
+    
     _setOptions: function( options ) {
         this._superApply( arguments );
         this.cached_counts = [];
@@ -603,8 +621,17 @@ $.widget( "heurist.search_faceted", {
        //get empty query
        this._first_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
        this._fillQueryWithValues( this._first_query );
-       this._recalculateFacets(-1);
+       
 
+       
+console.log('start search with empty form '+this.options.params.search_on_reset);        
+        if(this.options.params.search_on_reset){
+            //search at once - even none facet value provided
+            this.doSearch();
+        }else{
+            this._recalculateFacets(-1);     
+        }
+       
     }
 
     ,doSaveSearch: function(){
@@ -621,7 +648,37 @@ $.widget( "heurist.search_faceted", {
 
 
     }
+    
+    //
+    // return array of pairs - code:value
+    //
+    ,getFacetsValues: function(){
+        
+        var res = [];
+        
+        var facets = this.options.params.facets;
+        var facet_index, len = facets.length;
+        for (facet_index=0;facet_index<len;facet_index++){
 
+                if(facets[facet_index]['isfacet']==0){  //this is direct input
+                     var sel = $(_inputs[val]).editing_input('getValues');
+                     if(sel && sel.length>0){
+                         facets[facet_index].selectedvalue = {value:sel[0]};
+                     }else{
+                         facets[facet_index].selectedvalue = null;
+                     }
+                }
+                
+                var selval = facets[facet_index].selectedvalue;
+                
+                if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
+                    res.push({code:facets[facet_index].code, value:selval.value});
+                }
+
+        }//for
+
+        return res;                
+    }
 
     //
     // 1. substiture Xn variable in query array with value from input form
@@ -653,7 +710,7 @@ $.widget( "heurist.search_faceted", {
                         for (facet_index=0;facet_index<len;facet_index++){
                             if(facets[facet_index]["var"] == val.substr(2)){
 
-                                if(facets[facet_index]['isfacet']==0){
+                                if(facets[facet_index]['isfacet']==0){  //this is direct input
                                      var sel = $(_inputs[val]).editing_input('getValues');
                                      if(sel && sel.length>0){
                                          facets[facet_index].selectedvalue = {value:sel[0]};
@@ -662,7 +719,7 @@ $.widget( "heurist.search_faceted", {
                                      }
                                 }
                                 
-                                var selval = facets[facet_index].selectedvalue;;
+                                var selval = facets[facet_index].selectedvalue;
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
                                     predicate[key] = selval.value;
@@ -704,8 +761,11 @@ $.widget( "heurist.search_faceted", {
 
             var query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
             var isform_empty = this._fillQueryWithValues(query);
+
+//console.log('form is empty '+isform_empty);                
             
-            if(isform_empty){
+            if(isform_empty && !this.options.params.search_on_reset){
+                
                 if(true){
                     //clear main result set
                     
@@ -728,7 +788,8 @@ $.widget( "heurist.search_faceted", {
             //1) it requires that this filter must be a valid json  - FIXED
             //2) it makes whole request heavier
             //add additional/supplementary filter
-            this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
+            this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
+                            this.options.params.sup_filter, this.options.params.add_filter);
             
             //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             
@@ -759,6 +820,8 @@ $.widget( "heurist.search_faceted", {
     // _recalculateFacets (call server) -> as callback _redrawFacets -> _recalculateFacets (next facet)
     //
     , _recalculateFacets: function(field_index){
+     
+//@todo need to check that the sequence is not called more than once - otherwise we get multiple controls on facets
         
         //return;
         
@@ -786,7 +849,7 @@ $.widget( "heurist.search_faceted", {
                 if(this._isInited){
                     //replace with current query   - @todo check for empty 
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query, 
-                                    this.options.params.sup_filter);
+                                    this.options.params.sup_filter, this.options.params.add_filter);
                 }else{
                     //replace with list of ids
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query,
@@ -850,7 +913,8 @@ $.widget( "heurist.search_faceted", {
                         query = this._first_query;
                         
                         //add additional/supplementary filter
-                        query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
+                        query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
+                                        this.options.params.sup_filter, this.options.params.add_filter);
                         
                     }else{
                         //replace with list of ids

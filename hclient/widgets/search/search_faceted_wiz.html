@@ -72,24 +72,35 @@ A Heurist filter string which extracts a subset of the database, to which the fa
 </div>
 
 <div>
-<div class="header" style="vertical-align:top"><label for="svs_Rules">Expansion rules</label></div>
-<textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all"
-style="margin-top:0.4em;width:450px" readonly="readonly"></textarea>
-<div style="width: 420px; font-size: smaller; margin-top: 5px;  margin-bottom: 5px;">
-Rules are applied to the result set after each selection. They expand the results
-to include connected records (entities). This expansion may be restricted
-to specific entity types, connection types or filters.
-Use rules to bring in information such as map location or dates for display on a map or timeline.
-Edit with the pencil icon on the right.
+    <div class="header" style="vertical-align:top">
+        <label for="svs_Rules">Expansion rules</label>
+    </div>
+    <textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all"
+    style="margin-top:0.4em;width:450px" readonly="readonly"></textarea>
+    <div style="width: 420px; font-size: smaller; margin-top: 5px;  margin-bottom: 5px;">
+    Rules are applied to the result set after each selection. They expand the results
+    to include connected records (entities). This expansion may be restricted
+    to specific entity types, connection types or filters.
+    Use rules to bring in information such as map location or dates for display on a map or timeline.
+    Edit with the pencil icon on the right.
+    </div>
+
+    <div id="svs_btnset">
+        <div id="svs_Rules_edit"  style="margin-top:0.4em"></div>
+        <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+    </div>
+</div>    
+
+<div>
+    <div class="header">
+        <label for="svs_SearchOnReset">Perform search on init</label>
+    </div>
+    <input name="svs_SearchOnReset" id="svs_SearchOnReset" class="text ui-widget-content ui-corner-all" type="checkbox"/>
+    <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+        Perform search at initialization and on reset all values
+    </div>
 </div>
 
-
-<div id="svs_btnset">
-<div id="svs_Rules_edit"  style="margin-top:0.4em"></div>
-<div id="svs_Rules_clear" style="margin-top:0.4em"></div>
-</div>
-
-</div>
 
 </fieldset>
 

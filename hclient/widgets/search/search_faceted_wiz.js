@@ -381,6 +381,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     svs_title.removeClass( "ui-state-error" );
                 }
                 this.options.params.ui_title =  svs_title.val();
+                
+                this.options.params.search_on_reset = this.step0.find('#svs_SearchOnReset').is(':checked');
 
                 if(this.isversion==2){
                     this.step = 1;
@@ -549,6 +551,9 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(this.options.params.rectypes) {
                     $(opt_rectypes).val(this.options.params.rectypes[0]);
                 }
+                
+                $dlg.find('#svs_Title').val(this.options.params.ui_title);
+                $dlg.find('#svs_SearchOnReset').attr('checked', this.options.params.search_on_reset);
 
             }else{ //add new saved search
 
@@ -561,6 +566,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_ugrid.val(this.options.domain);
                 svs_ugrid.removeAttr('disabled');;
                 //svs_ugrid.parent().show();
+                $dlg.find('#svs_Title').val('');
+                $dlg.find('#svs_SearchOnReset').attr('checked', false);
             }
 
 

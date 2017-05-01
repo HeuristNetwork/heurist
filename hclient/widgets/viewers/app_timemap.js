@@ -112,7 +112,6 @@ $.widget( "heurist.app_timemap", {
                         that.option("selection",  null);
                     }
                 }else if (e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
-
                     that._refresh();
 
                 }
