@@ -19,7 +19,7 @@
 
 
 $.widget( "heurist.boro_results", $.heurist.resultList, {
- 
+    
   _initControls:function(){
         this.options.searchfull = this._searchFullRecords; 
         
@@ -28,10 +28,20 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         this._super();
 
         
-        this.div_content.css({'padding':'30px','top':'5em'});//.addClass('bor-search-results');
+        this.div_content.css({'padding':'30px','top':'8em'});//.addClass('bor-search-results');
+        
+        //this.span_info.appendTo(this.div_header);
+
+        //this.span_info = $('<div>').css('color','red').after(this.div_header);
+        
+        var $header = $(".header"+this.element.attr('id'));
+        this.span_info.addClass('help-block','lead').css({'color':'red','float':'left'}).insertAfter($header);
         
   },
     
+   //
+   // function for searchfull option - return full record info
+   //
   _searchFullRecords: function(rec_toload, current_page, callback){
       
     var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
@@ -88,7 +98,192 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 +'</div>';
 
         return html;
+ },
+ 
+ //
+ // overwrite parent method
+ //
+ _updateInfo: function(){
+     
+ },
+ 
+ _renderSearchInfoMsg: function(data){
+     
+    this._super(); 
+    
+    if(data==null){
+        this.span_info.html('');
+        return;
+    }
+     
+    var total_inquery = data.count_total();
+    var sinfo = [total_inquery+' result'+(total_inquery>1?'s':'')+' found.'];
+                /*
+    this.span_info.prop('title','');
+    this.span_info.html(sinfo);    
+    this.span_info.show();
+               */
+    //translate search criteria in human readable explanatory text
+    // for persons only
+    
+    //get faceted search instance
+    var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');
+    var iFacetedSearch = $(app.widget).dh_search('getFacetedSearch');    
+    
+    if(iFacetedSearch!=null){
+            //get faceted search values
+            var values = iFacetedSearch.search_faceted('getFacetsValues');    
+            var add_filter = iFacetedSearch.search_faceted('option','add_filter');
+            var f_params = iFacetedSearch.search_faceted('option','params');
+            var primary_rt = f_params.rectypes[0];
+        
+            var idx=0, len = values.length;
+
+            if (len>0 || !window.hWin.HEURIST4.util.isempty(add_filter)) {            
+            
+                if(primary_rt==10){  //for persons only
+                
+                    function __getTerm(value){
+                        return window.hWin.HEURIST4.terms.termsByDomainLookup.enum[value][0];
+                    }
+                
+                    sinfo.push('Showing');
+                    
+                    var gender = 'people';
+                    var born = '';
+                    var educated = '';
+                    var qualification = '';
+                    var served = '';
+                    var awarded = '';
+                    var died = '';
+                    
+                    var died_were = [4247,4970,4592,4632,4807];
+                    
+/*                    
+{"ui_title":"People (ao test)","rectypes":["10"],"facets":
+[{"var":3,"code":"10:lt103:24:9","title":"Date of Birth","type":"date","order":0,"isfacet":"1","help":""},
+ {"var":4,"code":"10:lt103:24:lt78:25:1","title":"Born in","type":"freetext","order":1,"isfacet":"2b","help":""},
+ {"var":0,"code":"10:20","title":"Gender","type":"enum","order":2,"isfacet":"2b","help":""},
+ {"var":2,"code":"10:lt102:27:lt97:26:1","title":"Name of institution","type":"freetext","order":3,"isfacet":"2b","help":""},
+ {"var":1,"code":"10:lt102:27:80","title":"Qualification","type":"enum","order":4,"isfacet":"2b","help":""},
+ {"var":5,"code":"10:lt88:29:99","title":"Military rank","type":"enum","order":5,"isfacet":"2b","help":""},
+ {"var":6,"code":"10:lt87:28:98","title":"Military award","type":"enum","order":6,"isfacet":"2b","help":""},
+ {"var":7,"code":"10:lt95:33:143","title":"Cause of death","type":"enum","order":7,"isfacet":"2b","help":""},
+ {"var":8,"code":"10:lt95:33:9","title":"Date of death","type":"date","order":8,"isfacet":"1","help":""},
+ {"var":9,"code":"10:lt95:33:lt78:25:1","title":"Died in","type":"freetext","order":9,"isfacet":"2b","help":""}],
+ "version":2,"title_hierarchy":false,"domain":"all","rules":"","sup_filter":""}                    
+*/                
+                    for (;idx<len;idx++){
+                
+                        var code = values[idx]['code'];
+                        var val =  values[idx].value;
+
+                        switch (code) {
+                            case '10:20':
+                                 if(val==414){
+                                     gender = 'men';
+                                 }else if(val==415){
+                                     gender = 'women';
+                                 }
+                            break;
+                            case '10:lt103:24:9':   //birth date
+                                 born = born+' in the year '+val;
+                            break;
+                            case '10:lt103:24:lt78:25:1': //birth place
+                                 born = born+' in '+val;
+                            case '10:lt103:24:lt78:25:26': //birth country
+                                 born = born+' in '+__getTerm(val);
+                            break;
+                            case '10:lt102:27:lt97:26:1':   //Name of institution
+                                 educated = val;
+                            break;
+                            case '10:lt102:27:80':   //Qualification
+                                 qualification = __getTerm(val); 
+                            break;
+                            case '10:lt88:29:99':   //Military rank
+                                 served = __getTerm(val); 
+                            break;
+                            case '10:lt87:28:98':   //Military award
+                                awarded = __getTerm(val); 
+                            break;
+                            case '10:lt95:33:9':   //death date
+                                 died = died+' in the year '+val;
+                            break;
+                            case '10:lt95:33:143':   //death cause
+                                 if (died_were.indexOf(Number(val))<0){
+                                    died = died+' from ';    
+                                 }else{
+                                    died = died+' were ';
+                                 }
+                                 died = died+__getTerm(val);
+                            break;
+                            case '10:lt95:33:lt78:25:1': //death place
+                                 died = died+' in '+val;
+                            case '10:lt95:33:lt78:25:26': //death place  country
+                                 died = died+' in '+__getTerm(val);
+                            break;
+                            default:
+                            
+                        }
+                        
+                        //sinfo.push(code);
+                        //sinfo.push( values[idx].value+',');
+                        
+    //console.log(code+'='+values[idx].value);                    
+                    }//for
+                  
+//console.log('here');
+                    
+                    sinfo.push(gender);
+                    if(born!=''){
+                        born = 'born'+born;
+                        sinfo.push(born);
+                    }
+                    if(qualification!=''){
+                        qualification = 'who studied '+qualification;
+                        sinfo.push(qualification);
+                    }
+                    if(educated!=''){
+                        if(qualification==''){
+                            educated = 'were educated at '+educated;
+                        }else{
+                            educated = 'at '+educated;
+                        }
+                        
+                        sinfo.push(educated);
+                    }
+                    if(served!=''){
+                        served = 'who served as '+served;
+                        sinfo.push(served);
+                    }
+                    if(awarded!=''){
+                        awarded = ' were awarded '+awarded;
+                        awarded = ((served=='')?'who':'and') + awarded;
+                        sinfo.push(awarded);
+                    }
+                    if(died!=''){
+                        died = 'who died'+died;
+                        sinfo.push(died);
+                    }
+                    
+                }//for persons only
+                else{
+                    sinfo.push('Showing '+window.hWin.HEURIST4.rectypes.names[primary_rt]);    
+                }
+                
+                if(!window.hWin.HEURIST4.util.isempty(add_filter)){
+                   sinfo.push('matching the phrase "'+add_filter['any'][0]['f:1']+'".');
+                }
+            
+            }//has values
+            
+            
+    }
+    
+    this.span_info.html(sinfo.join(' '));   
+     
  }
+
  
     
 });

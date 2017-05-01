@@ -27,7 +27,8 @@ $.widget( "heurist.dh_search", {
 
     // default options
     options: {
-        UGrpID: 1007 // 1915-1930 user group for 'original' Digital Harlem map. 1010 is Year of the Riot (1935) only
+        UGrpID: 1007, // 1915-1930 user group for 'original' Digital Harlem map. 1010 is Year of the Riot (1935) only
+        search_at_init: false  //open first saved search (if true) or with given Id (if numeric)
     },
 
     _currenttype:null,  //obsolete
@@ -37,6 +38,8 @@ $.widget( "heurist.dh_search", {
     _currentRecordset:null,
 
    _isDigitalHarlem:true,
+   
+   _first_search_in_list:0,
 
     // the constructor
     _create: function() {
@@ -179,7 +182,8 @@ $.widget( "heurist.dh_search", {
             
         }//_isDigitalHarlem
         
-        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+'  '+
+                        window.hWin.HAPI4.Event.ON_SYSTEM_INITED,
             function(e, data) {
                 // show progress div
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
@@ -190,10 +194,54 @@ $.widget( "heurist.dh_search", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                     that.res_div.show();
                     that.res_div_progress.hide();
+                    
+                }else if(e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
+//alas it does not work - it is triggered before this widget is created                    
+console.log(' INITED! ');
+                    
+                    if(that._isDigitalHarlem){
+                     
+                        var init_search = window.hWin.HEURIST?window.hWin.HEURIST.displayPreferences['defaultSearch']:'';
+                        if(!window.hWin.HEURIST4.util.isempty(init_search)){
+                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                            setTimeout(function(){
+                                window.hWin.HAPI4.SearchMgr.doSearch(document, request);
+                            }, 3000);
+                        }else{
+                            //trigger search finish to init some widgets
+                            $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
+                        }
+                        
+                    }
+                    
                 }
+                
         });
 
+        //find on page external search_value and search_button elements  - for BORO external search form
+        var ele_search = $('#search_query'); //$(window.hWin.document).find('#search_query');
+        if(ele_search.length>0){
+            
+            this._on( ele_search, {
+                keypress: function(e){
+                    var code = (e.keyCode ? e.keyCode : e.which);
+                    if (code == 13) {
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        that._doSearch3( ele_search.val() );
+                    }
+                }
+            });
+            
+            var btn_search = $('#search_button');
+            this._on( btn_search, {
+                click:  function(){
+                    that._doSearch3( ele_search.val() );}
+            });
 
+            
+        }
+        
     }, //end _create
 
 
@@ -257,6 +305,7 @@ $.widget( "heurist.dh_search", {
 
         var that = this, facet_params = null, isfaceted = false, cnt = 0;
 
+        this._first_search_in_list = 0;
 
         for (var svsID in this.usr_SavedSearch)
         {
@@ -271,6 +320,10 @@ $.widget( "heurist.dh_search", {
             }
 
             this.usr_SavedSearch[svsID].push(isfaceted);
+            
+            if(this._first_search_in_list<1){
+                this._first_search_in_list = svsID; //keep first
+            }
 
             if(true || isfaceted){
 
@@ -284,18 +337,46 @@ $.widget( "heurist.dh_search", {
             }
         }
         
-        if(cnt==1){ //launch faceted search in case the only button
-             this.search_list.find('button').click();
+        if(this._isDigitalHarlem && cnt==1){
+            this._doSearch2( this._first_search_in_list );
+        }else if(this.options.search_at_init==true || this.options.search_at_init>0){
+            this._doSearch2( this.options.search_at_init==true?this._first_search_in_list:this.options.search_at_init);    
         }
-
+                    
+                    
+        
         //add featured maps
-
-
     },
 
+    //
+    // apply search as preliminary filter for current faceted search
+    //
+    _doSearch3: function(search_value){
+       if(search_value!=''){
+            
+        var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
+            DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
+            DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
+            
+            search_value = {any:[{"f:1":search_value},{"f:18":search_value},{"f:134":search_value}]};
+       } 
+       this.search_faceted.search_faceted('option', 'add_filter', search_value);
+    },
 
+    //
+    //
+    //
+    getFacetedSearch: function(){
+        if(this.search_faceted.html()==''){
+            return null;
+        }else{
+            return this.search_faceted;    
+        }
+        
+    },
+    
      //
-     // START SEARH
+     // START SEARCH
      //
     _doSearch2: function(svsID){
 
@@ -384,7 +465,7 @@ $.widget( "heurist.dh_search", {
 
 
     //
-    // add current reuslt set as layer to current map document
+    // add current result set as layer to current map document
     //
     _onAddLayer: function(){
 

@@ -5214,7 +5214,7 @@ h1, h2, h3, h4, h5, h6 {
     text-transform: none; }
 
 h4, .h4 {
-  margin-top: 30px; }
+ /*artem margin-top: 30px; */}
 
 .bor-utility-nav .navbar-header .navbar-toggle, .bor-utility-nav .navbar-header .bor-sydney-logo, .bor-filter, .bor-filter:after, .bor-filter-expand {
   -moz-transform: translateZ(0);
