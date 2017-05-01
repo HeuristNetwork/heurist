@@ -212,7 +212,24 @@ window.hWin.HEURIST4.util = {
     //
     // both parameter should be JSON array or Object
     //
-    mergeHeuristQuery: function(query1, query2){
+    mergeHeuristQuery: function(){
+        
+        var res_query = [];
+        
+        if(arguments.length>0){
+
+            var idx=1, len = arguments.length;
+            
+            res_query = arguments[0];
+            for (;idx<len;idx++){
+                   res_query = window.hWin.HEURIST4.util.mergeTwoHeuristQueries(res_query, arguments[idx]);
+            }     
+        }   
+        
+        return res_query;
+    },
+
+    mergeTwoHeuristQueries: function(query1, query2){
         
         if(jQuery.type(query1) === "string"){
             var notJson = true;
