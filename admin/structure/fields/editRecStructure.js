@@ -1650,11 +1650,11 @@ function EditRecStructure() {
                             top.hWin.HEURIST4.detailtypes = context.detailTypes;
                         }
                     
-                    _structureWasUpdated = true;
+                    editStructure._structureWasUpdated = true;
                 }
                 _isServerOperationInProgress = false;
                 if(needClose){
-                    window.close(_structureWasUpdated);
+                    window.close(editStructure._structureWasUpdated);
                 }
             };
             var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -2183,7 +2183,7 @@ function EditRecStructure() {
         closeWin:function(){
             if(_checkForRequired()){
 
-                _checkForTitleMask(function(){ window.close(_structureWasUpdated); });
+                _checkForTitleMask(function(){ window.close(editStructure._structureWasUpdated); });
 
             }else{
                 alert("You should have at least one required field and at least one of them should appear in the title mask to ensure that the constructed title is not blank. \n\nPlease set one or more fields to Required.");
@@ -2769,7 +2769,9 @@ function _onAddEditFieldType(dty_ID, rty_ID){
                     //refresh the local heurist
                     top.HEURIST.detailTypes = context.detailTypes;
                     _cloneHEU = null;
-
+                    
+                    editStructure._structureWasUpdated = true; //no access  to top object
+                    
                     var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
                     var rst_type = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_Type];

@@ -351,8 +351,9 @@ function editRecordType(){
             height: dim.h*0.9,
             width: 860,
             "no-close": true,
-            closeCallback: function(){ alert('kiki'); },
+            closeCallback: function(){ console.log('close callback 1'); },
             callback: function(context) {
+//console.log('close callback 2 '+context);
                     if(!top.HEURIST.util.isnull(context) && context && win.location) {
                         //reload this page
                         win.location.reload();
