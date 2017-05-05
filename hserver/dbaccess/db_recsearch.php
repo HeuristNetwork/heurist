@@ -102,6 +102,10 @@
     // @return
     //
     function recordSearchFacets($system, $params){
+        
+        define('_FT_SELECT', 1);
+        define('_FT_LIST', 2);
+        define('_FT_COLUMN', 3);
 
         //for error message
         $savedSearchName = @$params['qname']?"Saved search: ".$params['qname']."<br>":"";
@@ -114,7 +118,8 @@
             $dt_type     = @$params['type'];
             $step_level  = @$params['step'];
             $fieldid     = $params['field'];
-            $facet_type =  @$params['facet_type'];
+            $facet_type =  @$params['facet_type']; //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
+            $facet_groupby =  @$params['facet_groupby'];  //by first char for freetext, by year for dates, by level for enum
 
             //do not include bookmark join
             if(!(strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0)){
@@ -152,6 +157,9 @@
             $grouporder_clause = "";
 
             if($dt_type=="date"){
+                
+                    //for dates we search min and max values to provide data to slider
+                    //@todo facet_groupby   by year, day, month, decade, century
 
                     $details_where = $details_where." AND (cast(getTemporalDateString(".$select_field.") as DATETIME) is not null  OR cast(getTemporalDateString(".$select_field.") as SIGNED) is not null)";
 
@@ -162,7 +170,7 @@
                     $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
 
             }
-            else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==1) || $dt_type=="year"){
+            else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT) || $dt_type=="year"){
                     // slider
                     //if ranges are not defined there are two steps 1) find min and max values 2) create select case
                     $select_field = "cast($select_field as DECIMAL)";
@@ -176,10 +184,9 @@
 
                     $select_field = "cast($select_field as DECIMAL)";
                     
-                }else if($step_level>0 || !($dt_type=="freetext" || $dt_type=="integer" || $dt_type=="float")){
-
-                }else{
-                    $select_field = "SUBSTRING(trim(".$select_field."), 1, 1)";
+                }else if($step_level==0 && $dt_type=="freetext"){ 
+                    
+                    $select_field = "SUBSTRING(trim(".$select_field."), 1, 1)";    //group by first charcter                }
                 }
 
                 if($params['needcount']==1){
@@ -226,12 +233,12 @@
 
                 while ( $row = $res->fetch_row() ) {
 
-                    if((($dt_type=="integer" || $dt_type=="float") && $facet_type==1)   || $dt_type=="year" || $dt_type=="date"){
-                        $third_element = $row[2];          //slider
+                    if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT)  || $dt_type=="year" || $dt_type=="date"){
+                        $third_element = $row[2];          // slider
+                    }else if($step_level==0 && $dt_type=="freetext"){
+                        $third_element = $row[0].'%';      // first character
                     }else if($step_level>0 || $dt_type!='freetext'){
                         $third_element = $row[0];
-                    }else{
-                        $third_element = $row[0].'%';
                     }
 
                     array_push($data, array($row[0], $row[1], $third_element ));

@@ -81,15 +81,21 @@ sup_filter - suplementary filter that is set in design time
 add_filter - additional filter that can be set in run time 
 search_on_reset - search for empty form (on reset and on init)
 
+order_by_count
+viewport - collapse facet to limit count of items
+
 rectypes[0] 
 */
-
-
 
 $.widget( "heurist.search_faceted", {
 
     _MIN_DROPDOWN_CONTENT: 50,//0, //min number in dropdown selector, otherwise facet values are displayed in explicit list
+    _FT_INPUT: 0,  //direct search input
+    _FT_SELECT: 1, //slider for numeric and date  (for freetext it is considered as _FT_LIST)
+    _FT_LIST: 2,
+    _FT_COLUMN: 3,
 
+    
     // default options
     options: {
         // callbacks
@@ -289,7 +295,7 @@ $.widget( "heurist.search_faceted", {
                
                field['id']   = code[code.length-1];
                field['rtid'] = code[code.length-2];
-               if(field['isfacet']!=0){
+               if(field['isfacet']!=that._FT_INPUT){  //not direct iinput
                
                        //create query to search facet values
                        function __crt( idx ){
@@ -423,11 +429,10 @@ $.widget( "heurist.search_faceted", {
                 facets[facet_index].selectedvalue = null;
                 
                 //support old format
-                if(window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet) || 
-                        facets[facet_index].isfacet==true || facets[facet_index].isfacet==1){
-                            facets[facet_index].isfacet=1;
+                if(window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet) || facets[facet_index].isfacet==true){
+                            facets[facet_index].isfacet = this._FT_SELECT;
                 }else if (facets[facet_index].isfacet==false){
-                            facets[facet_index].isfacet=0;
+                            facets[facet_index].isfacet = this._FT_INPUT;
                 }
                 
                 //facets[facet_index].isfacet = facets[facet_index].isfacet || window.hWin.HEURIST4.util.isnull(facets[facet_index].isfacet);
@@ -486,7 +491,7 @@ $.widget( "heurist.search_faceted", {
                
              if(!field['help']) field['help'] = '';
                
-             if(field['isfacet']!=0){
+             if(field['isfacet']!=that._FT_INPUT){
                     
                     //inpt.find('.input-div').hide();
                     //inpt.find('.header').css({'background-color': 'lightgray', 'padding': '5px', 'width': '100%'});
@@ -660,7 +665,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
         var facet_index, len = facets.length;
         for (facet_index=0;facet_index<len;facet_index++){
 
-                if(facets[facet_index]['isfacet']==0){  //this is direct input
+                if(facets[facet_index]['isfacet']==this._FT_INPUT){  //this is direct input
                      var sel = $(_inputs[val]).editing_input('getValues');
                      if(sel && sel.length>0){
                          facets[facet_index].selectedvalue = {value:sel[0]};
@@ -710,7 +715,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         for (facet_index=0;facet_index<len;facet_index++){
                             if(facets[facet_index]["var"] == val.substr(2)){
 
-                                if(facets[facet_index]['isfacet']==0){  //this is direct input
+                                if(facets[facet_index]['isfacet']==that._FT_INPUT){  //this is direct input
                                      var sel = $(_inputs[val]).editing_input('getValues');
                                      if(sel && sel.length>0){
                                          facets[facet_index].selectedvalue = {value:sel[0]};
@@ -842,7 +847,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
         for(;i< this.options.params.facets.length; i++)
         {
             var field = this.options.params.facets[i];
-            if(i>field_index && field['isfacet']!=0 && field['facet']){
+            if(i>field_index && field['isfacet']!=that._FT_INPUT && field['facet']){
                 
                 var subs_value = null;
                 
@@ -952,7 +957,16 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                 
                 
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
-                if(field['isfacet']!=1 && field['type']!='freetext'){
+                
+                if(field['type']=='freetext'){
+                    if(field['isfacet']==this._FT_SELECT){ //backward support
+                        field['isfacet']=this._FT_LIST;
+                        field['groupby'] == 'firstchar';
+                    }
+                    if(!field['groupby']){
+                        step_level = 1;
+                    }
+                }else{
                     step_level = 1; //always full value for this type of facet
                 }
                 
@@ -961,7 +975,8 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                      field:  field['id'],
                                      type:   field['type'],
                                      step:   step_level,
-                                     facet_type: field['isfacet'], //0 search, 1 - first char/slider, 2 - list inline, 2b - list column
+                                     facet_type: field['isfacet'], //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
+                                     facet_groupby: field['groupby'], //by first char for freetext, by year for dates, by level for enum
                                      needcount: needcount,
                                      qname:this.options.query_name, 
                                      source:this.element.attr('id') }; //, facets: facets
@@ -992,6 +1007,10 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
     // draw facet values
     //
     , _redrawFacets: function( response, keep_cache ) {
+        
+                if(!(this.options.params.viewport>0)){
+                    this.options.params.viewport = 50; //default viewport
+                }
         
                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
@@ -1063,15 +1082,15 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         
                         //{id:null, text:window.hWin.HR('all'), children:termtree}
                         //draw terms and all its parents    
-                        //2 - inline list, 2b - column list
+                        //2 - inline list, 3 - column list
                         function __drawTerm(term, level, $container, as_list_type){
                             
                                 //draw itslef - draw children
                                 if(term.value){
                                     
-                                        if(as_list_type=='2' || as_list_type=='2b'){                                    
+                                        if(as_list_type==that._FT_COLUMN || as_list_type==that._FT_LIST){                                    
                                             f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count} );
-                                            $("<div>").css({'display':(as_list_type=='2b')?'block':'inline-block',
+                                            $("<div>").css({'display':(as_list_type==that._FT_COLUMN)?'block':'inline-block',
                                                             'padding':"0 "+(level*5)+"px"})
                                                     .append(f_link)
                                                     .appendTo($container);
@@ -1085,23 +1104,43 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                 }
                         }//__drawTerm
                         
+                        /* todo
+                        //1. calculate summary for children 
+                        //2. sort by count within children array
+                        //3. keep total amount of added divs/options for viewport
+                        if(this.options.params.order_by_count){
+                            response.data.sort(function(a, b){ return (a[1]<b[1])?-1:1;});
+                        }
+                        
+                        field['groupby']
+                        
+                                                //sort by count
+                        if(this.options.params.order_by_count){
+                            response.data.sort(function(a, b){ return (a[1]<b[1])?-1:1;});
+                        }
+
+                        */
+                        
+                        
+                        
                         //
                         //calc number of terms with values
                         //
-                        function __calcTerm(term, level){
+                        function __calcTerm(term, level, groupby){
                             
                             var res_count = 0;
+                            
                             
                             if(window.hWin.HEURIST4.util.isArrayNotEmpty(term.children)){ //is root or has children
 
                                 var k;
                                 if(term.children)
                                 for (k=0; k<term.children.length; k++){
-                                    var cnt = __calcTerm(term.children[k], level+1);
+                                    var cnt = __calcTerm(term.children[k], level+1, groupby);
                                     res_count = res_count + cnt;
                                 }
                                 
-                                //sometimes value my equal to header
+                                //note: sometimes value may be equal to header
                                 var headerData = __checkTerm(term);
                                 if(headerData!=null){
                                         term.value = headerData.value;
@@ -1128,7 +1167,21 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                     } 
                                 }
                                 
-                            }else {
+                                /*wrong way
+                                // group by first level of terms
+                                if(groupby=='firstlevel'){
+                                    if(level==1){
+                                         term.count =  term.count + res_count;
+                                    }else{
+                                         term.value = null;
+                                         term.count = 0;
+                                    }
+                                }
+                                */
+                                
+                                
+                            }
+                            else {
                                 var termData =__checkTerm(term);
                                 if(termData!=null){
                                     //leave
@@ -1144,11 +1197,10 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         
                        
                         //calculate the total number of terms with value
-                        var tot_cnt = __calcTerm(term, 0, null);
-                        var as_list = ( field['isfacet']=='2' || field['isfacet']=='2b');    //is list
+                        var tot_cnt = __calcTerm(term, 0, field['groupby'], null);
+                        var as_list = (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST);    //is list
                                             //is dropdown but too many entries
 //this feature is remarked on 2017-01-26 || (field['isfacet']==2 && tot_cnt > that._MIN_DROPDOWN_CONTENT)); 
-
 
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
                             var $span = $('<span>').css({'display':'inline-block','vertical-align':'middle'});
@@ -1156,7 +1208,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                             $span.append(f_link).appendTo($facet_values);
                         }                        
 
-                        if(as_list){
+                        if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) {
                                 __drawTerm(term, 0, $facet_values, field['isfacet']);
                         }else{
                             //as dropdown
@@ -1250,7 +1302,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         }
 
                     }else 
-                    if( ((field['type']=="float" || field['type']=="integer")&& field['isfacet']==1)
+                    if( ((field['type']=="float" || field['type']=="integer")&& field['isfacet']==this._FT_SELECT)
                         || field['type']=="date" || field['type']=="year"){  //add slider
                     
 //console.log(facet_index);
@@ -1417,7 +1469,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         }
                         }
                     }
-                    else{
+                    else{   //freetext
                         
                         //$facet_values.css('padding-left','5px');
                         
@@ -1439,25 +1491,56 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                 }
                             }
                         }
-
+                        
+                        //sort by count
+                        if(this.options.params.order_by_count){
+                            response.data.sort(function(a, b){ return (a[1]<b[1])?-1:1;});
+                        }
+                        
+                        var display_mode = (field['isfacet']==this._FT_LIST || (field['groupby']=='firstchar' && step_level==0))?'inline-block':'block';
+                        
                         for (i=0;i<response.data.length;i++){
                             var cterm = response.data[i];
 
                             var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]});
-                            $("<div>").css({"display":(i>50?'none': (field['isfacet']=='2b'?'block':'inline-block') ),"padding":"0 3px"})
+                            
+                            //@todo draw first level for groupby firs tchar always inline
+                            var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])?field['selectedvalue'].step:0;
+                            
+                            var ditem = $("<div>").css({"display":(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px"})
                                                 .append(f_link).appendTo($facet_values);
-                            if(i==51){
-                                 $("<div>").css({"display":"inline-block","padding":"0 3px",'cursor':'pointer'})
-                                           .html('more...( '+(response.data.length-i)+' results )')
-                                           .click(function(event){ 
-                                                $(event.target).parent().find('div:hidden').css('display','inline-block');
-                                                $(event.target).hide();
-                                           })
-                                           .appendTo($facet_values);
-                            }else if(i>250){ 
+                            if(i>this.options.params.viewport-1){
+                                 ditem.addClass('in-viewport');
+                            }                    
+                            if(i>250){ 
                                  $("<div>").css({"display":"none","padding":"0 3px"}).html('still more...( '+(response.data.length-i)+' results )').appendTo($facet_values);
                                  break;       
                             }
+                        }
+                        //show viewport collapse/exand control
+                        if(this.options.params.viewport<response.data.length){
+                                 var diff = response.data.length-this.options.params.viewport;   
+                            
+                                 $("<div>").css({"display":"inline-block","padding":"0 3px",'cursor':'pointer'})
+                                           .html('more...( '+diff+' results )')
+                                           .click(function(event){ 
+                                                var ele = $(event.target);
+                                                var mode = ele.attr('data-mode');
+                                                if(mode=='on'){
+                                                    d_mode = 'none';
+                                                    text = 'more...( '+diff+' results )';
+                                                    mode = 'off';
+                                                }else{
+                                                    d_mode = display_mode  
+                                                    text = 'show less';
+                                                    mode = 'on';
+                                                }
+                                                
+                                                ele.parent().find('div.in-viewport').css('display',d_mode);
+                                                ele.html(text);
+                                                ele.attr('data-mode', mode);
+                                           })
+                                           .appendTo($facet_values);
                         }
                     }
 
@@ -1552,7 +1635,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
         }
         
         if(cterm.count>0){
-            $("<span>").text(" ("+cterm.count+")").appendTo(f_link);
+            $('<span>').addClass('badge').text(cterm.count).appendTo(f_link);
         }
         
         if(!iscurrent){ 
