@@ -153,15 +153,18 @@
 	}
 
 	function loadRecord($id, $fresh = false, $bare = false) {
-		global $memcache;
+		/* NO MEMCACHE ANYMORE global $memcache; */
 		if (! $id) {
 			return array("error" => "must specify record id");
 		}
 		$key = DATABASE . ":record:" . $id;
 		$record = null;
-		if (! $fresh) {
+        
+        /* NO MEMCACHE ANYMORE
+		if (!$fresh) {
 			$record = $memcache->get($key);
 		}
+        */
 		if (true || ! $record) { //ARTEM
 			$record = loadBareRecordFromDB($id);
 			if ($record) {
@@ -192,7 +195,7 @@
 
 
 	function updateCachedRecord($id) {
-		global $memcache;
+        /* NO MEMCACHE ANYMORE  global $memcache;
 		$key = DATABASE . ":record:" . $id;
         try{
 		    $record = @$memcache->get($key);
@@ -202,6 +205,7 @@
 		    }
         }catch(Exception $e){
         }
+        */
 	}
 
 	function loadRecordStub($id) {

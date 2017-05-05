@@ -116,7 +116,7 @@ function setLastModified() {
 * @uses      MEMCACHED_PORT
 */
 function getCachedData($key) {
-    global $memcache, $lastModified;
+    /*NO MEMCACHE ANYMORE global $memcache, $lastModified;
 
     setLastModified();
 
@@ -126,6 +126,8 @@ function getCachedData($key) {
     }
 
     return $memcache->get($key);
+    */
+    return null;
 }
 /**
 * store object in cache
@@ -137,7 +139,7 @@ function getCachedData($key) {
 * @uses      MEMCACHED_PORT
 */
 function setCachedData($key, $var) {
-    global $memcache, $lastModified;
+    /*NO MEMCACHE ANYMORE global $memcache, $lastModified;
 
     setLastModified();
 
@@ -146,6 +148,7 @@ function setCachedData($key, $var) {
         return $memcache->set($key, $var);
     }catch(Exception $e){
     }
+    */
 }
 /**
 * resolves a recID to any forwarded value and returns resolved recID with any bmkID for user and indicates

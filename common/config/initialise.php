@@ -172,11 +172,11 @@ define('HEURIST_INDEX_DBNAME', "HeuristMasterIndex");
 define('MEMCACHED_HOST', isset($memcachedHost) && $memcachedHost ? $memcachedHost : "localhost");
 define('MEMCACHED_PORT', isset($memcachedPort) && $memcachedPort ? $memcachedPort : "11211");
 // this was a global already anyway (in getSearchResults.php)
-$memcache = new Memcache;
+/* NO MEMCACHE ANYMORE   $memcache = new Memcache;
 // with addServer, connection is not established until actually used
 // the get/set functions return FALSE on fail so we get graceful degradation for free (if no memcached server is available)
 $memcache->addServer(MEMCACHED_HOST, MEMCACHED_PORT);
-
+*/
 if (@$httpProxy != '') {
     define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
     if (@$httpProxyAuth != '') {
