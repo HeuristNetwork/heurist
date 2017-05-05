@@ -2307,6 +2307,8 @@ function EditTerms() {
         }
         $treediv = $('<div>').attr('id','term_tree').appendTo(top_ele);
 
+        var dragEnterTimeout = 0;
+        
         $treediv.fancytree(
             {
                 activeVisible:true,
@@ -2332,7 +2334,7 @@ function EditTerms() {
                 },
                 extensions:['dnd','themeroller'],
                 dnd: {
-                    autoExpandMS: 1000, //it does not work - we expand manually in dragEnter
+                    autoExpandMS: 500, //it does not work - we expand manually in dragEnter
                     //focusOnClick: true,
                     draggable: { // modify default jQuery draggable options
                         zIndex: 10000,
@@ -2360,7 +2362,11 @@ function EditTerms() {
 
 
                         if (data.otherNode.getLevel()>1 && node.getLevel()===1){
-                            setTimeout(function(){node.setExpanded(true);},1000);
+                            if(dragEnterTimeout>0) clearTimeout(dragEnterTimeout);
+                            dragEnterTimeout = setTimeout(function(){
+                                    node.setExpanded(true);
+                            },1000);
+                            
                             return false;
                         }
 
