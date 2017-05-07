@@ -238,7 +238,7 @@ var cfg_layouts = [
                 //prod 
                 {appid:'dh_search', options:{UGrpID:48, search_at_init:152}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
                 //dev
-                // {appid:'dh_search', options:{UGrpID:18, search_at_init:110}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
+                //{appid:'dh_search', options:{UGrpID:18, search_at_init:110}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
 /*       ,search_pane:{dropable:false,apps:[{appid:'boro_search', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
     },

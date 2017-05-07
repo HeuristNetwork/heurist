@@ -1189,7 +1189,7 @@ div.coverall-div {
     background-position: center;     
     cursor:wait;
 }
-
+/* classes taken from boro design*/
 .badge {
     display: inline-block;
     min-width: 10px;
@@ -1205,3 +1205,14 @@ div.coverall-div {
     background-color: #999999;
     border-radius: 10px;
 }
+.bor-toggler{
+    text-align:center;
+    cursor:pointer;
+    color: #999999;
+}
+.bor-toggler > span >span{
+    display:inline-block;
+}
+.bor-toggler > span > .ui-icon{
+    vertical-align:sub;  
+} 

@@ -6027,7 +6027,7 @@ h2 .bor-tooltip, .h2 .bor-tooltip {
   transition: border-top-color 1s; }
   .bor-filter-expand span {
     display: block;
-    padding-top: 5px; }
+    padding-top: 2px; }   /*artem was 5px */
   .bor-filter-expand.bor-toggler-on {
     border-top-color: #eee; }
 

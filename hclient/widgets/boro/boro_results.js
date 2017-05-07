@@ -144,7 +144,19 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 if(primary_rt==10){  //for persons only
                 
                     function __getTerm(value){
-                        return window.hWin.HEURIST4.terms.termsByDomainLookup.enum[value][0];
+                        
+                        //check if comma separated and take first one
+                        var aval = value.split(',');
+                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(aval)){
+
+                            var term_id = aval[0];
+                            if(!window.hWin.HEURIST4.terms.termsByDomainLookup.enum[term_id]){
+                                console.log('term '+term_id+' not found');
+                                return 'term#'+term_id;   
+                            }else{
+                                return window.hWin.HEURIST4.terms.termsByDomainLookup.enum[term_id][0];
+                            }
+                        }
                     }
                 
                     sinfo.push('Showing');

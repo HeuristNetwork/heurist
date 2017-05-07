@@ -122,7 +122,7 @@ $.widget( "heurist.search_faceted", {
         this.div_header = $( "<div>" ).appendTo( this.element );
         
         if(!this.options.ispreview){                       //padding-top:1.4em;
-            this.div_title = $("<h4 style='text-align:left;margin-top:20px;padding-left:1em;display:inline-block;width:70%'></h4")
+            this.div_title = $("<h3 style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
                     .addClass('truncate').appendTo( this.div_header );
         }
 
@@ -156,7 +156,7 @@ $.widget( "heurist.search_faceted", {
 
 
         this.facets_list_container = $( "<div>" )
-        .css({"top":"3.6em","bottom":0,"left":'1em',"right":'0.5em',"position":"absolute"})
+        .css({"top":((this.div_title)?'5em':'2em'),"bottom":0,"left":'1em',"right":'0.5em',"position":"absolute"}) //was top 3.6
         .appendTo( this.element );
 
         this.facets_list = $( "<div>" )
@@ -241,11 +241,12 @@ $.widget( "heurist.search_faceted", {
         }else{
             
             if(hasHistory) {
-                if(this.div_title) this.div_title.css('width','45%');
+                //if(this.div_title) this.div_title.css('width','45%');
                 this.btn_reset.show()   
                 //this.btn_save.show();  //@todo
             }else{
-                if(this.div_title) this.div_title.css('width','70%');
+                //if(this.div_title) this.div_title.css({'width':'auto', 'max-width':'90%'});
+    
                 this.btn_reset.hide()   
                 this.btn_save.hide(); 
             }
@@ -463,7 +464,7 @@ $.widget( "heurist.search_faceted", {
         if(this.div_title) {
             this.div_title.html(this.options.params.ui_title
                             ?this.options.params.ui_title:this.options.query_name);
-            this.div_title.css('width','70%');    
+            //this.div_title.css('width','70%');    
         }
         this.btn_reset.hide()   
         this.btn_save.hide(); 
@@ -506,7 +507,7 @@ $.widget( "heurist.search_faceted", {
                               +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
                               +field['help']+'"></span>':'')+
                         '</div>'+
-                        '<div class="input-cell"></div>').appendTo($fieldset);
+                        '<div class="input-cell" style="display:block; width:100%"></div>').appendTo($fieldset);
                   
              }else{
                  //instead of list of links it is possible to allow enter search value directly into input field
@@ -629,7 +630,7 @@ $.widget( "heurist.search_faceted", {
        
 
        
-console.log('start search with empty form '+this.options.params.search_on_reset);        
+//console.log('start search with empty form '+this.options.params.search_on_reset);        
         if(this.options.params.search_on_reset){
             //search at once - even none facet value provided
             this.doSearch();
@@ -727,6 +728,13 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                 var selval = facets[facet_index].selectedvalue;
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
+                                    
+                                    if(facets[facet_index].groupby=='decade'){
+                                        selval.value = selval.value + '<>' +(Number(selval.value)+10+'-01-01 00:00');
+                                    }else if(facets[facet_index].groupby=='century'){
+                                        selval.value = selval.value + '<>' +(Number(selval.value)+100+'-01-01 00:00');
+                                    }
+                                    
                                     predicate[key] = selval.value;
                                     isbranch_empty = false;
                                 }else{
@@ -780,7 +788,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                 }
                 return;
             }else if(!this.options.ispreview){
-                this.div_title.css('width','45%');
+                //this.div_title.css('width','45%');
                 this.btn_reset.show()   
                 //@todo this.btn_save.show(); 
             }
@@ -957,16 +965,28 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                 
                 
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
+                var vocabulary_id = null;
+                if(field['type']=='enum' && field['groupby']=='firstlevel'){
+                    
+                    var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
+                    vocabulary_id = detailtypes[field['id']]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']];
+                    //it does work for vocabularies only!
+                    if(isNaN(Number(vocabulary_id)) || !(vocabulary_id>0)){
+                            vocabulary_id = null;
+                            field['groupby'] = null;
+                    }
+                    
+                }                
                 
                 if(field['type']=='freetext'){
                     if(field['isfacet']==this._FT_SELECT){ //backward support
-                        field['isfacet']=this._FT_LIST;
-                        field['groupby'] == 'firstchar';
+                        field['isfacet'] = this._FT_LIST;
+                        field['groupby'] = 'firstchar';
                     }
                     if(!field['groupby']){
                         step_level = 1;
                     }
-                }else{
+                }else {
                     step_level = 1; //always full value for this type of facet
                 }
                 
@@ -977,8 +997,10 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                      step:   step_level,
                                      facet_type: field['isfacet'], //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
                                      facet_groupby: field['groupby'], //by first char for freetext, by year for dates, by level for enum
-                                     needcount: needcount,
-                                     qname:this.options.query_name, 
+                                     vocabulary_id: vocabulary_id, //special case for firstlevel group - got it from field definitions
+                                     needcount: needcount,         
+                                     qname:this.options.query_name,
+                                     //DBGSESSID:'425944380594800002;d=1,p=0,c=07', 
                                      source:this.element.attr('id') }; //, facets: facets
 
 
@@ -1034,6 +1056,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                     var $facet_values = $input_div.find('.facets');
                     if( $facet_values.length < 1 ){
                         var dd = $input_div.find('.input-cell');
+                        //'width':'inherit',
                         $facet_values = $('<div>').addClass('facets').css({'padding':'4px 0 10px 10px'}).appendTo( $(dd[0]) );
                     }
                     $facet_values.css('background','none');
@@ -1052,11 +1075,37 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         field.history.push(field.selectedvalue);
                     }
                     
+                    function __drawToggler($facet_values, display_mode){
+                        
+                        $('<div class="bor-filter-expand bor-toggler">'
+                            +'<span class="bor-toggle-show-on" style="display:none"><span class="ui-icon ui-icon-circle-arrow-n"></span><span>Show less&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-n"></span></span>'
+                            +'<span class="bor-toggle-show-off"><span class="ui-icon ui-icon-circle-arrow-s"></span><span> Show more&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-s"></span></span>'
+                         +'</div>').click(function(event){ 
+                                            var ele = $(event.target).parents('div.bor-toggler');
+                                            var mode = ele.attr('data-mode');
+                                            if(mode=='on'){
+                                                ele.find('.bor-toggle-show-on').hide();
+                                                ele.find('.bor-toggle-show-off').show();
+                                                d_mode = 'none';
+                                                mode = 'off';
+                                            }else{
+                                                ele.find('.bor-toggle-show-on').show();
+                                                ele.find('.bor-toggle-show-off').hide();
+                                                d_mode = display_mode;
+                                                mode = 'on';
+                                            }
+                                            
+                                            ele.parent().find('div.in-viewport').css('display',d_mode);
+                                            ele.attr('data-mode', mode);
+                                       })
+                         .appendTo($facet_values)
+                    }
+                    
+                    
                
                     var that = this;
                     
-                    if( field['type']=="enum" ){
-
+                    if(field['type']=='enum' && field['groupby']!='firstlevel'){
                         
                         var dtID = field['id'];                        
                         //enumeration
@@ -1080,6 +1129,8 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                 return null; //no entries
                         }
                         
+                        var terms_drawn = 0; //it counts all terms as plain list 
+                        
                         //{id:null, text:window.hWin.HR('all'), children:termtree}
                         //draw terms and all its parents    
                         //2 - inline list, 3 - column list
@@ -1089,18 +1140,36 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                 if(term.value){
                                     
                                         if(as_list_type==that._FT_COLUMN || as_list_type==that._FT_LIST){                                    
-                                            f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count} );
-                                            $("<div>").css({'display':(as_list_type==that._FT_COLUMN)?'block':'inline-block',
-                                                            'padding':"0 "+(level*5)+"px"})
+                                            var display_mode = (as_list_type==that._FT_COLUMN)?'block':'inline-block';
+                                            f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count}, display_mode );
+                                            
+                                            terms_drawn++;  //global
+                                            
+                                            var ditem = $("<div>").css({'display':(terms_drawn>that.options.params.viewport?'none':display_mode),
+                                                            'padding':"0 "+(level*5)+"px",'line-height':'18px'})
                                                     .append(f_link)
                                                     .appendTo($container);
+                                         
+                                            if(terms_drawn>that.options.params.viewport){
+                                                 ditem.addClass('in-viewport');
+                                            }                    
+                                            
                                         }else{
                                             that._createOption( facet_index, level, {text:term.text, value:term.value, count:term.count} ).appendTo($container);
                                         }
                                 }
-                                if(term.children)
-                                for (var k=0; k<term.children.length; k++){
-                                    __drawTerm(term.children[k], level+1, $container, as_list_type);
+                                if(term.children){
+                                    //sort by count per level
+                                    if(that.options.params.order_by_count){
+                                        term.children.sort(function(a, b){ 
+                                            return (Number(a.count)>Number(b.count))?-1:1;
+                                        });
+                                    }
+                                    
+                                    for (var k=0; k<term.children.length; k++){
+                                        __drawTerm(term.children[k], level+1, $container, as_list_type);
+                                    }
+                                                   
                                 }
                         }//__drawTerm
                         
@@ -1167,19 +1236,6 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                     } 
                                 }
                                 
-                                /*wrong way
-                                // group by first level of terms
-                                if(groupby=='firstlevel'){
-                                    if(level==1){
-                                         term.count =  term.count + res_count;
-                                    }else{
-                                         term.value = null;
-                                         term.count = 0;
-                                    }
-                                }
-                                */
-                                
-                                
                             }
                             else {
                                 var termData =__checkTerm(term);
@@ -1197,7 +1253,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         
                        
                         //calculate the total number of terms with value
-                        var tot_cnt = __calcTerm(term, 0, field['groupby'], null);
+                        var tot_cnt = __calcTerm(term, 0, field['groupby']);
                         var as_list = (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST);    //is list
                                             //is dropdown but too many entries
 //this feature is remarked on 2017-01-26 || (field['isfacet']==2 && tot_cnt > that._MIN_DROPDOWN_CONTENT)); 
@@ -1210,6 +1266,13 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
 
                         if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) {
                                 __drawTerm(term, 0, $facet_values, field['isfacet']);
+                                
+                                //show viewport collapse/exand control
+                                if(this.options.params.viewport<terms_drawn){
+                                    var d_mode = field['isfacet']==this._FT_COLUMN ? 'block':'inline-block'; 
+                                    __drawToggler($facet_values, d_mode);
+                                }
+                                
                         }else{
                             //as dropdown
                                 var $sel = $('<select>').css({"font-size": "0.6em !important", "width":"180px"});
@@ -1297,13 +1360,14 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                 var rtID = cterm[0];
                                 var f_link = this._createFacetLink(facet_index, 
                                     {text:window.hWin.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
-                                $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
+                                $("<div>").css({"display":"inline-block","padding":"0 3px",'line-height':'18px'}).append(f_link).appendTo($facet_values);
                             }
                         }
 
                     }else 
-                    if( ((field['type']=="float" || field['type']=="integer")&& field['isfacet']==this._FT_SELECT)
-                        || field['type']=="date" || field['type']=="year"){  //add slider
+                    if ((field['type']=="float" || field['type']=="integer" 
+                        || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
+                    {  //add slider
                     
 //console.log(facet_index);
                     
@@ -1313,7 +1377,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         var cterm = response.data[0];
                         
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
-                                    var f_link = this._createFacetLink(facet_index, {test:'',value:null,step:0});
+                                    var f_link = this._createFacetLink(facet_index, {test:'',value:null,step:0}, 'inline-block');
                                     $('<span>').css({'display':'inline-block','vertical-align':'middle','margin-left':'-15px'})
                                         .append(f_link).appendTo($facet_values);
                         }
@@ -1469,7 +1533,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         }
                         }
                     }
-                    else{   //freetext
+                    else{   //freetext  or enum groupby firstlevel
                         
                         //$facet_values.css('padding-left','5px');
                         
@@ -1494,20 +1558,27 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                         
                         //sort by count
                         if(this.options.params.order_by_count){
-                            response.data.sort(function(a, b){ return (a[1]<b[1])?-1:1;});
+                            response.data.sort(function(a, b){ return (Number(a[1])>Number(b[1]))?-1:1;});
                         }
                         
-                        var display_mode = (field['isfacet']==this._FT_LIST || (field['groupby']=='firstchar' && step_level==0))?'inline-block':'block';
+                        var display_mode = (field['isfacet']==this._FT_LIST || (field['groupby']=='firstchar' && step_level==0))
+                                                        ?'inline-block':'block';
                         
                         for (i=0;i<response.data.length;i++){
                             var cterm = response.data[i];
+                            
+                            //for enum get term label w/o code
+                            if(field['type']=='enum' && cterm[0]>0){
+                                cterm[0] = window.hWin.HEURIST4.ui.getTermValue('enum', cterm[0], false);    
+                            }
 
-                            var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]});
+                            var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]}, display_mode);
                             
                             //@todo draw first level for groupby firs tchar always inline
-                            var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])?field['selectedvalue'].step:0;
+                            var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
+                                                ?field['selectedvalue'].step:0;
                             
-                            var ditem = $("<div>").css({"display":(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px"})
+                            var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px",'line-height':'18px'})
                                                 .append(f_link).appendTo($facet_values);
                             if(i>this.options.params.viewport-1){
                                  ditem.addClass('in-viewport');
@@ -1517,30 +1588,11 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
                                  break;       
                             }
                         }
+
                         //show viewport collapse/exand control
                         if(this.options.params.viewport<response.data.length){
-                                 var diff = response.data.length-this.options.params.viewport;   
-                            
-                                 $("<div>").css({"display":"inline-block","padding":"0 3px",'cursor':'pointer'})
-                                           .html('more...( '+diff+' results )')
-                                           .click(function(event){ 
-                                                var ele = $(event.target);
-                                                var mode = ele.attr('data-mode');
-                                                if(mode=='on'){
-                                                    d_mode = 'none';
-                                                    text = 'more...( '+diff+' results )';
-                                                    mode = 'off';
-                                                }else{
-                                                    d_mode = display_mode  
-                                                    text = 'show less';
-                                                    mode = 'on';
-                                                }
-                                                
-                                                ele.parent().find('div.in-viewport').css('display',d_mode);
-                                                ele.html(text);
-                                                ele.attr('data-mode', mode);
-                                           })
-                                           .appendTo($facet_values);
+                            var diff = response.data.length-this.options.params.viewport;   
+                            __drawToggler($facet_values, display_mode);
                         }
                     }
 
@@ -1601,7 +1653,7 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
     }
 
     // cterm - {text, value, count}
-    ,_createFacetLink : function(facet_index, cterm){
+    ,_createFacetLink : function(facet_index, cterm, display_mode){
 
         var field = this.options.params.facets[facet_index];
         //var step = cterm.step;
@@ -1635,7 +1687,12 @@ console.log('start search with empty form '+this.options.params.search_on_reset)
         }
         
         if(cterm.count>0){
-            $('<span>').addClass('badge').text(cterm.count).appendTo(f_link);
+            //.css('float','right')
+            var dcount = $('<span>').addClass('badge').text(cterm.count).appendTo(f_link);
+            if(display_mode!='inline-block'){
+                 //dcount.css({position:'absolute', right:'4px'});
+                 dcount.css({float:'right'});
+            }
         }
         
         if(!iscurrent){ 

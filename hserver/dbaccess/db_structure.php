@@ -33,6 +33,13 @@
     * dbs_GetTerms
     * dbs_GetDetailTypes
     * dbs_GetDtLookups
+    * 
+    * TERMS RELATED FUNCTION - to be public methods, 
+    * they work with global $terms array - need to be defined by dbs_GetTerms before call these methods
+    * getTermChildren
+    * getTermInTree    
+    * getTermByLabel    
+    * getTermById
     *
     * INTERNAL FUNCTIONS
     * __getRectypeColNames
@@ -316,9 +323,34 @@
         return $terms;
     }
 
+    // to public method ------>
     
+    /**
+    * return all term children as plain array
+    * 
+    * @param mixed $system
+    */
+    function getTermChildren($parentID, $system, $firstlevel_only){
+        
+        $mysqli = $system->get_mysqli();
+        $children = array();
+    
+        $query = 'select trm_ID from defTerms where trm_ParentTermID = ' . $parentID;
+        $res = $mysqli->query($query);
+        if ($res) {
+            while ($row = $res->fetch_row()) {
+                array_push($children, $row[0]);
+                if(!$firstlevel_only){
+                    $children = array_merge($children, getTermChildren($row[0], $system, $firstlevel_only));
+                }
+            }
+        }
+        
+        return $children;
+        
+    }
+
     //
-    // to public method
     // find tree in term tree
     // return branch with childs
     //
@@ -361,7 +393,6 @@
         return null;
     }
 
-    
     //
     // to public method
     //

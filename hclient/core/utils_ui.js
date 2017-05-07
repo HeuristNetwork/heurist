@@ -170,6 +170,8 @@ window.hWin.HEURIST4.ui = {
               
             return trm_ParentChildren;
     },
+    
+    
     //
     // Returns label and code for term by id
     //
@@ -177,7 +179,7 @@ window.hWin.HEURIST4.ui = {
 
         var terms = window.hWin.HEURIST4.terms;
         if(!terms || window.hWin.HEURIST4.util.isempty(termID)) return '';
-
+        
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
         }
@@ -187,7 +189,7 @@ window.hWin.HEURIST4.ui = {
 
         var termLookup = terms.termsByDomainLookup[datatype],
         termName,
-        termCode;
+        termCode='';
 
         if(termLookup[termID]){
             termName = termLookup[termID][terms.fieldNamesToIndex['trm_Label']];
@@ -197,6 +199,8 @@ window.hWin.HEURIST4.ui = {
             }else{
                 termCode = " ("+termCode+")";
             }
+        } else {
+            termName = 'not found term#'+termID;
         }
 
         return termName+(withcode ?termCode :'');

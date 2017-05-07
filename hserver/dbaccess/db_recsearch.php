@@ -94,6 +94,8 @@
     }
 
     //
+    // returns counts for facets for given query
+    //
     // @param mixed $system
     // @param mixed $params - array or parameters
     //      q - JSON query array
@@ -120,6 +122,7 @@
             $fieldid     = $params['field'];
             $facet_type =  @$params['facet_type']; //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
             $facet_groupby =  @$params['facet_groupby'];  //by first char for freetext, by year for dates, by level for enum
+            $vocabulary_id =  @$params['vocabulary_id'];  //special case for groupby first level
 
             //do not include bookmark join
             if(!(strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0)){
@@ -157,18 +160,85 @@
             $grouporder_clause = "";
 
             if($dt_type=="date"){
+
+                    $details_where = $details_where." AND (cast(getTemporalDateString(".$select_field.") as DATETIME) is not null  OR cast(getTemporalDateString(".$select_field.") as SIGNED) is not null)";
                 
                     //for dates we search min and max values to provide data to slider
                     //@todo facet_groupby   by year, day, month, decade, century
+                    if($facet_groupby=='year' || $facet_groupby=='decade' || $facet_groupby=='century'){
+                        
+                        $select_field = '(cast(getTemporalDateString('.$select_field.') as SIGNED))';
+                        //'YEAR(cast(getTemporalDateString('.$select_field.') as DATE))';
+                        if($facet_groupby=='decade'){
+                            $select_field = $select_field.' DIV 10 * 10';
+                        }else if($facet_groupby=='century'){
+                            $select_field = $select_field.' DIV 100 * 100';
+                        }
+                        
+                        
+                        $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
+                        if($grouporder_clause==''){
+                            $grouporder_clause = ' GROUP BY rng ORDER BY rng';
+                            //" GROUP BY $select_field ORDER BY $select_field";
+                        }
+                        
+                    }else{    
 
-                    $details_where = $details_where." AND (cast(getTemporalDateString(".$select_field.") as DATETIME) is not null  OR cast(getTemporalDateString(".$select_field.") as SIGNED) is not null)";
+                        $select_field = "cast(if(cast(getTemporalDateString(".$select_field.") as DATETIME) is null,"
+                            ."concat(cast(getTemporalDateString(".$select_field.") as SIGNED),'-1-1'),"
+                            ."getTemporalDateString(".$select_field.")) as DATETIME)";
 
-                    $select_field = "cast(if(cast(getTemporalDateString(".$select_field.") as DATETIME) is null,"
-                        ."concat(cast(getTemporalDateString(".$select_field.") as SIGNED),'-1-1'),"
-                        ."getTemporalDateString(".$select_field.")) as DATETIME)";
+                        $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
+                    
+                    }
 
-                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
-
+            }
+            else if($dt_type=="enum" && $facet_groupby=='firstlevel' && $vocabulary_id!=null){ 
+            
+                //NOTE - it applies for VOCABULARY only (individual selection of terms is not applicable)
+                
+                // 1. get first level of terms using $vocabulary_id 
+                $first_level = getTermChildren($vocabulary_id, $system, true); //get first level for vocabulary
+                
+//error_log($vocabulary_id.'  '.print_r($first_level, true));                                
+                
+                // 2.  find all children as plain array  [[parentid, child_id, child_id....],.....]
+                $terms = array();
+                foreach ($first_level as $parentID){
+                    $children = getTermChildren($parentID, $system, false); //get first level for vocabulary    
+                    array_unshift($children, $parentID);
+                    array_push($terms, $children);
+                }
+//error_log(print_r($terms, true));                
+                //3.  find distinct count for recid for every set of terms
+                $select_clause = "SELECT count(distinct r0.rec_ID) as cnt ";
+                
+                $data = array();
+                
+                foreach ($terms as $vocab){
+                    $d_where = $details_where.' AND ('.$select_field.' IN ('.implode(',', $vocab).'))';
+                    //count query
+                    $query =  $select_clause.$qclauses['from'].$detail_link.' WHERE '.$qclauses['where'].$d_where;
+                    
+//error_log($query);                    
+                    $res = $mysqli->query($query);
+                    if (!$res){
+                        return $system->addError(HEURIST_DB_ERROR, $savedSearchName
+                        .'Facet query error. Parameters:'.print_r($params, true), $mysqli->error);
+                    }else{
+                        $row = $res->fetch_row();
+                        
+                        //firstlevel term id, count, searhc value (set of all terms)
+                        if($row[0]>0){
+                            array_push($data, array($vocab[0], $row[0], implode(',', $vocab) )); 
+                            $res->close();
+                        }
+                    }
+                
+                }//for
+                return array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], 
+                            "facet_index"=>@$params['facet_index'], 'q'=>$params['q'] );
+                
             }
             else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT) || $dt_type=="year"){
                     // slider
@@ -186,7 +256,7 @@
                     
                 }else if($step_level==0 && $dt_type=="freetext"){ 
                     
-                    $select_field = "SUBSTRING(trim(".$select_field."), 1, 1)";    //group by first charcter                }
+                    $select_field = 'SUBSTRING(trim('.$select_field.'), 1, 1)';    //group by first charcter                }
                 }
 
                 if($params['needcount']==1){
@@ -222,7 +292,8 @@
             //
 //DEBUG
 //if(@$params['debug']) echo $query."<br>";
-//error_log($query);
+//
+// error_log($query);
 
             $res = $mysqli->query($query);
             if (!$res){
@@ -233,14 +304,27 @@
 
                 while ( $row = $res->fetch_row() ) {
 
-                    if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT)  || $dt_type=="year" || $dt_type=="date"){
-                        $third_element = $row[2];          // slider
+                    if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT)  || 
+                            (($dt_type=="year" || $dt_type=="date") && $facet_groupby==null)  ){
+                        $third_element = $row[2];          // slider - third parameter is MAX for range
+                    }else if ($dt_type=="year" || $dt_type=="date") {
+                        
+                        if($facet_groupby=='decade'){
+                            $third_element = $row[0]+10;
+                            //$row[0] = $row[0].'-01-01';
+                        }else if($facet_groupby=='century'){
+                            $third_element = $row[0]+100;
+                            //$row[0] = $row[0].'-01-01';
+                        }
+                        
+                        $third_element = $row[0];
                     }else if($step_level==0 && $dt_type=="freetext"){
                         $third_element = $row[0].'%';      // first character
                     }else if($step_level>0 || $dt_type!='freetext'){
                         $third_element = $row[0];
                     }
-
+                    
+                    //value, count, second value(max for range) or search value for firstchar
                     array_push($data, array($row[0], $row[1], $third_element ));
                 }
                 $response = array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], 
