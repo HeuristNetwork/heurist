@@ -153,30 +153,46 @@
 	}
 
 	function loadRecord($id, $fresh = false, $bare = false) {
-		/* NO MEMCACHE ANYMORE global $memcache; */
+
 		if (! $id) {
 			return array("error" => "must specify record id");
 		}
 		$key = DATABASE . ":record:" . $id;
 		$record = null;
         
-        /* NO MEMCACHE ANYMORE
-		if (!$fresh) {
-			$record = $memcache->get($key);
-		}
-        */
-		if (true || ! $record) { //ARTEM
-			$record = loadBareRecordFromDB($id);
-			if ($record) {
-				$memcache->set($key, $record);
-			}
-		}
+        $record = loadBareRecordFromDB($id);
+        
 		if ($record && ! $bare) {
 			loadUserDependentData($record);
 		}
 		return $record;
 	}
 
+/* NO MEMCACHE ANYMORE     
+    function loadRecord($id, $fresh = false, $bare = false) {
+        global $memcache; 
+        if (! $id) {
+            return array("error" => "must specify record id");
+        }
+        $key = DATABASE . ":record:" . $id;
+        $record = null;
+        
+        if (!$fresh) {
+            $record = $memcache->get($key);
+        }
+        if (true || ! $record) { //ARTEM
+            $record = loadBareRecordFromDB($id);
+            if ($record) {
+                $memcache->set($key, $record);
+            }
+        }
+        if ($record && ! $bare) {
+            loadUserDependentData($record);
+        }
+        return $record;
+    }
+*/
+    
     //
     // do not use memcache - use in export
     // otherwise it fails on export of entire database
