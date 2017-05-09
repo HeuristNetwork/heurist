@@ -41,7 +41,8 @@ regional['en'] = {
 
     'mailto_fail': 'You have not set an email handler for mailto: links. <br/>Please set this in your  browser (it is normally in the content settings under Privacy)',
 
-    'No filter defined':'No filter defined - you can set a default startup filter in <b>Profile > Preferences</b><br><br>'
+    'No filter defined':'No filter defined - you can set a default startup filter in <b>Profile > Preferences</b> '
++'(for logged-in access) or by adding a parameter &q=xxxx to the end of the URL (where xxxx is a valid Heurist search string).<br><br>'
 +'Filters are used to locate information in the database and to create subsets to '
 +'which different actions can be applied - listing, tagging, mapping, export etc.<br><br>'
 +'If you are starting a new database you may wish to consult <b>Help > Getting-started tips</b>',

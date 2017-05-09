@@ -952,6 +952,23 @@ $.widget( "heurist.svs_list", {
                             node.moveTo(node.getParent(), "after");
                             node.setActive();
                             break;
+                        case "embed":   //EMBED
+                        //show popup with link
+                            if(!node.folder && node.key>0){
+                        
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+'One or more saved facet (or ordinary) searches can be embedded into an iframe in a website using the following code:<br><br>'
++'<xmp style="font-size:1.2em">'
++'<iframe src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&searchIDs='
++node.key+'"\nwidth="100%" height="700" frameborder="0"></iframe>'
++'</xmp><br>'
++'For more than one search, separate the IDs by commas (the searches will appear as buttons). Enclose within &lt;code&gt; &lt;/code&gt; '
++'for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site). '
++'The URL can also be opened on its own in a separate tab. Note that ordinary searches can also be embedded simply through '
++'specifying the URL obtained when the search is run in the Heurist interface.',
+null, 'Embedding searches');
+                            }
+                            break;
                         case "rename":   //EDIT
 
                             if(!node.folder && node.key>0){
@@ -1117,6 +1134,7 @@ $.widget( "heurist.svs_list", {
                     {title: "New Faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
                     {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
                     {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
+                    {title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }, 
                     {title: "----"},
                     {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
                     {title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" },  // <kbd>[Del]</kbd>
