@@ -492,7 +492,7 @@ function print_private_details($bib) {
 
             global $terms, $is_map_popup;
 
-            $bds_res = mysql_query('select dty_ID,
+            $bds_res = mysql_query('select rst_DisplayOrder, dtl_ID, dty_ID,
                 IF(rdr.rst_DisplayName is NULL OR rdr.rst_DisplayName=\'\', dty_Name, rdr.rst_DisplayName) as name,
                 dtl_Value as val,
                 dtl_UploadedFileID,
@@ -507,7 +507,7 @@ function print_private_details($bib) {
                 order by rdr.rst_DisplayOrder is null,
                 rdr.rst_DisplayOrder,
                 dty_ID,
-            dtl_ID');
+            dtl_ID');      //show null last
 
             $bds = array();
             $thumbs = array();
@@ -550,9 +550,23 @@ function print_private_details($bib) {
 
                 }else if ($bd['dty_Type'] == 'resource') {
 
-                    $res = mysql_query('select rec_Title from Records where rec_ID='.intval($bd['val']));
+                    $rec_id = intval($bd['val']);
+                    $res = mysql_query('select rec_Title from Records where rec_ID='.$rec_id);
                     $row = mysql_fetch_row($res);
-                    $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
+                    $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$rec_id.(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
+
+                    //find dates
+                    $res = mysql_query('select cast(getTemporalDateString(dtl_Value) as DATETIME), dtl_Value from recDetails where dtl_DetailTypeID in ('
+                            .DT_DATE.','.DT_START_DATE.') and dtl_RecID='.$rec_id);
+                    if($res){
+                        $row = mysql_fetch_row($res); //get first date only
+                        if($row[0]==null){//year
+                            $bd['order_by_date'] = $row[1];
+                        }else{
+                            $bd['order_by_date'] = $row[0];    
+                        }
+                    }
+                    
                 }
                 else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
 
@@ -633,7 +647,32 @@ function print_private_details($bib) {
                 }
 
                 array_push($bds, $bd);
-            }
+            }//for
+            
+            
+            //sort array by order_by_date for resource (pointer) details
+            function cmp($a, $b)
+            {
+                if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){
+                    
+                    if($a['dty_ID'] == $b['dty_ID']){
+                        
+                        if(@$a['order_by_date']==null ||  @$b['order_by_date']==null){
+                             return ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
+                        }else{
+                             return ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
+                        }
+                        
+                        
+                    }else{
+                        return ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
+                    }
+                    
+                }else {
+                    return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
+                }
+            }            
+            usort($bds, "cmp");
 
 if($is_map_popup){
     echo '<div>';  
@@ -677,7 +716,13 @@ if($is_map_popup){
                     .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
                     .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
                     .'</div><div class="detail'
-                    .($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'.$bd['val'].'</div></div>';
+                    .($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
+                     /* debug
+                    .$bd['rst_DisplayOrder']
+                    .' '.@$bd['order_by_date']
+                    .' '.$bd['dtl_ID']
+                    .' '.$bd['dty_ID']  */
+                    .' '.$bd['val'].'</div></div>';
                 $prevLbl = $bd['name'];
             }
             ?>
