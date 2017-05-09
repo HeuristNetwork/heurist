@@ -745,6 +745,8 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .facet_link span:first-child{
     text-decoration: none;
     font-style: italic;
+    max-width: 80%;
+    display: inline-block;
 }
 
 .truncate {

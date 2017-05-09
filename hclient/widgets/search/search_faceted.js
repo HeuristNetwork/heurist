@@ -1146,7 +1146,8 @@ $.widget( "heurist.search_faceted", {
                                             terms_drawn++;  //global
                                             
                                             var ditem = $("<div>").css({'display':(terms_drawn>that.options.params.viewport?'none':display_mode),
-                                                            'padding':"0 "+(level*5)+"px",'line-height':'18px'})
+                                                            'padding':"0 "+(level*5)+"px",'line-height':'1.8em'})
+                                                    .addClass('facet-item')        
                                                     .append(f_link)
                                                     .appendTo($container);
                                          
@@ -1360,7 +1361,7 @@ $.widget( "heurist.search_faceted", {
                                 var rtID = cterm[0];
                                 var f_link = this._createFacetLink(facet_index, 
                                     {text:window.hWin.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
-                                $("<div>").css({"display":"inline-block","padding":"0 3px",'line-height':'18px'}).append(f_link).appendTo($facet_values);
+                                $("<div>").css({"display":"inline-block","padding":"0 3px",'line-height':'1.8em'}).append(f_link).appendTo($facet_values);
                             }
                         }
 
@@ -1578,7 +1579,7 @@ $.widget( "heurist.search_faceted", {
                             var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
                                                 ?field['selectedvalue'].step:0;
                             
-                            var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px",'line-height':'18px'})
+                            var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px",'line-height':'1.8em'})
                                                 .append(f_link).appendTo($facet_values);
                             if(i>this.options.params.viewport-1){
                                  ditem.addClass('in-viewport');
