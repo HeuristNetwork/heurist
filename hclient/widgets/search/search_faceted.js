@@ -507,7 +507,7 @@ $.widget( "heurist.search_faceted", {
                               +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
                               +field['help']+'"></span>':'')+
                         '</div>'+
-                        '<div class="input-cell" style="display:block; width:100%"></div>').appendTo($fieldset);
+                        '<div class="input-cell" style="display:block;"></div>').appendTo($fieldset);    //width:100%
                   
              }else{
                  //instead of list of links it is possible to allow enter search value directly into input field
@@ -1146,7 +1146,7 @@ $.widget( "heurist.search_faceted", {
                                             terms_drawn++;  //global
                                             
                                             var ditem = $("<div>").css({'display':(terms_drawn>that.options.params.viewport?'none':display_mode),
-                                                            'padding':"0 "+(level*5)+"px",'line-height':'1.8em'})
+                                                            'padding':"0 5px 0 "+(level*5)+"px"})
                                                     .addClass('facet-item')        
                                                     .append(f_link)
                                                     .appendTo($container);
@@ -1261,7 +1261,7 @@ $.widget( "heurist.search_faceted", {
 
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
                             var $span = $('<span>').css({'display':'inline-block','vertical-align':'middle'});
-                            var f_link = this._createFacetLink(facet_index, term);
+                            var f_link = this._createFacetLink(facet_index, term, 'inline-block');
                             $span.append(f_link).appendTo($facet_values);
                         }                        
 
@@ -1360,8 +1360,10 @@ $.widget( "heurist.search_faceted", {
                             if(facet_index>=0){
                                 var rtID = cterm[0];
                                 var f_link = this._createFacetLink(facet_index, 
-                                    {text:window.hWin.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
-                                $("<div>").css({"display":"inline-block","padding":"0 3px",'line-height':'1.8em'}).append(f_link).appendTo($facet_values);
+                                    {text:window.hWin.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]}, 'inline-block');
+                                $("<div>").css({"display":"inline-block","padding":"0 3px"})
+                                  .addClass('facet-item')
+                                  .append(f_link).appendTo($facet_values);
                             }
                         }
 
@@ -1550,7 +1552,7 @@ $.widget( "heurist.search_faceted", {
                                     $span.text(cvalue.text).appendTo($facet_values);
                                     //$span.append($('<br>'));
                                 }else{
-                                    var f_link = this._createFacetLink(facet_index, cvalue);
+                                    var f_link = this._createFacetLink(facet_index, cvalue, 'inline-block');
                                     $span.css({'display':'inline-block','vertical-align':'middle'}).append(f_link).appendTo($facet_values);
                                     //$span.append($('<span class="ui-icon ui-icon-carat-1-e" />').css({'display':'inline-block','height':'13px'}));
                                 }
@@ -1578,9 +1580,11 @@ $.widget( "heurist.search_faceted", {
                             //@todo draw first level for groupby firs tchar always inline
                             var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
                                                 ?field['selectedvalue'].step:0;
-                            
-                            var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px",'line-height':'1.8em'})
+                                                                                                      
+                            var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px"})
+                                                .addClass('facet-item')
                                                 .append(f_link).appendTo($facet_values);
+                                                
                             if(i>this.options.params.viewport-1){
                                  ditem.addClass('in-viewport');
                             }                    
@@ -1673,6 +1677,10 @@ $.widget( "heurist.search_faceted", {
                 .css({'font-size':'0.9em','height':'10px','margin-left':'-15px'}).appendTo(f_link);    
         }else{
             var f_link_content = $("<span>").text(cterm.text).appendTo(f_link);    
+            
+            if(display_mode=='block'){                 
+                f_link_content.css('width',this.facets_list_container.width()*0.6).addClass('truncate');    
+            }
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){
                 iscurrent = (currval == cterm.value);

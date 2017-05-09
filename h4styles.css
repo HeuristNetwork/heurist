@@ -739,13 +739,15 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .tag4{font-size:1.1em;}
 .tag5{font-size:1.2em;}
 
+.facet-item {
+    line-height:1.8em;
+}
 .facet_link {
     text-decoration: none;
 }
 .facet_link span:first-child{
     text-decoration: none;
     font-style: italic;
-    max-width: 80%;
     display: inline-block;
 }
 
