@@ -660,6 +660,7 @@ $.widget( "heurist.search_faceted", {
     //
     ,getFacetsValues: function(){
         
+        var _inputs = this._input_fields;
         var res = [];
         
         var facets = this.options.params.facets;
@@ -667,6 +668,8 @@ $.widget( "heurist.search_faceted", {
         for (facet_index=0;facet_index<len;facet_index++){
 
                 if(facets[facet_index]['isfacet']==this._FT_INPUT){  //this is direct input
+                
+                     var val = '$X'+facets[facet_index]["var"];
                      var sel = $(_inputs[val]).editing_input('getValues');
                      if(sel && sel.length>0){
                          facets[facet_index].selectedvalue = {value:sel[0]};

@@ -22,6 +22,7 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
     
   _initControls:function(){
         this.options.searchfull = this._searchFullRecords; 
+        this.options.navigator = 'buttons';
         
         //this.options.renderer = _renderRecord_html;
         
@@ -37,8 +38,17 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         var $header = $(".header"+this.element.attr('id'));
         this.span_info.addClass('help-block','lead').css({'color':'red','float':'left'}).insertAfter($header);
         
+        //add bottom panel and place navigator on it
+        this.div_content.removeClass('ent_content_full').addClass('ent_content');
+        
+        
+        this.div_bottom = $( "<div>" ).addClass('ent_footer').css('text-align','center')
+                .appendTo( this.element );
+        
+
+        this.span_pagination.css('float','').addClass('pagination').appendTo(this.div_bottom);
   },
-    
+  
    //
    // function for searchfull option - return full record info
    //
@@ -60,8 +70,18 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                     that._onGetFullRecordData(responce, rec_toload);   
                 });
       
-      
   },  
+
+  _renderPage: function(pageno, recordset, is_retained_selection){
+
+        this._super( pageno, recordset, is_retained_selection );
+
+               $('.div-result-list-content').css('overflow','hidden');
+               var newHeight = $('.div-result-list-content')[0].scrollHeight + 100;
+               if (newHeight<500) newHeight = 500;
+               
+        $('.bor-search-results').height( newHeight );
+  },    
     
  //<h3 class="bor-section-title">Results</h3>   
  _renderRecord_html: function(recordset, record){
@@ -109,7 +129,7 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
  
  _renderSearchInfoMsg: function(data){
      
-    this._super(); 
+    this._super( data ); 
     
     if(data==null){
         this.span_info.html('');

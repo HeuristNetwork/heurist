@@ -49,7 +49,9 @@ $.widget( "heurist.resultList", {
         searchfull: null,  // search full list data
 
         //event
-        onselect: null  //on select event for non event based
+        onselect: null,  //on select event for non event based
+        
+        navigator:'auto'  //none, buttons, menu, auto
     },
 
 
@@ -1274,6 +1276,9 @@ $.widget( "heurist.resultList", {
 
         if (pageCount < 2) {
             return;
+        }else if(this.options.navigator=='none'){
+            this._renderPage(0);
+            return;
         }
 
         // KJ's patented heuristics for awesome useful page numbers
@@ -1299,7 +1304,7 @@ $.widget( "heurist.resultList", {
 
         var that = this;
 
-        var ismenu = (that.element.width()<620);
+        var ismenu = that.options.navigator!='buttons' && (that.options.navigator=='menu' || (that.element.width()<620));
 
         var smenu = '';
 

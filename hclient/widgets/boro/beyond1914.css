@@ -3673,10 +3673,12 @@ tbody.collapse.in {
   padding-left: 0;
   margin: 20px 0;
   border-radius: 4px; }
+  
   .pagination > li {
     display: inline; }
-    .pagination > li > a,
-    .pagination > li > span {
+    
+.pagination > li > a,
+.pagination > li > span {
       position: relative;
       float: left;
       padding: 6px 12px;
@@ -3686,8 +3688,18 @@ tbody.collapse.in {
       background-color: white;
       border: 1px solid #dddddd;
       margin-left: -1px; }
-    .pagination > li:first-child > a,
-    .pagination > li:first-child > span {
+      
+/* artem */      
+.pagination > button{
+      font-size: 1em !important;
+      color: #428bca !important;
+      background-color: white !important;
+      border: 1px solid #dddddd !important;
+      border-radius: 4px;
+}      
+      
+.pagination > li:first-child > a,
+.pagination > li:first-child > span {
       margin-left: 0;
       border-bottom-left-radius: 4px;
       border-top-left-radius: 4px; }
