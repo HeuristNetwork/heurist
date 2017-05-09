@@ -482,7 +482,7 @@ If you have missing data for Required fields, you may find it convenient to set 
             <label for="sa_match0" style="padding-right:3em">Match on column(s)</label>
 
             <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
-            <label for="sa_match1" style="padding-right:3em">Use Heurist ID column</label>
+            <label for="sa_match1" id="lbl_sa_match1" style="padding-right:3em">Use Heurist ID column</label>
 
             <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
             <label for="sa_match2">Skip matching (all new records)</label>

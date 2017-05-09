@@ -2242,7 +2242,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
             var rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
             
-            if(key_idx<0){
+            if(key_idx<0){ //key field not defined
                 if($('#sa_match1').is(':checked')) $('#sa_match0').prop('checked', true);
                 //window.hWin.HEURIST4.util.setDisabled($('#sa_match1'), true);
                 //$('label[for="sa_match1"]').css('color','lightgray');
@@ -2251,6 +2251,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             }else{
                 $('#sa_match1').show();
                 $('label[for="sa_match1"]').show();
+                $('#lbl_sa_match1').html('Skip matching (use <i>'+imp_session['columns'][key_idx]+'</i>)');
                 //window.hWin.HEURIST4.util.setDisabled($('#sa_match1'), false);
                 //$('label[for="sa_match1"]').css('color','');
             }
@@ -2306,9 +2307,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 }
                 
             }
-
+            
             if($('#sa_match2').is(':checked')){  //skip matching
                 $('#btnMatchingStart').button({label:'Skip matching (import all as new)'});
+            }else if($('#sa_match1').is(':checked')){  //use id column
+                $('#btnMatchingStart').button({label:'Skip matching (use <i>'+imp_session['columns'][key_idx]+'</i>)'});
             }else{
                 $('#btnMatchingStart').button({label:'Match against existing records'});
             }
