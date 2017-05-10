@@ -231,6 +231,7 @@ var cfg_layouts = [
                 cssfile:'hclient/widgets/boro/beyond1914.css', template: 'hclient/widgets/boro/boro_main.html'
        ,result_pane:{dropable:false,css:{},
                 apps:[{appid:'boro_results', options:{
+                    emptyMessageURL: 'hclient/widgets/boro/ExpertNation_Discover_Instructions.html',
                     view_mode:'list', hide_view_mode: true, select_mode:'select_single', multiselect:false, showmenu: false
                 }, hasheader:true, css:{border:'none', 'background':'none'} }]}
        ,search_pane:{dropable:false,css:{},

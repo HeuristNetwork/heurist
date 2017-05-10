@@ -154,7 +154,8 @@ function hSvsEdit(args) {
         if($.isFunction($('body').search_faceted_wiz)){ //already loaded
             showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
-            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/search_faceted_wiz.js', 
+                        function(){ showSearchFacetedWizard(params); } );
         }
 
     }

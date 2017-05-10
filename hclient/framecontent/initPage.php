@@ -47,7 +47,6 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-
     if(defined('IS_INDEX_PAGE')){
         require (ERROR_REDIR);
     }else{

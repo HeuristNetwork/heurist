@@ -123,6 +123,7 @@
             $facet_type =  @$params['facet_type']; //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
             $facet_groupby =  @$params['facet_groupby'];  //by first char for freetext, by year for dates, by level for enum
             $vocabulary_id =  @$params['vocabulary_id'];  //special case for groupby first level
+            $limit         = @$params['limit']; //limit for preview
 
             //do not include bookmark join
             if(!(strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0)){
@@ -220,6 +221,10 @@
                     //count query
                     $query =  $select_clause.$qclauses['from'].$detail_link.' WHERE '.$qclauses['where'].$d_where;
                     
+                    /*if($limit>0){
+                        $query = $query.' LIMIT '.$limit;    
+                    }*/
+                    
 //error_log($query);                    
                     $res = $mysqli->query($query);
                     if (!$res){
@@ -288,11 +293,15 @@
             //count query
             $query =  $select_clause.$qclauses["from"].$detail_link." WHERE ".$qclauses["where"].$details_where.$grouporder_clause;
 
+            /*
+            if($limit>0){
+                $query = $query.' LIMIT '.$limit;    
+            }
+            */
 
             //
 //DEBUG
 //if(@$params['debug']) echo $query."<br>";
-//
 // error_log($query);
 
             $res = $mysqli->query($query);

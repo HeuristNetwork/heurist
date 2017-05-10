@@ -60,23 +60,32 @@ The facets can, however, be based on attributes of other record types linked fro
 
 <div>
 <div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
-<textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
-style="margin-top:0.4em;width:450px"></textarea>
-<div style="width: 420px; font-size: smaller; margin-top: 5px; margin-bottom: 5px;">
-A Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
-</div>
+    <div>
+        <textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
+                style="margin-top:0.4em;width:450px"></textarea>
+        <div id="svs_btnset2" style="float:right;padding-left:0.4em">
+            <div id="svs_getCurrentFilter"  style="margin-top:0.4em"></div>
+        </div>
+    </div>    
+    <div style="width: 420px; font-size: smaller; margin-top: 5px; margin-bottom: 5px;">
+            A Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
+    </div>
 
-<div id="svs_btnset2">
-<div id="svs_getCurrentFilter"  style="margin-top:0.4em"></div>
-</div>
 </div>
 
 <div>
     <div class="header" style="vertical-align:top">
         <label for="svs_Rules">Expansion rules</label>
     </div>
-    <textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all"
-    style="margin-top:0.4em;width:450px" readonly="readonly"></textarea>
+    <div>
+        <textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all"
+        style="margin-top:0.4em;width:450px" readonly="readonly"></textarea>
+        <div id="svs_btnset" style="float:right;padding-left:0.4em">
+            <div id="svs_Rules_edit"  style="margin-top:0.4em;display:block"></div>
+            <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+        </div>
+    </div>
+    
     <div style="width: 420px; font-size: smaller; margin-top: 5px;  margin-bottom: 5px;">
     Rules are applied to the result set after each selection. They expand the results
     to include connected records (entities). This expansion may be restricted
@@ -85,19 +94,16 @@ A Heurist filter string which extracts a subset of the database, to which the fa
     Edit with the pencil icon on the right.
     </div>
 
-    <div id="svs_btnset">
-        <div id="svs_Rules_edit"  style="margin-top:0.4em"></div>
-        <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
-    </div>
 </div>    
 
 <div>
     <div class="header">
         <label for="svs_SearchOnReset">Perform search on init</label>
     </div>
-    <input name="svs_SearchOnReset" id="svs_SearchOnReset" class="text ui-widget-content ui-corner-all" type="checkbox"/>
-    <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
-        Perform search at initialization and on reset all values
+    <input name="svs_SearchOnReset" id="svs_SearchOnReset" class="text ui-widget-content ui-corner-all" type="checkbox"
+            style="display:inline-block;margin:0"/>
+    <div style="width: 420px; font-size: smaller; display:inline-block">
+        Display full set of records prior to facet selection
     </div>
 </div>
 

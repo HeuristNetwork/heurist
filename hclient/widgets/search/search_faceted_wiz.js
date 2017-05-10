@@ -145,7 +145,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
         this.element.dialog({
             autoOpen: false,
-            height: 550,
+            height: 580,
             width: 700,
             modal: true,
             title: window.hWin.HR("Define Faceted Search"),
@@ -219,14 +219,12 @@ $.widget( "heurist.search_faceted_wiz", {
         header.html("<label>"+window.hWin.HR("Define titles, help tips and facet type")+"</label>"
         +'<br><br><label><input type="checkbox" id="cbShowHierarchy" style="vertical-align: middle;">'
             +window.hWin.HR("Show entity hierarchy above facet type")+"</label>"
-            +'<label><input type="checkbox" id="cbOrderByCount" style="vertical-align: middle;margin-left:16px">'
-            +window.hWin.HR("Order by count")+"</label>"
             +'<label style="margin-left:16px" for="selViewportLimit">'+window.hWin.HR("Limit viewport to")+'</label>'
             +'&nbsp;<select id="selViewportLimit"><option value=0>All</option><option value=5>5</option><option value=10>10</option>'
             +'<option value=20>20</option><option value=50>50</option></select>'
             );
             
-        $("<fieldset>",{id:'facets_list'}).appendTo(this.step3);
+        $("<div>",{id:'facets_list'}).css('padding','10px 10px 10px 0px').appendTo(this.step3); //fieldset
         this.step_panels.push(this.step3);
 
         //preview
@@ -312,9 +310,11 @@ $.widget( "heurist.search_faceted_wiz", {
                     $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
 
+                        /* it works however it produces a large gap below
                         $dlg.find("#svs_btnset")
                                 .css({'width':'20px'})
                                 .position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
+                        */
                                 
                         $dlg.find("#svs_Rules_edit")
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
@@ -334,9 +334,11 @@ $.widget( "heurist.search_faceted_wiz", {
                         });
 
                                 
+                        /* it works however it produces a large gap below
                         $dlg.find("#svs_btnset2")
                                 .css({'width':'20px'})
                                 .position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Query') });
+                        */
 
                         $dlg.find("#svs_getCurrentFilter")
                         .button({icons: {primary: "ui-icon-search"}, text:false})
@@ -704,9 +706,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(this.options.params.rectypes){
                     rectype = this.options.params.rectypes.join();
                 }
+                
+                window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
                 //load definitions for given rectypes
-                window.HAPI4.SystemMgr.get_defs({rectypes: rectype,
+                window.hWin.HAPI4.SystemMgr.get_defs({rectypes: rectype,
                     mode:4, //special node - returns data for treeview
                     fieldtypes:['enum','freetext',"year","date","integer","float","resource","relmarker"]},  //ART20150810 this.options.params.fieldtypes.join() },
 
@@ -911,6 +915,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         }else{
                             window.hWin.HEURIST4.msg.redirectToError(response.message);
                         }
+                        window.hWin.HEURIST4.util.setDisabled($('#btnNext'), false);
                 });
 
             }
@@ -1000,7 +1005,6 @@ $.widget( "heurist.search_faceted_wiz", {
 
             //-----------------------------------------------------------
             $(this.step3).find("#cbShowHierarchy").attr('checked', this.options.params.title_hierarchy==true);
-            $(this.step3).find("#cbOrderByCount").attr('checked', this.options.params.order_by_count==true);
             $(this.step3).find("#selViewportLimit").val(this.options.params.viewport);
             
             var listdiv = $(this.step3).find("#facets_list");
@@ -1012,53 +1016,73 @@ $.widget( "heurist.search_faceted_wiz", {
                 //help tip (take from rectype structure?)
                 //type of facet (radio group)
 
+                var codes = facets[k]['code'].split(':');
+                var j = 0;
+                var harchy = [];
+                while (j<codes.length){
+                    if(j % 2 ==0){
+                        harchy.push(window.hWin.HEURIST4.rectypes.names[codes[j]]);
+                    }else{
+                        harchy.push(window.hWin.HEURIST4.detailtypes.names[codes[j]]);    
+                    }
+                    j++;
+                }                
+                
                 var sContent =
-                '<div id="facet'+k+'">'
-                +'<div class="header_narrow"><span class="ui-icon ui-icon-up-down span_for_radio"></span><label for="facet_Title'+k+'">Facet</label></div>'
+                '<div id="facet'+k+'" style="border-top:1px lightgray solid">'
+                +'<div><span class="ui-icon ui-icon-up-down span_for_radio"></span><label>Facet</label>&nbsp;'
+                +'<label style="font-size:smaller">' + harchy.join('.') + '</label></div>'
+                
+                +'<div style="padding-left:24px">'
+                +'<label style="font-size:smaller" for="facet_Title'+k+'">Label</label>&nbsp;'   //'<div class="header_narrow"></div>'
                 +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" '
                 +' style="font-weight:bold" class="text ui-widget-content ui-corner-all" />'
-                +' <label for="facet_Help'+k+'">&nbsp;&nbsp;Rollover (optional)&nbsp;</label>'
+                +' <label style="font-size:smaller" for="facet_Help'+k+'">&nbsp;&nbsp;Rollover (optional)&nbsp;</label>'
                 +'<input name="facet_Help'+k+'" id="facet_Help'+k+'" type="text" '
-                +' style="font-size:smaller" class="text ui-widget-content ui-corner-all"'
-                +' style="margin-top:0.4em;margin-bottom:1.0em;width:300px;"/>';
-                +'</div>';
-
-                var sTypeLabel = '<div class="ent_search_cb" style="font-size:smaller;font-style:italic; margin-bottom:5px;"><div class="header_narrow"><label></label></div>';
+                +' class="text ui-widget-content ui-corner-all"'
+                +' style="font-size:smaller;margin-top:0.4em;margin-bottom:1.0em;width:300px;"/>'
+                +'</div>'
+                
+                +'<div class="ent_search_cb" style="padding:4px 0 10px 24px;font-style:italic;">'
+                +'<label style="font-size:smaller;">Type&nbsp;</label><span id="buttonset'+k+'">'
+                +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_3" name="facet_Type'+k+'" value="3"/><label for="facetType'+k+'_3">list as column</label>'
+                +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_2" name="facet_Type'+k+'" value="2"/><label for="facetType'+k+'_2">list</label>'
+                +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_0" name="facet_Type'+k+'" value="0"/><label for="facetType'+k+'_0">search</label>';
+                
                 var sGroupBy = '';
                 if(facets[k].type=='freetext'){
-                    sContent = sContent +   //placeholder
-                    sTypeLabel + '<span style="visibility:hidden"><input type="radio"/><span title="slider" class="ui-icon ui-icon-input-slider span_for_radio"></span></span>';
-                    
-                    sGroupBy = '<label style="margin-left:30px"><input type="checkbox" name="facet_Group'+k+'" value="firstchar"/>'
-                        +'<span title="group by first character at first step" class="ui-icon ui-icon-aa span_for_radio"></span></label>';
+                    sGroupBy = //'<span style="display:inline-block;width:45px">&nbsp;</span>'
+                        '<label style="float:right;font-size:smaller;"><input type="checkbox" name="facet_Group'+k+'" value="firstchar"/>'
+                        +'initial grouping by first character</label>';
                 }else if(facets[k].type=='float' || facets[k].type=='integer'){
-                    sContent = sContent +
-                    sTypeLabel
-                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/><span title="slider" class="ui-icon ui-icon-input-slider span_for_radio"></span></label>';
+                    sContent = sContent 
+                        +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_1" name="facet_Type'
+                        +k+'" value="1" data-type="slider"/><label for="facetType'+k+'_1">slider</label>';
                 }else if(facets[k].type=='date' || facets[k].type=='year'){
-                    sContent = sContent +
-                    sTypeLabel
-                    +'<label><input type="radio" data-idx="'+k+'" name="facet_Type'+k+'" value="1"/><span title="slider" class="ui-icon ui-icon-input-slider span_for_radio"></span></label>';
+                    sContent = sContent 
+                        +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_1" name="facet_Type'
+                        +k+'" value="1" data-type="slider"/><label for="facetType'+k+'_1">slider</label>';
                     
-                    sGroupBy = '<span id="facet_DateGroup'+k+'"><label style="margin-left:30px">group by '
+                    sGroupBy = '<span id="facet_DateGroup'+k+'" style="float:right;font-size:smaller;"><label>group by '
                         +'<select id="facet_Group'+k+'"><option>year</option><option>decade</option><option>century</option></select>'
                         +'</label></span>';
                     
                 }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
-                    sContent = sContent +
-                    sTypeLabel
-                                //!!!!!! dropdown was 2 - to correct
-                    + '<label><input type="radio" name="facet_Type'+k+'" value="1"/><span title="dropdown" class="ui-icon ui-icon-input-dropdown span_for_radio"></span></label>';
+                    sContent = sContent 
+                        +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_1" name="facet_Type'
+                        +k+'" value="1" data-type="dropdown"/><label for="facetType'+k+'_1">dropdown</label>';
                     
-                    sGroupBy = '<label style="margin-left:30px">'
+                    sGroupBy = '<label style="float:right;font-size:smaller;">'
                                             +'<input type="checkbox" name="facet_Group'+k+'" value="firstlevel"/>group by first level</label>';
                     
                 }
-                    sContent = sContent
-                    +'<label><input type="radio" data-idx="'+k+'" name="facet_Type'+k+'" value="3"/><span title="list as column" class="ui-icon ui-icon-list-column span_for_radio"></span></label>'
-                    +'<label><input type="radio" data-idx="'+k+'" name="facet_Type'+k+'" value="2"/><span title="list" class="ui-icon ui-icon-list-inline span_for_radio"></span></label>'
-                    +'<label><input type="radio" data-idx="'+k+'" name="facet_Type'+k+'" value="0"/><span title="search" class="ui-icon ui-icon-input span_for_radio"></span></label>'
-                    +sGroupBy+'</div>';  //+facets[k].order
+                
+                sContent = sContent + '</span>' 
+                + '<div style="float:right;font-size:smaller;margin-right:20px"><label><input type="checkbox" id="facet_Order'
+                + k+'" style="vertical-align: middle;margin-left:16px">'
+                + window.hWin.HR("Order by count")+"</label></div>"
+                + sGroupBy 
+                + '</div></div>'; 
 
                 listdiv.append($(sContent));
 
@@ -1066,7 +1090,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(facets[k].isfacet==false){
                     facets[k].isfacet = 0;
                 }else if(facets[k].isfacet==true || !(Number(facets[k].isfacet)<4 && Number(facets[k].isfacet)>=0)){
-                    facets[k].isfacet = (facets[k].type=='freetext')?2:1;
+                    //by default column for text and selector/slider for enum/dates
+                    facets[k].isfacet = (facets[k].type=='freetext')?3:1;
                 }
 //console.log('facet type '+facets[k].isfacet);                
 
@@ -1074,6 +1099,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 listdiv.find('#facet_Title'+k).val(facets[k].title);
                 listdiv.find('#facet_Help'+k).val(facets[k].help);
                 listdiv.find('input:radio[name="facet_Type'+k+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
+                listdiv.find('input:checkbox[name="facet_Order'+k+'"]').attr('checked', (facets[k].orderby=='count'));
+                
                 
                 if(facets[k].type=='date' || facets[k].type=='year'){
                     
@@ -1103,11 +1130,25 @@ $.widget( "heurist.search_faceted_wiz", {
                     listdiv.find('input:checkbox[name="facet_Group'+k+'"][value="'+facets[k].groupby+'"]').attr('checked', true);
                 }
             }//for
-            
-            
+           
             listdiv.sortable();
             listdiv.disableSelection();
 
+            
+            listdiv.find('input:radio[value="3"]')                                           
+                            .button({icons: { primary: 'ui-icon-list-column' }, text:false});
+            listdiv.find('input:radio[value="2"]')
+                            .button({icons: { primary: 'ui-icon-list-inline' }, text:false});
+            listdiv.find('input:radio[value="0"]')
+                            .button({icons: { primary: 'ui-icon-input' }, text:false});
+            listdiv.find('input:radio[data-type="slider"]')
+                            .button({icons: { primary: 'ui-icon-input-slider' }, text:false});
+            listdiv.find('input:radio[data-type="dropdown"]')
+                            .button({icons: { primary: 'ui-icon-input-dropdown' }, text:false});
+            //listdiv.find('input:radio').button().css({width:30,height:30});
+            listdiv.find('span[id^="buttonset"]').buttonset().css({height:'24px'});
+            
+            
             return true;
         }else{
             return false;
@@ -1118,7 +1159,7 @@ $.widget( "heurist.search_faceted_wiz", {
         if( window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
 
             this.options.params.title_hierarchy  = $(this.step3).find("#cbShowHierarchy").is(':checked');
-            this.options.params.order_by_count  = $(this.step3).find("#cbOrderByCount").is(':checked');
+            this.options.params.title_hierarchy  = $(this.step3).find("#cbShowHierarchy").is(':checked');
             this.options.params.viewport  = $(this.step3).find("#selViewportLimit").val();
             
             var listdiv = $(this.step3).find("#facets_list");
@@ -1129,6 +1170,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(title!='') this.options.params.facets[k].title = title;
                 this.options.params.facets[k].help = listdiv.find('#facet_Help'+k).val();
                 this.options.params.facets[k].isfacet = listdiv.find('input:radio[name="facet_Type'+k+'"]:checked').val();
+                this.options.params.facets[k].orderby = listdiv.find('input:checkbox[name="facet_Order'+k+'"]').is(':checked')?'count':null;
+                
                 if(this.options.params.facets[k].type=='date' 
                   || this.options.params.facets[k].type=='year'){
                     if(this.options.params.facets[k].isfacet>1){
@@ -1273,10 +1316,12 @@ $.widget( "heurist.search_faceted_wiz", {
 function showSearchFacetedWizard( params ){
 
     if(!$.isFunction($('body').rectype_manager)){ //@todo - replace to new entity/rectypes as soon as it will be implemented
-        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/structure/rectype_manager.js', 
+                function(){ showSearchFacetedWizard(params); } );
     }else if(!$.isFunction($('body').fancytree)){
 
-        $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js', 
+                function(){ showSearchFacetedWizard(params); } );
 
     }else{
 

@@ -163,8 +163,14 @@ $.widget( "heurist.resultList", {
                     that._renderSearchInfoMsg(data);
                     
                     if(data==null){
-                        var empty_message = window.hWin.HR('No filter defined');
-                        var $emptyres = that._renderMessage( empty_message );
+                       
+                        if(that.options.emptyMessageURL){
+                            that.div_content.load( that.options.emptyMessageURL );
+                        }else{
+                            var empty_message = window.hWin.HR('No filter defined');
+                            var $emptyres = that._renderMessage( empty_message );
+                        }
+                        
                     }
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
@@ -652,29 +658,37 @@ $.widget( "heurist.resultList", {
 
             this._renderPagesNavigator();
 
-            var empty_message = window.hWin.HR('No records match the search')+
-            '<div class="prompt">'+window.hWin.HR((window.hWin.HAPI4.currentUser.ugr_ID>0)
-                ?'Note: some records may only be visible to members of particular workgroups'
-                :'To see workgoup-owned and non-public records you may need to log in')+'</div>';
+            if(this.options.emptyMessageURL){
+                this.div_content.load( this.options.emptyMessageURL );
+            }else{
+            
+                var empty_message = window.hWin.HR('No records match the search')+
+                '<div class="prompt">'+window.hWin.HR((window.hWin.HAPI4.currentUser.ugr_ID>0)
+                    ?'Note: some records may only be visible to members of particular workgroups'
+                    :'To see workgoup-owned and non-public records you may need to log in')+'</div>';
 
-            if(this.options['empty_remark']!=''){
-                empty_message = empty_message + this.options['empty_remark'];
-            }
-
-            var $emptyres = this._renderMessage( empty_message );
-
-            if(window.hWin.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
-                var domain = this._query_request.w
-                if((domain=='b' || domain=='bookmark')){
-                    var $al = $('<a href="#">')
-                    .text(window.hWin.HR('Click here to search the whole database'))
-                    .appendTo($emptyres);
-                    this._on(  $al, {
-                        click: this._doSearch4
-                    });
-
+                if(this.options['empty_remark']!=''){
+                    empty_message = empty_message + this.options['empty_remark'];
                 }
+
+                var $emptyres = this._renderMessage( empty_message );
+
+                if(window.hWin.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
+                    var domain = this._query_request.w
+                    if((domain=='b' || domain=='bookmark')){
+                        var $al = $('<a href="#">')
+                        .text(window.hWin.HR('Click here to search the whole database'))
+                        .appendTo($emptyres);
+                        this._on(  $al, {
+                            click: this._doSearch4
+                        });
+
+                    }
+                }
+                
+            
             }
+            
         }
 
     },

@@ -2278,6 +2278,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 var counts = _getInsertUpdateCounts( currentSeqIndex );
                 
                 if(counts && counts[1]>0){
+                    
+                     shelp = shelp + 'Data (n = '+counts[1]
+                        + ' rows) will be assigned to the existing record where the Heurist ID field ('
+                        + imp_session['columns'][key_idx]+') is set (n = '+counts[0]
+                        + ' records).';
+                     if(counts[2]>0){
+                        shelp = shelp 
+                            + ' A new record will be created where the Heurist ID field is not set (n = '
+                            + counts[2]+' records)';                    
+                     }
+                     /*old version of message
                        shelp = shelp + 'It appears that you already have <b>'
                             + window.hWin.HEURIST4.rectypes.names[rtyID]
                             + '</b>. '+counts[1]+' rows in import table that match for '
@@ -2286,6 +2297,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             shelp = shelp + ' and '+counts[2]+' records will be added';       
                       }
                       shelp = shelp + '.';   
+                      */
                 }else{
                 
                     shelp = shelp + 'It does not match any <b>'

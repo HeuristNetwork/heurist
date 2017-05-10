@@ -64,6 +64,8 @@ title: "Family Name"
 type:  "freetext"
 levels: []
 search: [t:10 f:1] 
+orderby: count|null
+groupby
 ]
 
 ]
@@ -81,7 +83,6 @@ sup_filter - suplementary filter that is set in design time
 add_filter - additional filter that can be set in run time 
 search_on_reset - search for empty form (on reset and on init)
 
-order_by_count
 viewport - collapse facet to limit count of items
 
 rectypes[0] 
@@ -820,6 +821,10 @@ $.widget( "heurist.search_faceted", {
                             //to keep info what is primary record type in final recordset
                             primary_rt: this.options.params.rectypes[0] 
                             }; //, facets: facets
+                            
+            if(this.options.ispreview){
+                request['limit'] = 1000;    
+            }
             
             //perform search
             window.hWin.HAPI4.SearchMgr.doSearch( this, request );
@@ -1006,7 +1011,10 @@ $.widget( "heurist.search_faceted", {
                                      //DBGSESSID:'425944380594800002;d=1,p=0,c=07', 
                                      source:this.element.attr('id') }; //, facets: facets
 
-
+                if(this.options.ispreview){
+                    request['limit'] = 1000;    
+                }
+                                     
                 // try to find in cache by facet index and query string
                 var hashQuery = window.hWin.HEURIST4.util.hashString(JSON.stringify(request.q));
                 for (var k=0; k<this.cached_counts.length; k++){
@@ -1137,13 +1145,13 @@ $.widget( "heurist.search_faceted", {
                         //{id:null, text:window.hWin.HR('all'), children:termtree}
                         //draw terms and all its parents    
                         //2 - inline list, 3 - column list
-                        function __drawTerm(term, level, $container, as_list_type){
+                        function __drawTerm(term, level, $container, field){
                             
                                 //draw itslef - draw children
                                 if(term.value){
                                     
-                                        if(as_list_type==that._FT_COLUMN || as_list_type==that._FT_LIST){                                    
-                                            var display_mode = (as_list_type==that._FT_COLUMN)?'block':'inline-block';
+                                        if((field['isfacet']==that._FT_COLUMN) || (field['isfacet']==that._FT_LIST)){                                    
+                                            var display_mode = (field['isfacet']==that._FT_COLUMN)?'block':'inline-block';
                                             f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count}, display_mode );
                                             
                                             terms_drawn++;  //global
@@ -1164,37 +1172,18 @@ $.widget( "heurist.search_faceted", {
                                 }
                                 if(term.children){
                                     //sort by count per level
-                                    if(that.options.params.order_by_count){
+                                    if(field['orderby']=='count'){
                                         term.children.sort(function(a, b){ 
                                             return (Number(a.count)>Number(b.count))?-1:1;
                                         });
                                     }
                                     
                                     for (var k=0; k<term.children.length; k++){
-                                        __drawTerm(term.children[k], level+1, $container, as_list_type);
+                                        __drawTerm(term.children[k], level+1, $container, field);
                                     }
                                                    
                                 }
                         }//__drawTerm
-                        
-                        /* todo
-                        //1. calculate summary for children 
-                        //2. sort by count within children array
-                        //3. keep total amount of added divs/options for viewport
-                        if(this.options.params.order_by_count){
-                            response.data.sort(function(a, b){ return (a[1]<b[1])?-1:1;});
-                        }
-                        
-                        field['groupby']
-                        
-                                                //sort by count
-                        if(this.options.params.order_by_count){
-                            response.data.sort(function(a, b){ return (a[1]<b[1])?-1:1;});
-                        }
-
-                        */
-                        
-                        
                         
                         //
                         //calc number of terms with values
@@ -1269,7 +1258,7 @@ $.widget( "heurist.search_faceted", {
                         }                        
 
                         if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) {
-                                __drawTerm(term, 0, $facet_values, field['isfacet']);
+                                __drawTerm(term, 0, $facet_values, field);
                                 
                                 //show viewport collapse/exand control
                                 if(this.options.params.viewport<terms_drawn){
@@ -1283,7 +1272,7 @@ $.widget( "heurist.search_faceted", {
                                 $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
                                 
                                 that._createOption( facet_index, 0, {text:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
-                                __drawTerm(term, 0, $sel, false);
+                                __drawTerm(term, 0, $sel, field);
                                 
                                 if(field.selectedvalue && field.selectedvalue.value){
                                     var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
@@ -1563,7 +1552,7 @@ $.widget( "heurist.search_faceted", {
                         }
                         
                         //sort by count
-                        if(this.options.params.order_by_count){
+                        if(field['orderby']=='count'){
                             response.data.sort(function(a, b){ return (Number(a[1])>Number(b[1]))?-1:1;});
                         }
                         
