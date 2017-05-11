@@ -198,6 +198,16 @@ function hSvsEdit(args) {
 
     }
 
+    
+    function  _hasRules (query){
+        var prms = Hul.parseHeuristQuery(query);
+        if(Hul.isempty(prms.q)){
+            return Hul.isempty(prms.rules) ?-1:2;
+        }else {
+            return Hul.isempty(prms.rules) ?0:1;
+        }
+    }
+    
     /**
     * put your comment there...
     *
@@ -211,9 +221,44 @@ function hSvsEdit(args) {
         if(parseInt(svsID)>0){
             var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
             if(window.hWin.HEURIST4.util.isnull(svs)){
-                window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for this saved search. '
-                    +'It does not belong to your group'), null, "Error");
+                //verify that svsID is still in database
+                window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: [svsID],
+                                    UGrpID: window.hWin.HAPI4.currentUser.ugr_ID},
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            
+                            if(response.data && response.data[svsID]){
+                                window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for this saved search. '
+                                +'It does not belong to your group.')+' Owner is user id '+response.data[svsID][_GRPID],
+                                 null, "Error");
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for this saved search. '
+                                    +'It appears it was removed. Reload page to update tree of saved searches'), null, "Error");
+                            }
+                        }
+                    });
+                
                 return;
+            }
+            
+            /*
+            mode = 'faceted';
+            if(!node.data.isfaceted){
+                var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][_QUERY];
+                var hasrules = that._hasRules(qsearch);
+                mode = hasrules==2?'rules':'saved';
+            }
+            */
+            
+            var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
+            var qsearch = svs[_QUERY];
+            var mode = 'faceted';
+            try {
+                facet_params = $.parseJSON(qsearch);
+            }
+            catch (err) {
+                var hasrules = _hasRules(qsearch);
+                mode = hasrules==2?'rules':'saved';
             }
         }
         
@@ -236,8 +281,7 @@ function hSvsEdit(args) {
                 if(svs){
                     try {
                         facet_params = $.parseJSON(svs[_QUERY]);
-                    }
-                    catch (err) {
+                    }catch (err) {
                         // TODo something about the exception here
                         window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
                         return;

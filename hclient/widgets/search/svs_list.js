@@ -322,17 +322,19 @@ $.widget( "heurist.svs_list", {
     //
     // save current treeview layout
     //
-    _saveTreeData: function( groupToSave ){
+    _saveTreeData: function( groupToSave, treeData ){
 
-        isPersonal = (groupToSave=="all" || groupToSave=="bookmark");
+        var isPersonal = (groupToSave=="all" || groupToSave=="bookmark");
 
-        var treeData = {};
-        for (var groupID in this.treeviews)
-            if(groupID){
-                if ( (isPersonal && isNaN(groupID)) || groupToSave == groupID){
+        if(!treeData){
+            treeData = {};
+            for (var groupID in this.treeviews)
+                if(groupID){
+                    if ( (isPersonal && isNaN(groupID)) || groupToSave == groupID){
 
-                    var d = this.treeviews[groupID].toDict(true);
-                    treeData[groupID] = d;
+                        var d = this.treeviews[groupID].toDict(true);
+                        treeData[groupID] = d;
+                    }
                 }
         }
 
@@ -394,17 +396,34 @@ $.widget( "heurist.svs_list", {
                     try {
                         //1. remove nodes that refers to missed search
                         function __cleandata(data){
-
+                            
+                            if(data['all']&&data['bookmark']){ //this is top level
+                                for(groupID in data){
+                                     data[groupID] = __cleandata(data[groupID]);
+                                     if(data[groupID].was_cleaned==true){
+                                        data[groupID].was_cleaned = null;
+                                        var treeData = {};
+                                        treeData[groupID] = data[groupID];
+                                        that._saveTreeData( groupID, treeData );
+                                     }
+                                }
+                                return data;
+                            }
+                            
                             if(data.children){
                                 var newchildren = [];
                                 for (var idx in data.children){
                                     if(idx>=0){
                                         var node = __cleandata(data.children[idx]);
-                                        if(node!=null)
+                                        if(node!=null){
                                             newchildren.push(node)
+                                        }else{
+                                            data.was_cleaned = true;
+                                        }
                                     }
                                 }
                                 data.children = newchildren;
+                                return data;
                             }else if(data.key>0){
                                 return window.hWin.HAPI4.currentUser.usr_SavedSearch[data.key]?data:null;
                             }else{
@@ -705,9 +724,14 @@ $.widget( "heurist.svs_list", {
         window.hWin.HAPI4.SystemMgr.ssearch_gettree( {UGrpID:groupID}, function(response){
 
             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                var newdata = {};
                 try {
-
                     var newdata = $.parseJSON(response.data);
+                }
+                catch (err) {
+                    window.hWin.HEURIST4.msg.showMsgErrJson(response.data);
+                    return;
+                }
 
                     if( !newdata[groupID] ||
                         !window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID] ||
@@ -727,10 +751,6 @@ $.widget( "heurist.svs_list", {
                             +'" group has been modified by another user. The tree will be reloaded. '
                             +'Please repeat your operation with the new tree');
                     }
-                }
-                catch (err) {
-                    window.hWin.HEURIST4.msg.showMsgErrJson(response.data);
-                }
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -871,6 +891,7 @@ $.widget( "heurist.svs_list", {
                             isfaceted = data.node.data.isfaceted;
                         }
                     }
+                    
                     //data.node.setSelected(true);
                     //remove highlight from others
                     that.search_tree.find('li.ui-state-active').removeClass('ui-state-active');
@@ -972,14 +993,8 @@ null, 'Embedding searches');
                         case "rename":   //EDIT
 
                             if(!node.folder && node.key>0){
-                                var mode = 'faceted';
-                                if(!node.data.isfaceted){
-                                    var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][_QUERY];
-                                    var hasrules = that._hasRules(qsearch);
-                                    mode = hasrules==2?'rules':'saved';
-                                }
 
-                                that.editSavedSearch(mode, groupID, node.key, null, node);
+                                that.editSavedSearch(null, groupID, node.key, null, node);
                             }else{
                                 node.editStart();
                             }
@@ -1070,17 +1085,30 @@ null, 'Embedding searches');
                             CLIPBOARD = null;
                             break;
                         case "paste":
-                            if( CLIPBOARD.mode === "cut" ) {
-                                // refNode = node.getPrevSibling();
-                                CLIPBOARD.data.moveTo(node, "child");
-                                CLIPBOARD.data.setActive();
-                                that._saveTreeData( groupID );
+                            if(CLIPBOARD){
+                                
+                                if( CLIPBOARD.mode === "cut" ) {
+                                    // refNode = node.getPrevSibling();
+                                    CLIPBOARD.data.moveTo((!node.folder)?node.parent:node, "child");
+                                    CLIPBOARD.data.setActive();
+                                    that._saveTreeData( groupID );
 
-                            } else if( CLIPBOARD.mode === "copy" ) {
-                                node.addChildren(CLIPBOARD.data).setActive();
-                                that._saveTreeData( groupID );
+                                } else if( CLIPBOARD.mode === "copy" ) {
+                                    //get svsID and and save as new 
+                                    
+                                    var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[CLIPBOARD.data.key];
+                                    var request = {svs_ID: -1,
+                                    svs_Name: svs[_NAME]+' (copy)',
+                                    svs_Query: svs[_QUERY],
+                                    svs_UGrpID: groupID,
+                                    isfaceted: CLIPBOARD.data.data.isfaceted};
+                                    
+                                    //ssearch_save
+                                    that._saveSearch(request, node);
+                                    
+                                    //node.addChildren(CLIPBOARD.data).setActive();
+                                }
                             }
-
                             break;
                         default:
                             alert("Unhandled command: " + data.cmd);
@@ -1238,6 +1266,44 @@ null, 'Embedding searches');
 
         return res;
 
+    },
+    
+    
+    _saveSearch: function(request, node){
+        
+            var that = this;
+        
+            window.hWin.HAPI4.SystemMgr.ssearch_save(request,
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+                        var svsID = response.data;
+
+                        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
+                            window.hWin.HAPI4.currentUser.usr_SavedSearch = {};
+                        }
+
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
+                        
+                        window.hWin.HAPI4.save_pref('last_savedsearch_groupid', request.svs_UGrpID);
+
+                        request.new_svs_ID = svsID;
+                                    
+                        node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:request.isfaceted}
+                            , node.folder?"child":"after" );
+
+                        that._saveTreeData( request.svs_UGrpID );
+                        $("#addlink"+request.svs_UGrpID).css('display', 'none');
+                        
+                        //callback_method.call(that, null, request);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                    }
+                }
+
+            );
+        
+        
     },
 
     //add missed groups and saved searches to treeview

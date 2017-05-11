@@ -198,7 +198,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
 // [{"t":3},{"f:1":"?"},{"linked_to:15":[{"t":"10"},{"f:1":"?"}   ] } ]
 
-
+                                                                  
 class HQuery {
 
     var $from_clause = '';
