@@ -507,6 +507,9 @@ function hRecordSet(initdata) {
         }
     }
     
+    /**
+    * public method "values"
+    */
     function _getFieldValues(record, fldname){
         if(!isnull(record) && record['d'] && record['d'][fldname]){   
             return record['d'][fldname]
@@ -515,6 +518,7 @@ function hRecordSet(initdata) {
 
     
     /**
+    * public method "fld"
     * Returns field value by fieldname
     * WARNING for multivalues it returns first value ONLY
     * @todo - obtain fieldtype codes from server side

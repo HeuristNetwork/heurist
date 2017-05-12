@@ -350,7 +350,7 @@ window.hWin.HEURIST4.util = {
     },
     
     //
-    //
+    // Extract parameter from given URL or from current window.location.search
     //
     getUrlParameter: function getUrlParameter(name, query){
 

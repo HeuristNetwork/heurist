@@ -1176,7 +1176,8 @@ background: #8ea9b9
     text-align:center;
 }
 
-div.coverall-div {
+div.coverall-div, div.coverall-div-bare 
+{
     position: absolute;
     left:0;
     top: 0;
@@ -1185,6 +1186,8 @@ div.coverall-div {
     border: 0;
     padding: 0;
     margin: 0;
+}
+div.coverall-div {
     background-color: #000;
     opacity: 0.6;
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=60);

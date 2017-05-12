@@ -70,6 +70,8 @@ $.widget( "heurist.resultList", {
     _currentRecordset:null,
     _currentSelection:null, //for select_multi - to keep selection across pages and queries
 
+    _startupInfo:null,
+    
     // the constructor
     _create: function() {
 
@@ -152,18 +154,24 @@ $.widget( "heurist.resultList", {
                     }else{ //fake restart
                         that._clearAllRecordDivs('');
                         //that.loadanimation(true);
+                        
+                        that._renderStartupMessageComposedFromRecord();
                     }
                     
                     that._renderSearchInfoMsg(null);
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
-
+                    
                     that._showHideOnWidth();
                     that._renderPagesNavigator();
                     that._renderSearchInfoMsg(data);
                     
                     if(data==null){
-                       
+
+                        var recID_withStartupInfo = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
+                        if(recID_withStartupInfo>0){
+                            that._renderStartupMessageComposedFromRecord();
+                        }else                       
                         if(that.options.emptyMessageURL){
                             that.div_content.load( that.options.emptyMessageURL );
                         }else{
@@ -194,6 +202,8 @@ $.widget( "heurist.resultList", {
         */
 
         this._refresh();
+        
+        this._renderStartupMessageComposedFromRecord();
 
     }, //end _create
 
@@ -249,6 +259,12 @@ $.widget( "heurist.resultList", {
 
             }
         }
+        
+        this.div_coverall = $( "<div>" )                
+                .addClass('coverall-div-bare')
+                .css({'zIndex':10000,'background':'white'})
+                .hide()
+                .appendTo( this.element );
 
         this.div_toolbar = $( "<div>" )
                 .addClass('div-result-list-toolbar ent_header')
@@ -384,7 +400,7 @@ $.widget( "heurist.resultList", {
             .resultListMenu()
             .appendTo(this.div_toolbar);
         }else if(!this.options.innerHeader) {
-                    this.div_toolbar.hide();
+            this.div_toolbar.hide();
         }        
     },
     
@@ -460,6 +476,7 @@ $.widget( "heurist.resultList", {
         if(this.div_actions) this.div_actions.remove();
         this.div_toolbar.remove();
         this.div_content.remove();
+        this.div_coverall.remove();
 
         this.menu_tags.remove();
         this.menu_share.remove();
@@ -595,6 +612,10 @@ $.widget( "heurist.resultList", {
         //this._currentRecordset = null;
         this._lastSelectedIndex = -1;
 
+        if(this.div_coverall){
+            this.div_coverall.hide();
+        }
+        
         if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
@@ -705,6 +726,49 @@ $.widget( "heurist.resultList", {
         .appendTo(this.div_content);
 
         return $emptyres;
+    },
+    
+    //
+    //  
+    //
+    _renderStartupMessageComposedFromRecord: function(recID){
+        
+        var recID = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
+        if(recID>0){
+        
+        if(this._startupInfo){
+            this.div_coverall.show();
+        }else if(recID>0){
+            
+             var details = [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                            window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
+                            window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']];
+                            
+             var request = request = {q: 'ids:'+recID, w: 'all', detail:details };
+             
+             var that = this;
+
+             window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( new_recordset )
+             {
+                if(new_recordset!=null){
+                    var record = new_recordset.getFirstRecord();
+                    
+                    var title = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
+                    var summary = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY']);
+                    var extended = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']);
+                    
+                    //compose
+                    that._startupInfo = '<div style="padding:1em"><h2>'+title+'</h2><div style="padding-top:10px">'
+                                        +(summary?summary:'')+'</div><div>'
+                                        +(extended?extended:'')+'</div></div>';
+                    $(that._startupInfo).appendTo(that.div_coverall);
+                    that.div_coverall.show();
+                }
+             });
+            
+        }
+        
+        }        
     },
 
     //

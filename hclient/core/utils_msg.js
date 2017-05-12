@@ -24,6 +24,9 @@ showElementAsDialog
 
 createAlertDiv - return error-state html with alert icon 
 
+bringCoverallToFront
+sendCoverallToBack
+
 */
 if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
@@ -759,5 +762,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     sendCoverallToBack: function() {
         $(window.hWin.HEURIST4.msg.coverall).hide();//.style.visibility = "hidden";
     },
-    
+  
+  
 };

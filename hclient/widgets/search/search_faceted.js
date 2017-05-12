@@ -142,7 +142,8 @@ $.widget( "heurist.search_faceted", {
         .appendTo( this.div_toolbar )
         .button().hide(); //@todo
 
-        this.btn_close = $( "<button>", { text: window.hWin.HR("Close"), title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
+        this.btn_close = $( "<button>", { text: window.hWin.HR("Close"), 
+                    title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
         .appendTo( this.div_toolbar )
         .button({icons: {secondary: "ui-icon-close"}});
 
@@ -213,9 +214,11 @@ $.widget( "heurist.search_faceted", {
     
     _setOptions: function( options ) {
         this._superApply( arguments );
-        this.cached_counts = [];
-        //this._refresh();
-        this.doReset();
+        if(window.hWin.HEURIST4.util.isnull(options['add_filter'])){
+            this.cached_counts = [];
+            //this._refresh();
+            this.doReset();
+        }
     },
 
     /* 
@@ -632,7 +635,8 @@ $.widget( "heurist.search_faceted", {
 
        
 //console.log('start search with empty form '+this.options.params.search_on_reset);        
-        if(this.options.params.search_on_reset){
+        if(this.options.params.search_on_reset || 
+           !window.hWin.HEURIST4.util.isempty(this.options.params.add_filter)){
             //search at once - even none facet value provided
             this.doSearch();
         }else{
@@ -781,7 +785,9 @@ $.widget( "heurist.search_faceted", {
 
 //console.log('form is empty '+isform_empty);                
             
-            if(isform_empty && !this.options.params.search_on_reset){
+            if(isform_empty && 
+                window.hWin.HEURIST4.util.isempty(this.options.params.add_filter) && 
+                !this.options.params.search_on_reset){
                 
                 if(true){
                     //clear main result set
