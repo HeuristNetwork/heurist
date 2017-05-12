@@ -77,7 +77,7 @@ search: [t:10 f:1]
 NOTE - to make search fo facet value faster we may try to omit current search in query and search for entire database
 
 */
-
+                     
 /*
 step1 - selection of rectype, sup filter, rules
 step2 - select fields in treeview
@@ -124,6 +124,7 @@ $.widget( "heurist.search_faceted_wiz", {
     step: 0, //current step
     step_panels:[],
     current_tree_rectype_ids:null,
+    originalRectypeID:null, //flag that allows to save on first page for edit mode
 
     // the widget's constructor
     _create: function() {
@@ -168,6 +169,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 {text:window.hWin.HR('Next'), id:'btnNext',
                     click: function() {
                         that.navigateWizard(1);
+                }},
+                {text:window.hWin.HR('Save'), id:'btnSave',
+                    click: function() {
+                        that._doSaveSearch()
+                        //that.navigateWizard(1);
                 }},
             ]
         });
@@ -300,6 +306,7 @@ $.widget( "heurist.search_faceted_wiz", {
         } else{
             $("#btnNext").button('option', 'label', window.hWin.HR('Next'));
         }
+        
         if(this.step != newstep){
 
             if(isNaN(this.step) && newstep==0){ //select record types
@@ -388,9 +395,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     message.empty();
                     svs_title.removeClass( "ui-state-error" );
                 }
-                this.options.params.ui_title =  svs_title.val();
-                
-                this.options.params.search_on_reset = this.step0.find('#svs_SearchOnReset').is(':checked');
+
 
                 if(this.isversion==2){
                     this.step = 1;
@@ -488,10 +493,19 @@ $.widget( "heurist.search_faceted_wiz", {
             this._assignFacetParams();
         }
 
+        if(newstep==0 && this.options.svsID>0 && 
+            this.options.params.rectypes && this.options.params.rectypes[0]==this.originalRectypeID){
+            $("#btnSave").show();
+        }else{
+            $("#btnSave").hide();
+        }
+        
+        
         if(newstep==0){
             var that = this;
             setTimeout(function(){that.step0.find('#svs_Name').focus();},500);
             $("#btnBack").hide();
+            
         }else{
             var ht = $(window).height();
             if(ht>700) ht = 700;
@@ -543,6 +557,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
 
             if(isEdit){
+                
                 var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
@@ -558,12 +573,20 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 if(this.options.params.rectypes) {
                     $(opt_rectypes).val(this.options.params.rectypes[0]);
+                    
+                    $(opt_rectypes).change(function(){that.originalRectypeID=null; $("#btnSave").hide();});
+                    
+                    if(this.originalRectypeID==null){//init flag
+                        this.originalRectypeID = this.options.params.rectypes[0];    
+                    }
                 }
+                
                 
                 $dlg.find('#svs_Title').val(this.options.params.ui_title);
                 $dlg.find('#svs_SearchOnReset').attr('checked', this.options.params.search_on_reset);
 
             }else{ //add new saved search
+                this.originalRectypeID == null;
 
                 svs_id.val('');
                 svs_name.val('');
@@ -578,7 +601,16 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_SearchOnReset').attr('checked', false);
             }
 
+            if(isEdit && this.options.params.rectypes[0]==this.originalRectypeID)
+            {
+                $("#btnSave").show();
+            }else{
+                $("#btnSave").hide();
+            }
+        
 
+            
+            
             /* ART20150810
             var svs_id = $dlg.find('#svs_ID');
             var svs_name = $dlg.find('#svs_Name');
@@ -1098,7 +1130,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 sContent = sContent
                 +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_3" name="facet_Type'+k+'" value="3"/><label for="facetType'+k+'_3">list as column</label>'
                 +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_2" name="facet_Type'+k+'" value="2"/><label for="facetType'+k+'_2">list</label>'
-                +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_0" name="facet_Type'+k+'" value="0"/><label for="facetType'+k+'_0">search</label>';
+                +'<input type="radio" data-idx="'+k+'" id="facetType'+k+'_0" name="facet_Type'+k+'" value="0"/><label for="facetType'+k+'_0">search</label>'
                 + '</span>' 
                 + '<div style="float:right;font-size:smaller;margin-right:20px"><label><input type="checkbox" id="facet_Order'
                 + k+'" style="vertical-align: middle;margin-left:16px">'
@@ -1282,6 +1314,8 @@ $.widget( "heurist.search_faceted_wiz", {
             this.options.params.sup_filter = svs_fitler.val();
         }
 
+        this.options.params.ui_title =  $dlg.find('#svs_Title').val();
+        this.options.params.search_on_reset = $dlg.find('#svs_SearchOnReset').is(':checked');
 
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){
