@@ -49,11 +49,14 @@ require_once(dirname(__FILE__)."/initPage.php");
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];
-$allowed_actions = array('add_detail','replace_detail','delete_detail','merge_term');
+$allowed_actions = array('add_detail','replace_detail','delete_detail','merge_term','rectype_change');
 if(!in_array($action_type, $allowed_actions)){
+    //@todo - it does not work since initPage already produces some output
+    // need to call this piece of code with callback function in initPage after system itit
     header('Location: '.ERROR_REDIR.'?msg=Action is not defined or not allowed');
     exit();
 }
+
 
 //verify parameter scope
 $scope_type = @$_REQUEST['scope'];
@@ -189,6 +192,11 @@ break;
                 <select id="sel_fieldtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
 
+            <div id="div_sel_rectype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
+                <div class="header" style="padding-left: 16px;"><label for="sel_recordtype">Convert to record type:</label></div>
+                <select id="sel_recordtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+            </div>
+            
             <div style="padding: 0.2em; width: 100%;" class="input">
                 <div class="header" style="padding-left: 16px;"><label for="cb_add_tags">Tag affected records (auto-generated tag)</label></div>
                 <input id="cb_add_tags" type="checkbox" class="text ui-widget-content ui-corner-all">

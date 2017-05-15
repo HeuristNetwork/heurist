@@ -455,6 +455,56 @@ class DbRecDetails
         
         return $this->result_data;        
     }
+
+
+    /**
+    * change RecordType InBatch
+    */
+    public function changeRecordTypeInBatch(){
+
+        $this->data['dtyID'] = '1'; //dumb value to pass validation
+        
+        if(!$this->_validateParamsAndCounts()){
+            return false;
+        }else if (count(@$this->recIDs)==0){
+            return $this->result_data;
+        }
+
+        $rtyID_new = $this->data['rtyID_new'];
+        $rtyName = (@$this->data['rtyName'] ? "'".$this->data['rtyName']."'" : "id:".$this->data['rtyID_new']);
+        
+        $mysqli = $this->system->get_mysqli();
+        
+        $processedRecIDs = array();//success  
+        $sqlErrors = array();
+        
+        $now = date('Y-m-d H:i:s');
+        $dtl = Array('dtl_Modified'  => $now);
+        $rec_update = Array('rec_ID'  => 'to-be-filled',
+                            'rec_Modified'  => $now,
+                            'rec_RecTypeID'  => $rtyID_new);
+                     
+        $baseTag = "~changed rectype $rtyName $now";
+        
+        foreach ($this->recIDs as $recID) {
+               //update record edit date
+               $rec_update['rec_ID'] = $recID;
+               
+               $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
+               if (!is_numeric($ret)) {
+                    $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
+               }else{
+                   array_push($processedRecIDs, $recID);
+               }
+        }//for recors
+        
+        
+        //assign special system tags
+        $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
+        $this->_assignTagsAndReport('errors',    $sqlErrors, $baseTag);
+        
+        return $this->result_data;        
+    }
     
     /*
     * helper method

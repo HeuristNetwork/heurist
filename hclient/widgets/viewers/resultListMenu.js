@@ -334,6 +334,10 @@ $.widget( "heurist.resultListMenu", {
 
             this.detailBatchEditPopup('delete_detail');
 
+        }else if(action == "menu-selected-rectype-change"){
+
+            this.detailBatchEditPopup('rectype_change');
+
         }else if(action == "menu-collected-add"){
 
             this.collectionAdd();

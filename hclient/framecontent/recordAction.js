@@ -115,6 +115,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }
         }
         _onRecordScopeChange();
+        
+        if(action_type=='rectype_change'){
+            $('#div_sel_rectype').show();
+            _fillSelectRecordTypes();
+        }
     }
 
     //
@@ -129,10 +134,21 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
+/*                
+            case 'rectype_change':
+                $('#div_sel_rectype').show();
+                _fillSelectRecordTypes();
+                break;
+*/                
         }
 
     }
 
+    function _fillSelectRecordTypes() {
+        var rtSelect = $('#sel_recordtype');
+        rtSelect.empty();
+        window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0) );
+    }
     //
     // fill all field type selectors
     //
@@ -310,14 +326,18 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             return;
         }
 
+        var request = { tag: $('#cb_add_tags').is(':checked')?1:0 };
 
+        if(action_type!='rectype_change'){
+        
         var dtyID = $('#sel_fieldtype').val();
         if(window.hWin.HEURIST4.util.isempty(dtyID)) {
             alert('Field is not defined');
             return;
         }
-        var request = { dtyID:dtyID, tag: $('#cb_add_tags').is(':checked')?1:0 };
 
+        request['dtyID'] = dtyID;
+        
         if(action_type=='add_detail'){
             request['a'] = 'add';
             request['val'] = getFieldValue('fld-1');
@@ -351,7 +371,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }
             }
         }
-
+        
+        }
+        
         var scope_type = selectRecordScope.val();
 
         if(scope_type=="Selected"){
@@ -364,19 +386,54 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
 
 
-        /*
-        * recIDs - list of records IDS to be processed
-        * rtyID - optional filter by record type
-        * dtyID  - detail field to be added
-        * for add: val, geo or ulfID
-        * for replace: sVal - search value, rVal - replace value
-        * for delete:  sVal - search value
-        * tag 0|1  - add system tag to mark processed records
-        */
+        if(action_type=='rectype_change'){
+            
+            var rtyID = $('#sel_recordtype').val();
+            if(!(rtyID>0)){
+                alert('Select new record type');
+                return;
+            }
+            
+            if(request['rtyID']==rtyID){
+                alert('Selected and new record types are the same');
+                return;
+            }
+            
+            request['a'] = 'rectype_change';
+            request['rtyID_new'] = rtyID;
+          
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'You are about to convert '
+                + (request['rtyID']>0 ?('"'+window.hWin.HEURIST4.rectypes.names[request['rtyID']]+'"'):request['recIDs'].length)
+                +' records from their original record (entity) type into "'
+                + window.hWin.HEURIST4.rectypes.names[rtyID] 
+                + '" records.  This can result in invalid data for these records.<br><br>Are you sure?',
+                function(){_startAction_continue(request);},
+                 {title:'Warning',yes:'Proceed',no:'Cancel'});
+            
+        }else{
+            _startAction_continue(request)
+        }
+    }
+        
+    /*
+    * recIDs - list of records IDS to be processed
+    * rtyID - optional filter by record type
+    * dtyID  - detail field to be added
+    * for add: val, geo or ulfID
+    * for replace: sVal - search value, rVal - replace value
+    * for delete:  sVal - search value
+    * for rectype change rtyID_new - new record type
+    * tag 0|1  - add system tag to mark processed records
+    */
+     function _startAction_continue(request)
+     {   
 
         // show hourglass/wait icon
         $('body > div:not(.loading)').hide();
         $('.loading').show();
+        
+        //request['DBGSESSID'] = '425944380594800002;d=1,p=0,c=07';
 
         window.hWin.HAPI4.RecordMgr.details(request, function(response){
 

@@ -48,6 +48,10 @@
 
             $res = $dbRecDetails->detailsDelete();
 
+        }else if(@$_REQUEST['a'] == 'rectype_change'){
+
+            $res = $dbRecDetails->changeRecordTypeInBatch();
+
         }else {
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
