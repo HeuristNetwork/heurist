@@ -219,7 +219,18 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         if(action_type=='add_detail'){
             _createInputElement('fld-1', window.hWin.HR('Value to be added'));
-        }else if(action_type=='replace_detail'){
+        }else if(action_type=='replace_detail'){                              
+            
+            $('<div tyle="padding: 0.2em; width: 100%;" class="input">'
+                +'<span></span><div class="header" style="padding-left: 16px;">'
+                +'<label for="cb_replace_all">Replace all occurrences</label></div>'
+                +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 4px 0">'
+                +'</div>').change(function(){
+                    
+                    $('#fld-1').editing_input('setDisabled',$(event.target).is(':checked'));
+                    
+                }).appendTo($fieldset);
+            
             _createInputElement('fld-1', window.hWin.HR('Value to find'));
             _createInputElement('fld-2', window.hWin.HR('Replace with'));
         }else if(action_type=='delete_detail'){
@@ -349,10 +360,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }else if(action_type=='replace_detail'){
 
             request['a'] = 'replace';
-            request['sVal'] = getFieldValue('fld-1');
-            if(window.hWin.HEURIST4.util.isempty(request['sVal'])){
-                alert('Define value to search');
-                return;
+
+            if(!$('#cb_replace_all').is(':checked')){
+                request['sVal'] = getFieldValue('fld-1');
+                if(window.hWin.HEURIST4.util.isempty(request['sVal'])){
+                    alert('Define value to search');
+                    return;
+                }
             }
             request['rVal'] = getFieldValue('fld-2');
             if(window.hWin.HEURIST4.util.isempty(request['rVal'])){

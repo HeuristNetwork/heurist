@@ -887,6 +887,23 @@ $.widget( "heurist.editing_input", {
 
     },
 
+    
+    //
+    //
+    //
+    setDisabled: function(is_disabled){
+
+        if(!(this.options.readonly || this.f('rst_Display')=='readonly')){
+            var idx;
+            for (idx in this.inputs) {
+                var input_id = this.inputs[idx];
+                var $input = $(input_id);
+                window.hWin.HEURIST4.util.setDisabled($input, is_disabled);
+            }
+        }
+
+    },
+    
     //
     //
     //

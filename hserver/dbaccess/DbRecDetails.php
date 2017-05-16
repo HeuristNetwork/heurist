@@ -32,7 +32,7 @@ class DbRecDetails
     *       rtyID  - filter by record type
     *       dtyID  - detail field to be added
     *       for addition: val: | geo: | ulfID: - value to be added
-    *       for edit sVal - search value,  rVal - replace value
+    *       for edit sVal - search value (if missed - replace all occurences),  rVal - replace value
     *       for delete: sVal  
     *       tag  = 0|1  - add system tag to mark processed records
     */    
@@ -238,7 +238,7 @@ class DbRecDetails
     */
     public function detailsReplace(){
 
-        if (!(@$this->data['sVal'] && @$this->data['rVal'])){
+        if (!@$this->data['rVal']){
             $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
             return false;
         }
@@ -253,12 +253,12 @@ class DbRecDetails
         $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
         
         $mysqli = $this->system->get_mysqli();
- 
+        
         $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
         switch ($basetype) {
             case "freetext":
             case "blocktext":
-                $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string($this->data['sVal'])."%\"";
+                $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string(@$this->data['sVal'])."%\"";
                 $partialReplace = true;
                 break;
             case "enum":
@@ -267,12 +267,19 @@ class DbRecDetails
             case "integer":
             case "resource":
             case "date":
-                $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($this->data['sVal'])."\"";
+                $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
                 $partialReplace = false;
                 break;
             default:
                 $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by value-replace service");
                 return false;
+        }
+        
+        if(!@$this->data['sVal']){  
+            $searchClause = '1=1';
+            $replace_all_occurences = true;  
+        }else{
+            $replace_all_occurences = false;
         }
 
         $undefinedFieldsRecIDs = array(); //value not found
@@ -301,9 +308,11 @@ class DbRecDetails
             
             //update the details
             $recDetailWasUpdated = false;
+            $valuesToBeDeleted = array();
+            
             foreach ($valuesToBeReplaced as $dtlID => $dtlVal) {
                 
-                if ($partialReplace) {// need to replace sVal with rVal
+                if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
                     $newVal = preg_replace("/".$this->data['sVal']."/",$this->data['rVal'],$dtlVal);
                 }else{
                     $newVal = $this->data['rVal'];
@@ -319,7 +328,13 @@ class DbRecDetails
                     continue;
                 }
                 $recDetailWasUpdated = true;
-            }
+
+                if($replace_all_occurences && count($valuesToBeReplaced)>1){
+                    $valuesToBeDeleted = array_keys($valuesToBeReplaced);
+                    array_shift($valuesToBeDeleted);
+                    break;
+                }
+            }//for
             if ($recDetailWasUpdated) {
                 //only put in processed if a detail was processed, 
                 // obscure case when record has multiple details we record in error array also
@@ -332,6 +347,15 @@ class DbRecDetails
                     $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
                 }
             }
+            if(count($valuesToBeDeleted)>0){
+                //remove the rest for repalce all occurences
+                $sql = 'delete from recDetails where dtl_ID in ('.implode(',',$valuesToBeDeleted).')';
+                if ($mysqli->query($sql) === TRUE) {
+                    $sqlErrors[$recID] = $mysqli->error;         
+                }
+            }
+                    
+            
         }//for recors
         
         
