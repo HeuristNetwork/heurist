@@ -1,7 +1,7 @@
 <?php
 
     /**
-     * elasticHelper.php: Functions to help interacting with ElasticSearch
+     * elasticHelper.php: Functions to help interacting with ElasticSearch, mainly used by elasticSearchFunctions.php
      *
      * @package     Heurist academic knowledge management system
      * @link        http://HeuristNetwork.org
@@ -26,9 +26,12 @@
     // ElasticSearch index helpers
     //****************************************************************************************************************
 
-    $isElasticUp = NULL; // Cache whether or not Elastic indexing is enabled & operational
+    $isElasticUp = NULL; // Global variable whether or not Elastic indexing is enabled & operational
 
-    // Checks if ElasticSearch indexing is enabled in configIni.php
+    /**
+     * Checks if ElasticSearch indexing is enabled in configIni.php
+     * @return bool True if Elastic indexing is enabled.
+     */
     function isElasticEnabled() {
         global $indexServerAddress, $indexServerPort; // Set in configIni.php
         return !empty($indexServerAddress) && !empty($indexServerPort);
@@ -36,8 +39,8 @@
 
     /**
      * Determines the ElasticSearch index name for a database
-     * @param $dbName Name of the database
-     * @return Name of the ElasticSearch index
+     * @param string $dbName Name of the database
+     * @return string Name of the ElasticSearch index
      */
     function getElasticIndex($dbName) {
         $elasticIndex = strtolower($dbName); // Must be lowercase
@@ -47,10 +50,10 @@
 
     /**
      * Determines the ElasticSearch address based on the given parameters
-     * @param $dbName Name of the database
-     * @param $recTypeID Record Type ID
-     * @param $recID Record ID
-     * @return The ElasticSearch address for the given parameters
+     * @param string $dbName Name of the database
+     * @param int $recTypeID Record Type ID
+     * @param int $recID Record ID
+     * @return string The ElasticSearch address for the given parameters
      */
     function getElasticAddress($dbName=null, $recTypeID=null, $recID=null) {
         global $indexServerAddress, $indexServerPort; // Set in configIni.php
@@ -75,25 +78,43 @@
     }
 
     /**
+     * Checks if the given ElasticSearch address is created by checking if the HTTP Code is 200.
+     * @param string $address The address to check
+     * @return bool True if the given address is created
+     */
+    function isElasticAddressCreated($address) {
+        $handle = curl_init($address);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
+
+        curl_exec($handle);
+        $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        curl_close($handle);
+
+        return $httpCode == 200;
+    }
+
+    /**
+     * Checks if an ElasticSearch index exists for the given database
+     * @param string $dbName Name of the database
+     * @return bool True if an index has already been created
+     */
+    function isElasticIndexCreated($dbName) {
+        $address = getElasticAddress($dbName);
+        return isElasticAddressCreated($address);
+    }
+
+    /**
      * Checks if ElasticSearch is running
-     * @returns  Returns true if ElasticSearch is running
+     * @return bool Returns true if ElasticSearch is running
      */
     function isElasticRunning() {
         $address = getElasticAddress();
-        $query = new stdClass();
-        $json = getElastic($address, $query);
-
-        // Check if the response contains ElasticSearch its version number
-        if(!empty($json)) {
-            $object = json_decode($json);
-            return !empty($object->version);
-        }
-        return false;
+        return isElasticAddressCreated($address);
     }
 
     /**
      * Checks if ElasticSearch indexing is enabled and if ElasticSearch is running
-     * @returns  Returns true if ElasticSearch enabled & running
+     * @return bool Returns true if ElasticSearch enabled & running
      */
     function isElasticUp() {
         global $isElasticUp;
@@ -108,13 +129,20 @@
     // ElasticSearch query helpers
     //****************************************************************************************************************
 
-    // GET-request to adress with query
+    // GET-request to address with query
     function getElastic($address, $query) {
         $curl = curl_init();
         return queryElastic($curl, $address, $query);
     }
 
-    // PUT-request to adress with query
+    // POST-request to adress with query
+    function postElastic($address, $query) {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+        return queryElastic($curl, $address, $query);
+    }
+
+    // PUT-request to address with query
     function putElastic($address, $query) {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -124,8 +152,8 @@
     // UPDATE-request to adress with query
     function updateElastic($address, $query) {
         $curl = curl_init();
-        $address .= '/_update';
-        return queryElastic($curl, $address, $query);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+        return queryElastic($curl, $address.'/_update_by_query', $query);
     }
 
     // DELETE-request to adress with query
@@ -136,10 +164,10 @@
     }
 
     /**
-     * @param $curl Curl instance reference
-     * @param $address ElasticSearch instance address
-     * @param $query The query to send to the ElasticSearch instance
-     * @return ElasticSearch response (JSON)
+     * @param resource $curl Curl instance reference
+     * @param string $address ElasticSearch instance address
+     * @param stdClass $query The query to send to the ElasticSearch instance
+     * @return string ElasticSearch response (JSON)
      */
     function queryElastic($curl, $address, $query) {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -154,6 +182,130 @@
         //error_log("[elasticSearchHelper.php] Query $query --> resulted in $json");
 
         return $json;
+    }
+
+    /**
+     * Checks if the response from ElasticSearch has the given property, and if so, if this property holds the value 'true'
+     * @param string $json JSON received as ElasticSearch response
+     * @param string $property The property to check the value for
+     * @return bool True if $property exists and is true.
+     */
+    function checkElasticResponse($json, $property) {
+        if ($json != NULL) {
+            $response = json_decode($json);
+            return property_exists($response, $property) && $response->$property;
+        }
+        return false;
+    }
+
+
+    //****************************************************************************************************************
+    // ElasticSearch synchronisation helpers
+    //****************************************************************************************************************
+
+    /**
+     * Called from /admin/setup/createNewDB.php upon database creation.
+     * Sets up the correct Elastic mapping to automatically add an additional not_analyzed field to each field.
+     */
+    function createElasticIndex($database) {
+        if(isElasticUp()) {
+            $query = '{ 
+                        "settings": { 
+                            "number_of_replicas": 1,
+                            "number_of_shards": 1
+                        },
+                        "mappings": {
+                            "_default_": {
+                                "dynamic_templates": [
+                                    {
+                                        "raw_template": {
+                                            "match": "*",
+                                            "match_mapping_type": "*",
+                                            "mapping": {
+                                                "type": "string",
+                                                "fields": {
+                                                    "raw": {
+                                                        "type":  "string",
+                                                        "index": "not_analyzed"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                     }';
+
+            $address = getElasticAddress($database);
+            $json = putElastic($address, json_decode($query));
+
+            if(!checkElasticResponse($json, 'acknowledged')) {
+                error_log("[elasticSearchHelper.php] Failed to create dynamic template for index $database : $json");
+            }
+        }
+    }
+
+    /**
+     * Attempts to retrieve the highest rec_Modified timestamp in the MySql database
+     * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
+     */
+    function getHighestMySqlTimestamp() {
+        $query = "SELECT MAX(rec_Modified) FROM Records";
+        $res = mysql_query($query);
+        if ($res) {
+            return mysql_result($res,0); // Gets the rec_Modified value from the first row.
+        } else {
+            error_log("[elasticSearchHelper.php] getHighestMySqlTimestamp failed - query: $query");
+        }
+        return NULL;
+    }
+
+    /**
+     * Attempts to retrieve the highest rec_Modified timestamp in the Elastic instance
+     * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
+     */
+    function getHighestElasticTimestamp() {
+        $address = getElasticAddress(DATABASE) . '/_search?size=1';
+        $query = '{
+                    "query": {
+                        "match_all": {}
+                    },
+                    "sort": {
+                        "Modified.raw": {
+                            "order" : "desc"
+                        }
+                    }
+                  }';
+        $json = postElastic($address, json_decode($query));
+
+        if ($json != NULL) {
+            $response = json_decode($json);
+            return $response->hits->hits[0]->_source->Modified; // Gets the Modified value from the first hit.
+        }else{
+            error_log("[elasticSearchHelper.php] getHighestElasticTimestamp failed - query: $query");
+        }
+
+        return NULL;
+    }
+
+    /**
+     * Checks if ElasticSearch is synchronised, called by functions in elasticSearchFunctions.php
+     */
+    function checkElasticSync() {
+        // 1. Retrieve highest MySQL timestamp
+        $mysqlTimestamp = getHighestMySqlTimestamp();
+
+        // 2. Retrieve highest Elastic timestamp
+        $elasticTimestamp = getHighestElasticTimestamp();
+
+        // 3. Compare timestamps
+        if($mysqlTimestamp != NULL && $elasticTimestamp != NULL) {
+            if(strcmp($mysqlTimestamp, $elasticTimestamp) !== 0) {
+                // The timestamps are not equal. Note that ElasticSearch indexing takes ~100ms.
+                //error_log("[elasticSearchHelper.php] mysqlTimestamp: $mysqlTimestamp & elasticTimestamp: $elasticTimestamp are not equal.");
+            }
+        }
     }
 
 ?>

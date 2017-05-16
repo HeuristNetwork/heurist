@@ -23,34 +23,38 @@
 
 
     /*
-    Elastic Search creates indexes automatically and updates the index record when new data is supplied for an existing key
-    However we do need to delete keys explicitely if 1. the record type changes or 2. we delete the record altogether
-    Test for installation allows us to fall back to ordinary searching or render warning that feature is not supported
+    A hook has been added in createNewDB.php which calls createElasticIndex($newDBName).
+    The method createElasticIndex checks if Elastic has been enabled, and if it is running.
+    If that is the case, it creates the index for the given database.
 
-    ACTIONS TODO:
+    The index that is created has a dynamic_mapping, which adds an additional .raw field for every string field.
+    The raw field is not_analyzed which means it is not processed by Elastic.
+    By default, strings are processed and cut into pieces for fuzzy searching.
+    - Fuzzy searching can be done against the normal field
+    - Exact matching or aggregations should be done against the raw field.
 
-    Call updateRecordIndexEntry whenever a record is written (new or updated, from record edit or record import or record recode)
+    Additional hooks have been added to methods that add or modify the underlaying MySQL database.
+    With the help of these hooks the MySQL database and ElasticSearch index should always be synchronized.
 
-    Call buildAllIndices as part of database upgrade 1.1.0 to 1.2.0
-
-    Call deleteRecordIndexEntry whenever a record is saved with a different type (editRecord)
-
-    Call deleteRecordIndexEntry whenever a record is deleted (Search Actions)
+    The methods getHighestMySqlTimestamp() and getHighestElasticTimestamp() are used to
+    determine if the timestamps used in each system are equal. This check is done during
+    each of the functions below, to make sure the systems are synchronized at all times.
 
 
     FUNCTION CALLS:
-    updateRecordIndexEntry()
+
+    updateRecordIndexEntry() -> whenever a record is written (new or updated, from record edit or record import or record recode)
     - saveRecord.php
     - saveRecordDetails.php
 
-    deleteRecordIndexEntry()
+    deleteRecordIndexEntry() -> whenever a record is saved with a different type (editRecord)
     - deleteRecordInfo.php
 
-    deleteIndexForDatabase
+    deleteIndexForDatabase -> whenever a database is deleted (admin actions)
     - clearCurrentDB.php
     - deleteCurrentDB.php
 
-    buildAllIndices()
+    buildAllIndices() -> whenever a database upgrade has occurred or when a database has been cloned
     - uses deleteIndexForRectype()
     - uses buildAllIndices()
     - cloneDatabase.php
@@ -65,11 +69,11 @@
 
     // ****************************************************************************************************************
     /**
-    * Add a new key or update an existing key - Elastic Search adds or updates as appropriate, no need to specify
+    * Add a new key or update an existing key - ElasticSearch adds or updates as appropriate, no need to specify
     * By reading record from database we ensure that we are indexing only records which have been successfully written
-    * @param $dbName        The name of the Heurist database, excluding prefix
-    * @param $recTypeID     The record type ID of the record being indexed
-    * @return               True if successful
+    * @param string $dbName  The name of the Heurist database, excluding prefix
+    * @param int $recTypeID  The record type ID of the record being indexed
+    * @return bool True if successful
     */
     function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
         if(isElasticUp()) {
@@ -132,12 +136,10 @@
             $address = getElasticAddress($dbName, $recTypeID, $recID);
             $json = putElastic($address, $record);
 
-            // Check if created property exists and is true
-            if($json!=null){ //without check it ruins main save function
-                $response = json_decode($json);
-                return property_exists($response, 'created') && $response->created;
-            }else{
-                return false;
+            // Check if created
+            if(checkElasticResponse($json, 'created')) {
+                checkElasticSync();
+                return true;
             }
         }
         return false;
@@ -154,10 +156,10 @@
     // ****************************************************************************************************************
     /**
     * Delete the index entry for a specified record - use when record type changed or record deleted
-    * @param $dbName        The name of the Heurist databasem, excluding prefix
-    * @param $recTypeID     The record type ID of the record being deleted from the index
-    * @param $recID         The record to be deleted from the index
-    * @return               True if successful
+    * @param string $dbName The name of the Heurist databasem, excluding prefix
+    * @param int $recTypeID The record type ID of the record being deleted from the index
+    * @param int $recID     The record to be deleted from the index
+    * @return bool True if successful
     */
     function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
         if(isElasticUp()) {
@@ -166,12 +168,10 @@
             $query = new stdClass();
             $json = deleteElastic($address, $query);
 
-            // Check if acknowledged property exists and is true
-            if($json!=null){ //without check it ruins delete function
-                $response = json_decode($json);
-                return property_exists($response, 'acknowledged') && $response->acknowledged;
-            }else{
-                return false;
+            // Check if acknowledged
+            if(checkElasticResponse($json, 'acknowledged')) {
+                checkElasticSync();
+                return true;
             }
         }
         return false;
@@ -181,8 +181,9 @@
     // ****************************************************************************************************************
     /**
     * Delete the index for a specified record type
-    * @param $dbName       The name of the Heurist database, excluding prefix
-    *  @param $recTypeID    The record type ID of the record being deleted from the index
+    * @param string $dbName The name of the Heurist database, excluding prefix
+    * @param int $recTypeID The record type ID of the record being deleted from the index
+    * @return bool True if successfully deleted RecType from index.
     */
     function deleteIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
@@ -191,9 +192,11 @@
             $query = new stdClass();
             $json = deleteElastic($address, $query);
 
-            // Check if acknowledged property exists and is true
-            $response = json_decode($json);
-            return property_exists($response, 'acknowledged') && $response->acknowledged;
+            // Check if acknowledged
+            if(checkElasticResponse($json, 'acknowledged')) {
+                checkElasticSync();
+                return true;
+            }
         }
         return false;
     } // deleteIndexForRectype
@@ -202,7 +205,8 @@
     // ****************************************************************************************************************
     /**
     * Delete the index for a specified database
-    * @param $dbName       The name of the Heurist databasem, excluding prefix
+    * @param string $dbName The name of the Heurist database, excluding prefix
+    * @return bool True if successfully deleted complete index from ElasticSearch.
     */
     function deleteIndexForDatabase ($dbName) {
         if(isElasticUp()) {
@@ -211,9 +215,11 @@
             $query = new stdClass();
             $json = deleteElastic($address, $query);
 
-            // Check if acknowledged property exists and is true
-            $response = json_decode($json);
-            return property_exists($response, 'acknowledged') && $response->acknowledged;
+            // Check if acknowledged
+            if(checkElasticResponse($json, 'acknowledged')) {
+                checkElasticSync();
+                return true;
+            }
         }
         return false;
     } // deleteIndexForDatabase
@@ -222,9 +228,9 @@
     // ****************************************************************************************************************
     /**
     * Rebuild the index for a specified record type
-    * @param $dbName       The name of the Heurist databasem, excluding prefix
-    * @param $recTypeID    The record type to rebuild for
-    * @returns True if successful
+    * @param string $dbName   The name of the Heurist databasem, excluding prefix
+    * @param int $recTypeID   The record type to rebuild for
+    * @return bool True if successful
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
@@ -252,12 +258,13 @@
     // ****************************************************************************************************************
     /**
     * Rebuild the index for all record types
-    * @param    $dbName  The name of the Heurist databasem, excluding prefix
-    * @returns  0 = OK, 1 = error
+    * @param string $dbName The name of the Heurist database, excluding prefix
+    * @return bool True if OK, false if Error
     */
-    function buildAllIndices ($dbName) {
+    function buildAllIndices ($dbName, $print=true) {
         if(isElasticUp()) {
-            print "Building all Elasticsearch indices for: $dbName<br />";
+            if ($print)
+                print "Building all Elasticsearch indices for: $dbName<br />";
 
             $query = "SELECT MAX(rec_RecTypeID) FROM Records WHERE 1";
             $res = mysql_query($query);
@@ -274,7 +281,9 @@
                     }
                 }
 
-                print "ElasticSearch indices have successfully been built for $count record types.";
+                if ($print)
+                    print "ElasticSearch indices have successfully been built for $count record types.";
+
                 return true;
             }else{
                 error_log("[elasticSearchFunctions.php] buildAllIndices --> invalid query: $query");

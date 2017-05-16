@@ -33,6 +33,8 @@ require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../common/php/utilsMail.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
+require_once(dirname(__FILE__).'/../../../records/index/elasticSearchHelper.php');
+
 
 $blankServer = (HEURIST_DBNAME==''); //@todo check exxistense of other databases
 
@@ -1001,6 +1003,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
 
                         createDatabaseFolders($newDBName);
+                        createElasticIndex($newname); // All Elastic methods use the database prefix.
 
                         if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, smarty templates etc
                             unzip($templateFoldersContent, HEURIST_UPLOAD_ROOT.$newDBName."/");    
