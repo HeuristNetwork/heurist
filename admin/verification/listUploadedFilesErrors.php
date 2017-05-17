@@ -25,6 +25,7 @@
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
+require_once(dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php');
 
 if (isForAdminOnly()) exit();
 ?>
@@ -35,6 +36,7 @@ if (isForAdminOnly()) exit();
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <style type="text/css">
             h3, h3 span {
                 display: inline-block;
@@ -162,7 +164,8 @@ if (isForAdminOnly()) exit();
             }
             
     }//while
-            
+      
+      
             if (count(@$files_orphaned)>0 || count(@$files_notfound)>0 || count(@$files_path_to_correct)>0){
                 ?>
                 <script>
@@ -236,12 +239,74 @@ if (isForAdminOnly()) exit();
                         
                         document.getElementById('page-inner').style.display = 'none';
                     }
+                    
+                    //
+                    //
+                    //
+                    function removeUnlinkedFiles(){
+                        
+                        function _callback(context){
+                            document.getElementById('page-inner').style.display = 'block';
+                            
+                            if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
+                                top.HEURIST.util.showError(null);
+                            }else{
+                                
+                                var ft = $('input.file_to_clear:checked');
+                                var i, j, cnt=0, fdeleted = context['result'];
+                                
+                                if($('input.file_to_clear').length==fdeleted.length){
+                                    cnt = fdeleted.length;
+                                    //all removed
+                                    $('#nonreg').remove();
+                                }else{
+                                
+                                    for (i=0; i<fdeleted.length; i++){
+                                        for (j=0; j<ft.length; j++){
+                                            if($(ft[j]).parent().text()==fdeleted[i]){
+                                                //remove div 
+                                                $(ft[j]).parents('.msgline').remove();
+                                                cnt++;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                top.HEURIST.util.showMessage(cnt+' nonregistered/unlinked files have been removed from media folders');
+                            }
+                        }
+
+                        
+                        var res = [];
+                        $.each($('input.file_to_clear:checked'), function(idx, item){
+                            var filename = $(item).parent().text();
+                            res.push(filename);
+                        });
+                        
+                        if(res.length==0){
+                            alert('Mark at least on file to delete');
+                            return;
+                        }
+                        
+                        var dt = {"unlinked":res};
+                        var str = JSON.stringify(dt);
+                       
+
+                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairUploadedFiles.php";
+                        var callback = _callback;
+                        var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
+                        top.HEURIST.util.getJsonData(baseurl, callback, params);
+                        
+                        document.getElementById('page-inner').style.display = 'none';
+
+                    }
+                    
                 </script>
 
                 <?php
                 if(count($files_orphaned)>0){
                 ?>
-                    <h3>Orphand files</h3>
+                    <h3>Orphaned files</h3>
                     <div><?php echo count($files_orphaned);?> entries</div>
                     <div>No reference to these files found in record details. These files will be removed from db and file system</div>
                     <br>
@@ -305,11 +370,45 @@ if (isForAdminOnly()) exit();
                 print '<hr/>';
                 }
                 ?>
-                To fix the inconsistencies, please click here: <button onclick="repairBrokenPaths()">Repair selected</button><br/>
+                <br>To fix the inconsistencies, please click here: <button onclick="repairBrokenPaths()">Repair selected</button><br/>
                 <?php
             }else{
-                print "<br/><p><br/></p><h3>All uploaded file entries are valid</h3>";
+                print "<br><br><p><h3>All uploaded file entries are valid</h3></p>";
             }
+            
+            
+    //check for non-revistered files in mediafolders
+    $reg_info = array('reg'=>array(), 'nonreg'=>array());
+    $dirs_and_exts = getMediaFolders();
+
+    doHarvest($dirs_and_exts, false, 1);
+    
+    //$reg_info = getRegInfoResult();
+   
+//print print_r($reg_info,true);
+               
+    if(count($reg_info['nonreg'])>0){
+        ?>
+            <div id="nonreg">
+                    <hr>
+                    <h3>Nonregistered files</h3>
+                    <div><?php echo count($reg_info['nonreg']);?> entries</div>
+                    <br>
+                    <input type=checkbox id="do_clean_nonreg" 
+                        onchange="{$('.file_to_clear').attr('checked', $(event.target).is(':checked'));}">&nbsp;Select/unselect all
+                    <br>
+                    <br>
+                <?php
+                foreach ($reg_info['nonreg'] as $row) {
+                    print '<div class="msgline"><label><input type=checkbox class="file_to_clear">'.$row.'</label></div>';
+                }//for
+
+        print '<br><p>To remove nonregistered files in media folders, please click here: <button onclick="removeUnlinkedFiles()">Delete selected</button></p></div>'; 
+    }else{
+        print '<br><br><br><p><h3>There are nonregistered files in media folders: '.implode(';', $dirs_and_exts['dirs']).' </h3></p>';
+    }
+            
+            
             ?>
         </div>
     </body>

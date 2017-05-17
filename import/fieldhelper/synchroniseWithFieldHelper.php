@@ -236,7 +236,9 @@ if (! is_logged_in()) {
         function sanitizeFolderName($folder) {
             $folder = str_replace("\0", '', $folder);
             $folder = str_replace('\\', '/', $folder);
-            if( substr($folder, -1, 1) != '/' )  $folder = $folder.'/';
+            if( substr($folder, -1, 1) != '/' )  {
+                $folder = $folder.'/';
+            }
             return $folder;
         }
 
@@ -277,7 +279,11 @@ if (! is_logged_in()) {
                             continue;
                         }
                     }
-                    
+
+                    if(substr($dir, -1) != '/'){
+                        $dir .= "/";
+                    }
+
                 }
 
                 if(in_array($dir, $system_folders)){

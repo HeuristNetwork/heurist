@@ -144,6 +144,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         Multi-file upload</a>
                     </li>
 
+                    <li class="admin-only"><a href="admin/verification/listUploadedFilesErrors.php" name="auto-popup" 
+                            data-logaction="uplVerifyfile"
+                        class="large h3link embed"
+                        onClick="{return false;}" target="_blank"
+                        title="">
+                        Remove unlinked files</a>
+                    </li>
+
                     <!--
                     <li>-</li>
 

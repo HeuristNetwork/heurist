@@ -43,7 +43,7 @@
         print json_format($rv);
         return;
     }
-
+    
     $data = null;
     if(@$_REQUEST['data']){
         $data = json_decode(urldecode(@$_REQUEST['data']), true);
@@ -53,10 +53,26 @@
         return;
     }
 
+    //4. to remove from recUploadedFiles and delete file
+    $files_to_remove = @$data['unlinked'];
+    if(is_array($files_to_remove)){
+        
+        $res = array();
+        foreach ($files_to_remove as $file) {
+
+            if(file_exists($file)){
+                if(unlink($file)) array_push($res, $file);
+            }
+        }
+        $rv['result'] = $res;
+        
+    }else{
+
     
     //1. to remove from recUploadedFiles and delete file
-    $files = $data['orphaned'];
+    $files = @$data['orphaned'];
     $ids = array();
+    if(is_array($file_ids))
     foreach ($files as $file) {
 
         $ulf_ID = $file[0];
@@ -78,8 +94,8 @@
     }
     
     //2. to remove from recUploadedFiles, recDetails
-    $file_ids = $data['notfound'];
-    if(count($file_ids)>0){
+    $file_ids = @$data['notfound'];
+    if(is_array($file_ids) && count($file_ids)>0){
         mysql_query('delete from recDetails where dtl_UploadedFileID in ('.implode(',',$file_ids).')');
         if (mysql_error()) {
             $rv['error'] = "Cannot delete entries from recDetails. mySQL error: " . mysql_error();
@@ -95,7 +111,8 @@
     }
         
     //3. correct path
-    $file_ids = $data['fixpath'];
+    $file_ids = @$data['fixpath'];
+    if(is_array($file_ids))
     foreach ($file_ids as $ulf_ID) {
         
         $filedata = get_uploaded_file_info_internal($ulf_ID, false);
@@ -119,8 +136,10 @@
                             .'"where ulf_ID = '.$ulf_ID);
         }
     }
-        
-        
-    $rv['result'] = "Uploaded files have been repaired.";
+    
+    
+        $rv['result'] = "Uploaded files have been repaired.";
+    }
+    
     print json_format($rv);
 ?>

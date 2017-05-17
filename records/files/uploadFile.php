@@ -162,6 +162,36 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
     }
 
     /**
+    * check if file is already registered
+    */
+    function check_if_register_file($fullname, $needConnect) {
+        
+        if($needConnect){
+            mysql_connection_overwrite(DATABASE);
+        }
+        $path_parts = pathinfo($fullname);
+        $dirname = $path_parts['dirname'].'/';
+        $filename = $path_parts['basename'];
+        
+        // get relative path to db root folder
+        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);
+      
+        $res = mysql_query('select ulf_ID from recUploadedFiles '
+            .'where ulf_FileName = "'.mysql_real_escape_string($filename).'" and '
+            .' (ulf_FilePath = "file_uploads/" or ulf_FilePath = "'.mysql_real_escape_string($relative_path).'")');
+
+        if (mysql_num_rows($res) == 1) {
+            $row = mysql_fetch_assoc($res);
+            $file_id = $row['ulf_ID'];
+            return $file_id;
+        }else{
+            return null;
+        }
+        
+    }
+    
+    
+    /**
     * Registger the file on the server in recUploadedFiles
     *
     * It used in import (from db and folder) to register the existing files
@@ -192,6 +222,12 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             mysql_connection_overwrite(DATABASE);
         }
 
+        //check if such file is already registered
+        $file_id = check_if_register_file($fullname, false);
+        if($file_id>0){
+            return $file_id;
+        }
+        
         //get folder, extension and filename
         $path_parts = pathinfo($fullname);
         $dirname = $path_parts['dirname'].'/';
@@ -205,6 +241,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                 return "Error: mimtype for extension $mimetypeExt is is not defined in database";
             }
         }
+        
 
         if ($size && $size < 1024) {
             $file_size = 1;
@@ -215,42 +252,30 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         // get relative path to db root folder
         $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);
 
-        //check if such file is already registered
-        $res = mysql_query('select ulf_ID from recUploadedFiles '
-            .'where ulf_FileName = "'.mysql_real_escape_string($filename).'" and '
-            .' (ulf_FilePath = "file_uploads/" or ulf_FilePath = "'.mysql_real_escape_string($relative_path).'")');
-
-        if (mysql_num_rows($res) == 1) {
-            $row = mysql_fetch_assoc($res);
-            $file_id = $row['ulf_ID'];
-            return $file_id;
-        }else{
-
-            $toins = array(	'ulf_OrigFileName' => $filename,
-                'ulf_UploaderUGrpID' => get_user_id(),
-                'ulf_Added' => date('Y-m-d H:i:s'),
-                'ulf_MimeExt ' => $mimetypeExt,
-                'ulf_FileSizeKB' => $file_size,
-                'ulf_Description' => $description?$description : NULL,
-                'ulf_FilePath' => $relative_path,
-                'ulf_FileName' => $filename,
-                'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt));
+        $toins = array(	'ulf_OrigFileName' => $filename,
+            'ulf_UploaderUGrpID' => get_user_id(),
+            'ulf_Added' => date('Y-m-d H:i:s'),
+            'ulf_MimeExt ' => $mimetypeExt,
+            'ulf_FileSizeKB' => $file_size,
+            'ulf_Description' => $description?$description : NULL,
+            'ulf_FilePath' => $relative_path,
+            'ulf_FileName' => $filename,
+            'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt));
 
 
 
-            $res = mysql__insert('recUploadedFiles', $toins);
+        $res = mysql__insert('recUploadedFiles', $toins);
 
-            if (!$res) {
-                return "Error registration file $fullname into database";
-            }
-
-            $file_id = mysql_insert_id();
-
-            mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
-
-            return $file_id;
-
+        if (!$res) {
+            return "Error registration file $fullname into database";
         }
+
+        $file_id = mysql_insert_id();
+
+        mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+
+        return $file_id;
+
     }
 
     /**
