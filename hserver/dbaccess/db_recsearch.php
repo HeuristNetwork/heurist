@@ -895,7 +895,8 @@
 
         }
         
-//error_log($istimemap_request.' Q='.$query);                
+//error_log(' Q='.$query);                
+//DEBUG return $system->addError(HEURIST_INVALID_REQUEST,  $query);
 
 //error_log($istimemap_request.' limit '.$aquery["limit"]);
 

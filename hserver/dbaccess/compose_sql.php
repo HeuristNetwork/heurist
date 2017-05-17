@@ -1521,9 +1521,10 @@ class FieldPredicate extends Predicate {
 
         if ($timestamp) {
             $date_match_pred = $this->makeDateClause();
+        }else{
+            $date_match_pred = $match_pred;
         }
-
-
+        
         if($this->field_type_value=='resource'){ //field type is found - search for specific detailtype
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' left join Records link on rd.dtl_Value=link.rec_ID '

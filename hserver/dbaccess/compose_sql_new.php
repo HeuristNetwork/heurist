@@ -740,24 +740,44 @@ class HPredicate {
             $this->field_type = 'freetext';
         }
         
+        $is_empty = $this->isEmptyValue(); //search for empty of not defined value
+        
         $val = $this->getFieldValue();
         if(!$val) return null;
+        
+        $sHeaderField = null;
 
         if($this->field_id=="title"){
 
-            $res = "(r".$this->qlevel.".rec_Title ".$val.")";
+            $sHeaderField = "rec_Title";
 
         }else if($this->field_id=="modified"){
 
-            $res = "(r".$this->qlevel.".rec_Modified ".$val.")";
+            $sHeaderField = "rec_Modified";
             
         }else if($this->field_id=='url'){
             
-            $res = "(r".$this->qlevel.".rec_URL ".$val.")";
+            $sHeaderField = "rec_URL";
 
         }else if($this->field_id=='notes'){
             
-            $res = "(r".$this->qlevel.".rec_ScratchPad ".$val.")";
+            $sHeaderField = "rec_ScratchPad";
+        }
+            
+          
+        if($sHeaderField){    
+            
+            if($is_empty){
+                $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField=='')";    
+            }else{
+                $res = "(r".$this->qlevel.".$sHeaderField ".$val.")";    
+            }
+            
+            
+        }else if( $is_empty ){ //search for records where field value is not defined
+            
+            $res = "NOT exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
+            .$p."dtl_DetailTypeID=".$this->field_id.")";
             
         }else{
             
@@ -848,33 +868,55 @@ class HPredicate {
     function predicateLinkedTo(){
 
         $this->field_type = "link";
-
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
-
-        if($this->query){
-            $this->query->makeSQL();
-            if($this->query->where_clause && trim($this->query->where_clause)!=""){
-                $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+        
+        if($this->isEmptyValue()){
+            
+            $rd = "rd".$this->qlevel;
+            
+            if($this->field_id){
+                //no pointer field
+                $where = "NOT exists (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
+            ."$rd.dtl_DetailTypeID=".$this->field_id.")";
+            
             }else{
-                return null;
+                //no links at all
+                $where = "r$p.rec_ID NOT IN (select rl_SourceID from recLinks where $rl.rl_RelationID is null";
             }
-
+            
+            return array("where"=>$where);
+            
         }else{
-            $val = $this->getFieldValue();
+        
+            $rl = "rl".$p."x".$this->index_of_predicate;
 
-            if(!$this->field_list){
-                $val = "=0";
-                //@todo  findAnyField query
-                //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
+            if($this->query){
+                $this->query->makeSQL();
+                if($this->query->where_clause && trim($this->query->where_clause)!=""){
+                    $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+                }else{
+                    return null;
+                }
+
+            }else{
+                
+                $val = $this->getFieldValue();
+
+                if(!$this->field_list){
+                    $val = "=0";
+                    //@todo  findAnyField query
+                    //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
+                }
             }
+
+            $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
+            (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+            ." AND $rl.rl_TargetID".$val;
+
+            return array("from"=>"recLinks ".$rl, "where"=>$where);
+        
         }
-
-        $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
-        (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
-        ." AND $rl.rl_TargetID".$val;
-
-        return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
 
     /**
@@ -1089,6 +1131,12 @@ class HPredicate {
         }
     }
 
+    /*
+      is search for empty or null value
+    */
+    function isEmptyValue(){
+        return !is_array($this->value) && (strtolower($this->value)=='null');
+    }
 
     /**
     * put your comment there...
