@@ -80,6 +80,8 @@ var cfg_widgets = [
 
     // BORO APPS
     {id:'boro_results', name:'Search Result', widgetname:'boro_results', script:'hclient/widgets/boro/boro_results.js'},
+    {id:'boro_nav', name:'Navigation', widgetname:'boro_nav', script:'hclient/widgets/boro/boro_nav.js'},
+    
     
     //fake app - reference to another layout to include
     {id:'include_layout',name:'Inner Layout', widgetname:'include_layout'}
@@ -229,6 +231,7 @@ var cfg_layouts = [
 
     {id:'boro', name:'Beyond 1914 - Book of Rememberance', theme:'heurist', type:'free', 
                 cssfile:'hclient/widgets/boro/beyond1914.css', template: 'hclient/widgets/boro/boro_main.html'
+       //widgets will be loaded into divs with id "result_pane" and "search_pane" in boro_main.html         
        ,result_pane:{dropable:false,css:{},
                 apps:[{appid:'boro_results', options:{
                     view_mode:'list', hide_view_mode: true, select_mode:'select_single', multiselect:false, showmenu: false
@@ -239,6 +242,11 @@ var cfg_layouts = [
                 {appid:'dh_search', options:{UGrpID:48, search_at_init:152}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
                 //dev
                 //{appid:'dh_search', options:{UGrpID:18, Xsearch_at_init:110}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
+       ,boro_nav:{dropable:false,css:{},
+                apps:[                           
+                //creates navigation menu and loads info pages
+                {appid:'boro_nav', options:{menu_div:'bor-navbar-collapse'}, hasheader:false, 
+                            css:{border:'none', 'background':'none'} }]} 
 /*       ,search_pane:{dropable:false,apps:[{appid:'boro_search', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
     },

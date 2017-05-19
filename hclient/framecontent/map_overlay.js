@@ -65,7 +65,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             detail: 'header',
             source: 'map-doc-select'};
 
-        
             ele.prop('title','');
             ele.empty();
             var btnMapRefresh = $("#btnMapRefresh");
@@ -123,7 +122,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _loadMapDocumentById() {
 
-        console.log('load '+current_map_document_id);    
+console.log('load '+current_map_document_id);    
 
         // Clean old data
         $('#map_extents').css('visibility','hidden');
@@ -163,6 +162,11 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     }
 
     function _getMapDocumentDataById(mapdocument_id) {    
+        
+        if(typeof mapdocument_id==='undefined'){
+              mapdocument_id = current_map_document_id; 
+        }
+        
         //find mapdoc data
         if(mapdocument_id>0 && map_data)
             for(var i=0;i<map_data.length;i++){
@@ -511,7 +515,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     // assign listeners for checkboxes
     //
     function _initLegendListeners() {
-        if(Object.keys(overlays_not_in_doc).length + Object.keys(overlays).length>0){
+        if(mapping.options('legendVisible') &&
+            (Object.keys(overlays_not_in_doc).length + Object.keys(overlays).length)>0){
+                
             $("#map_legend").show();
         }else{
             $("#map_legend").hide();

@@ -148,14 +148,18 @@ require_once(dirname(__FILE__)."/initPage.php");
             _adjustLegendHeight();
         };
 
-        <?php if(@$_REQUEST['notimeline']){ ?>
+
+        if(window.hWin.HEURIST4.util.getUrlParameter('notimeline', location.search)){
             layout_opts.south__size = 0;
             layout_opts.south__spacing_open = 0;
             layout_opts.south__spacing_closed = 0;
-            <?php }
-        if(@$_REQUEST['noheader']){ ?>
+        }
+        
+        if(window.hWin.HEURIST4.util.getUrlParameter('noheader') || 
+           window.hWin.HEURIST4.util.getUrlParameter('header', location.search)=='off'){
             layout_opts.north__size = 0;
-            <?php } ?>
+        }
+        
 
         var mylayout = $('#mapping').layout(layout_opts);
 
@@ -163,7 +167,12 @@ require_once(dirname(__FILE__)."/initPage.php");
         var mapdata = [];
         mapping = new hMapping("map", "timeline", window.hWin.HAPI4.baseURL, mylayout);
 
-        var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
+        if(window.hWin.HEURIST4.util.getUrlParameter('legend', location.search)=='off'){
+            mapping.options('legendVisible', false);
+        }
+        
+        var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
+        
         //t:26 f:85:3313  f:1:building
         // Perform database query if possible (for standalone mode - when map.php is separate page)
         if( !window.hWin.HEURIST4.util.isempty(q) )
@@ -198,7 +207,13 @@ require_once(dirname(__FILE__)."/initPage.php");
                 }
             );
         } else {
-            mapping.load();//load empty map
+            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
+            if(mapdocument>0){
+                mapping.load(null, null, mapdocument);//load with map document
+            }else{
+                mapping.load();//load empty map    
+            }
+            
         }
 
         //init popup for timeline  ART14072015
@@ -372,7 +387,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     }
     
     function _adjustLegendHeight() {
-
+        
         setTimeout(function(){
             var legend = document.getElementById('map_legend');
             var ch = $("#map_legend .content").height()+65;

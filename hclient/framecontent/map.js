@@ -38,6 +38,12 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     mylayout,         // layout object that contains map and timeline
     _curr_layout = null; // keep current layout sets to avoid redundant update
 
+    var options = {
+        legendVisible: true,
+        defaultZoom: 2
+        //to be extended
+    };
+    
     var tmap = null,  // timemap object
     vis_timeline = null, // vis timeline object
     vis_timeline_range = null,
@@ -45,7 +51,6 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     drawingManager,     //manager to draw the selection rectnagle
     lastSelectionShape,
 
-    defaultZoom = 2,
     keepMinDate = null,
     keepMaxDate = null,
     keepMinMaxDate = true,
@@ -873,6 +878,7 @@ console.log('tileloaded 2');
                     // loading the list of map documents  see map_overlay.js
                     that.map_control = new hMappingControls(that, __startup_mapdocument);
 
+                    
                     $("#map-settingup-message").hide();
                     $(".map-inited").show();
 
@@ -959,7 +965,7 @@ console.log('tileloaded 2');
                 datasets: _mapdata,
 
                 options: {
-                    mapZoom: defaultZoom,
+                    mapZoom: options['defaultZoom'],
                     theme: customTheme,
                     eventIconPath: window.hWin.HAPI4.iconBaseURL,
                     useMarkerClusterer: useMarkerClusterer,
@@ -1459,7 +1465,17 @@ console.log('tileloaded 2');
                 //if(!item.opts.info){
                 //    return;   //supress popup
                 //}else 
-                if(item.opts.info && item.opts.info.indexOf('http://')==0){
+                
+                var mapdocument = that.map_control.getMapDocumentDataById(); //get current map document
+                   
+                mapdocument = {popup_template:'Person connected to Place via Events.tpl'};
+                    
+                if(false && mapdocument.popup_template){
+                                                                                                                         
+                    popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?h4=1&w=a&db='+window.hWin.HAPI4.database
+                            +'&q=ids:'+item.opts.recid+'&template='+encodeURIComponent(mapdocument.popup_template);
+                
+                }else if(item.opts.info && item.opts.info.indexOf('http://')==0){
                     popupURL =  item.opts.info; //load content from url
                 }else{
                     popupURL = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='
@@ -1469,7 +1485,7 @@ console.log('tileloaded 2');
                 }
 
             }else{
-                //compose content of popup dynamically
+                //compose content of popup dynamically - workable NOT USED - in favour of renderRecordData.php
 
                 var recID       = item.opts.recid,
                     rectypeID   = item.opts.rectype,
@@ -1761,7 +1777,14 @@ ed_html +
                 tmap.opts[name] = value;
             }
         },
-
+        
+        options: function(key, value){
+            if(typeof value==="undefined"){
+                return options[key];
+            }else{
+                options[key] = value;
+            }
+        },
 
         //@todo - separate this functionality to different classes
         map_control: null,    //controls layers on map - add/edit/remove

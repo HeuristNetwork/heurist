@@ -129,7 +129,7 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
  
  _renderSearchInfoMsg: function(data){
      
-console.log('_renderSearchInfoMsg empty:'+(data==null));     
+//console.log('_renderSearchInfoMsg empty:'+(data==null));     
 
     this._super( data ); 
     

@@ -197,7 +197,7 @@ $.widget( "heurist.dh_search", {
                     
                 }else if(e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
 //alas it does not work - it is triggered before this widget is created                    
-console.log(' INITED! ');
+//console.log(' INITED! ');
                     
                     if(that._isDigitalHarlem){
                      
@@ -218,28 +218,32 @@ console.log(' INITED! ');
                 
         });
 
-        //find on page external search_value and search_button elements  - for BORO external search form
-        var ele_search = $('#search_query'); //$(window.hWin.document).find('#search_query');
-        if(ele_search.length>0){
-            
-            this._on( ele_search, {
-                keypress: function(e){
-                    var code = (e.keyCode ? e.keyCode : e.which);
-                    if (code == 13) {
-                        window.hWin.HEURIST4.util.stopEvent(e);
-                        e.preventDefault();
-                        that._doSearch3( ele_search.val() );
+        if(window.hWin.HAPI4.sysinfo['layout']=='boro'){
+            //find on page external search_value and search_button elements  - for BORO external search form
+            var ele_search = $('#search_query'); //$(window.hWin.document).find('#search_query');
+            if(ele_search.length>0){
+                
+                this._on( ele_search, {
+                    keypress: function(e){
+                        var code = (e.keyCode ? e.keyCode : e.which);
+                        if (code == 13) {
+                            window.hWin.HEURIST4.util.stopEvent(e);
+                            e.preventDefault();
+                            $('.bor-page-search').find('.clearfix').hide();
+                            $('.bor-search-results').show();
+                            that._doSearch3( ele_search.val() );
+                        }
                     }
-                }
-            });
-            
-            var btn_search = $('#search_button');
-            this._on( btn_search, {
-                click:  function(){
-                    that._doSearch3( ele_search.val() );}
-            });
-
-            
+                });
+                
+                var btn_search = $('#search_button');
+                this._on( btn_search, {
+                    click:  function(){
+                            $('.bor-page-search').find('.clearfix').hide();
+                            $('.bor-search-results').show();
+                            that._doSearch3( ele_search.val() );}
+                });
+            }
         }
         
     }, //end _create

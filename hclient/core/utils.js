@@ -365,7 +365,7 @@ window.hWin.HEURIST4.util = {
         if( results == null ) {
             return null;
         } else {
-            return results[1];
+            return decodeURIComponent(results[1]);
         }
     },
 

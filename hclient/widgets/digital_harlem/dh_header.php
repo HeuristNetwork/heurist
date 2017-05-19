@@ -69,14 +69,15 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
                 <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{location.reload(true);}">HOME</a></div>
                 <?php
                 if(true){
-                    // Building query
+                    // Building query  - search for "Web Content" records (id 25)
                     $query = 'SELECT rec_ID id, rec_Title as title, d1.dtl_Value as content, d2.dtl_Value as ord, '
                     .' d3.dtl_Value as btn_title'
                     .' FROM Records '
-                    .' left join recDetails d2 on rec_ID=d2.dtl_recID and d2.dtl_DetailTypeID=94 '  //order 
+                    .' left join recDetails d2 on rec_ID=d2.dtl_recID and d2.dtl_DetailTypeID='.DT_ORDER  //order 
                     .' , recDetails d1, recDetails d3 '   
-                    .' WHERE rec_ID=d1.dtl_recID and rec_RecTypeID=25 and d1.dtl_DetailTypeID=4 and ' //content
-                    .' rec_ID=d3.dtl_recID and d3.dtl_DetailTypeID=1 '   //title
+                    .' WHERE rec_ID=d1.dtl_recID and rec_RecTypeID='.RT_WEB_CONTENT
+                    .' and d1.dtl_DetailTypeID='.DT_EXTENDED_DESCRIPTION.' and ' //content
+                    .' rec_ID=d3.dtl_recID and d3.dtl_DetailTypeID='.DT_NAME   //title
                     .' ORDER BY d2.dtl_Value';
 
 

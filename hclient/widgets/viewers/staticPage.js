@@ -1,8 +1,8 @@
 /**
-* Integration with existing Vsn 3 applications - mapping and smarty reports
-* Working with current result set and selection
-* External application are loaded in iframe
-*
+* Content of options.url to be loaded either in iframe or in widget element
+* Url may have [layout] and [dbname] parameters
+* 
+* 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2016 University of Sydney
@@ -25,7 +25,8 @@ $.widget( "heurist.staticPage", {
     // default options
     options: {
         title: '',
-        url:null
+        url:null,
+        isframe: false
     },
 
     _loaded_url:null,

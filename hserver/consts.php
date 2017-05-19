@@ -184,8 +184,10 @@ $rtDefines = array(
     'RT_GEOTIFF_SOURCE' => array(3, 1018),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),
-    'RT_QUERY_SOURCE' => array(3, 1021)  //RT_MAPABLE_QUERY
+    'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
 
+    //Web content
+    'RT_WEB_CONTENT' => array(1147, 25)
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -253,6 +255,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_JOURNAL_REFERENCE' => array(3, 1034),
     'DT_MEDIA_REFERENCE' => array(3, 508), //*******************ERROR  THIS IS MISSING
     'DT_TEI_DOCUMENT_REFERENCE' => array(3, 1045), //TODO : change DT_XML_DOCUMENT_REFERENCE with new update.
+    'DT_ORDER' => array(1147, 94), //order of web content - origin DH
     // Spatial & mapping
     'DT_KML_FILE' => array(3, 1044),
     'DT_KML' => array(3, 1036),
