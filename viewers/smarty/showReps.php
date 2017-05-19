@@ -125,6 +125,8 @@ function executeSmartyTemplate($params){
             $params["limit"] = PHP_INT_MAX;
         }
     }
+    
+    $recIDs = array();
 
     if(@$params['recordset']){ //we already have the list of record ids
 

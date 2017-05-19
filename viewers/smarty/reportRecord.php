@@ -146,26 +146,36 @@ class ReportRecord {
                 $rec_ID = $rec;
             }
             
-            $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID in (';
+            $where = ' WHERE ';  
             
-            if(is_array($rty_ID)){
-                if(count($rty_ID)>0){
-                    $where = $where.implode(',',$rty_ID).') and ';
+            if($rty_ID!=null){
+                if(is_int($rty_ID) && $rty_ID>0) 
+                {
+                    $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID='.$rty_ID.' AND ';
+                }else{
+                    if(!is_array($rty_ID)){
+                        $ids = explode(',', $rty_ID);
+                    }
+                    $ids = array_map('intval', $ids);
+                    if(count($ids)>1){
+                        $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID in ('
+                                 .implode(',', $ids).') and ';
+                    }
                 }
-            }else if(is_int(rty_ID)){
-                $where = $where.$rty_ID.') and ';
-            }else {
-                $where = ' WHERE ';
             }
         
             $to_records = array();
             $from_records = array();
             
             // get rel records where current record is source
-            $from_res = mysql_query('SELECT rl_TargetID as linkID FROM recLinks '.$where.' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID);
+            $from_res = mysql_query('SELECT rl_TargetID as linkID FROM recLinks '
+                    .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID);
 
             // get rel records where current record is target
-            $to_res = mysql_query('SELECT rl_SourceID as linkID FROM recLinks '.$where.' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID);
+            $to_query = 'SELECT rl_SourceID as linkID FROM recLinks '
+            .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
+
+            $to_res = mysql_query($to_query);
 
             if (mysql_num_rows($from_res) > 0  ||  mysql_num_rows($to_res) > 0) {
 
@@ -179,7 +189,9 @@ class ReportRecord {
                 }
             }
             
-            return array('linkedto'=>$to_records, 'linkedfrom'=>$from_records);
+            $res = array('linkedto'=>$to_records, 'linkedfrom'=>$from_records);
+          
+            return $res;
     }
     
     
