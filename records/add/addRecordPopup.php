@@ -316,13 +316,16 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
             </div>
 
 
-            <div class="input-row" style="text-align: center;<?= (@$_REQUEST['wg_id']>0 || $showAccessRights) ? "display:none" : ""?>" id="currSettings">
+            <div class="input-row" style="text-align: center;<?= (@$_REQUEST['wg_id']>0 || $showAccessRights) ? "display:none" : ""?>">
+                <div class="input-header-cell" style="vertical-align:inherit;"><b>Access settings</b></div>
+                <div class="input-cell" id="currSettings">
+                </div>
             </div>
 
             <div class="input-row">
 
-                <div class="input-header-cell" style="padding-top: 20px;"><b>Access settings</b>
-                </div>
+                
+                
 
                 <div class="resource workgroup" style="margin:10px 0">
                     <div class="input-row workgroup">
