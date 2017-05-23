@@ -138,7 +138,7 @@ class ReportRecord {
     //
     //
     //
-    public function getLinkedRecords($rec, $rty_ID=null, $smarty_obj=null){
+    public function getLinkedRecords($rec, $rty_ID=null, $direction=null, $smarty_obj=null){
         
             if(is_array($rec) && $rec['recID']){
                 $rec_ID = $rec['recID'];
@@ -167,25 +167,32 @@ class ReportRecord {
             $to_records = array();
             $from_records = array();
             
-            // get rel records where current record is source
-            $from_res = mysql_query('SELECT rl_TargetID as linkID FROM recLinks '
-                    .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID);
+            if($direction==null || $direction=='linkedfrom'){
+                // get linked records where current record is source
+                $from_query = 'SELECT rl_TargetID as linkID FROM recLinks '
+                    .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID;
+//error_log('from '.$from_query);
+                $from_res = mysql_query($from_query);
+                if (mysql_num_rows($from_res) > 0){
+                    //find sources
+                    while ($row = mysql_fetch_row($from_res)) {
+                        array_push($from_records, $row[0]);
+                    }
+                }    
+            }
 
-            // get rel records where current record is target
-            $to_query = 'SELECT rl_SourceID as linkID FROM recLinks '
-            .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
+            if($direction==null || $direction=='linkedto'){
+                // get linked records where current record is target
+                $to_query = 'SELECT rl_SourceID as linkID FROM recLinks '
+                    .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
 
-            $to_res = mysql_query($to_query);
-
-            if (mysql_num_rows($from_res) > 0  ||  mysql_num_rows($to_res) > 0) {
-
-                //find targets
-                while ($row = mysql_fetch_row($from_res)) {
-                    array_push($to_records, $row[0]);
-                }
-                //find sources
-                while ($row = mysql_fetch_row($to_res)) {
-                    array_push($from_records, $row[0]);
+                $to_res = mysql_query($to_query);
+//error_log('to '.$to_query);
+                if (mysql_num_rows($to_res) > 0) {
+                    //find targets
+                    while ($row = mysql_fetch_row($to_res)) {
+                        array_push($to_records, $row[0]);
+                    }
                 }
             }
             
