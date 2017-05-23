@@ -100,7 +100,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
         
         <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_search.js"></script>
-        <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_maps.js"></script>
+        <script type="text/javascript" src="hclient/widgets/boro/boro_place.js"></script>
+        <script type="text/javascript" src="hclient/widgets/boro/boro_nav.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
 
         <!-- DEBUG -->
@@ -126,7 +127,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript">
 
            function onPageInit(success){
-
+               
                 if(!success) return;
                 
                 // OLD H3 stuff
@@ -143,7 +144,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
 
                 
-                $( "#heurist-about" ).dialog("close");
+                if($( "#heurist-about" ).dialog){
+                    $( "#heurist-about" ).dialog("close");
+                }
                 
                 //
                 // init layout

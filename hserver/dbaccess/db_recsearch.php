@@ -714,6 +714,8 @@
                         //$params3['detail'] = 'ids';  //no need in details for preliminary results  ???????
                     }
 
+//DEBUg  error_log(print_r($params3,true));                    
+                    
                     $response = recordSearch($system, $params3);
 
                     if($response['status'] == HEURIST_OK){
@@ -895,7 +897,8 @@
 
         }
         
-//error_log(' Q='.$query);                
+//
+error_log(' Q='.$query);                
 //DEBUG return $system->addError(HEURIST_INVALID_REQUEST,  $query);
 
 //error_log($istimemap_request.' limit '.$aquery["limit"]);

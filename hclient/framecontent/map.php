@@ -121,6 +121,12 @@ require_once(dirname(__FILE__)."/initPage.php");
     function onPageInit(success){
 
         if(!success) return;
+        
+        var lt = window.hWin.HAPI4.sysinfo['layout'];
+        if(lt=='boro'){
+                $("head").append($('<link rel="stylesheet" type="text/css" href="'
+                    +window.hWin.HAPI4.baseURL+'hclient/widgets/boro/beyond1914.css?t='+(new Date().getTime())+'">'));
+        }        
 
         // Layout options
         var layout_opts =  {
@@ -185,7 +191,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                         // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                         var recset = new hRecordSet(response.data);
-                        
+                       
                         //var mapdataset = recset.toTimemap();
                         //mapping.load([mapdataset]);
                         

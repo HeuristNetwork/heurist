@@ -98,10 +98,10 @@ $.widget( "heurist.boro_nav", {
     _constructNavigationMenu: function( recordset ){
     
         var that = this;
-        var ele = $('#'+this.options.menu_div);
+        var menu_ele = $('#'+this.options.menu_div);
         
-        ele.empty();    
-        
+        menu_ele.empty();    
+
         var recs = recordset.getRecords();
         var rec_order = recordset.getOrder();
         var idx=0, recID;
@@ -120,14 +120,10 @@ $.widget( "heurist.boro_nav", {
                     //that.data_content[recID]
                     var content = recordset.fld(recs[recID], 
                                     window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']);
-                                    
-                    if($('.bor-page-'+recID).length==1){ 
-                       $('.bor-page-'+recID).empty(); 
-                    }else{
-                        $('<div>').addClass('clearfix bor-page-'+recID).appendTo($('#main_pane'));
-                    }                                    
-                  
-                    $('.bor-page-'+recID).html( content );      
+                     
+                    var ele = that._addClearPageDiv(recID);                
+
+                    ele.html( content );      
             }
         }//for
         //add two special items - People and Search
@@ -135,7 +131,7 @@ $.widget( "heurist.boro_nav", {
             +'<li><a href="#" class="nav-link" data-id="people">People</a></li>'
             +'<li><a href="#" class="nav-link" data-id="search">Search</a></li></ul>';
         
-        ele.html(html);
+        menu_ele.html(html);
         
         /*
         $('.bor-dismiss-veil').click(function(event){
@@ -144,7 +140,7 @@ $.widget( "heurist.boro_nav", {
         });
         */
          
-        ele.find('.nav-link').click(function(event){
+        menu_ele.find('.nav-link').click(function(event){
             var recID = $(event.target).attr('data-id');
             window.hWin.HEURIST4.util.stopEvent(event);
             
@@ -153,7 +149,90 @@ $.widget( "heurist.boro_nav", {
             //show selected 
             $('.bor-page-'+recID).show();
         });
-        $(ele.find('.nav-link')[0]).click();
-    }
+        
+        var placeID = window.hWin.HEURIST4.util.getUrlParameter('placeid');
+        var profileID = window.hWin.HEURIST4.util.getUrlParameter('profileid');
+        
+        if(placeID>0){
 
+            
+            var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_place');
+            if(app1 && app1.widget){
+                $('#main_pane').find('.clearfix').hide();
+                $('.bor-page-place').show();
+                $(app1.widget).boro_place('option', 'placeID', placeID);
+            }
+
+            //this.recordResolver( 'place', placeID );
+            
+        }else if(profileID>0){
+            this.recordResolver( 'profile', profileID );
+        }else{
+            $(menu_ele.find('.nav-link')[0]).click();
+        }
+    },
+
+    //
+    // add/clear page div on main_pane
+    //
+    _addClearPageDiv: function( recID ){
+            var ele = $('.bor-page-'+recID); 
+            
+            if(ele.length==1){ 
+                
+               ele.empty(); 
+               return ele;
+            }else{
+                return $('<div>').addClass('clearfix bor-page-'+recID).appendTo($('#main_pane'));
+            }                                    
+    },
+    
+    //
+    // executes smarty template for record
+    //    
+    recordResolver: function( sType, recID ){
+    
+            var ele = this._addClearPageDiv( sType );
+        
+            //hide all 
+            $('#main_pane').find('.clearfix').hide();
+            //show selected 
+            ele.show();
+            //load and execute smarty template for record
+            
+            var sURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?h4=1&w=a&db='+window.hWin.HAPI4.database
+                            +'&q=ids:'+recID+'&template=BoroProfileOrPlace.tpl';
+            
+            ele.load(sURL);
+    }
+    
 });
+
+
+function boroResolver(event){
+
+    var url = $(event.target).attr('href');
+    var params = url.split('/');
+    if(params.length>2){
+        var recID = params[params.length-2];
+        var type = params[params.length-3];
+        
+        window.hWin.HEURIST4.util.stopEvent(event);
+        
+       if(recID>0){
+            var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_'+type);
+            if(app1 && app1.widget){
+                var hdoc = $(window.hWin.document);
+                hdoc.find('#main_pane > .clearfix').hide();
+                hdoc.find('.bor-page-'+type).show();
+                hdoc.scrollTop(0);
+                if(type=='place'){
+                    $(app1.widget).boro_place('option', type+'ID', recID);    
+                }else{
+                    $(app1.widget).boro_profile('option', type+'ID', recID);    
+                }
+            }
+       }
+    }   
+}
+

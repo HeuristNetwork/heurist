@@ -76,11 +76,11 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
 
         this._super( pageno, recordset, is_retained_selection );
 
-               $('.div-result-list-content').css('overflow','hidden');
-               var newHeight = $('.div-result-list-content')[0].scrollHeight + 100;
-               if (newHeight<500) newHeight = 500;
+        this.div_content.css('overflow','hidden');
+        var newHeight = $(this.div_content)[0].scrollHeight + 100;
+        if (newHeight<500) newHeight = 500;
                
-        $('.bor-search-results').height( newHeight );
+        $('.bor-page-search').height( newHeight );
   },    
     
  //<h3 class="bor-section-title">Results</h3>   
@@ -95,24 +95,28 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
             DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
    
         var fullName = fld(DT_GIVEN_NAMES)+' '+fld(DT_NAME);
+        var profileLink = 'href="'+window.hWin.HAPI4.baseURL+'profile/'+fld('rec_ID')+'/a" onclick="{window.hWin.boroResolver(event);}"';
    
         //get thumbnail if available for this record, or generic thumbnail for record type
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
             html_thumb = 
-                '<a href="#" class="bor-stop-image ab-dark" data-ab-yaq="19" style="background-color: rgb(19, 19, 19);">'
+                '<a '+profileLink+' class="bor-stop-image ab-dark" data-ab-yaq="19" style="background-color: rgb(19, 19, 19);">'
                 +'<img src="'+fld('rec_ThumbnailURL')+'" alt="Photograph of '+fullName
                 +'" data-adaptive-background="1" data-ab-color="rgb(19,19,19)"></a>';
             //'<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
         }else{
-            html_thumb = '<a href="#" class="bor-stop-image bor-stop-image-placeholder"></a>';
+            html_thumb = '<a '+profileLink+' class="bor-stop-image bor-stop-image-placeholder"></a>';
         }
+   
+              +'<a >'
+   
    
         var html = 
                 '<div class="bor-search-result bor-stop bor-stop-large">'
                 + html_thumb
                 + '<div class="bor-stop-description">'
-                +     '<h3><a href="#">'+fullName+'</a></h3>'
+                +     '<h3><a '+profileLink+'>'+fullName+'</a></h3>'
                 +     '<p class="bor-search-result-text">'+fld(DT_EXTENDED_DESCRIPTION)+'</p>'
                 + '</div>'
                 +'</div>';

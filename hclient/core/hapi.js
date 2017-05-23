@@ -634,7 +634,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             //          UGrpID
             //          recIDs - record ids
             //          info - full or short
-            // responce  recIDs
+            // response  recIDs
             //
             ,tag_get: function(request, callback){
                 if(request) request.a = 'search';

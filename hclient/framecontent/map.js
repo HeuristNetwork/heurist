@@ -781,7 +781,7 @@ if(_mapdata.limit_warning){
 
                     $( document ).bubble( "option", "content", "" );
                     _showSelection(true, true); //show selction on map
-                    _onSelectEventListener.call(that, selection); //trigger global selection event
+                    if(_onSelectEventListener)_onSelectEventListener.call(that, selection); //trigger global selection event
                 }
             });
 
@@ -1168,7 +1168,7 @@ console.log('tileloaded 2');
         //reset and highlight selection
         _showSelection(true);
         //trigger selection - to highlight on other widgets
-        _onSelectEventListener.call(that, selection);
+        if(_onSelectEventListener)_onSelectEventListener.call(that, selection);
     }
 
 
@@ -1185,7 +1185,7 @@ console.log('tileloaded 2');
         selection = [this.opts.recid];
         _showSelection(true);
         //trigger global selection event - to highlight on other widgets
-        _onSelectEventListener.call(that, selection);
+        if(_onSelectEventListener) _onSelectEventListener.call(that, selection);
         //TimeMapItem.openInfoWindowBasic.call(this);
     }
 
@@ -1460,23 +1460,39 @@ console.log('tileloaded 2');
             var ed_html =  '';
             var popupURL = null;
 
+            //popup can be shown
+            // 1. as a result of mapdocument smarty template  (popupURL)  - expermental
+            // 2. renderRecordData.php output (default)  (popupURL) - defaul
+            // 3. item.opts.info - popupURL or html content - filled in _toTimemap as rec_Info field content 
+            //              - this is main customization way for DH
+            // 4. html content is created from item.opts values here - deprecated way
+            
+            
             if(true){ //Since 2016-11-17 use common renderRecordData !window.hWin.HEURIST4.util.isnull(item.opts.info)){
 
                 //if(!item.opts.info){
                 //    return;   //supress popup
                 //}else 
-                
+
+                var mapdocument = null;
+                /*                
                 var mapdocument = that.map_control.getMapDocumentDataById(); //get current map document
-                   
                 mapdocument = {popup_template:'Person connected to Place via Events.tpl'};
+                mapdocument = {popup_template:'BoroPlaceOnMap.tpl'};
+                */
                     
-                if(false && mapdocument.popup_template){
-                                                                                                                         
+                if(mapdocument && mapdocument.popup_template){
+                                               
                     popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?h4=1&w=a&db='+window.hWin.HAPI4.database
                             +'&q=ids:'+item.opts.recid+'&template='+encodeURIComponent(mapdocument.popup_template);
-                
-                }else if(item.opts.info && item.opts.info.indexOf('http://')==0){
-                    popupURL =  item.opts.info; //load content from url
+
+            
+                }else if(item.opts.info){
+                    if(item.opts.info.indexOf('http://')==0){
+                        popupURL =  item.opts.info; //load content from url
+                    }else{
+                        html =  item.opts.info; //content already defined
+                    }
                 }else{
                     popupURL = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='
                             +item.opts.recid+'&db='+window.hWin.HAPI4.database;
@@ -1485,7 +1501,7 @@ console.log('tileloaded 2');
                 }
 
             }else{
-                //compose content of popup dynamically - workable NOT USED - in favour of renderRecordData.php
+                //compose content of popup dynamically - workable although NOT USED - in favour of renderRecordData.php
 
                 var recID       = item.opts.recid,
                     rectypeID   = item.opts.rectype,

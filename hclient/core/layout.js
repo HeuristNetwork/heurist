@@ -803,9 +803,10 @@ function hLayout(args) {
 
                    widget = $content.dh_search( options );
 
-            }else if(app.widgetname=='dh_maps'){
-
-                   widget = $content.dh_maps( options );
+            }else if(app.widgetname=='boro_place'){
+                   widget = $content.boro_place( options );
+            }else if(app.widgetname=='boro_nav'){
+                   widget = $content.boro_nav( options );
             }else
                     {
                         //this is normal way of widget initialization

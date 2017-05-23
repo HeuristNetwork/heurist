@@ -393,6 +393,7 @@ window.hWin.HEURIST4.util = {
         if (e) {
             e.cancelBubble = true;
             if (e.stopPropagation) e.stopPropagation();
+            e.preventDefault();
         }
         return e;
     },

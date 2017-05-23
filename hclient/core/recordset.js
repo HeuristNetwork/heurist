@@ -288,6 +288,8 @@ function hRecordSet(initdata) {
                             end: (endDate && endDate!=startDate)?endDate:'',
                             placemarks:[],
                             options:{
+                                eventIconImage: iconId + 'm.png',
+                                icon: window.hWin.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor),
 
                                 description: description,
                                 //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
@@ -297,9 +299,6 @@ function hRecordSet(initdata) {
                                 rectype: recTypeID,
                                 iconId: iconId,
                                 title: recName,
-                                
-                                eventIconImage: iconId + 'm.png',
-                                icon: window.hWin.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor),
                                 
                                 //color on dataset level works once only - timemap bug
                                 color: iconColor,
@@ -513,6 +512,8 @@ function hRecordSet(initdata) {
     function _getFieldValues(record, fldname){
         if(!isnull(record) && record['d'] && record['d'][fldname]){   
             return record['d'][fldname]
+        }else{
+            return null;
         }
     }
 
@@ -527,6 +528,10 @@ function hRecordSet(initdata) {
 
         if(isnull(record)){
             return null;
+        }
+        
+        if(that.calcfields && $.isFunction(that.calcfields[fldname])){
+            return that.calcfields[fldname].call(that, record, fldname);
         }
         
         //this is field type ID  or field name (nominal for most common fields)
@@ -588,7 +593,13 @@ function hRecordSet(initdata) {
             if(!d){
                 record['d'] = {};
             }
-            record['d'][fldname] = [newvalue];
+            if($.isArray(newvalue)){
+                record['d'][fldname] = newvalue;
+            }else{
+                record['d'][fldname] = [newvalue];    
+            }
+            
+            
         }else {
 
             var idx = $.inArray(fldname, fields);
@@ -607,6 +618,8 @@ function hRecordSet(initdata) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
         entityName:'',
+        calcfields:{}, //set of callback functions for calculation fields
+                       // is is used tp generate value for rec_Info field for mapping popup
 
         /**
         * Returns field value by fieldname for given record

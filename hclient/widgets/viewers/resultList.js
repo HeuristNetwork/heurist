@@ -647,6 +647,7 @@ $.widget( "heurist.resultList", {
     //
     updateResultSet: function( recordset, request ){
 
+        this.loadanimation(false);
         this._clearAllRecordDivs(null);
         this._renderPagesNavigator();
         this._renderRecordsIncrementally(recordset);
@@ -1658,8 +1659,8 @@ $.widget( "heurist.resultList", {
                     id: that.current_page,
                     source:this.element.attr('id') };
 
-                window.hWin.HAPI4.RecordMgr.search(request, function(responce){
-                    that._onGetFullRecordData(responce, rec_toload);   
+                window.hWin.HAPI4.RecordMgr.search(request, function(response){
+                    that._onGetFullRecordData(response, rec_toload);   
                 });
             }
 

@@ -267,7 +267,7 @@ function hSearchMinimalDigitalHarlem() {
                   primary_rt = RT_ADDRESS;
             }
         } 
-console.log('primary '+primary_rt);
+//console.log('primary '+primary_rt);
 
         var is_Riot = '';
         if(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
