@@ -9,7 +9,7 @@
         HEURIST_FILESTORE_DIR."generated-reports/",
         HEURIST_FILESTORE_DIR."scratch/",
         HEURIST_FILESTORE_DIR."settings/",
-        HEURIST_FILESTORE_DIR.'term-images/',
+        HEURIST_FILESTORE_DIR.'term-icons/',
         HEURIST_SMARTY_TEMPLATES_DIR,
         HEURIST_XSL_TEMPLATES_DIR);
     if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);

@@ -72,7 +72,7 @@
     //1. to remove from recUploadedFiles and delete file
     $files = @$data['orphaned'];
     $ids = array();
-    if(is_array($file_ids))
+    if(is_array($files))
     foreach ($files as $file) {
 
         $ulf_ID = $file[0];
@@ -114,26 +114,44 @@
     $file_ids = @$data['fixpath'];
     if(is_array($file_ids))
     foreach ($file_ids as $ulf_ID) {
-        
+
+
         $filedata = get_uploaded_file_info_internal($ulf_ID, false);
+        
         if($filedata!=null){
 
             $filename = $filedata['fullpath'];
             
-            chdir(HEURIST_FILESTORE_DIR);  // relatively db root
-            $fpath = realpath($filename);
-            if(!$fpath || !file_exists($fpath)){
-                chdir(HEURIST_FILES_DIR);  // relatively db root
+            $is_local = (strpos($filename,'http://')===false && strpos($filename,'https://')===false);
+            
+            if($is_local){
+            
+                chdir(HEURIST_FILESTORE_DIR);  // relatively db root
                 $fpath = realpath($filename);
+                if(!$fpath || !file_exists($fpath)){
+                    chdir(HEURIST_FILES_DIR);  // relatively db root
+                    $fpath = realpath($filename);
+                }
+                $path_parts = pathinfo($fpath);
+                $dirname = $path_parts['dirname'].'/';
+                $file_name = $path_parts['filename'];
+                
+                $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                
+                $query = 'update recUploadedFiles set ulf_FilePath="'
+                                .mysql_real_escape_string($relative_path)
+                                .'", ulf_FileName="'
+                                .mysql_real_escape_string($file_name).'" where ulf_ID = '.$ulf_ID;
+                mysql_query($query);
+                
+            }else{
+
+                $query = 'update recUploadedFiles set ulf_ExternalFileReference="'
+                                .mysql_real_escape_string($filename)
+                                .'", ulf_FilePath=NULL, ulf_FileName=NULL where ulf_ID = '.$ulf_ID;
+                mysql_query($query);
+                  
             }
-            $path_parts = pathinfo($fpath);
-            $dirname = $path_parts['dirname'].'/';
-            
-            $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
-            
-            mysql_query('update recUploadedFiles set ulf_FilePath="'
-                            .mysql_real_escape_string($relative_path)
-                            .'"where ulf_ID = '.$ulf_ID);
         }
     }
     

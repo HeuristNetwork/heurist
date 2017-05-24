@@ -109,10 +109,12 @@ if (isForAdminOnly()) exit();
             
             if( $res['db_fullpath']!=null && @$res['res_fullpath'] ){
             
+                $is_local = (strpos($res['db_fullpath'],'http://')===false && strpos($res['db_fullpath'],'https://')===false);
+                
                 if($currentRecID==null){
                     $files_orphaned[$res['ulf_ID']]['isfound'] = file_exists($res['res_fullpath'])?1:0;
                 }else
-                if ( !file_exists($res['res_fullpath']) ){
+                if ( $is_local && !file_exists($res['res_fullpath']) ){
                     //file not found
                     $files_notfound[$res['ulf_ID']] = array(
                                     'ulf_ID'=>$res['ulf_ID'], 
@@ -120,7 +122,7 @@ if (isForAdminOnly()) exit();
                                     'rec_ID'=>$currentRecID,
                                     'is_remote'=>!@$res['ulf_ExternalFileReference'] );
                     
-                }else{
+                }else if($is_local) {
 
                     chdir(HEURIST_FILESTORE_DIR);  // relatively db root
 
@@ -141,25 +143,38 @@ if (isForAdminOnly()) exit();
                     
                     //check that the relative path is correct
                     $path_parts = pathinfo($fpath);
-                    $dirname = $path_parts['dirname'].'/';
+                    if(!@$path_parts['dirname']){
+                       error_log($fpath.'  '.$res['db_fullpath']);
+                       continue;
+                    }else{
+                        $dirname = $path_parts['dirname'].'/';
+                        $filename = $path_parts['filename'];
+                    }
 
                     $dirname = str_replace("\0", '', $dirname);
                     $dirname = str_replace('\\', '/', $dirname);
                     if(strpos($dirname, HEURIST_FILESTORE_DIR)===0){
                         
                     
-                    $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
                     
-                    if($relative_path!=@$res['ulf_FilePath']){
-                        
-                        $files_path_to_correct[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
-                                    'db_fullpath'=>$res['db_fullpath'],
-                                    'res_fullpath'=>$fpath,
-                                    'ulf_FilePath'=>@$res['ulf_FilePath'],
-                                    'res_relative'=>$relative_path
-                                    );
-                    }
+                        if($relative_path!=@$res['ulf_FilePath']){
+                            
+                            $files_path_to_correct[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
+                                        'db_fullpath'=>$res['db_fullpath'],
+                                        'res_fullpath'=>$fpath,
+                                        'ulf_FilePath'=>@$res['ulf_FilePath'],
+                                        'res_relative'=>$relative_path,
+                                        'filename'=>$filename
+                                        );
+                        }
                     }                    
+                }else{
+                            
+                            $files_path_to_correct[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
+                                        'clear_remote'=>$res['db_fullpath']
+                                        );
+                            
                 } 
             }
             
@@ -363,7 +378,13 @@ if (isForAdminOnly()) exit();
                     ?>
                     
                     <div class="msgline"><b><?php echo $row['ulf_ID'];?></b> 
-                            <?php echo $row['res_fullpath'].' &nbsp;&nbsp;&nbsp;&nbsp; '.$row['ulf_FilePath'].' -&gt; '.$row['res_relative']; ?>
+                            <?php 
+                                if(@$row['clear_remote']){
+                                    echo 'move url from filepath field '.$row['clear_remote'];
+                                }else{
+                                    echo $row['res_fullpath'].' &nbsp;&nbsp;&nbsp;&nbsp; '.$row['ulf_FilePath'].' -&gt; '.$row['res_relative']; 
+                                }
+                            ?>
                     </div>
                     <?php
                 }
