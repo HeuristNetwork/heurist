@@ -94,7 +94,7 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
             DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
             DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
    
-        var fullName = fld(DT_GIVEN_NAMES)+' '+fld(DT_NAME);
+        var fullName = composePersonName(recordset, record);
         var profileLink = 'href="'+window.hWin.HAPI4.baseURL+'profile/'+fld('rec_ID')+'/a" onclick="{window.hWin.boroResolver(event);}"';
    
         //get thumbnail if available for this record, or generic thumbnail for record type

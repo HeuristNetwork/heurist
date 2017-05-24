@@ -59,28 +59,8 @@ $.widget( "heurist.boro_place", $.heurist.resultList, {
    // function for searchfull option - return full record info
    //
   _searchFullRecords: function(rec_toload, current_page, callback){
-      
       this._renderPage( this.current_page );
       return;
-      
-      /*
-    var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
-        DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
-        DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
-      */  
-      
-                var ids = rec_toload.join(',');
-                var request = { q: 'ids:'+ ids,
-                    w: 'a',
-                    detail: 'detail', //[DT_NAME, DT_GIVEN_NAMES, DT_EXTENDED_DESCRIPTION], 
-                    id: current_page,
-                    source:this.element.attr('id') };
-               var that = this;
-                    
-                window.hWin.HAPI4.RecordMgr.search(request, function(response){
-                    that._onGetFullRecordData(response, rec_toload);   
-                });
-      
   },  
 
   _renderPage: function(pageno, recordset, is_retained_selection){
@@ -103,12 +83,10 @@ $.widget( "heurist.boro_place", $.heurist.resultList, {
             return recordset.fld(record, fldname);
         }
 
-        var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
-            DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
-            DT_EXTENDED_DESCRIPTION = 134,//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
+        var DT_EXTENDED_DESCRIPTION = 134,//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
             DT_EVENT_DESC = 999999;
             
-        var fullName = fld(DT_GIVEN_NAMES)+' '+fld(DT_NAME);
+        var fullName = composePersonName(recordset, record);
    
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
@@ -236,7 +214,7 @@ $.widget( "heurist.boro_place", $.heurist.resultList, {
                         if(sDesc=='Death') sDesc = 'died'
                         else if(sDesc=='Birth') sDesc = 'was born'
                         else{
-                            sDesc = 'was ' + sDesc[0].toLowerCase() + sDesc.substring(1);
+                            sDesc = 'was ' + sDesc;//sDesc[0].toLowerCase() + sDesc.substring(1);
                         }
                     }
                     

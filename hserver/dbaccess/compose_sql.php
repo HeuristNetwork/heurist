@@ -1912,6 +1912,13 @@ class LinkedFromParentPredicate extends Predicate {
         }else{
             $rty_IDs = array();
         }
+        if($dty_ID){
+            $dty_IDs = array_map('intval', explode(',', $dty_ID));
+        }else{
+            $dty_IDs = array();
+        }
+        
+        
         
         /*
         //additions for FROM and WHERE
@@ -1948,8 +1955,15 @@ class LinkedFromParentPredicate extends Predicate {
             }
             
             $add_where = $add_where
-            . ' rl.rl_SourceID=rd.rec_ID and '
-            . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+            . ' rl.rl_SourceID=rd.rec_ID and ';
+            
+            if(count($dty_IDs)>1){
+                $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
+            }else if(count($dty_IDs)>0){
+                $add_where = $add_where.'rl.rl_DetailTypeID = '.$dty_IDs[0];
+            }else{
+                $add_where = $add_where.'rl.rl_RelationID is null';
+            }
         }
         
         $add_from  = 'recLinks rl ';
@@ -1982,8 +1996,15 @@ class LinkedFromParentPredicate extends Predicate {
             
             $add_where = $add_where.' rl.rl_TargetID=rd.rec_ID ';
             if($rty_ID!=1){
-                $add_where = $add_where . ' and ' 
-                 .(($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );    
+                $add_where = $add_where . ' and ';
+                
+                if(count($dty_IDs)>1){
+                    $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
+                }else if(count($dty_IDs)>0){
+                    $add_where = $add_where.'rl.rl_DetailTypeID = '.$dty_IDs[0];
+                }else{
+                    $add_where = $add_where.'rl.rl_RelationID is null';
+                }
             }    
             
             $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
@@ -2021,7 +2042,11 @@ class LinkedToParentPredicate extends Predicate {
         }else{
             $rty_IDs = array();
         }
-        
+        if($dty_ID){
+            $dty_IDs = array_map('intval', explode(',', $dty_ID));
+        }else{
+            $dty_IDs = array();
+        }
 
         /*
         //additions for FROM and WHERE
@@ -2059,8 +2084,15 @@ class LinkedToParentPredicate extends Predicate {
             }
             
             $add_where = $add_where
-                . ' rl.rl_TargetID=rd.rec_ID and '
-                . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+                . ' rl.rl_TargetID=rd.rec_ID and ';
+                
+            if(count($dty_IDs)>1){
+                $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
+            }else if(count($dty_IDs)>0){
+                $add_where = $add_where.'rl.rl_DetailTypeID = '.$dty_IDs[0];
+            }else{
+                $add_where = $add_where.'rl.rl_RelationID is null';
+            }
         }
         $add_from  = 'recLinks rl ';
 
@@ -2092,8 +2124,15 @@ class LinkedToParentPredicate extends Predicate {
             
             $add_where = $add_where.' rl.rl_SourceID=rd.rec_ID ';
             if($rty_ID!=1){
-                $add_where = $add_where . ' and ' 
-                 .(($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );    
+                $add_where = $add_where . ' and ';
+                
+                if(count($dty_IDs)>1){
+                    $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
+                }else if(count($dty_IDs)>0){
+                    $add_where = $add_where.'rl.rl_DetailTypeID = '.$dty_IDs[0];
+                }else{
+                    $add_where = $add_where.'rl.rl_RelationID is null';
+                }
             }    
             
             

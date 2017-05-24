@@ -14,47 +14,219 @@
 </nav>
 
 <div class="container">
-            <header class="bor-header">
-            <a href="/" class="bor-logo">
-                <h1 class="bor-header-title sr-only">Beyond 1914</h1>
+    <header class="bor-header">
+        <a href="/" class="bor-logo">
+            <h1 class="bor-header-title sr-only">Beyond 1914</h1>
 
-                <p class="bor-header-sub-title sr-only">The University of Sydney and the Great War</p>
-            </a>
+            <p class="bor-header-sub-title sr-only">The University of Sydney and the Great War</p>
+        </a>
 
-                        
-            <div class="form-horizontal bor-header-search">
-                                <fieldset>
-                    <legend class="sr-only">Search BOR</legend>
-                    <div class="form-group">
-                        <label class="col-lg-12 control-label sr-only" for="query">Enter your search terms to search the BOR database</label>
-                        <div class="col-lg-12 bor-search-body">
-                            <input id="search_query" type="search" placeholder="Find people and places" class="form-control input-lg" value="">
-                            <button id="search_button" class="submit fa-search ui-icon ui-icon-search" style="height:30px"><i>&nbsp;</i></button>
-                        </div>
+
+        <div class="form-horizontal bor-header-search">
+            <fieldset>
+                <legend class="sr-only">Search BOR</legend>
+                <div class="form-group">
+                    <label class="col-lg-12 control-label sr-only" for="query">Enter your search terms to search the BOR database</label>
+                    <div class="col-lg-12 bor-search-body">
+                        <input id="search_query" type="search" placeholder="Find people and places" class="form-control input-lg" value="">
+                        <button id="search_button" class="submit fa-search ui-icon ui-icon-search" style="height:30px"><i>&nbsp;</i></button>
                     </div>
-                </fieldset>
-            </div>
-            
-            
-            
-        </header>
-        <div id="main_pane" class="bor-page clearfix">
+                </div>
+            </fieldset>
+        </div>
+
+
+
+    </header>
+    <div id="main_pane" class="bor-page clearfix">
         
-            <div class="bor-page-people clearfix" style="display:none">
-                <div>
-                    People search - to be implemented
-                </div>
+        <div class="bor-page-people clearfix" style="display:none">
+            <div>
+                People search - to be implemented
             </div>
-            <div class="bor-page-place clearfix" style="display:none">
-                <div class="col-lg-12 col-sm-8">
-                    <section class="bor-body-region" id="boro_place"></section>
-                </div>
+        </div>
+        <div class="bor-page-place clearfix" style="display:none">
+            <div class="col-lg-12 col-sm-8">
+                <section class="bor-body-region" id="boro_place"></section>
             </div>
+        </div>
             
-            <div class="bor-page-profile clearfix" style="display:none">
-                <div id="boro_profile">Person's profile</div>
+        <div class="bor-page bor-page-profile clearfix" style="display:none">
+
+            <aside class="col-lg-3 col-sm-4 bor-gutter">
+                <div class="bor-emblem">
+                </div>
+
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Lifetime</h3><ul id="p_lifetime" class="bor-group"></ul></section>
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Gender</h3><p id="p_gender" style="margin-left:15px"></p></section>
+                
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Early education
+                        <span class="bor-tooltip fa fa-question-circle" data-toggle="tooltip" data-placement="auto top" title="" data-original-title="These are the primary and secondary schools attended before university."></span></h3>
+                        <ul class="bor-group" id="p_education">
+                            <li><a href="/institution/23161/sydney-boys-high-school">Sydney Boys High School</a>
+                                <span class="bor-group-date"></span>
+                            </li>
+                        </ul>
+                </section>
+                        
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Tertiary education
+                        <span class="bor-tooltip fa fa-question-circle" data-toggle="tooltip" data-placement="auto top" title="" data-original-title="This is the degree earned or studied for before enlisting. Unless otherwise indicated this was at the University of Sydney."></span></h3><ul class="bor-group"><li><a href="/tertiary-study/bachelor-of-engineering">Bachelor of Engineering</a><span class="bor-group-date">
+                                1915
+                            </span></li></ul></section><section class="bor-group-emphasised"><h3 class="bor-group-title">Military honours
+                        <span class="bor-tooltip fa fa-question-circle" data-toggle="tooltip" data-placement="auto top" title="" data-original-title="Any military decorations or awards."></span></h3><ul class="bor-group"><li><a href="/military-award/d-s-o-">Companion of the Distinguished Service Order</a><span class="bor-group-date"></span></li><li><a href="/military-award/m-c-">Military Cross</a><span class="bor-group-date"></span></li><li><a href="/military-award/mentioned-in-despatches">Mentioned in Despatches</a><span class="bor-group-date"></span></li></ul></section><section class="bor-group-emphasised"><h3 class="bor-group-title">Military rank
+                        <span class="bor-tooltip fa fa-question-circle" data-toggle="tooltip" data-placement="auto top" title="" data-original-title="A person's rank at the end of the War, as listed in The Book of Remembrance."></span></h3><ul class="bor-group"><li><a href="/military-service/captain">Captain</a><span class="bor-group-date"></span></li></ul></section><section class="bor-group-emphasised"><h3 class="bor-group-title">Other resources</h3><ul class="bor-group"><li><a target="_blank" href="http://discoveringanzacs.naa.gov.au/browse/records/267192">Discovering Anzacs</a></li><li><a target="_blank" href="https://aif.adfa.edu.au/showPerson?pid=272923">Additional resource</a></li></ul></section><section class="bor-group-emphasised"><h4 class="bor-last-updated">Last updated &nbsp;<span class="bor-tooltip fa fa-question-circle" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="This is the date of the last change made to the Book of Remembrance"></span></h4><p style="margin-left:15px">             28
+                        September
+                        2016
+                </p></section>      </aside>
+            <div class="col-lg-9 col-sm-8 bor-gutter-main-content">
+                <div class="bor-map bor-map-1000423901" style="position: relative; overflow: hidden;">
+                    <div style="height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; background-color: rgb(229, 227, 223);">
+                    </div>
+                </div>
+
+                <div class="bor-body-region">
+                    <h2>Book of Remembrance entry     <span class="bor-tooltip fa fa-question-circle" data-toggle="tooltip" data-placement="auto top" title="" data-original-title="The Book of Remembrance is a list of every man and woman who who served overseas that was compiled by the University and published in 1939. This is the entry as it appears in the Book."></span>
+                    </h2>
+                    <p>D.S.O., M.C., B.E. : Captain, 29th Squadron, R.F.C., B.E.F., France. Enlisting 8th September, 1915, and sailing as second-lieutenant n th March, 1916, with 4th Reinforcements 30th Battn., crossed to France via Egypt with 46th Battn. Volunteering for R.F.C., crossed to England, became second-lieutenant 23rd October and was promoted flying-officer, 15th March, 1917, and captain (flight-leader), 15th July. Returning to France, served brilliantly for two and a half months till death. Awarded D.S.O.* and M.C. and Mentioned in Despatches twice. Killed in Action, near Zantvoorde, 20th July, 1917,  while going straight for twelve Germans  . Commemorated in Arras Memorial. Early education at Sydney High School. *  Though surrounded by enemy machines, he continued to fight for nearly an hour with the utmost gallantry and determination against two hostile formations, finally bringing down one of the enemy out of control. Within a month he brought down seven hostile machines, completely out of control,</p>
+                    <p>
+                        <a class="bor-download" data-type="bor entry pdf" data-name="Alfred Seymour Shepherd" href="/resolve/media/736/download"><span class="fa fa-download"></span> Download entry ( PDF 32KB )</a>
+                    </p>
+                </div>
+                <hr class="bor-profile-separator">
+                <section class="bor-body-region">
+                    <h2 class="bor-section-title">Timeline</h2>
+                    <ul class="bor-path">
+                        <li class="bor-stop bor-stop-large">
+                            <div class="bor-stop-image ab-dark" data-ab-yaq="60" style="background-color: rgb(60, 60, 60);">
+                                <img src="http://beyond1914.sydney.edu.au/media/cache/timeline_portrait_file/files/shepherd-a-s-jpg-177238.jpeg" alt="Photograph of Alfred Seymour Shepherd" data-adaptive-background="1" data-ab-color="rgb(60,60,60)">
+
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label bor-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">
+                                ?
+                            </div>
+                            <div class="bor-stop-description">
+                                <p>Birth                            </p>
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label bor-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">
+                                ?
+                            </div>
+                            <div class="bor-stop-description">
+                                <p>Early education&nbsp; at
+                                <a href="/institution/23161/sydney-boys-high-school">Sydney Boys High School</a>                            </p>
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label">1915</div>
+                            <div class="bor-stop-description">
+                                <p>Studied
+                                    <a href="/tertiary-study/bachelor-of-engineering">Bachelor of Engineering</a>                                        at
+                                    <a href="/institution/4409/university-of-sydney">University of Sydney</a>,                                        <a href="/place/39482/camperdown">                                                    NSW, Australia                                        </a>
+                                </p>
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label">1915</div>
+                            <div class="bor-stop-description">
+                                <p>Enlisted on             8
+                                    September
+                                    1915
+                                </p>
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label bor-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">
+                                ?
+                            </div>
+                            <div class="bor-stop-description">
+                                <p>Served as
+                                    <a href="/military-service/captain">Captain</a>,                                        <a href="/place/15694/france">                                                    France                                        </a>
+                                </p>
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label bor-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">
+                                ?
+                            </div>
+                            <div class="bor-stop-description">
+                                <p>                                        Awarded
+                                    <a href="/military-award/d-s-o-">Companion of the Distinguished Service Order</a>
+                                </p>
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label bor-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">
+                                ?
+                            </div>
+                            <div class="bor-stop-description">
+                                <p>                                        Awarded
+                                    <a href="/military-award/m-c-">Military Cross</a>
+                                </p>
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label bor-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">
+                                ?
+                            </div>
+                            <div class="bor-stop-description">
+                                <p>                                        <a href="/military-award/mentioned-in-despatches">Mentioned in Despatches</a>
+                                    twice                            </p>
+                            </div>
+                        </li>
+                        <li class="bor-stop">
+                            <div class="bor-stop-label">1917</div>
+                            <div class="bor-stop-description">
+                                <p>                                        Killed in action,                                        <a href="/place/5621/zantvoorde">                                                    Zantvoorde, Belgium                                        </a>
+                                    on             20
+                                    July
+                                    1917
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="help-block">These dates have been taken from the Book of Remembrance archive files and we know
+                        it’s not complete. If you have any information or dates that we can add, please see our
+                        <a href="/contribute">contribute page</a> and find
+                        out how to help.</p>
+                </section>
+                <hr class="bor-profile-separator">
+                <section class="bor-body-region">
+                    <h2 class="bor-section-title">From the archives</h2>
+
+                    <div class="bor-gallery">
+                        <a class="bor-gallery-link" data-toggle="lightbox" data-gallery="profile-images" data-title="Shepherd, A S.jpg" data-footer="" title="Shepherd, A S.jpg" href="http://beyond1914.sydney.edu.au/media/cache/image_gallery/media/files/shepherd-a-s-jpg-260.jpg">
+                            <img class="bor-thumbnail" src="http://beyond1914.sydney.edu.au/media/cache/image_gallery_thumb/media/files/shepherd-a-s-jpg-260.jpg" alt="Photograph of Alfred Seymour Shepherd">
+                        </a>
+
+                        <a class="bor-gallery-link" data-toggle="lightbox" data-gallery="profile-images" data-footer="" data-title="0001.jpg" href="http://beyond1914.sydney.edu.au/media/cache/image_gallery/media/files/0001-jpg-37128.jpg">
+                            <img class="bor-thumbnail" src="http://beyond1914.sydney.edu.au/media/cache/image_gallery_thumb/media/files/0001-jpg-37128.jpg" alt="Document scan">
+                        </a>
+
+                        <a class="bor-gallery-link" data-toggle="lightbox" data-gallery="profile-images" data-footer="" data-title="0001.jpg" href="http://beyond1914.sydney.edu.au/media/cache/image_gallery/media/files/0001-jpg-37129.jpg">
+                            <img class="bor-thumbnail" src="http://beyond1914.sydney.edu.au/media/cache/image_gallery_thumb/media/files/0001-jpg-37129.jpg" alt="Document scan">
+                        </a>
+
+                        <a class="bor-gallery-link" data-toggle="lightbox" data-gallery="profile-images" data-footer="" data-title="0002.jpg" href="http://beyond1914.sydney.edu.au/media/cache/image_gallery/media/files/0002-jpg-37130.jpg">
+                            <img class="bor-thumbnail" src="http://beyond1914.sydney.edu.au/media/cache/image_gallery_thumb/media/files/0002-jpg-37130.jpg" alt="Document scan">
+                        </a>
+
+
+
+
+                        <p class="help-block">
+                            Unless otherwise noted, these photographs, War Service Records, letters, diaries and cards were sent to the University by family and friends during and after World War One. If you have any material to add, please see our
+                            <a href="/contribute">contribute page</a>.
+                        </p>
+                    </div>
+                </section>
             </div>
-            
+        </div>            
+        <!-- end profile page --->            
+
+
             <div class="bor-page-search clearfix" style="display:none">
                 <aside class="col-lg-3 col-sm-4 bor-gutter">
                     <div class="bor-search-facets" id="search_pane"></div>
