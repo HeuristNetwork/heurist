@@ -384,6 +384,8 @@ $.widget( "heurist.dh_search", {
      //
     _doSearch2: function(svsID){
 
+        if(!this.usr_SavedSearch[svsID]) return;
+        
         var qsearch = this.usr_SavedSearch[svsID][_QUERY];
 
         //switch to result List Tab

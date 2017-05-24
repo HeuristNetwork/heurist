@@ -100,6 +100,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
         
         <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_search.js"></script>
+        <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_maps.js"></script>
         <script type="text/javascript" src="hclient/widgets/boro/boro_place.js"></script>
         <script type="text/javascript" src="hclient/widgets/boro/boro_nav.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>

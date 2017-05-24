@@ -800,9 +800,9 @@ function hLayout(args) {
                    widget = $content.connections( options );
                    
             }else if(app.widgetname=='dh_search'){
-
                    widget = $content.dh_search( options );
-
+            }else if(app.widgetname=='dh_maps'){
+                   widget = $content.dh_maps( options );
             }else if(app.widgetname=='boro_place'){
                    widget = $content.boro_place( options );
             }else if(app.widgetname=='boro_nav'){

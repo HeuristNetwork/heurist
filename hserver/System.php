@@ -186,7 +186,9 @@ class System {
     * @param    int [$dbID] origin database id
     */
     function defineRTLocalMagic($defString, $rtID, $dbID) {
+        
         $id = $this->rectypeLocalIDLookup($rtID, $dbID);
+        
         if ($id) {
             //echo "\nRT DEFINING \"" . $defString . "\" AS " . $id;
             define($defString, $id);
@@ -209,6 +211,10 @@ class System {
     function rectypeLocalIDLookup($rtID, $dbID = 2) {
         global $talkToSysAdmin;
         static $RTIDs;
+        
+        if($dbID==$this->get_system('sys_dbRegisteredID')){
+            return $rtID;
+        }else
         if (!$RTIDs) {
             $res = $this->mysqli->query('select rty_ID as localID,
             rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
@@ -261,6 +267,10 @@ class System {
     function detailtypeLocalIDLookup($dtID, $dbID = 2) {
         global $talkToSysAdmin;
         static $DTIDs;
+        
+        if($dbID==$this->get_system('sys_dbRegisteredID')){
+            return $dtID;
+        }else
         if (!$DTIDs) {
             $res = $this->mysqli->query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
             if (!$res) {

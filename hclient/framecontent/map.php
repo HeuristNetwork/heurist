@@ -161,7 +161,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             layout_opts.south__spacing_closed = 0;
         }
         
-        if(window.hWin.HEURIST4.util.getUrlParameter('noheader') || 
+        if(window.hWin.HEURIST4.util.getUrlParameter('noheader', location.search) || 
            window.hWin.HEURIST4.util.getUrlParameter('header', location.search)=='off'){
             layout_opts.north__size = 0;
         }
