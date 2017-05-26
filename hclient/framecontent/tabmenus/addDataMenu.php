@@ -149,7 +149,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         class="large h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="">
-                        Remove unlinked files</a>
+                        Verify files</a>
                     </li>
 
                     <!--

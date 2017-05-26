@@ -40,7 +40,7 @@ if(isForOwnerOnly("to delete a database")){
     <body class='popup'>
         <div class='banner'><h2>Delete Current Heurist Database</h2></div>
         <div id='page-inner' style='overflow:auto'>
-            <<<<<<< HEAD
+            
             <?php
             $dbname = $_REQUEST['db'];
 

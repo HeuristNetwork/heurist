@@ -58,10 +58,11 @@ if (isForAdminOnly()) exit();
 
         <div><br/><br/>
             These checks look for errors in record uploaded files.
+            <div id="linkbar" style="float:right"></div>
         </div>
         <hr>
 
-        <div id="page-inner">
+        <div id="page-inner" style="top:52px;">
 
             <?php
             
@@ -180,6 +181,12 @@ if (isForAdminOnly()) exit();
             
     }//while
       
+            
+    //check for non-revistered files in mediafolders
+    $reg_info = array('reg'=>array(), 'nonreg'=>array());
+    $dirs_and_exts = getMediaFolders();
+    doHarvest($dirs_and_exts, false, 1);
+      
       
             if (count(@$files_orphaned)>0 || count(@$files_notfound)>0 || count(@$files_path_to_correct)>0){
                 ?>
@@ -287,7 +294,7 @@ if (isForAdminOnly()) exit();
                                         }
                                     }
                                 }
-                                top.HEURIST.util.showMessage(cnt+' nonregistered/unlinked files have been removed from media folders');
+                                top.HEURIST.util.showMessage(cnt+' non-registered/unlinked files have been removed from media folders');
                             }
                         }
 
@@ -316,14 +323,32 @@ if (isForAdminOnly()) exit();
 
                     }
                     
+                    document.getElementById('linkbar').innerHTML = ''+
+                <?php
+                if(count($files_orphaned)>0){
+                    print '\'<a href="#orphaned" style="white-space: nowrap;padding-right:10px">Orphaned files</a>\'+';
+                }
+                if(count($files_notfound)>0){
+                    print '\'<a href="#missed" style="white-space: nowrap;padding-right:10px">Files not found</a>\'+';
+                }
+                if(count($files_path_to_correct)>0){
+                    print '\'<a href="#fixpath" style="white-space: nowrap;padding-right:10px">Path corrections</a>\'+';
+                }
+                if(count($reg_info['nonreg'])>0){
+                    print '\'<a href="#nonreg" style="white-space: nowrap;padding-right:20px">Non-registered files</a>\'+';
+                }
+                ?>
+                    '';
                 </script>
-
                 <?php
                 if(count($files_orphaned)>0){
                 ?>
+                    <a name="orphaned"></a>    
                     <h3>Orphaned files</h3>
                     <div><?php echo count($files_orphaned);?> entries</div>
-                    <div>No reference to these files found in record details. These files will be removed from db and file system</div>
+                    <div>These files are not referenced by any record in the database. 
+                    Check the checkbox below and click the button <a href="#repair">"Repair Selected"</a> at the end of this page 
+                    to remove the files from the file system and database</div>
                     <br>
                     <input type=checkbox id="do_orphaned">&nbsp;Confirm the deletion of these entries
                     <br>
@@ -340,6 +365,7 @@ if (isForAdminOnly()) exit();
                 }
                 if(count($files_notfound)>0){
                 ?>
+                    <a name="missed"></a>    
                     <h3>Files not found</h3>
                     <div><?php echo count($files_notfound);?> entries</div>
                     <div>Path specified in database is wrong and file cannot be found. Entries will be removed from database</div>
@@ -364,7 +390,8 @@ if (isForAdminOnly()) exit();
                 print '<hr/>';
                 }
                 if(count($files_path_to_correct)>0){
-                ?>             
+                ?>         
+                    <a name="fixpath"></a>    
                     <h3>Paths to be corrected</h3>
                     <div><?php echo count($files_path_to_correct);?> entries</div>
                     <div>These relative paths in database are wrong. They will be updated in database. Files retain untouched</div>
@@ -391,18 +418,12 @@ if (isForAdminOnly()) exit();
                 print '<hr/>';
                 }
                 ?>
-                <br>To fix the inconsistencies, please click here: <button onclick="repairBrokenPaths()">Repair selected</button><br/>
+                <br><a name="repair"></a>To fix the inconsistencies, please click here: <button onclick="repairBrokenPaths()">Repair selected</button><br/>
                 <?php
             }else{
                 print "<br><br><p><h3>All uploaded file entries are valid</h3></p>";
             }
             
-            
-    //check for non-revistered files in mediafolders
-    $reg_info = array('reg'=>array(), 'nonreg'=>array());
-    $dirs_and_exts = getMediaFolders();
-
-    doHarvest($dirs_and_exts, false, 1);
     
     //$reg_info = getRegInfoResult();
    
@@ -411,8 +432,9 @@ if (isForAdminOnly()) exit();
     if(count($reg_info['nonreg'])>0){
         ?>
             <div id="nonreg">
+                    <a name="nonreg"></a>
                     <hr>
-                    <h3>Nonregistered files</h3>
+                    <h3>Non-registered files</h3>
                     <div><?php echo count($reg_info['nonreg']);?> entries</div>
                     <br>
                     <input type=checkbox id="do_clean_nonreg" 
@@ -424,9 +446,13 @@ if (isForAdminOnly()) exit();
                     print '<div class="msgline"><label><input type=checkbox class="file_to_clear">'.$row.'</label></div>';
                 }//for
 
-        print '<br><p>To remove nonregistered files in media folders, please click here: <button onclick="removeUnlinkedFiles()">Delete selected</button></p></div>'; 
+        print '<br>Use Add Data > Import > Index multimedia to add these to the database as multimedia records.';
+        print '<br><p>To remove non-registered files in media folders, please click here: <button onclick="removeUnlinkedFiles()">Delete selected</button></p></div>'; 
     }else{
-        print '<br><br><br><p><h3>There are nonregistered files in media folders: '.implode(';', $dirs_and_exts['dirs']).' </h3></p>';
+        ?>
+        <br><br><br><p><h3>There are no non-registered files in media folders: <?php echo implode(';', $dirs_and_exts['dirs'])?></h3>
+        </p>
+    <?php        
     }
             
             

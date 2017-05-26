@@ -139,12 +139,21 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             These checks look for errors in the structure of the database and errors in the data within the database. These are generally not serious, but are best eliminated.
             <br /> Click the hyperlinked record ID at the start of each row to open an edit form to change the data for that record.
             <br />Look for red warning texts or pointer fields in the record which do not display data or which display a warning.
-            <p>
+            <div id="linkbar" style="float:right;padding-top:10px">
+                <a href="#field_type" style="white-space: nowrap;padding-right:10px">Field types</a>
+                <a href="#pointer_targets" style="white-space: nowrap;padding-right:10px">Pointer targets</a>
+                <a href="#target_types" style="white-space: nowrap;padding-right:10px">Target types</a>
+                <a href="#empty_fields" style="white-space: nowrap;padding-right:10px">Empty fields</a>
+                <a href="#date_values" style="white-space: nowrap;padding-right:10px">Date values</a>
+                <a href="#term_values" style="white-space: nowrap;padding-right:10px">Term values</a>
+                <a href="#expected_terms" style="white-space: nowrap;padding-right:10px">Expected terms</a>
+                <a href="#single_value" style="white-space: nowrap;padding-right:10px">Single value fields</a>
+                <a href="#required_fields" style="white-space: nowrap;padding-right:10px">Required fields</a>
+                <a href="#nonstandard_fields" style="white-space: nowrap;padding-right:10px">Non-standard fields</a>
+            </div>
         </div>
-        <hr>
-
-
-        <div id="page-inner" style="top:80px">
+        <hr style="margin-top:15px">
+        <div id="page-inner" style="top:90px">
 
 
             <!-- CHECK FOR FIELD TYPE ERRORS -->
@@ -202,6 +211,8 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                     }
                 </script>
 
+
+                <a name="field_type"/>
                 <br/><p><br/></p><h3>Warning: Inconsistent field definitions</h3><br/>&nbsp;<br/>
 
                 The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please advise Heurist developers<br/><br/>
@@ -290,6 +301,8 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 $ids[$row['dtl_RecID']] = 1;
             }
 
+            print '<a name="pointer_targets"/>';
+                
             if(count($bibs)==0){
                 print "<div><h3>All record pointers point to a valid record</h3></div>";
                 if($wasdeleted>1){
@@ -358,6 +371,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
             
             <div>
+                <a name="target_types"/>
                 <?php
                 if (count($bibs == 0)) {
                     print "<h3>All record pointers point to the correct record type</h3>";
@@ -426,6 +440,8 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 }
             }
             
+            
+            print '<a name="empty_fields"/>';
             if($total_count_rows<1){
                  print '<div><h3>All records don\'t have empty fields</h3></div>';
             }
@@ -528,6 +544,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             }
 
 
+            print '<a name="date_values"/>';
             if(count($bibs)==0){
                 print '<div><h3>All records have recognisable Date values</h3></div>';
                 if($wascorrected>1){
@@ -616,6 +633,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 array_push($dtl_ids, $row['dtl_ID']);
             }
 
+            print '<a name="term_values"/>';
             if(count($bibs)==0){
                 print "<div><h3>All records have recognisable term values</h3></div>";
                 if($wasdeleted>1){
@@ -665,6 +683,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
             <!--  Records containing fields with terms not in the list of terms specified for the field   -->
 
+            <a name="expected_terms"/>
             <?php
 
             $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, rec_RecTypeID, rty_Name, trm_Label
@@ -744,6 +763,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             <!--  single value fields containing excess values  -->
 
 
+            <a name="single_value"/>
             <?php
 
             $res = mysql_query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
@@ -818,7 +838,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
 
 
             <!--  records with missing required values  -->
-
+            <a name="required_fields"/>
             <?php
 
             $res = mysql_query("select rec_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type
@@ -895,7 +915,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
 
 
             <!--  Records with non-standard fields (not listed in recstructure)  -->
-
+            <a name="nonstandard_fields"/>
             <?php
 
             $res = mysql_query("select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
