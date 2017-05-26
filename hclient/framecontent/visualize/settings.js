@@ -306,6 +306,7 @@ function handleSettingsInUI() {
         initRecTypeSelector();    
         $('#setDivExport').hide();
     }else{
+        $('#setDivExport').show();
         $('#gephi-export').button();
     }
     

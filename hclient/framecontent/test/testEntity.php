@@ -54,6 +54,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
         
         <style>
             .fancytree-hide{
@@ -198,6 +201,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             options.height = 600;
                             options.width = 840;
                             showManageDefTerms( options );      
+                            
+                       }else if(entity=='RecUploadedFiles'){
+                           
+                            options.edit_dialog = false;
+                            options.height = 600;
+                            options.width = 840;
+                            showManageRecUploadedFiles( options );      
+                            
                        }
                         
                     }else{
@@ -234,6 +245,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
                        }else
                        if(entity=='DefTerms'){
                             $content.manageDefTerms( options );      
+
+                       }else 
+                       if(entity=='RecUploadedFiles'){
+                            $content.manageRecUploadedFiles( options );      
+                            
                        }
                         
                     }else{
@@ -327,7 +343,7 @@ print $targetPath.'<br>';
                             <option value="SysUsers">Users +</option>
                             <option value="SysGroups">Workgroups +</option>
                             <option value="Tags">Tags</option>
-                            <option value="RecUploadedFiles">Uploaded Files</option>
+                            <option value="RecUploadedFiles" selected>Uploaded Files</option>
                             <option value="Reminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>

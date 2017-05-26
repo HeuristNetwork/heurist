@@ -1169,6 +1169,7 @@ $loop_cnt++;
                             'data'=> array(
                                 //'query'=>$query,
                                 'queryid'=>@$params['id'],  //query unqiue id
+                                'pageno'=>@$params['pageno'],  //to sync page 
                                 'count'=>$total_count_rows,
                                 'offset'=>get_offset($params),
                                 'reccount'=>count($records),

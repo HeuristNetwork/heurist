@@ -81,22 +81,14 @@ $.widget( "heurist.searchEntity", {
                 .button({label: window.hWin.HR("Start search"), text:false, icons: {
                     secondary: "ui-icon-search"
                 }});
-                        
+                    
+            //this is default search field - define it in your instance of html            
             this.input_search = this.element.find('#input_search');
             if(!window.hWin.HEURIST4.util.isempty(this.options.filter_title)) {
                 this.input_search.val(this.options.filter_title);    
             }
             
-            this._on( this.input_search, {
-                keypress:
-                function(e){
-                    var code = (e.keyCode ? e.keyCode : e.which);
-                        if (code == 13) {
-                            window.hWin.HEURIST4.util.stopEvent(e);
-                            e.preventDefault();
-                            this.startSearch();
-                        }
-                }});
+            this._on( this.input_search, { keypress: this.startSearchOnEnterPress });
             this._on( this.btn_search_start, {
                 click: this.startSearch });
                 
@@ -126,6 +118,20 @@ $.widget( "heurist.searchEntity", {
     },  
     
     //
+    //
+    //
+    startSearchOnEnterPress: function(e){
+        
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 13) {
+            window.hWin.HEURIST4.util.stopEvent(e);
+            e.preventDefault();
+            this.startSearch();
+        }
+
+    },
+    
+    //
     // use_cache = true
     // load entire entity data and work with cached on client side recordset
     // applicabele for counts < ~1500
@@ -148,7 +154,7 @@ $.widget( "heurist.searchEntity", {
     // public methods
     //
     startSearch: function(){
-        //EXTEND        
+        //TO EXTEND        
     },
     
 

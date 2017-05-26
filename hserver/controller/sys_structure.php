@@ -37,7 +37,7 @@
 
         //get error and response
         $response = $system->getError();
-
+        
     }else{
 
         //$currentUser = $system->getCurrentUser();

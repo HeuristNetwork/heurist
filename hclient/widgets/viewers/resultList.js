@@ -36,6 +36,8 @@ $.widget( "heurist.resultList", {
         isapplication: true,  //if false it does not listen global events @todo merge with eventbased
         showcounter: true,
         showmenu: true,       //@todo - replace to action_select and action_buttons
+        //showtoolbar: true,
+                
         innerHeader: false,   // show title of current search in header
         title: null,
         eventbased:true,
@@ -395,10 +397,12 @@ $.widget( "heurist.resultList", {
         //-----------------------
 
         if(this.options.showmenu){
-            this.div_actions = $('<div>')
-            //.css({'position':'absolute','top':3,'left':2})
-            .resultListMenu()
-            .appendTo(this.div_toolbar);
+            if($.isFunction($('body').resultListMenu)){
+                this.div_actions = $('<div>')
+                    //.css({'position':'absolute','top':3,'left':2})
+                    .resultListMenu()
+                    .appendTo(this.div_toolbar);
+            }
         }else if(!this.options.innerHeader) {
             this.div_toolbar.hide();
         }        
@@ -1639,16 +1643,20 @@ $.widget( "heurist.resultList", {
         if(!window.hWin.HAPI4.is_logged()){
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
-
+        
+        //rec_toload - list of ids
         //load full record info - record header111
         if(rec_toload.length>0){
             var that = this;
 
             that.loadanimation(true);
-
+            
             if($.isFunction(this.options.searchfull)){
-
-                this.options.searchfull.call(this, rec_toload, this.current_page, this._onGetFullRecordData);
+                //call custom function 
+                this.options.searchfull.call(this, rec_toload, this.current_page, 
+                    function(response){ 
+                        that._onGetFullRecordData(response, rec_toload); 
+                    });
                 
             }else{
 
@@ -1657,6 +1665,7 @@ $.widget( "heurist.resultList", {
                     w: 'a',
                     detail: 'header',
                     id: that.current_page,
+                    pageno: that.current_page,
                     source:this.element.attr('id') };
 
                 window.hWin.HAPI4.RecordMgr.search(request, function(response){
@@ -1674,7 +1683,7 @@ $.widget( "heurist.resultList", {
                     this.loadanimation(false);
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
-                        if(response.data.queryid==this.current_page) {
+                        if(response.data.pageno==this.current_page) { //response.data.queryid==this.current_page || 
 
                             var resp = new hRecordSet( response.data );
                             this._currentRecordset.fillHeader( resp );
@@ -1732,12 +1741,13 @@ $.widget( "heurist.resultList", {
     hideHeader: function(do_hide){
         if(do_hide){
             if(this.div_header!=null) this.div_header.hide();
-            this.div_toolbar.hide();
-            this.div_content.css('top','0px');
+            //this.div_toolbar.hide();
+            this.div_toolbar.css('top','0');
+            this.div_content.css('top','2.5em');
         }else{
             if(this.div_header!=null) this.div_header.show();
-            this.div_toolbar.show();
-            this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
+            this.div_toolbar.css('top','2.5em');
+            this.div_content.css('top','5.5em');
         }
     }
 

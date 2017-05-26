@@ -1,7 +1,7 @@
 <?php
 
     /** 
-    * shorten path to access files - redirects to php/common/file_download.php
+    * shorten path to access files - redirects to hserver/dbaccess/file_download.php
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

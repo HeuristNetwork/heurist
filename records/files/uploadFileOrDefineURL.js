@@ -41,6 +41,7 @@ var viewerObject,
 	fileUploadInput,
 	_filedata = null,
 	_recordID = null,
+    _fileselected = false,
 	_fileuploaded = false;
 
  /**
@@ -50,6 +51,7 @@ var viewerObject,
  {
 		var rec_url = URLInput.inputs[0]; //document.getElementById("rec_url");
  		rec_url.value = input.link;
+        _fileselected = false;
  		_fileuploaded = true;
  		onChangeURL(null, input.fileType);
  }
@@ -198,10 +200,42 @@ function initPage() {
 		}
 
 }
+//
+//
+//
+function showFileSelectionPopup(){
+
+    var url = top.HEURIST.baseURL + "hclient/framecontent/test/testFileSelector.php?db="+top.HEURIST.database.name;
+    top.HEURIST.util.popupURL(this, url, { height: 700, width:700, title:'Select uploaded file',
+                            callback: function(context) {
+                            if(context) {
+                                //alert('selected '+context);
+           
+_fileuploaded = false;                                
+_fileselected = true;
+_filedata = top.HEURIST.util.expandJsonStructure(context);
+_filedata = _filedata['file'];
+/*{"id":23,"origName":"0_a1ed2_3548064c_XL.jpg",
+"URL":"http://127.0.0.1/h4-ao/records/files/downloadFile.php/0_a1ed2_3548064c_XL.jpg?db=artem_8&ulf_ID=c373fc6140bcd755a1c24c5a6380d37192cffe4e",
+"fileSize":"171","ext":"jpg",
+"remoteURL":null,"remoteSource":"heurist","mediaType":"image"};*/
+                               
+                 curr_link = _filedata.URL;
+                 URLInput.inputs[0].value = curr_link;
+                 document.getElementById("cbSource").value = _filedata.remoteSource;
+                 document.getElementById("cbType").value = _filedata.mediaType;
+                 showViewer(document.getElementById('preview'), [curr_link, _filedata.remoteSource, _filedata.mediaType], _recordID);
+                               
+                                
+                            }
+                            }});
+}
+
+
 
 // returns
 function isChanged(){
-  if(_fileuploaded){
+  if(_fileuploaded || _fileselected){
   		return true;
   }else if (Hul.isempty(_filedata) && Hul.isempty(curr_link)){ //was open and closed without any change
   		return false;

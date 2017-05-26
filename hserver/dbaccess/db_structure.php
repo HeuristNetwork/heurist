@@ -478,18 +478,32 @@
     * @param     int $parentIndex id of parent term to attach child branch to
     * @param     int $childIndex id of child branch in current array
     * @param     mixed $terms the array of branches to build the tree
+    * @param     array $parents of current branch to avoid recursion
     * @return    object $terms
     */
-    function __attachChild($parentIndex, $childIndex, $terms) {
-        if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
+    function __attachChild($parentIndex, $childIndex, $terms, $parents) {
+        
+        /*if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
             return $terms;
-        }
-        if (array_key_exists($childIndex, $terms)) {//check for
-            if (count($terms[$childIndex])) {
-                foreach ($terms[$childIndex] as $gChildID => $n) {
+        }*/
+        
+        if (array_key_exists($childIndex, $terms)) {//check if this child is parent itself
+            if (count($terms[$childIndex])) { //has children
+            
+                if($parents==null){
+                    $parents = array($childIndex);
+                }else{
+                    array_push($parents, $childIndex);
+                }
+            
+                foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
                     if ($gChildID != null) {
-//error_log($gChildID);                        
-                        $terms = __attachChild($childIndex, $gChildID, $terms);//depth first recursion
+                        if(array_search($gChildID, $parents)===false){
+                            $terms = __attachChild($childIndex, $gChildID, $terms, $parents);//depth first recursion
+                        }else{
+                            error_log('Recursion in '.HEURIST_DBNAME.'.defTerms!!! Tree '.implode('>',$parents)
+                                    .'. Can\'t add term '.$gChildID);
+                        }
                     }
                 }
             }
@@ -528,12 +542,13 @@
             }
         }//we have all the branches, now lets build a tree
         $res->close();
+        
         foreach ($terms as $parentID => $childIDs) {
             foreach ($childIDs as $childID => $n) {
                 //check that we have a child branch
                 if ($childID != null && array_key_exists($childID, $terms)) {
                     if (count($terms[$childID])) {//yes then attach it and it's children's branches
-                        $terms = __attachChild($parentID, $childID, $terms);
+                        $terms = __attachChild($parentID, $childID, $terms, null);
                     } else {//no then it's a leaf in a branch, remove this redundant node.
                         unset($terms[$childID]);
                     }

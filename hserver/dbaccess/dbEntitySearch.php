@@ -377,7 +377,7 @@ class DbEntitySearch
     //
     //
     //
-    public function execute($query, $is_ids_only, $entityName){        
+    public function execute($query, $is_ids_only, $entityName, $calculatedFields=null){        
         
         $mysqli = $this->system->get_mysqli();
         
@@ -430,13 +430,18 @@ class DbEntitySearch
                     // load all records
                     while ($row = $res->fetch_row())// && (count($records)<$chunk_size) ) {  //3000 maxim allowed chunk
                     {
+                        if($calculatedFields!=null){
+                            $row = $calculatedFields($fields, $row);  
+                        }
+                        
                         $records[$row[0]] = $row;
                         array_push($order, $row[0]);
                     }
                     $res->close();
 
                     $response = array(
-                            'queryid'=>@$this->data['request_id'],  //query unqiue id
+                            'queryid'=>@$this->data['request_id'],  //query unqiue id set in doRequest
+                            'pageno'=>@$this->data['pageno'],  //page number to sync
                             'offset'=>@$this->data['offset'],
                             'count'=>$total_count_rows,
                             'reccount'=>count($records),

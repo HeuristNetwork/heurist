@@ -28,8 +28,6 @@ $db = @$_REQUEST['db'];
 
 if($db){
 
-    //@todo - allow Obfuscated id only
-
     $fileid = @$_REQUEST['thumb'];
     if($fileid){
         $system->initPathConstants($db);
@@ -45,18 +43,24 @@ if($db){
         }
     }else if(@$_REQUEST['id']) {
 
+        $fileid = @$_REQUEST['id'];
+        
+        if(is_numeric($file_id)){
+            error_log('Obfuscated id is allowed only');
+            exit;
+        }
+        
         $system->init($db);
 
-        $fileid = @$_REQUEST['id'];
         //find
         $listpaths = fileGetPath_URL_Type($system, $fileid);
         if(is_array($listpaths) && count($listpaths)>0){
 
             $fileinfo = $listpaths[0];
-            $filepath = $fileinfo[0];
-            $url = $fileinfo[1];
-            $mimeType = $fileinfo[2];
-            $params = $fileinfo[3];
+            $filepath = $fileinfo[0];  //concat(ulf_FilePath,ulf_FileName
+            $url = $fileinfo[1];     //ulf_ExternalFileReference
+            $mimeType = $fileinfo[2];  //fxm_MimeType
+            $params = $fileinfo[3];  //ulf_Parameters
             $originalFileName = $fileinfo[4];
 
             $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);

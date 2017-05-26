@@ -134,7 +134,7 @@ $.widget( "heurist.manageEntity", {
                     +'<div class="ent_content_full editForm" style="left:251px"/>'
                 +'</div>';
         
-        }else if(this.options.layout_mode=='short'){ //short search form above list
+        }else if(this.options.layout_mode=='short'){ //short search form above the list, viewer/editor on right side
         
             layout = 
                 '<div class="ent_wrapper">'
@@ -212,7 +212,7 @@ $.widget( "heurist.manageEntity", {
                     .resultList({
                        eventbased: false, 
                        isapplication: false, //do not listent global events @todo merge with eventbased
-                       showmenu: false,      //@todo - replace to action_select and action_buttons
+                       //showmenu: false,      //@todo - replace to action_select and action_buttons
                        multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
 
                        select_mode: this.options.select_mode,
@@ -519,9 +519,12 @@ $.widget( "heurist.manageEntity", {
                 'a'          : 'search',
                 'entity'     : this.options.entity.entityName,
                 'details'    : 'list',
-                'request_id' : pageno,
-                'dty_ID'     : arr_ids
+                'pageno'    : pageno
         };
+        
+        request[this.options.entity.keyField] = arr_ids;
+        
+        //request[this.options.entity] = arr_ids;
         
         window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     },

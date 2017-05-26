@@ -4397,7 +4397,7 @@ console.log('heurist not defined');
             callback: function(isChanged, fileJSON) {
 
                 if(isChanged){
-
+                 
                     if(top.HEURIST.util.isnull(fileJSON)){
                         var r = confirm('You uploaded/changed the file data. If you continue, all changes will be lost.');
                         return r;

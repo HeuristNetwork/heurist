@@ -274,6 +274,9 @@ class DbEntityBase
         }
     }
     
+    //
+    //
+    //
     private function _readFields($fields){
 
         foreach($fields as $field){

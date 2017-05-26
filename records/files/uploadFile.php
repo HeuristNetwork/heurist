@@ -796,7 +796,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             $res["remoteSource"] = (array_key_exists('source', $params))?$params['source']:null;
 
             $type_source = $res['remoteSource'];
-            if (!($type_source==null || $type_source=='heurist')){ //verify that this is actually remote resource
+            if ($type_source==null || $type_source!='heurist'){ //verify that this is actually remote resource
                 if( @$res['fullpath'] && file_exists($res['fullpath']) ){
                     $res['remoteSource'] = 'heurist';
                 }
