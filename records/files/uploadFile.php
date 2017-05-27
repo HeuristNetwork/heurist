@@ -296,6 +296,45 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
     */
     function unregister_for_recid2($recid, $needDelete){
 
+        $ulf_ToDelete = array();
+        $query = "select dtl_UploadedFileID from recDetails where dtl_RecID=".$recid;
+        $res = mysql_query($query);
+        while ($row = mysql_fetch_array($res)) {
+            $ulf_ID = $row[0];
+            if($ulf_ID>0){
+            //verify that other records does not refer to this file
+            $query = 'select count(*) from recDetails where dtl_UploadedFileID='.$ulf_ID;
+            $res2 = mysql_query($query);
+            if($res2){
+                $cnt = mysql_fetch_array($res2);
+                if($cnt[0]==1){
+                    array_push($ulf_ToDelete, $ulf_ID);
+                }
+            }
+            }
+        }
+
+        if(count($ulf_ToDelete)>0){
+        
+            if($needDelete){
+                foreach ($ulf_ToDelete as $ulf_ID) {
+                    deleteUploadedFiles($ulf_ID);
+                }
+            }
+            
+            //remove from database
+            mysql_query('SET foreign_key_checks = 0');
+            mysql_query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$ulf_ToDelete).')');
+            mysql_query('SET foreign_key_checks = 1');
+
+            if (mysql_error()) {
+                return mysql_error();
+            }
+        
+        }
+        return null;
+        
+        /* OLD WAY
         if($needDelete){
             // find all files associated with this record
             $query = "select dtl_UploadedFileID from recDetails where dtl_RecID=".$recid;
@@ -315,6 +354,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         }else{
             return null;
         }
+        */
     }
 
 
