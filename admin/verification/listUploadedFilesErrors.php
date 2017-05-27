@@ -45,6 +45,18 @@ if (isForAdminOnly()) exit();
             Table tr td {
                 line-height:2em;
             }
+            
+            div#in_porgress{
+                background-color:#FFF;
+                background-image: url(../../common/images/loading-animation-white.gif);
+                background-repeat: no-repeat;
+                background-position:50%;
+                cursor: wait;
+                width:100%;
+                height:100%;
+                z-index:999999;
+                display:none;
+            }
         </style>
 
     </head>
@@ -52,6 +64,8 @@ if (isForAdminOnly()) exit();
 
     <body class="popup">
 
+        <div id='in_porgress'><h2>Repairing....</h2></div>    
+    
         <div class="banner">
             <h2>Check for missed and orphaned files and wrong paths</h2>
         </div>
@@ -66,7 +80,7 @@ if (isForAdminOnly()) exit();
 
             <?php
             
-    $query1 = "SELECT * from recUploadedFiles"; // get a list of all the files
+    $query1 = "SELECT * from recUploadedFiles where ulf_ID"; //  limit 100 get a list of all the files  in (2401,2271)
     $res1 = mysql_query($query1);
     if (!$res1 || mysql_num_rows($res1) == 0) {
         die ("<p><b>This database does not have uploaded files");
@@ -149,7 +163,7 @@ if (isForAdminOnly()) exit();
                        continue;
                     }else{
                         $dirname = $path_parts['dirname'].'/';
-                        $filename = $path_parts['filename'];
+                        $filename = $path_parts['basename'];
                     }
 
                     $dirname = str_replace("\0", '', $dirname);
@@ -204,11 +218,19 @@ if (isForAdminOnly()) exit();
                     }
                     function repairBrokenPaths(){
                         
-                        function _callback(context){
+                        function _callbackRepair(context){
+                            
+                            $('#in_porgress').hide();
+                            
                             if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
                                 top.HEURIST.util.showError(null);
                             }else{
-                                top.HEURIST.util.showMessage(context['result']);
+                                //top.HEURIST.util.showMessage(context['result']);
+                                var url = top.HEURIST.baseURL + 'admin/verification/listDatabaseErrorsInit.php?type=files&db='+top.HEURIST.database.name;
+                                console.log(window.parent.addDataMenu);
+                                if(window.parent.parent.addDataMenu)
+                                    window.parent.parent.addDataMenu.doAction('menulink-verify-files');
+                                //$(top.document).find('#frame_container2').attr('src', url); 
                             }
                         }
 
@@ -255,8 +277,10 @@ if (isForAdminOnly()) exit();
                         var str = JSON.stringify(dt);
 
                         var baseurl = top.HEURIST.baseURL + "admin/verification/repairUploadedFiles.php";
-                        var callback = _callback;
+                        var callback = _callbackRepair;
                         var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
+                        
+                        $('#in_porgress').show();
                         top.HEURIST.util.getJsonData(baseurl, callback, params);
                         
                         document.getElementById('page-inner').style.display = 'none';
@@ -345,12 +369,12 @@ if (isForAdminOnly()) exit();
                 ?>
                     <a name="orphaned"></a>    
                     <h3>Orphaned files</h3>
-                    <div><?php echo count($files_orphaned);?> entries</div>
+                    <div style="padding:15px;font-weight:bold"><?php echo count($files_orphaned);?> entries</div>
                     <div>These files are not referenced by any record in the database. 
                     Check the checkbox below and click the button <a href="#repair">"Repair Selected"</a> at the end of this page 
                     to remove the files from the file system and database</div>
                     <br>
-                    <input type=checkbox id="do_orphaned">&nbsp;Confirm the deletion of these entries
+                    <input type=checkbox id="do_orphaned">&nbsp;Confirm the deletion of these entries when <a href="#repair">"Repair Selected"</a> button  is clicked
                     <br>
                     <br>
                 <?php

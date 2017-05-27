@@ -42,8 +42,13 @@
                 $('#in_porgress').hide()
             });
             
-            $dosframe.attr('src', 'listDatabaseErrors.php?db=<?php echo $_REQUEST['db']; ?>');
-            
+            <?php
+             if(@$_REQUEST['type']=='files'){
+                print '$dosframe.attr("src", "listUploadedFilesErrors.php?db='.$_REQUEST['db'].'");';     
+             }else{
+                print '$dosframe.attr("src", "listDatabaseErrors.php?db='.$_REQUEST['db'].'");';     
+             }
+             ?>
         });
         
         </script>
@@ -60,7 +65,7 @@
         </style>            
     </head>
     <body class="popup" style="overflow:hidden">
-        <div id='in_porgress'><h2>Verifying database. This may take up to a minute...</h2></div>    
+        <div id='in_porgress'><h2>Verifying <?php echo @$_REQUEST['type']=='files'?'files':'database'; ?>. This may take up to a minute...</h2></div>    
         <iframe id="verification_output" style='display:none;border:none'>
         </iframe>
     </body>

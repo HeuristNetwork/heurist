@@ -212,7 +212,9 @@ function haddDataMenu() {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
-
+        doAction: function(link_id){
+            $('#'+link_id).click();
+        }
     }
 
     _init();

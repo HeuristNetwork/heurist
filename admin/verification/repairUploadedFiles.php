@@ -126,23 +126,46 @@
             
             if($is_local){
             
+                //since files are stored on the separate server we got complex relative path with lots of ../../
                 chdir(HEURIST_FILESTORE_DIR);  // relatively db root
                 $fpath = realpath($filename);
                 if(!$fpath || !file_exists($fpath)){
                     chdir(HEURIST_FILES_DIR);  // relatively db root
                     $fpath = realpath($filename);
                 }
+                
+                //realpath gives real path on remote file server
+                if(strpos($fpath, '/srv/HEURIST_FILESTORE/')===0){
+                    $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $fpath);
+                }else
+                if(strpos($fpath, '/misc/heur-filestore/')===0){
+                    $fpath = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $fpath);
+                }
+                
                 $path_parts = pathinfo($fpath);
-                $dirname = $path_parts['dirname'].'/';
-                $file_name = $path_parts['filename'];
+                //check that the relative path is correct
+                if(!@$path_parts['dirname']){
+                    error_log('Cant correct file path '.$fpath.'  for '.$filename);
+                    continue;
+                }else{
+                    $dirname = $path_parts['dirname'].'/';
+                    $file_name = $path_parts['basename'];
+                }
+
+                $dirname = str_replace("\0", '', $dirname);
+                $dirname = str_replace('\\', '/', $dirname);
+                if(strpos($dirname, HEURIST_FILESTORE_DIR)===0){
                 
-                $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                    $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                    
                 
-                $query = 'update recUploadedFiles set ulf_FilePath="'
-                                .mysql_real_escape_string($relative_path)
-                                .'", ulf_FileName="'
-                                .mysql_real_escape_string($file_name).'" where ulf_ID = '.$ulf_ID;
-                mysql_query($query);
+                    $query = 'update recUploadedFiles set ulf_FilePath="'
+                                    .mysql_real_escape_string($relative_path)
+                                    .'", ulf_FileName="'
+                                    .mysql_real_escape_string($file_name).'" where ulf_ID = '.$ulf_ID;
+                    mysql_query($query);
+                
+                }
                 
             }else{
 

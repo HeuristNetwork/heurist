@@ -29,8 +29,8 @@ function getMediaFolders() {
     $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where 1";
     $res1 = mysql_query($query1);
     if (!$res1 || mysql_num_rows($res1) == 0) {
-        return array('error'=>'Sorry, unable to read the sysIdentification from the current database. '.
-            'Possibly wrong database format, please consult Heurist team');
+        return array('error'=>'Sorry, unable to read the sysIdentification from the current database '.HEURIST_DBNAME
+            .'. Possibly wrong database format, please consult Heurist team');
     }
 
     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
@@ -87,6 +87,11 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
 
     global $rep_counter, $rep_issues, $system_folders;
     
+    if(@$dirs_and_exts['error']){
+        print "<div style=\"color:red\">".$dirs_and_exts['error']."</div>";
+        return;
+    }
+    
     $dirs = $dirs_and_exts['dirs'];
     $mediaExts = $dirs_and_exts['exts'];
 
@@ -142,7 +147,10 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
 
                     if(!($filename=="." || $filename=="..")){
                         if(is_dir($dir.$filename)){
-                            array_push($subdirs, $dir.$filename."/");
+                            $subdir = $dir.$filename."/";
+                            if(!in_array($subdir, $system_folders)){
+                                    array_push($subdirs, $subdir);
+                            }
                         }else if($isfirst){ //if($filename == "fieldhelper.xml"){
                             $isfirst = false;
                             if($dir == HEURIST_FILESTORE_DIR){
@@ -162,8 +170,9 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
                 }
 
                 if(count($subdirs)>0){
-                    doHarvest($subdirs);
-                    flush();
+//error_log(print_r($subdirs,true));                    
+                    doHarvest(array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
+                    if($is_report) flush();
                 }
             }
         }else if ($dir) {

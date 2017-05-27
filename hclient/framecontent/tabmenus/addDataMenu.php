@@ -26,13 +26,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/tabmenus/addDataMenu.js"></script>
 
 <script type="text/javascript">
-    var editing;
+    var editing, addDataMenu;
 
     // Callback function on initialization
     function onPageInit(success){
         if(success){
 
-            var addDataMenu = new haddDataMenu();
+            addDataMenu = new haddDataMenu();
 
             var $container = $("<div>").appendTo($("body"));
         }
@@ -144,8 +144,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         Multi-file upload</a>
                     </li>
 
-                    <li class="admin-only"><a href="admin/verification/listUploadedFilesErrors.php" name="auto-popup" 
-                            data-logaction="uplVerifyfile"
+                    <li class="admin-only"><a href="admin/verification/listDatabaseErrorsInit.php?type=files" name="auto-popup" 
+                            data-logaction="uplVerifyfile" id="menulink-verify-files"
                         class="large h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="">

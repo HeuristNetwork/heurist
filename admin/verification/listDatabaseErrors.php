@@ -135,11 +135,14 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             <h2>Check for invalid definitions and data (invalid pointers, terms, missing required, excess values etc.)</h2>
         </div>
 
-        <div><br/><br/>
+        <div style="padding-top:20px">
             These checks look for errors in the structure of the database and errors in the data within the database. These are generally not serious, but are best eliminated.
             <br /> Click the hyperlinked record ID at the start of each row to open an edit form to change the data for that record.
             <br />Look for red warning texts or pointer fields in the record which do not display data or which display a warning.
-            <div id="linkbar" style="float:right;padding-top:10px">
+            
+            <hr style="margin-top:15px">
+            <div id="linkbar" style="padding-top:10px">
+                <label><b>Go to:</b></label>
                 <a href="#field_type" style="white-space: nowrap;padding-right:10px">Field types</a>
                 <a href="#pointer_targets" style="white-space: nowrap;padding-right:10px">Pointer targets</a>
                 <a href="#target_types" style="white-space: nowrap;padding-right:10px">Target types</a>
@@ -152,9 +155,9 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 <a href="#nonstandard_fields" style="white-space: nowrap;padding-right:10px">Non-standard fields</a>
             </div>
         </div>
-        <hr style="margin-top:15px">
-        <div id="page-inner" style="top:90px">
-
+        
+        <div id="page-inner" style="top:110px">
+            
 
             <!-- CHECK FOR FIELD TYPE ERRORS -->
 
