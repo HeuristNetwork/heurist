@@ -3186,6 +3186,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     
                     if(fieldnames[i] == checked_field){
                         
+                        if(!recStruc || !recStruc[dt_id]){
+                            console.log('ERROR: field '+dt_id+' not found for '+rtyID);
+                            console.log(recStruc);                            
+                        }else
                         if(recStruc[dt_id][idx_reqtype] == "required"){
                             colname = colname + "*";
                         }
