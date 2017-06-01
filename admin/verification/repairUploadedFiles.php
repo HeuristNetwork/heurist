@@ -53,8 +53,9 @@
         return;
     }
 
-    //4. to remove from recUploadedFiles and delete file
-    $files_to_remove = @$data['unlinked'];
+    //------------------------------------------------------
+    //Remove non-registred files
+    $files_to_remove = @$data['files_notreg'];
     if(is_array($files_to_remove)){
         
         $res = array();
@@ -65,36 +66,43 @@
             }
         }
         $rv['result'] = $res;
-        
-    }else{
-
+        print json_format($rv);   
+        exit;
+    }
     
-    //1. to remove from recUploadedFiles and delete file
-    $files = @$data['orphaned'];
-    $ids = array();
-    if(is_array($files))
-    foreach ($files as $file) {
+    //------------------------------------------------------
+    // remove registration for nonused entries in ulf
+    $regs_to_remove = @$data['unused_file_local'];
+    if(!is_array($regs_to_remove)){
+        $regs_to_remove = @$data['unused_file_remote'];        
+    }
+    if(is_array($regs_to_remove) && count($regs_to_remove)>0){
 
+        mysql_query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$regs_to_remove).')');
+        if (mysql_error()) {
+            $rv['error'] = "Cannot delete entries from recUploadedFiles. mySQL error: " . mysql_error();
+            print json_format($rv);
+        }else{
+            $rv['result'] = $regs_to_remove;
+            print json_format($rv);
+        }
+        exit;
+    }    
+    
+    /*
+    foreach ($files as $file) {
         $ulf_ID = $file[0];
         $isfound = $file[1]; //if true - find and delete file if in db root or uploaded files
-        
         if($isfound==1){
             deleteUploadedFiles($ulf_ID);
         }
         $ids[] = $ulf_ID;
     }
+    */
     
-    if(count($ids)>0){
-        mysql_query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$ids).')');
-        if (mysql_error()) {
-            $rv['error'] = "Cannot delete entries from recUploadedFiles. mySQL error: " . mysql_error();
-            print json_format($rv);
-            return;
-        }
-    }
-    
-    //2. to remove from recUploadedFiles, recDetails
-    $file_ids = @$data['notfound'];
+    //------------------------------------------------------
+    // remove missed files
+    $file_ids = @$data['files_notfound'];
     if(is_array($file_ids) && count($file_ids)>0){
         mysql_query('delete from recDetails where dtl_UploadedFileID in ('.implode(',',$file_ids).')');
         if (mysql_error()) {
@@ -108,79 +116,11 @@
             print json_format($rv);
             return;
         }
-    }
-        
-    //3. correct path
-    $file_ids = @$data['fixpath'];
-    if(is_array($file_ids))
-    foreach ($file_ids as $ulf_ID) {
-
-
-        $filedata = get_uploaded_file_info_internal($ulf_ID, false);
-        
-        if($filedata!=null){
-
-            $filename = $filedata['fullpath'];
-            
-            $is_local = (strpos($filename,'http://')===false && strpos($filename,'https://')===false);
-            
-            if($is_local){
-            
-                //since files are stored on the separate server we got complex relative path with lots of ../../
-                chdir(HEURIST_FILESTORE_DIR);  // relatively db root
-                $fpath = realpath($filename);
-                if(!$fpath || !file_exists($fpath)){
-                    chdir(HEURIST_FILES_DIR);  // relatively db root
-                    $fpath = realpath($filename);
-                }
-                
-                //realpath gives real path on remote file server
-                if(strpos($fpath, '/srv/HEURIST_FILESTORE/')===0){
-                    $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $fpath);
-                }else
-                if(strpos($fpath, '/misc/heur-filestore/')===0){
-                    $fpath = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $fpath);
-                }
-                
-                $path_parts = pathinfo($fpath);
-                //check that the relative path is correct
-                if(!@$path_parts['dirname']){
-                    error_log('Cant correct file path '.$fpath.'  for '.$filename);
-                    continue;
-                }else{
-                    $dirname = $path_parts['dirname'].'/';
-                    $file_name = $path_parts['basename'];
-                }
-
-                $dirname = str_replace("\0", '', $dirname);
-                $dirname = str_replace('\\', '/', $dirname);
-                if(strpos($dirname, HEURIST_FILESTORE_DIR)===0){
-                
-                    $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
-                    
-                
-                    $query = 'update recUploadedFiles set ulf_FilePath="'
-                                    .mysql_real_escape_string($relative_path)
-                                    .'", ulf_FileName="'
-                                    .mysql_real_escape_string($file_name).'" where ulf_ID = '.$ulf_ID;
-                    mysql_query($query);
-                
-                }
-                
-            }else{
-
-                $query = 'update recUploadedFiles set ulf_ExternalFileReference="'
-                                .mysql_real_escape_string($filename)
-                                .'", ulf_FilePath=NULL, ulf_FileName=NULL where ulf_ID = '.$ulf_ID;
-                mysql_query($query);
-                  
-            }
-        }
+        $rv['result'] = $file_ids;
+        print json_format($rv);
+        exit;
     }
     
-    
-        $rv['result'] = "Uploaded files have been repaired.";
-    }
-    
+    $rv['error'] = "Wrong parameters. No data defined";
     print json_format($rv);
 ?>

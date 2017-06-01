@@ -81,7 +81,7 @@
     </head>
 
 
-    <body class="popup" style="margin:0 !important">
+    <body class="popup" style="margin:0 !important; color:black;">
 
         <?php
 
@@ -102,7 +102,7 @@
 
 
             // ----Visit #1 - CHECK MEDIA FOLDERS --------------------------------------------------------------------------------
-
+            
             if(!array_key_exists('mode', $_REQUEST)) {
 
                 // Find out which folders are allowable - the default scratch space plus any
@@ -134,7 +134,7 @@
                 $mediaFolders = $row1[0];
                 $dirs = explode(';', $mediaFolders); // get an array of folders
                 $dirs2 = array();
-                
+
                 // MEDIA FOLDERS ALWAYS RELATIVE TO HEURIST_FILESTORE_DIR
                 foreach ($dirs as $dir){
                     if( $dir && $dir!="*") {
@@ -143,6 +143,7 @@
                             $dir .= "/";
                         }
 
+                        
                         /* changed to check that folder is in HEURIST_FILESTORE_DIR 
                         if(!file_exists($dir) ){ //probable this is relative
                             $orig = $dir;
@@ -151,9 +152,18 @@
                         }
                         */
                         $dir = str_replace('\\','/',$dir);     
+                        
                         if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                             chdir(HEURIST_FILESTORE_DIR);
                             $dir = realpath($dir);
+
+                            //realpath gives real path on remote file server
+                            if(strpos($dir, '/srv/HEURIST_FILESTORE/')===0){
+                                $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $dir);
+                            }else
+                            if(strpos($dir, '/misc/heur-filestore/')===0){
+                                $dir = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $dir);
+                            }
                             $dir = str_replace('\\','/',$dir);     
                             if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                                 // Folder must be in heurist filestore directory
