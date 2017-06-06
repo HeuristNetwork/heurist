@@ -90,8 +90,9 @@
       $size = 'width="'.$width.'" height="'.$height.'"';
 
       $annot_edit = ($isannotation_editor)?'&annedit=yes':'';
+      $origin = (!$isannotation_editor && @$_REQUEST['origin'])?'&origin='.$_REQUEST['origin']:'';
 
-      $text = '<iframe '.$size.' src="'.HEURIST_BASE_URL.'records/files/mediaViewer.php?ulf_ID='.$_REQUEST['ulf_ID'].$annot_edit.'&db='.$_REQUEST['db'].'" frameborder="0"></iframe>';
+      $text = '<iframe '.$size.' src="'.HEURIST_BASE_URL.'records/files/mediaViewer.php?ulf_ID='.$_REQUEST['ulf_ID'].$annot_edit.'&db='.$_REQUEST['db'].$origin.'" frameborder="0"></iframe>';
 
       print $text;
     }

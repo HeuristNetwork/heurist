@@ -815,6 +815,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                 (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
             }
 
+            
 
             $downloadURL = HEURIST_BASE_URL."records/files/downloadFile.php/".$origName."?".
             (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
@@ -841,7 +842,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                     $res['remoteSource'] = 'heurist';
                 }
             }
-
+            
             //
             //@todo - add special parameters for specific sources and media types
             // QUESTION - store it in database? Or create on-fly??

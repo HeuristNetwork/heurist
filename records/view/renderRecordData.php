@@ -90,7 +90,9 @@ if(!$is_map_popup){
         <!-- script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
         <script type="text/javascript" src="../../records/files/initViewer.js"></script -->
         <script type="text/javascript" src="../../common/js/hintDiv.js"></script> <!-- for mapviewer roolover -->
-
+<!--
+        <script type="text/javascript" src="../../ext/yoxview/yoxview-init.js"></script>
+-->        
         <script type="text/javascript">
 
             //find heurist object in parent windows or init new one if current window is a top most
@@ -253,6 +255,10 @@ if(!$is_map_popup){
                 }
                 }catch(e){
                 }
+                
+                //init image viewer
+                //$('.mediacontent').yoxview({ skin: "top_menu", allowedUrls: /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
+                
             }
 
         </script>
@@ -585,10 +591,18 @@ function print_private_details($bib) {
                             if($isplayer && is_image($filedata) && is_logged_in()){
                                 $filedata['playerURL'] .= "&annedit=yes";
                             }
-
+                            
+                            //$filedata standart thumb with 200px image
+                            if(!$is_map_popup){
+                            $filedata["thumbURL"] =
+                                HEURIST_BASE_URL."common/php/resizeImage.php?maxw=200&maxh=200&".
+                                (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$filedata['nonce'];
+                            }
+                            
                             array_push($thumbs, array(
                                 'id' => $filedata['id'],
                                 'url' => $filedata['URL'],   //download
+                                'mediaType'=>$filedata['mediaType'],   
                                 'thumb' => $filedata['thumbURL'],
                                 'player' => $isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  //link to generate player html
                             ));
@@ -680,12 +694,25 @@ if($is_map_popup){
     echo '<div class=detailRowHeader>Shared';
 }
 ?>
-            <div  class=thumbnail>
+            <div class=thumbnail>
                 <?php
                 foreach ($thumbs as $thumb) {
+                    
+                    
+                    
                     print '<div class=thumb_image>';
+                    /*
+                    if($thumb["mediaType"]=='image' && !$is_map_popup){
+                        //NEW WAY                        
+                        print '<div id="mediarec"'.$thumb['id'].'" style="width:100%,text-align:center,height:auto" class="mediacontent thumbnails">';
+                        print '<div style="height:auto;display:inline-block"><a target="yoxview" href="'
+                        .HEURIST_BASE_URL.'redirects/file_download.php?db='.HEURIST_DBNAME.'&id='.$thumb['id'].'">';
+                        print '<img src="'.htmlspecialchars($thumb['thumb']).'"/>';
+                        print '</a></div></div>';
+                    }else
+                    */
                     if($thumb['player'] && !$is_map_popup){
-                        print '<img id="img'.$thumb['id'].'" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player']) .'\')">';
+                        print '<img id="img'.$thumb['id'].'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
                         print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
                     }else{  //for usual image
                         print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';

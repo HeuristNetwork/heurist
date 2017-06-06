@@ -70,7 +70,9 @@ regional['en'] = {
     'record_action_undefined_delete_detail': 'Skipped due to no matching',
     'record_action_limitted_add_detail': 'Skipped due exceeding repeat values limit',
     'record_action_limitted_delete_detail': 'Skipped due impossibility to delete required field',
-    'record_action_errors': 'Database sql errors'
+    'record_action_errors': 'Database sql errors',
+    
+    'thumbs3':'preview'
 
 };
 
@@ -173,6 +175,7 @@ regional['ru'] = {
     'list':'список',
     'icons':'иконки',
     'thumbs':'миниатюры',
+    'thumbs3':'превью',
 
     'first':'первая',
     'previous':'предыдущая',
@@ -345,6 +348,7 @@ regional['fr'] = {
     'list':'liste',
     'icons':'icones',
     'thumbs':'onglets',
+    'thumbs3':'onglets2',
 
     'first':'premier',
     'previous':'précédent',
@@ -508,6 +512,7 @@ regional['nl'] = {
     'list':'lijst',
     'icons':'iconen',
     'thumbs':'miniaturen',
+    'thumbs3':'miniaturen 2',
 
     'first':'eerste',
     'previous':'vorige',

@@ -362,6 +362,8 @@ $.widget( "heurist.resultList", {
             +'<label for="cb2_'+rnd+'">'+window.hWin.HR('icons')+'</label>'
             +'<input  id="cb3_'+rnd+'" type="radio" name="list_lo" value="thumbs"/>'
             +'<label for="cb3_'+rnd+'">'+window.hWin.HR('thumbs')+'</label>'
+            +'<input  id="cb4_'+rnd+'" type="radio" name="list_lo" value="thumbs3"/>'
+            +'<label for="cb4_'+rnd+'">'+window.hWin.HR('thumbs3')+'</label>'
         )
         .buttonset()
         .appendTo( this.div_toolbar );
@@ -380,6 +382,7 @@ $.widget( "heurist.resultList", {
         this.element.find('input[type=radio][value="list"]').button({icons: {primary: "ui-icon-list"}, text:false, title:window.hWin.HR('list')});
         this.element.find('input[type=radio][value="icons"]').button({icons: {primary: "ui-icon-view-icons-b"}, text:false, title:window.hWin.HR('icons')});
         this.element.find('input[type=radio][value="thumbs"]').button({icons: {primary: "ui-icon-view-icons"}, text:false, title:window.hWin.HR('thumbs')});
+        this.element.find('input[type=radio][value="thumbs3"]').button({icons: {primary: "ui-icon-stop"}, text:false, title:window.hWin.HR('thumbs3')});
 
         //----------------------
         //,'min-width':'10em'
@@ -544,7 +547,7 @@ $.widget( "heurist.resultList", {
     //
     _applyViewMode: function(newmode){
         
-        var allowed = ['list','icons','thumbs'];
+        var allowed = ['list','icons','thumbs','thumbs3'];
         
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = 'list';

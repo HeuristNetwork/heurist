@@ -434,8 +434,16 @@ div .selected_last{
     /*line-height: 12px;*/
 }
 
+.smaller{
+    width: 110px !important;
+} 
+.smaller:hover{
+    width: 112px !important;
+} 
+
+
 /* THUMBS VIEW */
-.thumbs .recordDiv {
+.thumbs .recordDiv, .thumbs3 .recordDiv {
     -moz-user-select: none;
     border: 3px solid #FFFFFF;
     border-collapse: collapse;
@@ -461,14 +469,6 @@ div .selected_last{
     width:134px;
     margin:3px;
 }
-
-.smaller{
-    width: 110px !important;
-} 
-.smaller:hover{
-    width: 112px !important;
-} 
-
 
 .thumbs .recordDiv .recordTitle {
     bottom: 18px;
@@ -666,6 +666,57 @@ div .selected_last{
 
 .thumbs2 .recordDiv .recTypeThumb{
     height: 100%;
+}
+
+/*   */
+
+.thumbs3 .recordDiv {
+    height: 178px;
+    width: 178px;
+}
+
+.thumbs3 .recordDiv .recTypeThumb{
+    height: 150px
+}
+
+.thumbs3 .recordDiv:hover {
+    z-index:10;
+    -moz-box-shadow:0px 3px 8px #666;
+    -webkit-box-shadow:0px 3px 8px #666;
+    box-shadow:0px 3px 8px #666;
+    height:184px;
+    width:184px;
+    margin:3px;
+}
+
+.thumbs3 .recordDiv .recordTitle {
+    bottom: 1px;
+    left: 33px;
+    right: 3px;
+    height: 18px;
+    width: 150px;
+}
+
+.thumbs3 .recordDiv .recordSelector {
+    bottom: 1px;
+    right: 3px;
+    position: absolute;
+}
+
+.thumbs3 .recordDiv .recordIcons {
+    bottom: 1px;
+    left: 3px;
+    position: absolute;
+    width: auto;
+}
+.thumbs3 .rec_edit_link {
+    bottom: 1px;
+    right:1px;
+}
+
+.thumbs3 .recordDiv .rec_owner{
+    display: inline-block;
+    padding-left:5px;
 }
 
 

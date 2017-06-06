@@ -40,10 +40,21 @@ mysql_connection_select(DATABASE);
 if (!@$_REQUEST['ulf_ID'] && !@$_REQUEST['rec_ID']) return; // nothing returned if no ulf_ID parameter
 
 if (@$_REQUEST['ulf_ID']){
+    
 	$filedata = get_uploaded_file_info_internal($_REQUEST['ulf_ID'], false);
 	if($filedata==null) return; // nothing returned if parameter does not match one and only one row
 
+    if(@$_REQUEST['origin']=='recview' && $filedata['remoteSource']=='heurist' && $filedata["mediaType"]=='image'){
+        //return resizeImage for this origin
+        $filedata['URL'] =
+                    HEURIST_BASE_URL."common/php/resizeImage.php?maxw=640&maxh=640&".
+                    "file_url=".$filedata['URL'].'&'
+                    .(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME : "" );
+    }
+
+
 	$url = $filedata['URL'];
+    
 	$url = str_replace("\\","\\\\",$url);
 	$recID = get_uploaded_file_recordid($filedata['id'], false);
 
