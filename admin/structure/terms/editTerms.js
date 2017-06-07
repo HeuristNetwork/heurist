@@ -38,8 +38,7 @@ function getParentLabel(_node){
 }
 
 //aliases
-var Dom = YAHOO.util.Dom,
-Hul = top.HEURIST.util;
+var Hul = top.HEURIST.util;
 
 /**
 * EditTerms - class for pop-up window to edit terms
@@ -51,10 +50,6 @@ function EditTerms() {
 
     //private members
     var _className = "EditTerms",
-    _tabView = new YAHOO.widget.TabView(),
-    _termTree1, //treeview for enum terms
-    _termTree2, //treeview for relation terms
-    _currTreeView,
     _currentNode,
     _keepCurrentParent = null,
     _vocabulary_toselect,
@@ -97,245 +92,44 @@ function EditTerms() {
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        if (!top.HEURIST.util.isempty(treetype))
+        if (!(treetype == "terms" || treetype == "relationships")){
+            treetype = "terms";
+        } 
+        
+        if (treetype == "terms")
         {
-            if (treetype == "terms")
-            {
-                _tabView.addTab(new YAHOO.widget.Tab({
-                    id: 'enum',
-                    label: 'Terms',
-                    content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;overflow:hidden;"></div></div>'
-
-
-                }));
-
-                $(".banner h2").text("Manage terms used by term-list (category/dropdown) fields");
-            }
-
-            if (treetype == "relationships")
-            {
-                _tabView.addTab(new YAHOO.widget.Tab({
-                    id: 'relation',
-                    label: 'Relationship types',
-                    content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;overflow:hidden;"></div></div>'
-
-                }));
-                $(".banner h2").html("Manage terms used for relationship type in relationship records");
-            }
+                _currentDomain = "enum";
+                $("#divBanner h2").text("Manage terms used by term-list (category/dropdown) fields");
+        }else if (treetype == "relationships")
+        {
+                _currentDomain = "relation";
+                $("#divBanner h2").html("Manage terms used for relationship type in relationship records");
         }
 
-        else
-        {
-            tab_view = 0;
-            _tabView.addTab(new YAHOO.widget.Tab({
-                id: 'enum',
-                label: 'Terms',
-                content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
-            }));
+        /*
+        $('<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden">'
+        +'<div id="termTree" class="termTree" style="height:100%;width:100%;overflow:hidden"></div></div>').appendTo($('#pnlLeft'));
+        */
+            
+        _defineContentTreeView();
+        
 
-            tab_view = 1;
-            _tabView.addTab(new YAHOO.widget.Tab({
-                id: 'relation',
-                label: 'Relationship types',
-                content: '<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden"><div id="termTree2" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
-
-            }));
-
-        }
-        _tabView.addListener("activeTabChange", _handleTabChange);
-        _tabView.appendTo("tabContainer");
-        _tabView.set("activeIndex", initdomain);
-
-        var dv1 = Dom.get('divApply');
-        var dv2 = Dom.get('divBanner');
-        var dv3 = Dom.get('page-inner');
+        var dv1 = $('#divApply');
+        var dv2 = $('#divBanner');
+        var dv3 = $('.ent_content_full');//'#page-inner');
         if(_isWindowMode){
-            dv1.style.display = "block";
-            dv2.style.display = "none";
-            dv3.style.top = "5px";
+            dv1.show();
+            dv2.hide();
+            dv3.css({top:'0'});
             window.close = that.applyChanges;
 
         }else{
-            dv1.style.display = "none";
-            dv2.style.display = "block";
+            dv1.hide();
+            dv2.show();
         }
 
         _initFileUploader();
     }
-
-    /**
-    * Listener of  tabview control. Creates new treeview on the tab
-    */
-    function _handleTabChange (e) {
-        var ind = _tabView.get("activeIndex");
-        if(e.newValue!==e.prevValue){
-            if (!top.HEURIST.util.isempty(treetype))
-            {
-                if(treetype=="terms"){
-                    _currentDomain = "enum";
-
-                    if(Hul.isnull(_termTree1)){
-                        _termTree1 = new YAHOO.widget.TreeView("termTree1");
-                        //fill treeview with content
-                        // _fillTreeView(_termTree1);
-                        _defineContentTreeView();
-                    }
-                    _currTreeView = _termTree1;
-
-                } else if(treetype=="relationships"){
-                    _currentDomain = "relation";
-
-                    if(Hul.isnull(_termTree2)){
-                        _termTree2 = new YAHOO.widget.TreeView("termTree2");
-                        //fill treeview with content
-                        //_fillTreeView(_termTree2);
-                        _defineContentTreeView();
-                    }
-                    _currTreeView = _termTree2;
-                }
-            }
-            else{
-                if(Hul.isnull(_termTree1)){
-                    _currentDomain = "enum";
-                    _termTree1 = new YAHOO.widget.TreeView("termTree1");
-                    //fill treeview with content
-                    _fillTreeView(_termTree1);
-                    _currTreeView = _termTree1;
-                }
-
-                else  if(Hul.isnull(_termTree2))
-                {
-                    _currentDomain = "relation";
-                    _termTree2 = new YAHOO.widget.TreeView("termTree2");
-                    //fill treeview with content
-                    _fillTreeView(_termTree2);
-                    _currTreeView = _termTree2;
-                }
-
-
-            }
-
-            if(_vocabulary_toselect){
-                _findNodeById(_vocabulary_toselect, true);
-                _vocabulary_toselect=null;
-            }
-        }
-    }
-
-
-    /**
-    *    Fills the given treeview with the appropriate content
-    */
-    function _fillTreeView (tv) {
-
-        var termid,
-        tv_parent = tv.getRoot(),
-        first_node,
-        treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
-        termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
-        fi = top.HEURIST.terms.fieldNamesToIndex;
-
-        tv.removeChildren(tv_parent); // Reset the the tree
-
-        //first level terms
-        for (termid in treesByDomain)
-        {
-            if(!Hul.isnull(termid)){
-
-                var nodeIndex = tv.getNodeCount()+1;
-
-                var arTerm = termsByDomainLookup[termid];
-
-                var term = {};//new Object();
-                term.id = termid;
-                term.parent_id = null;
-                term.conceptid = arTerm[fi.trm_ConceptID];
-                term.domain = _currentDomain;
-                term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
-                term.description = arTerm[fi.trm_Description];
-                term.termcode  = arTerm[fi.trm_Code];
-                term.inverseid = arTerm[fi.trm_InverseTermID];
-                term.status = arTerm[fi.trm_Status];
-                term.original_db = arTerm[fi.trm_OriginatingDBID];
-
-                //'<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[parentElement]+'</div>';
-                //term.href = "javascript:void(0)";
-                //internal function
-                function __createChildren(parentNode, parent_id, parentEntry) { // Recursively get all children
-                    var term,
-                    childNode,
-                    nodeIndex,
-                    child;
-
-                    for(child in parentNode)
-                    {
-                        if(!Hul.isnull(child)){
-                            nodeIndex = tv.getNodeCount()+1;
-
-                            var arTerm = termsByDomainLookup[child];
-
-                            if(!Hul.isnull(arTerm)){
-
-                                term = {};//new Object();
-                                //if(child==5746){ //debug
-                                //    term.id = child;
-                                //}
-
-                                term.id = child;
-                                term.parent_id = parent_id;
-                                term.conceptid = arTerm[fi.trm_ConceptID];
-                                term.domain = _currentDomain;
-                                term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
-                                term.description = arTerm[fi.trm_Description];
-                                term.termcode  =  arTerm[fi.trm_Code];
-                                term.inverseid = arTerm[fi.trm_InverseTermID];
-                                term.status = arTerm[fi.trm_Status];
-                                term.original_db = arTerm[fi.trm_OriginatingDBID];
-
-
-                                //term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[child]+'</div>';
-                                //term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
-
-                                childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
-
-                                __createChildren(parentNode[child], term.id, childNode); // createChildren() again for every child found
-                            }
-                        }
-                    }//for
-                }
-
-                var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
-
-                if(!first_node) { first_node = topLayerParent;}
-
-                var parentNode = treesByDomain[termid];
-                __createChildren(parentNode, termid, topLayerParent); // Look for children of the node
-            }
-        }//for
-
-        //tv.subscribe("labelClick", _onNodeClick);
-        tv.singleNodeHighlight = true;
-
-        tv.subscribe("clickEvent", _onNodeClick); //tv.onEventToggleHighlight);
-
-        tv.render();
-        //first_node.focus();
-        //first_node.toggle();
-
-        // todo
-        if(_keepCurrentParent!=null){
-            //need some time for render
-            setTimeout(function(){
-                var node = _findNodeById(_keepCurrentParent);
-                node.focus();
-                node.toggle();
-                }, 1000);
-            //_onNodeClick(node);
-        }
-
-    }
-
-
 
     //
     // find node(s) by name in current treeview
@@ -369,7 +163,7 @@ function EditTerms() {
             return (node.data.id===nodeid);
 
         }
-        //var nodes = _currTreeView.getNodesBy(__doSearchById);
+
         var tree = $treediv.fancytree("getTree");
         var nodes=[];
 
@@ -421,18 +215,18 @@ function EditTerms() {
 
         if(_currentNode!=null){
             
-            var termName = Dom.get('edName').value.trim();
+            var termName = $('#edName').val().trim();
 
-            var iInverseId = Number(Dom.get('edInverseTermId').value);
+            var iInverseId = Number($('#edInverseTermId').val());
             iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
             var iInverseId_prev = Number(_currentNode.data.inverseid);
             iInverseId_prev = (iInverseId_prev>0)?iInverseId_prev:null;
             
             ischanged =
             termName != _currentNode.data.label ||
-            Dom.get('edDescription').value.trim() != _currentNode.data.description ||
-            Dom.get('edCode').value.trim() != _currentNode.data.termcode ||
-            Dom.get("trm_Status").value != _currentNode.data.status ||
+            $('#edDescription').val().trim() != _currentNode.data.description ||
+            $('#edCode').val().trim() != _currentNode.data.termcode ||
+            $('#trm_Status').val() != _currentNode.data.status ||
             iInverseId != iInverseId_prev;
         }
 
@@ -483,30 +277,26 @@ function EditTerms() {
             status = 'open';
 
             if(!Hul.isnull(node)){
-                Dom.get('formMessage').style.display = "none";
+                $('#formMessage').hide();
                 $("#btnMerge").css("display", "none");
                 if (node.isActive())
 
                 {
-                    //$("#formEditor").show();
-                    Dom.get('formEditor').style.display = "block";
-                    // $(".form_editor ").hide();
-
-
+                    $('#formEditor').show();
                 }
 
                 if (Hul.isempty( node.data.conceptid)){
-                    Dom.get('div_ConceptID').innerHTML = '';
+                    $('#div_ConceptID').empty();
                 }else{
-                    Dom.get('div_ConceptID').innerHTML = 'Concept ID: '+node.data.conceptid;
+                    $('#div_ConceptID').html('Concept ID: '+node.data.conceptid);
                 }
 
 
                 //    alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
-                Dom.get('edId').value = node.data.id;
-                Dom.get('edParentId').value = node.data.parent_id;
-                var edName = Dom.get('edName');
-                edName.value = node.data.label;
+                $('#edId').val(node.data.id);
+                $('#edParentId').val(node.data.parent_id);
+                var edName = $('#edName');
+                edName.val(node.data.label);
                 if(node.data.label==="new term"){
                     //highlight all text
                     edName.selectionStart = 0;
@@ -519,24 +309,24 @@ function EditTerms() {
                 if(Hul.isnull(node.data.termcode)) {
                     node.data.termcode="";
                 }
-                Dom.get('edDescription').value = node.data.description;
-                Dom.get('edCode').value = node.data.termcode;
+                $('#edDescription').val(node.data.description);
+                $('#edCode').val(node.data.termcode);
 
                 //image
                 if(node.data.id>0){
                     var curtimestamp = (new Date()).getMilliseconds();
-                    Dom.get('termImage').innerHTML =
+                    $('#termImage').html(
                     '<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
                     '<img id="imgThumb" style="max-width: 380px;" src="'+
                     top.HEURIST.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
-                    '"></a>';
-                    Dom.get('termImage').style.display = 'inline-block';
-                    Dom.get('btnClearImage').style.display = 'inline-block';
-                    Dom.get('termImageForNew').style.display = 'none';
+                    '"></a>');
+                    $('#termImage').css({display:'inline-block'});
+                    $('#btnClearImage').css({display:'inline-block'});
+                    $('#termImageForNew').hide();
                 }else{
-                    Dom.get('termImage').style.display = 'none';
-                    Dom.get('btnClearImage').style.display = 'none';
-                    Dom.get('termImageForNew').style.display = 'inline-block';
+                    $('#termImage').hide();
+                    $('#btnClearImage').hide();
+                    $('#termImageForNew').css({display:'inline-block'});
                 }
 
 
@@ -545,35 +335,34 @@ function EditTerms() {
                     node_invers = _findNodeById(node.data.inverseid, false);
                 }
                 if(!Hul.isnull(node_invers)){ //inversed term found
-                    Dom.get('edInverseTermId').value = node_invers.data.id;
-                    Dom.get('edInverseTerm').value = getParentLabel(node_invers);
-                    Dom.get('btnInverseSetClear').value = 'clear';
+                    $('#edInverseTermId').val(node_invers.data.id);
+                    $('#edInverseTerm').val(getParentLabel(node_invers));
+                    $('#btnInverseSetClear').val('clear');
 
-                    Dom.get('divInverse').style.display = (node_invers.data.id==node.data.id)?'none':'block';
-                    Dom.get('cbInverseTermItself').checked = (node_invers.data.id==node.data.id)?'checked':'';
-                    Dom.get('cbInverseTermOther').checked = (node_invers.data.id==node.data.id)?'':'checked';
+                    $('#divInverse').css({display:(node_invers.data.id==node.data.id)?'none':'block'});
+                    $('#cbInverseTermItself').prop('checked',(node_invers.data.id==node.data.id));
+                    $('#cbInverseTermOther').prop('checked',!(node_invers.data.id==node.data.id));
                 }else{
                     node.data.inverseid = null;
-                    Dom.get('edInverseTermId').value = '0';
-                    Dom.get('edInverseTerm').value = 'click me to select inverse term...';
-                    Dom.get('btnInverseSetClear').value = 'set';
-
-                    Dom.get('divInverse').style.display = "none"; //(_currTreeView === _termTree2)?"block":"none";
-                    Dom.get('cbInverseTermItself').checked = 'checked';
-                    Dom.get('cbInverseTermOther').checked = '';
+                    $('#edInverseTermId').val('0');
+                    $('#edInverseTerm').val('click me to select inverse term...');
+                    $('#btnInverseSetClear').val('set');
+                    $('#divInverse').hide();
+                    $('#cbInverseTermItself').prop('checked',true);
+                    $('#cbInverseTermOther').prop('checked',false);
                 }
 
                 if(isExistingNode(node)){
-                    Dom.get('div_btnAddChild').style.display = "inline-block";
-                    Dom.get('btnDelete').value = "Delete";
-                    Dom.get('btnSave').value = "Save changes";
+                    $('#div_btnAddChild').css({display:'inline-block'});
+                    $('#btnDelete').val("Delete");
+                    $('#btnSave').val("Save changes");
                 }else{//new term
-                    Dom.get('div_btnAddChild').style.display = "none";
-                    Dom.get('btnDelete').value = "Cancel";
-                    Dom.get('btnSave').value = "Save term";
+                    $('#div_btnAddChild').hide()
+                    $('#btnDelete').val("Cancel");
+                    $('#btnSave').val("Save term");
                 }
 
-                Dom.get('divInverseType').style.display = (_currTreeView === _termTree2)?"block":"none";
+                $('#divInverseType').css({display: (_currentDomain=="relation")?"block":"none"});
 
                 var dbId = Number(top.HEURIST.database.id),
                 original_dbId = Number(node.data.original_db),
@@ -597,34 +386,25 @@ function EditTerms() {
 
 
                 _optionReserved(add_reserved);
-                var selstatus = Dom.get("trm_Status");
-                selstatus.value = status;
+                $("#trm_Status").val(status);
 
                 _toggleAll(disable_status || disable_fields, disable_status);
             }//node!=null
         }
 
-        Dom.get('formInverse').style.display = "none";
+        $('#formInverse').hide();
         if(Hul.isnull(node)){
-            Dom.get('formEditor').style.display = "none";
-            Dom.get('formMessage').style.display = "block";
+            $('#formEditor').hide();
+            $('#formMessage').show();
 
         }
-
-        /* if(node){ //obj && obj.event){
-        var ind = _tabView.get("activeIndex");
-        var tv = (ind===0)?_termTree1:_termTree2;
-        tv.onEventToggleHighlight(node);
-        } */
-
-        ///();
     }
 
     /**
     * adds reserved option to status dropdown list
     */
     function _optionReserved(isAdd){
-        var selstatus = Dom.get("trm_Status");
+        var selstatus = $("#trm_Status")[0];
         if(isAdd && selstatus.length<4){
             Hul.addoption(selstatus, "reserved", "reserved");
         }else if (!isAdd && selstatus.length===4){
@@ -638,22 +418,22 @@ function EditTerms() {
     */
     function _toggleAll(disable, reserved) {
 
-        Dom.get("trm_Status").disabled = reserved;
+        document.getElementById ("trm_Status").disabled = reserved;
 
         if(disable){
-            Dom.get("btnDelete").onclick = _disableWarning;
-            Dom.get("btnInverseSetClear").onclick = _disableWarning2;
-            Dom.get('edInverseTerm').onclick = _disableWarning2;
+            document.getElementById ("btnDelete").onclick = _disableWarning;
+            document.getElementById ("btnInverseSetClear").onclick = _disableWarning2;
+            document.getElementById ('edInverseTerm').onclick = _disableWarning2;
 
-            Dom.get("cbInverseTermItself").onclick= _disableWarning2;
-            Dom.get("cbInverseTermOther").onclick= _disableWarning2;
+            document.getElementById ("cbInverseTermItself").onclick= _disableWarning2;
+            document.getElementById ("cbInverseTermOther").onclick= _disableWarning2;
         }else{
-            Dom.get("btnDelete").onclick = _doDelete;
-            Dom.get("btnInverseSetClear").onclick = _setOrclearInverseTermId;
-            Dom.get('edInverseTerm').onclick = _setOrclearInverseTermId2;
+            document.getElementById ("btnDelete").onclick = _doDelete;
+            document.getElementById ("btnInverseSetClear").onclick = _setOrclearInverseTermId;
+            document.getElementById ('edInverseTerm').onclick = _setOrclearInverseTermId2;
 
-            Dom.get("cbInverseTermItself").onclick= _onInverseTypeClick;
-            Dom.get("cbInverseTermOther").onclick= _onInverseTypeClick;
+            document.getElementById ("cbInverseTermItself").onclick= _onInverseTypeClick;
+            document.getElementById ("cbInverseTermOther").onclick= _onInverseTypeClick;
         }
     }
 
@@ -662,21 +442,19 @@ function EditTerms() {
     */
     function _onInverseTypeClick(){
 
-        if(Dom.get("cbInverseTermItself").checked){
-            Dom.get('edInverseTermId').value = Dom.get('edId').value;
-            Dom.get('divInverse').style.display = 'none';
+        if(document.getElementById ("cbInverseTermItself").checked){
+            document.getElementById ('edInverseTermId').value = $('#edId').val();
+            document.getElementById ('divInverse').style.display = 'none';
         }else{
-            Dom.get('edInverseTermId').value = "0";
-            Dom.get('divInverse').style.display = 'block';
-            Dom.get('btnInverseSetClear').value = 'set';
-            Dom.get('edInverseTerm').value = "";
+            document.getElementById ('edInverseTermId').value = "0";
+            document.getElementById ('divInverse').style.display = 'block';
+            document.getElementById ('btnInverseSetClear').value = 'set';
+            document.getElementById ('edInverseTerm').value = "";
         }
         _isNodeChanged();
     }
 
     function _setOrclearInverseTermId2(){
-        // Dom.get('formInverse').style.display = "block";
-        //Dom.get('edInverseTerm').value = "";
 
         function _doSearch(event){
 
@@ -729,10 +507,10 @@ function EditTerms() {
                     alert("you can't make top level vocabulary an inverse");
                 }else{
 
-                    Dom.get('edInverseTerm').value = sel.options[sel.selectedIndex].text;
-                    Dom.get('edInverseTermId').value = nodeid;
-                    Dom.get('btnInverseSetClear').value = 'clear';
-                    //Dom.get('formInverse').style.display = "none";
+                    document.getElementById ('edInverseTerm').value = sel.options[sel.selectedIndex].text;
+                    document.getElementById ('edInverseTermId').value = nodeid;
+                    document.getElementById ('btnInverseSetClear').value = 'clear';
+                    //document.getElementById ('formInverse').style.display = "none";
                     _doSave(true, false);
 
                 }
@@ -773,41 +551,41 @@ function EditTerms() {
     * Clear button listener
     */
     function _setOrclearInverseTermId(){
-        if(Dom.get('btnInverseSetClear').value==='cancel'){
-            Dom.get('btnInverseSetClear').value = (Dom.get('edInverseTermId').value!=="0")?'clear':'set';
-            //Dom.get('formInverse').style.display = "block"; Popup is being used instead rather than displaying in the current Html page
-            Dom.get('formInverse').style.display = "none";
+        if(document.getElementById ('btnInverseSetClear').value==='cancel'){
+            document.getElementById ('btnInverseSetClear').value = (document.getElementById ('edInverseTermId').value!=="0")?'clear':'set';
+            //document.getElementById ('formInverse').style.display = "block"; Popup is being used instead rather than displaying in the current Html page
+            document.getElementById ('formInverse').style.display = "none";
             _setOrclearInverseTermId2()
-        }else if(Dom.get('edInverseTermId').value==="0"){
+        }else if(document.getElementById ('edInverseTermId').value==="0"){
             //show inverse div
-            Dom.get('btnInverseSetClear').value = 'cancel';
-            //Dom.get('formInverse').style.display = "block";
-            Dom.get('formInverse').style.display = "none";
+            document.getElementById ('btnInverseSetClear').value = 'cancel';
+            //document.getElementById ('formInverse').style.display = "block";
+            document.getElementById ('formInverse').style.display = "none";
 
             //clear search result - since some terms may be removed/renamed
-            Dom.get('resSearchInverse').innerHTML = "";
+            document.getElementById ('resSearchInverse').innerHTML = "";
             _setOrclearInverseTermId2()
 
         }else{
-            Dom.get('btnInverseSetClear').value = 'set';
-            //Dom.get('formInverse').style.display = "block";
-            Dom.get('formInverse').style.display = "none";
-            Dom.get('edInverseTerm').value = "";
-            Dom.get('edInverseTermId').value = "0";
+            document.getElementById ('btnInverseSetClear').value = 'set';
+            //document.getElementById ('formInverse').style.display = "block";
+            document.getElementById ('formInverse').style.display = "none";
+            document.getElementById ('edInverseTerm').value = "";
+            document.getElementById ('edInverseTermId').value = "0";
             _setOrclearInverseTermId2()
         }
     }
 
     function _showWarning(message){
-        var ele = Dom.get('divMessage');
-        Dom.get('divMessage-text').innerHTML =  message;
+        var ele = document.getElementById ('divMessage');
+        document.getElementById ('divMessage-text').innerHTML =  message;
         Hul.popupTinyElement(this, ele);
     }
     function _disableWarning(){
-        _showWarning("Sorry, this term is marked as "+Dom.get("trm_Status").value+" and cannot therefore be deleted");
+        _showWarning("Sorry, this term is marked as "+document.getElementById ("trm_Status").value+" and cannot therefore be deleted");
     }
     function _disableWarning2(){
-        _showWarning("Sorry, this term is marked as "+Dom.get("trm_Status").value+". Inverse term cannot be set");
+        _showWarning("Sorry, this term is marked as "+document.getElementById ("trm_Status").value+". Inverse term cannot be set");
     }
 
     /**
@@ -837,15 +615,22 @@ function EditTerms() {
                 top.HEURIST.terms = context.terms;
 
                 /*_isSomethingChanged = true;
-                Dom.get('div_btnAddChild').style.display = "inline-block";
-                Dom.get('btnDelete').value = "Delete";
-                Dom.get('btnSave').value = "Save";
-                Dom.get('div_SaveMessage').style.display = "inline-block";
-                setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);*/
+                document.getElementById ('div_btnAddChild').style.display = "inline-block";
+                document.getElementById ('btnDelete').value = "Delete";
+                document.getElementById ('btnSave').value = "Save";
+                document.getElementById ('div_SaveMessage').style.display = "inline-block";
+                setTimeout(function(){document.getElementById ('div_SaveMessage').style.display = "none";}, 2000);*/
 
-                var ind = _tabView.get("activeIndex");
-                // _fillTreeView((ind===0)?_termTree1:_termTree2); FillTreeView only called for Yui tree
-                _fillTreeView((ind===0)?_termTree1:_termTree2);
+                //@todo !!!! verify that we need this code
+                /*
+                if(_termTree2==null){
+                    _fillTreeView(_termTree1);
+                }else{
+                    var ind = _tabView.get("activeIndex");
+                    // _fillTreeView((ind===0)?_termTree1:_termTree2); FillTreeView only called for Yui tree
+                    _fillTreeView((ind===0)?_termTree1:_termTree2);
+                }
+                */
             }
         };
 
@@ -871,7 +656,7 @@ function EditTerms() {
             $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
             $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
 
-        var str = YAHOO.lang.JSON.stringify(oTerms);
+        var str = JSON.stringify(oTerms);
 
         //alert(str);
 
@@ -1059,20 +844,20 @@ function EditTerms() {
     function _doSave(needConfirm, noValidation, callback){
 
 
-        var sName = Dom.get('edName').value.trim().replace(/\s+/g,' ');
-        Dom.get('edName').value = sName;
-        var sDesc = Dom.get('edDescription').value.trim();
-        Dom.get('edDescription').value = sDesc;
-        var sCode = Dom.get('edCode').value.trim().replace(/\s+/g,' ');
-        Dom.get('edCode').value = sCode;
-        var sStatus = Dom.get('trm_Status').value;
+        var sName = document.getElementById ('edName').value.trim().replace(/\s+/g,' ');
+        document.getElementById ('edName').value = sName;
+        var sDesc = document.getElementById ('edDescription').value.trim();
+        document.getElementById ('edDescription').value = sDesc;
+        var sCode = document.getElementById ('edCode').value.trim().replace(/\s+/g,' ');
+        document.getElementById ('edCode').value = sCode;
+        var sStatus = document.getElementById ('trm_Status').value;
 
-        var iInverseId = Number(Dom.get('edInverseTermId').value);
+        var iInverseId = Number(document.getElementById ('edInverseTermId').value);
         iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
         var iInverseId_prev = Number(_currentNode.data.inverseid);
         iInverseId_prev = (iInverseId_prev>0)?iInverseId_prev:null;
 
-        var iParentId = Number(Dom.get('edParentId').value);
+        var iParentId = Number(document.getElementById ('edParentId').value);
         iParentId = (Number(iParentId)>0)?iParentId:null;
         var iParentId_prev = Number(_currentNode.data.parent_id);
         iParentId_prev = (iParentId_prev>0)?iParentId_prev:null;
@@ -1105,12 +890,12 @@ function EditTerms() {
             }
             if(swarn!=""){
                 alert(swarn);
-                Dom.get('edName').setFocus();
+                document.getElementById ('edName').setFocus();
                 return;
             }
-            if(_currTreeView === _termTree2 && Dom.get('cbInverseTermOther').checked && iInverseId==null){
+            if((_currentDomain=="relation") && document.getElementById ('cbInverseTermOther').checked && iInverseId==null){
                 alert("Please find inverse term, or select non-directional in the radio buttons");
-                Dom.get('edInverseTermId').setFocus();
+                document.getElementById ('edInverseTermId').setFocus();
                 return;
             }
             
@@ -1167,13 +952,6 @@ function EditTerms() {
                     nodeForAction.data.title = _currentNode.data.description;
 
                     nodeForAction.data.parent_id = iParentId;
-
-
-                    //_currTreeView.render
-                    //var tree = $treediv.fancytree("getTree");
-                    //tree.reload();
-                    // _currentNode.load();
-                    //_defineContentTreeView();
 
                     _updateTermsOnServer(nodeForAction, needReload, callback);
 
@@ -1260,7 +1038,7 @@ function EditTerms() {
         //PLEASE NOTE use "node.label' for YUI TREE INSTEAD OF 'term.label'
         oTerms.terms.defs[term.id] = [term.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
 
-        var str = YAHOO.lang.JSON.stringify(oTerms);
+        var str = JSON.stringify(oTerms);
 
         if(!Hul.isnull(str)) {
 
@@ -1292,7 +1070,7 @@ function EditTerms() {
                                             _affectedVocabs.push(vocab_id);
                                             _showFieldUpdater();
                                             /*if(_affectedVocabs.length===1){
-                                            Dom.get('formAffected').style.display = 'block';
+                                            document.getElementById ('formAffected').style.display = 'block';
                                             }*/
                                         }
                                     }
@@ -1320,7 +1098,7 @@ function EditTerms() {
 
                                 //update ID field
                                 if(_currentNode ===  node){
-                                    Dom.get('edId').value = item;
+                                    document.getElementById ('edId').value = item;
                                 }
                                 /*
                                 if(_parentNode){
@@ -1340,8 +1118,8 @@ function EditTerms() {
                         top.HEURIST.terms = context.terms;
 
                         _isSomethingChanged = true;
-                        Dom.get('div_btnAddChild').style.display = "inline-block";
-                        Dom.get('btnDelete').value = "Delete";
+                        document.getElementById ('div_btnAddChild').style.display = "inline-block";
+                        document.getElementById ('btnDelete').value = "Delete";
 
                         /* var $_dialogbox;
                         var ele = document.getElementById('div_SaveMessage');
@@ -1355,7 +1133,7 @@ function EditTerms() {
                         });*/
 
 
-                        //Dom.get('div_SaveMessage').style.display = "inline-block";
+                        //document.getElementById ('div_SaveMessage').style.display = "inline-block";
                         $("#Saved" ).css("display","inline-block");
                         setTimeout(function(){$("#Saved" ).css("display","none")}, 1000);
                         $("#btnSave" ).prop('disabled', 'disabled');
@@ -1387,14 +1165,7 @@ function EditTerms() {
 
 
                         if(needReload){
-                            // var ind = _tabView.get("activeIndex");
-                            //_fillTreeView((ind===0)?_termTree1:_termTree2);//; calll fillTreview for only YuI tree
 
-
-                            //_defineContentTreeView();
-
-                            //$treediv.remove();
-                            //_defineContentTreeView();
 
 
                         }
@@ -1446,13 +1217,12 @@ function EditTerms() {
 
         var r = (!needConfirm) || confirm(sMessage);
 
-        if (r && !Hul.isnull(_currTreeView)) {
-            //_currTreeView.removeChildren(_currentNode);
+        if (r) {
 
             if(isExistingTerm){
                 //this term exists in database - delete it
-                Dom.get('deleteMessage').style.display = "block";
-                Dom.get('formEditor').style.display = "none";
+                document.getElementById ('deleteMessage').style.display = "block";
+                document.getElementById ('formEditor').style.display = "none";
 
                 function __updateAfterDelete(context) {
 
@@ -1460,8 +1230,6 @@ function EditTerms() {
 
                         top.HEURIST.terms = context.terms;
                         //remove from tree
-                        //_currTreeView.popNode(_currentNode);
-                        //  _currTreeView.render();
                         var term_id = _currentNode?_currentNode.data.id:0;
                         var term_id2 = nodeToDelete.data.id;
                         
@@ -1474,9 +1242,9 @@ function EditTerms() {
                         
                         _isSomethingChanged = true;
                     }else{
-                        Dom.get('formEditor').style.display = "block";
+                        document.getElementById ('formEditor').style.display = "block";
                     }
-                    Dom.get('deleteMessage').style.display = "none";
+                    document.getElementById ('deleteMessage').style.display = "none";
                 }
 
                 var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -1495,7 +1263,7 @@ function EditTerms() {
                             _onNodeClick(null);
                         }
                 
-                Dom.get('deleteMessage').style.display = "none";
+                document.getElementById ('deleteMessage').style.display = "none";
             }
         }
     }
@@ -1534,9 +1302,9 @@ function EditTerms() {
                 callback: function(newparent_id) {
                     if(newparent_id) {
                         if(newparent_id === "root") {
-                            Dom.get('edParentId').value = "";
+                            document.getElementById ('edParentId').value = "";
                         }else{
-                            Dom.get('edParentId').value = newparent_id;
+                            document.getElementById ('edParentId').value = newparent_id;
                         }
                         _doSave(false, true);
 
@@ -1627,7 +1395,6 @@ function EditTerms() {
 
         if(isRoot){
 
-            //var rootNode = _currTreeView.getRoot(); YUI tree
             var rootNode =   $treediv.fancytree("getRootNode");
 
 
@@ -1647,18 +1414,6 @@ function EditTerms() {
                 folder:true,
                 title:value.label});
 
-
-
-
-            //rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node
-            //  _currTreeView.render();
-            //$treediv.remove();
-            //_defineContentTreeView();
-
-
-
-            // rootNode.setFocus(true); //expand
-            // rootNode.setExpanded(true);
 
             newNode.setActive(true);
 
@@ -1683,16 +1438,10 @@ function EditTerms() {
                 title:value.label});
 
 
-            // var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
-            // _currTreeView.render();
-
-
-
             newNode.setActive(true); //expand
             _currentNode.setExpanded(true);
-            //_onNodeClick(newNode);
             _parentNode = newNode.getParent();
-            Dom.get('edParentId').value = _parentNode.data.id;
+            document.getElementById ('edParentId').value = _parentNode.data.id;
         }
     }
 
@@ -1700,7 +1449,7 @@ function EditTerms() {
     * take the current selection from resSearch, find and open it in tree and show in edit form
     */
     function _doEdit(){
-        var sel = Dom.get('resSearch');
+        var sel = document.getElementById ('resSearch');
         if(sel.selectedIndex>=0){
             var nodeid = sel.options[sel.selectedIndex].value;
             var node = _findNodeById(nodeid, true); 
@@ -1720,7 +1469,7 @@ function EditTerms() {
         }
     }
     function _doSelectInverse(){ // This Function may not be necessary as internal function (_Select inverse) has been defined in _setOrclearInverseTermId2 for PopUp
-        var sel = Dom.get('resSearchInverse');
+        var sel = document.getElementById ('resSearchInverse');
         if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
 
             var nodeid = sel.options[sel.selectedIndex].value;
@@ -1737,10 +1486,10 @@ function EditTerms() {
                 alert("you can't make top level vocabulary an inverse");
             }else{
 
-                Dom.get('edInverseTerm').value = sel.options[sel.selectedIndex].text;
-                Dom.get('edInverseTermId').value = nodeid;
-                Dom.get('btnInverseSetClear').value = 'clear';
-                Dom.get('formInverse').style.display = "none";
+                document.getElementById ('edInverseTerm').value = sel.options[sel.selectedIndex].text;
+                document.getElementById ('edInverseTermId').value = nodeid;
+                document.getElementById ('btnInverseSetClear').value = 'clear';
+                document.getElementById ('formInverse').style.display = "none";
             }
         }
     }
@@ -1819,7 +1568,7 @@ function EditTerms() {
             top.HEURIST.terms = context.terms;
             var res = context.result,
             ind,
-            parentNode = (context.parent===0)?_currTreeView.getRoot():_currentNode,
+            parentNode = (context.parent===0)?_currTreeView.getRoot():_currentNode, //??????
             fi = top.HEURIST.terms.fieldNamesToIndex;
 
             if(res.length>0){
@@ -1846,8 +1595,6 @@ function EditTerms() {
                                 term.inverseid = null;
 
                                 var newNode= parentNode.addChildren(term);    
-                                
-                                //OLD var newNode = new YAHOO.widget.TextNode(term, parentNode, false);
                             }
                         }
                     }
@@ -1855,8 +1602,6 @@ function EditTerms() {
                 
             
                 parentNode.setExpanded(true);    
-                //_currTreeView.render();
-                //parentNode.focus(); //expand
                 /*var _temp = _currentNode;
                 _onNodeClick(_currentNode);
                 _parentNode = _temp;
@@ -1880,7 +1625,7 @@ function EditTerms() {
         allTerms = top.HEURIST.terms.treesByDomain[_currentDomain],
         dty_ID, ind, td, deftype,
         arrRes = [],
-        _needtype = _currentDomain==='enum'?'enum':'relationtype';   //relmarker???
+        _needtype = (_currentDomain==='enum')?'enum':'relationtype';   //relmarker???
 
 
         //
@@ -1937,15 +1682,15 @@ function EditTerms() {
         //3. show list of affected field types
         if(arrRes.length==0){
 
-            var parent = Dom.get('formEditFields');
+            var parent = document.getElementById ('formEditFields');
             parent.innerHTML = ""; //"<h2>No affected field types found</h2>";
 
-            Dom.get('formAffected').style.display = 'none';
+            document.getElementById ('formAffected').style.display = 'none';
 
         }else{
             //debug alert(arrRes.join(","));
 
-            var parent = Dom.get('formEditFields');
+            var parent = document.getElementById ('formEditFields');
             parent.innerHTML = "Term(s) have been added to the term tree but this does not add them to the individual trees for different fields," +
             " since these are individually selected from the complete term tree. Please update the lists for each field to which these terms should be added." +
             "<p>The fields most likely to be affected are:</p>";
@@ -1975,7 +1720,7 @@ function EditTerms() {
     function _recreateSelector(dty_ID, allTerms, disabledTerms, parentdiv)
     {
         //
-        var el_sel = Dom.get("selector"+dty_ID);
+        var el_sel = document.getElementById ("selector"+dty_ID);
         if(el_sel){
             parentdiv = el_sel.parentNode;
             parentdiv.removeChild(el_sel);
@@ -2029,7 +1774,7 @@ function EditTerms() {
 
                         _oDetailType.detailtype.defs[dty_ID] = {common:[editedTermTree, editedDisabledTerms]};
 
-                        var str = YAHOO.lang.JSON.stringify(_oDetailType);
+                        var str = JSON.stringify(_oDetailType);
 
                         function _updateResult(context) {
 
@@ -2102,7 +1847,7 @@ function EditTerms() {
             url: top.HEURIST.baseURL +  'hserver/utilities/fileUpload.php',
             formData: [ {name:'db', value: _db},
                 {name:'entity', value:'terms'},
-                {name:'newfilename', value: Dom.get('edId').value }],
+                {name:'newfilename', value: document.getElementById ('edId').value }],
             acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
             autoUpload: true,
             sequentialUploads:true,
@@ -2125,7 +1870,7 @@ function EditTerms() {
                             //window.hWin.HEURIST4.msg.showMsgErr(file.error);
                         }else{
                             var curtimestamp = (new Date()).getMilliseconds();
-                            var url = top.HEURIST.iconBaseURL + Dom.get('edId').value+ "&ent=term&t=" + curtimestamp
+                            var url = top.HEURIST.iconBaseURL + document.getElementById ('edId').value+ "&ent=term&t=" + curtimestamp
                             $input_img.find('img').prop('src', url); //file.url);
                         }
                     });
@@ -2145,17 +1890,6 @@ function EditTerms() {
             if(!Hul.isnull(context) && !context.error){
 
                 top.HEURIST.terms = context.terms;
-
-                /*_isSomethingChanged = true;
-                Dom.get('div_btnAddChild').style.display = "inline-block";
-                Dom.get('btnDelete').value = "Delete";
-                Dom.get('btnSave').value = "Save";
-                Dom.get('div_SaveMessage').style.display = "inline-block";
-                setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);*/
-
-                // var ind = _tabView.get("activeIndex");
-                // _fillTreeView((ind===0)?_termTree1:_termTree2); FillTreeView only called for Yui tree
-                // _fillTreeView((ind===0)?_termTree1:_termTree2);
             }
         };
 
@@ -2181,7 +1915,7 @@ function EditTerms() {
             $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
             $(top.document).find('input:radio[name="rbMergeCode"]:checked').val()];
 
-        var str = YAHOO.lang.JSON.stringify(oTerms);
+        var str = JSON.stringify(oTerms);
 
         //alert(str);
 
@@ -2299,12 +2033,7 @@ function EditTerms() {
             }
         }
 
-        if (treetype == "terms"){
-            top_ele = document.getElementById("termTree1");
-        }
-        else if (treetype ="relationships"){
-            top_ele = document.getElementById("termTree2");
-        }
+        var top_ele = document.getElementById("termTree");
         $treediv = $('<div>').attr('id','term_tree').appendTo(top_ele);
 
         var dragEnterTimeout = 0;
@@ -2401,9 +2130,13 @@ function EditTerms() {
         
         
        setTimeout(function(){
-        $.each( $('.fancytree-node'), function( idx, item ){
-            __defineActionIcons(item);
-        });
+            
+            var tree = $treediv.fancytree("getTree");
+            tree.getRootNode().sortChildren(null, true); //true - deep sort
+            
+            $.each( $('.fancytree-node'), function( idx, item ){
+                __defineActionIcons(item);
+            });
         }, 500);  
 
        function __defineActionIcons(item){ 
@@ -2411,7 +2144,7 @@ function EditTerms() {
 
                var actionspan = $('<div class="svs-contextmenu3">'
                    +'<span class="ui-icon ui-icon-plus" title="Add a child term (a term hierarchichally below the current vocabulary or term)"></span>'
-                   +((_currTreeView === _termTree2)
+                   +((_currentDomain=="relation")
                       ?'<span class="ui-icon ui-icon-reload" title="Set the inverse term for this term"></span>' //for relations only
                       :'')
                    +'<span class="ui-icon ui-icon-close" title="Delete this term (if unused in database)"></span>'
@@ -2507,9 +2240,9 @@ function EditTerms() {
 
 
                         if(node.data.id === "root") {
-                        Dom.get('edParentId').value = "";
+                        document.getElementById ('edParentId').value = "";
                         }else{
-                        Dom.get('edParentId').value = node.data.id;
+                        document.getElementById ('edParentId').value = node.data.id;
 
                         }
                         // alert($('#edParentId').val());
@@ -2535,11 +2268,11 @@ function EditTerms() {
                         {
 //console.log('AAAAAsave  '+data.otherNode.data.id); 
                             
-                            var prev_parent = Dom.get('edParentId').value;
+                            var prev_parent = document.getElementById ('edParentId').value;
                             if(node.data.id === "root") {
-                                Dom.get('edParentId').value = "";
+                                document.getElementById ('edParentId').value = "";
                             }else{
-                                Dom.get('edParentId').value = node.data.id;
+                                document.getElementById ('edParentId').value = node.data.id;
 
                             }
                             // alert($('#edParentId').val());
@@ -2558,7 +2291,7 @@ function EditTerms() {
                                     data.otherNode.moveTo(node, data.hitMode);        
                                 }else{
 //console.log('restore '+prev_parent);                                    
-                                    Dom.get('edParentId').value = prev_parent;
+                                    document.getElementById ('edParentId').value = prev_parent;
                                 }
                             });
                             */
@@ -2591,9 +2324,9 @@ function EditTerms() {
                         if(node.data.id)
                         {
                             if(node.data.id === "root") {
-                                Dom.get('edParentId').value = "";
+                                document.getElementById ('edParentId').value = "";
                             }else{
-                                Dom.get('edParentId').value = node.data.id;
+                                document.getElementById ('edParentId').value = node.data.id;
 
                             }
                             // alert($('#edParentId').val());
@@ -2604,7 +2337,7 @@ function EditTerms() {
 
                         data.otherNode.moveTo(node,data.hitMode);
                         $_dialogbox.dialog($_dialogbox).dialog("close");
-                        //var iInverseId = Number(Dom.get('edInverseTermId').value);
+                        //var iInverseId = Number(document.getElementById ('edInverseTermId').value);
                         //alert(iInverseId);
                     });
 
@@ -2757,9 +2490,9 @@ function EditTerms() {
 
 
                     if(parentNode.data.id === "root") {
-                        Dom.get('edParentId').value = "";
+                        document.getElementById ('edParentId').value = "";
                     }else{
-                        Dom.get('edParentId').value = parentNode.data.id;
+                        document.getElementById ('edParentId').value = parentNode.data.id;
                     }
 
                     _doSave(false, true);
@@ -2827,7 +2560,7 @@ function EditTerms() {
             $input.fileupload('option','formData',
                 [ {name:'db', value: _db},
                     {name:'entity', value:'terms'},
-                    {name:'newfilename', value: Dom.get('edId').value }]);
+                    {name:'newfilename', value: document.getElementById ('edId').value }]);
 
             $input.click();
 
@@ -2866,7 +2599,7 @@ function doSearch(event){
     var el = event.target;
 
     // var sel = (el.id === 'edSearch')? $(top.document).find('#resSearch'):$(top.document).find('#resSearchInverse');
-    var sel = (el.id === 'edSearch')?Dom.get('resSearch'):Dom.get('resSearchInverse');
+    var sel = (el.id === 'edSearch')?document.getElementById ('resSearch'):document.getElementById ('resSearchInverse');
 
     //remove all
     while (sel.length>0){
@@ -2874,7 +2607,7 @@ function doSearch(event){
         sel.remove(0);
     }
 
-    //el = Dom.get('edSeartch');
+    //el = document.getElementById ('edSeartch');
     if(el.value && el.value.length>2){
 
         //fill selection element with found nodes
