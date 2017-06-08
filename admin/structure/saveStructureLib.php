@@ -1309,7 +1309,7 @@
 
 				if ($rows==0 || is_string($rows) ) {      //ERROR
 					$oper = (($isInsert)?"inserting":"updating term ".$trmID);
-					$ret = "SQL error $oper in updateTerms: ".$rows; //."  ".htmlspecialchars($query);
+					$ret = "SQL error $oper in updateTerms: ".$rows.'   '.$query; //."  ".htmlspecialchars($query);
 				} else {
 					if($isInsert){
 						$trmID = $ext_db->insert_id;  // new id
@@ -1354,8 +1354,12 @@
     function mergeTerms($retain_id, $merge_id, $colNames, $dt){
         global $mysqli;
 
-        $ret = array();
+        $ret = isTermInUse($merge_id, true, false);
 
+        if(array_key_exists("error", $ret))
+        {
+            return $ret;   
+        }
         //1. change parent id for all children terms
         $query = "update defTerms set trm_ParentTermID = $retain_id where trm_ParentTermID = $merge_id";
         $res = $mysqli->query($query);
@@ -1385,7 +1389,13 @@
         }
 
         //4. update term $retain_id
-        return updateTerms( $colNames, $retain_id, $dt, null );
+        $res = updateTerms( $colNames, $retain_id, $dt, null );
+        if(!($res>0)){
+           $ret['error'] = $res;
+        }else{
+           $ret = $res; 
+        }
+        return $ret; 
     }
 
 	/**
@@ -1429,54 +1439,62 @@
             return $termId;
         }
     }
+    
+    /**
+    *  verify whether term (and its children) is in use in field definition or record details
+    * 
+    * @param mixed $infield
+    * @param mixed $indetails
+    */
+    function isTermInUse($trmID, $infield, $indetails){
+        
+        global $mysqli;
 
+        $ret = array();
 
-	/**
-	* deletes the term with given ID and all its children
-	* before deletetion it verifies that this term or any of its children is refered in defDetailTypes dty_JsonTermIDTree
-	*
-	* @todo - need to check inverseid or it will error by foreign key constraint?
-	*/
-	function deleteTerms($trmID) {
-         global $mysqli;
+        $children = array();
+        //find all children
+        $children = getTermsChilds($children, $trmID);
+        array_push($children, $trmID); //add itself
 
-		$ret = array();
-
-		$children = array();
-		//find all children
-		$children = getTermsChilds($children, $trmID);
-		array_push($children, $trmID);
-
-        //find possible entries in defDetailTypes dty_JsonTermIDTree
-        foreach ($children as $termID) {
-            $query = 'select dty_ID, dty_Name from defDetailTypes where dty_JsonTermIDTree like \'%"'.$termID.'"%\' '
-                      .'and (dty_Type=\'enum\' or dty_Type=\'relationtype\')';
-            //OLD does not work (FIND_IN_SET($termID, dty_JsonTermIDTree)>0)";
-            $res = $mysqli->query($query);
-            if ($mysqli->error) {
-                $ret['error'] = "SQL error in deleteTerms retreiving field types which use term $termID: ".$mysqli->error;
-                break;
-            }else{
-                $dtCount = $res->num_rows;
-                if ($dtCount>0) { // there are records existing of this rectype, need to return error and the recIDs
-                    $ret['error'] = "Error: You cannot delete term $trmID. "
-                                .(($trmID==$termID)?"It":"Its child term $termID")
-                                ." is referenced in $dtCount base field defintions "
-                                ."- please delete field definitions or remove terms from these fields to allow deletion of these terms.<div style='text-align:left'><ul>";
-                    $ret['dtyIDs'] = array();
-                    while ($row = $res->fetch_row()) {
-                        array_push($ret['dtyIDs'], $row[0]);
-                        $ret['error'] = $ret['error'].("<li>".$row[0]."&nbsp;".$row[1]."</li>");
-                    }
-                    $ret['error'] = $ret['error']."</ul></div>";
+        if($infield){
+            //find possible entries in defDetailTypes dty_JsonTermIDTree
+            foreach ($children as $termID) {
+                $query = 'select dty_ID, dty_Name from defDetailTypes where '
+                .'(dty_JsonTermIDTree='.$termID.' OR dty_JsonTermIDTree like \'%"'.$termID.'"%\') '
+                          .'AND (dty_Type=\'enum\' or dty_Type=\'relationtype\')';
+                //OLD does not work (FIND_IN_SET($termID, dty_JsonTermIDTree)>0)";
+                $res = $mysqli->query($query);
+                if ($mysqli->error) {
+                    $ret['error'] = "SQL error in isTermInUse retreiving field types which use term $termID: ".$mysqli->error;
                     break;
+                }else{
+                    $dtCount = $res->num_rows;
+                    if ($dtCount>0) { 
+                        
+                        $labels = getTermLabels(array($trmID, $termID));
+                        
+                        $ret['error'] = "You cannot delete term $trmID [{$labels[$trmID]}]. "
+                                    .(($trmID==$termID)?"It":"Its child term $termID [{$labels[$termID]}]")
+                                    ." is referenced in $dtCount base field definitions. "
+                                    ." Please delete field(s) or remove terms from these fields.<div style='padding:10px 30px;text-align:left'><ul>";
+                        $ret['dtyIDs'] = array();
+                        while ($row = $res->fetch_row()) {
+                            array_push($ret['dtyIDs'], $row[0]);
+                            $ret['error'] = $ret['error'].("<li>".$row[0]."&nbsp;".$row[1]."</li>");
+                        }
+                        $ret['error'] = $ret['error']."</ul></div>";
+                        
+                        $ret['error_title'] = 'Warning: Terms in use';
+                        break;
+                    }
                 }
-            }
-            //TODO: need to check inverseid or it will error by foreign key constraint?
-        }//foreach
+                //TODO: need to check inverseid or it will error by foreign key constraint?
+            }//foreach
+        }
 
         //find usage in recDetails
-        if(!array_key_exists("error", $ret)){
+        if(!array_key_exists("error", $ret) && $indetails){
 
             $query = "select distinct dtl_RecID from recDetails, defDetailTypes "
                     ."where (dty_ID = dtl_DetailTypeID ) and "
@@ -1485,12 +1503,13 @@
 
                 $res = $mysqli->query($query);
                 if ($mysqli->error) {
-                    $ret['error'] = "SQL error in deleteTerms retreiving records which use term $termID: ".$mysqli->error;
+                    $ret['error'] = "SQL error in isTermInUse retreiving records which use term $termID: ".$mysqli->error;
                     break;
                 }else{
                     $recCount = $res->num_rows;
                     if ($recCount>0) { // there are records existing of this rectype, need to return error and the recIDs
-                        $ret['error'] = "Error: You cannot delete term $trmID. It or its child terms are referenced in $recCount record(s)";
+                        $ret['error'] = "You cannot delete term $trmID. It or its child terms are referenced in $recCount record(s)";
+                        $ret['error_title'] = 'Warning: Terms in use';
                         $ret['recIDs'] = array();
                         while ($row = $res->fetch_row()) {
                             array_push($ret['recIDs'], $row[0]);
@@ -1502,6 +1521,21 @@
                 }
         }
 
+        return $ret;        
+        
+    }
+
+
+	/**
+	* deletes the term with given ID and all its children
+	* before deletetion it verifies that this term or any of its children is refered in defDetailTypes dty_JsonTermIDTree
+	*
+	* @todo - need to check inverseid or it will error by foreign key constraint?
+	*/
+	function deleteTerms($trmID) {
+        global $mysqli;
+        
+        $ret = isTermInUse($trmID, true, true);
 
 		//all is clear - delete the term
 		if(!array_key_exists("error", $ret)){

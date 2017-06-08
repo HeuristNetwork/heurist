@@ -1338,12 +1338,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     if(!obj) {
                         top.HEURIST.util.showError("Server at "+url+" responded with incorrectly structured data. Excerpt of data: "+xhr.responseText.substring(0,250));
                     }else if (obj.error) {
-                        top.HEURIST.util.showError(obj.error);
+                        top.HEURIST.util.showError(obj.error, obj.error_title);
 
                         obj = null;
                     }else if(obj.errors && obj.errors.length>0){
                         var rep = obj.errors.join(" ");
-                        top.HEURIST.util.showError(rep);
+                        top.HEURIST.util.showError(rep, obj.error_title);
 
                         obj = null;
                     }
@@ -2023,15 +2023,17 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
     },
 
-    showError: function(msg){
+    showError: function(msg, dlg_title){
         if(top.HEURIST.util.isempty(msg)){
             msg = "Incorrect response from server. Please contact development team if this error persists";
         }else if (Number(msg)===-1 || typeof msg !== 'string'){
             msg = "No response from server, please try again later";
-        }else if (msg.toLowerCase().indexOf("error")<0){
+        }else if (msg.toLowerCase().indexOf("error")<0 && top.HEURIST.util.isempty(dlg_title)){
             msg = "Error occurred: " + msg;
         }
+        
         if(hasH4()){
+            msg = {message:msg, error_title:dlg_title};
             window.hWin.HEURIST4.msg.showMsgErr(msg);
         }else{
             alert(msg);    

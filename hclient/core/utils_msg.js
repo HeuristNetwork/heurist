@@ -40,6 +40,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
     showMsgErr: function(response, needlogin){
         var msg = '';
+        var dlg_title = null;
         if(typeof response === "string"){
             msg = response;
         }else{
@@ -52,6 +53,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
             msg = window.hWin.HR(msg);
 
+            dlg_title = response.error_title;
+
             if(response.sysmsg && response.status!=window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED){
                 //sysmsg for REQUEST_DENIED is current user id - it allows to check if session is expired
                 
@@ -63,7 +66,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             }
             if(response.status==window.hWin.HAPI4.ResponseStatus.SYSTEM_FATAL
-            || response.status==window.hWin.HAPI4.ResponseStatus.SYSTEM_FATALSYSTEM_CONFIG){
+            || response.status==window.hWin.HAPI4.ResponseStatus.SYSTEM_CONFIG){
 
                 msg = msg + "<br><br>May result from a network outage, or because the system is not properly configured. "
                 +"If the problem persists, please report to your system administrator";
@@ -90,8 +93,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 +' and describe the circumstances under which it occurs so that we/they can find a solution';
             }
         }
+
+
         if(window.hWin.HEURIST4.util.isempty(msg)){
                 msg = 'Error_Empty_Message';
+        }
+        if(window.hWin.HEURIST4.util.isempty(dlg_title)){
+                dlg_title = 'Error';
         }
 
         var buttons = {};
@@ -103,7 +111,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             //$(top.document).trigger(window.hWin.HAPI4.Event.LOGOUT);
                     }
                 }; 
-        window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, "Error");
+        window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, dlg_title);
         
     },
 

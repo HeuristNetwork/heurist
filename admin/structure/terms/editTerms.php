@@ -145,10 +145,11 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="editTerms.js"></script>
 
         <div class="ent_wrapper"> <!-- style="top:0px"-->
-            <div class="ent_header" id="divBanner" style="height:1.5em;border:none;">
+            <div class="ent_header" id="divBanner" style="height:3em;border:none;">
                 <h2></h2>
+                <label style="padding-left:5px;font-weight:bold">Vocabularies</label>
             </div>
-            <div class="ent_content_full" style="overflow:hidden">
+            <div class="ent_content_full" style="overflow:hidden;top:4em">
             
             <div id="termTree"  style="width:350;max-width:350;top:0;bottom:0;padding-right:5px;overflow:hidden;position:absolute">
             </div>
@@ -162,10 +163,10 @@ if(isForAdminOnly("to modify database structure")){
                     <span style="margin-left:10px;"> (adds a new root to the tree)</span>
                 </div>
                 <!-- Navigation: Search form to do partial match search on terms in the tree -->
-                <div id="formSearch" style="padding-top:5px">
+                <div id="formSearch" style="padding-top:15px">
                     <div class="dtyField"><label class="dtyLabel" style="width:30px;">Find:</label>
                         <input id="edSearch" style="width:70px"  onkeyup="{doSearch(event)}"/>
-                        <label>type 3 or more letters</label>
+                        <br><label style="padding-left:37px">&gt;2 characters</label>
                     </div>
                     <div class="dtyField">
                         <select id="resSearch" size="5" style="width:300px" onclick="{editTerms.doEdit()}"></select>

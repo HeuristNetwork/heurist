@@ -389,9 +389,16 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
                 $colNames = $data['terms']['colNames'];
                 $dt = @$data['terms']['defs'][$retain_id];
 
-                $res = mergeTerms($retain_id, $merge_id, $colNames, $dt);
+                $ret = mergeTerms($retain_id, $merge_id, $colNames, $dt);
 
-                $rv['terms'] = getTerms();
+                if(is_array($ret) && @$ret['error']){
+                    $rv = $ret;
+                }else{
+                    $rv['result'] = $ret;
+                    $rv['terms'] = getTerms();
+                }
+                
+
                 break;
 
             case 'deleteTerms':
@@ -401,7 +408,7 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
                     $rv['error'] = "Error: No IDs or invalid IDs sent with deleteTerms method call to saveStructure.php";
                 }else{
                     $ret = deleteTerms($trmID);
-                    if(@$ret['error']){
+                    if(is_array($ret) && @$ret['error']){
                         $rv = $ret;
                     }else{
                         $rv['result'] = $ret;

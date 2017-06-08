@@ -527,7 +527,8 @@ function EditTerms() {
 
         $("#edSearchInverse").keyup(function(event){_doSearch(event)});
         $("#btnSelect2").click(function(){
-            _SelectInverse();$_dialogbox.dialog($_dialogbox ).dialog('close');
+            _SelectInverse();
+            $_dialogbox.dialog($_dialogbox ).dialog('close');
 
             //ele.style.display = "none";
             //_originalParentNode.appendChild(ele)
@@ -602,6 +603,7 @@ function EditTerms() {
     }
 
     /**
+    * NOT USED - called from _mergeTerms
     * nodeid - to be merged
     * retain_nodeid - target
     */
@@ -610,6 +612,7 @@ function EditTerms() {
         var $_dialogbox;
 
         var _updateResult = function(context){
+
             if(!Hul.isnull(context) && !context.error){
 
                 top.HEURIST.terms = context.terms;
@@ -1331,14 +1334,16 @@ function EditTerms() {
     }
 
     /**
+    * NOT USED 
     * Open popup and select term to be merged
     */
     function _mergeTerms(){
 
         if(_currentNode===null) return;
+        
         if (_currentNode === _findTopLevelForId(_currentNode.data.id))
         {
-            alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms).Vocabularies cannot be moved or merged.");
+            alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms). Vocabularies cannot be moved or merged.");
             return;
         }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1879,17 +1884,28 @@ function EditTerms() {
         });
 
     }
-
-    function _doMerge(retain_node, node){
+    
+    /**
+    * IN USE!!!
+    * 
+    * @param retain_node
+    * @param node - node to be merged
+    */
+    function _doMerge(retain_node, node, hitMode){
 
         var merge_term = node.data;
         var retain_term =retain_node.data;
-        var $_dialogbox;
-
+        
         var _updateResult = function(context){
             if(!Hul.isnull(context) && !context.error){
 
                 top.HEURIST.terms = context.terms;
+                
+                while(node.hasChildren())
+                {
+                    node.getFirstChild().moveTo(retain_node, hitMode);
+                }
+                $(node.span).hide();                
             }
         };
 
@@ -1922,11 +1938,8 @@ function EditTerms() {
         var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
         var callback = _updateResult;
         var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
+        
         Hul.getJsonData(baseurl, callback, params);
-
-
-        if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);
-        $_dialogbox = null;
 
     }
 
@@ -1951,6 +1964,8 @@ function EditTerms() {
 
         verifyLibrariesLoaded();
 
+        var $_dialogbox;
+        
         var  treedata = [];
         var termid,
         first_node,
@@ -2082,21 +2097,30 @@ function EditTerms() {
                         return true;
                     },
                     dragEnter: function(node, data) {
-                        if (data.otherNode.getLevel()===1){
-                            if(node.getLevel()>1)
+                        if (data.otherNode.getLevel()===1){ //we drag vocabulary
+                            if(node.getLevel()>1){ //over child
+                                //console.log('vocab over child '+node.data.id);    
                                 return false;
+                            }
 
                             return "over";
                         }
 
 
-                        if (data.otherNode.getLevel()>1 && node.getLevel()===1){
-                            if(dragEnterTimeout>0) clearTimeout(dragEnterTimeout);
-                            dragEnterTimeout = setTimeout(function(){
-                                    node.setExpanded(true);
-                            },1000);
-                            
-                            return false;
+                        if ( data.otherNode.getLevel()>1 && node.getLevel()===1 ){
+                            //we drag child over vocab 
+                            //1. for vocab with children - expand it manually
+                            if(node.hasChildren()){
+                                if(dragEnterTimeout>0) clearTimeout(dragEnterTimeout);
+                                dragEnterTimeout = setTimeout(function(){
+                                        node.setExpanded(true);
+                                },1000);
+                                
+                                return false;
+                            }else{
+                                //allow to add as a first child
+                                return 'after';
+                            }
                         }
 
 
@@ -2107,11 +2131,11 @@ function EditTerms() {
                         
                         //_onNodeClick(data.otherNode);
 
-                        if(data.otherNode.getLevel()===1){
-                            if(node.getLevel()!=1)
-                                return false;
+                        if(data.otherNode.getLevel()===1){ //drop vocab
+                            if(node.getLevel()!=1)  
+                                return false;  //not allowed to drop on child
                             else{
-                                showMergePopUp(node,data);
+                                showMergePopUp(node,data); //merge vocabs
                             }
 
                         }else if((data.otherNode.hasChildren()) && (data.otherNode.getLevel()!=1)){
@@ -2120,6 +2144,7 @@ function EditTerms() {
                         else{
                             showMergePopUp(node,data);
                         }
+                        //add child
                     }
 
                 },
@@ -2220,129 +2245,15 @@ function EditTerms() {
            }
        }
 
-                    
-        function showMergePopUp(node, data)
-        {
+       
+       //
+       // node - item drop on
+       // data.otherNode - dragged node
+       //             
+       function showMergePopUp(node, data)
+       {
 
             if(data.hitMode==='over'){
-
-
-                if(!data.otherNode.hasChildren()){
-
-                    $("#btnMergeOK").click(function(){
-
-                        // data.otherNode.moveTo(node,data.hitMode);
-                        //   $_dialogbox.dialog($_dialogbox).dialog("close");
-
-
-
-                        /* if (node.data.id){
-
-
-                        if(node.data.id === "root") {
-                        document.getElementById ('edParentId').value = "";
-                        }else{
-                        document.getElementById ('edParentId').value = node.data.id;
-
-                        }
-                        // alert($('#edParentId').val());
-
-                        // _updateTermsOnServer(_currentNode,false);
-                        //_doSave(false,true);
-                        } */
-                        // data.otherNode.moveTo(node,data.hitMode);
-                        _doMerge(node,data.otherNode);
-                        $(data.otherNode.span).hide();
-                        $_dialogbox.dialog($_dialogbox).dialog("close");
-                        // _doMerge(node,data.otherNode);
-                        // $treediv.remove();
-                        //_defineContentTreeView();
-                        //alert(node.data.label)
-
-                    });
-                    $("#moveBtn").click(function(){
-
-                        _findNodeById(data.otherNode.data.id, true);
-                        
-                        if(node.data.id)
-                        {
-//console.log('AAAAAsave  '+data.otherNode.data.id); 
-                            
-                            var prev_parent = document.getElementById ('edParentId').value;
-                            if(node.data.id === "root") {
-                                document.getElementById ('edParentId').value = "";
-                            }else{
-                                document.getElementById ('edParentId').value = node.data.id;
-
-                            }
-                            // alert($('#edParentId').val());
-
-                            // _updateTermsOnServer(_currentNode,false);
-
-//console.log('save  '+data.otherNode.data.id); 
-
-                            _doSave(false, true);
-                            data.otherNode.moveTo(node, data.hitMode);
-
-                            /*
-                            _doSave(false, true, function(is_success){
-//console.log('callback '+is_success);
-                                if(is_success){
-                                    data.otherNode.moveTo(node, data.hitMode);        
-                                }else{
-//console.log('restore '+prev_parent);                                    
-                                    document.getElementById ('edParentId').value = prev_parent;
-                                }
-                            });
-                            */
-                            
-                            
-                        }
-                        
-                        $_dialogbox.dialog($_dialogbox).dialog("close");
-                    });
-
-                }
-                else{
-
-                    $("#btnMergeOK").click(function(){
-                        while(data.otherNode.hasChildren())
-                        {
-                            data.otherNode.getFirstChild().moveTo(node, data.hitMode);
-
-                        }
-
-                        _doMerge(node,data.otherNode);
-                        $(data.otherNode.span).hide();
-                        $_dialogbox.dialog($_dialogbox).dialog("close");
-                    });
-
-
-                    $("#moveBtn").click(function(){
-
-
-                        if(node.data.id)
-                        {
-                            if(node.data.id === "root") {
-                                document.getElementById ('edParentId').value = "";
-                            }else{
-                                document.getElementById ('edParentId').value = node.data.id;
-
-                            }
-                            // alert($('#edParentId').val());
-
-                            // _updateTermsOnServer(_currentNode,false);
-                            _doSave(false,true);
-                        }
-
-                        data.otherNode.moveTo(node,data.hitMode);
-                        $_dialogbox.dialog($_dialogbox).dialog("close");
-                        //var iInverseId = Number(document.getElementById ('edInverseTermId').value);
-                        //alert(iInverseId);
-                    });
-
-
-                }
 
                 function displayPopUpContents(cbCode1,cbCode2,cbDescr1,cbDescr2){
                     if(cbCode1){
@@ -2465,7 +2376,6 @@ function EditTerms() {
                 var ele = document.getElementById('divTermMergeConfirm');
                 $("#moveText").html("Insert "+ "&#60;" +data.otherNode.data.label+"&#62; under " + "&#60;"+node.data.label
                     +"&#62;");
-                $("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
                 
                 var isVocabulary = (node === _findTopLevelForId(node.data.id));
                     
@@ -2475,32 +2385,107 @@ function EditTerms() {
                     {
                         "close-on-blur": false,
                         "no-resize": true,
+                        close: function(){
+                            $_dialogbox.find("#btnMergeOK").off('click');
+                            $_dialogbox.find("#moveBtn").off('click');
+                            $_dialogbox.find("#btnMergeCancel").off('click');
+                        },
                         title: 'Select values to be retained',
                         height: 440,
                         width: 600
                 });
+                
+                
+                $_dialogbox.find("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
+                $_dialogbox.find("#btnMergeOK").click(function(){
+                        _doMerge(node, data.otherNode, data.hitMode);
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                });
+
+
+                if(!data.otherNode.hasChildren()){ //no children in term to be merged
+                    $_dialogbox.find("#moveBtn").click(function(){
+
+                        _findNodeById(data.otherNode.data.id, true);
+                        
+                        if(node.data.id)
+                        {
+                            
+                            var prev_parent = document.getElementById ('edParentId').value;
+                            if(node.data.id === "root") {
+                                document.getElementById ('edParentId').value = "";
+                            }else{
+                                document.getElementById ('edParentId').value = node.data.id;
+
+                            }
+
+                            _doSave(false, true);
+                            data.otherNode.moveTo(node, data.hitMode);
+                        }
+                        
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                    });
+
+                }
+                else{ //has children - vocabulary to be merged
+                    $_dialogbox.find("#moveBtn").click(function(){
+
+
+                        if(node.data.id)
+                        {
+                            if(node.data.id === "root") {
+                                document.getElementById ('edParentId').value = "";
+                            }else{
+                                document.getElementById ('edParentId').value = node.data.id;
+
+                            }
+                            // alert($('#edParentId').val());
+
+                            // _updateTermsOnServer(_currentNode,false);
+                            _doSave(false,true);
+                        }
+
+                        data.otherNode.moveTo(node,data.hitMode);
+                        $_dialogbox.dialog($_dialogbox).dialog("close");
+                    });
+                }
+                
+                
+                
+                
 
 
             }
             else if (data.hitMode==='before' || data.hitMode==='after'){
 
-                var parentNode = node.getParent();
+                var parentNodeId = null;
+                var isAddChild = (data.otherNode.getLevel()>1 && node.getLevel()===1 && !node.hasChildren());
+                if(isAddChild){
+                    //add fist child to empty vocab
+                    parentNodeId = node.data.id;
+                }else{
+                    var parentNode = node.getParent();    
+                    parentNodeId = parentNode.data.id;
+                }
+                
 
-                if (parentNode.data.id){
+                if (parentNodeId!=null){
 
-
-                    if(parentNode.data.id === "root") {
+                    if(parentNodeId === "root") {
                         document.getElementById ('edParentId').value = "";
                     }else{
-                        document.getElementById ('edParentId').value = parentNode.data.id;
+                        document.getElementById ('edParentId').value = parentNodeId;
                     }
 
                     _doSave(false, true);
 
                     // _updateTermsOnServer(_currentNode,false);
                 }
-                data.otherNode.moveTo(node,data.hitMode);
-
+                if(isAddChild){
+                    node.addNode(data.otherNode);
+                }else{
+                    data.otherNode.moveTo(node,data.hitMode);    
+                }
             }
 
         }
