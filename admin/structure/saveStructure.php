@@ -56,6 +56,7 @@
         "saveTerms",
         "mergeTerms",
         "deleteTerms",
+        'checkTerm',
         "deleteDT",
         "deleteRT",
         "deleteRTG",
@@ -401,6 +402,13 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
 
                 break;
 
+            case 'checkTerm':  //show the usage if term is in vocab
+
+                $termID = @$_REQUEST['termID'];
+                $rv = checkTerms($termID);
+
+                break;
+                
             case 'deleteTerms':
                 $trmID = @$_REQUEST['trmID'];
 

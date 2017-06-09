@@ -2459,6 +2459,7 @@ function EditTerms() {
             else if (data.hitMode==='before' || data.hitMode==='after'){
 
                 var parentNodeId = null;
+                
                 var isAddChild = (data.otherNode.getLevel()>1 && node.getLevel()===1 && !node.hasChildren());
                 if(isAddChild){
                     //add fist child to empty vocab
@@ -2467,39 +2468,43 @@ function EditTerms() {
                     var parentNode = node.getParent();    
                     parentNodeId = parentNode.data.id;
                 }
+                if(parentNodeId === 'root'){
+                    parentNodeId = '';
+                }
                 
-
-                if (parentNodeId!=null){
-
-                    if(parentNodeId === "root") {
-                        document.getElementById ('edParentId').value = "";
-                    }else{
-                        document.getElementById ('edParentId').value = parentNodeId;
-                    }
-
-                    _doSave(false, true);
-
-                    // _updateTermsOnServer(_currentNode,false);
+                function __moveNode(){
+                        if(isAddChild){
+                            //add first child to empty vocab 
+                            node.addNode(data.otherNode);
+                        }else{
+                            data.otherNode.moveTo(node,data.hitMode);    
+                        }                    
                 }
-                if(isAddChild){
-                    node.addNode(data.otherNode);
+
+                //move to another vocab
+                if (parentNodeId!=null && document.getElementById ('edParentId').value != parentNodeId){
+
+                    // verify whether term is in use in field that uses vocabulry
+                    // if yes it means it can not be moved into different vocabulary
+                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                    var params = "method=checkTerm&termID=" + data.otherNode.data.id + "&db="+_db;
+                    Hul.getJsonData(baseurl, function(context){
+                        if(!Hul.isnull(context) && !context.error){
+                            document.getElementById ('edParentId').value = parentNodeId;
+                            _doSave(false, true);
+                            // _updateTermsOnServer(_currentNode,false);
+                            __moveNode();
+                        }}, params);
+
                 }else{
-                    data.otherNode.moveTo(node,data.hitMode);    
-                }
+                    __moveNode();
+                } 
             }
 
         }
 
     }
-
-
-
-
-
-
-
-
-
+    
     //
     //public members
     //

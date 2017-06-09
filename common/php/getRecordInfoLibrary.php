@@ -68,6 +68,7 @@
 * - getRectypeDef()
 * - getRectypeStructureFieldColNames()
 * - getRectypeFields()
+* - getRectypeNames()
 * - getRectypeStructure()
 * - getRectypeStructures()
 * - getAllRectypeStructures()
@@ -942,6 +943,8 @@ function getTermLabels($termIDs) {
     return $labels;
 }
 
+
+
 function getTermByLabel($label){
 
     if ($label) {
@@ -1105,6 +1108,25 @@ function getRectypeStructure($rtID) {
     $rectypesStructure['dtFields'] = getRectypeFields($rtID);
     return $rectypesStructure;
 }
+
+/**
+* put your comment there...
+* 
+* @param mixed $rtyIDs
+*/
+function getRecTypeNames($rtyIDs) {
+    $labels = array();
+    if ($rtyIDs) {
+        $res = mysql_query("select rty_ID, rty_Name from defRecTypes where rty_ID in (".implode(",", $rtyIDs).")");
+        if ($res && mysql_num_rows($res)) {
+            while ($row = mysql_fetch_row($res)) {
+                $labels[$row[0]] = $row[1];
+            }
+        }
+    }
+    return $labels;
+}
+
 /**
 * returns an array of RecType Structures for array of ids passed in
 * @param     array [$rtIDs] of recType IDs

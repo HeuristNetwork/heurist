@@ -658,6 +658,7 @@ function getCompleteVocabulary($termId){
     return $terms;
 
 }
+
 //
 //
 //

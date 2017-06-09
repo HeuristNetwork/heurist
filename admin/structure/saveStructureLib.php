@@ -1340,6 +1340,7 @@
 		return $ret;
 	}
 
+    
     /**
     * Merge two terms in defTerms and update recDetails
     *
@@ -1434,10 +1435,105 @@
 
         $parentId = mysql_fetch_array(mysql_query($query));
         if($parentId && @$parentId[0]){
-            return getTopMostParentTerm($parentId[0]);
+            return getTermTopMostParent($parentId[0]);
         }else{
             return $termId;
         }
+    }
+    
+    
+    //
+    //
+    //
+    function getTermTopMostParent($termId){
+        global $mysqli;
+
+        $query = "select trm_ParentTermID from defTerms where trm_ID = ".$termId;
+
+        $res = $mysqli->query($query);
+        $parentId = $res->fetch_row();
+        if($parentId && @$parentId[0]){
+            return getTermTopMostParent($parentId[0]);
+        }else{
+            return $termId;
+        }
+    }
+    
+    
+    /**
+    * verify whether term is in use in field that uses vocabulry
+    * if yes it means it can not be moved into different vocabulary
+    */
+    function checkTerms($termID){
+    
+        global $mysqli;
+/*
+    Get parent vocabulary (vocab id) which is not necessarily the immediate parent term
+    Get field types where this vocab is used
+    Find details which are of found field types which use this term value
+    If any are found, get the record types for these details
+    Report as above
+*/    
+        $ret = array();
+
+        $vocab_id = getTermTopMostParent($termID);
+        if($vocab_id>0){ //not vocab itself
+         
+                $query = 'select dty_ID, dty_Name from defDetailTypes where '
+                          .'dty_JsonTermIDTree='.$vocab_id
+                          .' AND (dty_Type=\'enum\' or dty_Type=\'relationtype\')';
+                $res = $mysqli->query($query);
+                if ($mysqli->error) {
+                    $ret['error'] = "SQL error in checkTerms retreiving field types which use vocabulary $vocab_id: ".$mysqli->error;
+                    return $ret;
+                }else{
+                    $dtCount = $res->num_rows;
+                    if ($dtCount>0) { 
+                        $dtyIDs = array();
+                        while ($row = $res->fetch_row()) {
+                            array_push($dtyIDs, $row[0]);
+                        }
+                        
+                        $query = 'select rec_ID, rec_RecTypeID  from recDetails, Records '
+                                .'where (dtl_RecID=rec_ID) AND (dtl_DetailTypeID in ('.implode(',',$dtyIDs).')) and '
+                                .'(dtl_Value='.$termID.')';
+
+                            $res = $mysqli->query($query);
+                            if ($mysqli->error) {
+                                $ret['error'] = "SQL error in checkTerms retreiving records which use term $termID: ".$query.$mysqli->error;
+                                return $ret;
+                            }else{
+                                $recCount = $res->num_rows;
+                                if ($recCount>0) { //yes, $termID is in use
+                                    $labels = getTermLabels(array($termID));
+                                    $ret['error'] = "You cannot move term $termID [{$labels[$termID]}] to a different vocabulary as it is used by field(s) in existing record(s) which depend on its current vocabulary. We recommend merging the current vocabulary with the target vocabulary instead. Moving the term would invalidate values in $recCount records.";
+                                    
+                                    $ret['error_title'] = 'Warning: Terms in use';
+                                    $recIDs = array();
+                                    $rtyIDs = array();
+                                    while ($row = $res->fetch_row()) {
+                                        array_push($recIDs, $row[0]);
+                                        if(!in_array($rtyIDs))array_push($rtyIDs, $row[1]);
+                                    }
+                                    $ret['error'] = $ret['error'].'<br><br>'
+                                    ."<a href='#' onclick='window.open(\""
+                                    .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs)."\",\"_blank\")'>Click here</a> to search for all the records which would be affected.";
+
+                                    $ret['error'] = $ret['error'].'<br><div style="padding:10px 30px;text-align:left">The following record types would be affected: <ul style="padding-top:5px">';
+                                     $labels = getRecTypeNames($rtyIDs);
+                                    
+                                     foreach  ($labels as $rty_ID=>$rty_Name)  {
+                                         $ret['error'] = $ret['error'].'<li>'.$rty_Name.'</li>';
+                                     }
+                                    
+                                     $ret['error'] = $ret['error']."</ul></div>";            
+                                }
+                            }
+                    }//$dtCount>0
+                }
+        }
+        return $ret;
+
     }
     
     /**
