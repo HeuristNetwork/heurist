@@ -333,13 +333,16 @@ $.widget( "heurist.svs_list", {
                     if ( (isPersonal && isNaN(groupID)) || groupToSave == groupID){
 
                         var d = this.treeviews[groupID].toDict(true);
+                        if(groupID=='all'){
+                            console.log(d);                            
+                        }
+                        
                         treeData[groupID] = d;
                     }
                 }
         }
 
         var request = { data:JSON.stringify(treeData) };
-
         window.hWin.HAPI4.SystemMgr.ssearch_savetree( request, function(response){
 
             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
@@ -936,6 +939,7 @@ $.widget( "heurist.svs_list", {
                 save:function(event, data){
                     if(''!=data.input.val()){
                         that._avoidConflictForGroup(groupID, function(){
+                            data.node.setTitle( data.input.val() );
                             that._saveTreeData( groupID );
                         });
                     }
@@ -987,7 +991,7 @@ $.widget( "heurist.svs_list", {
 +'for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site). '
 +'The URL can also be opened on its own in a separate tab. Note that ordinary searches can also be embedded simply through '
 +'specifying the URL obtained when the search is run in the Heurist interface.',
-null, 'Embedding searches');
+null, 'Embedding searchs');
                             }
                             break;
                         case "rename":   //EDIT
