@@ -693,7 +693,7 @@ class Predicate {
 
 
 class TitlePredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$not = ($this->parent->negate)? 'not ' : '';
 
 		$query = &$this->getQuery();
@@ -710,7 +710,7 @@ class TitlePredicate extends Predicate {
 
 
 class TypePredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$eq = ($this->parent->negate)? '!=' : '=';
 		if (is_numeric($this->value)) {
 			return "rec_RecTypeID $eq ".intval($this->value);
@@ -728,7 +728,7 @@ class TypePredicate extends Predicate {
 
 
 class URLPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$not = ($this->parent->negate)? 'not ' : '';
 
 		$query = &$this->getQuery();
@@ -738,7 +738,7 @@ class URLPredicate extends Predicate {
 
 
 class NotesPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$not = ($this->parent->negate)? 'not ' : '';
 
 		$query = &$this->getQuery();
@@ -751,7 +751,7 @@ class NotesPredicate extends Predicate {
 
 
 class UserPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$not = ($this->parent->negate)? 'not ' : '';
 		if (is_numeric($this->value)) {
 			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_ID '
@@ -776,7 +776,7 @@ class UserPredicate extends Predicate {
 
 
 class AddedByPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$eq = ($this->parent->negate)? '!=' : '=';
 		if (is_numeric($this->value)) {
 			return "rec_AddedByUGrpID $eq " . intval($this->value);
@@ -793,7 +793,7 @@ class AddedByPredicate extends Predicate {
 }
 
 class AnyPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$not = ($this->parent->negate)? 'not ' : '';
 		return $not . ' (exists (select * from recDetails rd '
 		                          . 'left join defDetailTypes on dtl_DetailTypeID=dty_ID '
@@ -820,7 +820,7 @@ class FieldPredicate extends Predicate {
 		}
 	}
 
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$not = ($this->parent->negate)? 'not ' : '';
 
         $isnumericvalue = is_numeric($this->value);
@@ -906,7 +906,7 @@ class TagPredicate extends Predicate {
 		$this->query = NULL;
 	}
 
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$query = &$this->getQuery();
 		$not = ($this->parent->negate)? 'not ' : '';
 		if ($query->search_type == BOOKMARK) {
@@ -1000,7 +1000,7 @@ class TagPredicate extends Predicate {
 
 
 class BibIDPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$not = ($this->parent->negate)? 'not' : '';
 		return "rec_ID $not in (" . join(',', array_map('intval', explode(',', $this->value))) . ')';
 	}
@@ -1008,7 +1008,7 @@ class BibIDPredicate extends Predicate {
 
 
 class LinkToPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		if ($this->value) {
 			return 'exists (select * from defDetailTypes, recDetails bd '
 			              . 'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
@@ -1023,7 +1023,7 @@ class LinkToPredicate extends Predicate {
 
 
 class LinkedToPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		if ($this->value) {
 			return 'exists (select * from defDetailTypes, recDetails bd '
 			              . 'where bd.dtl_RecID in (' . join(',', array_map('intval', explode(',', $this->value))) .') and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
@@ -1038,7 +1038,7 @@ class LinkedToPredicate extends Predicate {
 
 
 class RelatedToPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		if ($this->value) {
 			$ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
 			return "exists (select * from recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in $ids)
@@ -1053,7 +1053,7 @@ class RelatedToPredicate extends Predicate {
 
 
 class RelationsForPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
 /*
 		return "exists (select * from recRelationshipsCache where ((rrc_TargetRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_SourceRecID=$id)
@@ -1085,7 +1085,7 @@ class RelationsForPredicate extends Predicate {
 
 
 class AfterPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$timestamp = strtotime($this->value);
 		if ($timestamp  &&  $timestamp != -1) {
 			$not = ($this->parent->negate)? 'not' : '';
@@ -1098,7 +1098,7 @@ class AfterPredicate extends Predicate {
 
 
 class BeforePredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$timestamp = strtotime($this->value);
 		if ($timestamp  &&  $timestamp != -1) {
 			$not = ($this->parent->negate)? 'not' : '';
@@ -1118,7 +1118,7 @@ class DatePredicate extends Predicate {
 		parent::Predicate($parent, $value);
 	}
 
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$col = $this->col;
         
          try{   
@@ -1145,7 +1145,7 @@ class DateModifiedPredicate extends DatePredicate {
 
 
 class WorkgroupPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$eq = ($this->parent->negate)? '!=' : '=';
 		if (is_numeric($this->value)) {
 			return "rec_OwnerUGrpID $eq ".intval($this->value);
@@ -1162,7 +1162,7 @@ class WorkgroupPredicate extends Predicate {
 
 
 class LatitudePredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$op = '';
 		if ($this->parent->lessthan) {
 			$op = ($this->parent->negate)? '>=' : '<';
@@ -1202,7 +1202,7 @@ class LatitudePredicate extends Predicate {
 
 
 class LongitudePredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$op = '';
 		if ($this->parent->lessthan) {
 			$op = ($this->parent->negate)? '>=' : '<';
@@ -1242,7 +1242,7 @@ class LongitudePredicate extends Predicate {
 
 
 class HHashPredicate extends Predicate {
-	function makeSQL() {
+	function makeSQL($table_name) {
 		$op = '';
 		if ($this->parent->exact) {
 			$op = $this->parent->negate? "!=" : "=";

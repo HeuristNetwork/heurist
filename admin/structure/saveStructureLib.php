@@ -1513,7 +1513,7 @@
                                     $rtyIDs = array();
                                     while ($row = $res->fetch_row()) {
                                         array_push($recIDs, $row[0]);
-                                        if(!in_array($rtyIDs))array_push($rtyIDs, $row[1]);
+                                        if(!in_array($row[1], $rtyIDs)) array_push($rtyIDs, $row[1]);
                                     }
                                     $ret['error'] = $ret['error'].'<br><br>'
                                     ."<a href='#' onclick='window.open(\""
