@@ -189,7 +189,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
 var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
 var ele_warn = $('#map_limit_warning');
-console.log(_mapdata.limit_warning+'  '+_mapdata.mapenabled+'  '+MAXITEMS);
+//DEBUG console.log(_mapdata.limit_warning+'  '+_mapdata.mapenabled+'  '+MAXITEMS);
+
 if(_mapdata.limit_warning){
     //cnt = _mapdata.options.items.length;
     ele_warn.html('These results are limited to '+MAXITEMS+' records<br>(limit set in your profile Preferences)<br>Please filter to a smaller set of results').show();//.delay(2000).fadeOut(10000);
@@ -1467,7 +1468,6 @@ console.log('tileloaded 2');
             //              - this is main customization way for DH
             // 4. html content is created from item.opts values here - deprecated way
             
-            
             if(true){ //Since 2016-11-17 use common renderRecordData !window.hWin.HEURIST4.util.isnull(item.opts.info)){
 
                 //if(!item.opts.info){
@@ -1582,9 +1582,21 @@ ed_html +
                         placemark.closeInfoBubble.removeHandler(item.closeHandler);
                     });
                 } else {
-                    item.map.openBubble(item.getInfoPoint(), html);
-                    item.map.tmBubbleItem = item;
+                    
+                    if(popupURL){
+                        $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                           if(statusTxt == "success"){
+                                item.map.openBubble(item.getInfoPoint(), bubble_header+responseTxt+'</div>');
+                                item.map.tmBubbleItem = item;
+                           }
+                        });
+
+                    }else{
+                        item.map.openBubble(item.getInfoPoint(), html);
+                        item.map.tmBubbleItem = item;
+                    }
                 }
+                
 
             } else {
                 // open window on TIMELINE - replacement native Timeline bubble with our own implementation
