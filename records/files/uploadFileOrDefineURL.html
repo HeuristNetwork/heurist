@@ -106,23 +106,13 @@
         </script>
 
         <div style="overflow:hidden;">
-            <div id="search" class="banner" style="top:0;height:85px;padding-top:5px">
-                <div style="display:inline-block;width:250px" id="div_fileupload">
+            <div id="search" class="banner" style="top:0;height:125px;padding-top:5px">
+                <div style="width:250px" id="div_fileupload">
                 </div>
-                <div style="display:inline-block;vertical-align:top;padding-top:10px">
-                    <button onclick="showFileSelectionPopup()" title="Choose previously uploaded file">Choose uploaded</button>
+                <div style="display:inline-block;vertical-align:top;padding-left:36px">
+                    <button onclick="showFileSelectionPopup()" title="Choose previously uploaded file">Choose previously uploaded file</button>
                 </div>    
-                <div style="width: 100%;" id="div_url"></div>
-                <div id="progressbar_div" style="width:99%;height:40px;padding:5px;text-align:center;display:none">
-                    <div id="progressbar">
-                        <div class="progress-label">Loading data...</div>
-                    </div>
-                    <div id="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
-                </div>
-
-                
-                
-                <div style="position: absolute; top:13px; right: 0px; text-align: right;" id="div_type">
+                <div style="float:right; text-align: right; padding-right: 6px;" id="div_type">
                     <input id="cbSource" type="hidden" />
                     <!--Source:
                     <select id="cbSource">
@@ -145,13 +135,26 @@
                         <option>flash</option>
                         <option>xml</option>
                     </select>
-                    <button onclick="onApply()">Save</button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button onclick="onApply()">Save</button>&nbsp;&nbsp;&nbsp;
                     <button onclick="onCancel()">Cancel</button>
                 </div>
+                
+                
+                <div style="width: 100%;" id="div_url"></div>
+                <div id="progressbar_div" style="width:99%;height:40px;padding:5px;text-align:center;display:none">
+                    <div id="progressbar">
+                        <div class="progress-label">Loading data...</div>
+                    </div>
+                    <div id="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+                </div>
+
+                
+                
             </div>
         </div>
 
-        <div id="preview" style="position:absolute;top:86px;bottom:0px;left:0px;right:0px;">
+        <div id="preview" style="position:absolute;top:126px;bottom:0px;left:0px;right:0px;">
             <div class='wrap'>
                 <div id='errorMsg' style="display:none">
                     <span></span>

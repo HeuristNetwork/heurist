@@ -159,6 +159,16 @@ function initPage() {
 		var container = document.getElementById("div_fileupload");
 		fileUploadInput = new top.HEURIST.edit.inputs.BibDetailFileInput("0", dt, rfr, fieldValues, container);
 
+        // change default appearence - it does not work
+        /*setTimeout(function(){
+            var ele = $(container).find('input[type=file]')
+            ele.css({'border':'none !important', 'border-color':'white'});
+            console.log(ele.css('border'));
+        },2000);
+        */
+        
+        $(container).find('.input-header-cell').text('');
+        
 		fileUploadInput.promptDiv.innerHTML = '';
 		fileUploadInput.onchange = updateURLtoFile;
 
