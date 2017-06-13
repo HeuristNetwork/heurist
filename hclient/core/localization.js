@@ -23,8 +23,8 @@ regional['en'] = {
     'Import data': 'Import data',
     'Please log in':'Please Log in or Register to use all features Heurist in full scale',
     'Please contact to register':'Please contact database owner to register and use all features Heurist in full scale',
-    'My Searches':'My Filters (private)',
-    'My Bookmarks':'My Bookmarks (private)',
+    'My Searches':'My Filters',
+    'My Bookmarks':'My Bookmarks',
 
     'Error_Empty_Message':'No error message was supplied, please report to Heurist developers',
 

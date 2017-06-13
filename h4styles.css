@@ -870,6 +870,10 @@ Allow use of icon-large to be properly aligned
     background-position: -64px -48px;
 }
 
+/* indent for folders */
+ul.fancytree-container ul{
+    padding: 0 0 0 26px !important;
+}
 
 
 .heurist-helper2{ /*display and visibility*/

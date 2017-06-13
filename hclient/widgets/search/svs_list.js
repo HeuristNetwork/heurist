@@ -85,10 +85,10 @@ $.widget( "heurist.svs_list", {
             if(this.options.btn_visible_save){
 
                 this.btn_search_save = $( "<button>", {
-                    text: window.hWin.HR("Save"),
+                    text: window.hWin.HR('Save Filter'),
                     title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
                 })
-                .css({'min-width': '110px','vertical-align':'top','margin-left': '12px','font-size':'1.2em', 'font-weight': 'bold'})
+                .css({'min-width': '110px','vertical-align':'top','margin-left': '32px','font-size':'1.2em', 'font-weight': 'bold'})
                 .addClass('ui-state-focus')
                 .appendTo(this.div_header)
                 .button({icons: {
@@ -480,7 +480,7 @@ $.widget( "heurist.svs_list", {
             this.helper_btm.before(
                 $('<div>')
                 .addClass('svs-acordeon-group')
-                .html(window.hWin.HR('PERSONAL')));
+                .html('&nbsp;')); //window.hWin.HR('PERSONAL')
 
             this.helper_btm.before(
                 $('<div>')
@@ -504,7 +504,7 @@ $.widget( "heurist.svs_list", {
                 this.helper_btm.before(
                     $('<div>')
                     .addClass('svs-acordeon-group')
-                    .html(window.hWin.HR('WORKGROUPS')));
+                    .html('&nbsp;')); //window.hWin.HR('WORKGROUPS')
 
                 for (var groupID in groups)
                 {
@@ -700,7 +700,9 @@ $.widget( "heurist.svs_list", {
 
         var $header = $('<h3 grpid="'+domain+'"><span class="ui-icon ui-icon-'+sIcon+'" '
             + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
-            + name+'</span></h3>').addClass('tree-accordeon-header');
+            + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;">('
+            + ((sIcon=='user')?'private':'workgroup')
+            + ')</span></h3>').css({color:'rgb(142, 169, 185)'}).addClass('tree-accordeon-header');
 
         if('dbs'!=domain){
             var context_opts = this._getAddContextMenu(domain);
@@ -803,8 +805,8 @@ $.widget( "heurist.svs_list", {
                         //
                         s1 = '<span class="ui-icon-folder-open ui-icon" style="display:inline-block;"></span>';
                         $span.find("> span.fancytree-title").html(s1 +
-                            '<div style="display:inline-block;vertical-align:top;padding:2 0 0 3;font-weight:normal !important">'+node.title+'</div>');
-                        //vertical-align:top;
+                            '<div style="display:inline-block;vertical-align:top;padding:2 0 0 3;">'+node.title+'</div>');
+                        //vertical-align:top;  font-weight:normal !important
 
                         //$span.find("> span.fancytree-icon").addClass("ui-icon-folder-open ui-icon").css('display','inline-block');
                         //s = '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);">';
