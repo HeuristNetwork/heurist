@@ -93,7 +93,10 @@ if (isForAdminOnly()) exit();
     $external_count = 0;
     $local_count = 0;
     
+    $autoRepair = false;
     
+    if($autoRepair){
+        
     //search for duplicates
     //local
     $query2 = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles '
@@ -260,9 +263,10 @@ if (isForAdminOnly()) exit();
         }
     }
        
-    
+    }//autoRepair
+   
 
-    $query1 = "SELECT * from recUploadedFiles where ulf_ID"; 
+    $query1 = 'SELECT ulf_ID, ulf_ExternalFileReference, ulf_FilePath, ulf_FileName from recUploadedFiles'; // where ulf_ID=5188 
     $res1 = mysql_query($query1);
     if (!$res1 || mysql_num_rows($res1) == 0) {
         die ("<p><b>This database does not have uploaded files");
@@ -286,6 +290,8 @@ if (isForAdminOnly()) exit();
                 $res['db_fullpath'] = $res['ulf_FilePath'].@$res['ulf_FileName'];
                 $res['res_fullpath'] = resolveFilePath(@$res['db_fullpath']);
             }
+            
+//print print_r($res, true);
             
             //missed link from recDetails - orphaned files       
             $query2 = "SELECT dtl_RecID from recDetails where dtl_UploadedFileID=".$res['ulf_ID'];
@@ -335,7 +341,7 @@ if (isForAdminOnly()) exit();
                     $fpath = realpath($res['db_fullpath']);
 
                     if(!$fpath || !file_exists($fpath)){
-                        chdir(HEURIST_FILES_DIR);  // relatively db root
+                        chdir(HEURIST_FILES_DIR);  // relatively file_uploads
                         $fpath = realpath($res['db_fullpath']);
                     }
 
@@ -346,6 +352,7 @@ if (isForAdminOnly()) exit();
                     if(strpos($fpath, '/misc/heur-filestore/')===0){
                         $fpath = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $fpath);
                     }
+                    
                     
                     //check that the relative path is correct
                     $path_parts = pathinfo($fpath);
@@ -359,6 +366,7 @@ if (isForAdminOnly()) exit();
 
                     $dirname = str_replace("\0", '', $dirname);
                     $dirname = str_replace('\\', '/', $dirname);
+                    
                     if(strpos($dirname, HEURIST_FILESTORE_DIR)===0){
                         
                     
