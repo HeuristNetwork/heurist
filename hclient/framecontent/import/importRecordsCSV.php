@@ -96,6 +96,9 @@ function get_config_bytes($val) {
                 background-color: lightblue;
                 padding: 4px;
             }
+            .tberror td{
+                text-align:center;
+            }
             .action_buttons{
                /*position: absolute;
                right:20px;

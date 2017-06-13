@@ -728,6 +728,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         for (i=0;i<selected_fields.length;i++){ //loop all selected
             
              var field = fields[selected_fields[i]];
+             
+             if(!field){
+                 console.log(i+'  '+selected_fields[i]);
+                 continue;
+             }
+             
              if(field['depend'] && field['depend'].length>0){
                 
                 var rt_id = field['rt_id']; 
@@ -2063,11 +2069,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             var keyfields = Object.keys( response.data['err_keyfields'] );
                             if(keyfields.length>0){
 
-                                var msg = 'Field you marked as identifier contain wrong or out of range values';
+                                var msg = 'Field you marked as identifier contain wrong or out of range values. Table below shows the number of wrong values';
                                     
                                 $( window.hWin.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
 
-                                tbl  = $('<table><tr><th>Field</th><th>Non integer values</th><th>Out of range</th></tr>')
+                                tbl  = $('<table class="tberror"><tr><th>Field</th><th align=center>Non integer values</th><th align=center>Out of range</th></tr>')
                                     .addClass('tbpreview')
                                     .appendTo(container3);
                                 
@@ -2076,7 +2082,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                     var issues = response.data['err_keyfields'][keyfields[i]];
                                 
                                     $('<tr><td>'+response.data['fields'][keyfields[i]]+'</td>'
-                                        +'<td>'+issues[0]+'</td><td>'+issues[1]+'</td></tr>').appendTo(tbl);
+                                        +'<td>'+(issues[0]>0?issues[0]:'')+'</td><td>'+(issues[1]>0?issues[1]:'')+'</td></tr>').appendTo(tbl);
                                 }         
                             }
                             $('<hr>').appendTo(container3);
@@ -2641,11 +2647,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                             $('#mrr_warning').text('Warnings: '+res['count_warning']);
                             $('#prepareWarnings').show();//.css('display','inline-block');
-                            
-                            window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
-                            +' missing values for fields set to Required.<br><br> '
-                            +' You can find and correct these values using Manage > Structure > Verify<br><br>'
-                            + 'Click "Show" button  for a list of rows with missing values');                            
+console.log(res);                            
+                            if(res['missed_required']==true){
+                                window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
+                                +' missing values for fields set to Required.<br><br> '
+                                +' You can find and correct these values using Manage > Structure > Verify<br><br>'
+                                + 'Click "Show" button  for a list of rows with missing values');                            
+                            }
                         }else{
                             $('#prepareWarnings').css('display','none');    
                         }
@@ -3251,7 +3259,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 s = s + '</div>';
             }
             
-            dlg_options['title'] = 'Records with errors';
+            dlg_options['title'] = 'Records with '+mode+'s';
             
         }else if(res['count_'+mode+'_rows']>0){ //-------------------------------------------------------------------------------
             

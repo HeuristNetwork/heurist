@@ -527,31 +527,36 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                     $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
                     //check integer value
                     if(@$int_fields[$k] || $check_keyfield_K){
-                        
-                         if(!ctype_digit(strval($field))){ //is_integer
-                            //not integer
-                            
-                            if($check_keyfield_K){
-                                if(is_array(@$err_keyfields[$k])){
-                                    $err_keyfields[$k][1]++;
-                                }else{
-                                    $err_keyfields[$k] = array(0,1);
-                                }
-                            }
-                            //exclude from array of fields with integer values
-                            if(@$int_fields[$k]) $int_fields[$k]=null;
-                            
-                        }else if(intval($field)<1 || intval($field)>2147483646){ //max int value in mysql
 
-                            if($check_keyfield_K){
-                                if(is_array(@$err_keyfields[$k])){  //out of range
-                                    $err_keyfields[$k][0]++;
-                                }else{
-                                    $err_keyfields[$k] = array(1,0);
+                        $values = explode('|', $field);
+                        foreach($values as $value){
+                            if($value=='')continue;
+                            
+                            if(!ctype_digit(strval($value))){ //is_integer
+                                    //not integer
+                                    if($check_keyfield_K){
+
+                                        if(is_array(@$err_keyfields[$k])){
+                                            $err_keyfields[$k][1]++;
+                                        }else{
+                                            $err_keyfields[$k] = array(0,1);
+                                        }
+                                    }
+                                    //exclude from array of fields with integer values
+                                    if(@$int_fields[$k]) $int_fields[$k]=null;
+
+                            }else if(intval($value)<1 || intval($value)>2147483646){ //max int value in mysql
+
+                                if($check_keyfield_K){
+                                    if(is_array(@$err_keyfields[$k])){  //out of range
+                                        $err_keyfields[$k][0]++;
+                                    }else{
+                                        $err_keyfields[$k] = array(1,0);
+                                    }
                                 }
+                                //exclude from array of fields with integer values
+                                if(@$int_fields[$k]) $int_fields[$k]=null;
                             }
-                            //exclude from array of fields with integer values
-                            if(@$int_fields[$k]) $int_fields[$k]=null;
                         }
                     }
                     if(@$num_fields[$k] && !is_numeric($field)){

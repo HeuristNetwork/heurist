@@ -1278,9 +1278,11 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             "Missing Values", $field, 'warning');
         if(is_array($wrong_records)) {
             
+            
             $cnt = count(@$imp_session['validation']['warning']);//was
             //@$imp_session['validation']['count_warning']
             $imp_session = $wrong_records;
+            $imp_session['validation']['missed_required'] = true;
 
             //allow add records with empty required field - 2017/03/12
             if(false && count(@$imp_session['validation']['recs_insert'])>0 ){
@@ -1393,7 +1395,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = validateNumericField($mysqli, $query, $imp_session, $field, $idx);
+            $wrong_records = validateNumericField($mysqli, $query, $imp_session, $field, $idx, 'warning');
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
@@ -1402,7 +1404,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
                 "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
-                "Invalid Numerics", $field);
+                "Invalid Numerics", $field, 'warning');
         }
 
         $k++;
@@ -1426,7 +1428,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = validateDateField($mysqli, $query, $imp_session, $field, $idx);
+            $wrong_records = validateDateField($mysqli, $query, $imp_session, $field, $idx, 'warning');
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
@@ -1434,7 +1436,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             ." where ".$only_for_specified_id."(".$query_date_where[$k].")"; //implode(" or ",$query_date_where);
             $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
                 "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
-                "Invalid Dates", $field);
+                "Invalid Dates", $field, 'warning');
+
         }
 
         $k++;
@@ -1478,7 +1481,7 @@ function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsag
         $cnt_error = count($wrong_records);
         if($cnt_error>0){
             $error = array();
-            $error["count_error"] = $cnt_error;
+            $error["count_".$type] = $cnt_error;
             $error["recs_error"] = $wrong_records; //array_slice($wrong_records,0,1000); //imp_id, fields
             $error["recs_error_ids"] = $wrong_records_ids;
             $error["field_checked"] = $fields_checked;
@@ -1674,7 +1677,7 @@ function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked
 * @param mixed $fields_checked - name of field to be verified
 * @param mixed $field_idx - index of validation field in query result (to get value)
 */
-function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $field_idx){
+function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $field_idx, $type){
 
     $res = $mysqli->query($query." LIMIT 5000");
 
@@ -1706,13 +1709,13 @@ function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $f
         $cnt_error = count($wrong_records);
         if($cnt_error>0){
             $error = array();
-            $error["count_error"] = $cnt_error;
+            $error["count_".$type] = $cnt_error;
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation";
             $error["short_messsage"] = "Invalid Numerics";
-            $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
-            array_push($imp_session['validation']['error'], $error);
+            $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
+            array_push($imp_session['validation'][$type], $error);
 
             return $imp_session;
         }
@@ -1733,7 +1736,7 @@ function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $f
 * @param mixed $fields_checked - name of field to be verified
 * @param mixed $field_idx - index of validation field in query result (to get value)
 */
-function validateDateField($mysqli, $query, $imp_session, $fields_checked, $field_idx){
+function validateDateField($mysqli, $query, $imp_session, $fields_checked, $field_idx, $type){
 
     $res = $mysqli->query($query." LIMIT 5000");
 
@@ -1786,13 +1789,13 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
         $cnt_error = count($wrong_records);
         if($cnt_error>0){
             $error = array();
-            $error["count_error"] = $cnt_error;
+            $error["count_".$type] = $cnt_error;
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats";
             $error["short_messsage"] = "Invalid Dates";
-            $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
-            array_push($imp_session['validation']['error'], $error);
+            $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
+            array_push($imp_session['validation'][$type], $error);
 
             return $imp_session;
         }
