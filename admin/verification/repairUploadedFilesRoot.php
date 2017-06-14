@@ -80,8 +80,9 @@ move all the files in the root into resources/ulfFromRoot, resources/xslFromRoot
                 }
             }//while
             
+            if(count($files)>0){
             //update entries - change path
-            mysql_query('update recUploadedFiles set ulf_FilePath=\'resources/ulfFromRoot/\' where ulf_ID in ('
+            mysql_query('update recUploadedFiles set ulf_FilePath="resources/ulfFromRoot/" where ulf_ID in ('
                             .implode(',',array_keys($files)).')');
             if (mysql_error()) {
                 $rv['error'] = "Cannot update paths from recUploadedFiles. mySQL error: " . mysql_error();
@@ -94,6 +95,7 @@ move all the files in the root into resources/ulfFromRoot, resources/xslFromRoot
                     //unlink($file);
                 }                
                 $rv['ulfFromRoot'] = count($files);
+            }
             }
     }
     
