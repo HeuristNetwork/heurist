@@ -93,7 +93,7 @@ if (isForAdminOnly()) exit();
     $external_count = 0;
     $local_count = 0;
     
-    $autoRepair = false;
+    $autoRepair = true;
     
     if($autoRepair){
         
@@ -102,8 +102,12 @@ if (isForAdminOnly()) exit();
     $query2 = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles '
                 .'where ulf_FileName is not null GROUP BY ulf_FilePath, ulf_FileName HAVING cnt>1'; //ulf_ID<1000 AND 
     $res2 = mysql_query($query2);
-    if ($res2 && mysql_num_rows($res2) > 0) {
        
+//DEBUG print 'Duplication '.mysql_num_rows($res2).'<br>';
+//DEBUG $res2 = false;
+    
+    if ($res2 && mysql_num_rows($res2) > 0) {
+
             $fix_dupes = 0;    
             //find id with duplicated path+filename 
             while ($res = mysql_fetch_assoc($res2)) {
@@ -147,6 +151,10 @@ if (isForAdminOnly()) exit();
     $query2 = 'SELECT ulf_ExternalFileReference, count(*) as cnt FROM recUploadedFiles '
                 .'where ulf_ExternalFileReference is not null GROUP BY ulf_ExternalFileReference HAVING cnt>1';
     $res2 = mysql_query($query2);
+    
+//DEBUG print 'Duplication remote '.mysql_num_rows($res2).'<br>';
+//DEBUG $res2 = false;
+    
     if ($res2 && mysql_num_rows($res2) > 0) {
 
             $fix_dupes = 0;
@@ -185,6 +193,9 @@ if (isForAdminOnly()) exit();
     $query2 = 'SELECT ulf_OrigFileName, count(*) as cnt FROM recUploadedFiles ' 
 .' where ulf_OrigFileName is not null and ulf_OrigFileName<>"_remote" GROUP BY ulf_OrigFileName HAVING cnt>1';
     $res2 = mysql_query($query2);
+    
+//DEBUG print 'Possible dupes in diff folders '.mysql_num_rows($res2).'<br>';
+//DEBUG $res2 = false;
     
     if ($res2 && mysql_num_rows($res2) > 0) {
     
@@ -290,8 +301,6 @@ if (isForAdminOnly()) exit();
                 $res['db_fullpath'] = $res['ulf_FilePath'].@$res['ulf_FileName'];
                 $res['res_fullpath'] = resolveFilePath(@$res['db_fullpath']);
             }
-            
-//print print_r($res, true);
             
             //missed link from recDetails - orphaned files       
             $query2 = "SELECT dtl_RecID from recDetails where dtl_UploadedFileID=".$res['ulf_ID'];
@@ -408,7 +417,8 @@ if (isForAdminOnly()) exit();
                                     .'", ulf_FileName="'
                                     .mysql_real_escape_string($row['filename']).'" where ulf_ID = '.$ulf_ID;
         }
-        mysql_query($query);            
+       mysql_query($query);            
+//DEBUG       print '<div>'.$ulf_ID.'  rem '.@$row['clear_remote'].'   path='.$row['res_relative'].'  file='.$row['filename'].'</div>';
     }
     if(count($files_path_to_correct)>0){
             print '<div>Autorepair: corrected '.count($files_path_to_correct).' paths</div>';

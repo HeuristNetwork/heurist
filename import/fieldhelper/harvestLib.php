@@ -158,12 +158,7 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
                                     print "<div style=\"color:red\">Files are not scanned in root upload folder $dir</div>";
                                 }
                             }else{
-                                if($imode==0){
-                                    $rep_counter = $rep_counter + doHarvestInDir($dir);
-                                }else if($imode==1){
-                                    getRegisteredFilesInDir($dir, $mediaExts);
-                                }
-                                    
+                                getFilesInDir($dir, $mediaExts, $imode);
                             }
                         }
                     }
@@ -204,8 +199,11 @@ function getRegInfoResult(){
 
 //
 // return arrays registered and non-registered files
+// $imode 
+// 0 - all
+// 1 - reg and unreg separately
 //
-function getRegisteredFilesInDir($dir, $mediaExts) {
+function getFilesInDir($dir, $mediaExts, $imode) {
     
     global $reg_info;
     
@@ -223,16 +221,21 @@ function getRegisteredFilesInDir($dir, $mediaExts) {
             $recordNotes = null;
 
             //checks for allowed extensions
-                if(in_array(strtolower(@$flleinfo['extension']),$mediaExts))
+            if(in_array(strtolower(@$flleinfo['extension']),$mediaExts))
             {
-                $file_id = check_if_register_file($filename, false);
-
-                if($file_id>0){
-                    array_push($reg_info['reg'], $filename);
-                }else{
-                    array_push($reg_info['nonreg'], $filename);
-                }
+                if($imode==1){
                 
+                    $file_id = check_if_register_file($filename, false);
+
+                    if($file_id>0){
+                        array_push($reg_info['reg'], $filename);
+                    }else{
+                        array_push($reg_info['nonreg'], $filename);
+                    }
+                
+                }else{
+                    array_push($reg_info, $filename);
+                }
             }
             
             
