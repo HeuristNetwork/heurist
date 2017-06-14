@@ -1941,7 +1941,6 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
         }
     }
 
-
     $res = $mysqli->query($select_query);
     if (!$res) {
 
@@ -1989,7 +1988,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
             //loop all id values - because on index field may have multivalue ID
             foreach($id_field_values as $idx2 => $recordId_in_import){
 
-                if(@$pairs[$recordId_in_import]){ //already impported
+                if(@$pairs[$recordId_in_import]){ //already imported
                     $recordId_in_import = $pairs[$recordId_in_import];
                 }
 
@@ -1999,12 +1998,14 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                     //@toremove OLD $recordId_in_import = $row[$id_field_idx];
                     if($previos_recordId!=$recordId_in_import){ //next record ID
 
-                        //save data
+                        //record id is changed - save data
+                        //$recordId is already set 
                         if($previos_recordId!=null && !$is_mulivalue_index && count($details)>0){ //perform action
 
                             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                             //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
-                            doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
+                            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
+                            $pairs[$previos_recordId] = $new_id;//new_A
                         }
                         $previos_recordId = $recordId_in_import;
 
@@ -2227,6 +2228,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
                     if(!$ignore_insert){
                         $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
+                        $pairs[$recordId_in_import] = $new_id;//new_A
                         $details = array();
                     }
                     
@@ -2262,6 +2264,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                 }
             }//foreach multivalue index
 
+            
             if($is_mulivalue_index && is_array($new_record_ids) && count($new_record_ids)>0){
                 //save record ids in import table
                 updateRecIds($import_table, end($row), $id_field, $new_record_ids, $csv_mvsep);
