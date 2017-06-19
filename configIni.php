@@ -62,7 +62,13 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.2.19"; // sets current program version number, determined by Heurist development lead
+$version = "4.2.21"; // sets current program version number, determined by Heurist development lead
+
+// 4.2.21 19Jun17. Clean up methods for uploaded files, multi-record attachment, increase thumbnail image size, 
+//                 improve vocabulary tree, handling of repeating and missing value matching in CSV import,
+//                 simplify navigation panel 
+
+// 4.2.20 5Jun17. Improved file upload and verifiction, Beyond 1914 website, new ftrs on facet searches, bug fixes
 
 
 // *** DO NOT SET THESE UNLESS YOU KNOW WHAT YOU ARE DOING ***
