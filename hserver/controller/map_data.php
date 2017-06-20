@@ -195,6 +195,9 @@ function getRecordDetails($system, $record) {
             $geo_value = $detail["dtl_Geo"];
 
             /* GENERAL */
+            if($type == DT_NAME) {
+                $record->name = $value; //for layers use it instead of title (rec_Title)
+            }else
             if($type == DT_SHORT_SUMMARY) {
                 // Description
                 $record->description = $value;
