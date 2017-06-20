@@ -213,7 +213,8 @@
 
         <!-- The file upload form used as target for the file upload widget -->
         <form id="fileupload" action="//jquery-file-upload.appspot.com/" method="POST" enctype="multipart/form-data">
-
+            <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
+            <input type="hidden" name="upload_thumb_url" value="<?php echo HEURIST_THUMB_URL; ?>"/>
             <div><label for="upload_folder" style="color:black;">Select target folder:</label>
                 <select name="folder" id="upload_folder">
                     <?php
@@ -366,6 +367,7 @@
                 $('#fileupload').fileupload({
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
+                    upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
                     url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/'
                 });
                 
