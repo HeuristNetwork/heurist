@@ -25,6 +25,7 @@ require_once(dirname(__FILE__)."/../../admin/verification/valueVerification.php"
 
 // global variable for progress report
 $rep_processed = 0;
+$rep_unique_ids = array();
 $rep_added = 0;
 $rep_updated = 0;
 $rep_skipped = 0;
@@ -524,6 +525,8 @@ function matchingAssign($mysqli, $imp_session, $params){
 * @param mixed $mysqli
 * @param mixed $imp_session
 * @param mixed $params
+* 
+* we may work with the only multivalue field for matching - otherwise it is not possible to detect proper combination
 */
 function matchingMultivalues($mysqli, $imp_session, $params){
 
@@ -560,15 +563,12 @@ function matchingMultivalues($mysqli, $imp_session, $params){
 
     //create search query  - based on mapping (search for  sa_keyfield_ - checkboxes in UI)
 
-    //for update
-    $select_query_update_from = array("Records");
-    $select_query_update_where = array("rec_RecTypeID=".$recordType);
-    $sel_fields = array();
 
     $detDefs = getAllDetailTypeStructures(true);
     $detDefs = $detDefs['typedefs'];
     $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
-    $mapped_fields = array();
+    $mapped_fields = array(); //field_XXX => dty_ID
+    $sel_fields = array();
 
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_keyfield_")===0 && $field_type){
@@ -576,61 +576,19 @@ function matchingMultivalues($mysqli, $imp_session, $params){
             $index = substr($key,12);
             $field_name = "field_".$index;
 
-            $mapped_fields[$field_name] = $field_type;
-
-            if($field_type=="url" || $field_type=="id"){  // || $field_type=="scratchpad"){
-                array_push($select_query_update_where, "rec_".$field_type."=?");
-
-            }else if(is_numeric($field_type)){
-
-                $where = "d".$index.".dtl_DetailTypeID=".$field_type." and ";
-
-                $dt_type = $detDefs[$field_type]['commonFields'][$idx_dt_type];
-
-                if( $dt_type == "enum" ||  $dt_type == "relationtype") {
-
-                    //if fieldname is numeric - compare it with dtl_Value directly
-                    $where = $where."( d".$index.".dtl_Value=t".$index.".trm_ID and "
-                    ." (? in (t".$index.".trm_Label, t".$index.".trm_Code)))";
-                    //"t".$index.".trm_Label=?)";
-                    //." if(concat('',? * 1) = ?,d".$index.".dtl_Value=?,t".$index.".trm_Label=?) ";
-error_log('ehre !!! '.$where);
-                    
-                    array_push($select_query_update_from, "defTerms t".$index);
-                }else{
-                    $where = $where." (d".$index.".dtl_Value=?)";
-                }
-                array_push($select_query_update_where, "rec_ID=d".$index.".dtl_RecID and ".$where);
-                array_push($select_query_update_from, "recDetails d".$index);
-            }else{
-                continue;
+            if($field_type=="url" || $field_type=="id" || @$detDefs[$field_type]){
+                $mapped_fields[$field_name] = $field_type;
+                $sel_fields[] = $field_name;
             }
-
-            array_push($sel_fields, $field_name);
-            if($multivalue_field_name==$field_name){
-                $multivalue_field_name_idx = count($sel_fields);
-            }
+            
         }
-    }
-
+    }//foreach
     //keep mapping   field_XXX => dty_ID
     $imp_session['validation']['mapped_fields'] = $mapped_fields;
-
-
-    //query to search record ids
-    $search_query = "SELECT rec_ID, rec_Title "
-    ." FROM ".implode(",",$select_query_update_from)
-    ." WHERE ".implode(" and ",$select_query_update_where);
-
     
-    $search_stmt = $mysqli->prepare($search_query);
-
-    $params_dt = str_repeat('s',count($sel_fields));
-    //$search_stmt->bind_param('s', $field_value);
-    $search_stmt->bind_result($rec_ID, $rec_Title);
 
     //already founded IDs
-    $pairs = array(); //to avoid search
+    $pairs = array(); //to avoid search for the same combination of match values
     $records = array();
     $disambiguation = array();
     $tmp_idx_insert = array(); //to keep indexes
@@ -642,85 +600,164 @@ error_log('ehre !!! '.$where);
     $res = $mysqli->query($select_query);
     if($res){
         $ind = -1;
-        while ($row = $res->fetch_row()){
-            $imp_id = $row[0];
-            $row[0] = $params_dt;
-
-            $is_update = false;
-            $is_insert = false;
-
-            $multivalue = $row[$multivalue_field_name_idx];
-
-            $ids = array();
-            //split multivalue field
-            $values = getMultiValues($multivalue, $params['csv_enclosure'], $params['csv_mvsep']);
-
-            foreach($values as $idx=>$value){
+        while ($row = $res->fetch_assoc()){
+            
+                $imp_id = $row['imp_id'];
                 
-                $row[$multivalue_field_name_idx] = $value;
-                //verify that not empty
-                $fc = $row;
-                array_shift($fc);
-                $fc = trim(implode("", $fc));
+                $values_tobind = array();
+                $values_tobind[] = ''; //first element for bind_param must be a string with field types
 
-                if($fc==null || $fc=="") continue;       //key is empty
+                //BEGIN statement constructor
+                $select_query_match_from = array("Records");
+                $select_query_match_where = array("rec_RecTypeID=".$recordType);
+                
+                $multivalue_selquery_from = null;
+                $multivalue_selquery_where = null;
+                $multivalue_field_value = null;
 
-                $fc = $row;
-                array_walk($fc, 'trim_lower_accent2');
+                $index = 0;
+                foreach ($mapped_fields as $fieldname => $field_type) {
 
-                $keyvalue = implode($params['csv_mvsep'], $fc);  //csv_mvsep - separator
+                    if($row[$fieldname]==null || trim($row[$fieldname])=='') continue; //ignore empty values
+                    
+                        if($field_type=="url" || $field_type=="id"){  // || $field_type=="scratchpad"){
+                            array_push($select_query_match_where, "rec_".$field_type."=?");
+                            $values_tobind[] = trim($row[$fieldname]);
+                        }else if(is_numeric($field_type)){
 
-//error_log($keyvalue.'  ='.implode(' ',$row));                 
+                            $from = '';
+                            $where = "d".$index.".dtl_DetailTypeID=".$field_type." and ";
+                            $dt_type = $detDefs[$field_type]['commonFields'][$idx_dt_type];
 
-                if(!@$pairs[$keyvalue]){  //was $value && $value!="" &&
-                    //search for ID
-
-                    //assign parameters for search query
-                    call_user_func_array(array($search_stmt, 'bind_param'), refValues($row));
-                    $search_stmt->execute();
-                    $disamb = array();
-                    while ($search_stmt->fetch()) {
-                        //keep pair ID => key value
-                        $disamb[$rec_ID] = $rec_Title; //get value from binding
-                    }
-
-                    if(count($disamb)==0){ //nothing found - insert
-                        $new_id = $ind;
-                        $ind--;
-                        $rec = $row;
-                        $rec[0] = $imp_id;
-                        $tmp_idx_insert[$keyvalue] = count($imp_session['validation']['recs_insert']); //keep index in rec_insert
-                        array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query)
-                        $is_insert = true;
-
-                    }else if(count($disamb)==1 ||  array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){
-                        //either found exact or disamiguation is resolved
-
-                        $new_id = $rec_ID;
-                        $rec = $row;
-                        $rec[0] = $imp_id;
-                        array_unshift($rec, $rec_ID);
-                        $tmp_idx_update[$keyvalue] = count($imp_session['validation']['recs_update']); //keep index in rec_update
-                        array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
-                        $is_update = true;
-                    }else{
-                        $new_id= 'Found:'.count($disamb); //Disambiguation!
-                        $disambiguation[$keyvalue] = $disamb;
-                    }
-                    $pairs[$keyvalue] = $new_id;
-                    array_push($ids, $new_id);
-                }else{ //already found
-
-                    if(array_key_exists($keyvalue, $tmp_idx_insert)){
-                        $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (",".$imp_id);
-                        $is_insert = true;
-                    }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
-                        $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][1] .= (",".$imp_id);
-                        $is_update = true;
-                    }
-                    array_push($ids, $pairs[$keyvalue]);
+                            if( $dt_type == "enum" ||  $dt_type == "relationtype") {
+                                //if fieldname is numeric - compare it with dtl_Value directly
+                                $where = $where."( d".$index.".dtl_Value=t".$index.".trm_ID and "
+                                ." (? in (t".$index.".trm_Label, t".$index.".trm_Code)))";
+                                
+                                $from = 'defTerms t'.$index.',';
+                            }else{
+                                $where = $where." (d".$index.".dtl_Value=?)";
+                            }
+                            
+                            $where = 'rec_ID=d'.$index.'.dtl_RecID and '.$where;
+                            $from = $from.'recDetails d'.$index;
+                            
+                            //we may work with the only multivalue field for matching - otherwise it is not possible to detect proper combination
+                            if($multivalue_field_name==$field_name){
+                                $multivalue_selquery_from = $where;
+                                $multivalue_selquery_where = $from;
+                                $multivalue_field_value = trim($row[$fieldname]);
+                            }else{  
+                                array_push($select_query_match_where, $where);
+                                array_push($select_query_match_from, $from);
+                                $values_tobind[] = trim($row[$fieldname]);
+                            }
+                            $values_tobind[0] = $values_tobind[0].'s';
+                            
+                        }
+                        $index++;
+                }//for all fields in match array
+                
+                if($index==0){//all matching fields in import table are empty - skip it
+                    continue;
                 }
-            }//foreach multivalues
+                
+                
+                $is_update = false;
+                $is_insert = false;
+
+                $ids = array();
+                //split multivalue field
+                $values = getMultiValues($multivalue_field_value, $params['csv_enclosure'], $params['csv_mvsep']);
+                
+                if(!is_array($values) || count($values)==0){
+                    $values = array(''); //at least one value
+                }
+
+                foreach($values as $idx=>$value){
+                    
+                    $a_tobind = $values_tobind; //values for prepared query
+                    $a_from = $select_query_match_from;
+                    $a_where = $select_query_match_where;
+                    
+                    $row[$multivalue_field_name] = $value;
+                    
+                    if(trim($value)!=''){
+                            $a_tobind[0] = $a_tobind[0].'s';
+                            $a_tobind[] = $value;
+                 
+                            $a_from[] = $multivalue_selquery_from;
+                            $a_where[] = $multivalue_selquery_where;
+                    }
+                    
+                    $fc = $a_tobind;
+                    array_shift($fc); //remove ssssss
+                    array_walk($fc, 'trim_lower_accent2');
+                    //merge all values - to create unuque key for combination of values
+                    $keyvalue = implode($params['csv_mvsep'], $fc);
+                    
+                    if(@$pairs[$keyvalue]){  //we already found record for this combination
+                    
+                        if(array_key_exists($keyvalue, $tmp_idx_insert)){
+                            $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (",".$imp_id);
+                            $is_insert = true;
+                        }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
+                            $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][1] .= (",".$imp_id);
+                            $is_update = true;
+                        }
+                        array_push($ids, $pairs[$keyvalue]);
+                    
+                    }else{
+                        
+                        //query to search record ids
+                        $search_query = "SELECT rec_ID, rec_Title "
+                        ." FROM ".implode(",",$a_from)
+                        ." WHERE ".implode(" and ",$a_where);
+
+                        $search_stmt = $mysqli->prepare($search_query);
+                        //$search_stmt->bind_param('s', $field_value);
+                        $search_stmt->bind_result($rec_ID, $rec_Title);
+                        
+                        //assign parameters for search query
+                        call_user_func_array(array($search_stmt, 'bind_param'), refValues($a_tobind));
+                        $search_stmt->execute();
+                        $disamb = array();
+                        while ($search_stmt->fetch()) {
+                            //keep pair ID => key value
+                            $disamb[$rec_ID] = $rec_Title; //get value from binding
+                        }
+
+                        if(count($disamb)==0){ //nothing found - insert
+                            $new_id = $ind;
+                            $ind--;
+                            $rec = $row;
+                            $rec[0] = $imp_id;
+                            $tmp_idx_insert[$keyvalue] = count($imp_session['validation']['recs_insert']); //keep index in rec_insert
+                            array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query)
+                            $is_insert = true;
+
+                        }else if(count($disamb)==1 ||  array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){
+                            //either found exact or disamiguation is resolved
+
+                            $new_id = $rec_ID;
+                            $rec = $row;
+                            $rec[0] = $imp_id;
+                            array_unshift($rec, $rec_ID);
+                            $tmp_idx_update[$keyvalue] = count($imp_session['validation']['recs_update']); //keep index in rec_update
+                            array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
+                            $is_update = true;
+                        }else{
+                            $new_id= 'Found:'.count($disamb); //Disambiguation!
+                            $disambiguation[$keyvalue] = $disamb;
+                        }
+                        $pairs[$keyvalue] = $new_id;
+                        array_push($ids, $new_id);
+                        
+                        
+                    }
+                    
+                }//for multivalues
+
             $records[$imp_id] = implode($params['csv_mvsep'], $ids);   //IDS to be added to import table
 
             if($is_update) $cnt_update_rows++;
@@ -827,6 +864,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
 
     //add NEW records
     $rep_processed=0;
+    $rep_unique_ids = array();
     $rep_added   = 0;
     $rep_updated = 0;
     $rep_skipped = 0;
@@ -1949,6 +1987,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
     }else{
 
         $rep_processed = 0;
+        $rep_unique_ids = array();
         $rep_added = 0;
         $rep_updated = 0;
         $rep_skipped = 0;
@@ -2458,8 +2497,8 @@ function findOriginalRecord($recordId){
 //
 function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output){
 
-    global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated, $rep_skipped, $rep_permission,
-            $wg_id,$rec_visibility;
+    global $mysqli, $imp_session, $rep_processed, $rep_skipped, $rep_permission,
+            $wg_id,$rec_visibility, $rep_added, $rep_updated, $rep_unique_ids;
 
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
@@ -2531,9 +2570,20 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_out
         $out["bibID"] = null;
     }else{
 
+        
         if($recordId!=$out["bibID"]){ //}==null){
-
-            if($id_field && ($recordId==null || $recordId>0)){
+            $rep_added++;
+            $rep_unique_ids[] = $out["bibID"];
+        }else{
+            //do not count updates if this record was already inserted with doImport
+            if(!in_array($out["bibID"], $rep_unique_ids)){
+                $rep_unique_ids[] = $out["bibID"];
+                $rep_updated++;  
+            } 
+        }
+        
+        //change record id in import table from negative temp to id form Huerist records (for insert)        
+        if($id_field){ // ($recordId==null || $recordId>0)){
                 $updquery = "UPDATE ".$import_table
                 ." SET ".$id_field."=".$out["bibID"]
                 ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
@@ -2542,12 +2592,9 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_out
                     print "<div style='color:red'>Cannot update import table (set record id ".$out["bibID"].") for lines:".
                     implode(",",$details['imp_id'])."</div>";
                 }
-            }
-
-            $rep_added++;
-        }else{
-            $rep_updated++;
         }
+
+
 
         if (@$out['warning'] && $mode_output!='array') {
             print "<div style=\"color:#ff8844\">Warning: ".implode("; ",$out["warning"])."</div>";

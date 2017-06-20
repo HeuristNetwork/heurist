@@ -471,7 +471,9 @@
 
     
     function trim_item(&$item, $key, $len){
-        $item = substr(trim($item),0,$len);
+        if($item!=''){
+            $item = substr(trim($item),0,$len);
+        }
     }
 
     //

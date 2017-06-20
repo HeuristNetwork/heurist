@@ -447,7 +447,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 $('#sa_primary_rectype').change( function(event){ 
                         var ele = $(event.target);
                         var treeElement = ele.parents('#divSelectPrimaryRecType').find('#dependencies_preview');
-                        _loadRectypeDependencies( treeElement, ele.val() ); 
+
+                        _loadRectypeDependencies( $dlg, treeElement, ele.val() ); 
+                        
                 });
                 
             }else{
@@ -456,6 +458,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             //apply selection of primary and dependent reccord types
             buttons[window.hWin.HR('OK')]  = function() {
+                    
                     
                 $dlg.dialog( "close" );
 
@@ -561,6 +564,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 };
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
             $dlg.addClass('ui-heurist-bg-light');
+            //disable OK button
+            var btn = $dlg.parent().find('.ui-dialog-buttonset > button').first();
+            window.hWin.HEURIST4.util.setDisabled(btn, true);
         
     }
 
@@ -768,7 +774,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     // show dependecies list in popup dialog where we choose primary rectype
     //
-    function _loadRectypeDependencies( treeElement, preview_rty_ID ){
+    function _loadRectypeDependencies($dlg, treeElement, preview_rty_ID ){
 
         //request to server to get all dependencies for given primary record type
         var request = { action: 'set_primary_rectype',
@@ -777,9 +783,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             imp_ID: imp_ID,
             id: window.hWin.HEURIST4.util.random()
         };
+        
+        
+        treeElement.empty();
+        treeElement.addClass('loading');
+        treeElement.html('<div style="font-style:italic;padding-bottom:20px">loading...</div>');
+        var btn = $dlg.parent().find('.ui-dialog-buttonset > button').first();
+        window.hWin.HEURIST4.util.setDisabled(btn, true);
+                        
 
         window.hWin.HAPI4.parseCSV(request, function( response ){
 
+            treeElement.removeClass('loading');
+            window.hWin.HEURIST4.util.setDisabled(btn, false);
+        
+            
             //that.loadanimation(false);
             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
@@ -2361,6 +2379,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             var key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
             //do we have field to match?
             var field_mapping = {};
+            var multifields = []; //indexes of multivalue fields
+            
             if(!isSkipMatch){
                 var ele = $("input[id^='cbsa_dt_']");
                 
@@ -2368,9 +2388,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     var item = $(item);
                     if(item.is(':checked')){ // && item.val()!=key_idx){
                         var field_type_id = $('#sa_dt_'+item.val()).val();
-                        if(field_type_id && item.val()!=key_idx){ //except id field
-                            field_mapping[item.val()] = field_type_id;
+                        var field_idx = Number(item.val());
+                        if(field_type_id && field_idx!=key_idx){ //except id field
+                            field_mapping[field_idx] = field_type_id;
                             haveMapping = true;
+                            
+                            if(imp_session['multivals'].indexOf(field_idx)>=0){
+                                multifields.push(field_idx);    
+                            }
                         }
                     }
                 });
@@ -2382,6 +2407,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 return;
             }
 
+            //detect multivalue field among mapped fields - we may allow the ONLY multivalue field for matching
+            //otherwise we can't search exactly
+            if(multifields.length>1){
+                //imp_session['columns'][key_idx]
+                window.hWin.HEURIST4.msg.showMsgErr('It is possible to select the only field with multivalues (separated with '
+                        +imp_session['csv_mvsep']+
+                        '). You selected '+multifields.length+' multivalue fields');
+                return;
+            }
+            
                 //verify setting
                 // id is defined
                 // mapping defined -> values in id field will be overwritten
@@ -2434,15 +2469,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 action    : 'step3',
                 sa_rectype: imp_session['sequence'][currentSeqIndex]['rectype'],
                 seq_index: currentSeqIndex,
-                mapping   : field_mapping,
+                mapping   : field_mapping,  //index => field_type
                 skip_match: isSkipMatch?1:0
             };
+            if(multifields.length>0){
+                request['multifield'] = multifields[0];  //get index of multivalue field
+            }
             if(key_idx>=0){
                 request['idfield']=imp_session['columns'][key_idx]; //key_idx;            
             }
             if(disamb_resolv!=null){
                 request['disamb_resolv']=disamb_resolv;          
             }
+            
             
             _showStep(0);
         
@@ -3007,9 +3046,11 @@ console.log(res);
         if(mode=='disamb'){
             
             s = '<div>The following rows match with multiple records. This may be due to the existence of duplicate '
-            +'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
-            +'the incoming rows against existing data records.</div><br/><br/>'
-            +'<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>Source</th><th>Count</th><th>Records in Heurist</th></tr>';
+            + 'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
+            + 'the incoming rows against existing data records.</div><br/><br/>'
+            + '<button style="float:right" onclick="{$(\'.sel_disamb\').val(-1);}">Set all to Create New</button>'
+            + '<br/><br/>'
+            + '<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>Source</th><th>Count</th><th>Records in Heurist</th></tr>';
 
             
             var buttons = {};
@@ -3041,7 +3082,7 @@ console.log(res);
             for(i=0;i<keyvalues.length;i++){
 
                 var keyvalue = keyvalues[i].split(imp_session['csv_mvsep']);
-                keyvalue.shift(); //remove first element
+                //WHY???!!! keyvalue.shift(); //remove first element 
                 keyvalue = keyvalue.join(';&nbsp;&nbsp;');
                 
                 //list of heurist records
@@ -3261,7 +3302,8 @@ console.log(res);
             
             dlg_options['title'] = 'Records with '+mode+'s';
             
-        }else if(res['count_'+mode+'_rows']>0){ //-------------------------------------------------------------------------------
+        }else if(res['count_'+mode+'_rows']>0)
+        { //-------------------------------------------------------------------------------
             
             dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
             
@@ -3301,6 +3343,7 @@ console.log(res);
             dlg_options['window'] = window;  //current frame
             dlg_options['element'] = container.get(0);
             container.html(s);
+            container.css({'overflow-x':'hidden'});
             
             if(container.find("#tabs_records").length>0){
                     $("#tabs_records").tabs();
