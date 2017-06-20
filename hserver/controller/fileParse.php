@@ -1027,6 +1027,11 @@ function findRecordIds($imp_session, $params){
                 $sel_fields[] = $field_name;
         }
     }    
+    
+    if(count($mapped_fields)==0){
+        return 'No mapping defined';
+    }
+    
     //keep mapping   field_XXX => dty_ID
     $imp_session['validation']['mapped_fields'] = $mapped_fields;
 
@@ -1278,6 +1283,7 @@ function assignRecordIds($params){
     //get rectype to import
     $rty_ID = @$params['sa_rectype'];
     $currentSeqIndex = @$params['seq_index'];
+    $match_mode = @$params['match_mode'] ?$params['match_mode']: 0;
     
     if(intval($rty_ID)<1 || !(intval($currentSeqIndex)>=0)){
         $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong value');
@@ -1290,27 +1296,38 @@ function assignRecordIds($params){
         return false; //error - can not get import session
     }
     
-//error_log(print_r($imp_session,true));
-//error_log(print_r($params,true));
+    $records = null;
+    $pairs = null;
+    $disambiguation = array();
     
-    $imp_session = findRecordIds($imp_session, $params);
+    if($match_mode == 0){
+    
+    //error_log(print_r($imp_session,true));
+    //error_log(print_r($params,true));
+    //$system->addError(HEURIST_INVALID_REQUEST, print_r($params,true));
+    //return false;
         
-    if(is_array($imp_session)){
-        $records = $imp_session['validation']['records']; //imp_id(line#) => list of records ids
-        $pairs = $imp_session['validation']['pairs'];     //keyvalues => record id - count number of unique values
-        $disambiguation = $imp_session['validation']['disambiguation'];
-    }else{
-        return $imp_session; //error
-    }
-    
-    //keep counts 
-    if(!@$imp_session['sequence'][$currentSeqIndex]['counts']){
-        $imp_session['sequence'][$currentSeqIndex]['counts'] = array();
-    }
+        $imp_session = findRecordIds($imp_session, $params);
+            
+        if(is_array($imp_session)){
+            $records = $imp_session['validation']['records']; //imp_id(line#) => list of records ids
+            $pairs = $imp_session['validation']['pairs'];     //keyvalues => record id - count number of unique values
+            $disambiguation = $imp_session['validation']['disambiguation'];
+        }else{
+            return $imp_session; //error
+        }
+        
+        //keep counts 
+        if(!@$imp_session['sequence'][$currentSeqIndex]['counts']){
+            $imp_session['sequence'][$currentSeqIndex]['counts'] = array();
+        }
 
-    if(count($disambiguation)>0){
-        return $imp_session; //"It is not possible to proceed because of disambiguation";
-    }
+        if(count($disambiguation)>0){
+            return $imp_session; //"It is not possible to proceed because of disambiguation";
+        }
+        
+    
+    }//$match_mode==0
 
     $import_table = $imp_session['import_table'];
 
@@ -1328,11 +1345,13 @@ function assignRecordIds($params){
     $index = array_search($id_fieldname, $imp_session['columns']); //find it among existing columns
     if($index!==false){ //this is existing field
         $id_field  = "field_".$index;
-        $imp_session['uniqcnt'][$index] = count($pairs);
+        $imp_session['uniqcnt'][$index] = (is_array(@$pairs)&&count($pairs)>0)?count($pairs):$imp_session['reccount'];
     }
 
     //add new field into import table
     if(!$id_field){
+        
+        $is_existing_id_field = false;
 
         $id_field = "field_".$field_count;
         $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
@@ -1348,14 +1367,32 @@ function assignRecordIds($params){
         }*/
         
         array_push($imp_session['columns'], $id_fieldname );
-        array_push($imp_session['uniqcnt'], count($pairs)>0?count($pairs):$imp_session['reccount'] );
+        array_push($imp_session['uniqcnt'], (is_array(@$pairs)&&count($pairs)>0)?count($pairs):$imp_session['reccount'] );
         if(@$params['idfield']){
             array_push($imp_session['multivals'], $field_count ); //!!!!
         }
+    }else{
+        $is_existing_id_field = true;
     }
     
+    
+    if($match_mode==2){
 
-    if(count($records)>0){
+        if($is_existing_id_field){
+            $updquery = "update $import_table set $id_field=NULL where imp_id>0";
+            $mysqli->query($updquery);
+        }
+        
+        $imp_session['validation'] = array( 
+            "count_update"=>0, 
+            "count_insert"=>$imp_session['reccount'],
+            "count_update_rows"=>0,
+            "count_insert_rows"=>$imp_session['reccount'],
+            'disambiguation'=>array()
+        );
+    }
+    else if(count($records)>0)
+    {     //$records - is result of findRecordsIds
         //update ID values in import table - replace id to found
         foreach($records as $imp_id => $ids){
 
@@ -1370,28 +1407,20 @@ function assignRecordIds($params){
             }
         }
     
-    }else{
-        //find records to insert and update if matching is skipped
+    }else if($match_mode==1){
+        //find records to insert and update if matching is skipped AND WE USE current key field
         
         // find records to update
         $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
         ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
-        $cnt = mysql__select_value($mysqli, $select_query);
-        if( $cnt>0 ){
+        $cnt_update = mysql__select_value($mysqli, $select_query);
+        /*if( $cnt_insert>0 ){
 
                 $imp_session['validation']['count_update'] = $cnt;
                 $imp_session['validation']['count_update_rows'] = $cnt;
                 
-                /*
-                //find first 100 records to display
-                $select_query = "SELECT ".$id_field.", imp_id FROM ".$import_table
-                ." left join Records on rec_ID=".$id_field
-                ." WHERE rec_ID is not null and ".$id_field.">0"
-                ." ORDER BY ".$id_field." LIMIT 5000";
-                $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query);
-                */
                 $imp_session['validation']['recs_update'] = array(); //do not send all records to client side
-        }
+        } */
 
         // find records to insert
         $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0";
@@ -1399,20 +1428,29 @@ function assignRecordIds($params){
 
         $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
         $cnt2 = mysql__select_value($mysqli, $select_query);
-        $cnt = $cnt + (($cnt2>0)?intval($cnt2):0);
-
+        $cnt_insert = $cnt + (($cnt2>0)?intval($cnt2):0);
+        /*
         if( $cnt>0 ){
                 $imp_session['validation']['count_insert'] = $cnt;
                 $imp_session['validation']['count_insert_rows'] = $cnt;
 
-                /*
+                
                 //find first 100 records to display
-                $select_query = "SELECT imp_id FROM ".$import_table
-                        .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
-                $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
-                */
+                //$select_query = "SELECT imp_id FROM ".$import_table
+                //        .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
+                //$imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
+                
                 $imp_session['validation']['recs_insert'] = array(); //do not send all records to client side
         }
+        */
+        
+        $imp_session['validation'] = array( 
+            "count_update"=>$cnt_update, 
+            "count_update_rows"=>$cnt_update,
+            "count_insert"=>$cnt_insert,
+            "count_insert_rows"=>$cnt_insert,
+            'disambiguation'=>array()
+        );
         
         //$imp_session['validation']['count_insert'] = $imp_session['reccount'];
     }
@@ -1425,7 +1463,7 @@ function assignRecordIds($params){
         $imp_session['sequence'][$currentSeqIndex]['mapping_keys'] = array();
     }
     
-    if(@$params['skip_match']!=1){
+    if($match_mode!=2){
         $imp_session['sequence'][$currentSeqIndex]['mapping_keys'] = @$params['mapping'];
     }
     

@@ -258,7 +258,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         $('#btnMatchingSkip')
                     .button({icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
-                            _doMatching( true, null );
+                            _doMatching( 2, null );
                         });
 */                        
         $('#btnBackToMatching')
@@ -565,8 +565,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
             $dlg.addClass('ui-heurist-bg-light');
             //disable OK button
-            var btn = $dlg.parent().find('.ui-dialog-buttonset > button').first();
-            window.hWin.HEURIST4.util.setDisabled(btn, true);
+            if(!(imp_session['primary_rectype']>0)){
+                var btn = $dlg.parent().find('.ui-dialog-buttonset > button').first();
+                window.hWin.HEURIST4.util.setDisabled(btn, true);
+            }
         
     }
 
@@ -2362,14 +2364,24 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     //
     function _doMatchingInit(){
-        isSkipMatch = $('#sa_match2').is(':checked');
-        _doMatching( isSkipMatch, null );
+        
+        var matchMode = 0;    
+
+        if($('#sa_match2').is(':checked')){
+            matchMode = 2;    
+        }else if($('#sa_match1').is(':checked')){
+            matchMode = 1;    
+        }
+        
+        _doMatching( matchMode, null );
     }
         
     //
     // Find records in Heurist database and assign record id to identifier field in import table
     //
-    function _doMatching( isSkipMatch, disamb_resolv ){
+    // matchMode - 0 - match by mapped fields, 1- match by id column, 2 - skip matching
+    //
+    function _doMatching( matchMode, disamb_resolv ){
         
         if(currentSeqIndex>=0){
         
@@ -2381,7 +2393,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             var field_mapping = {};
             var multifields = []; //indexes of multivalue fields
             
-            if(!isSkipMatch){
+            if(matchMode==0){ //find mapped fields
                 var ele = $("input[id^='cbsa_dt_']");
                 
                 $.each(ele, function(idx, item){
@@ -2401,7 +2413,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 });
             }
             
-            if($('#sa_match0').is(':checked') && !haveMapping){
+            if(matchMode==0 && !haveMapping){
                 window.hWin.HEURIST4.msg.showMsgErr('Please select the fields on which you wish to match the data read '
                         +'with records already in the database (if any)');
                 return;
@@ -2470,7 +2482,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 sa_rectype: imp_session['sequence'][currentSeqIndex]['rectype'],
                 seq_index: currentSeqIndex,
                 mapping   : field_mapping,  //index => field_type
-                skip_match: isSkipMatch?1:0
+                match_mode: matchMode  //0 - mapping, 1 - id, 2 - skip match 
             };
             if(multifields.length>0){
                 request['multifield'] = multifields[0];  //get index of multivalue field
@@ -3066,7 +3078,8 @@ console.log(res);
 
                     $dlg.dialog( "close" );
                     
-                    _doMatching(false, disamb_resolv);
+                    //perform matching again with resolved disambiguations
+                    _doMatching(0, disamb_resolv);
                 }; 
             buttons[window.hWin.HR('Close')]  = function() {
                     $dlg.dialog( "close" );
