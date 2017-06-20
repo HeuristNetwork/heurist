@@ -294,6 +294,7 @@ console.log('load '+current_map_document_id);
             var overlay_index = 1;
             if(doc.layers.length > 0) {
                 for(var i = 0; i < doc.layers.length; i++) {
+                    if(doc.layers[i].name) doc.layers[i].title = doc.layers[i].name; //use name istead of rec_Title
                     _addLayerOverlay(bounds, doc.layers[i], overlay_index, true);
                     overlay_index++;
                 }
@@ -1145,6 +1146,7 @@ console.log('load '+current_map_document_id);
             if(index>=0){  //this layer belong to map document
                 overlays[index] = overlay;
 
+                //was mapdata.title
                 _addLegendEntryForLayer(index, mapdata.title, mapdata.color, dependent_layers); //was RT_MAPABLE_QUERY insteadof color
 
             }else{ // this layer is explicitely (by user) added
