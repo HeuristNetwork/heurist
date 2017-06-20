@@ -758,9 +758,12 @@ if($is_map_popup){
                     <div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div>
             </div>
             <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-                    <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>"><a target=_blank class="external-link"
-                href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">
-                <?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?></a></div>
+                    <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
+                    <a target=_blank class="external-link" 
+                            href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML</a>
+                            &nbsp;&nbsp;
+                    <a target=_blank class="external-link" 
+                            href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&fmt=html&db=".HEURIST_DBNAME ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
             </div>
                 
            
