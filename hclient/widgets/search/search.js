@@ -833,11 +833,16 @@ $.widget( "heurist.search", {
 
                     var rectype = (event)?Number(event.target.value):0;
                     
-                    var topOptions2 = [{key:'',title:window.hWin.HR('Any field type')},
-                                       {key:'latitude',title:window.hWin.HR('Latitude')},
-                                       {key:'longitude',title:window.hWin.HR('Longitude')}];
+                    var topOptions2 = 'Any field type';
+                    var bottomOptions = null;
+
+                    if(!(rectype>0)){
+                        //topOptions2 = [{key:'',title:window.hWin.HR('Any field type')}];
+                        bottomOptions = [{key:'latitude',title:window.hWin.HR('geo: Latitude')},
+                                         {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
+                    }
                     window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), 
-                                rectype, allowed, topOptions2);
+                                rectype, allowed, topOptions2, {show_latlong:true, bottom_options:bottomOptions});
 
                     var topOptions = [{key:'t', title:window.hWin.HR("record title")},
                         {key:'id', title:window.hWin.HR("record id")},
