@@ -45,7 +45,7 @@ if($db){
 
         $fileid = @$_REQUEST['id'];
         
-        if(is_numeric($file_id)){
+        if(is_numeric($fileid)){
             error_log('Obfuscated id is allowed only');
             exit;
         }
