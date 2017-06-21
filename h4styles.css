@@ -849,21 +849,29 @@ Allow use of icon-large to be properly aligned
 }
 .fancytree-title{
     margin:0 !important;
-    padding: 0 !important;
+    padding-right: 0 !important;
+    padding-right: 5px !important;
 }
 .fancytree-edit-input{
     min-width: 12em !important;
 }
 
+span.fancytree-checkbox{
+    width:26;
+}
+
 .fancytree-has-children span.fancytree-checkbox
 {
+    background-position: 0px -176px
+    /* 
+    0px -48px; - circle
+    none
     background-position: 0 -176px;
-    width:0;
+    width:0;*/
 }
 .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
 {
-    background-position: -64px -48px;
-    width:16;
+    background-position: -64px -176px;
 }
 .fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
 {

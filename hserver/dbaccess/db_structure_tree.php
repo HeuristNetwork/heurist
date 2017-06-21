@@ -49,6 +49,8 @@
 
         global $dbs_rtStructs, $dbs_lookups;
 
+        if($mode==4) set_time_limit(0); //no limit
+        
         if($fieldtypes==null){
             $fieldtypes = array('integer','date','freetext','year','float','enum','resource','relmarker');
         }else if(!is_array($fieldtypes)){
@@ -67,9 +69,10 @@
 
         //foreach ($rtypes as $rectypeID=>$rectypeName){
         foreach ($rectypeids as $rectypeID){
-                $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes);
+                $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes, null);
                 if($def!==null) {
                     //asign codes
+
                     if(is_array(@$def['children'])){
                         $def = __assignCodes($def);
                         array_push($res, $def);
@@ -105,9 +108,11 @@
     //                  fNNN: 'display name of field', 
     //                  fNNN: array(termfield_name: , id, code:  )  // array of term's subfields
     //                  fNNN: array(rt_name: , recID ...... )       // unconstrained pointer or exact constraint
-    //                  fNNN: array(array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointers
+    //                  fNNN: array(array(rt_id: , rt_name, recID, recTitle ... ) //constrained pointers
     //     NNN - field type ID
-    function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode, $fieldtypes){
+    //
+    // $pointer_fields - to avoid recursion for reverse pointers
+    function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields){
 
         global $dbs_rtStructs;
 
@@ -150,10 +155,20 @@
                 $details =  $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
                 
                 $children_links = array();
+                $new_pointer_fields = array();
 
                 foreach ($details as $dtID => $dtValue){
+
+                    $dt_type = $dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type']];
+                    if($dt_type=='resource' || $dt_type=='relmarker'){
+                            array_push($new_pointer_fields, $dtID);
+                    }
+                }
+                
+                foreach ($details as $dtID => $dtValue){
                     
-                    $res_dt = __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, null);
+                    $res_dt = __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, 
+                                                            $fieldtypes, null, $new_pointer_fields);
                     if($res_dt){
                         
                         if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
@@ -175,22 +190,24 @@
                 //add resource and relation at the end of result array
                 $children = array_merge($children, $children_links);
                 
-                
                 //find all reverse links and relations
-                if($mode==4){ //&& $recursion_depth==0){
+                if($mode==4 && $recursion_depth<2){ //&& $recursion_depth==0){
                     $reverse_rectypes = __getReverseLinkedRecordTypes($recTypeId);
+                    
                     foreach ($reverse_rectypes as $rtID => $dtID){
                         //$dtValue =  $dbs_rtStructs['typedefs'][$rtID]['dtFields'][$dtID];
-
-                        $res_dt = __getDetailSection($system, $rtID, $dtID, $recursion_depth, $mode, $fieldtypes, $recTypeId);
-                        if($res_dt){
-                            array_push($children, $res_dt);
+                        if( $pointer_fields==null || (is_array($pointer_fields) && !in_array($dtID, $pointer_fields)) ){  // to avoid recursion
+                            $res_dt = __getDetailSection($system, $rtID, $dtID, $recursion_depth, $mode, $fieldtypes, $recTypeId, null);
+             
+                            if($res_dt){
+                                array_push($children, $res_dt);
+                            }
                         }
                     }
                 }
             }
             if($mode==3 && $recursion_depth==0){
-                array_push($children, __getRecordTypeTree($system, 'Relationship', $recursion_depth+1, $mode, $fieldtypes));
+                array_push($children, __getRecordTypeTree($system, 'Relationship', $recursion_depth+1, $mode, $fieldtypes, null));
             }   
 
         }else if($recTypeId=="Relationship") {
@@ -211,12 +228,12 @@
     }
     
     //
-    // returns array of record types that are linked to giveb record type
+    // returns array of record types that are linked to given record type
+    //
     //
     function __getReverseLinkedRecordTypes($rt_ID){
         
         global $dbs_rtStructs;
-        
         
         //find all reverse links (pointers and relation that point to selected rt_ID)
         $alldetails = $dbs_rtStructs['typedefs'];
@@ -227,23 +244,20 @@
         
         foreach ($alldetails as $recTypeId => $details){
         
-            if(is_numeric($recTypeId) && $recTypeId!=$rt_ID){
-         
+            if(is_numeric($recTypeId) && $recTypeId!=$rt_ID){ //not itself
                 
                 $details = @$dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
                 if(!is_array($details)) continue;
                 
                 foreach ($details as $dtID => $dtValue){
                 
-                        if($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker'){
+                        if(($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')){
 
                                 //find constraints
                                 $constraints = $dtValue[$fi_rectypes];
                                 $constraints = explode(",", $constraints);
                                 //verify that selected record type is in this constaint
                                 if(count($constraints)>0 && in_array($rt_ID, $constraints) && !@$arr_rectypes[$recTypeId] ){
-                                    
-                                    
                                     $arr_rectypes[$recTypeId] = $dtID;
                                 }
                         }
@@ -264,7 +278,7 @@
 
     $mode - 3 all, 4 for facet treeview
     */
-    function __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId){
+    function __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
         global $dbs_rtStructs, $dbs_lookups;    
 
@@ -283,7 +297,7 @@
         $pref = "";
         //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
         //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
-
+        
         if (($mode==3) ||  in_array($detailType, $fieldtypes)) //$fieldtypes - allowed types
         {
             
@@ -316,18 +330,18 @@
             case 'resource': // link to another record type
             case 'relmarker':
 
-                if(($mode==5 && $recursion_depth<4) || $recursion_depth<2){
-
-
+                if( ($mode==5 && $recursion_depth<4) || ($mode==4 && $recursion_depth<3) || $recursion_depth<2){
 
                     
                     if($reverseRecTypeId!=null){
-                            $res = __getRecordTypeTree($system, $recTypeId, $recursion_depth+1, $mode, $fieldtypes);
+                            $res = __getRecordTypeTree($system, $recTypeId, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                             if($res){
                                 $res['rt_ids'] = "".$recTypeId; //list of rectype - constraint
                                 //$res['reverse'] = "yes";
                                 $pref = ($detailType=="resource")?"lf":"rf";
-                                $dt_title = " <span style='font-style:italic'>" . $rtNames[$recTypeId] ."  ". $dt_title . "</span>";
+                                //before 2017-06-20 $dt_title = " <span style='font-style:italic'>" . $rtNames[$recTypeId] ."  ". $dt_title . "</span>";
+
+                                $dt_title = "<span>&lt;&lt; <span style='font-weight:bold'>" . $rtNames[$recTypeId] ."</span> . ". $dt_title.'</span>';
                             }
                     }else{
 
@@ -343,7 +357,7 @@
                             
                             if($pointerRecTypeId=="" || count($rectype_ids)==0){ //unconstrainded
 
-                                $res = __getRecordTypeTree($system, null, $recursion_depth+1, $mode, $fieldtypes);
+                                $res = __getRecordTypeTree($system, null, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                                 //$res['constraint'] = 0;
 
                             }else{ //constrained pointer
@@ -358,7 +372,7 @@
                                 }
 
                                 foreach($rectype_ids as $rtID){
-                                    $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode, $fieldtypes);
+                                    $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                                     if(count($rectype_ids)==1){//exact one rectype constraint
                                         //avoid redundant level in tree
                                         $res = $rt_res;
@@ -391,7 +405,7 @@
                     
                 $stype = ($detailType=='resource' || $detailType=='relmarker')?"":$dbs_lookups[$detailType];
                 if($reverseRecTypeId!=null){
-                    $stype = $stype."linked from";
+                    //before 2017-06-20  $stype = $stype."linked from";
                     $res['isreverse'] = 1;
                 }
                 if($stype!=''){

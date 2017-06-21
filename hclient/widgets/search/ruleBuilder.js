@@ -405,19 +405,21 @@ $.widget( "heurist.ruleBuilder", {
                                     if(arr_fields[i].key == dtyID){   //this field may be added already
                                         arr_fields[i].rectypes.push(rtyID);
 
-                                        if(arr_fields[i].isreverse && arr_fields[i].title.length<73){
-                                            if(arr_fields[i].title.length>=70){
+                                            var tlen = arr_fields[i].title.length;
+                                        if(arr_fields[i].isreverse && tlen<73){
+                                            if(tlen>=70){
                                                 arr_fields[i].title = arr_fields[i].title.substr(0,70)+'...';
                                             }else{
                                                 var rt_name = alldetails[rtyID].commonFields[0];
-                                                arr_fields[i].title = arr_fields[i].title + ', '+rt_name;
+                                                //'<< '+rt_name + ' . ' + name
+                                                arr_fields[i].title = '<< '+rt_name+' | '+arr_fields[i].title.substr(3,tlen-1);
                                             }
                                         }
 
                                         isnotfound = false;
                                         break;
                                     }
-                                }
+                                }//for fields
 
                                 //
                                 if(isnotfound){ //it means this is reverse
@@ -435,14 +437,14 @@ $.widget( "heurist.ruleBuilder", {
                                         temp = ( typeof(temp) === "string" && !window.hWin.HEURIST4.util.isempty(temp) ) ?  temp.split(",") :[];
                                         if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
 
-                                        arr_fields.push({key:dtyID, title:'<< '+name + ' (in: ' + rt_name +')', terms:details[dtyID][fi_term],
+                                        arr_fields.push({key:dtyID, title:'<< '+rt_name + ' . ' + name, terms:details[dtyID][fi_term],
 
                                             terms_dis:temp, rectypes:[rtyID], isreverse:true });
 
                                     }else{ // reverse pointer
 
                                         this._has_rev_pointers = '1';
-                                        arr_fields.push({key:dtyID, title:'<< '+name + ' (in: ' + rt_name+')', rectypes:[rtyID], isreverse:true });
+                                        arr_fields.push({key:dtyID, title:'<< '+rt_name + ' . ' + name, rectypes:[rtyID], isreverse:true });
                                     }
                                 } // reverse pointer
 

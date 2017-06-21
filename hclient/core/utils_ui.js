@@ -90,7 +90,14 @@ window.hWin.HEURIST4.ui = {
         }else{
             $(selObj).empty();
         }
+        
+        window.hWin.HEURIST4.ui.fillSelector(selObj, topOptions);
+        
+        return selObj;
+    },
 
+    fillSelector: function(selObj, topOptions) {
+        
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
             var idx,key,title,disabled;
             if(topOptions){  //list of options that must be on top of list
@@ -677,13 +684,14 @@ window.hWin.HEURIST4.ui = {
         var addLatLongForGeo = false;
         var requriedHighlight = false;
         var selectedValue = null;
+        var showLatLongForGeo = false;
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name'];
             addLatLongForGeo  = options['show_latlong'];
             requriedHighlight = options['show_required'];
             selectedValue     = options['selected_value'];
         }
-
+        
         var dtyID, details;
         
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length>1){
@@ -704,11 +712,12 @@ window.hWin.HEURIST4.ui = {
                 rtyName = window.hWin.HEURIST4.rectypes.names[rty];
                 for (dty in window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields) {
                     
+                  var field_type = window.hWin.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type];
                   if(allowedlist!=null && 
-                     allowedlist.indexOf(window.hWin.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type])<0){
+                     allowedlist.indexOf(field_type)<0){
                       continue; //not allowed - skip
                   }  
-                    
+                  
                   dtyName = window.hWin.HEURIST4.detailtypes.names[dty];
                   if (!dtys[dtyName]){
                     dtys[dtyName] = [];
@@ -767,6 +776,7 @@ window.hWin.HEURIST4.ui = {
 
                     if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
                     {
+                        
                         var name = details[dtyID][fi];
                         
                         if(showDetailType){
@@ -774,15 +784,13 @@ window.hWin.HEURIST4.ui = {
                         }
 
                         if(!window.hWin.HEURIST4.util.isnull(name)){
-                            arrterm.push([dtyID, name, (details[dtyID][fir]=="required") ]);
+                                arrterm.push([dtyID, name, (details[dtyID][fir]=="required") ]);    
                         }
                         
-                        if(addLatLongForGeo && details[dtyID][fit]=="geo"){
-                            arrterm.push([ dtyID+'_long', name+' Longitude', false ]);
-                            arrterm.push([ dtyID+'_lat', name+' Latitude', false ]);
-                        }
-                        
-                    }
+                    }else if(addLatLongForGeo && details[dtyID][fit]=="geo"){
+                        arrterm.push([ 'longitude', 'geo: Longitude', false ]);
+                        arrterm.push([ 'latitude', 'geo: Latitude', false ]);
+                    } 
                 }
             }
 
@@ -842,6 +850,10 @@ window.hWin.HEURIST4.ui = {
             }
 
         }
+        
+        if(options && options['bottom_options']){
+            window.hWin.HEURIST4.ui.fillSelector(selObj, options['bottom_options']);
+        }   
 
         if(selectedValue){
             $(selObj).val(selectedValue);
