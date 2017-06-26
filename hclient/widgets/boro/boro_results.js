@@ -54,6 +54,8 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
    //
   _searchFullRecords: function(rec_toload, current_page, callback){
       
+      console.log('_searchFullRecords');
+      
     var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
         DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
         DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
@@ -62,12 +64,13 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 var request = { q: 'ids:'+ ids,
                     w: 'a',
                     detail: 'detail', //[DT_NAME, DT_GIVEN_NAMES, DT_EXTENDED_DESCRIPTION], 
-                    id: current_page,
+                    id: window.hWin.HEURIST4.util.random(),
+                    pageno: current_page,
                     source:this.element.attr('id') };
                var that = this;
                     
-                window.hWin.HAPI4.RecordMgr.search(request, function(responce){
-                    that._onGetFullRecordData(responce, rec_toload);   
+                window.hWin.HAPI4.RecordMgr.search(request, function(response){
+                    that._onGetFullRecordData(response, rec_toload);   
                 });
       
   },  
@@ -87,14 +90,29 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
  _renderRecord_html: function(recordset, record){
   
         function fld(fldname){
-            return recordset.fld(record, fldname);
+            var res = recordset.fld(record, fldname);
+            if(window.hWin.HEURIST4.util.isempty(res)) res = '';
+            return res;
         }
 
         var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
             DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
+            DT_INITIALS = 72, 
+            DT_HONOR = 19,
             DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
    
-        var fullName = composePersonName(recordset, record);
+        //var fullName = composePersonName(recordset, record);
+        
+        var fullName = fld(DT_GIVEN_NAMES);    
+        if(window.hWin.HEURIST4.util.isempty(fullName)){
+            fullName = fld(DT_INITIALS);        
+        }
+        if(!window.hWin.HEURIST4.util.isempty(fld(DT_HONOR))){
+            fullName = window.hWin.HEURIST4.ui.getTermValue( fld(DT_HONOR) )+' '+fullName;
+        }
+        fullName = fullName + ' ' + fld(DT_NAME);
+
+        
         var profileLink = 'href="'+window.hWin.HAPI4.baseURL+'profile/'+fld('rec_ID')+'/a" onclick="{window.hWin.boroResolver(event);}"';
    
         //get thumbnail if available for this record, or generic thumbnail for record type
@@ -108,8 +126,6 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         }else{
             html_thumb = '<a '+profileLink+' class="bor-stop-image bor-stop-image-placeholder"></a>';
         }
-   
-              +'<a >'
    
    
         var html = 

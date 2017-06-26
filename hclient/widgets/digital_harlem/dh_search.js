@@ -36,6 +36,7 @@ $.widget( "heurist.dh_search", {
 
     _currentRequest:null,
     _currentRecordset:null,
+    add_filter:null,
 
    _isDigitalHarlem:true,
    
@@ -88,10 +89,18 @@ $.widget( "heurist.dh_search", {
         .css({'position':'absolute',top:'3em',bottom:'0','width':'100%'})
         .appendTo( this.search_pane )
 
-        this._refresh();
+        if(this.element.is(':visible')){
+            this._refresh();
+        }
 
         //find Map Documents (19) for featured individuals ---------------------------------------
         if(this._isDigitalHarlem){
+            
+            this.element.on("myOnShowEvent", function(event){
+                if( event.target.id == that.element.attr('id')){
+                    that._refresh();
+                }
+            });
             
             var query = null;
             // "Featured Individuals"
@@ -229,8 +238,9 @@ $.widget( "heurist.dh_search", {
                         if (code == 13) {
                             window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
-                            $('.bor-page-search').find('.clearfix').hide();
-                            $('.bor-search-results').show();
+                            
+                            $('#main_pane > .clearfix').hide(); //hide all
+                            $('.bor-page-search').show();
                             that._doSearch3( ele_search.val() );
                         }
                     }
@@ -239,12 +249,22 @@ $.widget( "heurist.dh_search", {
                 var btn_search = $('#search_button');
                 this._on( btn_search, {
                     click:  function(){
-                            $('.bor-page-search').find('.clearfix').hide();
-                            $('.bor-search-results').show();
+                            $('#main_pane > .clearfix').hide(); //hide all
+                            $('.bor-page-search').show();
                             that._doSearch3( ele_search.val() );}
                 });
             }
+            
+            $('.bor-page-search').on("myOnShowEvent", function(event){
+                if( event.target.id == 'bor-page-search'){
+                    that._refresh();
+                }
+            });
+            
+            
         }
+        
+        
         
     }, //end _create
 
@@ -357,14 +377,23 @@ $.widget( "heurist.dh_search", {
     //
     _doSearch3: function(search_value){
        if(search_value!=''){
-            
-        var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
-            DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
-            DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
+           
+            var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
+                DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
+                DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
             
             search_value = {any:[{"f:1":search_value},{"f:18":search_value},{"f:134":search_value}]};
-       } 
-       this.search_faceted.search_faceted('option', 'add_filter', search_value);
+            
+            this.add_filter = search_value;
+       } else {
+            this.add_filter = null;
+       }
+       if(this.search_faceted.html()==''){ //not inited yet
+            
+       }else{
+            //add filter to existing faceted search
+            this.search_faceted.search_faceted('option', 'add_filter', this.add_filter);
+       }
     },
 
     //
@@ -385,6 +414,8 @@ $.widget( "heurist.dh_search", {
     _doSearch2: function(svsID){
 
         if(!this.usr_SavedSearch[svsID]) return;
+        
+        this.options.search_at_init = false; //only once!!!!
         
         var qsearch = this.usr_SavedSearch[svsID][_QUERY];
 
@@ -409,8 +440,13 @@ $.widget( "heurist.dh_search", {
 
             this.search_pane.show();
             this.search_list.hide();
+            
+            if(that.add_filter!=null){
+                facet_params['add_filter'] = that.add_filter;
+            }            
 
-            var noptions= { query_name: this.usr_SavedSearch[svsID][_NAME], params:facet_params,
+            var noptions= { query_name: this.usr_SavedSearch[svsID][_NAME], 
+                params:facet_params,
                 onclose:function(event){
                     that.search_pane.hide();
                     that.search_list.show();

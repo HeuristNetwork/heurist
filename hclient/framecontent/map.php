@@ -521,7 +521,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 <!-- HTML -->
 
 <body>
-    <div id="mapping" style="height:100%; width:100%;cursor:progress">
+    <div id="mapping" style="min-height:1px;height:100%; width:100%;cursor:progress">
         <!-- Map -->
         <div class="ui-layout-center">
             <div id="map" style="width:100%; height:100%">Mapping</div>

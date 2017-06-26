@@ -1064,7 +1064,7 @@ console.log('load '+current_map_document_id);
                                         +'<div class="bor-map-infowindow-heading">'
                                         + this.fld(record, 'rec_Title')+', '
                                         //+ this.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'])+', '
-                                        //+ window.hWin.HEURIST4.ui.getTermValue('enum',this.fld(record, 26)) //country name
+                                        //+ window.hWin.HEURIST4.ui.getTermValue(this.fld(record, 26)) //country name
                                         +'</div><a href="'
                                         +window.hWin.HAPI4.baseURL+'place/'+this.fld(record,'rec_ID')+'/a" '
                                         +'onclick="{window.hWin.boroResolver(event);}" class="bor-button bor-map-button">See connections</a>'

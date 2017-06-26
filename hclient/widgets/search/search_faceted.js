@@ -817,6 +817,9 @@ $.widget( "heurist.search_faceted", {
             //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
+            this._current_query.push({sortby:'t'});
+//console.log( this._current_query );
+
             
             var request = { q: this._current_query, 
                             w: this.options.params.domain, 
@@ -1570,7 +1573,7 @@ $.widget( "heurist.search_faceted", {
                             
                             //for enum get term label w/o code
                             if(field['type']=='enum' && cterm[0]>0){
-                                cterm[0] = window.hWin.HEURIST4.ui.getTermValue('enum', cterm[0], false);    
+                                cterm[0] = window.hWin.HEURIST4.ui.getTermValue(cterm[0], false);    
                             }
 
                             var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]}, display_mode);

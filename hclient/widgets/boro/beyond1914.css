@@ -988,9 +988,13 @@ h1, h2, h3, h4, h5, h6,
 
 h1, .h1,
 h2, .h2,
-h3, .h3 {
+.h3  {
   margin-top: 20px;
-  margin-bottom: 10px; }
+  margin-bottom: 10px;
+}
+h3{
+  margin-bottom: 0px; /*artem*/
+}
   h1 small,
   h1 .small, .h1 small,
   .h1 .small,
@@ -1025,7 +1029,7 @@ h2, .h2 {
   font-size: 30px; }
 
 h3, .h3 {
-  font-size: 24px; }
+  font-size: 22px; }
 
 h4, .h4 {
   font-size: 18px; }
@@ -5285,6 +5289,10 @@ html {
 .bor-tooltip {
   color: #7f7f7f;
   font-size: 17px;
+    width: 17px;
+    height: 17px;
+    margin-left: 4px;
+    display: inline-block;  
 }
 
 .bor-body-section {
@@ -5360,13 +5368,19 @@ html {
   text-align: left;
   padding-left: 20px;
   padding-right: 20px;
+  padding-bottom: 0px;
+  margin: 0px;
+  /* artem remarked it
   padding-bottom: 20px;
-  margin: 20px 0px;
+  margin: 20px 0px;*/
   border-bottom: 1px solid #f7f7f7; }
   .bor-group-emphasised .bor-group-title {
-    font-size: 20px;
+    font-size: 18px;
     line-height: 24px;
-    color: #ce1126; }
+    color: #ce1126; 
+    padding: 0px; /*artem*/
+    margin: 0px;  /*artem*/
+  }
   .bor-group-emphasised .bor-group {
     font-size: 14px;
     padding-left: 30px; }

@@ -90,7 +90,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     * show/hide panels map and timeline
     */
     function _updateLayout(){
-
+        
         var ismap = false, istime = false;
 
 

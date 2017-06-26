@@ -865,7 +865,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                        data.node.setExpanded(!data.node.isExpanded());
                                        treediv.find('.fancytree-expander').hide();
                                        
-                                        var showrev = $(event.target).is(":checked");
+                                        var showrev = $('#fsw_showreverse').is(":checked");
                                         var tree = treediv.fancytree("getTree");
                                         tree.visit(function(node){
                                             if(node.data.isreverse==1){ 
