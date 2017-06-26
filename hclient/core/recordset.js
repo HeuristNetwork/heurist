@@ -510,6 +510,8 @@ function hRecordSet(initdata) {
     * public method "values"
     */
     function _getFieldValues(record, fldname){
+        if(window.hWin.HEURIST4.util.isempty(fldname)) return null;
+        
         if(!isnull(record) && record['d'] && record['d'][fldname]){   
             return record['d'][fldname]
         }else{
@@ -526,7 +528,7 @@ function hRecordSet(initdata) {
     */
     function _getFieldValue(record, fldname){
 
-        if(isnull(record)){
+        if(isnull(record) || window.hWin.HEURIST4.util.isempty(fldname)){
             return null;
         }
         

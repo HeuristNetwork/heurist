@@ -1006,7 +1006,7 @@ $.widget( "heurist.editing_input", {
 
         }else if(this.detailType=="enum" || this.detailType=="relationtype"){
 
-            disp_value = window.hWin.HEURIST4.ui.getTermValue(this.detailType, value, true);
+            disp_value = window.hWin.HEURIST4.ui.getTermValue(value, true);
 
             if(window.hWin.HEURIST4.util.isempty(value)) {
                 disp_value = 'term missed. id '+termID

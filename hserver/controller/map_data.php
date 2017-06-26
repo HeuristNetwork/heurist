@@ -141,7 +141,8 @@ function getRecord($row) {
 function getDetailedRecord($system, $id) {
     //echo "Get detailed record #".$id;
     $record = getRecordByID($system, $id);
-    $record = getRecordDetails($system, $record);
+    if(@$record->id)
+        $record = getRecordDetails($system, $record);
     return $record;
 }
 

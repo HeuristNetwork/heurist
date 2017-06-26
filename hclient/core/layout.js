@@ -396,9 +396,14 @@ function hLayout(args) {
     */
     function _initLayoutFree(layout, $container){
 
+        $container.hide();
+        
         //find main container and load template
         if(layout['template']){
-               $container.load(layout['template'], function(){ layout['template']=null; _initLayoutFree(layout, $container); });    
+               $container.load(layout['template'], function(){ 
+                    layout['template']=null; 
+                    _initLayoutFree(layout, $container); 
+               });    
                return;
         }
 
@@ -447,6 +452,8 @@ function hLayout(args) {
         }
 
         initDragDropListener();
+        
+        setTimeout(function(){$container.show();},1000);
     }
 
     /**

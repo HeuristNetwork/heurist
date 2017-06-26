@@ -46,6 +46,7 @@ initHelper - Inits helper div (slider) and button
 
 Fast access:
 getTermValue - Returns label and code for term by id
+getTermDesc
 getPlainTermsList
 */
 
@@ -178,29 +179,35 @@ window.hWin.HEURIST4.ui = {
             return trm_ParentChildren;
     },
     
+    getTermById: function(termID){
+        
+        var terms = window.hWin.HEURIST4.terms;
+        if(!terms || window.hWin.HEURIST4.util.isempty(termID)) return '';
+        
+        var term, termLookup = terms.termsByDomainLookup['enum'];
+        if(termLookup[termID]){
+            term = termLookup[termID];
+        }else{
+            termLookup = terms.termsByDomainLookup['relation'];
+            term = termLookup[termID];
+        }
+        
+        return term;
+    },
     
     //
     // Returns label and code for term by id
     //
-    getTermValue: function(datatype, termID, withcode){
+    getTermValue: function(termID, withcode){
 
-        var terms = window.hWin.HEURIST4.terms;
-        if(!terms || window.hWin.HEURIST4.util.isempty(termID)) return '';
+        var term = window.hWin.HEURIST4.ui.getTermById(termID);    
         
-        if(datatype === "relmarker" || datatype === "relationtype"){
-            datatype = "relation";
-        }
-        if(!(datatype=="enum" || datatype=="relation")){
-            return '';
-        }
+        var termName, termCode='';
 
-        var termLookup = terms.termsByDomainLookup[datatype],
-        termName,
-        termCode='';
-
-        if(termLookup[termID]){
-            termName = termLookup[termID][terms.fieldNamesToIndex['trm_Label']];
-            termCode = termLookup[termID][terms.fieldNamesToIndex['trm_Code']];
+        if(term){
+            var terms = window.hWin.HEURIST4.terms;
+            termName = term[terms.fieldNamesToIndex['trm_Label']];
+            termCode = term[terms.fieldNamesToIndex['trm_Code']];
             if(window.hWin.HEURIST4.util.isempty(termCode)){
                 termCode = '';
             }else{
@@ -211,6 +218,28 @@ window.hWin.HEURIST4.ui = {
         }
 
         return termName+(withcode ?termCode :'');
+    },
+    
+    //
+    // get description of label for term
+    //
+    getTermDesc: function(termID){
+
+        var term = window.hWin.HEURIST4.ui.getTermById(termID);    
+        if(term){
+
+            var terms = window.hWin.HEURIST4.terms;
+            var termDesc = term[terms.fieldNamesToIndex['trm_Description']];
+            if(window.hWin.HEURIST4.util.isempty(termDesc)){
+                return term[terms.fieldNamesToIndex['trm_Label']];
+            }else{
+                return termDesc;
+            }
+            
+        }else{
+            return 'not found term#'+termID;
+        }
+
     },
 
     // not used

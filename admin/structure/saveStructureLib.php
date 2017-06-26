@@ -1617,6 +1617,11 @@
                 }
         }
 
+        
+        if(!array_key_exists("error", $ret)){
+            $ret['children'] = $children;
+        }
+        
         return $ret;        
         
     }
@@ -1638,6 +1643,8 @@
 			//$query = "delete from defTerms where trm_ID in (".join(",",$children).")";
 			//$query = "delete from defTerms where trm_ID = $trmID";
 
+            $children = $ret['children'];
+            
 			foreach ($children as $termID) {
 				$query = "delete from defTerms where trm_ID = $termID";
 				$res = $mysqli->query($query);

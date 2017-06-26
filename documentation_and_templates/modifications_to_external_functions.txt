@@ -41,6 +41,15 @@ ext/js/themeswitchcontrol.js - reimplementation of appearance (css)
 external/php/phpZotero.php (114-121) support proxy settings
                            (598) new property totalCount
 
+2017-04-03 MarkerClusterer
+		ext/timemap.js/2.0.1/lib/mxn/mxn.googlev3.core.js  
+		ext/timemap.js/2.0.1/lib/mxn/mxn.core.js 
+						   
+2017-06-20 external\jquery-file-upload\server\php\UploadHandler.php	
+			- specification of thumbnail upload folder via url parameters upload_thumb_dir, upload_thumb_url
+2017-06-21 ext/fancytree/skin-themeroller/icons.gif 
+			- add 2 arrow icons
+
 -----------------------------------------------------------------------------------------------------------------------------------
 
 /**

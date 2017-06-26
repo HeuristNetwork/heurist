@@ -1667,7 +1667,7 @@ $.widget( "heurist.resultList", {
                 var request = { q: '{"ids":"'+ ids+'"}',
                     w: 'a',
                     detail: 'header',
-                    id: that.current_page,
+                    id: window.hWin.HEURIST4.util.random(),
                     pageno: that.current_page,
                     source:this.element.attr('id') };
 

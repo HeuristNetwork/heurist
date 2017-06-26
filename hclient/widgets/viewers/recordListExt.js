@@ -218,7 +218,7 @@ $.widget( "heurist.recordListExt", {
             }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
                 
                 if (this.options.recordset!=null){
-                    this._checkRecordsetLengthAndRunCrosstabsAnalysis(200);
+                    this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000);
                 }
                 
             }else{

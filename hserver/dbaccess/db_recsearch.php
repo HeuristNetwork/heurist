@@ -614,6 +614,7 @@
             .'rec_Title,'
             .'rec_OwnerUGrpID,'
             .'rec_NonOwnerVisibility,'
+            .'rec_Modified,'
             .'bkm_PwdReminder ';
             /*.'rec_URLLastVerified,'
             .'rec_URLErrorMessage,'
@@ -725,27 +726,31 @@
 
                                 $fin_result['data']['records'] = array_merge_unique($fin_result['data']['records'], 
                                                                              $response['data']['records']);
-                                                                             
+
                             }else{
                                 $fin_result['data']['records'] = mergeRecordSets($fin_result['data']['records'], 
                                                                                  $response['data']['records']);
 
+                                $fin_result['data']['rectypes'] = array_merge_unique($fin_result['data']['rectypes'], 
+                                                                             $response['data']['rectypes']);
+                                                                                 
                                 $fin_result['data']['order'] = array_merge($fin_result['data']['order'], 
                                                                         array_keys($response['data']['records']));
+                                                                        /*
                                 foreach( array_keys($response['data']['records']) as $rt){
                                     $rectype_id = @$rt['4'];
                                     if($rectype_id){
-                                        /*if(@$fin_result['data']['rectypes'][$rectype_id]){
-                                            $fin_result['data']['rectypes'][$rectype_id]++;
-                                        }else{
-                                            $fin_result['data']['rectypes'][$rectype_id]=1;
-                                        }*/
+                                        //if(@$fin_result['data']['rectypes'][$rectype_id]){
+                                        //    $fin_result['data']['rectypes'][$rectype_id]++;
+                                        //}else{
+                                        //    $fin_result['data']['rectypes'][$rectype_id]=1;
+                                        //}
                                         if(!array_key_exists($rectype_id, $fin_result['data']['rectypes'])){
                                             $fin_result['data']['rectypes'][$rectype_id] = 1;
                                         }
                                     }
-
                                 }
+                                */
                             }
 
                             if(!$is_last){ //add top ids for next level
