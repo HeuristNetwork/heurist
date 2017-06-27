@@ -239,9 +239,7 @@ $.widget( "heurist.dh_search", {
                             window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
                             
-                            $('#main_pane > .clearfix').hide(); //hide all
-                            $('.bor-page-search').show();
-                            that._doSearch3( ele_search.val() );
+                            that.doSearch3( ele_search.val() );
                         }
                     }
                 });
@@ -249,9 +247,7 @@ $.widget( "heurist.dh_search", {
                 var btn_search = $('#search_button');
                 this._on( btn_search, {
                     click:  function(){
-                            $('#main_pane > .clearfix').hide(); //hide all
-                            $('.bor-page-search').show();
-                            that._doSearch3( ele_search.val() );}
+                            that.doSearch3( ele_search.val() );}
                 });
             }
             
@@ -375,14 +371,22 @@ $.widget( "heurist.dh_search", {
     //
     // apply search as preliminary filter for current faceted search
     //
-    _doSearch3: function(search_value){
+    doSearch3: function(search_value){
+        
+       $('#main_pane > .clearfix').hide(); //hide all
+       $('.bor-page-search').show();
+        
        if(search_value!=''){
            
-            var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
-                DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
-                DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
-            
-            search_value = {any:[{"f:1":search_value},{"f:18":search_value},{"f:134":search_value}]};
+           if(typeof search_value === 'string'){
+           
+                var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
+                    DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
+                    DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
+                
+                search_value = {any:[{"f:1":search_value},{"f:18":search_value},{"f:134":search_value}]};
+               
+           }
             
             this.add_filter = search_value;
        } else {

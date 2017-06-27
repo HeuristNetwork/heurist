@@ -396,7 +396,7 @@ function hLayout(args) {
     */
     function _initLayoutFree(layout, $container){
 
-        $container.hide();
+        //$container.hide();
         
         //find main container and load template
         if(layout['template']){
@@ -453,7 +453,7 @@ function hLayout(args) {
 
         initDragDropListener();
         
-        setTimeout(function(){$container.show();},1000);
+        //setTimeout(function(){$container.show();},1000);
     }
 
     /**

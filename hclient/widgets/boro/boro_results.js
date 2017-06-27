@@ -63,7 +63,8 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 var ids = rec_toload.join(',');
                 var request = { q: 'ids:'+ ids,
                     w: 'a',
-                    detail: 'detail', //[DT_NAME, DT_GIVEN_NAMES, DT_EXTENDED_DESCRIPTION], 
+                    detail: [DT_NAME, DT_GIVEN_NAMES, 
+                        19/*that.DT_INITIALS*/, 72/*that.DT_HONOR*/, DT_EXTENDED_DESCRIPTION, 'rec_ThumbnailURL'],
                     id: window.hWin.HEURIST4.util.random(),
                     pageno: current_page,
                     source:this.element.attr('id') };
@@ -111,7 +112,6 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
             fullName = window.hWin.HEURIST4.ui.getTermValue( fld(DT_HONOR) )+' '+fullName;
         }
         fullName = fullName + ' ' + fld(DT_NAME);
-
         
         var profileLink = 'href="'+window.hWin.HAPI4.baseURL+'profile/'+fld('rec_ID')+'/a" onclick="{window.hWin.boroResolver(event);}"';
    
@@ -226,6 +226,9 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
  {"var":8,"code":"10:lt95:33:9","title":"Date of death","type":"date","order":8,"isfacet":"1","help":""},
  {"var":9,"code":"10:lt95:33:lt78:25:1","title":"Died in","type":"freetext","order":9,"isfacet":"2b","help":""}],
  "version":2,"title_hierarchy":false,"domain":"all","rules":"","sup_filter":""}                    
+ 
+ 
+ 
 */                
                     for (;idx<len;idx++){
                 
@@ -326,7 +329,12 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 }
                 
                 if(!window.hWin.HEURIST4.util.isempty(add_filter)){
-                   sinfo.push('matching the phrase "'+add_filter['any'][0]['f:1']+'".');
+                    
+                    if(add_filter['any']){
+                        sinfo.push('matching the phrase "'+add_filter['any'][0]['f:1']+'".');
+                    }else{
+                       //sinfo.push('matching the phrase "'+add_filter['any'][0]['f:1']+'".');
+                    }
                 }
             
             }//has values

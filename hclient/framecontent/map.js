@@ -230,7 +230,7 @@ if(_mapdata.limit_warning){
     }
 
     //
-    // chnage color andn reload dataset 
+    // chnage color and reload dataset 
     //
     function _changeDatasetColor( dataset_id, new_color, updateOnMap ){
 
@@ -239,9 +239,16 @@ if(_mapdata.limit_warning){
             if(mapdata['color']!=new_color){
 
                 for (var i=0; i<mapdata.options.items.length; i++){
-                    mapdata.options.items[i].options.icon =
-                        window.hWin.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId 
-                        + 'm.png&color='+encodeURIComponent(new_color);
+                    
+                    var iconId = mapdata.options.items[i].options.iconId;
+                    if(typeof iconId=='string' && iconId.indexOf('http:')==0){
+                        mapdata.options.items[i].options.icon = iconId;
+                    }else{
+                        mapdata.options.items[i].options.icon =
+                            window.hWin.HAPI4.iconBaseURL + iconId
+                                + 'm.png&color='+encodeURIComponent(new_color);
+                    }
+                    
 
                     mapdata.options.items[i].options.color = new_color;
                     mapdata.options.items[i].options.lineColor = new_color;

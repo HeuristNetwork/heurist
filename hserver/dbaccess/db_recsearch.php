@@ -488,6 +488,7 @@
 
     }
 
+    //-----------------------------------------------------------------------
     /**
     * put your comment there...
     *
@@ -540,9 +541,10 @@
             $params['detail'] = @$params['f']; //backward capability
         }
 
+        $fieldtypes_in_res = null;
         $istimemap_request = (@$params['detail']=='timemap');
         $istimemap_counter = 0; //total records with timemap data
-
+        $needThumbField = false;
         
         $fieldtypes_ids = null;
         if($istimemap_request){
@@ -552,7 +554,7 @@
                 $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE); //9,10,11,28';    
              }
              $fieldtypes_ids = implode(',', $fieldtypes_ids);
-             
+             $needThumbField = true;
 //DEBUG error_log('timemap fields '.$fieldtypes_ids);
              
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
@@ -562,16 +564,37 @@
             } else {
                 $fieldtypes_ids = explode(',', $params['detail']);
             }
-            if(is_array($fieldtypes_ids) && (count($fieldtypes_ids)>1 || is_numeric($fieldtypes_ids[0])) ){
-                $fieldtypes_ids = implode(',', $fieldtypes_ids);
-                $params['detail'] = 'detail';
+            
+            if(is_array($fieldtypes_ids) && count($fieldtypes_ids)>0)  
+            //(count($fieldtypes_ids)>1 || is_numeric($fieldtypes_ids[0])) )
+            {
+                $f_res = array();
+                
+                foreach ($fieldtypes_ids as $dt_id){
+                    
+                    if(is_numeric($dt_id) && $dt_id>0){
+                        array_push($f_res, $dt_id);
+                    }else if($dt_id=='rec_ThumbnailURL'){
+                        $needThumbField = true;
+                    }
+                }
+                if(count($f_res)>0){
+                    $fieldtypes_ids = implode(',', $f_res);
+                    $params['detail'] = 'detail';
+                    $needThumbField = true;
+                }else{
+                    $fieldtypes_ids = null;
+                }
+                
             }else{
                 $fieldtypes_ids = null;
                 $params['detail'] = 'ids';
             }
 
+        }else{
+            $needThumbField = true;
         }
-
+        
         $is_count_only = ('count'==$params['detail']);
         $is_ids_only = ('ids'==$params['detail']);
         $return_h3_format = (@$params['vo']=='h3' &&  $is_ids_only);
@@ -731,6 +754,9 @@
                                 $fin_result['data']['records'] = mergeRecordSets($fin_result['data']['records'], 
                                                                                  $response['data']['records']);
 
+                                $fin_result['data']['fields_detail'] = array_merge_unique($fin_result['data']['fields_detail'], 
+                                                                             $response['data']['fields_detail']);
+                                                                                 
                                 $fin_result['data']['rectypes'] = array_merge_unique($fin_result['data']['rectypes'], 
                                                                              $response['data']['rectypes']);
                                                                                  
@@ -997,7 +1023,7 @@
                     
                     // load all records
                     while ($row = $res->fetch_row()) {
-                        array_push( $row, ($fieldtypes_ids)?'':fileGetThumbnailURL($system, $row[2]) );
+                        array_push( $row, $needThumbField?fileGetThumbnailURL($system, $row[2]):'' ); //($fieldtypes_ids)?'':
                         //array_push( $row, $row[4] ); //by default icon if record type ID
                         $records[$row[2]] = $row;
                         array_push($order, $row[2]);
@@ -1023,7 +1049,8 @@
                                     $rectypes = array();
                                     $istimemap_counter = 0;
                             }
-                     
+                            
+                    $fieldtypes_in_res = array(); //reset
                      
 //error_log('total '.$res_count.'  '.$istimemap_request);                     
 $loop_cnt=1;                            
@@ -1037,7 +1064,6 @@ $loop_cnt=1;
 
                             //search for specific details
                             if($fieldtypes_ids!=null && $fieldtypes_ids!=''){
-
                                 $detail_query =  'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
@@ -1047,6 +1073,7 @@ $loop_cnt=1;
                                 .' and dtl_DetailTypeID in ('.$fieldtypes_ids.')';
                                 
                             }else{
+                                
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
@@ -1063,7 +1090,6 @@ $loop_cnt=1;
 $loop_cnt++;                          
                             // @todo - we may use getAllRecordDetails
                             $res_det = $mysqli->query( $detail_query );
-
 
                             if (!$res_det){
                                 $response = $system->addError(HEURIST_DB_ERROR, 
@@ -1090,6 +1116,7 @@ $loop_cnt++;
                                     }
                                     
                                     if($val){
+                                        $fieldtypes_in_res[$dtyID] = 1;
                                         if( !array_key_exists($dtyID, $records[$recID]['d']) ){
                                             $records[$recID]['d'][$dtyID] = array();
                                         }
@@ -1185,8 +1212,8 @@ $loop_cnt++;
                                 'rectypes'=>$rectypes,
                                 'limit_warning'=>$limit_warning,
                                 'memory_warning'=>$memory_warning));
-                        if($fieldtypes_ids){
-                              $response['data']['fields_detail'] =  explode(',', $fieldtypes_ids);
+                        if(is_array($fieldtypes_in_res)){
+                              $response['data']['fields_detail'] =  array_keys($fieldtypes_in_res);
                         }
 
                 }//$is_ids_only

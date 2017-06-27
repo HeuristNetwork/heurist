@@ -34,7 +34,7 @@ function hRecordSet(initdata) {
     offset = 0,
     //limit = 1000, use length()
     fields = [],       //array of field names
-    fields_detail = [], //array of fieldtypes ids in details - filled if search was with field ids in parameter detail
+    fields_detail = [], //array of fieldtypes ids in details 
     records = null,      //list of records objects {recID:[], ....}
     order = [], //array of record IDs in specified order
     mainset = null, //array of record IDs that belong to main result set (without applied rules)
@@ -238,12 +238,18 @@ function hRecordSet(initdata) {
                      
                             dres = dates[k];
                             
+                            if(typeof iconId=='string' && iconId.indexOf('http:')==0){
+                                iconImg = iconId;
+                            }else{
+                                iconImg = window.hWin.HAPI4.iconBaseURL + iconId + '.png';
+                            }
+                            
                             titem = {
                                 id: dataset_name+'-'+recID+'-'+k, //unique id
                                 group: dataset_name,
                                 content: 
-                                '<img src="'+window.hWin.HAPI4.iconBaseURL + iconId + 
-                                           '.png"  align="absmiddle" style="padding-right:3px;"/>&nbsp;<span>'+recName+'</span>',
+                                '<img src="'+iconImg + 
+                                           '"  align="absmiddle" style="padding-right:3px;"/>&nbsp;<span>'+recName+'</span>',
                                 //'<span>'+recName+'</span>',
                                 title: recName,
                                 start: dres[0],
@@ -281,15 +287,24 @@ function hRecordSet(initdata) {
                     recID = recID + "_link";
                 }
                 
-                
+                        var iconImgEvt, iconImg;
+                        if(typeof iconId=='string' && iconId.indexOf('http:')==0){
+                            iconImgEvt = iconId;    
+                            iconImg = iconId;    
+                        }else{
+                            iconImgEvt = iconId + 'm.png';
+                            iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor);
+                        }
+                        
+                       
                         item = {
                             title: recName,
                             start: (startDate || ''),
                             end: (endDate && endDate!=startDate)?endDate:'',
                             placemarks:[],
                             options:{
-                                eventIconImage: iconId + 'm.png',
-                                icon: window.hWin.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor),
+                                eventIconImage: iconImgEvt,
+                                icon: iconImg,
 
                                 description: description,
                                 //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
@@ -751,6 +766,7 @@ function hRecordSet(initdata) {
                 total_count: _order.length,
                 offset: 0,
                 fields: fields,
+                fields_detail:fields_detail,
                 rectypes: rectypes,
                 structures: structures,
                 records: _records,

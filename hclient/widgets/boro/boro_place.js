@@ -1,6 +1,7 @@
 /**
-* result list for connection to Place
-* via options('place', ID) it searches for linkedfrom events 37,24,29,33 and then linkto Persons
+* Aggregation result list for Connected People to Place or particular Attribute
+* 
+* see function fillConnectedPeople in bor_nav
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

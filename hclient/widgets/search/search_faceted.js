@@ -152,7 +152,7 @@ $.widget( "heurist.search_faceted", {
         //Ian this.div_toolbar.buttonset();
 
         this._on( this.btn_submit, { click: "doSearch" });
-        this._on( this.btn_reset, { click: "doReset" });
+        this._on( this.btn_reset, { click: "doResetAll" });
         this._on( this.btn_save, { click: "doSaveSearch" });
         this._on( this.btn_close, { click: "doClose" });
 
@@ -415,7 +415,11 @@ $.widget( "heurist.search_faceted", {
      
        this.options.params['q'] = mainquery;
    }
-    
+
+    ,doResetAll: function(){
+        this.options.params.add_filter = null;
+        this.doReset();
+    }
     //
     // reset current search 
     // recreate facet elements/ or form inputs

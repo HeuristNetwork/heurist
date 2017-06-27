@@ -41,10 +41,180 @@
     <div id="main_pane" class="bor-page clearfix">
         
         <div class="bor-page-people clearfix" style="display:none">
-            <div>
-                People search - to be implemented
+            <div class="bor-body-region bor-people-list">
+                <h1>People of the Book of Remembrance</h1>
+
+                <div class="bor-pagination">
+                    <ul class="pagination">
+                        <li class="active">
+                            <a href="/people/a">A</a>
+                        </li>
+                        <li>
+                            <a href="/people/b">B</a>
+                        </li>
+                        <li>
+                            <a href="/people/c">C</a>
+                        </li>
+                        <li>
+                            <a href="/people/d">D</a>
+                        </li>
+                        <li>
+                            <a href="/people/e">E</a>
+                        </li>
+                        <li>
+                            <a href="/people/f">F</a>
+                        </li>
+                        <li>
+                            <a href="/people/g">G</a>
+                        </li>
+                        <li>
+                            <a href="/people/h">H</a>
+                        </li>
+                        <li>
+                            <a href="/people/i">I</a>
+                        </li>
+                        <li>
+                            <a href="/people/j">J</a>
+                        </li>
+                        <li>
+                            <a href="/people/k">K</a>
+                        </li>
+                        <li>
+                            <a href="/people/l">L</a>
+                        </li>
+                        <li>
+                            <a href="/people/m">M</a>
+                        </li>
+                        <li>
+                            <a href="/people/n">N</a>
+                        </li>
+                        <li>
+                            <a href="/people/o">O</a>
+                        </li>
+                        <li>
+                            <a href="/people/p">P</a>
+                        </li>
+                        <li>
+                            <a href="/people/q">Q</a>
+                        </li>
+                        <li>
+                            <a href="/people/r">R</a>
+                        </li>
+                        <li>
+                            <a href="/people/s">S</a>
+                        </li>
+                        <li>
+                            <a href="/people/t">T</a>
+                        </li>
+                        <li>
+                            <a href="/people/u">U</a>
+                        </li>
+                        <li>
+                            <a href="/people/v">V</a>
+                        </li>
+                        <li>
+                            <a href="/people/w">W</a>
+                        </li>
+                        <li class="disabled">
+                            <span>X</span>
+                        </li>
+                        <li>
+                            <a href="/people/y">Y</a>
+                        </li>
+                        <li class="disabled">
+                            <span>Z</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bor-emblem" id="cp_people_by_char">
+                </div>
+
+                <div class="bor-pagination">
+                    <ul class="pagination">
+                        <li class="active">
+                            <a href="/people/a">A</a>
+                        </li>
+                        <li>
+                            <a href="/people/b">B</a>
+                        </li>
+                        <li>
+                            <a href="/people/c">C</a>
+                        </li>
+                        <li>
+                            <a href="/people/d">D</a>
+                        </li>
+                        <li>
+                            <a href="/people/e">E</a>
+                        </li>
+                        <li>
+                            <a href="/people/f">F</a>
+                        </li>
+                        <li>
+                            <a href="/people/g">G</a>
+                        </li>
+                        <li>
+                            <a href="/people/h">H</a>
+                        </li>
+                        <li>
+                            <a href="/people/i">I</a>
+                        </li>
+                        <li>
+                            <a href="/people/j">J</a>
+                        </li>
+                        <li>
+                            <a href="/people/k">K</a>
+                        </li>
+                        <li>
+                            <a href="/people/l">L</a>
+                        </li>
+                        <li>
+                            <a href="/people/m">M</a>
+                        </li>
+                        <li>
+                            <a href="/people/n">N</a>
+                        </li>
+                        <li>
+                            <a href="/people/o">O</a>
+                        </li>
+                        <li>
+                            <a href="/people/p">P</a>
+                        </li>
+                        <li>
+                            <a href="/people/q">Q</a>
+                        </li>
+                        <li>
+                            <a href="/people/r">R</a>
+                        </li>
+                        <li>
+                            <a href="/people/s">S</a>
+                        </li>
+                        <li>
+                            <a href="/people/t">T</a>
+                        </li>
+                        <li>
+                            <a href="/people/u">U</a>
+                        </li>
+                        <li>
+                            <a href="/people/v">V</a>
+                        </li>
+                        <li>
+                            <a href="/people/w">W</a>
+                        </li>
+                        <li class="disabled">
+                            <span>X</span>
+                        </li>
+                        <li>
+                            <a href="/people/y">Y</a>
+                        </li>
+                        <li class="disabled">
+                            <span>Z</span>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
-        </div>
+        </div>        
         
         <div class="bor-page-loading clearfix" style="display:none">
             <div class="loading" style="background-color: transparent;line-height:64px;max-width:64px;margin:auto">
@@ -81,7 +251,7 @@
         <div class="bor-page bor-page-profile clearfix" style="display:none">
 
             <aside class="col-lg-3 col-sm-4 bor-gutter">
-                <div class="bor-emblem">
+                <div class="bor-emblem" id="p_image">
                 </div>
 
                 <section class="bor-group-emphasised"><h3 class="bor-group-title">Lifetime</h3><ul id="p_lifetime" class="bor-group"></ul></section>
@@ -122,7 +292,8 @@
             </aside>
             
             <div class="col-lg-9 col-sm-8 bor-gutter-main-content">
-                <div class="bor-map bor-map-1000423901" style="position: relative; overflow: hidden;min-height:100px">
+                <div class="bor-map bor-map-1000423901" id="p_mapframe_container"
+                        style="position: relative; overflow: hidden;min-height:100px">
                     <div style="height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; background-color: rgb(229, 227, 223);">
                     <iframe id="p_mapframe" 
             src='http://heurist.sydney.edu.au/h4-ao/hclient/framecontent/map.php?ll=boro&db=ExpertNation&header=off&legend=off' 

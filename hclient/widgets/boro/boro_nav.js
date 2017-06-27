@@ -36,6 +36,7 @@ $.widget( "heurist.boro_nav", {
     
     data_content:{},
     static_pages:{},
+    currentChar:null, 
     
     recset: null, //current recordset
     
@@ -207,12 +208,17 @@ $.widget( "heurist.boro_nav", {
         var homepage_id = this._getStaticPageIdByName('home');
          
         menu_ele.find('.nav-link').click(function(event){
+            
             var recID = $(event.target).attr('data-id');
             window.hWin.HEURIST4.util.stopEvent(event);
 
             var hdoc = $(window.hWin.document);
             
-            if(recID==homepage_id && hdoc.find('.bor-page-'+homepage_id).is(':visible')){ //home page
+            if(recID=='people'){ //people by first char
+            
+                that.fillPeopleByFirstChar();
+                
+            }else if(recID==homepage_id && hdoc.find('.bor-page-'+homepage_id).is(':visible')){ //home page
                 location.reload();
             }else{
                 //hide all 
@@ -225,6 +231,17 @@ $.widget( "heurist.boro_nav", {
             }
         
 
+        });
+
+        //init links to search personby first char
+        $('div.bor-pagination > ul.pagination > li > a').click(function(event){
+         
+            var firstChar = $(event.target).text();
+            $('div.bor-pagination > ul.pagination > li').removeClass('active');
+            $('div.bor-pagination > ul.pagination > li > a[href="/people/'+ firstChar.toLowerCase() +'"]').parent().addClass('active');
+            window.hWin.HEURIST4.util.stopEvent(event);
+            that.fillPeopleByFirstChar(firstChar);
+            
         });
         
         
@@ -307,28 +324,39 @@ $.widget( "heurist.boro_nav", {
         if(!this.isempty(entityType) && (entityID>0 || entityType=='military-service') ){
             //switch to page
             
-            var hdoc = $(window.hWin.document);
-            hdoc.find('#main_pane > .clearfix').hide(); //hide all
             
-            var pagename = entityType;
-            if(entityType!='profile'){
-                pagename = 'connected-people'
-            }
-            
-            
-            hdoc.scrollTop(0);
-            if(entityType=='profile'){
-                hdoc.find('.bor-page-profile').show();
-                this.fillProfilePage();    
+            if(entityType=='gender'){
+                //assign value to faceted search
+
+                var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');
+                if(app1 && app1.widget){
+                    $(app1.widget).dh_search('doSearch3', {"f:20":entityID});    
+                }              
+                
             }else{
-                this.fillConnectedPeople();    
-            }
             
+                var hdoc = $(window.hWin.document);
+                hdoc.find('#main_pane > .clearfix').hide(); //hide all
+                
+                var pagename = entityType;
+                if(entityType!='profile'){
+                    pagename = 'connected-people'
+                }
+                
+                hdoc.scrollTop(0);
+                if(entityType=='profile'){
+                    hdoc.find('.bor-page-profile').show();
+                    this.fillProfilePage();    
+                }else{
+                    this.fillConnectedPeople();    
+                }
+            
+            }
         } 
     },
     
     //
-    //
+    // searches for person connected to particular Place or attribute
     //
     fillConnectedPeople: function(){
         
@@ -458,7 +486,6 @@ $.widget( "heurist.boro_nav", {
                 var personID = that.recset.fld(person, 'rec_ID');
                 var recTypeID = Number(that.recset.fld(person, 'rec_RecTypeID'));
                 
-                //loop for events
                 if(recTypeID == that.RT_PERSON){
                     res_records[personID] = person;
                     res_orders.push(personID);
@@ -467,8 +494,7 @@ $.widget( "heurist.boro_nav", {
                     
                     //IMAGE AND NAME
                     var fullName = that.__composePersonName(person);
-                    var profileLink = window.hWin.HAPI4.baseURL
-                                        +'profile/'+personID+'/'+that.__composePersonNameTag(person);
+                    var profileLink = window.hWin.HAPI4.baseURL+'profile/'+personID+'/'+that.__composePersonNameTag(person);
                     var thumb = that.recset.fld(person, 'rec_ThumbnailURL');
                
                     var html_thumb = '';
@@ -625,7 +651,26 @@ $.widget( "heurist.boro_nav", {
                 $(app1.widget).boro_place('updateResultSet', res_recordset);
             }
             
-            //mapping - addRecordsetLayer to map
+            //mapping
+            if(mapids.length>0){
+                var map_recset = that.recset.getSubSetByIds(mapids);
+                map_recset.setMapEnabled();
+                
+                var params = {id:'main',
+                    title: 'Current query',
+                    recordset: map_recset,
+                    color: '#ff0000'
+                };            
+                $('#cp_mapframe_container').show()
+                var mapping = $('#cp_mapframe')[0].contentWindow.mapping;
+                if(mapping && mapping.map_control){
+                    mapping.map_control.addRecordsetLayer(params);
+                }
+                
+            }else{
+                $('#cp_mapframe_container').hide()  
+            }            
+            /* 
             if(mapids.length==0){
                 $('#cp_mapframe_container').hide();
             }else{
@@ -640,7 +685,7 @@ $.widget( "heurist.boro_nav", {
                 if(mapping && mapping.map_control){
                     mapping.map_control.addQueryLayer(params);
                 }
-            }
+            }*/
             
             
             
@@ -648,6 +693,91 @@ $.widget( "heurist.boro_nav", {
                 
     }, //fillConnectedPeople
     
+
+    //
+    // searches for person with Family name started with given character
+    //
+    fillPeopleByFirstChar: function(firstChar){
+        
+        var that = this;
+        
+        if(that.isempty(firstChar) && $('#cp_people_by_char').children().length==0){
+            firstChar = 'A';
+        }
+
+        if(that.isempty(firstChar) || that.currentChar == firstChar){
+            $('#main_pane').find('.clearfix').hide(); //hide all
+            $('.bor-page-people').show();
+            return;
+        }
+        
+        
+        var request = {
+            w: 'a',
+            detail: [that.DT_NAME, that.DT_GIVEN_NAMES, that.DT_INITIALS, that.DT_HONOR, 'rec_ThumbnailURL'], 
+            q: [{"t":"10"},{"f:1":firstChar+'%'},{"sortby":"t"}],//,{"sortby":"t"}
+            //sortby:'t',
+            //id: random
+            source:this.element.attr('id')};
+
+        $('#main_pane').find('.clearfix').hide();     
+        $('.bor-page-loading').show();
+        
+        //perform search
+        window.hWin.HAPI4.RecordMgr.search(request, function(response){
+
+            if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+                $('#main_pane').find('.clearfix').hide(); //hide all
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+            
+            that.recset = new hRecordSet(response.data);
+            
+            var idx, html = '';
+            
+            var records = that.recset.getRecords();
+            var rec_order = that.recset.getOrder();
+            var len = rec_order.length;
+
+            for(idx=0; idx<len; idx++) {
+                var recID = rec_order[idx];
+                if(recID>0 && records[recID]){
+
+                    var person = records[recID];
+                    var personID = that.recset.fld(person, 'rec_ID');
+
+                    //IMAGE AND NAME
+                    var fullName = that.__composePersonName(person);
+                    var profileLink = window.hWin.HAPI4.baseURL+'profile/'+personID+'/'+that.__composePersonNameTag(person);
+                    var thumb = that.recset.fld(person, 'rec_ThumbnailURL');
+
+                    html = html + 
+                    '<a class="bor-emblem-portrait" href="'+profileLink+'" onclick="{window.hWin.boroResolver(event);}">';
+
+                    if(thumb){
+                        html = html 
+                        +'<div class="img-circle ab-light" data-ab-yaq="223" style="background-color: rgb(223, 223, 223);">'
+                        +'<img class="bor-emblem-portrait-image" height="130" src="'+thumb+'" alt="Photograph of '+fullName
+                        +'" data-adaptive-background="1" data-ab-color="rgb(223,223,223)"></div>';
+                    }else{
+                        html = html + '<div class="bor-emblem-portrait-image placeholder"></div>';
+                    }
+
+                    html = html + '<div class="bor-emblem-portrait-name">'+fullName+'</div></a>';
+                }
+            }//for recset
+  
+            $('#main_pane').find('.clearfix').hide(); //hide all
+            $('.bor-page-people').show();
+            $('#cp_people_by_char').html(html);
+            $(window.hWin.document).scrollTop(0);
+            
+            that.currentChar = firstChar;
+            
+        });//end search
+                
+    }, //fillPeopleByFirstChar
     
     //
     // uses this.recset
@@ -659,6 +789,8 @@ $.widget( "heurist.boro_nav", {
             var mapids = [];
             var leftside = {};
             
+            var iconPath = window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/bundles/markers/';
+            
             //LEFT SIDE
             //Lifetime
             var idx, html = '', sDate='', place = {ids:[0], link:''};
@@ -668,7 +800,7 @@ $.widget( "heurist.boro_nav", {
                 if(birth_rec){
                     var sDate = that.__getDate(birth_rec);
                     
-                    place = that.__getPlace(birth_rec, 0);
+                    place = that.__getPlace(birth_rec, 0, iconPath+'birth.png');
                     mapids = mapids.concat(place.ids); 
                     html = '<li>Born '+that.__formatDate(sDate)+(place.link?' in '+place.link:'')+'</li>';   
                 }
@@ -691,7 +823,7 @@ $.widget( "heurist.boro_nav", {
                 var death_rec = that.recset.getById(deathID);
                 if(death_rec){
                     var sDate = that.__getDate(death_rec);
-                    place = that.__getPlace(death_rec, 0);
+                    place = that.__getPlace(death_rec, 0, iconPath+'death.png');
                     mapids = mapids.concat(place.ids); 
                 
                     sDeathType = that.__getTerm(that.recset.fld(death_rec, 143) );
@@ -713,7 +845,9 @@ $.widget( "heurist.boro_nav", {
             
             //Gender -------------------------------
             //@todo facet link
-            leftside['p_gender'] = '<a href="#">'+that.__getTerm(that.recset.fld(person, 20))+'</a>';
+            termID = that.recset.fld(person, 20);
+            leftside['p_gender'] = '<a href="gender/'+termID
+                    +'/a" onclick="{window.hWin.boroResolver(event);}">'+that.__getTerm( termID )+'</a>';
 
             //Early education -------------------------------
             var early = that.recset.values(person, that.DT_SCHOOLING);
@@ -730,7 +864,7 @@ $.widget( "heurist.boro_nav", {
                         
                         var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
                         
-                        var place = that.__getPlace(edu_record, 1);
+                        var place = that.__getPlace(edu_record, 1, iconPath+'schooling.png');
                         mapids = mapids.concat(place.ids); 
                         
                         html = html + '<li>'+sEduInst
@@ -772,7 +906,7 @@ $.widget( "heurist.boro_nav", {
 
                         var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
 
-                        var place = that.__getPlace(edu_record, 1);
+                        var place = that.__getPlace(edu_record, 1, iconPath+'tertiary-study.png');
                         mapids = mapids.concat(place.ids); 
 
                         html = html + '<li>' 
@@ -812,8 +946,11 @@ $.widget( "heurist.boro_nav", {
                         
                         var eventDate = that.__getEventDates(record);
                         
-                        var place = that.__getPlace(record, 0);
-                        if(termID==4254 || termID==3694){
+                        var iconImg = (termID==4254)?'married.png':((termID==3692)?'lived.png':null);
+                        if(iconImg) iconImg = iconPath + iconImg;
+                        
+                        var place = that.__getPlace(record, 0, iconImg);
+                        if(termID==4254 || termID==3694){ //married, lived
                             mapids = mapids.concat(place.ids); 
                         }
                         
@@ -941,7 +1078,7 @@ $.widget( "heurist.boro_nav", {
                     }
                     
                     //places of service
-                    var place = that.__getPlace(record, 0);
+                    var place = that.__getPlace(record, 0, iconPath + 'military-service.png');
                     mapids = mapids.concat(place.ids);
                     
                     if(placeID==0 || place.ids.indexOf(placeID)>=0){            
@@ -1020,7 +1157,7 @@ $.widget( "heurist.boro_nav", {
             }
             html_thumb = html_thumb +'<div class="bor-emblem-portrait-name">'+fullName+'</div></a>';
             
-            $('.bor-emblem').empty().append($(html_thumb));
+            $('#p_image').empty().append($(html_thumb));
             
             var res = that.getTimelineByPersonAndPlace(person, 0);
             
@@ -1041,287 +1178,6 @@ $.widget( "heurist.boro_nav", {
                     }
                 }
             }
-    
-/*
-            //LEFT SIDE
-            //Lifetime
-            var idx, html = '', sDate='', place = {link:''};
-            var birthID = that.recset.fld(person, 103);
-            if(birthID>0){
-                var birth_rec = that.recset.getById(birthID);
-                var sDate = that.__getDate(birth_rec);
-                var place = that.__getPlace(birth_rec, 0);
-                mapids = mapids.concat(place.ids); 
-                html = '<li>Born '+that.__formatDate(sDate)+(place.link?' in '+place.link:'')+'</li>';   
-                
-            }
-            var birthYear = that.__getYear(sDate,1);
-            timeline.push({year:birthYear, 
-                    date: that.__getYear(sDate), description: 'Birth'+(html
-                                                                ?(', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):'') )
-                                                                :'') });
-                                                        
-            var deathID = that.recset.fld(person, 95);
-            if(deathID>0){
-                
-                var death_rec = that.recset.getById(deathID);
-                var sDate = that.__getDate(death_rec);
-                
-                var place = that.__getPlace(death_rec, 0);
-                mapids = mapids.concat(place.ids); 
-                
-                var sDeathType = that.__getTerm(that.recset.fld(death_rec, 143) );
-                if(sDeathType!='Killed in action'){
-                    sDeathType = 'Died';
-                }
-                 
-                html = html + '<li>'+sDeathType+' '+that.__formatDate(sDate)+ (place.link?' in '+place.link:'') + '</li>';                            
-            }
-            timeline.push({year:that.__getYear(sDate,9999), 
-                    date: that.__getYear(sDate), description: 
-                            (html?(sDeathType+', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):'')):'Death' ) });
-            
-            $('#p_lifetime').empty().append($(html));
-            
-            //Gender -------------------------------
-            $('#p_gender').empty().append(
-                //@todo facet link
-                $('<a href="#">'+that.__getTerm(that.recset.fld(person, 20))+'</a>'));
-
-            //Early education -------------------------------
-            var early = that.recset.values(person, that.DT_SCHOOLING);
-            idx = 0
-            html = '';
-            if($.isArray(early)){
-                for (idx in early){
-                    var rec_id = early[idx];
-                    var record = that.recset.getById(rec_id);
-                    var sDate = that.__getDate(record);
-                    
-                    var sEduInst = that.__getEduInst( record ); //get institution from education record
-                    
-                    var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
-                    
-                    var place = that.__getPlace(edu_record, 1);
-                    mapids = mapids.concat(place.ids); 
-                    
-                    //@todo facet link
-                    html = html + '<li>'+sEduInst
-                                +'<span class="bor-group-date">&nbsp;'+that.__formatDate(sDate)+'</span></li>';
-                                
-                    timeline.push({year:that.__getYear(sDate,birthYear+1), 
-                        date: that.__getYear(sDate), description: 'Early education  at '+sEduInst+', '+place.link});
-                }
-            }
-            if(that.isempty(html)){
-                $('#p_education').parent().hide();            
-            }else{
-                $('#p_education').parent().show();            
-                $('#p_education').empty().append($(html));
-            }
-
-            
-            //Tertiary education -------------------------------
-            var educat = that.recset.values(person, that.DT_TERTIARY);
-            idx = 0;
-            html = '';
-            if($.isArray(educat)){
-                for (idx in educat){
-                    var rec_id = educat[idx];
-                    var record = that.recset.getById(rec_id);
-                    var sDate = that.__getDate(record, [260,9,205]);//year of study
-                    
-                    //degree, qualification, courses
-                    var term_id = that.recset.fld(record, that.DT_DEGREE);
-                    var sDegree = '<a href="'
-                        + window.hWin.HAPI4.baseURL+'tertiary-study/'
-                        + term_id +'/a" onclick="{window.hWin.boroResolver(event);}">'
-                        + window.hWin.HEURIST4.ui.getTermDesc( term_id )+'</a>';
-                    
-                    var sEduInst = that.__getEduInst( record );
-
-                    var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
-
-                    var place = that.__getPlace(edu_record, 1);
-                    mapids = mapids.concat(place.ids); 
-
-                    //@todo facet link
-                    html = html + '<li>' 
-                                + sDegree
-                                +'<span class="bor-group-date">&nbsp;'+that.__formatDate(sDate)+'</span></li>';
-                                
-                    timeline.push({year:that.__getYear(sDate,birthYear+2), 
-                        date: that.__getYear(sDate), description: 'Studied <a href="#">'+sDegree
-                                        +'</a> at '+sEduInst+','+place.link});
-                                
-                }
-            }
-            if(that.isempty(html)){
-                $('#p_tertiary').parent().hide();            
-            }else{
-                $('#p_tertiary').parent().show();            
-                $('#p_tertiary').empty().append($(html));
-            }
-            
-
-            //Events (79->t:24) -------------------------------
-            
-            // 4 - before service, 10 after service
-            //Enlisted, Embarked, Wounded, Demobilized, Returned, Married, Lived
-            var allowed = [3302,4578,4355,3303,3304,4254,3694];
-            var deforder = [1914,1915,1918,1919,1919,1919,1920];
-            var events = that.recset.values(person, 79);
-            idx = 0;
-            if($.isArray(events)){
-                for (idx in events){
-                    var rec_id = events[idx];
-                    var record = that.recset.getById(rec_id);
-                    var termID = Number(that.recset.fld(record, 77));
-                    
-                    if(termID==3298) continue; //exclude Birth
-                    
-                    var k = allowed.indexOf(termID);
-                    var ord = (k<0)?1920:deforder[k];
-                    
-                    var eventDate = that.__getEventDates(record);
-                    
-                    var place = that.__getPlace(record, 0);
-                    if(termID==4254 || termID==3694){
-                        mapids = mapids.concat(place.ids); 
-                    }
-                    
-                    var sEventType = that.__getTerm(termID);
-                    
-                    timeline.push({year:that.__getYear(eventDate.date, ord), 
-                        date: that.__getYear(eventDate.date), 
-                        description: sEventType+(place.link?', '+place.link:'')+eventDate.desc });
-                    
-                }
-            }
-            
-            //Occupation Event (151->t:37) -------------------------------
-            events = that.recset.values(person, 151);
-            idx = 0;
-            if($.isArray(events)){
-                for (idx in events){
-                    var rec_id = events[idx];
-                    var record = that.recset.getById(rec_id);
-                    var eventDate = that.__getEventDates(record);
-                    
-                    var place = that.__getPlace(record, 0);
-                    
-                    var termID = that.recset.fld(record, 150);
-                    var sOccupationTitle = that.__getTerm(termID);
-                    
-                    timeline.push({year:that.__getYear(eventDate.date, 1920), 
-                        date: that.__getYear(eventDate.date), 
-                            description: sOccupationTitle
-                                    +(place.link?', '+place.link:'')+eventDate.desc });
-                }
-            }
-            
-            //Military Awards -------------------------------
-            var awards = that.recset.values(person, that.DT_MILAWARD);
-            idx = 0;
-            html = '';
-            if($.isArray(awards)){
-                for (idx in awards){
-                    var rec_id = awards[idx];
-                    var record = that.recset.getById(rec_id);
-                    var sDate = that.__getDate(record);//date of service
-                    
-                    var countID = that.recset.fld(record, 142); //counts
-                    var sCounts = (countID==3763)?'':that.__getTerm(countID);
-                    
-                    //name of award
-                    var awardID = that.recset.fld(record, 98);
-                    var sAward = window.hWin.HEURIST4.ui.getTermDesc( awardID );
-                    
-                    sAward = '<a href="'
-                            + window.hWin.HAPI4.baseURL+'military-award/'
-                            + awardID + '/a" onclick="{window.hWin.boroResolver(event);}">'
-                            + sAward+'</a>';
-                    
-                    html = html + '<li>'+sAward
-                                + '<span class="bor-group-date">&nbsp;'+that.__formatDate(sDate)+' '
-                                + (sCounts?sCounts:'') + '</span></li>';
-                                
-                    timeline.push({year:that.__getYear(sDate, 1917), 
-                        date: that.__getYear(sDate), description: 'Awarded '+sAward+ ' '
-                                +(sCounts?sCounts: (sDate?' on '+that.__formatDate(sDate):'')) });
-                                
-                }
-            }
-            if(that.isempty(html)){
-                $('#p_awards').parent().hide();            
-            }else{
-                $('#p_awards').parent().show();            
-                $('#p_awards').empty().append($(html));            
-            }
-
-            //Military Service -------------------------------
-            var service = that.recset.values(person, that.DT_MILSERVICE);
-            idx = 0;
-            html = '';
-            if($.isArray(service)){
-                for (idx in service){
-                    var rec_id = service[idx];
-                    var record = that.recset.getById(rec_id);
-                    var eventDate = that.__getEventDates(record);
-                    
-                    var termID = Number(that.recset.fld(record, 77));//type
-                    var k = allowed.indexOf(termID);
-                    var ord = (k<0)?1916:deforder[k];
-                    
-                    //event type
-                    var sEventType = that.__getTerm(termID);
-                    if(!sEventType) sEventType = 'Served';//default
-                    
-                    //rank
-                    var rankID = that.recset.fld(record, 99);
-                    var sRank = that.__getTerm(rankID);
-                    //
-                    var unitID = that.recset.fld(record, 138);
-                    var sUnit = that.__getTerm(unitID);
-                    
-                    if(sRank){
-                        sRank = '<a href="'
-                            + window.hWin.HAPI4.baseURL+'military-service/'
-                            + rankID + ',' +  (sUnit?unitID:0) + '/a" onclick="{window.hWin.boroResolver(event);}">'
-                            + sRank+'</a>';
-                    }else if(sUnit){
-                        sUnit = '<a href="'
-                            + window.hWin.HAPI4.baseURL+'military-service/0,'
-                            + unitID +'/a" onclick="{window.hWin.boroResolver(event);}">'
-                            + sUnit+'</a>';
-                    }
-
-                    
-                    if(sRank){
-                        html = html + '<li>' + sRank
-                                + '<span class="bor-group-date">&nbsp;'+ eventDate.desc + '</span></li>';
-                    }
-                    
-                    //places of service
-                    var place = that.__getPlace(record, 0);
-                    mapids = mapids.concat(place.ids);
-                                
-                    timeline.push({year:that.__getYear(eventDate.date, ord), 
-                        date: that.__getYear(eventDate.date), description: sEventType+' '
-                        + (sRank && sEventType?'as ':'')
-                        + sRank
-                        + (sUnit?' with '+sUnit:'')
-                        + (place.link?', '+place.link:'')+eventDate.desc });
-                                
-                }
-            }
-            if(that.isempty(html)){
-                $('#p_service').parent().hide();            
-            }else{
-                $('#p_service').parent().show();            
-                $('#p_service').empty().append($(html));            
-            }
-*/
 
             //Other resources -------------------------------
             html = '';
@@ -1475,7 +1331,7 @@ $.widget( "heurist.boro_nav", {
                 html =  html
                 +'<div class="bor-stop-image ab-light" data-ab-yaq="223" style="background-color: rgb(223, 223, 223);">'
                 //+'<div class="bor-stop-image ab-dark" data-ab-yaq="60" style="background-color: rgb(60, 60, 60);">'
-                + '<img src="'+that.recset.fld(person, 'rec_ThumbnailURL')+'" alt="Photograph of '+fullName
+                + '<img src="'+that.recset.fld(person, 'rec_ThumbnailURL')+'" height="65" alt="Photograph of '+fullName
                 + '" data-adaptive-background="1" data-ab-color="rgb(19,19,19)"></div>';
             }else{
                 html =  html + '<div class="bor-stop-image bor-stop-image-placeholder"></div>';
@@ -1499,7 +1355,29 @@ $.widget( "heurist.boro_nav", {
             
             
             // MAPPING -------------------
+            //get subset 
+            if(mapids.length>0){
+                
+                //set rec_Icon according to type of event
             
+                var map_recset = that.recset.getSubSetByIds(mapids);
+                map_recset.setMapEnabled();
+                
+                var params = {id:'main',
+                    title: 'Current query',
+                    recordset: map_recset,
+                    color: '#ff0000'
+                };            
+                $('#p_mapframe_container').show()
+                var mapping = $('#p_mapframe')[0].contentWindow.mapping;
+                if(mapping && mapping.map_control){
+                    mapping.map_control.addRecordsetLayer(params);
+                }
+                
+            }else{
+                $('#p_mapframe_container').hide()  
+            }
+            /*
             //add new layer with given name
             var params = {id:'main',
                 title: 'Current query',
@@ -1510,7 +1388,7 @@ $.widget( "heurist.boro_nav", {
             if(mapping && mapping.map_control){
                 mapping.map_control.addQueryLayer(params);
             }
-            
+            */
                     
             
         }); //end for record response
@@ -1660,7 +1538,7 @@ $.widget( "heurist.boro_nav", {
     // detail 0 - name, state, country, 1 - state, country
     // returns {ids:[], names, link: }
     //
-    __getPlace: function(rec, details){
+    __getPlace: function(rec, details, iconPath){
         
                 var rt = this.recset.fld(rec, 'rec_RecTypeID');
                 var places = [];
@@ -1692,6 +1570,8 @@ $.widget( "heurist.boro_nav", {
                             
                         if(place_rec){
                                 place_ids.push(placeID);
+                                
+                                if(iconPath) this.recset.setFld(place_rec, 'rec_Icon', iconPath);
                                 
                                 var placename = this.recset.fld(place_rec, this.DT_NAME); //place name
                                 var state = this.recset.fld(place_rec, 2); //state
@@ -1730,7 +1610,15 @@ $.widget( "heurist.boro_nav", {
 //
 function boroResolver(event){
 
-    var url = $(event.target).attr('href');
+    var url;
+        
+    if($(event.target).is('a')){
+        url = $(event.target).attr('href');
+    }else{
+        var ele = $(event.target).parents('a');
+        url = ele.attr('href');
+    } 
+    
     var params = url.split('/');
     if(params.length>2){
         var recID = params[params.length-2];

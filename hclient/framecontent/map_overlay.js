@@ -896,22 +896,24 @@ console.log('load '+current_map_document_id);
 
             
             // Retrieve records for this request
-            window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
+            window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, 
+            
+                    function( recordset, original_recordset ){
 
-                if(loadingbar)  loadingbar.setMap(null);
+                        if(loadingbar)  loadingbar.setMap(null);
 
-                if(recordset!=null){
-                    source.recordset = recordset;
-                    source.recordset.setMapEnabled( true );
-                    _addRecordsetLayer(source, index);
-                }
-                if( source.callback && $.isFunction(source.callback) ){
-                    source.callback( recordset, original_recordset );     
-                }
+                        if(recordset!=null){
+                            source.recordset = recordset;
+                            source.recordset.setMapEnabled( true );
+                            _addRecordsetLayer(source, index);
+                        }
+                        if( source.callback && $.isFunction(source.callback) ){
+                            source.callback( recordset, original_recordset );     
+                        }
 
-                $('#mapping').css('cursor','auto');
+                        $('#mapping').css('cursor','auto');
 
-            });
+                    });
             
             /*
             window.hWin.HAPI4.RecordMgr.search(request,
@@ -953,7 +955,7 @@ console.log('load '+current_map_document_id);
     * 
     * @todo - unite with mapping.addDataset
     */
-    function _addRecordsetLayer(source, index) {
+        function _addRecordsetLayer(source, index) {
 
         // Show info on map
         var mapdata = source.mapdata;
