@@ -545,6 +545,7 @@
         $istimemap_request = (@$params['detail']=='timemap');
         $istimemap_counter = 0; //total records with timemap data
         $needThumbField = false;
+        $needThumbBackground = false;
         
         $fieldtypes_ids = null;
         if($istimemap_request){
@@ -557,7 +558,7 @@
              $needThumbField = true;
 //DEBUG error_log('timemap fields '.$fieldtypes_ids);
              
-        }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
+        }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){ //list of specific detailtypes
             //specific set of detail fields
             if(is_array($params['detail'])){
                 $fieldtypes_ids = $params['detail'];
@@ -576,6 +577,8 @@
                         array_push($f_res, $dt_id);
                     }else if($dt_id=='rec_ThumbnailURL'){
                         $needThumbField = true;
+                    }else if($dt_id=='rec_ThumbnailBg'){
+                        $needThumbBackground = true;
                     }
                 }
                 if(count($f_res)>0){
@@ -594,6 +597,11 @@
         }else{
             $needThumbField = true;
         }
+        
+       
+        //specific for boro parameters - returns prevail bg color for thumbnail image
+        $needThumbBackground = $needThumbBackground || ($params['thumb_bg']==1); 
+        
         
         $is_count_only = ('count'==$params['detail']);
         $is_ids_only = ('ids'==$params['detail']);
@@ -1017,13 +1025,20 @@
                     foreach($_flds as $fld){
                         array_push($fields, $fld->name);
                     }
-                    array_push($fields, 'rec_ThumbnailURL');
+                    if($needThumbField) array_push($fields, 'rec_ThumbnailURL');
+                    if($needThumbBackground) array_push($fields, 'rec_ThumbnailBg');
                     //array_push($fields, 'rec_Icon'); //last one -icon ID
 
                     
                     // load all records
                     while ($row = $res->fetch_row()) {
-                        array_push( $row, $needThumbField?fileGetThumbnailURL($system, $row[2]):'' ); //($fieldtypes_ids)?'':
+
+                        if($needThumbField) {
+                            $tres = fileGetThumbnailURL($system, $row[2], $needThumbBackground);   
+                            array_push( $row, $tres['url'] );
+                            if($needThumbBackground) array_push( $row, $tres['bg_color'] );
+                        }
+                        
                         //array_push( $row, $row[4] ); //by default icon if record type ID
                         $records[$row[2]] = $row;
                         array_push($order, $row[2]);

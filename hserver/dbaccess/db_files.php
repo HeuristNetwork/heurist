@@ -108,9 +108,10 @@ function fileGetPath_URL_Type($system, $file_ids){
 * @param mixed $system
 * @param mixed $recIDs
 */
-function fileGetThumbnailURL($system, $recID){
+function fileGetThumbnailURL($system, $recID, $get_bgcolor){
 
     $thumb_url = null;
+    $bg_color = null;
 
     $query = "select recUploadedFiles.ulf_ObfuscatedFileID".
     " from recDetails".
@@ -131,12 +132,165 @@ function fileGetThumbnailURL($system, $recID){
         }else{
             $thumb_url = HEURIST_BASE_URL."redirects/file_download.php?db=".HEURIST_DBNAME."&thumb=".$fileid;
         }
+        
+        if($get_bgcolor){
+            $background_file  = 'ulf_'.$fileid.'.bg';
+            if(false && file_exists(HEURIST_THUMB_DIR . $background_file)){
+                $bg_color = file_get_contents(HEURIST_THUMB_DIR.$background_file);
+            }else if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
+                $bg_color = getPrevailBackgroundColor( HEURIST_THUMB_DIR . $thumbfile );
+            }else{
+                $bg_color = 'rgb(223, 223, 223)';
+            }
+        }
+        
     }
 
-
-    return $thumb_url;
+    return array('url'=>$thumb_url, 'bg_color'=>$bg_color);
 }
 
+//
+//
+//
+function getImageFromFile($filename){
+    $image = null;
+    if(file_exists($filename)){
+        
+            $path_parts = pathinfo($filename);
+        
+            switch($path_parts['extension']) {
+                case 'jpeg':
+                case 'jpg':
+                    $image = @imagecreatefromjpeg($filename);
+                    break;
+                case 'gif':
+                    $image = @imagecreatefromgif($filename);
+                    break;
+                case 'png':
+                    $image = @imagecreatefrompng($filename);
+                    break;
+            }
+    }
+    return $image;
+}
+
+/**
+* find prevail background color need php version 5.5
+* 
+* @param mixed $file
+*/
+function getPrevailBackgroundColor2($filename){
+    
+    $image = getImageFromFile($filename);
+    if($image){
+        
+        $scaled = imagescale($image, 1, 1, IMG_BICUBIC);  //since v5.5
+        $index = imagecolorat($scaled, 0, 0);
+        $rgb = imagecolorsforindex($scaled, $index); 
+        /* $red = round(round(($rgb['red'] / 0x33)) * 0x33); 
+        $green = round(round(($rgb['green'] / 0x33)) * 0x33); 
+        $blue = round(round(($rgb['blue'] / 0x33)) * 0x33); 
+        return sprintf('#%02X%02X%02X', $red, $green, $blue);     
+        */
+        return sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
+    }else{
+        return '#FFFFFF';
+    }
+    
+}
+
+//
+//
+//
+function rgb2hex($rgb) {
+   $hex = "#";
+   $hex .= str_pad(dechex($rgb[0]), 2, "0", STR_PAD_LEFT);
+   $hex .= str_pad(dechex($rgb[1]), 2, "0", STR_PAD_LEFT);
+   $hex .= str_pad(dechex($rgb[2]), 2, "0", STR_PAD_LEFT);
+
+   return $hex; // returns the hex value including the number sign (#)
+}
+
+//
+//
+//
+function getPrevailBackgroundColor($filename){
+    // histogram options
+
+    $maxheight = 300;
+    $barwidth = 2;
+
+    $image = getImageFromFile($filename);
+    if($image){
+
+        $im = $image;
+
+        $imgw = imagesx($im);
+        $imgh = imagesy($im);
+
+        // n = total number or pixels
+
+        $n = $imgw*$imgh;
+
+        $histo = array();
+
+        for ($i=0; $i<$imgw; $i++)
+        {
+            for ($j=0; $j<$imgh; $j++)
+            {
+
+                // get the rgb value for current pixel
+
+                $rgb = imagecolorat($im, $i, $j);
+
+                // extract each value for r, g, b
+
+                $r = ($rgb >> 16) & 0xFF;
+                $g = ($rgb >> 8) & 0xFF;
+                $b = $rgb & 0xFF;
+
+                // get the Value from the RGB value
+
+                $V = round(($r + $g + $b) / 3);
+
+                // add the point to the histogram
+
+                $histo[$V] += $V / $n;
+                $histo_color[$V] = rgb2hex(array($r,$g,$b));
+            }
+        }
+
+        // find the maximum in the histogram in order to display a normated graph
+
+        $max = 0;
+        for ($i=0; $i<255; $i++)
+        {
+            if ($histo[$i] > $max)
+            {
+                $max = $histo[$i];
+            }
+        }
+
+        $key = array_search ($max, $histo);
+        $col = $histo_color[$key];
+        return $col;
+        /*
+        echo "<div style='width: ".(256*$barwidth)."px; border: 1px solid'>";
+        for ($i=0; $i<255; $i++)
+        {
+        $val += $histo[$i];
+
+        $h = ( $histo[$i]/$max )*$maxheight;
+
+        echo "<img src=\"img.gif\" width=\"".$barwidth."\"
+        height=\"".$h."\" border=\"0\">";
+        }
+        echo "</div>";
+        */
+    }else{
+        return '#FFFFFF';   
+    }
+}
 /**
 * Returns files for given array of records for specified users
 *
@@ -313,6 +467,93 @@ function fileDelete($system, $file_ids, $ugrID=null){
             $system->addError(HEURIST_INVALID_REQUEST);
             return false;
         }
+
+    }
+}
+
+
+/**
+* resolve path relatively db root or file_uploads
+* 
+* @param mixed $path
+*/
+function resolveFilePath($path){
+
+        if( $path && !file_exists($path) ){
+            chdir(HEURIST_FILESTORE_DIR);  // relatively db root
+            $fpath = realpath($path);
+            if(file_exists($fpath)){
+                return $fpath;
+            }else{
+                chdir(HEURIST_FILES_DIR);          // relatively file_uploads 
+                $fpath = realpath($path);
+                if(file_exists($fpath)){
+                    return $fpath;
+                }else{
+                    //special case to support absolute path on file server
+                    if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
+                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
+                        if(file_exists($fpath)){
+                            return $fpath;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $path;
+}
+
+
+/**
+* direct file download
+*
+* @param mixed $mimeType
+* @param mixed $filename
+*/
+function downloadFile($mimeType, $filename, $originalFileName=null){
+
+    if (file_exists($filename)) {
+//error_log($mimeType.'   '.$filename);
+        header('Content-Description: File Transfer');
+        $is_zip = false;
+        if(!$mimeType || $mimeType == 'application/octet-stream'){
+            $is_zip = true;
+            header('Content-Encoding: gzip');
+        }
+        if ($mimeType) {
+            header('Content-type: ' .$mimeType);
+        }else{
+            header('Content-type: binary/download');
+        }
+        if($mimeType!="video/mp4"){
+            header('access-control-allow-origin: *');
+            header('access-control-allow-credentials: true');
+        }
+        //header('Content-Type: application/octet-stream');
+        //force download
+        if($originalFileName!=null){
+            header('Content-Disposition: attachment; filename='.$originalFileName); //basename($filename));
+        }
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filename));
+        @ob_clean();
+        flush();
+        
+        if($is_zip){
+            ob_start(); 
+            readfile($filename);
+            $output = gzencode(ob_get_contents(),6); 
+            ob_end_clean(); 
+            echo $output; 
+            unset($output);         
+        }else{
+            readfile($filename);
+        }
+        
 
     }
 }
