@@ -1061,15 +1061,18 @@ console.log('load '+current_map_document_id);
                 
                     if(lt=='boro'){ //customized popup for boro
                         recset.calcfields['rec_Info'] = function(record, fldname){
+                            
+                            var title = this.fld(record, 'rec_Title');
+                            if(title.indexOf('bor-map-infowindow-heading')<0){
+                                title = '<div class="bor-map-infowindow-heading">'+title+'</div>';
+                            }
+                            
                             return '<div style="display: inline-block; overflow: auto; max-height: 369px; max-width: 260px;">'
                                     +'<div class="bor-map-infowindow">'
-                                        +'<div class="bor-map-infowindow-heading">'
-                                        + this.fld(record, 'rec_Title')+', '
-                                        //+ this.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'])+', '
-                                        //+ window.hWin.HEURIST4.ui.getTermValue(this.fld(record, 26)) //country name
-                                        +'</div><a href="'
-                                        +window.hWin.HAPI4.baseURL+'place/'+this.fld(record,'rec_ID')+'/a" '
-                                        +'onclick="{window.hWin.boroResolver(event);}" class="bor-button bor-map-button">See connections</a>'
+                                        + title
+                                        + '<a href="'
+                                        + window.hWin.HAPI4.baseURL+'place/'+this.fld(record,'rec_ID')+'/a" '
+                                        + 'onclick="{window.hWin.boroResolver(event);}" class="bor-button bor-map-button">See connections</a>'
                                     +'</div></div>';                            
                         }
                     }

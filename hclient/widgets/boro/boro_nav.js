@@ -714,7 +714,7 @@ $.widget( "heurist.boro_nav", {
         
         var request = {
             w: 'a',
-            detail: [that.DT_NAME, that.DT_GIVEN_NAMES, that.DT_INITIALS, that.DT_HONOR, 'rec_ThumbnailURL'], 
+            detail: [that.DT_NAME, that.DT_GIVEN_NAMES, that.DT_INITIALS, that.DT_HONOR, 'rec_ThumbnailURL', 'rec_ThumbnailBg'], 
             q: [{"t":"10"},{"f:1":firstChar+'%'},{"sortby":"t"}],//,{"sortby":"t"}
             //sortby:'t',
             //id: random
@@ -757,9 +757,10 @@ $.widget( "heurist.boro_nav", {
 
                     if(thumb){
                         html = html 
-                        +'<div class="img-circle ab-light" data-ab-yaq="223" style="background-color: rgb(223, 223, 223);">'
+                        +'<div class="img-circle" style="background-color: '
+                        + that.recset.fld(person, 'rec_ThumbnailBg')+ ';">' 
                         +'<img class="bor-emblem-portrait-image" height="130" src="'+thumb+'" alt="Photograph of '+fullName
-                        +'" data-adaptive-background="1" data-ab-color="rgb(223,223,223)"></div>';
+                        +'"></div>';
                     }else{
                         html = html + '<div class="bor-emblem-portrait-image placeholder"></div>';
                     }
@@ -788,9 +789,6 @@ $.widget( "heurist.boro_nav", {
             var timeline = []; //{year: , date: , story: , descrption:}
             var mapids = [];
             var leftside = {};
-            
-            var iconPath = window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/bundles/markers/';
-            
             //LEFT SIDE
             //Lifetime
             var idx, html = '', sDate='', place = {ids:[0], link:''};
@@ -800,30 +798,33 @@ $.widget( "heurist.boro_nav", {
                 if(birth_rec){
                     var sDate = that.__getDate(birth_rec);
                     
-                    place = that.__getPlace(birth_rec, 0, iconPath+'birth.png');
+                    place = that.__getPlace(birth_rec, 0);
                     mapids = mapids.concat(place.ids); 
                     html = '<li>Born '+that.__formatDate(sDate)+(place.link?' in '+place.link:'')+'</li>';   
+                    
+                    if(placeID==0){
+                        that.__setPlaceDesc(place, 'birth', 'Birth '+(sDate?(' on '+that.__formatDate(sDate)):''));                    
+                    }
                 }
             }
             var birthYear = that.__getYear(sDate,1);
-            if(placeID==0 || placeID==place.ids[0]){
-                timeline.push({year:birthYear, 
+            timeline.push({year:birthYear, 
                         date: that.__getYear(sDate), 
                         story: 'was born',
                         description: 'Birth'+(html
                                 ?(', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):'') )
                                 :'') });
-            }
                                                         
             var deathID = that.recset.fld(person, 95);
             place = {ids:[0], link:''};
+            sDate = '';
             var sDeathType = '';
             if(deathID>0){
                 
                 var death_rec = that.recset.getById(deathID);
                 if(death_rec){
-                    var sDate = that.__getDate(death_rec);
-                    place = that.__getPlace(death_rec, 0, iconPath+'death.png');
+                    sDate = that.__getDate(death_rec);
+                    place = that.__getPlace(death_rec, 0);
                     mapids = mapids.concat(place.ids); 
                 
                     sDeathType = that.__getTerm(that.recset.fld(death_rec, 143) );
@@ -831,15 +832,18 @@ $.widget( "heurist.boro_nav", {
                         sDeathType = 'Died';
                     }
                     html = html + '<li>'+sDeathType+' '+that.__formatDate(sDate)+ (place.link?' in '+place.link:'') + '</li>';
+            
+                    if(placeID==0){
+                        that.__setPlaceDesc(place, 'death', sDeathType+(sDate?(' on '+that.__formatDate(sDate)):''));                        
+                    }
+                    
                 }
             }
-            if(placeID==0 || placeID==place.ids[0]){
-                timeline.push({year:that.__getYear(sDate,9999), 
+            timeline.push({year:that.__getYear(sDate,9999), 
                         date: that.__getYear(sDate), 
                         story: sDeathType.toLowerCase(),
                         description: (sDeathType?(sDeathType+', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):''))
                                                 :'Death' ) });
-            }
             
             leftside['p_lifetime'] = html;
             
@@ -864,7 +868,7 @@ $.widget( "heurist.boro_nav", {
                         
                         var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
                         
-                        var place = that.__getPlace(edu_record, 1, iconPath+'schooling.png');
+                        var place = that.__getPlace(edu_record, 1);
                         mapids = mapids.concat(place.ids); 
                         
                         html = html + '<li>'+sEduInst
@@ -876,6 +880,10 @@ $.widget( "heurist.boro_nav", {
                                             story: 'attended school at '+sEduInst,
                                             description: 'Early education  at '+sEduInst+', '+place.link});
                             
+                        }
+                        
+                        if(placeID==0){
+                            that.__setPlaceDesc(place, 'schooling', 'Early education  at '+sEduInst);                    
                         }
                         
                     }
@@ -906,7 +914,7 @@ $.widget( "heurist.boro_nav", {
 
                         var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
 
-                        var place = that.__getPlace(edu_record, 1, iconPath+'tertiary-study.png');
+                        var place = that.__getPlace(edu_record, 1);
                         mapids = mapids.concat(place.ids); 
 
                         html = html + '<li>' 
@@ -918,7 +926,12 @@ $.widget( "heurist.boro_nav", {
                                     date: that.__getYear(sDate), 
                                     story: 'studied '+sDegree+' at '+sEduInst,
                                     description: 'Studied '+sDegree+' at '+sEduInst+','+place.link});
-                        }      
+                        } 
+                        
+                        if(placeID==0){
+                            that.__setPlaceDesc(place, 'tertiary-study', 'Studied '+sDegree+' at '+sEduInst);                    
+                        }
+
                     }
                 }
             }
@@ -945,16 +958,17 @@ $.widget( "heurist.boro_nav", {
                         var ord = (k<0)?1920:deforder[k];
                         
                         var eventDate = that.__getEventDates(record);
+                        var sEventType = that.__getTerm(termID);
                         
-                        var iconImg = (termID==4254)?'married.png':((termID==3692)?'lived.png':null);
-                        if(iconImg) iconImg = iconPath + iconImg;
-                        
-                        var place = that.__getPlace(record, 0, iconImg);
+                        var place = that.__getPlace(record, 0);
                         if(termID==4254 || termID==3694){ //married, lived
                             mapids = mapids.concat(place.ids); 
+                            
+                            if(placeID==0){
+                                that.__setPlaceDesc(place, (termID==4254)?'married':'lived',
+                                                        sEventType+eventDate.desc);                    
+                            }
                         }
-                        
-                        var sEventType = that.__getTerm(termID);
                         
                         if(placeID==0 || place.ids.indexOf(placeID)>=0){
 
@@ -1078,20 +1092,25 @@ $.widget( "heurist.boro_nav", {
                     }
                     
                     //places of service
-                    var place = that.__getPlace(record, 0, iconPath + 'military-service.png');
+                    var place = that.__getPlace(record, 0);
                     mapids = mapids.concat(place.ids);
+                    
+                    var sRankAndUnit = (sRank && sEventType?'as ':'')
+                                    + sRank
+                                    + (sUnit?' with '+sUnit:'');
                     
                     if(placeID==0 || place.ids.indexOf(placeID)>=0){            
                         timeline.push({year:that.__getYear(eventDate.date, ord), 
                             date: that.__getYear(eventDate.date), 
-                            story: sEventType.toLowerCase()+' '+(sRank?'as '+sRank:'')+(sUnit?' with '+sUnit:''),
-                            description: sEventType+' '
-                            + (sRank && sEventType?'as ':'')
-                            + sRank
-                            + (sUnit?' with '+sUnit:'')
+                            story: sEventType.toLowerCase()+' '+sRankAndUnit,
+                            description: sEventType+' '+sRankAndUnit
                             + (place.link?', '+place.link:'')+eventDate.desc });
                     }
-                                
+                    
+                    if(placeID==0){
+                        that.__setPlaceDesc(place, 'military-service',  sEventType+' '+sRankAndUnit);                    
+                    }
+                    
                 }
             }
             
@@ -1112,6 +1131,7 @@ $.widget( "heurist.boro_nav", {
         var request = {
             w: 'a',
             detail: 'detail', 
+            thumb_bg: 1,  //return bg color for thumbnail
             //id: random
             source:this.element.attr('id'),
             q:'ids:'+recID,
@@ -1146,10 +1166,9 @@ $.widget( "heurist.boro_nav", {
             var html_thumb = '<a class="bor-emblem-portrait" href="#">';
             if( that.recset.fld(person, 'rec_ThumbnailURL') ){
                 html_thumb = html_thumb
-                            +'<div class="img-circle ab-light" data-ab-yaq="223" style="background-color: rgb(223, 223, 223);">'
-                            //+'<div class="img-circle ab-dark" data-ab-yaq="59" style="background-color: rgb(59, 59, 59);">'
+                            +'<div class="img-circle" style="background:'+that.recset.fld(person, 'rec_ThumbnailBg')+';">'
                                 +'<img height="130" class="bor-emblem-portrait-image" src="' + that.recset.fld(person, 'rec_ThumbnailURL')
-                                    +'" alt="Photograph of '+fullName+'" data-adaptive-background="1" data-ab-color="rgb(59,59,59)">'
+                                    +'" alt="Photograph of '+fullName+'">'
                             +'</div>';
             }else{
                 html_thumb = html_thumb 
@@ -1329,10 +1348,9 @@ $.widget( "heurist.boro_nav", {
             html = '<li class="bor-stop bor-stop-large">';  
             if(that.recset.fld(person, 'rec_ThumbnailURL')){
                 html =  html
-                +'<div class="bor-stop-image ab-light" data-ab-yaq="223" style="background-color: rgb(223, 223, 223);">'
-                //+'<div class="bor-stop-image ab-dark" data-ab-yaq="60" style="background-color: rgb(60, 60, 60);">'
+                +'<div class="bor-stop-image" style="background-color: '+that.recset.fld(person, 'rec_ThumbnailBg')+';">'
                 + '<img src="'+that.recset.fld(person, 'rec_ThumbnailURL')+'" height="65" alt="Photograph of '+fullName
-                + '" data-adaptive-background="1" data-ab-color="rgb(19,19,19)"></div>';
+                + '"></div>';
             }else{
                 html =  html + '<div class="bor-stop-image bor-stop-image-placeholder"></div>';
             }
@@ -1538,7 +1556,9 @@ $.widget( "heurist.boro_nav", {
     // detail 0 - name, state, country, 1 - state, country
     // returns {ids:[], names, link: }
     //
-    __getPlace: function(rec, details, iconPath){
+    // in military service this is repeatable field
+    //
+    __getPlace: function(rec, details){
         
                 var rt = this.recset.fld(rec, 'rec_RecTypeID');
                 var places = [];
@@ -1571,8 +1591,6 @@ $.widget( "heurist.boro_nav", {
                         if(place_rec){
                                 place_ids.push(placeID);
                                 
-                                if(iconPath) this.recset.setFld(place_rec, 'rec_Icon', iconPath);
-                                
                                 var placename = this.recset.fld(place_rec, this.DT_NAME); //place name
                                 var state = this.recset.fld(place_rec, 2); //state
                                 var country = this.__getTerm(this.recset.fld(place_rec, 26));
@@ -1598,7 +1616,34 @@ $.widget( "heurist.boro_nav", {
 
                 return {ids:place_ids, names:place_names, link:sRes};
                 
+    },
+
+
+    __setPlaceDesc: function(place, icon, description){
+
+        for(var i=0;i<place.ids.length;i++){
+            var place_rec = this.recset.getById(place.ids[i]);
+            if(place_rec){
+                
+                if(description){
+                    this.recset.setFld(place_rec, 'rec_Title', 
+                        '<div class="bor-map-infowindow-heading">'+description+'</div>'+
+                        '<div class="bor-map-infowindow-description">'+place.names[i]+'</div>'
+                    );   
+                }
+                
+                if(icon) {
+                    var iconPath = window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/bundles/markers/';
+                    this.recset.setFld(place_rec, 'rec_Icon', iconPath+icon+'.png');   
+                }
+                                
+                
+            }
+        }
+
     }
+    
+    
      
      
 });

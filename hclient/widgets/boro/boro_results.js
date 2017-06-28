@@ -64,7 +64,7 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 var request = { q: 'ids:'+ ids,
                     w: 'a',
                     detail: [DT_NAME, DT_GIVEN_NAMES, 
-                        19/*that.DT_INITIALS*/, 72/*that.DT_HONOR*/, DT_EXTENDED_DESCRIPTION, 'rec_ThumbnailURL'],
+                        19/*that.DT_INITIALS*/, 72/*that.DT_HONOR*/, DT_EXTENDED_DESCRIPTION, 'rec_ThumbnailURL', 'rec_ThumbnailBg'],
                     id: window.hWin.HEURIST4.util.random(),
                     pageno: current_page,
                     source:this.element.attr('id') };
@@ -119,10 +119,9 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
             html_thumb = 
-                '<a '+profileLink+' class="bor-stop-image ab-dark" data-ab-yaq="19" style="background-color: rgb(19, 19, 19);">'
-                +'<img src="'+fld('rec_ThumbnailURL')+'" alt="Photograph of '+fullName
-                +'" data-adaptive-background="1" data-ab-color="rgb(19,19,19)"></a>';
-            //'<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
+                '<a '+profileLink+' class="bor-stop-image" style="background-color: '+fld('rec_ThumbnailBg')+';">'
+                +'<img src="'+fld('rec_ThumbnailURL')+'" height="65" alt="Photograph of '+fullName
+                +'"></a>';
         }else{
             html_thumb = '<a '+profileLink+' class="bor-stop-image bor-stop-image-placeholder"></a>';
         }
