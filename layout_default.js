@@ -124,15 +124,19 @@ var cfg_layouts = [
                                 border:'3px solid green'}, //height:'99%',width:'99%'
 
                 apps:[
-                    {appid:'h4_static', name: 'Manage',  dragable:false,
+                    {appid:'h4_static', 
+                      name: '<span class="ui-icon ui-icon-gear" style="display:inline-block;margin-right:4px"></span>Manage',  dragable:false,
                         options:{url: 'hclient/framecontent/tabmenus/manageMenu.php?db=[dbname]', isframe:true}}
                         //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0, 'min-width':'75em'}}             
-                    ,{appid:'h4_static', name: 'Add Data',  dragable:false,
+                    ,{appid:'h4_static', 
+                    name: '<span class="ui-icon ui-icon-circle-plus" style="display:inline-block;margin-right:4px"></span>Add Data',  dragable:false,
                         options:{url: 'hclient/framecontent/tabmenus/addDataMenu.php?db=[dbname]', isframe:true}}
                         //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0,'min-width':'75em'}}
-                    ,{appid:'include_layout', name: 'Filter-Analyse-Publish', layout_id:'FAP',dragable:false,
+                    ,{appid:'include_layout', 
+                        name: '<span class="ui-icon ui-icon-search" style="display:inline-block;margin-right:4px"></span>Filter-Analyse-Publish',
+                        layout_id:'FAP',dragable:false,
                         options:{ref: 'SearchAnalyze'}
-                        ,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.1em',right:0,'font-size':'0.9em'}}
+                        ,css:{position:'absolute', top:'5.5em',left:0,bottom:'0.1em',right:0,'font-size':'0.9em'}}
                      ]
             }]
         }
@@ -176,6 +180,20 @@ var cfg_layouts = [
 
     // 3 main tabs on top with accodion menu on each one - most of admin/import/export in iframes
     {id:'SearchAnalyze', name:'Search Analyze Publish', theme:'heurist', type:'cardinal',
+    
+        west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, 
+                css:{border:'none', 'background':'none'},
+                options:{btn_visible_dbstructure:false} }]},  //saved searches
+                
+        center:{minsize:300, dropable:false,
+            apps:[{appid:'include_layout', name: 'AAA', layout_id:'FAP2',dragable:false,
+                        options:{ref: 'SearchAnalyze2'}
+                        ,xcss:{position:'absolute', top:'4.5em',left:0,bottom:'0.1em',right:0,'font-size':'0.9em'}}]
+    
+        }
+    },
+        
+    {id:'SearchAnalyze2', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
         north:{size:'7em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_search', hasheader:false, 
@@ -183,9 +201,6 @@ var cfg_layouts = [
                 border:'none', 'background':'white', 'min-width':'75em'}, 
             options:{has_paginator:false, btn_visible_newrecord:false} }, 
         ]},
-        west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, 
-                css:{border:'none', 'background':'none'},
-                options:{btn_visible_dbstructure:false} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true,
                      dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,

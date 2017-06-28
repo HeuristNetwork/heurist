@@ -29,7 +29,7 @@ $.widget( "heurist.svs_list", {
         isapplication:true,  // send and recieve the global events
         btn_visible_dbstructure: true,
         btn_visible_filter: false,
-        btn_visible_save: true,
+        btn_visible_save: false,
 
         buttons_mode: false,
         allowed_UGrpID: [], // allowed groups
@@ -106,11 +106,12 @@ $.widget( "heurist.svs_list", {
             }
         }
 
-        this.helper_top = $( '<div>'+window.hWin.HR('right-click for actions')+'</div>' )
-        .addClass('logged-in-only heurist-helper1')
-        .appendTo( $( "<div>" ).css({'padding':'0.2em 0 0 1.2em'}).appendTo(this.div_header) )
+        this.helper_top = $( '<div>'+window.hWin.HR('right-click in list for menu')+'</div>' )
+        //.addClass('logged-in-only heurist-helper1')
+        .appendTo( $( "<div>" )
+        .css({'padding':'0.2em 0 0 1.2em','color':'rgb(142, 169, 185)','font-size':'1em','font-style':'italic'}).appendTo(this.div_header) )
         //.appendTo( this.accordeon ); 'height':'1.3em', 
-        if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
+        //if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
 
 
 
@@ -147,7 +148,7 @@ $.widget( "heurist.svs_list", {
         if(hasHeader) toppos = toppos + 2;
 
         if(this.options.buttons_mode){
-            this.helper_top.hide();
+            //this.helper_top.hide();
             toppos = 1;
             if(this.filter_div) this.filter_div.hide();
             if(this.btn_search_save) this.btn_search_save.hide();
@@ -193,7 +194,7 @@ $.widget( "heurist.svs_list", {
         //global listener
         $(this.document).on(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT, function(e, data) {
             that.accordeon.empty();
-            that.helper_top = null;
+            //that.helper_top = null;
             that.helper_btm = null;
             that._refresh();
         });

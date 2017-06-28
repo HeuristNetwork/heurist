@@ -270,11 +270,11 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" )
                 .addClass('div-result-list-toolbar ent_header')
-                .css({top:(this.div_header!=null)?'2.5em':'0', 'border-bottom':'1px solid #cccccc'})
+                .css({top:(this.div_header!=null)?'2.5em':'0', height:'4.6em', 'border-bottom':'1px solid #cccccc'})
                 .appendTo( this.element );
         this.div_content = $( "<div>" )
                 .addClass('div-result-list-content ent_content_full')
-                .css({'top':(this.div_header!=null)?'5.5em':'2.5em',
+                .css({'top':(this.div_header!=null)?'8.2em':'2.5em',
                               'overflow-y':'scroll'})   //@todo - proper relative layout        
         /*'left':0,'right':'0.3em','overflow-y':'scroll','padding':'0em',
             'position':'absolute',
@@ -367,6 +367,7 @@ $.widget( "heurist.resultList", {
         )
         .buttonset()
         .appendTo( this.div_toolbar );
+     
 
         this._on( this.view_mode_selector, {
             click: function(event) { //it works twice - first for button, then for buttonset
@@ -408,7 +409,28 @@ $.widget( "heurist.resultList", {
             }
         }else if(!this.options.innerHeader) {
             this.div_toolbar.hide();
-        }        
+        }  
+        
+        var btndiv = $('<div>').css({position:'absolute',bottom:0,left:0,top:'2.8em'}).appendTo(this.div_toolbar);
+        this.btn_search_save = $( "<button>", {
+                    text: window.hWin.HR('Save Filter'),
+                    title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
+                })
+                .css({'min-width': '110px','font-size':'0.8em', 'font-weight': 'bold', 'margin-left': '0.9em' ,background: 'none', color: 'rgb(142, 169, 185)', 'padding':'2px 0'})
+                .addClass('ui-state-focus')
+                .appendTo( btndiv )
+                .button({icons: {
+                    primary: 'ui-icon-circle-arrow-w'  //"ui-icon-disk"
+                }});
+
+                this._on( this.btn_search_save, {  click: function(){
+                    window.hWin.HAPI4.SystemMgr.is_logged(function(){
+                        var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
+                        if(app && app.widget){
+                            $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+                        }
+                    });
+                } });                 
     },
     
     _setOptions: function() {
@@ -480,6 +502,7 @@ $.widget( "heurist.resultList", {
 
         // remove generated elements
         this.action_buttons_div.remove();
+        this.btn_search_save.remove();
         if(this.div_actions) this.div_actions.remove();
         this.div_toolbar.remove();
         this.div_content.remove();

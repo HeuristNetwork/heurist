@@ -274,17 +274,19 @@ $.widget( "heurist.search", {
         });
 
         
-        // Save search popup button
-        var div_save_filter = $('<div>').addClass('div-table-cell logged-in-only')
-        
-        if(window.hWin.HAPI4.sysinfo['layout']=='original'){
-            div_save_filter.appendTo( this.div_search );
-        }else{
-            div_save_filter.css({'min-width': '245px'});
-            div_save_filter.insertBefore( this.div_search_header );
-        }
         
         if(this.options.btn_visible_save){
+            
+            // Save search popup button
+            var div_save_filter = $('<div>').addClass('div-table-cell logged-in-only')
+            
+            if(window.hWin.HAPI4.sysinfo['layout']=='original'){
+                div_save_filter.appendTo( this.div_search );
+            }else{
+                div_save_filter.css({'min-width': '245px'});
+                div_save_filter.insertBefore( this.div_search_header );
+            }
+            
             this.btn_search_save = $( "<button>", {
                 text: window.hWin.HR("Save"),
                 title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
@@ -298,7 +300,7 @@ $.widget( "heurist.search", {
 
             this._on( this.btn_search_save, {  click: function(){
                 window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
-                var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+                var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
                 if(app && app.widget){
                     $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
                 }
