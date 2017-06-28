@@ -279,7 +279,7 @@ function hexportMenu() {
         var q = "";
         if(isAll){
 
-            q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request);
+            q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
 
             if(q=='?'){
                 window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");

@@ -183,7 +183,19 @@ require_once(dirname(__FILE__)."/initPage.php");
         // Perform database query if possible (for standalone mode - when map.php is separate page)
         if( !window.hWin.HEURIST4.util.isempty(q) )
         {
-            window.hWin.HAPI4.RecordMgr.search({q: q, w: "all", detail:"timemap", l:3000},
+            var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
+            
+            if(!window.hWin.HEURIST4.util.isempty(rules)){
+                try{
+                    rules = JSON.parse(rules);
+                }catch(ex){
+                    rules = null;    
+                }
+            }else{
+                rules = null;
+            }
+            
+            window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:(rules?'detail':'timemap'), l:3000},
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         //console.log("onMapInit response");
@@ -425,17 +437,26 @@ require_once(dirname(__FILE__)."/initPage.php");
 
     function showEmbedDialog(){
 
-        var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request);
+        var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
         var url = window.hWin.HAPI4.baseURL+'hclient/framecontent/map.php' + query;
 
         //document.getElementById("linkTimeline").href = url;
 
-        document.getElementById("code-textbox").value = '<iframe src="' + url +
-        '" width="800" height="650" frameborder="0"></iframe>';
+        document.getElementById("code-textbox").value = '<iframe src=\'' + url +
+        '\' width="800" height="650" frameborder="0"></iframe>';
 
         //document.getElementById("linkKml").href = url_kml;
 
+        //encode
+        query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+        query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
+        url = window.hWin.HAPI4.baseURL+'hclient/framecontent/map.php' + query;
+        document.getElementById("code-textbox2").value = '<iframe src=\'' + url +
+        '\' width="800" height="650" frameborder="0"></iframe>';
+        
+        
+        
         var $dlg = $("#embed-dialog");
 
         $dlg.dialog({
@@ -450,7 +471,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
     function exportKML(){
 
-        var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request);
+        var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
         if(query=='?'){
             window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
         }else{
@@ -588,8 +609,12 @@ require_once(dirname(__FILE__)."/initPage.php");
     </div>
     <div id="embed-dialog" style="display:none">
         <p>Embed this Google Map (plus timeline) in your own web page:</p>
-        <p style="padding:1em 0 1em 0">Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. </p>
+        <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. Use the web-safe version if the readable version does not work</p>
+        <label style="font-size:0.9em">Readable code:</label>
         <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
+        <label style="font-size:0.9em">Web-safe code:</label>
+        <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="     border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+        
         <p style="padding-top:1em">Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status - private records will not appear on the map, which could therefore be empty. </p>
         <p style="padding-top:1em"><button id="btnExportKML">Create KML for Google Earth</button></p>
     </div>

@@ -185,28 +185,68 @@ window.hWin.HEURIST4.util = {
             return query_string;        
     },
 
-    composeHeuristQuery2: function(params){
-        if(params)
-            return window.hWin.HEURIST4.util.composeHeuristQuery(params.q, params.w, params.rules, params.notes);
-        else
+    composeHeuristQuery2: function(params, encode){
+        if(params){
+        
+            var rules = params.rules;
+            rules = window.hWin.HEURIST4.util.cleanRules(rules);  
+            if(rules!=null){ 
+                rules = JSON.stringify(rules);
+            }
+        
+            return window.hWin.HEURIST4.util.composeHeuristQuery(params.q, 
+                                        params.w, rules, params.notes, encode);
+        }else
             return '?';
     },
 
-    composeHeuristQuery: function(query, domain, rules, notes){
+    composeHeuristQuery: function(query, domain, rules, notes, encode){
             var query_to_save = [];
             if(!(window.hWin.HEURIST4.util.isempty(domain) || domain=="all")){
                 query_to_save.push('w='+domain);
             }
             if(!window.hWin.HEURIST4.util.isempty(query)){
-               query_to_save.push('q='+query);
+               query_to_save.push('q='+ (encode?encodeURIComponent(query):query) );
             }
             if(!window.hWin.HEURIST4.util.isempty(rules)){
-               query_to_save.push('rules='+rules);
+              query_to_save.push('rules='+ (encode?encodeURIComponent(rules):rules));
             }
             if(!window.hWin.HEURIST4.util.isempty(notes)){
-               query_to_save.push('notes='+notes);
+               query_to_save.push('notes='+ (encode?encodeURIComponent(notes):notes));
             }
             return '?'+query_to_save.join('&');
+    },
+    
+    
+    cleanRules: function(rules){
+        
+        if(window.hWin.HEURIST4.util.isempty(rules)){
+            return null;
+        }
+        
+        if(typeof rules==='string'){
+            try{
+                rules = JSON.parse(rules);
+            }catch(ex){
+                return null;
+            }
+        }
+        
+        for(var k=0; k<rules.length; k++){
+            delete rules[k]['codes'];
+            var rl = null;
+            if(rules[k]['levels'] && rules[k]['levels'].length>0){
+                var rl = window.hWin.HEURIST4.util.cleanRules(rules[k]['levels']);
+            }
+            if(rl==null){
+                delete rules[k]['levels'];    
+            }else{
+                rules[k]['levels'] = rl;    
+            }
+            
+        }
+        
+        return rules;        
     },
 
     //
@@ -365,7 +405,12 @@ window.hWin.HEURIST4.util = {
         if( results == null ) {
             return null;
         } else {
-            return decodeURIComponent(results[1]);
+            try{
+                return decodeURIComponent(results[1]);
+            }catch (ex){
+                return results[1];
+                //console.log('cant decode '+name+'='+results[1]);
+            }
         }
     },
 

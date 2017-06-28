@@ -389,7 +389,7 @@ function hSvsEdit(args) {
 
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
-                            svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery(svs_query.val(), domain, svs_rules.val(), svs_notes.val()),
+                            svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery(svs_query.val(), domain, svs_rules.val(), svs_notes.val(), false),
                             svs_UGrpID: svs_ugrid,
                             domain:domain};
 
