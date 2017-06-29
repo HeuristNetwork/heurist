@@ -416,12 +416,14 @@ $.widget( "heurist.resultList", {
                     text: window.hWin.HR('Save Filter'),
                     title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
                 })
-                .css({'min-width': '110px','font-size':'0.8em', 'font-weight': 'bold', 'margin-left': '0.9em' ,background: 'none', color: 'rgb(142, 169, 185)', 'padding':'2px 0'})
+                .css({'max-width': '75px','font-size':'0.8em', 'xfont-weight': 'bold', 'margin-left': '0.9em' ,background: 'none', color: 'rgb(142, 169, 185)', 'xpadding':'2px 0'})
                 .addClass('ui-state-focus')
                 .appendTo( btndiv )
                 .button({icons: {
-                    primary: 'ui-icon-circle-arrow-w'  //"ui-icon-disk"
+                    primary: 'ui-icon-arrowthick-1-w'
                 }});
+                
+        this.btn_search_save.find('.ui-button-icon-primary').css({'left':'0.1em'});
 
                 this._on( this.btn_search_save, {  click: function(){
                     window.hWin.HAPI4.SystemMgr.is_logged(function(){
