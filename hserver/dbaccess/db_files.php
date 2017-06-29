@@ -233,6 +233,7 @@ function getPrevailBackgroundColor($filename){
         $n = $imgw*$imgh;
 
         $histo = array();
+        for ($i=0; $i<256; $i++) $histo[]=0;
 
         for ($i=0; $i<$imgw; $i++)
         {
@@ -254,7 +255,6 @@ function getPrevailBackgroundColor($filename){
                 $V = round(($r + $g + $b) / 3);
 
                 // add the point to the histogram
-
                 $histo[$V] += $V / $n;
                 $histo_color[$V] = rgb2hex(array($r,$g,$b));
             }
@@ -263,7 +263,7 @@ function getPrevailBackgroundColor($filename){
         // find the maximum in the histogram in order to display a normated graph
 
         $max = 0;
-        for ($i=0; $i<255; $i++)
+        for ($i=0; $i<256; $i++)
         {
             if ($histo[$i] > $max)
             {
@@ -557,5 +557,4 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 
     }
 }
-
 ?>

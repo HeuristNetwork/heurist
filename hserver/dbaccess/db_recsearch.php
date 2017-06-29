@@ -600,7 +600,7 @@
         
        
         //specific for boro parameters - returns prevail bg color for thumbnail image
-        $needThumbBackground = $needThumbBackground || ($params['thumb_bg']==1); 
+        $needThumbBackground = $needThumbBackground || (@$params['thumb_bg']==1); 
         
         
         $is_count_only = ('count'==$params['detail']);
@@ -1222,6 +1222,7 @@ $loop_cnt++;
                                 'reccount'=>count($records),
                                 'tmcount'=>$istimemap_counter,
                                 'fields'=>$fields,
+                                'fields_detail'=>array(),
                                 'records'=>$records,
                                 'order'=>$order,
                                 'rectypes'=>$rectypes,
