@@ -808,8 +808,9 @@ $.widget( "heurist.boro_nav", {
                 }
             }
             var birthYear = that.__getYear(sDate,1);
-            timeline.push({year:birthYear, 
-                        date: that.__getYear(sDate), 
+            timeline.push({year:birthYear,            //for sort
+                        date: that.__getYear(sDate),  //year to display
+                        date2: sDate,
                         story: 'was born',
                         description: 'Birth'+(html
                                 ?(', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):'') )
@@ -841,6 +842,7 @@ $.widget( "heurist.boro_nav", {
             }
             timeline.push({year:that.__getYear(sDate,9999), 
                         date: that.__getYear(sDate), 
+                        date2: sDate,
                         story: sDeathType.toLowerCase(),
                         description: (sDeathType?(sDeathType+', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):''))
                                                 :'Death' ) });
@@ -877,6 +879,7 @@ $.widget( "heurist.boro_nav", {
                         if(placeID==0 || place.ids.indexOf(placeID)>=0){
                                     timeline.push({year:that.__getYear(sDate,birthYear+1), 
                                             date: that.__getYear(sDate), 
+                                            date2: null,
                                             story: 'attended school at '+sEduInst,
                                             description: 'Early education  at '+sEduInst+', '+place.link});
                             
@@ -924,6 +927,7 @@ $.widget( "heurist.boro_nav", {
                         if(placeID==0 || place.ids.indexOf(placeID)>=0){
                             timeline.push({year:that.__getYear(sDate,birthYear+2), 
                                     date: that.__getYear(sDate), 
+                                    date2: null,
                                     story: 'studied '+sDegree+' at '+sEduInst,
                                     description: 'Studied '+sDegree+' at '+sEduInst+','+place.link});
                         } 
@@ -940,9 +944,9 @@ $.widget( "heurist.boro_nav", {
             //Events (79->t:24) -------------------------------
             
             // 4 - before service, 10 after service
-            //Enlisted, Embarked, Wounded, Demobilized, Returned, Married, Lived
-            var allowed = [3302,4578,4355,3303,3304,4254,3694];
-            var deforder = [1914,1915,1918,1919,1919,1919,1920];
+            //Enlisted, Embarked, Served, Wounded, Demobilized, Returned, Married, Lived
+            var allowed = [3302,4578,3693,4355,3303,3304,4254,3694];
+            var deforder = [1914,1914,1914,1918,1919,1919,1919,1920];
             var events = that.recset.values(person, 79);
             idx = 0;
             if($.isArray(events)){
@@ -974,6 +978,8 @@ $.widget( "heurist.boro_nav", {
 
                             timeline.push({year:that.__getYear(eventDate.date, ord), 
                                 date: that.__getYear(eventDate.date), 
+                                date2: eventDate.date,
+                                eventTypeID: termID,
                                 story: sEventType.toLowerCase(),
                                 description: sEventType+(place.link?', '+place.link:'')+eventDate.desc });
                         }
@@ -999,7 +1005,8 @@ $.widget( "heurist.boro_nav", {
                         if(placeID==0 || place.ids.indexOf(placeID)>=0){
 
                             timeline.push({year:that.__getYear(eventDate.date, 1920), 
-                                    date: that.__getYear(eventDate.date), 
+                                    date: that.__getYear(eventDate.date),
+                                    date2: eventDate.date, 
                                     story: 'was '+sOccupationTitle.toLowerCase(),
                                     description: sOccupationTitle
                                         +(place.link?', '+place.link:'')+eventDate.desc });
@@ -1038,6 +1045,7 @@ $.widget( "heurist.boro_nav", {
                         if(placeID==0){ 
                             timeline.push({year:that.__getYear(sDate, 1917), 
                                 date: that.__getYear(sDate), 
+                                date2: sDate,
                                 story:'',
                                 description: 'Awarded '+sAward+ ' '
                                     +(sCounts?sCounts: (sDate?' on '+that.__formatDate(sDate):'')) });
@@ -1064,7 +1072,10 @@ $.widget( "heurist.boro_nav", {
                     
                     //event type
                     var sEventType = that.__getTerm(termID);
-                    if(!sEventType) sEventType = 'Served';//default
+                    if(!sEventType) {
+                        termID = 3693;
+                        sEventType = 'Served';//default   
+                    }
                     
                     //rank
                     var rankID = that.recset.fld(record, 99);
@@ -1102,6 +1113,8 @@ $.widget( "heurist.boro_nav", {
                     if(placeID==0 || place.ids.indexOf(placeID)>=0){            
                         timeline.push({year:that.__getYear(eventDate.date, ord), 
                             date: that.__getYear(eventDate.date), 
+                            date2: eventDate.date,
+                            eventTypeID:termID,
                             story: sEventType.toLowerCase()+' '+sRankAndUnit,
                             description: sEventType+' '+sRankAndUnit
                             + (place.link?', '+place.link:'')+eventDate.desc });
@@ -1113,6 +1126,22 @@ $.widget( "heurist.boro_nav", {
                     
                 }
             }
+            
+            //sort timeline array by year
+            timeline.sort(function(a,b){
+                if(a.year==b.year){
+                    if(a.date2 && b.date2){
+                        return a.date2 < b.date2 ?-1:1;
+                    }else if(a.eventTypeID && b.eventTypeID){
+                        return allowed.indexOf(a.eventTypeID)<allowed.indexOf(b.eventTypeID)?-1:1;
+                    }else{
+                        return 0;
+                    }
+                }else{
+                    return a.year<b.year?-1:1    
+                }
+            });
+            
             
             leftside['p_service'] = html;
             
@@ -1359,8 +1388,6 @@ $.widget( "heurist.boro_nav", {
             var head_of_item = '<li class="bor-stop">'
             +'<div class="bor-stop-label bor-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">';
             
-            //sort timeline array by year
-            timeline.sort(function(a,b){return a.year<b.year?-1:1});
             
             for(var k=0; k<timeline.length; k++){
                 
