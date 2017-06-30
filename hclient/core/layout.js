@@ -1154,15 +1154,13 @@ function hLayout(args) {
                             'background-size': 'cover',
                             'background-repeat': 'no-repeat',
                             'text-align': 'center',
-                            'width': '180px',
+                            'width': '200px',
                             'height': (navigator.userAgent.indexOf('Firefox')<0)?'33px':'45px' });
                             
                 lis.each(function(idx,item){
                     
-                   var width = $(item).find('a').width()+60; 
-                   if(width>180){
-                       $(item).css({width:width+'px'});
-                   }
+                    if(idx==2) $(item).css({width:'300px'});
+                   //$(item).css({width:((idx+1)*100+'px')});
                    $(item).css({'z-index': count_lis - idx});
                    $(item).attr('data-zkeep', count_lis - idx);
                    $(item).attr('data-zmax', count_lis+1);
