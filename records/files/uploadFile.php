@@ -65,7 +65,7 @@
         if ($size <= 0  ||  $error) {
             return "File size recognized as 0. Either file size more than php upload_max_filesize or file is corrupted. Error: $error";
         }
-
+        
         /* clean up the provided file name -- these characters shouldn't make it through anyway */
         $name = str_replace("\0", '', $name);
         $name = str_replace('\\', '/', $name);
@@ -99,6 +99,32 @@
             $file_size = 1;
         }else{
             $file_size = round($size / 1024);
+        }
+        
+        $is_image = (strpos($mimeType,'image')===0); 
+        
+        //limit the size upload file to 50Mb and 120Mpix for images       
+        if($size>50*1048576){
+
+            $uploadFileError = 'The file you are attempting to upload exceeds the limit set for this system (50 Mbytes - this maximum can be reset by the system administrator). File size is restricted both to avoid excessive server space usage'
+            .($is_image?' and because very large images are not generally useful in a web context. Please rescale images to an appropriate size before upload (we suggest a good quality JPG)':'').'. (File size='.round($size/1048576).'Mb)';
+            return $uploadFileError;
+            
+        }else if($is_image && file_exists($tmp_name)) {
+                $imageInfo = getimagesize($tmp_name); 
+                $memoryNeeded = 0;
+                
+                if(is_array($imageInfo)){
+                    if(array_key_exists('channels', $imageInfo) && array_key_exists('bits', $imageInfo)){
+                        $memoryNeeded = round(($imageInfo[0] * $imageInfo[1] * $imageInfo['bits'] * $imageInfo['channels'] / 8 + Pow(2,16)) * 1.65); 
+                    }else{ //width x height
+                        $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);  
+                    } 
+                }
+                if($memoryNeeded>120*1048576){  
+                    $uploadFileError = 'The file you are attempting to upload exceeds the limit set for this system (120 MPix - this maximum can be reset by the system administrator). File size is restricted both to avoid excessive server space usage and because very large images are not generally useful in a web context. Please rescale images to an appropriate size before upload (we suggest a good quality JPG). (Image resolution='.round($memoryNeeded/1048576).'M)';
+                    return $uploadFileError;
+                }
         }
 
         $res = mysql__insert('recUploadedFiles', array(	'ulf_OrigFileName' => $name,
