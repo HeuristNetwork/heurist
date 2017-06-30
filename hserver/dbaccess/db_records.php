@@ -177,6 +177,29 @@
     */
     function recordSave($system, $record){
 
+        
+        //check capture
+        if (@$record['Captcha'] || @$_SESSION["captcha_code"]){
+            
+            $is_InValid = (@$_SESSION["captcha_code"] != @$record['Captcha']);
+            
+            if (@$_SESSION["captcha_code"]){
+                        unset($_SESSION["captcha_code"]);
+            }
+            if(@$record['Captcha']){
+                unset($record['Captcha']);
+            }
+            
+            if($is_InValid) {
+                return $system->addError(HEURIST_UNKNOWN_ERROR, 
+                    'Are you a bot? Please enter the correct answer to the challenge question');
+            }else{
+                if($system->get_user_id()<1){ //if captcha is valies allow 
+                    $system->setCurrentUser(array('ugr_ID'=>5,'ugr_FullName'=>'Guest'));
+                }
+            }
+        }
+        
         if ( $system->get_user_id()<1 ) {
             return $system->addError(HEURIST_REQUEST_DENIED);
         }
@@ -528,7 +551,7 @@
         $title = null;
 
         
-        //@TODO $title = fill_title_mask($mask, $recID, $rectype);
+        //@TODO  $title = fill_title_mask($mysqli, $mask, $recID, $rectype);
         if($title==null && $recTitleDefault!=null) $title = $recTitleDefault;
 
         if ($title) {

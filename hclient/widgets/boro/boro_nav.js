@@ -185,10 +185,32 @@ $.widget( "heurist.boro_nav", {
                     
                     //that.data_content[recID]
                     var content = recordset.fld(recs[recID], this.DT_EXTENDED_DESCRIPTION);
-                     
+                    
+                    //add section on page for database content
                     var ele = that._addClearPageDiv(recID);                
 
-                    ele.html( content );      
+                    //add page content from database  
+                    ele.html( content );    
+                    
+                    if(name.toLowerCase()!=='contribute'){
+                        //add registration form
+                        ele = $('<div>').attr('data-recID', recID).appendTo(ele); 
+                        ele.load(window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/boro_subscribe.html',
+                        function(){
+                            var recID = $(this).attr('data-recID');
+                            var edit_form = $('.bor-page-'+recID).find('.newsletter-form');
+
+                            if(edit_form.length>0){
+                                that._refreshCaptcha(edit_form);
+                                edit_form.find('#newsletter_type_submit').click(function(event){
+                                    that._doSubsribeNewsLetter(edit_form);
+                                    return false;
+                                })
+                            }
+                        }
+                        );
+                    }
+                      
             }
         }//for
         //add two special items - People and Search
@@ -227,6 +249,13 @@ $.widget( "heurist.boro_nav", {
                 hdoc.find('.bor-page-'+recID).show();
                 //scroll to top
                 hdoc.scrollTop(0);
+                
+                if(recID>0){
+                    var edit_form = hdoc.find('.bor-page-'+recID).find('.newsletter-form');
+                    if(edit_form.length>0){
+                        that._refreshCaptcha(edit_form);
+                    }
+                }
                 
             }
         
@@ -282,6 +311,7 @@ $.widget( "heurist.boro_nav", {
 
     //
     // add/clear page div on main_pane
+    // add section on page for database content
     //
     _addClearPageDiv: function( recID ){
             var ele = $('.bor-page-'+recID); 
@@ -291,11 +321,11 @@ $.widget( "heurist.boro_nav", {
                ele.empty(); 
                return ele;
             }else{
-                return $('<div>').addClass('clearfix bor-page-'+recID).appendTo($('#main_pane'));
+               return $('<div>').addClass('clearfix bor-page-'+recID).appendTo($('#main_pane'));
             }                                    
     },
     
-    //
+    // NOT USED
     // executes smarty template for record   - it works however it is slowly. Hence, it is not used
     //    
     recordResolver: function( sType, recID ){
@@ -1668,8 +1698,110 @@ $.widget( "heurist.boro_nav", {
             }
         }
 
-    }
+    },
     
+    //
+    //subsctibe form 
+    //
+   _doSubsribeNewsLetter: function( edit_form ){
+
+              
+        var that = this;
+        var allFields = edit_form.find('input');
+        var err_text = '';
+
+        // validate mandatory fields
+        allFields.each(function(){
+            var input = $(this);
+            if(input.attr('required')=='required' && input.val()=='' ){
+                input.addClass( "ui-state-error" );
+                err_text = err_text + ', '+edit_form.find('label[for="' + input.attr('id') + '"]').html();
+            }
+        });
+        
+        //verify captcha
+        //remove/trim spaces
+        var ele = edit_form.find("#captcha");
+        var val = ele.val().trim().replace(/\s+/g,'');
+        
+        var ss = window.hWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
+        if(ss!=''){
+            err_text = err_text + ', Humanity check';
+        }else{
+            ele.val(val);
+        }
+
+        if(err_text==''){
+            // validate email
+            // 
+            var email = edit_form.find("#newsletter_type_email");
+            var bValid = window.hWin.HEURIST4.msg.checkEmail(email);
+            if(!bValid){
+                err_text = err_text + ', '+window.hWin.HR('Email does not appear to be valid');
+            }
+            if(err_text!=''){
+                err_text = err_text.substring(2);
+            }
+
+
+        }else{
+            err_text = window.hWin.HR('Missing required field(s)')+': '+err_text.substring(2);
+        }
+
+        if(err_text==''){
+
+            var newsletter_type_name = edit_form.find('#newsletter_type_name').val()
+            var newsletter_type_email = edit_form.find('#newsletter_type_email').val()
+            
+            var details = {};
+                details['t:'+that.DT_NAME] = [ newsletter_type_name ];
+                details['t:23'] = [ newsletter_type_email ];
+            
+
+            var request = {a: 'save', 
+                    db: window.hWin.HAPI4.database+'_Signups',
+                    ID:-1, //new record
+                    RecTypeID: that.RT_PERSON,
+                    RecTitle: newsletter_type_name+' ('+newsletter_type_email+')',
+                    Captcha: edit_form.find("#captcha").val(),
+                    details: details };     
+                    
+            window.hWin.HAPI4.RecordMgr.save(request, 
+                    function(response){
+                        var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+                        if(success){
+                           //window.hWin.HEURIST4.msg.showMsgDlg("Thank you for signing up with our newsletter");
+                           $('.newsletter-form').hide();
+                           $('.bor-home-subscribe').append($('<label>Thank you for signing up with our newsletter</label>'))
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+
+                            edit_form.find("#captcha").val('');
+                            that._refreshCaptcha(edit_form);
+                        }
+                    }
+                );
+
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(err_text);
+        }
+
+    },
+    
+    _refreshCaptcha: function(edit_form){
+        
+        edit_form.find('#captcha').val('');
+        var $dd = edit_form.find('#captcha_img');
+        var id = window.hWin.HEURIST4.util.random();
+        if(true){  //simple captcha
+            $dd.load(window.hWin.HAPI4.baseURL+'hserver/utilities/captcha.php?id='+id);
+        }else{ //image captcha
+            $dd.empty();
+            $('<img src="'+window.hWin.HAPI4.baseURL+'hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+        }
+        
+        
+    }    
     
      
      
