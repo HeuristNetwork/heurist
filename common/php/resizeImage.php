@@ -162,7 +162,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                 if(is_array($imageInfo)){
                     if(array_key_exists('channels', $imageInfo) && array_key_exists('bits', $imageInfo)){
                         $memoryNeeded = round(($imageInfo[0] * $imageInfo[1] * $imageInfo['bits'] * $imageInfo['channels'] / 8 + Pow(2,16)) * 1.65); 
-                    }else{
+                    }else{ //width x height
                         $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);  
                     } 
                     $mem_usage = memory_get_usage();

@@ -593,16 +593,20 @@ function print_private_details($bib) {
                             }
                             
                             //$filedata standart thumb with 200px image
-                            if(!$is_map_popup){
-                            $filedata["thumbURL"] =
+                            if(!$is_map_popup && $filedata['URL']!=$filedata['remoteURL']){
+                                $filedata["thumbURL"] =
                                 HEURIST_BASE_URL."common/php/resizeImage.php?maxw=200&maxh=200&".
                                 (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$filedata['nonce'];
+                                $thumb_size = 200;
+                            }else{
+                                $thumb_size = 100;
                             }
                             
                             array_push($thumbs, array(
                                 'id' => $filedata['id'],
                                 'url' => $filedata['URL'],   //download
-                                'mediaType'=>$filedata['mediaType'],   
+                                'mediaType'=>$filedata['mediaType'], 
+                                'thumb_size'=>$thumb_size,
                                 'thumb' => $filedata['thumbURL'],
                                 'player' => $isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  //link to generate player html
                             ));
@@ -712,7 +716,7 @@ if($is_map_popup){
                     }else
                     */
                     if($thumb['player'] && !$is_map_popup){
-                        print '<img id="img'.$thumb['id'].'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
+                        print '<img id="img'.$thumb['id'].'" style="width:'.$thumb['thumb_size'].'px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
                         print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
                     }else{  //for usual image
                         print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
