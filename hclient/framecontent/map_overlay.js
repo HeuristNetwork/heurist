@@ -383,6 +383,8 @@ console.log('load '+current_map_document_id);
             legendid = overlay_idx;
             overlay = overlays_not_in_doc[overlay_idx];
         }
+        overlay.legendid = legendid;
+        
         if(!overlay) return;
 
         var warning = '';
@@ -434,7 +436,7 @@ console.log('load '+current_map_document_id);
 
         legenditem.find(".overlay-legend").change(_showHideOverlay);
 
-        if(!ismapdoc){
+        if(true || !ismapdoc){//it is possible to edit mapdoc layers since 2017/07/01
 
             $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+overlay_idx+'"></div>')
             .click(function(event){ 
@@ -1145,7 +1147,7 @@ console.log('load '+current_map_document_id);
                     }
                 },
                 editProperties: function(){
-                    _editLayerProperties( this.id );    
+                    _editLayerProperties( this.id, this.legendid );    
                 }
             };
             if(index>=0){  //this layer belong to map document
@@ -1232,12 +1234,13 @@ console.log('load '+current_map_document_id);
         }
     }
 
-    var edit_mapdata, edit_callback;
+    var edit_mapdata, edit_callback, overlay_legend_id;
 
     //open dialog and edit layer/dataset properties - name and color
-    function _editLayerProperties( dataset_id, callback ){
+    function _editLayerProperties( dataset_id, legend_id, callback ){
 
         edit_mapdata = mapping.getDataset( dataset_id );
+        overlay_legend_id = legend_id;
         edit_callback = callback;
         if( !window.hWin.HEURIST4.util.isempty(dataset_id) && window.hWin.HEURIST4.util.isnull(edit_mapdata) ){
             if (edit_callback) edit_callback(false);
@@ -1321,15 +1324,20 @@ console.log('load '+current_map_document_id);
                     }*/
 
                 }else{
+                    
+                    var overlay_id = mapdata.id;
+                    if(overlay_legend_id){
+                        overlay_id = overlay_legend_id;
+                    }
 
                     if(mapdata.title!=new_title){
                         mapdata.title = new_title;
-                        $("#map_legend .content").find('#'+mapdata.id+' label').html(new_title);
+                        $("#map_legend .content").find('#'+overlay_id+' label').html(new_title);
                         //$('#timeline > div > div.vis-panel.vis-left > div.vis-content > div > div:nth-child(2) > div
                         $('#timeline div[data-groupid="'+mapdata.id+'"]').html(new_title);
                     }
                     if(mapdata.color!=new_color){
-                        $("#map_legend .content").find('#'+mapdata.id+'>div').css('border-color',new_color);
+                        $("#map_legend .content").find('#'+overlay_id+'>div').css('border-color',new_color);
                     }
 
                     var idx;
@@ -1588,8 +1596,8 @@ console.log('load '+current_map_document_id);
             _addRecordsetLayer(params, -1);
         },
 
-        editLayerProperties: function( dataset_id, callback ){
-            _editLayerProperties( dataset_id, callback );
+        editLayerProperties: function( dataset_id, legendid, callback ){
+            _editLayerProperties( dataset_id, legendid, callback );
         }
 
     }

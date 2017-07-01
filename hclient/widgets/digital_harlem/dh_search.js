@@ -520,7 +520,7 @@ $.widget( "heurist.dh_search", {
             var that = this;
             //switch to Map Tab
             window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
-            $(app.widget).app_timemap('editLayerProperties', 'main', function(res){
+            $(app.widget).app_timemap('editLayerProperties', 'main', null, function(res){
                 if(res){
                     that.res_div.hide();
                 }

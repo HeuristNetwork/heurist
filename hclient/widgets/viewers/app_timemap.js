@@ -291,10 +291,10 @@ $.widget( "heurist.app_timemap", {
         }
     }
     
-    , editLayerProperties: function( dataset_id, callback ){
+    , editLayerProperties: function( dataset_id, legendid, callback ){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
-            mapping.map_control.editLayerProperties(dataset_id, callback);
+            mapping.map_control.editLayerProperties(dataset_id, legendid, callback);
         }
     }
 
