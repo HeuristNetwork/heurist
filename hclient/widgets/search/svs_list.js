@@ -628,10 +628,25 @@ $.widget( "heurist.svs_list", {
             }
 
             this.allowed_svsIDs[svsID].push(isfaceted);
+            
 
-            $('<button>', {text: this.allowed_svsIDs[svsID][_NAME], 'data-svs-id':svsID })
+            var iconBtn = 'ui-icon-search';
+            if(isfaceted){
+                iconBtn = 'ui-icon-box';
+            }else {
+                var qsearch = this.allowed_svsIDs[svsID][_QUERY];
+                var hasrules = this._hasRules(qsearch);
+                if(hasrules==1){ //withrules
+                    iconBtn = 'ui-icon-plus ui-icon-shuffle';
+                }else if(hasrules==2){ //rules only
+                    iconBtn = 'ui-icon-shuffle';
+                }
+            }
+            
+
+            $('<button>', {text: this.allowed_svsIDs[svsID][_NAME], 'data-svs-id':svsID})
             .css({'width':'100%','margin-top':'0.4em'})
-            .button().on("click", function(event){
+            .button({icons:{primary: iconBtn}}).on("click", function(event){
 
                 var svs_ID = $(this).attr('data-svs-id');
                 if (svs_ID){
