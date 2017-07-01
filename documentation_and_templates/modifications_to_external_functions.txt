@@ -50,6 +50,10 @@ external/php/phpZotero.php (114-121) support proxy settings
 2017-06-21 ext/fancytree/skin-themeroller/icons.gif 
 			- add 2 arrow icons
 
+2017-07-01
+           external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js 
+           - hide image util load is completed
+            
 -----------------------------------------------------------------------------------------------------------------------------------
 
 /**

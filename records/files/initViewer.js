@@ -303,9 +303,11 @@ function showViewer(container, url_and_cfg, _recordID, sTypeDef){
  		if(sType === "image"){
 
  			container.style.bottom = 22;
+            
+            var baseURL = ((window.hWin && window.hWin.HAPI4)?window.hWin.HAPI4.baseURL:top.HEURIST.baseURL);
 
  			viewerObject = null;
-			viewer.toolbarImages = ((window.hWin && window.hWin.HEURIST4)?window.hWin.HEURIST4.baseURL:top.HEURIST.baseURL)
+			viewer.toolbarImages = baseURL
                 +"external/js/simple_js_viewer/images/toolbar";
 			viewer.onload =  viewer.toolbar;
 			image_digitizer_container = document.getElementById('image_digitizer_container');
@@ -321,11 +323,19 @@ function showViewer(container, url_and_cfg, _recordID, sTypeDef){
   								};
                 */
 			}
+            
+            bgStyle = "url('"+baseURL+"hclient/assets/loading-animation-white.gif')";//" no-repeat center center !important;";
+            container.style['backgroundImage'] = bgStyle;
+            container.style['backgroundRepeat'] = 'no-repeat';
+            container.style['backgroundPosition'] = 'center center';
 
 			viewerObject = new viewer({
 					parent: container,
 					imageSource: sUrl,
-					frame: ['100%','100%']
+					frame: ['100%','100%'],
+                    onload:function(){
+                        console.log('viewer is loaded');
+                    }
 			});
 
 

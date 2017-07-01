@@ -124,7 +124,11 @@ if(!$is_map_popup){
                 var url = url;
                 var currentImg = obj;
                 if (currentImg.parentNode.className != "fullSize"){
+                    $(currentImg).hide();                    
                     currentImg.src = url;
+                    currentImg.onload=function(){
+                        $(currentImg).fadeIn(500);
+                    }                    
                     currentImg.parentNode.className = "fullSize";
 
                 }else{
@@ -142,6 +146,7 @@ if(!$is_map_popup){
                 if (currentImg.parentNode.className != "fullSize"){  //thumb to player
                     currentImg.style.display = 'none';
                     currentImg.parentNode.className = "fullSize";
+                    
                     //add content to player div
         $.ajax({
             url: url,
@@ -153,7 +158,6 @@ if(!$is_map_popup){
             },
             success: function( response, textStatus, jqXHR ){
                         var obj = jqXHR.responseText;
-                        //console.log('!!!!'+obj);
                         if (obj){
                             var  elem = document.getElementById('player'+id);
                             elem.innerHTML = obj;
@@ -725,6 +729,7 @@ if($is_map_popup){
                     if($thumb['player'] && !$is_map_popup){
                         print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
                     }
+
                     print '<a href="' . htmlspecialchars($thumb['url']) . '" target=_surf class="image_tool">DOWNLOAD</a></div>';
                     print '</div>';
                     if($is_map_popup){
