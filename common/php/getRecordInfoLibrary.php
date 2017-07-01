@@ -425,15 +425,28 @@ function getAllworkgroupTags($recID) {
 * @param     mixed $terms the array of branches to build the tree
 * @return    object $terms
 */
-function attachChild($parentIndex, $childIndex, $terms) {
-    if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
-        return $terms;
-    }
+function attachChild($parentIndex, $childIndex, $terms, $parents) {
+
     if (array_key_exists($childIndex, $terms)) {//check for
         if (count($terms[$childIndex])) {
+            
+            
+            if($parents==null){
+                $parents = array($childIndex);
+            }else{
+                array_push($parents, $childIndex);
+            }
+            
+            
             foreach ($terms[$childIndex] as $gChildID => $n) {
                 if ($gChildID != null) {
-                    $terms = attachChild($childIndex, $gChildID, $terms);//depth first recursion
+
+                    if(array_search($gChildID, $parents)===false){
+                        $terms = attachChild($childIndex, $gChildID, $terms, $parents);//depth first recursion
+                    }else{
+                        error_log('Recursion in '.HEURIST_DBNAME.'.defTerms!!! Tree '.implode('>',$parents)
+                            .'. Can\'t add term '.$gChildID);
+                    }
                 }
             }
         }
@@ -474,7 +487,7 @@ function getTermTree($termDomain, $matching = 'exact') { // termDomain can be em
             //check that we have a child branch
             if ($childID != null && array_key_exists($childID, $terms)) {
                 if (count($terms[$childID])) {//yes then attach it and it's children's branches
-                    $terms = attachChild($parentID, $childID, $terms);
+                    $terms = attachChild($parentID, $childID, $terms, null);
                 } else {//no then it's a leaf in a branch, remove this redundant node.
                     unset($terms[$childID]);
                 }
