@@ -179,8 +179,12 @@ $.widget( "heurist.resultList", {
                         }else{
                             var empty_message = window.hWin.HR('No filter defined');
                             var $emptyres = that._renderMessage( empty_message );
+                            
                         }
                         
+                        if(that.btn_search_save) that.btn_search_save.hide();
+                    }else{
+                        if(that.btn_search_save) that.btn_search_save.show();
                     }
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
@@ -419,7 +423,7 @@ $.widget( "heurist.resultList", {
                     .appendTo( btndiv )
                     .button({icons: {
                         primary: 'ui-icon-arrowthick-1-w'
-                    }});
+                    }}).hide();
                     
             this.btn_search_save.find('.ui-button-icon-primary').css({'left':'0.1em'});
 
