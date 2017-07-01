@@ -47,6 +47,81 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/visualize.js"></script>
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>hclient/framecontent/visualize/visualize.css">
+        
+        <script type="text/javascript">
+
+var isStandAlone = false;
+        
+// Callback function on page initialization - see initPage.php
+function onPageInit(success){
+
+    if(!success) return;
+                
+        var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
+        
+        //t:26 f:85:3313  f:1:building
+        // Perform database query if possible (for standalone mode - when map.php is separate page)
+        if( !window.hWin.HEURIST4.util.isempty(q) )
+        {
+            isStandAlone = true;
+            
+            var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
+            
+            if(!window.hWin.HEURIST4.util.isempty(rules)){
+                try{
+                    rules = JSON.parse(rules);
+                }catch(ex){
+                    rules = null;    
+                }
+            }else{
+                rules = null;
+            }
+            
+            var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+            
+            window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:'detail', l:MAXITEMS},
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        console.log("onNetInit response");
+                        //console.log(response);
+
+                        var recordset = new hRecordSet(response.data);
+                          
+                        var records_ids = recordset.getIds(MAXITEMS);
+                //console.log('was '+recordset.getIds().length+'  send for '+records_ids.length);        
+                        if(records_ids.length>0){
+                            
+                            var callback = function(response)
+                            {
+                                var resdata = null;
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    // Store relationships
+                //console.log("Successfully retrieved relationship data!", response.data);
+                                    
+                                    // Parse response to spring diagram format
+                                    var data = __parseData(records_ids, response.data);
+                                    
+                                    showData(data, [], null, null);
+                                    
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                }
+                                
+                            }
+
+                            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
+                        }
+                                    
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
+        }
+}
+   
+        </script>
     </head>
 
     <body>
@@ -55,12 +130,100 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <!-- Call from parent iframe -->
         <script>
-            /** Shows data visually */
-            function showSelection( selectedRecordsIds ){
-                 visualizeSelection( selectedRecordsIds );
+        
+        /**
+        * Parses record data and relationship data into usable D3 format
+        * 
+        * @param records    Object containing all record
+        * @param relations  Object containing direct & reverse links
+        * 
+        * @returns {Object}
+        */
+        function __parseData(records_ids, relations) {
+            var data = {}; 
+            var nodes = {};                         
+            var links = [];
+
+            if(records_ids !== undefined && relations !== undefined) {
+                // Construct nodes for each record
+                var i;
+                for(i=0;i<records_ids.length;i++) {
+                    var recId = records_ids[i];
+                    var node = {id: parseInt(recId),
+                                name: relations.headers[recId][0],  //record title   records[id][5]
+                                image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
+                                count: 0,
+                                depth: 1
+                               };
+                    nodes[recId] = node;
+                }
+                
+                
+                /**
+                * Determines links between nodes
+                * 
+                * @param nodes      All nodes
+                * @param relations  Array of relations
+                */
+                function __getLinks(nodes, relations) {
+                    var links = [];
+                    
+                    // Go through all relations
+                    for(var i = 0; i < relations.length; i++) { 
+                        // Null check
+                        var source = relations[i].recID;
+                        var target = relations[i].targetID;
+                        var dtID = relations[i].dtID;
+                        var trmID = relations[i].trmID;
+                        var relationName = "Floating relationship";
+                        if(dtID > 0) {
+                            //type = window.hWin.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
+                            relationName = window.hWin.HEURIST4.detailtypes.names[dtID];
+                        }else if(trmID > 0) {
+                            relationName = window.hWin.HEURIST4.terms.termsByDomainLookup['relation'][trmID][0];
+                        }
+
+                        // Link check
+                        if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
+                            // Construct link
+                            var link = {source: nodes[source],
+                                        target: nodes[target],
+                                        targetcount: 1,
+                                        relation: {id: dtID>0?dtID:trmID, 
+                                                   name: relationName,
+                                                   type: dtID>0?'resource':'relationship'} 
+                                       };
+                            links.push(link); 
+                        }      
+                    }   
+                    
+                    return links;
+                }
+                        
+                       
+                
+                // Links
+                links = links.concat( __getLinks(nodes, relations.direct)  ); // Direct links
+                links = links.concat( __getLinks(nodes, relations.reverse) ); // Reverse links
             }
 
-            function showData(data, selectedRecordsIds, onSelectEvent, onRefreshData) {
+            // Construct data object with nodes as array
+            var array = [];
+            for(var id in nodes) {
+                array.push(nodes[id]);
+            }
+            return {nodes: array, links: links};
+        }
+                            
+        /** Shows data visually */
+        function showSelection( selectedRecordsIds ){
+             visualizeSelection( selectedRecordsIds );
+        }
+
+        //
+        //
+        //
+        function showData(data, selectedRecordsIds, onSelectEvent, onRefreshData) {
                 // Processing...
                 if(data && data.nodes && data.links)
                 console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
@@ -104,15 +267,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     showEntitySettings: false,
                     showFormula: false
                 });
-            }
+        }
             
-            function onVisualizeResize(){
-                    var width = $(window).width();
-                    var supw = (width<744)?3.8:0; //1120
-                    $('#divSvg').css('top', 5+supw+'em');
-            }
+        function onVisualizeResize(){
+                var width = $(window).width();
+                var supw = (width<744)?3.8:0; //1120
+                $('#divSvg').css('top', 5+supw+'em');
+        }
             
-
         </script>
     </body>
 

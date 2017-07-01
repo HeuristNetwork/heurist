@@ -109,7 +109,9 @@ function onRecordNodeClick(event, data, node) {
         createOverlay(Math.round(nodePos.left-dx+r), Math.round(nodePos.top-dy+r), "record", "id"+recID, getRecordOverlayData(data));    }
     
     // Trigger selection
-    settings.triggerSelection.call(this, settings.selectedNodeIds);
+    if(settings.triggerSelection){
+       settings.triggerSelection.call(this, settings.selectedNodeIds); 
+    }  
 }
 
 /**
@@ -238,7 +240,7 @@ function onMouseUp() {
                 if((nodePos.top >= positions.clickY1 && nodePos.top <= positions.clickY2) ||
                    (nodePos.top <= positions.clickY1 && nodePos.top >= positions.clickY2)) {    
                        // Node is in selection box
-                       console.log(d.name + " is in selection box!");
+//DEBUG console.log(d.name + " is in selection box!");
                        updateCircles(selector, selectionColor, selectionColor);      
                 }
             }

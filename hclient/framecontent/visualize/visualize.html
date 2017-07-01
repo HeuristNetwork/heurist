@@ -138,6 +138,7 @@
         style="border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px;display:none">
             <label>&nbsp;</label><br>
             <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
+            <button type="button" id="embed-export">Embed</button>
         </div>
 
     </div> <!-- end of toolbar -->
@@ -153,4 +154,14 @@
             <div id="net_limit_warning" 
                 style="z-index:2000;position:absolute;top:0;right:0;border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold;color:red; padding:8px; display:none;">
             </div>
+</div>
+
+
+<div id="embed-dialog" style="display:none">
+        <p>Embed this Network Diagram in your own web page:</p>
+        <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the graph, or use the URL on its own. The graph will be generated live from the database using the current search criteria whenever the graph is loaded. Use the web-safe version if the readable version does not work</p>
+        <label style="font-size:0.9em">Readable code:</label>
+        <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
+        <label style="font-size:0.9em">Web-safe code:</label>
+        <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="     border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
 </div>

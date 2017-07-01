@@ -516,6 +516,16 @@ var lines = svg.append("svg:g").selectAll("path")
          zoomBtn(false);
     }
     );
+
+    if(settings.isDatabaseStructure || isStandAlone){
+        $('#embed-export').css('visibility','hidden');//hide();
+    }else{
+        $('#embed-export').button({icons:{primary:'ui-icon-globe'},text:false}).click(
+        function(){
+             showEmbedDialog();
+        }
+        );
+    }
     
 } //end visualizeData
 
@@ -1222,3 +1232,40 @@ function addLabels(name, color) {
                   });
     return labels;
 }
+
+//
+//
+//
+function showEmbedDialog(){
+
+    var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+    query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
+    var url = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
+
+    //document.getElementById("linkTimeline").href = url;
+
+    document.getElementById("code-textbox").value = '<iframe src=\'' + url +
+    '\' width="800" height="650" frameborder="0"></iframe>';
+
+    //document.getElementById("linkKml").href = url_kml;
+
+    //encode
+    query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+    query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
+    url = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
+    document.getElementById("code-textbox2").value = '<iframe src=\'' + url +
+    '\' width="800" height="650" frameborder="0"></iframe>';
+    
+    
+    
+    var $dlg = $("#embed-dialog");
+
+    $dlg.dialog({
+        autoOpen: true,
+        height: 320,
+        width: 700,
+        modal: true,
+        resizable: false,
+        title: window.hWin.HR('Publish Network Diagram')
+    });
+}            

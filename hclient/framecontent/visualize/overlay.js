@@ -472,6 +472,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         widthTitle = widthTitle+(iconSize+3)*(icons_cnt+2);
         if(widthTitle>maxWidth) maxWidth = widthTitle;
         
+        if( settings.isDatabaseStructure ||  settings.onRefreshData){
+        
         //link button      
         var btnAddLink = overlay
                   .append("svg:image")
@@ -527,7 +529,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                    .text(function(d) {
                         return 'Click and drag to another node to create link';
                    });
-
+        }
 
         //edit button
         var btnEdit = overlay
@@ -753,7 +755,7 @@ function _addNewLinkField(source_ID, target_ID){
                             hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
                             if(settings.isDatabaseStructure){
                                 getDataFromServer();    
-                            }else{
+                            }else if(settings.onRefreshData){
                                 // Trigger refresh
                                 settings.onRefreshData.call(this);
                             }
