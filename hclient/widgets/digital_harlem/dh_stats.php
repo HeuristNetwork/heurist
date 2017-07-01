@@ -19,6 +19,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+if(function_exists('recordSearch')) {
 
     $appcode = @$_REQUEST['app'];
     if($appcode=='DigitalHarlem1935'){
@@ -99,4 +100,6 @@
     .'</b> events, <b title="Number of addresses">'.@$stats[16]
     .'</b> addresses and <b title="Number of documents">'.@$stats[15].'</b> sources';
     //.'</b> documentary sources related to Harlem, '.$explanation.'</p>';
+    
+}
 ?>

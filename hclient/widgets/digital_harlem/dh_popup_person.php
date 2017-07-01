@@ -20,6 +20,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+if(function_exists('dbs_GetTerms')) {
 
 if(!isset($terms)){   //global
     $terms = dbs_GetTerms($system);
@@ -216,4 +217,5 @@ if($recTypeID==RT_PERSON){
     exit();
 }
 
+}
 ?>
