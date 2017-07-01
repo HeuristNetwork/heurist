@@ -82,6 +82,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         var opt, selScope = selectRecordScope.get(0);
 
+        opt = new Option("please select the records to be affected …", "");
+        selScope.appendChild(opt);
+        
         if(init_scope_type=='all'){
             opt = new Option("All records", "All");
             selScope.appendChild(opt);
@@ -126,6 +129,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     //
     function _onRecordScopeChange() {
+        
+        window.hWin.HEURIST4.util.setDisabled($('#btn-ok'), (selectRecordScope.val()==''));
 
         switch(action_type) {
             case 'add_detail':
@@ -134,6 +139,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
+            default:
+                $('#div_sel_fieldtype').hide();
 /*                
             case 'rectype_change':
                 $('#div_sel_rectype').show();
@@ -329,6 +336,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _startAction(){
 
+        
+        if(window.hWin.HEURIST4.util.isempty(selectRecordScope.val())){
+            alert('Select records scope to be affected');
+            return;
+        }
 
         if ($('#div_result').is(':visible')){
             $('#div_result').hide();
