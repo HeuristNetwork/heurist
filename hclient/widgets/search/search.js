@@ -904,7 +904,9 @@ $.widget( "heurist.search", {
                             disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
                             window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, 
-                                                allTerms, disabledTerms, null, window.hWin.HR('<blank>'));
+                                                allTerms, disabledTerms, null, 
+                                                [{ key:'any', title:window.hWin.HR('<any>')},
+                                                 { key:'blank', title:window.hWin.HR('<blank>')}]);
                         } else {
                             $dlg.find("#fld_contain").show();
                             $dlg.find("#fld_enum").hide();
@@ -986,11 +988,20 @@ $.widget( "heurist.search", {
             
             if(fld) fld = "f:"+fld+":";
             
-            ctn =  isEnum?this.search_assistant.find("#sa_termvalue").val()
-                         :this.search_assistant.find("#sa_fieldvalue").val();
-            
-            if(this.search_assistant.find("#sa_negate"+(isEnum?'2':'')).is(':checked')){
-                fld  = '-'+fld;
+            if(isEnum){
+                var termid = this.search_assistant.find("#sa_termvalue").val();
+                if(termid=='any' || termid=='blank'){
+                    ctn = ''; 
+                }
+                if(termid=='blank' || this.search_assistant.find("#sa_negate2").is(':checked')){
+                    fld  = '-'+fld;
+                }
+                
+            }else{
+                ctn =  this.search_assistant.find("#sa_fieldvalue").val();
+                if(this.search_assistant.find("#sa_negate").is(':checked')){
+                    fld  = '-'+fld;
+                }
             }
         }
 
