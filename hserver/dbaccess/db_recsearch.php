@@ -951,7 +951,7 @@
         }else if($is_count_only){
         
                 $total_count_rows = $res->fetch_row();
-                $total_count_rows = (int)$row[0];
+                $total_count_rows = (int)$total_count_rows[0];
                 $res->close();
                 
                 $response = array('status'=>HEURIST_OK,

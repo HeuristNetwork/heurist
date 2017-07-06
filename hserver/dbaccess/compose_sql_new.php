@@ -1135,7 +1135,8 @@ class HPredicate {
       is search for empty or null value
     */
     function isEmptyValue(){
-        return !is_array($this->value) && (strtolower($this->value)=='null');
+                                            //$this->value=='' ||
+        return !is_array($this->value) && ( strtolower($this->value)=='null');
     }
 
     /**

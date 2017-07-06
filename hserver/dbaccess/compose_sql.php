@@ -707,6 +707,36 @@ class AndLimb {
             case 'ids':
                 return new BibIDPredicate($this, $pred_val);
 
+            case 'fc':
+
+                $colon_pos = strpos($raw_pred_val, ':');
+                if (! $colon_pos) {
+                    if (($colon_pos = strpos($raw_pred_val, '='))) $this->exact = true;
+                    else if (($colon_pos = strpos($raw_pred_val, '<'))) $this->lessthan = true;
+                        else if (($colon_pos = strpos($raw_pred_val, '>'))) $this->greaterthan = true;
+                }
+                
+                $fieldtype_id = null;
+            
+                if ($colon_pos === FALSE){
+                    $value = $this->cleanQuotedValue($raw_pred_val);
+                } else if ($colon_pos == 0){
+                    $value = $this->cleanQuotedValue($raw_pred_val);
+                    $value =  substr($value, 1);
+                }else{
+                    $fieldtype_id = $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos));
+                    $value = $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1));
+                    
+                    if (($colon_pos = strpos($value, '='))===0) $this->exact = true;
+                    else if (($colon_pos = strpos($value, '<'))===0) $this->lessthan = true;
+                        else if (($colon_pos = strpos($value, '>'))===0) $this->greaterthan = true;
+                            if($colon_pos===0){
+                        $value = substr($value,1);
+                    }
+                }
+
+                return new FieldCountPredicate($this, $fieldtype_id, $value);
+            
             case 'field':
             case 'f':
 
@@ -727,14 +757,14 @@ class AndLimb {
 
                     $fieldtype_id = $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos));
                     $value = $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1));
-
+                          
                     if (($colon_pos = strpos($value, '='))===0) $this->exact = true;
                     else if (($colon_pos = strpos($value, '<'))===0) $this->lessthan = true;
                         else if (($colon_pos = strpos($value, '>'))===0) $this->greaterthan = true;
                             if($colon_pos===0){
                         $value = substr($value,1);
                     }
-
+                    
                     return new FieldPredicate($this, $fieldtype_id, $value);
                 }
 
@@ -1684,6 +1714,84 @@ class FieldPredicate extends Predicate {
                 }
             }
             
+        }
+
+        return $match_pred;
+    }
+
+}
+
+
+class FieldCountPredicate extends Predicate {
+    var $field_type;        //name of dt_id
+
+    function FieldCountPredicate(&$parent, $type, $value) {
+        $this->field_type = $type;
+        parent::Predicate($parent, $value);
+
+        if ($value[0] == '-') {    // DWIM: user wants a negate, we'll let them put it here
+            $parent->negate = true;
+            $value = substr($value, 1);
+        }
+    }
+
+    function makeJSON() {
+            $compare = '';
+            if ($this->parent->exact)
+                $compare = '=';
+            else if ($this->parent->lessthan)
+                $compare = '<';
+            else if ($this->parent->greaterthan)
+                $compare = '>';
+            
+            $res = array();
+            $res['f#:'.$this->field_type] = $not.$compare.$this->value;
+            return $res;
+            //@todo implement nested values
+    }
+    
+    
+    function makeSQL() {
+        global $mysqli;
+        
+        $not = ($this->parent->negate)? '(not ' : '';
+        $not2 = ($this->parent->negate)? ') ' : '';
+
+        $match_pred = $this->get_field_value();
+        
+        $ft_compare = '';
+        if($this->field_type>0){
+            $ft_compare = 'and rd.dtl_DetailTypeID='.intval($this->field_type);
+        }
+        
+        return $not . '(select count(rd.dtl_ID) from recDetails rd left join Records link on rd.dtl_Value=link.rec_ID 
+where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$ft_compare.' )'.$match_pred . $not2;       
+    }
+
+    //
+    function get_field_value(){
+        global $mysqli;
+
+        if (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
+
+            $vals = explode("<>", $this->value);
+            $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
+
+        }else {
+                
+                if(!is_numeric($this->value)){
+                    $match_value = 0;
+                }else{
+                    $match_value = intval($this->value);
+                }
+
+                if ($this->parent->lessthan) {
+                    $match_pred = " < $match_value";
+                } else if ($this->parent->greaterthan) {
+                    $match_pred = " > $match_value";
+                } else {
+                    $match_pred = ' = '.$match_value;
+                }
         }
 
         return $match_pred;
