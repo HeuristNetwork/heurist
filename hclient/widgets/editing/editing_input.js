@@ -41,6 +41,8 @@ $.widget( "heurist.editing_input", {
         show_header: true, //show/hide label
         suppress_prompts:false, //supress help, error and required features
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
+        
+        change: null  //onchange callback
     },
 
     newvalues:{},
@@ -291,6 +293,13 @@ $.widget( "heurist.editing_input", {
             });
         }
     },
+    
+    
+    _onChange: function(event){
+        if($.isFunction(this.options.change)){
+            this.options.change.call();    
+        }
+    },
 
     /**
     * add input according field type
@@ -320,6 +329,7 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
+            .change(function(){that._onChange();})
             .appendTo( $inputdiv );
 
         }else if(this.detailType=='enum' || this.detailType=='relationtype'){
@@ -329,6 +339,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
+            .change(function(){that._onChange();})
             .appendTo( $inputdiv );
 
             this._recreateSelector($input, value);
@@ -339,6 +350,7 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
+            .change(function(){that._onChange();})
             .appendTo( $inputdiv );
 
             if(!(value==false || value=='0' || value=='n')){
@@ -352,6 +364,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
+            .change(function(){that._onChange();})
             .appendTo( $inputdiv );
 
             window.hWin.HEURIST4.ui.createRectypeSelect($input.get(0),null, this.f('cst_EmptyValue'));
@@ -366,6 +379,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
+            .change(function(){that._onChange();})
             .appendTo( $inputdiv );
 
             window.hWin.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
@@ -380,6 +394,9 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
+            .change(function(){
+                    that._onChange();
+            })
             .appendTo( $inputdiv );
 
             if(this.detailType=="integer" || this.detailType=="year"){
@@ -503,8 +520,8 @@ $.widget( "heurist.editing_input", {
                                         if( window.hWin.HEURIST4.util.isRecordSet(recordset) ){
                                             var record = recordset.getFirstRecord();
                                             var name = recordset.fld(record,'rec_Title');
-                                            $input.val(name);
                                             that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                            $input.val(name).change();
                                         }
                                     }
                                 } );

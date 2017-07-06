@@ -1470,7 +1470,7 @@ console.log('tileloaded 2');
 
             //popup can be shown
             // 1. as a result of mapdocument smarty template  (popupURL)  - expermental
-            // 2. renderRecordData.php output (default)  (popupURL) - defaul
+            // 2. renderRecordData.php output (default)  (popupURL) - default
             // 3. item.opts.info - popupURL or html content - filled in _toTimemap as rec_Info field content 
             //              - this is main customization way for DH
             // 4. html content is created from item.opts values here - deprecated way
@@ -1488,7 +1488,7 @@ console.log('tileloaded 2');
                 mapdocument = {popup_template:'BoroPlaceOnMap.tpl'};
                 */
                     
-                if(mapdocument && mapdocument.popup_template){
+                if(mapdocument && mapdocument.popup_template){ //1. as smarty output 
                                                
                     popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?h4=1&w=a&db='+window.hWin.HAPI4.database
                             +'&q=ids:'+item.opts.recid+'&template='+encodeURIComponent(mapdocument.popup_template);
@@ -1498,7 +1498,7 @@ console.log('tileloaded 2');
                     if(item.opts.info.indexOf('http://')==0){
                         popupURL =  item.opts.info; //load content from url
                     }else{
-                        html =  item.opts.info; //content already defined
+                        html =  item.opts.info; //3. content already defined
                     }
                 }else{
                     popupURL = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='

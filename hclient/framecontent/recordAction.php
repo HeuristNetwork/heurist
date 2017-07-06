@@ -57,81 +57,6 @@ if(!in_array($action_type, $allowed_actions)){
     exit();
 }
 
-
-//verify parameter scope
-$scope_type = @$_REQUEST['scope'];
-$allowed_scope = array('all','selected','current');
-/*if (!( intval($scope_type)>0 || in_array($scope_type, $allowed_scope))){
-    header('Location: '.ERROR_REDIR.'?msg=Scope is not allowed');
-    exit();
-}*/
-
-$field_type = @$_REQUEST['ft'];
-$field_value = @$_REQUEST['value'];
-
-
-
-/*
-switch ($action_type) {
-case 'delete_bookmark':
-$result = delete_bookmarks($data);
-break;
-
-case 'add_wgTags_by_id':
-$result = add_wgTags_by_id($data);
-break;
-
-case 'remove_wgTags_by_id':
-$result = remove_wgTags_by_id($data);
-break;
-
-case 'add_tags':
-$result = add_tags($data);
-break;
-
-case 'remove_tags':
-$result = remove_tags($data);
-break;
-
-case 'bookmark_reference':
-$result = bookmark_references($data);
-break;
-
-case 'bookmark_and_tag':
-case 'bookmark_and_tags':   //save collection of ids with some tag
-$result = bookmark_and_tag_record_ids($data);
-break;
-
-case 'add_detail':
-$result = add_detail($data);
-break;
-
-case 'replace_detail':
-$result = replace_detail($data);
-break;
-
-case 'delete_detail':
-$result = delete_detail($data);
-break;
-
-case 'set_ratings':
-$result = set_ratings($data);
-break;
-
-case 'save_search':
-$result = save_search($data);
-break;
-
-case 'bookmark_tag_and_ssearch': //from saveCollectionPopup.html   NOT USED SINCE 2012-02-13
-$result = bookmark_tag_and_save_search($data);
-break;
-
-case 'set_wg_and_vis':
-$result = set_wg_and_vis($data);
-break;
-}
-*/
-
 ?>
 <!-- date picker -->        
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.js"></script>
@@ -143,11 +68,16 @@ break;
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
 
 <script type="text/javascript">
-    // Callback function on map initialization
+    // Callback function on page init complete
     function onPageInit(success){
         if(success){
-            var recordAction = new hRecordAction('<?php echo $action_type;?>', 
-                    '<?php echo $scope_type;?>', '<?php echo $field_type;?>', '<?php echo $field_value;?>');
+            
+            var action = window.hWin.HEURIST4.util.getUrlParameter('action', window.location.search);
+            var scope = window.hWin.HEURIST4.util.getUrlParameter('scope', window.location.search);
+            var field_type = window.hWin.HEURIST4.util.getUrlParameter('ft', window.location.search);
+            var field_value = window.hWin.HEURIST4.util.getUrlParameter('value', window.location.search);
+            
+            var recordAction = new hRecordAction(action, scope, field_type, field_value);
         }
     }
 </script>
@@ -214,7 +144,7 @@ break;
     </div>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div">
         <div class="ui-dialog-buttonset">
-            <div id="btn-ok">OK</div>
+            <div id="btn-ok" class="ui-state-disabled">OK</div>
             <div id="btn-cancel">Cancel</div>
         </div>
     </div>

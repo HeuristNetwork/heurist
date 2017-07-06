@@ -52,6 +52,7 @@ regional['en'] = {
     'replace_detail':'Replace field value',
     'delete_detail':'Delete field value',
     'rectype_change':'Change record (entity) type',
+    'add_link':'Add new link or create a relationship between records',
     //helps
     'record_action_add_detail':'This function adds a new value for a specific field to the set of records selected in the dropdown. Existing values are unaffected. Addition will add values even if this exceeds the valid repeat count (eg. more than one value for single-value fields) - check the database for validity with Database > Verify structure and data.',
     'record_action_replace_detail':'This functions replaces a specified value in a particular field for the set of records selected in the dropdown. Other fields / values are not affected.',

@@ -102,7 +102,7 @@ window.hWin.HEURIST4.util = {
                     ele.addClass('ui-state-disabled');
               }else{
                     ele.removeProp('disabled');
-                    ele.removeClass('ui-state-disabled');
+                    ele.removeClass('ui-state-disabled ui-button-disabled');
               }
           });
       }

@@ -359,7 +359,7 @@ function hRecordSet(initdata) {
                 visible: true, 
                 mapenabled: mapenabled,
                 options: { items: aitems },
-                timeline:{ items:titems }, //, start: min_date  ,end: max_date  }
+                timeline:{ items: titems }, //, start: min_date  ,end: max_date  }
                 limit_warning:limit_warning
             };
 
@@ -711,6 +711,25 @@ function hRecordSet(initdata) {
 
                 
             return aitems;
+        },
+        
+        
+        getIdsByRectypeId: function(rty_ID){
+
+            var rty_ID = Number(rty_ID);
+            var res = [];
+            
+            if(rty_ID>0)
+            for(recID in records)
+                if(recID){
+                    var rec = records[recID];
+                    var recTypeID = Number(_getFieldValue(rec, 'rec_RecTypeID'));
+                    if(rty_ID==recTypeID){
+                        res.push(recID);
+                    }
+                }
+                
+            return res;
         },
         
         

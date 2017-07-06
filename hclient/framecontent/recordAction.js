@@ -6,6 +6,12 @@
 * @see  hclient/framecontent/record for widgets
 * @see  migrated/search/actions
 * @see  record_action_help_xxxx in localization.js for description and help
+
+IT USES
+    window.hWin.HAPI4.currentRecordset
+    window.hWin.HAPI4.currentRecordsetSelection
+
+
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,7 +28,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
 
 function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     var _className = "RecordAction",
@@ -62,10 +67,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         _fillSelectRecordScope();
 
         //init buttons
-        $('#btn-ok').button({label:window.hWin.HR('Go')}).click(_startAction);
+        $('#btn-ok').button({label:window.hWin.HR('Go')}).addClass('ui-state-disabled'); //.click(_startAction);
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).click(function(){window.close();});
     }
 
+    
+    
     //
     //
     //
@@ -130,7 +137,16 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _onRecordScopeChange() {
         
-        window.hWin.HEURIST4.util.setDisabled($('#btn-ok'), (selectRecordScope.val()==''));
+        var isdisabled = (selectRecordScope.val()=='');
+        //window.hWin.HEURIST4.util.setDisabled($('#btn-ok'), isdisabled);
+        var ele = $('#btn-ok');
+        ele.off('click');
+        if(isdisabled){
+            ele.addClass('ui-state-disabled');
+        }else{
+            ele.removeClass('ui-state-disabled');
+            ele.click(_startAction);
+        }
 
         switch(action_type) {
             case 'add_detail':

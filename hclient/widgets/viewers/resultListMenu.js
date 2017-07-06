@@ -53,7 +53,7 @@ $.widget( "heurist.resultListMenu", {
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
-        this.divMainMenuItems.find('li').css('padding-right','3px'); //reduce gap
+        this.divMainMenuItems.find('li').css({'padding':'0 3px'}); //reduce gap
 
         this.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');
 
@@ -167,6 +167,13 @@ $.widget( "heurist.resultListMenu", {
             .show()
             .position({my: "left top", at: "left bottom", of: parent });
             //$( document ).one( "click", function() { menu.hide(); });
+/*
+console.log('padleft');            
+console.log(menu.find('.ui-menu-item').css('padding-left'));
+            menu.find('.ui-menu-item').css({'padding':'0 !important'});
+console.log('pad');            
+console.log(menu.find('.ui-menu-item').css('padding'));
+*/            
             return false;
         };
 
@@ -188,7 +195,9 @@ $.widget( "heurist.resultListMenu", {
             .css('position','absolute')
             .appendTo( that.document.find('body') )
             //.addClass('ui-menu-divider-heurist')
-            .menu({select: function(event, ui){ 
+            .menu({
+                icons: { submenu: "ui-icon-circle-triangle-e" },
+                select: function(event, ui){ 
                 event.preventDefault(); 
                 that._menuActionHandler(ui.item.attr('id')); 
                 return false; }});
@@ -198,12 +207,16 @@ $.widget( "heurist.resultListMenu", {
             }else{
                 that['menu_'+name].find('.logged-in-only').hide();
             }
-
+            
+            that['menu_'+name].find('li').css('padding-left',0);
+            
         })
         //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
         .hide();
 
         //{select: that._menuActionHandler}
+        
+
 
         this._on( this['btn_'+name], {
             mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
@@ -334,6 +347,10 @@ $.widget( "heurist.resultListMenu", {
 
             this.detailBatchEditPopup('delete_detail');
 
+        }else if(action == "menu-selected-add-link"){
+
+            this.detailBatchEditPopup('add_link');
+            
         }else if(action == "menu-selected-rectype-change"){
 
             this.detailBatchEditPopup('rectype_change');
@@ -929,7 +946,7 @@ $.widget( "heurist.resultListMenu", {
 
         window.hWin.HEURIST4.msg.showDialog(url, {height:500, width:700, title: window.hWin.HR('Add field value')} );
     },
-
+    
     //
     //  MAIN  in use
     //  
@@ -941,6 +958,19 @@ $.widget( "heurist.resultListMenu", {
             return;
         }
         window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds();
+        
+        var script_name = 'recordAction';
+        var callback = null;
+        if(action_type=='add_link'){
+            script_name = 'recordAddLink';
+            callback = function(context) {
+                        if(context!="" && context!=undefined) {
+                            var sMsg = (context==true)?'Link created...':context;
+                            hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
+                        }
+            };            
+        }
+        
         /*
         var that = this;
 
@@ -960,11 +990,12 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.rectypes =  window.hWin.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
         */
-        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database+'&action='+action_type;
+        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/'+script_name+'.php?db='+window.hWin.HAPI4.database+'&action='+action_type;
 
         window.hWin.HEURIST4.msg.showDialog(url, {height:450, width:700,
             padding: '0px',
             title: window.hWin.HR(action_type),
+            callback: callback,
             class:'ui-heurist-bg-light'} );
     },
 
