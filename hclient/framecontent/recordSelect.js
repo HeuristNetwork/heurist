@@ -48,8 +48,32 @@ function hRecordSelect(rectype_set) {
                         primary: "ui-icon-plus"
                     }})
                     .click(function(e) {
-                            //window.hWin.HAPI4.SearchMgr.doStop();
-                            alert('Add record');
+                                alert('To be implemented');
+                                /*
+                                var recTypeId =  $('#sel_rectypes').val();                     
+                                var title = "Add new record "+$("#sel_rectypes option:selected" ).text();
+
+                                var url = window.hWin.HAPI4.baseURL 
+                                    + 'records/add/formAddRecordPopup.html?fromadd=new_bib&rectype='
+                                    + recTypeId
+                                    + '&title='+$('#input_search').val()
+                                    + '&db='+ window.hWin.HAPI4.database
+                                    + '&t=' + (new Date).getMilliseconds();
+
+                                window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:800,
+                                    title: title,
+                                    class:'ui-heurist-bg-light',
+                                    callback: function(arguments){
+                                        if(arguments && arguments.length>2){
+                                            var recID = arguments[3];
+console.log(arguments);                                        
+                                            if( recID>0 ){
+                                                window.close([recID]);
+                                            }
+                                        }
+                                    }
+                                } ); 
+                                */                   
                         });
         
                 input_search = $('#input_search')
@@ -67,7 +91,7 @@ function hRecordSelect(rectype_set) {
                 .on('change',
                     function(e){
                         if(selectRectype.val()>0){
-                            lbl = window.hWin.HR('Add')+' '+$( "#sel_rectypes option:selected" ).text();
+                            lbl = window.hWin.HR('Add')+' '+$("#sel_rectypes option:selected" ).text();
                         }else{
                             lbl = window.hWin.HR("Add Record");
                         }

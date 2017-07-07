@@ -510,6 +510,7 @@ $.widget( "heurist.editing_input", {
                             __show_select_dialog = function __show_select_dialog(event){
                                 event.preventDefault();
 
+                                /*
                                 var url = window.hWin.HAPI4.baseURL +
                                 'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
@@ -525,6 +526,25 @@ $.widget( "heurist.editing_input", {
                                         }
                                     }
                                 } );
+                                */
+             
+        top.HEURIST.rectypes = window.hWin.HEURIST4.rectypes;                        
+                                //OLD SELECTOR
+        var url = window.hWin.HAPI4.baseURL+'records/pointer/selectRecordFromSearch.html?' 
+        +'&db='+window.hWin.HAPI4.database+'&t='+that.f('rst_PtrFilteredIDs');
+            
+        window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:600,    
+                                    title: window.hWin.HR('Select linked record'),
+                                    class:'ui-heurist-bg-light',
+                                    callback: function(bibID, bibTitle){
+                                        if(bibID>0){
+                                            var name = bibTitle;
+                                            that.newvalues[$input.attr('id')] = bibID;
+                                            $input.val(bibTitle).change();
+                                        }
+                                    }
+                                } );
+                                
 
                             };
 

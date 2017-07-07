@@ -64,7 +64,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             </div>
             
             <!-- field selector -->
-            <div id="source_field" style="padding-top:10px;padding-bottom:20px">
+            <div id="source_field" style="margin-top:10px;margin-bottom:20px;max-height: 40%;overflow: auto;">
             </div>
 
             <label style="vertical-align: top; padding-top:4px">Target:</label>
@@ -94,7 +94,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 -->
                                     
             <!-- field selector -->
-            <div id="target_field" style="padding-top:10px">
+            <div id="target_field" style="margin-top:10px;max-height:25%;overflow: auto;">
             </div>
                     
         </div>
