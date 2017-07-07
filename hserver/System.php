@@ -46,7 +46,6 @@ require_once (dirname(__FILE__).'/dbaccess/utils_file.php');
 */
 class System {
 
-
     private $mysqli = null;
     private $dbname_full = null;
     private $dbname = null;

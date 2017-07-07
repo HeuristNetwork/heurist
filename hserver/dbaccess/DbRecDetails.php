@@ -22,6 +22,7 @@
 
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/db_tags.php');
+require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 
 class DbRecDetails
 {
@@ -519,8 +520,13 @@ class DbRecDetails
                     $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
                }else{
                    array_push($processedRecIDs, $recID);
+                   //update title
+                   $new_title = TitleMask::fill($recID);
+                   $rec_update = Array('rec_ID'  => $recID, 'rec_Title'  => $new_title);
+                   mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
                }
         }//for recors
+        
         
         
         //assign special system tags

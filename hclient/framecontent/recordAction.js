@@ -92,6 +92,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         opt = new Option("please select the records to be affected …", "");
         selScope.appendChild(opt);
         
+        var is_initscope_empty = window.hWin.HEURIST4.util.isempty(init_scope_type);
+        
         if(init_scope_type=='all'){
             opt = new Option("All records", "All");
             selScope.appendChild(opt);
@@ -100,18 +102,18 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             selScope.appendChild(opt);
         }else{
             
-            if(init_scope_type=='' || init_scope_type=='current'){
+            if(is_initscope_empty || init_scope_type=='current'){
                 //add result count option default
                 opt = new Option("Current results set (count="+ window.hWin.HAPI4.currentRecordset.length()+")", "Current");
                 selScope.appendChild(opt);
             }
             //selected count option
-            if((init_scope_type=='' || init_scope_type=='selected') &&
+            if((is_initscope_empty || init_scope_type=='selected') &&
                (window.hWin.HAPI4.currentRecordsetSelection &&  window.hWin.HAPI4.currentRecordsetSelection.length > 0)) {
                 opt = new Option("Selected results set (count=" + window.hWin.HAPI4.currentRecordsetSelection.length+")", "Selected");
                 selScope.appendChild(opt);
             }
-            if(init_scope_type==''){
+            if(is_initscope_empty){
                 //find all types for result and add option for each with counts.
                 var rectype_Ids = window.hWin.HAPI4.currentRecordset.getRectypes();
 
@@ -368,54 +370,54 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         var request = { tag: $('#cb_add_tags').is(':checked')?1:0 };
 
         if(action_type!='rectype_change'){
-        
-        var dtyID = $('#sel_fieldtype').val();
-        if(window.hWin.HEURIST4.util.isempty(dtyID)) {
-            alert('Field is not defined');
-            return;
-        }
 
-        request['dtyID'] = dtyID;
-        
-        if(action_type=='add_detail'){
-            request['a'] = 'add';
-            request['val'] = getFieldValue('fld-1');
-            if(window.hWin.HEURIST4.util.isempty(request['val'])){
-                alert('Define value to add');
+            var dtyID = $('#sel_fieldtype').val();
+            if(window.hWin.HEURIST4.util.isempty(dtyID)) {
+                alert('Field is not defined');
                 return;
             }
 
-        }else if(action_type=='replace_detail'){
+            request['dtyID'] = dtyID;
 
-            request['a'] = 'replace';
-
-            if(!$('#cb_replace_all').is(':checked')){
-                request['sVal'] = getFieldValue('fld-1');
-                if(window.hWin.HEURIST4.util.isempty(request['sVal'])){
-                    alert('Define value to search');
+            if(action_type=='add_detail'){
+                request['a'] = 'add';
+                request['val'] = getFieldValue('fld-1');
+                if(window.hWin.HEURIST4.util.isempty(request['val'])){
+                    alert('Define value to add');
                     return;
                 }
-            }
-            request['rVal'] = getFieldValue('fld-2');
-            if(window.hWin.HEURIST4.util.isempty(request['rVal'])){
-                alert('Define value to replace');
-                return;
-            }
 
-        }else if(action_type=='delete_detail'){
+            }else if(action_type=='replace_detail'){
 
-            request['a'] = 'delete';
-            if(!$('#cb_remove_all').is(':checked')){
-                request['sVal'] = getFieldValue('fld-1');
-                if(window.hWin.HEURIST4.util.isempty(request['sVal'])){
-                    alert('Define value to delete');
+                request['a'] = 'replace';
+
+                if(!$('#cb_replace_all').is(':checked')){
+                    request['sVal'] = getFieldValue('fld-1');
+                    if(window.hWin.HEURIST4.util.isempty(request['sVal'])){
+                        alert('Define value to search');
+                        return;
+                    }
+                }
+                request['rVal'] = getFieldValue('fld-2');
+                if(window.hWin.HEURIST4.util.isempty(request['rVal'])){
+                    alert('Define value to replace');
                     return;
                 }
+
+            }else if(action_type=='delete_detail'){
+
+                request['a'] = 'delete';
+                if(!$('#cb_remove_all').is(':checked')){
+                    request['sVal'] = getFieldValue('fld-1');
+                    if(window.hWin.HEURIST4.util.isempty(request['sVal'])){
+                        alert('Define value to delete');
+                        return;
+                    }
+                }
             }
+
         }
-        
-        }
-        
+
         var scope_type = selectRecordScope.val();
 
         if(scope_type=="Selected"){
@@ -488,7 +490,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 $('#div_result').empty();
 
                 response = response['data'];
-
+ //console.log(response);
                 /*
                 *       passed - count of given rec ids
                 *       noaccess - no rights to edit
