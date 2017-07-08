@@ -26,7 +26,7 @@
 */
 
 
-function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
+function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
     var _className = "Mapping",
     _version   = "0.4";
 
@@ -39,6 +39,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     _curr_layout = null; // keep current layout sets to avoid redundant update
 
     var options = {
+        mapVisible: true, //otherwise show timeline only
         legendVisible: true,
         defaultZoom: 2
         //to be extended
@@ -70,12 +71,13 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
     /**
     * Initialization
-    * _basePath - redundant
     */
-    function _init(_mapdiv_id, _timeline, _basePath, _mylayout) {
+    function _init(_mapdiv_id, _timeline, _options, _mylayout) {
         mapdiv_id = _mapdiv_id;
         timelinediv_id = _timeline;
         mylayout = _mylayout;
+        
+        $.extend(options, _options);
 
         /*if(_mapdata){
         _load(_mapdata);
@@ -140,11 +142,17 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
             if(!istime){
                 mylayout.hide('south');
             }else {
+                
                 mylayout.show('south', true);
-                if(ismap){
-                    mylayout.sizePane('south', th);
+                if(options.mapVisible){
+                    if(ismap){
+                        mylayout.sizePane('south', th);
+                    }else{
+                        mylayout.sizePane('south', tha-30);  //center panel with map - reduced to minimum (30px)
+                    }
                 }else{
-                    mylayout.sizePane('south', tha-30);  //center panel with map - reduced to minimum (30px)
+                    $(".ui-layout-center").hide();
+                    mylayout.sizePane('south', tha);
                 }
             }
             if(ismap || !istime){
@@ -783,8 +791,14 @@ if(_mapdata.limit_warning){
                     //remove dataset prefixes
                     $.each(selection,function(idx, itemid){
                         var k = itemid.indexOf('-');
-                        if(k>0)
-                            selection[idx] = itemid.substring(k+1);
+                        if(k>0){
+                            itemid = itemid.substring(k+1);
+                            k = itemid.indexOf('-');
+                            if(k>0){
+                                itemid = itemid.substring(0,k);
+                            }
+                        }
+                        selection[idx] = itemid;
                     });
 
                     $( document ).bubble( "option", "content", "" );
@@ -1608,8 +1622,22 @@ ed_html +
             } else {
                 // open window on TIMELINE - replacement native Timeline bubble with our own implementation
                 if(vis_timeline && marker){
+                    
+                    if(popupURL){
+                        $( document ).bubble( "option", "content", popupURL );
+                        /*
+                        $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                           if(statusTxt == "success"){
+                               $( document ).bubble( "option", "content", html );
+                               //$( marker ).bubble('open');
+                               //that.openBubbleOnTimeline( marker, html );
+                           }
+                        });
+                        */
 
-                    $( document ).bubble( "option", "content", html );
+                    }else{
+                        $( document ).bubble( "option", "content", html );
+                    }
 
                     //marker.scrollIntoView();
                     //setTimeout(function(){ $( marker ).click();}, 500);
@@ -1654,7 +1682,7 @@ ed_html +
             }
 
     }
-
+    
     /**
     *  Keeps timeline zoom
     */
@@ -1820,14 +1848,14 @@ ed_html +
                 options[key] = value;
             }
         },
-
+        
         //@todo - separate this functionality to different classes
         map_control: null,    //controls layers on map - add/edit/remove
         map_selection: null,  //@todo working with selection - search within selected area, highlight and popup info
         map_timeline: null,   //@todo vis timeline functionality
     }
 
-    _init(_mapdiv_id, _timeline, _basePath, _mylayout);
+    _init(_mapdiv_id, _timeline, _options, _mylayout);
     return that;  //returns object
 }
 

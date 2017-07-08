@@ -154,28 +154,31 @@ require_once(dirname(__FILE__)."/initPage.php");
             _adjustLegendHeight();
         };
 
+        var _options = {};
 
         if(window.hWin.HEURIST4.util.getUrlParameter('notimeline', location.search)){
             layout_opts.south__size = 0;
             layout_opts.south__spacing_open = 0;
             layout_opts.south__spacing_closed = 0;
+        }else if(window.hWin.HEURIST4.util.getUrlParameter('nomap', location.search)){
+            _options['mapVisible'] = false;
+            layout_opts.center__minHeight = 0;
+            layout_opts.south__spacing_open = 0;
         }
-        
         if(window.hWin.HEURIST4.util.getUrlParameter('noheader', location.search) || 
            window.hWin.HEURIST4.util.getUrlParameter('header', location.search)=='off'){
             layout_opts.north__size = 0;
         }
-        
+        if(window.hWin.HEURIST4.util.getUrlParameter('legend', location.search)=='off'){
+            _options['legendVisible'] = false;
+        }
 
         var mylayout = $('#mapping').layout(layout_opts);
-
+        
         // Mapping data
         var mapdata = [];
-        mapping = new hMapping("map", "timeline", window.hWin.HAPI4.baseURL, mylayout);
+        mapping = new hMapping("map", "timeline", _options, mylayout);
 
-        if(window.hWin.HEURIST4.util.getUrlParameter('legend', location.search)=='off'){
-            mapping.options('legendVisible', false);
-        }
         
         var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
         
