@@ -110,7 +110,7 @@ class DbRecDetails
                 $passedRecIDCnt = count(@$recIDs);
             }
             if($passedRecIDCnt>0){
-                //exclude records user has no right to edit
+                //exclude records if user has no right to edit
                 $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in (".implode(",",$recIDs).") and rec_OwnerUGrpID in (0,".join(",",$this->system->get_user_group_ids()).")");
                 $inAccessibleRecCnt = $passedRecIDCnt - count(@$this->recIDs);
             }

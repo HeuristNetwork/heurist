@@ -107,7 +107,7 @@ console.log(arguments);
                 //init record list          
                 recordList = $('#recordList')
                         .resultList({eventbased: false, 
-                                       showmenu: false, 
+                                    show_toolbar: false, 
                                     multiselect: false,
                                     isapplication: false,
                                        onselect: function(event, selected_recs){

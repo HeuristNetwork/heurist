@@ -63,7 +63,6 @@ $.widget( "heurist.manageRecord", {
             .resultList({
                eventbased: false, 
                isapplication: false, //do not listent global events
-               showmenu: false, 
                multiselect: (this.options.select_mode=='multi'),
                //onselect: function(event, selected_recs){this.selection(selected_recs);},
                empty_remark: 

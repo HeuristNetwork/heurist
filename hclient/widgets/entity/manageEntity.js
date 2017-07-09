@@ -28,8 +28,8 @@
 //_recordListItemRenderer    - renderer of item for resultlist
 //_recordListGetFullData     - callback function to retrieve full record info (in case we use 2 steps search: ids then list per page)  
 //_initDialog - init dialog widget 
-//popupDialog
-//closeDialog
+// popupDialog
+// closeDialog
 
 //_selectAndClose - event handler for select-and-close (select_multi) or for any selection event for select_single
 // selectedRecords get and set selected records 
@@ -66,7 +66,7 @@ $.widget( "heurist.manageEntity", {
         //LIST section 
         pagesize: 100,      // page size in resultList 
         list_header: false, // show header in list mode (@todo implement)
-        list_mode:'default', // use standard resultList widget
+        list_mode:'default', // use standard resultList widget (for example in defTerms we use treeview)
         
         //SEARCH/filter section
         use_cache: false,   // search performed once and then we apply local filter  @see updateRecordList, filterRecordList
@@ -76,13 +76,13 @@ $.widget( "heurist.manageEntity", {
         filter_groups: null,
 
         //EDIT section
-        edit_mode:'inline', //'popup','none'
+        edit_mode:'inline', //'popup', 'none'
         edit_height:null,
         edit_width :null,
         edit_title :null,
         edit_need_load_fullrecord: false, //if for edit form we need to load full(all data) record
         
-        layout_mode:'basic',
+        layout_mode:'basic', //short wide  or valid html snippet
         
         // manager - all selection ui (buttons, checkboxes, label with number of sel.records) is hidden
         //        highlight in list works as usual and selected records are used in actions
@@ -116,7 +116,7 @@ $.widget( "heurist.manageEntity", {
     }, //end _create
     
     //
-    //  load configuratio and call _initControls
+    //  load configuration and call _initControls
     //
     _init: function() {
 
@@ -126,7 +126,7 @@ $.widget( "heurist.manageEntity", {
         
         //init layout
         var layout = '';
-        if(this.options.layout_mode=='basic'){
+        if(this.options.layout_mode=='basic'){  //tooolbar on top, list on left, edit form on right side
             layout = 
                 '<div class="ent_wrapper">'
                     +'<div class="ent_header editForm-toolbar"/>'
@@ -192,7 +192,7 @@ $.widget( "heurist.manageEntity", {
     },
       
     //  
-    // invoked from _init after load entity config    
+    // invoked from _init after loading of entity configuration    
     // in base widget: init resultList, adds search and edit panels
     // in descendat: init ui listeners and init searchEntity
     //
@@ -212,15 +212,10 @@ $.widget( "heurist.manageEntity", {
                     .resultList({
                        eventbased: false, 
                        isapplication: false, //do not listent global events @todo merge with eventbased
-                       //showmenu: false,      //@todo - replace to action_select and action_buttons
                        multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
 
                        select_mode: this.options.select_mode,
                        selectbutton_label: this.options.selectbutton_label,
-                       
-                       //action_select: this.options.action_select, 
-                       //action_buttons: this.options.action_buttons,
-                       
                        
                        pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
                        empty_remark: 
@@ -254,7 +249,7 @@ $.widget( "heurist.manageEntity", {
         }        
         
        //---------    EDITOR PANEL
-       //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
+       //if actions allowed - add div for edit form exists - it may be shown as right-hand panel or in modal popup
        if(this.options.edit_mode!='none'){
             if(this.options.edit_mode=='inline'){
 /* @todo align toolbar in list and editor for wide layout mode
@@ -295,8 +290,6 @@ $.widget( "heurist.manageEntity", {
                                     
                     this.element.dialog('option','title',title);                                     
              }
-                                                 
-            
         }
         
         return true;
@@ -500,6 +493,7 @@ $.widget( "heurist.manageEntity", {
     // custom renderer for resultList header
     //
     _recordListHeaderRenderer:function(){
+        //TO EXTEND        
         return '';
     },
     
@@ -714,7 +708,7 @@ $.widget( "heurist.manageEntity", {
     
     //  -----------------------------------------------------
     //
-    //  send update request and close popup if edit is dialog
+    //  send update request and close popup if edit is in dialog
     //
     _saveEditAndClose: function(){
 
@@ -814,7 +808,7 @@ $.widget( "heurist.manageEntity", {
     _initEditForm: function(recID){
 
         if(!this._editing){
-            this._editing = new hEditing(this.editForm);
+            this._editing = new hEditing(this.editForm); //pass container
             this._initEditForm_continue(recID);
         }else{
             var that = this;
@@ -870,6 +864,7 @@ $.widget( "heurist.manageEntity", {
                     this._editing.initEditForm(this.options.entity.fields, recordset);
                 }
             }else if(recID<0){
+                // add new record
                 this._editing.initEditForm(this.options.entity.fields, null);
             }
             
@@ -881,7 +876,7 @@ $.widget( "heurist.manageEntity", {
     },
     
     //-----
-    // perform required after edit form init modifications (show/hide fields, assign even listener )
+    // perform required after edit form init modifications (show/hide fields, assign event listener )
     // for example hide/show some fields based on value of field
     //
     _afterInitEditForm: function(){

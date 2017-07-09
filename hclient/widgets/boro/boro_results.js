@@ -29,8 +29,6 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         this._super();
 
         
-        this.div_content.css({'padding':'30px','top':'8em'});//.addClass('bor-search-results');
-        
         //this.span_info.appendTo(this.div_header);
 
         //this.span_info = $('<div>').css('color','red').after(this.div_header);
@@ -47,6 +45,11 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         
 
         this.span_pagination.css('float','').addClass('pagination').appendTo(this.div_bottom);
+  },
+  
+  _refresh: function(){
+      this._super();
+      this.div_content.css({'padding':'30px','top':'8em'});//.addClass('bor-search-results');
   },
   
    //

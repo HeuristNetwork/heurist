@@ -25,7 +25,7 @@ $.widget( "heurist.resultList", {
     // default options
     options: {
         view_mode: null, // list|icons|thumbs   @toimplement detail, condenced
-        hide_view_mode: false,
+
         select_mode:null,//manager, select_single, select_multi
         selectbutton_label:'Select',
         action_select:null,  //array of actions
@@ -34,11 +34,14 @@ $.widget( "heurist.resultList", {
         recordview_onselect: false,
         multiselect: true,    //@todo replace to select_mode
         isapplication: true,  //if false it does not listen global events @todo merge with eventbased
-        showcounter: true,
-        showmenu: true,       //@todo - replace to action_select and action_buttons
-        //showtoolbar: true,
-                
-        innerHeader: false,   // show title of current search in header
+
+        show_toolbar: true,
+            show_menu: false,       //@todo ? - replace to action_select and action_buttons
+            show_savefilter: false,
+            show_counter: true,
+            show_viewmode: true,
+        show_inner_header: false,   // show title of current search in header
+        
         title: null,
         eventbased:true,
         //searchsource: null,
@@ -47,7 +50,7 @@ $.widget( "heurist.resultList", {
         pagesize: -1,
 
         renderer: null,    // renderer function to draw item
-        rendererHeader: null,    // renderer function to draw header for list view-mode
+        rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         searchfull: null,  // search full list data
 
         //event
@@ -79,10 +82,6 @@ $.widget( "heurist.resultList", {
 
         var that = this;
 
-        //that.hintDiv = new HintDiv('resultList_thumbnail_rollover', 160, 160, '<div id="thumbnail_rollover_img" style="width:100%;height:100%;"></div>');
-
-        //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
-        
         if(this.options.pagesize<50 || this.options.pagesize>5000){
             this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
         }
@@ -227,44 +226,11 @@ $.widget( "heurist.resultList", {
         header.parent().parent().css({'background':'none','border':'none'});
         } */
 
-        this.div_header = null;
-        if(this.options.innerHeader || this.options.select_mode=='select_multi'){
-            this.div_header =  $( "<div>" ).css('height','2.2em').appendTo( this.element );
-
-            if(this.options.innerHeader){
-                $('<h3>'+window.hWin.HR('Filtered Result')+'</h3>')
-                .css('padding','1em 0 0 0.7em')
-                .appendTo(this.div_header);
-                //set background to none
-                this.element.parent().css({'background':'none','border':'none'});
-                this.element.parent().parent().css({'background':'none','border':'none'});
-            }
-
-            if(this.options.select_mode=='select_multi'){
-                this.show_selected_only = $( "<div>" )
-                .addClass('ui-widget-content ent_select_multi')
-                .css({'right':right_padding+2})
-                .html(
-                    '<label style="padding:0 0.4em;">'
-                    +'<input id="cb_selected_only" type="checkbox" style="vertical-align:-0.3em;"/>'
-                    +'&nbsp;show selected only</label>'
-                    +'<div id="btn_select_and_close"></div>')
-                .appendTo( this.div_header );
-
-                //init checkbox and button
-                this.btn_select_and_close = this.element.find('#btn_select_and_close')
-                .css({'min-width':'11.9em'})
-                .button({label: window.hWin.HR( this.options.selectbutton_label )})
-                .click(function(e) {
-                    that._trigger( "onaction", null, 'select-and-close' );
-                });
-
-                this.cb_selected_only = this.element.find('#cb_selected_only')
-                this._on( this.cb_selected_only, {
-                    change: this.showRetainedSelection} );
-
-            }
-        }
+        //set background to none ???? if inner header visible 
+        this.element.parent().css({'background':'none','border':'none'});
+        this.element.parent().parent().css({'background':'none','border':'none'});
+        
+        //------------------------------------------       
         
         this.div_coverall = $( "<div>" )                
                 .addClass('coverall-div-bare')
@@ -272,20 +238,51 @@ $.widget( "heurist.resultList", {
                 .hide()
                 .appendTo( this.element );
 
+        //------------------------------------------       
+        
+        //if(this.options.innerHeader || this.options.select_mode=='select_multi'){
+        this.div_header =  $( "<div>" ).css('height','2.2em').appendTo( this.element );
+
+        $('<h3>'+window.hWin.HR('Filtered Result')+'</h3>')
+            .css('padding','1em 0 0 0.7em')
+            .appendTo(this.div_header);
+
+        if(this.options.select_mode=='select_multi'){
+            this.show_selected_only = $( "<div>" )
+            .addClass('ui-widget-content ent_select_multi')
+            .css({'right':right_padding+2})
+            .html(
+                '<label style="padding:0 0.4em;">'
+                +'<input id="cb_selected_only" type="checkbox" style="vertical-align:-0.3em;"/>'
+                +'&nbsp;show selected only</label>'
+                +'<div id="btn_select_and_close"></div>')
+            .appendTo( this.div_header );
+
+            //init checkbox and button
+            this.btn_select_and_close = this.element.find('#btn_select_and_close')
+            .css({'min-width':'11.9em'})
+            .button({label: window.hWin.HR( this.options.selectbutton_label )})
+            .click(function(e) {
+                that._trigger( "onaction", null, 'select-and-close' );
+            });
+
+            this.cb_selected_only = this.element.find('#cb_selected_only')
+            this._on( this.cb_selected_only, {
+                change: this.showRetainedSelection} );
+
+        }
+        
+        // -------------------------------------------
+        
         this.div_toolbar = $( "<div>" )
                 .addClass('div-result-list-toolbar ent_header')
-                .css({top:(this.div_header!=null)?'2.5em':'0', height:(this.options.showmenu?'4.6em':'2.4em'),
-                                 'border-bottom':'1px solid #cccccc'})
+                .css({'border-bottom':'1px solid #cccccc'})
                 .appendTo( this.element );
         this.div_content = $( "<div>" )
                 .addClass('div-result-list-content ent_content_full')
-                .css({'top':(this.div_header!=null)?'8.2em':'2.5em',
-                              'overflow-y':'scroll'})   //@todo - proper relative layout        
-        /*'left':0,'right':'0.3em','overflow-y':'scroll','padding':'0em',
-            'position':'absolute',
-            'border-top': '1px solid #cccccc','bottom':'15px'
-            */
-        .appendTo( this.element );
+                .css({'overflow-y':'scroll'})
+                .appendTo( this.element );
+
 
         this.div_loading = $( "<div>" )
         .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
@@ -405,14 +402,16 @@ $.widget( "heurist.resultList", {
         
         //-----------------------
 
-        if(this.options.showmenu){
+        if(this.options.show_menu){
             if($.isFunction($('body').resultListMenu)){
                 this.div_actions = $('<div>')
                     //.css({'position':'absolute','top':3,'left':2})
                     .resultListMenu()
                     .appendTo(this.div_toolbar);
             }
-            
+        }    
+        if(this.options.show_savefilter){
+            //special feature to save current filter
             var btndiv = $('<div>').css({position:'absolute',bottom:0,left:0,top:'2.8em'}).appendTo(this.div_toolbar);
             this.btn_search_save = $( "<button>", {
                         text: window.hWin.HR('Save Filter'),
@@ -434,11 +433,9 @@ $.widget( "heurist.resultList", {
                                 $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
                             }
                         });
-                    } });                 
+                    } });    
+        }             
             
-        }else if(!this.options.innerHeader) {
-            this.div_toolbar.hide();
-        }  
         
     },
     
@@ -459,13 +456,6 @@ $.widget( "heurist.resultList", {
     /* private function */
     _refresh: function(){
 
-        // repaint current record set
-        //??? this._renderRecords();  //@todo add check that recordset really changed  !!!!!
-        if(this.options.hide_view_mode==true){
-            this.view_mode_selector.hide();
-        }else{
-            this.view_mode_selector.show();
-        }
         this._applyViewMode(this.options.view_mode);
         
         if(window.hWin.HAPI4.currentUser.ugr_ID>0){
@@ -488,10 +478,95 @@ $.widget( "heurist.resultList", {
         }
         });
         */
+        
+        //adjust top,height according to visibility settings -----------
+        
+        var top = this.options.show_inner_header?3:0;
+        if(this.options.show_inner_header){
+            this.div_header.show();
+        }else{
+            this.div_header.hide();
+        }
+        
+        this.div_toolbar.css({'top':top+'em', height:this.options.show_savefilter?'5em':'3em'});
+        if(this.options.show_toolbar){
+            this.div_toolbar.show();
+        }else{
+            this.div_toolbar.hide();
+        }
+        
+        top = top + (this.options.show_toolbar?3:0);
+        top = top + (this.options.show_savefilter?3:0);
+        
+        this.div_content.css({'top': top+'em'});
 
+        //show/hide elements on toolbar
+        if(this.div_actions){
+            if(this.options.show_menu){        
+                this.div_actions.show();
+            }else{
+                this.div_actions.hide();
+            }
+        }
+        
+        if(this.options.show_viewmode==true){
+            this.view_mode_selector.show();
+        }else{
+            this.view_mode_selector.hide();
+        }
+        
+        /*
+        if(this.btn_search_save){
+            if(this.options.show_savefilter==true){
+                this.btn_search_save.show();
+            }else{
+                this.btn_search_save.hide();
+            }
+        }*/
 
+        //counter and pagination        
+        this._showHideOnWidth();
     },
 
+    //
+    // show hide pagination and info panel depend on width
+    //
+    _showHideOnWidth: function(){      
+    
+        if(this.options.show_counter){
+            var w = this.element.width();
+            /* pagination has more priority than reccount
+            if ( w < 380 || (w < 440 && this.max_page>1) ) {
+                this.span_info.hide();
+            }else{
+                this.span_info.show();
+            }
+            if ( w < 380 ) {
+                this.span_pagination.hide();
+            }else{
+                this.span_pagination.show();
+            }
+            */
+            // pagination has LESS priority than reccount
+            if ( w > 440 && this.max_page>1) {
+                this.span_pagination.show();
+            }else{
+                this.span_pagination.hide();
+            }
+            if ( true || w > 340 ) {
+                this.span_info.show();
+            }else{
+                this.span_info.hide();
+            }
+            
+            this._updateInfo();
+        }else{
+            this.span_pagination.hide();
+            this.span_info.hide();
+        }
+            
+    },
+    
     // events bound via _on are removed automatically
     // revert other modifications here
     _destroy: function() {
@@ -511,7 +586,7 @@ $.widget( "heurist.resultList", {
 
         // remove generated elements
         this.action_buttons_div.remove();
-        if(this.btn_search_save )this.btn_search_save.remove();
+        if(this.btn_search_save)this.btn_search_save.remove();
         if(this.div_actions) this.div_actions.remove();
         this.div_toolbar.remove();
         this.div_content.remove();
@@ -539,39 +614,6 @@ $.widget( "heurist.resultList", {
             this.btn_page_next.remove();
             this.menu_pages.remove();
         }
-    },
-
-    //
-    // show hide pagination and info panel depend on width
-    //
-    _showHideOnWidth: function(){                    
-            var w = this.element.width();
-            /* pagination has more priority than reccount
-            if ( w < 380 || (w < 440 && this.max_page>1) ) {
-                this.span_info.hide();
-            }else{
-                this.span_info.show();
-            }
-            if ( w < 380 ) {
-                this.span_pagination.hide();
-            }else{
-                this.span_pagination.show();
-            }
-            */
-            // pagination has LESS priority than reccount
-            if ( w > 440 && this.max_page>1) {
-                this.span_pagination.show();
-            }else{
-                this.span_pagination.hide();
-            }
-            if ( true || w > 340 ) {
-                this.span_info.show();
-            }else{
-                this.span_info.hide();
-            }
-            
-            this._updateInfo();
-            
     },
 
     //
@@ -1772,18 +1814,5 @@ $.widget( "heurist.resultList", {
         
         
     },
-    
-    hideHeader: function(do_hide){
-        if(do_hide){
-            if(this.div_header!=null) this.div_header.hide();
-            //this.div_toolbar.hide();
-            this.div_toolbar.css('top','0');
-            this.div_content.css('top','2.5em');
-        }else{
-            if(this.div_header!=null) this.div_header.show();
-            this.div_toolbar.css('top','2.5em');
-            this.div_content.css('top','5.5em');
-        }
-    }
 
 });

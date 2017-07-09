@@ -83,10 +83,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 "searchdeftermsonfilter": this.filterRecordList
                 });
                 
-        if(this.options.list_mode=='default'){
-            this.recordList.resultList('hideHeader',true);
-        }
-        
        //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
        //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
        if(this.options.edit_mode!='none'){

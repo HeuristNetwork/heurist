@@ -152,7 +152,7 @@ var cfg_layouts = [
                         dockable:false, dragable:false, 
                             css:{'background-color':'white'}, 
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
-                            showmenu:false, showcounter:true, innerHeader: true} }]}  //search result
+                            show_inner_header: true} }]}  //search result
      },
       
     // original layout with united top dropdown menu - all admin/import/export features are in popup dialogs
@@ -166,8 +166,9 @@ var cfg_layouts = [
         ]},
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, 
-                apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, 
-                            css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
+                apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false, 
+                            css:{'background-color':'white'}, 
+                            options:{show_menu:true, show_savefilter:true, show_inner_header: true} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
@@ -201,8 +202,9 @@ var cfg_layouts = [
                 border:'none', 'background':'white', 'min-width':'75em'}, 
             options:{has_paginator:false, btn_visible_newrecord:false} }, 
         ]},
-        center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true,
-                     dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
+        center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, 
+                     dockable:false, dragable:false, css:{'background-color':'white'}, 
+                     options:{show_menu:true, show_savefilter:true, show_inner_header:true} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
@@ -251,13 +253,15 @@ var cfg_layouts = [
        ,boro_place:{dropable:false,css:{},
                 apps:[                           
                 //creates navigation menu and loads info pages
-                {appid:'boro_place', options:{
-                    view_mode:'list', hide_view_mode: true, select_mode:'select_single', multiselect:false, showmenu: false
-                }, hasheader:false, css:{border:'none', 'background':'none'} }]}
+                {appid:'boro_place', 
+                    options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
+                                multiselect:false, show_menu: false},
+                hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,result_pane:{dropable:false,css:{},
-                apps:[{appid:'boro_results', options:{
-                    view_mode:'list', hide_view_mode: true, select_mode:'select_single', multiselect:false, showmenu: false
-                }, hasheader:true, css:{border:'none', 'background':'none'} }]}
+                apps:[{appid:'boro_results', 
+                    options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
+                    multiselect:false, show_menu: false},
+                hasheader:true, css:{border:'none', 'background':'none'} }]}
        ,search_pane:{dropable:false,css:{},
                 apps:[                           
                 //prod 
@@ -289,7 +293,7 @@ var cfg_layouts = [
                 apps:[
                     {appid:'ha51', options:{layout:['map','timeline'], startup:61557, eventbased:false} } //mapping
                     ,{appid:'h3_resultList', hasheader:true, name: 'List', 
-                        options:{title:'List', showmenu:false, eventbased:false} }
+                        options:{title:'List', show_viewmode:false, eventbased:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                 ]
             }]
@@ -326,7 +330,8 @@ var cfg_layouts = [
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
                     {appid:'ha51', options:{layout:['map','timeline'], startup:61557, eventbased:false} } //mapping
-                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false, eventbased:false} }
+                    ,{appid:'h3_resultList', hasheader:true, name: 'List', 
+                        options:{title:'List', show_viewmode:false, eventbased:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                 ]
             }]

@@ -41,7 +41,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 });
         this.recordList.css('top','5.5em');
                 
-        this.recordList.resultList('option','hide_view_mode',true);
+        this.recordList.resultList('option', 'show_toolbar', false);
     },
     
     //----------------------

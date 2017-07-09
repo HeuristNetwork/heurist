@@ -54,7 +54,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         this.wrapper.css('min-width','300px');
         
-        this.recordList.resultList('option','hide_view_mode',true);
+        this.recordList.resultList('option','show_toolbar', false);
     },
     
     //----------------------

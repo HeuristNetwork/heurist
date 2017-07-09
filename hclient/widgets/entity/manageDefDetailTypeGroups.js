@@ -33,9 +33,6 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
 
         //hide header
         this.searchForm.css('height',0);
-        if(this.recordList){
-            this.recordList.resultList('hideHeader',true);
-        }
         
 
         var that = this;
