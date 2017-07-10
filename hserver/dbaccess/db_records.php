@@ -37,6 +37,7 @@
     require_once (dirname(__FILE__).'/db_users.php');
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_recsearch.php');
+    require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 
     $recstructures = array();
     $detailtypes   = array();
@@ -548,18 +549,17 @@
             return false;
         }
 
-        $title = null;
 
+        $new_title = TitleMask::fill($recID);
         
-        //@TODO  $title = fill_title_mask($mysqli, $mask, $recID, $rectype);
-        if($title==null && $recTitleDefault!=null) $title = $recTitleDefault;
+        if($new_title==null && $recTitleDefault!=null) $new_title = $recTitleDefault;
 
-        if ($title) {
+        if ($new_title) {
             $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
 
             $stmt = $mysqli->prepare($query);
 
-            $stmt->bind_param('s', $title);
+            $stmt->bind_param('s', $new_title);
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
                 $stmt->close();
@@ -607,10 +607,15 @@
         //exlude empty and wrong entries         t:dty_ID:[0:value, 1:value]
         $details2 = array();
         foreach ($details as $dtyID => $pairs) {
-            if( (!preg_match("/^t:\\d+$/", $dtyID)) || count($pairs)==0 ) continue;
-
-            $dtyID = substr($dtyID, 2);
-            $details2[$dtyID] = $pairs;
+            
+            if((is_array($pairs) && count($pairs)==0) || $pairs=='') continue; //empty value
+            
+            if(preg_match("/^t:\\d+$/", $dtyID)){
+                $dtyID = substr($dtyID, 2);
+            }
+            if($dtyID>0){
+                $details2[$dtyID] = is_array($pairs)?$pairs:array($pairs);    
+            }
         }
 
         //get list of fieldtypes for all details

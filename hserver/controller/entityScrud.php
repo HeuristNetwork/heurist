@@ -32,6 +32,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/dbDefTerms.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysImportFiles.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbRecords.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
     $response = array();

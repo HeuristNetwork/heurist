@@ -527,10 +527,17 @@ function hRecordSet(initdata) {
     function _getFieldValues(record, fldname){
         if(window.hWin.HEURIST4.util.isempty(fldname)) return null;
         
-        if(!isnull(record) && record['d'] && record['d'][fldname]){   
-            return record['d'][fldname]
-        }else{
-            return null;
+        if(isnull(record)){
+            return null
+        }else{  //@todo calcfields
+            var idx = $.inArray(fldname, fields);
+            if(idx>-1){
+                return record[idx];
+            }else if(record['d'] && record['d'][fldname]){   
+                return record['d'][fldname]
+            }else{
+                return null;   
+            }
         }
     }
 

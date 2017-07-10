@@ -54,6 +54,11 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this._on( this.input_search_path, { keypress: this.startSearchOnEnterPress });
         this._on( this.input_search_code, { keypress: this.startSearchOnEnterPress });
 
+        
+        if(this.options.select_mode=='manager'){
+            this.element.find('#input_search_type_div').css('float','left');
+        }
+        
                       
         this.startSearch();            
     },  

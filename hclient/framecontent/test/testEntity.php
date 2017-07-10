@@ -32,11 +32,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecord.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecord.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysUsers.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysUsers.js"></script>
@@ -107,7 +108,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 
                 
             }
-            
+             
+            // to remove 
             function testRecords(){
                     var ispopup = true;
                     var select_mode = 'select_multi'; //'single',
@@ -207,7 +209,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             options.edit_dialog = false;
                             options.height = 600;
                             options.width = 840;
-                            showManageRecUploadedFiles( options );      
+                            showManageRecUploadedFiles( options );
+                                  
+                       }else if(entity=='Records'){
+                           
+                            options.edit_dialog = false;
+                            options.height = 600;
+                            options.width = 840;
+                            showManageRecords( options );      
                             
                        }
                         
@@ -249,7 +258,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                        }else 
                        if(entity=='RecUploadedFiles'){
                             $content.manageRecUploadedFiles( options );      
-                            
+                       }else 
+                       if(entity=='Records'){
+                            $content.manageRecords( options );      
                        }
                         
                     }else{
@@ -271,7 +282,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             {"key":"RecUploadedFiles",title:"Uploaded Files",icon:'ui-icon-image'},
                             {"key":"Reminders",title:"Reminders",icon:'ui-icon-mail-closed'},
                             {"key":"Databases",title:"Databases",icon:'ui-icon-database'},
-                            {"key":"Records",title:"Saved Searches",icon:'ui-icon-search'},
+                            {"key":"",title:"Saved Searches",icon:'ui-icon-search'},
                             {"key":"DefRecTypes",title:"Record Types",icon:'ui-icon-image'},
                             {"key":"DefRecTypeGroups",title:"Record Type Groups"},
                             {"key":"DefDetailTypes",title:"Field Types"},
@@ -339,17 +350,17 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
-                            <option value="Records">Records</option>
-                            <option value="SysUsers">Users +</option>
-                            <option value="SysGroups">Workgroups +</option>
+                            <option value="Records"  selected>Records</option>
+                            <option value="SysUsers">Users</option>
+                            <option value="SysGroups">Workgroups</option>
                             <option value="Tags">Tags</option>
-                            <option value="RecUploadedFiles" selected>Uploaded Files</option>
+                            <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="Reminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>
-                            <option value="DefRecTypes">Record Types +</option>
-                            <option value="DefRecTypeGroups">Record Type Groups +</option>
-                            <option value="DefDetailTypes">Field Types +</option>
+                            <option value="DefRecTypes">Record Types</option>
+                            <option value="DefRecTypeGroups">Record Type Groups</option>
+                            <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
                             <option value="DefTerms">Terms</option>
                             <option value="RecComments">Record Comments</option>
@@ -383,8 +394,8 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <span style="padding-left:20px;">
                         <label>Edit mode</label>
-                        <label><input type="radio" name="edit_mode" checked=checked value="inline">inline</label> 
-                        <label><input type="radio" name="edit_mode" value="popup">popup</label> 
+                        <label><input type="radio" name="edit_mode" value="inline">inline</label> 
+                        <label><input type="radio" name="edit_mode" checked=checked value="popup">popup</label> 
                         <label><input type="radio" name="edit_mode" value="none">none</label> 
                     </span>
                 </div>

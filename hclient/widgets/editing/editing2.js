@@ -72,7 +72,7 @@ function hEditing(container, _recdata, _recstructure) {
             var idx, ele;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
-                var val = recdata.fld(record, ele.editing_input('option', 'dtID'));
+                var val = recdata.values(record, ele.editing_input('option', 'dtID'));
                 if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
                 ele.editing_input('setValue', val );
             }
@@ -107,17 +107,18 @@ function hEditing(container, _recdata, _recstructure) {
                     break;
                }
             }
+            
         }
         
         
-        //rec structure is arrya in following format
+        //rec structure is array in following format
         /*
             only type 'header' can have children
                [
                     {
                     groupHeader: '',
                     groupType: '',  accordeon, tab, group 
-                    groupStye: {}
+                    groupStyle: {}
                     children:[
                         dtID, dtID, dtID, 
                         {groupHeader: , children:},
@@ -178,6 +179,7 @@ function hEditing(container, _recdata, _recstructure) {
                     }
                     
                     var headerText = fields[idx]['groupHeader'];
+                    
                     fieldContainer = $('<fieldset>').uniqueId();
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
                         fieldContainer.css(fields[idx]['groupStyle']);    
@@ -194,8 +196,8 @@ function hEditing(container, _recdata, _recstructure) {
                          $(fieldContainer).addClass('ui-heurist-bg-light').appendTo(groupEle);
                          //.css({'font-size':'1em'})
                     }else{
-                         fieldContainer.appendTo(container);
                          $('<h3>').text(headerText).appendTo(groupContainer);
+                         fieldContainer.appendTo(groupContainer);
                     }
                         
                     __createGroup(fields[idx].children, groupContainer, fieldContainer);
@@ -215,7 +217,11 @@ function hEditing(container, _recdata, _recstructure) {
                         
                         //assign values from record
                         if(record!=null){
-                            var val = recdata.fld(record, fields[idx]['dtID']);
+                            var val = recdata.values(record, fields[idx]['dtID']);
+
+//console.log( fields[idx]['dtID'] + '=>');
+//console.log(val);                            
+                            
                             if(!window.hWin.HEURIST4.util.isnull(val)){
                                 if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
                                 fields[idx].values = val;

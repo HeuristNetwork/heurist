@@ -87,6 +87,7 @@ $.widget( "heurist.editing_input", {
         if(this.options.readonly || this.f('rst_Display')=='readonly') {
             required = "readonly";
 
+            //spacer
             $( "<span>")
             .addClass('editint-inout-repeat-button')
             .css({width:'16px', display:'table-cell'})
@@ -101,11 +102,11 @@ $.widget( "heurist.editing_input", {
             else if (required == 'recommended') required = "recommended";
             else required = "";*/
 
-            var repeatable = (this.f('rst_MaxValues') != 1)? true : false; //saw TODO this really needs to check many exist
+            var repeatable = (Number(this.f('rst_MaxValues')) != 1)? true : false; //saw TODO this really needs to check many exist
 
             
-            if(!repeatable || this.options.suppress_repeat){
-
+            if(!repeatable || this.options.suppress_repeat){  
+                //spacer
                 $( "<span>")
                 .addClass('editint-inout-repeat-button')
                 .css({width:'16px', display:'table-cell'})
@@ -123,7 +124,7 @@ $.widget( "heurist.editing_input", {
                 // bind click events
                 this._on( this.btn_add, {
                     click: function(){
-                        if(this.f('rst_MaxValues')==null  || this.inputs.length < this.f('rst_MaxValues')){
+                        if( !(Number(this.f('rst_MaxValues'))>0)  || this.inputs.length < this.f('rst_MaxValues')){
                             this._addInput('');
                         }
                     }
@@ -243,7 +244,7 @@ $.widget( "heurist.editing_input", {
             var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
             val = this.options['dtFields'][fi[fieldname]];
         }
-        if(!val){ //some default values
+        if(window.hWin.HEURIST4.util.isempty(val)){ //some default values
             if(fieldname=='rst_RequirementType') val = 'optional'
             else if(fieldname=='rst_MaxValues') val = 1
                 else if(fieldname=='dty_Type') val = 'freetext'
@@ -509,7 +510,27 @@ $.widget( "heurist.editing_input", {
 
                             __show_select_dialog = function __show_select_dialog(event){
                                 event.preventDefault();
+       
+       //LATEST "ENTITY" SELECTOR  - 
+                                 var options = {
+                                    select_mode: 'select_single',
+                                    edit_mode: 'popup',
+                                    select_return_mode: 'recordset',
+                                    rectype_set: that.f('rst_PtrFilteredIDs'),
+                                    onselect:function(event, data){
 
+                                        if(data && data.selection && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
+                                            var record = data.selection.getFirstRecord();
+                                            var rec_Title = data.selection.fld(record,'rec_Title');
+                                            that.newvalues[$input.attr('id')] = data.selection.fld(record,'rec_ID');
+                                            $input.val(rec_Title).change();
+                                        }
+                                    }
+                                 };                                
+                                 //public function on manageRecords.js
+                                 showManageRecords( options ); 
+                            };
+       //OLD SELECTOR
                                 /*
                                 var url = window.hWin.HAPI4.baseURL +
                                 'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
@@ -528,8 +549,10 @@ $.widget( "heurist.editing_input", {
                                 } );
                                 */
              
+        //OLDEST H3 SELECTOR
+        /*
         top.HEURIST.rectypes = window.hWin.HEURIST4.rectypes;                        
-                                //OLD SELECTOR
+                                
         var url = window.hWin.HAPI4.baseURL+'records/pointer/selectRecordFromSearch.html?' 
         +'&db='+window.hWin.HAPI4.database+'&t='+that.f('rst_PtrFilteredIDs');
             
@@ -544,13 +567,21 @@ $.widget( "heurist.editing_input", {
                                         }
                                     }
                                 } );
-                                
-
                             };
+        */
 
+                                //assign initial display value
+                                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "all", f:"header"}, 
+                                    function(response){
+                                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                            var recordset = new hRecordSet(response.data);
+                                            $input.val( recordset.fld(recordset.getFirstRecord(),'rec_Title') );        
+                                        }
+                                    }
+                                );
 
                             //$input.css('width', this.options['input_width']?this.options['input_width']:'300px');
-                        }else{
+                        }else{ //---------------------------------------------
                             //this is entity selector
                             //detect entity
                             var entityName = this.configMode.entity;
@@ -593,9 +624,7 @@ $.widget( "heurist.editing_input", {
                                 }
                                 
                                 //assign initial display value
-                                
-                                var display_value = window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','));                                
-                                $input.val( display_value.join(',') );
+                                var display_value = window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','));                                   $input.val( display_value.join(',') );
                             }
                         }
 
@@ -729,7 +758,7 @@ $.widget( "heurist.editing_input", {
 
         if (parseFloat( this.f('rst_DisplayWidth') ) > 0 
             && this.detailType!='boolean' && this.detailType!='date') {    //if the size is greater than zero
-            $input.css('width', Math.round(2 + Number(this.f('rst_DisplayWidth'))) + "ex"); //was *4/3
+            $input.css('width', Math.round(2 + Math.min(100, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
         }
 
 

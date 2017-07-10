@@ -34,6 +34,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         //hide header
         this.searchForm.css('height',0);
         
+        this.recordList.resultList('option', 'show_toolbar', false);
 
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
@@ -64,7 +65,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     
     //----------------------
     //
-    //
+    // customized item renderer for search result list
     //
     _recordListItemRenderer: function(recordset, record){
         

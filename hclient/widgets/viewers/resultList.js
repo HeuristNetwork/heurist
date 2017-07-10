@@ -49,7 +49,7 @@ $.widget( "heurist.resultList", {
         empty_remark:'',
         pagesize: -1,
 
-        renderer: null,    // renderer function to draw item
+        renderer: null,    // custom renderer function to draw item
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         searchfull: null,  // search full list data
 
@@ -488,17 +488,17 @@ $.widget( "heurist.resultList", {
             this.div_header.hide();
         }
         
-        this.div_toolbar.css({'top':top+'em', height:this.options.show_savefilter?'5em':'3em'});
+        this.div_toolbar.css({'top':top+'em', height:this.options.show_savefilter?'5em':'2.5em'});
         if(this.options.show_toolbar){
             this.div_toolbar.show();
         }else{
             this.div_toolbar.hide();
         }
         
-        top = top + (this.options.show_toolbar?3:0);
-        top = top + (this.options.show_savefilter?3:0);
+        top = top + (this.options.show_toolbar?2.5:0);
+        top = top + (this.options.show_savefilter?2.5:0);
         
-        this.div_content.css({'top': top+'em'});
+        this.div_content.css({'top': (top+0.4)+'em'});
 
         //show/hide elements on toolbar
         if(this.div_actions){

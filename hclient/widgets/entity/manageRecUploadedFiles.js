@@ -36,11 +36,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
         this._super();
         
-        //if(this.options.edit_mode=='inline'){
-        if(this.options.select_mode!='manager'){
-            //hide form 
-            this.editForm.parent().hide();
-            this.recordList.parent().css('width','100%');
+        if(!(this.options.select_mode!='manager' || this.options.edit_mode!='inline')){
+            //edit form is not visible
+            this.recordList.parent().width(300);
+            this.editForm.parent().css('left',301);
         }
         
     },
@@ -61,7 +60,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var iheight = 2;
         //if(this.searchForm.width()<200){  - width does not work here  
         if(this.options.select_mode=='manager'){            
-            iheight = iheight + 2;
+            iheight = iheight + 4;
         }
         if(window.hWin.HEURIST4.util.isempty(this.options.filter_groups)){
             iheight = iheight + 2;    

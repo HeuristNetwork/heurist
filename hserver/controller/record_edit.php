@@ -54,6 +54,7 @@
                 $record['RecTypeID'] = @$_REQUEST['rt'];
                 $record['OwnerUGrpID'] = @$_REQUEST['ro'];
                 $record['NonOwnerVisibility'] =  @$_REQUEST['rv'];
+                $record['FlagTemporary'] = @$_REQUEST['temp'];
 
                 $response = recordAdd($system, $record);
 

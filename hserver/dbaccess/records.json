@@ -1,0 +1,45 @@
+{
+        "entityName": "records",
+
+        "tableName": "Records",
+        "tablePrefix": "rec",
+        
+        "helpContent": "records.html",
+        
+        "searchFormContent": "searchRecords.html",
+        
+        "entityTitle": "Records",
+        "entityTitlePlural": "Records",
+        "empty_remark": "Please use the search field above to locate relevant record (partial string match on title)",
+
+        "sel_actions": [{"key":"edit", "title":"Edit Record"},
+                        {"key":"delete", "title":"Remove Record"}],
+        "btn_actions": [{"key":"add_file", "title":"Add New Record"}],
+
+        "reference_query": {},
+        
+        "fields": [
+                {
+                    "dtID": "rec_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "rec_Title",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"title",
+                        "dty_Size":63,
+                        "rst_DisplayName": "Record title",
+                        "rst_DisplayHelpText": "", 
+                        "rst_Display":"readonly"
+                    }
+                }
+        ]
+}
