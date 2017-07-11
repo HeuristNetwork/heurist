@@ -992,6 +992,8 @@ $.widget( "heurist.search", {
                 var termid = this.search_assistant.find("#sa_termvalue").val();
                 if(termid=='any' || termid=='blank'){
                     ctn = ''; 
+                }else{
+                    ctn = termid;
                 }
                 if(termid=='blank' || this.search_assistant.find("#sa_negate2").is(':checked')){
                     fld  = '-'+fld;
