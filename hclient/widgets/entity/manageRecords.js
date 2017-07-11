@@ -127,6 +127,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         function __load(response){
             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                 
+                //@todo - move navigation for recordset into editing
                 var recordset = new hRecordSet(response.data);
                 var record = recordset.getFirstRecord();
                 var rectypeID = recordset.fld(record, 'rec_RecTypeID');
@@ -137,7 +138,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that._currentEditID = recordset.fld(record, 'rec_ID');;
                 that._currentEditRecTypeID = rectypeID;
                 
-                //convert structure
+                //@todo - move it inside editing
+                //convert structure - 
                 var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields);
                 var fieldNames = rectypes.typedefs.dtFieldNames;
                 var fi = rectypes.typedefs.dtFieldNamesToIndex;
@@ -219,16 +221,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record
             
-            
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"detail", l:1}, __load);
 
         }else if(recID<0 && this._currentEditRecTypeID>0){ //add new record
-        
             //this._currentEditRecTypeID is set in add button
-        
             window.hWin.HAPI4.RecordMgr.add( {rt:this._currentEditRecTypeID, temp:1}, //ro - owner,  rv - visibility
                         __load);
-        
         }
 
         return;

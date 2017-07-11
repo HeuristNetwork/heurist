@@ -217,7 +217,13 @@ function hEditing(container, _recdata, _recstructure) {
                         
                         //assign values from record
                         if(record!=null){
-                            var val = recdata.values(record, fields[idx]['dtID']);
+                            
+                            var val;
+                            if(fields[idx]['dty_Type']=="geo"){
+                                val = recdata.getFieldGeoValue(record, fields[idx]['dtID']);
+                            }else{
+                                val = recdata.values(record, fields[idx]['dtID']);
+                            }
 
 //console.log( fields[idx]['dtID'] + '=>');
 //console.log(val);                            

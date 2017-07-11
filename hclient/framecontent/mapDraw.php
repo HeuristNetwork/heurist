@@ -38,8 +38,10 @@ require_once(dirname(__FILE__)."/initPage.php");
                 
                 if(!success) return;
 
+                var initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
+                
                 // Mapping data
-                mapping = new hMappingDraw('map_digitizer');
+                mapping = new hMappingDraw('map_digitizer', initial_wkt);
                 
                 // init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
@@ -114,7 +116,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     </head>
 
     <!-- HTML -->
-    <body>
+    <body style="overflow:hidden">
         <div style="height:100%; width:100%;">
 
             <div id="mapToolbarDiv" style="height: 30px;padding:0.2em">

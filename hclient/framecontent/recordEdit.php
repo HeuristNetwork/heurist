@@ -57,7 +57,7 @@
 
                         var rt = window.hWin.HEURIST4.util.getUrlParameter('rt', window.location.search);
 
-                        window.hWin.HAPI4.RecordMgr.add( {rt:rt}, //ro - owner,  rv - visibility
+                        window.hWin.HAPI4.RecordMgr.add( {rt:rt, temp:1}, //ro - owner,  rv - visibility
                             function(response){
                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 

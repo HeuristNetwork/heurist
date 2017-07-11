@@ -736,7 +736,7 @@
                         }
                         $res->close();
                         }*/
-
+                        break;
                         // retained for backward compatibility
                     case "year":
                         $isValid = preg_match("/^\\s*(?:(?:-|ad\\s*)?\\d+(?:\\s*bce?)?|in\\s+press)\\s*$/i", $dtl_Value);

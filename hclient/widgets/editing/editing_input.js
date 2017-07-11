@@ -532,6 +532,9 @@ $.widget( "heurist.editing_input", {
                             };
        //OLD SELECTOR
                                 /*
+                            __show_select_dialog = function __show_select_dialog(event){
+                                event.preventDefault();
+                                
                                 var url = window.hWin.HAPI4.baseURL +
                                 'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
@@ -749,6 +752,39 @@ $.widget( "heurist.editing_input", {
                         $input_img.on({click: function(){ //find('a')
                                 $input.click();}
                         }); 
+            }
+            else 
+            if(this.detailType=="geo"){
+                
+                $input.css('width','20ex');
+                //browse button    
+                var $btn_digitizer_dialog = $( "<button>", {title: "Click to draw map location"})
+                        .addClass("smallbutton")
+                        .css('vertical-align','top')
+                        .appendTo( $inputdiv )
+                        .button({icons:{primary: "ui-icon-globe"},text:false});
+                      
+                __show_mapdigit_dialog = function __show_select_dialog(event){
+                    event.preventDefault();
+
+                    var url = window.hWin.HAPI4.baseURL +
+                    'hclient/framecontent/mapDraw.php?db='+window.hWin.HAPI4.database+
+                    '&wkt='+$input.val();
+                    
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:'800', width:'1000',
+                        title: window.hWin.HR('Heurist map digitizer'),
+                        class:'ui-heurist-bg-light',
+                        callback: function(location){
+                            if( !window.hWin.HEURIST4.util.isempty(location) ){
+                                //that.newvalues[$input.attr('id')] = location
+                                $input.val(location.type+' '+location.wkt).change();
+                            }
+                        }
+                    } );
+                };
+
+                this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
+                this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
             }
             /*else if(this.detailType=="freetext" && this.options['input_width']){
             $input.css('width', this.options['input_width']);

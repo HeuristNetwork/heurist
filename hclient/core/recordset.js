@@ -656,6 +656,10 @@ function hRecordSet(initdata) {
             return _getFieldValues(record, fldName);
         },
         
+        getFieldGeoValue: function(record, fldName){
+            return _getFieldGeoValue(record, fldName);
+        },
+        
         setFld: function(record, fldName, value){
             _setFieldValue(record, fldName, value);  
         },
