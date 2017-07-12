@@ -257,7 +257,57 @@
         return $result;
     }
     
-    
+    //
+    //
+    function mysql__get_table_columns($mysqli, $table){
+
+        $res = $mysqli->query('DESCRIBE '.$table);
+        if (!$res) return NULL;
+        $matches = array();
+        if($res){
+            while (($row = $res->fetch_row())) array_push($matches, $row[0]);
+            
+            $res->close();
+        }
+        return $matches;    
+    }
+
+//
+//
+//
+    function mysql__duplicate_table_record($mysqli, $table, $idfield, $oldid, $newid){
+
+        $columns = mysql__get_table_columns($mysqli, $table);    
+       
+        //in our scheme first column is always id (primary key)
+        array_shift($columns);
+        
+        if($idfield!=null && $newid!=null){
+            
+            $idx = array_search($idfield, $columns);
+            $columns2 = $columns;
+            $columns2[$idx] = $newid;
+            $columns2 = implode(',',$columns2);
+            
+        }else{
+            $columns2 = implode(',',$columns);
+        }
+        
+        $where = ' where '.$idfield.'='.$oldid;
+        
+        $columns = implode(',',$columns);
+        //
+        $query = 'INSERT INTO '.$table.' ('.$columns.') SELECT '.$columns2.' FROM '.$table.' '.$where;
+    //print $query.'<br>';    
+        
+        $res = $mysqli->query($query);
+        if(!$res){
+            $ret = 'database error - ' .$mysqli->error;
+        }else{
+            $ret = $mysqli->insert_id;
+       }
+        return $ret;
+    }
     
     /**
     * delete record for given table

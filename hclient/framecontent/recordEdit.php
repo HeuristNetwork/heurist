@@ -33,7 +33,7 @@
             function onPageInit(success){
                 if(success){
                     var $container = $("<div>").appendTo($("body"));
-                    editing = new hEditing($container);
+                    editing = new hEditing({container:$container});
                     
                     //@todo take from HAPI parameters
                     var q = window.hWin.HEURIST4.util.getUrlParameter('q', window.location.search);

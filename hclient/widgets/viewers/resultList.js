@@ -1796,6 +1796,10 @@ $.widget( "heurist.resultList", {
         }
     },
 
+    getRecordSet: function(){
+        return this._currentRecordset;    
+    },
+    
     //
     //
     //
@@ -1807,12 +1811,14 @@ $.widget( "heurist.resultList", {
             }        
     },
     
+    //
+    // NOT USED
+    //
     applyFilter:function(request){
-        
+        /*
         $.each(this._currentRecordset)
         this.recordList.find
-        
-        
+        */
     },
 
 });

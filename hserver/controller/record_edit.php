@@ -66,8 +66,26 @@
 
                 $response = recordDelete($system, $_REQUEST['ids']);
 
-            } else {
+            } else if ($action=="duplicate" && @$_REQUEST['id']) {
 
+                
+                $mysqli = $system->get_mysqli();
+                $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
+                if($keep_autocommit===true) $mysqli->autocommit(FALSE);
+                if (strnatcmp(phpversion(), '5.5') >= 0) {
+                    $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
+                }
+
+                $response = recordDuplicate($system, $_REQUEST['id']);
+
+                if( $response && @$response['status']==HEURIST_OK ){
+                    $mysqli->commit();
+                }else{
+                    $mysqli->rollback();
+                }
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);                
+
+            } else {
                 $response = $system->addError(HEURIST_INVALID_REQUEST);
             }
         }

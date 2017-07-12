@@ -705,7 +705,7 @@ $.widget( "heurist.manageEntity", {
             this._currentEditID = null;
             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been saved'));
             if(this.options.edit_mode=='popup'){
-                this.editForm.dialog('close');
+                this.editFormPopup.dialog('close');
             }
             
             if(this.options.use_cache){
@@ -766,7 +766,7 @@ $.widget( "heurist.manageEntity", {
             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been deleted'));
             if(this.options.edit_mode=='popup'){
                 //hide popup edit form 
-                this.editForm.dialog('close');
+                this.editFormPopup.dialog('close');
             }else{
                 //hide inline edit form 
                 this._addEditRecord(null);
@@ -813,16 +813,28 @@ $.widget( "heurist.manageEntity", {
                     });
     },       
     
+    //
+    // to override
+    //
+    onEditFormChange: function(){
+        // this._editing.isModified()
+    },
+    
     //  -----------------------------------------------------
     //
     //
     _initEditForm: function(recID){
 
+        var that = this;
+        
         if(!this._editing){
-            this._editing = new hEditing(this.editForm); //pass container
+            this._editing = new hEditing({container:this.editForm, onchange:function(){
+                that.onEditFormChange()
+            }}); //pass container
             this._initEditForm_step1(recID);
+            
         }else{
-            var that = this;
+            
             if(this._currentEditID!=null && this._editing.isModified()){
                 window.hWin.HEURIST4.msg.showMsgDlg('Data were modified in edit form. Ignore modifications and start edit the new data',
                 function(){ that._initEditForm_step1(recID); },
@@ -841,32 +853,41 @@ $.widget( "heurist.manageEntity", {
         if(recID!=null && this.options.edit_mode=='popup'){ //show in popup
 
             var that = this; 
+
+            this.editFormPopup = this.editForm;
+
+            var isOpenAready = false;
+            try{
+                isOpenAready = this.editFormPopup.dialog('isOpen');
+            }catch(e){}
+            
+            if( !isOpenAready ){            
         
-            var btn_array = [{text:window.hWin.HR('Save'),
-                        click: function() { that._saveEditAndClose(); }},
-                              {text:window.hWin.HR('Close'), 
-                        click: function() { that.editForm.dialog('close'); }}]; 
-            
-            this.editForm.css('top',0);
-             
-            this.editForm.dialog({
-                autoOpen: true,
-                height: this.options['edit_height']?this.options['edit_height']:400,
-                width:  this.options['edit_width']?this.options['edit_width']:740,
-                modal:  true,
-                title: this.options['edit_title']
-                            ?this.options['edit_title']
-                            :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,
-                resizeStop: function( event, ui ) {//fix bug
-                    that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
-                },
-                buttons: btn_array
-            });        
-            
-            //help and tips buttons on dialog header
-            window.hWin.HEURIST4.ui.initDialogHintButtons(this.editForm,
-             window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
-            
+                var btn_array = [{text:window.hWin.HR('Save'),
+                            click: function() { that._saveEditAndClose(); }},
+                                  {text:window.hWin.HR('Close'), 
+                            click: function() { that.editFormPopup.dialog('close'); }}]; 
+                
+                this.editForm.css({'top': 0, overflow:'auto'});
+                 
+                this.editFormPopup.dialog({
+                    autoOpen: true,
+                    height: this.options['edit_height']?this.options['edit_height']:400,
+                    width:  this.options['edit_width']?this.options['edit_width']:740,
+                    modal:  true,
+                    title: this.options['edit_title']
+                                ?this.options['edit_title']
+                                :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,
+                    resizeStop: function( event, ui ) {//fix bug
+                        that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+                    },
+                    buttons: btn_array
+                });        
+                
+                //help and tips buttons on dialog header
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this.editFormPopup,
+                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+            }
         }
         this._initEditForm_continue(recID); 
     },        
@@ -941,6 +962,7 @@ $.widget( "heurist.manageEntity", {
                         this.editForm,'full',{margin:'0 40%'});
         }
 
+        this.onEditFormChange();
         // to EXTEND         
     },
 

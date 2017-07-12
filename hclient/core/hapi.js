@@ -119,7 +119,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
 
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
@@ -435,6 +435,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   add       - creates new temporary record
     *   save      - save record
     *   remove    - delete record
+    *   duplicate
     *
     *   details   - batch edition of record details for many records
     *
@@ -485,6 +486,12 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 's';
                 _callserver('record_edit', request, callback);
             }
+            
+            ,duplicate: function(request, callback){
+                if(request) request.a = 'duplicate';
+                _callserver('record_edit', request, callback);
+            }
+            
 
             /**
             * Remove Record

@@ -21,6 +21,7 @@
     /*
         recordAdd  - create temporary record for given user
         recordSave - Save record
+        recordDuplicate - Duplicate record
         recordDelete  - TODO!!!
         
         isWrongAccessRights - validate parameter values
@@ -205,11 +206,15 @@
             return $system->addError(HEURIST_REQUEST_DENIED);
         }
 
+        $recID = intval(@$record['ID']);
+        if ( $recID<1 ) {
+            return $system->addError(HEURIST_INVALID_REQUEST, "Record ID is not defined");
+        }
+
         $mysqli = $system->get_mysqli();
 
         $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
 
-        $recID = intval(@$record['ID']);
         $rectype = intval(@$record['RecTypeID']);
 
         if ($rectype && !dbs_GetRectypeByID($mysqli, $rectype))  {
@@ -841,6 +846,138 @@
         return true;
     }
 
+    //
+    //
+    //
+    function recordDuplicate($system, $id){
+        
+        if ( $system->get_user_id()<1 ) {
+            return $system->addError(HEURIST_REQUEST_DENIED);
+        }
+
+        $mysqli = $system->get_mysqli();
+
+        $id = intval($id);
+        if ( $id<1 ) {
+            return $system->addError(HEURIST_INVALID_REQUEST, "Record ID is not defined");
+        }
+
+        if (!$system->is_admin()) {
+            $owner = mysql__select_value($mysqli, "SELECT rec_OwnerUGrpID FROM Records WHERE rec_ID = ".$id);
+            if (!($owner == $system->get_user_id() || $system->is_admin('group', $owner))){
+                return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
+            }
+        }
+
+        $bkmk_count = 0;
+        $rels_count = 0;
+
+        $error = null;
+
+        while (true) {
+
+            $mysqli->query('SET foreign_key_checks = 0');
+
+            $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
+            //@todo addRecordIndexEntry(DATABASE, $recTypeID, $id);
+            
+            if(!is_int($new_id)){ $error = $new_id; break; }
+
+            $res = mysql__duplicate_table_record($mysqli, 'recDetails', 'dtl_RecID', $id, $new_id);
+            if(!is_int($res)){ $error = $res; break; }
+            
+            //@todo duplicate uploaded files
+            //$fd_res = unregister_for_recid2($id, $needDeleteFile);
+            //if ($fd_res) { $error = "database error - " . $fd_res; break; }
+            
+            //@todo update details with new file ids
+
+
+            $res = mysql__duplicate_table_record($mysqli, 'usrReminders', 'rem_RecID', $id, $new_id);
+            if(!is_int($res)){ $error = $res; break; }
+
+            $res = mysql__duplicate_table_record($mysqli, 'usrRecTagLinks', 'rtl_RecID', $id, $new_id);
+            if(!is_int($res)){ $error = $res; break; }
+
+            //$res = mysql__duplicate_table_record($mysqli, 'recThreadedComments', 'cmt_RecID', $id, $new_id);
+            //if(!is_int($res)){ $error = $res; break; }
+
+            //@todo change all woots with title bookmark: to user:
+            /*
+            mysql_query('update woots set woot_Title="user:" where woot_Title in (select concat("boomark:",bkm_ID) as title from usrBookmarks where bkm_recID = ' . $id.')');
+            if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
+            */
+
+            $res = mysql__duplicate_table_record($mysqli, 'usrBookmarks', 'bkm_RecID', $id, $new_id);
+            if(!is_int($res)){ $error = $res; break; }
+            $bkmk_count = mysql_affected_rows();
+
+            /*@todo add to woot
+            mysql_query('delete from woot_ChunkPermissions where wprm_ChunkID in '.
+            '(SELECT chunk_ID FROM woots, woot_Chunks where chunk_WootID=woot_ID and woot_Title="record:'.$id.'")');
+            if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
+
+            mysql_query('delete from woot_Chunks where chunk_WootID in '.
+            '(SELECT woot_ID FROM woots where woot_Title="record:'.$id.'")');
+            if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
+
+            mysql_query('delete from woot_RecPermissions where wrprm_WootID in '.
+            '(SELECT woot_ID FROM woots where woot_Title="record:'.$id.'")');
+            if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
+
+            mysql_query('delete from woots where woot_Title="record:'.$id.'"');
+            if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
+            */
+
+            $mysqli->query('SET foreign_key_checks = 1');
+
+            //add special kind of record - relationships
+            $refs_res = mysql__select_list($mysqli, 'recLinks', 'rl_RelationID', 
+                '(rl_RelationTypeID is not null) and  (rl_SourceID='.$id.' or rl_TargetID='.$id.')');
+
+            
+            foreach ($refs_res as $rel_recid){
+                
+                $res = recordDuplicate($system, $rel_recid);
+                
+                if($res && @$res['status']==HEURIST_OK){
+                
+                $new_rel_recid = @$res['data']['added'];
+//error_log($rel_recid.'   '.$new_rel_recid);                
+                if($new_rel_recid){
+                
+                    //change reference to old record id to new one
+                    $query = 'UPDATE recDetails set dtl_Value='.$new_id
+                    .' where dtl_RecID='.$new_rel_recid
+                    .' and dtl_Value='.$id   //old record id
+                    .' and (dtl_DetailTypeID='.DT_TARGET_RESOURCE.' or dtl_DetailTypeID='.DT_PRIMARY_RESOURCE.')';
+//error_log($query);                  
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $error = 'database error - ' .$mysqli->error;
+                        break;
+                    }else{
+                        $rels_count++;   
+                    }
+                }
+                }else{
+                   $error = @$res['message'];
+                }
+            } //foreach
+
+            break;
+        }
+
+        if($error==null){
+            return array("status"=>HEURIST_OK, 'data'
+                        =>array("added"=>$new_id, "bkmk_count"=>$bkmk_count, "rel_count"=>$rels_count));
+        }else{
+            return $system->addError(HEURIST_DB_ERROR, $error);
+        }
+        
+    }
+    
+    
     // @todo move terms function in the separate
 
     //

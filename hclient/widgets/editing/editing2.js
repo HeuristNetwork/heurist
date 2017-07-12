@@ -19,32 +19,37 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hEditing(container, _recdata, _recstructure) {
+function hEditing(_options) {
      var _className = "Editing",
          _version   = "0.4";
 
      var $container = null,
          recdata = null,     //hRecordSet with data to be edited
          editing_inputs = [],
-         recstructure;
+         recstructure,
+         onChangeCallBack=null;
 
     /**
     * Initialization
     * 
     * container - element Id or jqyuery element
     */
-    function _init(container, _recdata, _recstructure) {
-        if (typeof container==="string") {
-            $container = $("#"+container);
+    function _init(_options) {
+        
+        
+        if (typeof _options.container==="string") {
+            $container = $("#"+_options.container);
         }else{
-            $container = $(container);
+            $container = $(_options.container);
         }
         if($container==null || $container.length==0){
             $container = null;
             alert('Container element for editing not found');
         }
         
-        _initEditForm(_recstructure, _recdata);
+        onChangeCallBack = _options.onchange;
+        
+        _initEditForm(_options.recstructure, _options.recdata);
     }
 
     //
@@ -240,6 +245,7 @@ function hEditing(container, _recdata, _recstructure) {
                         }
                         
                         fields[idx].recID = recID;
+                        fields[idx].change = _onChange;
                         
                         var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
                         editing_inputs.push(inpt);  
@@ -312,6 +318,12 @@ function hEditing(container, _recdata, _recstructure) {
             if(ele.editing_input('isChanged')) return true;
         }
         return false;
+    }
+    
+    function _onChange(){
+        if($.isFunction(onChangeCallBack)){
+            onChangeCallBack.call();    
+        }
     }
     
     function _validate(){
@@ -414,7 +426,7 @@ function hEditing(container, _recdata, _recstructure) {
         
     }
 
-    _init(container, _recdata, _recstructure);
+    _init(_options);
     return that;  //returns object
 }
 /*

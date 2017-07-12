@@ -25,7 +25,24 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _currentEditRecTypeID:null,
     
     _init: function() {
-        this.options.layout_mode = 'short';
+        this.options.layout_mode = //slightly modified 'short' layout
+                        '<div class="ent_wrapper">'
+                        +'<div class="ent_wrapper" style="width:200px">'
+                        +    '<div class="ent_header searchForm"/>'     
+                        +    '<div class="ent_content_full recordList"/>'
+                        +'</div>'
+                        + '<div id="editFormDialog" class="ent_wrapper editForm"/>'
+                        /*
+                        +'<div id="editFormDialog" class="ent_wrapper">'
+                        //+    '<div id="editFormCont" style="height:100%; width:100%;overflow-y:auto"></div>'
+                        +    '<div class="editForm ui-layout-center" style="height:100%; width:100%;"/>'
+                        +    '<div id="editFormSummary" class="ui-layout-east">summary.....</div>'
+                        */
+                        +'</div>'
+                        +'</div>';
+
+        
+        
         this.options.use_cache = false;
         this.options.edit_height = 640;
         this.options.edit_width = 1200;
@@ -40,15 +57,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
         this._super();
         
+        /*
         if(!(this.options.select_mode!='manager' || this.options.edit_mode!='inline')){
             //edit form is not visible
             this.recordList.parent().width(640);
             this.editForm.parent().css('left',641);
         }
+        */
+        this.editForm.parent().show(); //restore 
+        this.editFormPopup = this.element.find('#editFormDialog');
+        this.element.find('#editFormSummary').hide(); //temp
+        
+        this.element.find('#editFormDialog').hide();
         
         //-----------------
         this.recordList.css('top','5.5em');
         this.searchForm.height('7.5em').css('border','none');
+        
         
     },
     //  
@@ -112,8 +137,125 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
        return true;
     },
-    
+
+
+    _navigateToRec: function(dest){
+        if(this._currentEditID>0){
+                var recset = this.recordList.resultList('getRecordSet');
+                var order  = recset.getOrder();
+                var idx = order.indexOf(Number(this._currentEditID));
+                idx = idx + dest;
+                if(idx>=0 && idx<order.length){
+                    this.editFormPopup.parent().find('#divNav').html( (idx+1)+' of '+order.length);
+                    if(dest!=0){
+                        this._addEditRecord(order[idx]);
+                    }
+                }
+        }
+    },    
     //override some editing methods
+    
+    //
+    // open popup edit dialog if need it
+    //
+    _initEditForm_step1: function(recID){
+    
+        if(recID!=null && this.options.edit_mode=='popup'){ //show in popup 
+        
+            var isOpenAready = false;
+            try{
+                isOpenAready = this.editFormPopup.dialog('isOpen');
+            }catch(e){}
+
+            if(!isOpenAready){            
+        
+            var that = this; 
+            this._currentEditID = recID;
+            
+            var recset = this.recordList.resultList('getRecordSet');
+            var recset_length = recset.length();
+
+            var btn_array = [
+                              {text:window.hWin.HR('Duplicate'), id:'btnRecDuplicate',
+                              css:{'display':((that._currentEditID>0)?'inline-block':'none')},
+                        click: function(event) { 
+                            var btn = $(event.target);
+                            btn.hide();
+                            window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
+                                function(response){
+                                    btn.css('display','inline-block');
+                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                        window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been duplicated'));
+                                        var new_recID = ''+response.data.added;
+                                        that._initEditForm_continue(new_recID);
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                                }); 
+                        }},
+                              {text:window.hWin.HR('Previous'),icons:{primary:'ui-icon-circle-triangle-w'},
+                              css:{'display':((recset_length>1)?'inline-block':'none')}, id:'btnPrev',
+                        click: function() { that._navigateToRec(-1); }},
+                              {text:window.hWin.HR('Next'),icons:{secondary:'ui-icon-circle-triangle-e'},
+                              css:{'display':((recset_length>1)?'inline-block':'none')},
+                        click: function() { that._navigateToRec(1); }},
+                              {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
+                        click: function() { that._initEditForm_continue(that._currentEditID) }},  //reload edit form
+                              {text:window.hWin.HR('Save and new record'), id:'btnRecSaveAndNew',
+                        click: function() { that._saveEditAndClose( 'newrecord' ); }},
+                              {text:window.hWin.HR('Save'), id:'btnRecSave',
+                        click: function() { that._saveEditAndClose( 'none' ); }},
+                              {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose',
+                        click: function() { that._saveEditAndClose( 'close' ); }},
+                              {text:window.hWin.HR('Close'), 
+                        click: function() { that.editFormPopup.dialog('close'); }}]; 
+            
+            this.editForm.css({'top': 0, overflow:'auto !important'});
+             
+            this.editFormPopup.dialog({
+                autoOpen: true,
+                height: this.options['edit_height']?this.options['edit_height']:400,
+                width:  this.options['edit_width']?this.options['edit_width']:740,
+                modal:  true,
+                title: this.options['edit_title']
+                            ?this.options['edit_title']
+                            :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,
+                resizeStop: function( event, ui ) {//fix bug
+                    that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+                },
+                buttons: btn_array
+            });        
+            
+            if(recset_length>1 && recID>0){
+                $('<div id="divNav" style="min-width:40px;padding:0 4px;display:inline-block;text-align:center">')
+                    .insertAfter(this.editFormPopup.parent().find('#btnPrev'));
+                this._navigateToRec(0);
+            }
+            
+            //help and tips buttons on dialog header
+            window.hWin.HEURIST4.ui.initDialogHintButtons(this.editFormPopup,
+             window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+        
+            //edit form layout with summary tab
+            var layout_opts =  {
+                applyDefaultStyles: true,
+                togglerContent_open:    '<div class="ui-icon"></div>',
+                togglerContent_closed:  '<div class="ui-icon"></div>'
+            };
+            // Setting layout
+            layout_opts.center__minWidth = 800;
+            layout_opts.east__size = 400;
+            layout_opts.east__spacing_open = 7;
+            layout_opts.east__spacing_closed = 7;
+            //this.editFormPopup.layout(layout_opts);
+            //.find('#editFormCont')
+            //this.editFormPopup.layout(layout_opts);
+            
+            }
+        }
+        this._initEditForm_continue(recID); 
+    },
+    
     //
     //
     //
@@ -212,7 +354,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that._editing.initEditForm(fields, recordset);
                 that._afterInitEditForm();
             }else{
-                window.hWin.HEURIST4.util.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         }        
         
@@ -238,7 +380,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //  send update request and close popup if edit is in dialog
     // OVERRIDE
     //
-    _saveEditAndClose: function(){
+    _saveEditAndClose: function( afterAction ){
 
             var fields = this._getValidatedValues(); 
             
@@ -250,19 +392,47 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //that.loadanimation(true);
                 window.hWin.HAPI4.RecordMgr.save(request, 
                     function(response){
+                        
+                        that.onEditFormChange();
+                        
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                             var recID = ''+response.data[0];
                             
-                            that._afterSaveEventHandler( recID, fields );
+                            //that._afterSaveEventHandler( recID, fields);
+                            window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been saved'));
+                            
+                            if(afterAction=='close'){
+                                that._currentEditID = null;
+                                that.editFormPopup.dialog('close');    
+                            }else if(afterAction=='newrecord'){
+                                that._initEditForm_continue(-1);
+                            }else{
+                                //reload after save
+                                that._initEditForm_continue(that._currentEditID)
+                            }
+                            
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
-    },       
+    },   
     
-    
+    //
+    //
+    //
+    onEditFormChange:function(){
+        var isChanged = this._editing.isModified();
+        var mode = isChanged?'visible':'hidden';
+        //show/hide save buttons
+        var ele = this.editFormPopup.parent();
+        ele.find('#btnRecCancel').css('visibility', mode);
+        ele.find('#btnRecSaveAndNew').css('visibility', mode);
+        ele.find('#btnRecSave').css('visibility', mode);
+        ele.find('#btnRecSaveAndClose').css('visibility', mode);
+        
+    }
     
 });
 
