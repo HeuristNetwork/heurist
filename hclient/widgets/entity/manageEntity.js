@@ -45,7 +45,7 @@
 // _saveEditAndClose - send update request and close popup edit dialog
 
 // _afterInitEditForm perform required after edit form init modifications (show/hide fields, assign even listener )
-// _addEditRecord - call _initEditForm and popup edit dialog
+// addEditRecord - call _initEditForm and popup edit dialog
 
 // _afterDeleteEvenHandler
 //  _deleteAndClose
@@ -350,11 +350,11 @@ $.widget( "heurist.manageEntity", {
                  action = action.action;
              }
              if(action=='add'){
-                    this._addEditRecord(-1);
+                    this.addEditRecord(-1);
                     return true;
              }else if(action=='delete'){
                  
-                    this._addEditRecord(recID);
+                    this.addEditRecord(recID);
                     return true;    
                      
              }else if(action=='delete'){
@@ -376,7 +376,7 @@ $.widget( "heurist.manageEntity", {
              }
              
              if(action=='edit'){
-                    this._addEditRecord(recID);
+                    this.addEditRecord(recID);
                     return true;
              }else if(action=='save'){
                     this._saveEditAndClose();
@@ -451,6 +451,21 @@ $.widget( "heurist.manageEntity", {
                     }});
         }
         
+    },
+    
+    _defineActionButton2: function(options, container){        
+        
+        var btn_opts = {label:options.text, icons:options.icons};
+        
+        var btn = $('<div>').button(btn_opts)
+                    .click(options.click)
+                    .appendTo(container);
+        if(options.id){
+            btn.attr('id', options.id);
+        }
+        if(options.css){
+            btn.css(options.css);
+        }
     },
     
     // @todo  to remove
@@ -769,7 +784,7 @@ $.widget( "heurist.manageEntity", {
                 this.editFormPopup.dialog('close');
             }else{
                 //hide inline edit form 
-                this._addEditRecord(null);
+                this.addEditRecord(null);
             }
             
             if(this.options.use_cache){
@@ -969,7 +984,7 @@ $.widget( "heurist.manageEntity", {
     //
     // show edit form in popup dialog or rigth-hand panel
     //
-    _addEditRecord: function(recID){
+    addEditRecord: function(recID){
         
         if(this.options.edit_mode == 'none') return;
         

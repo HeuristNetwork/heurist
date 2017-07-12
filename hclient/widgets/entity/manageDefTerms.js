@@ -205,7 +205,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this._currentParentID = this._currentEditID;
             
             if(action=='add-child'){
-                this._addEditRecord(-1);
+                this.addEditRecord(-1);
             }else if(action=='add-import'){
                 
                 var that = this;
@@ -394,7 +394,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 parentNode.setExpanded();
                 parentNode.setActive();
                 //reload parent in edit form 
-                this._addEditRecord( fieldvalues['trm_ParentTermID'] );
+                this.addEditRecord( fieldvalues['trm_ParentTermID'] );
             }
         }
         

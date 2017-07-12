@@ -195,27 +195,23 @@ require_once(dirname(__FILE__)."/../initPage.php");
                        }else if(entity=='DefDetailTypes'){
                             showManageDefDetailTypes( options );      
                        }else if(entity=='DefDetailTypeGroups'){
-                            options.edit_dialog = false;
                             options.height = 400;
                             options.width = 840;
                             showManageDefDetailTypeGroups( options );      
                        }else if(entity=='DefTerms'){
                            
-                            options.edit_dialog = false;
                             options.height = 600;
                             options.width = 840;
                             showManageDefTerms( options );      
                             
                        }else if(entity=='RecUploadedFiles'){
                            
-                            options.edit_dialog = false;
                             options.height = 600;
                             options.width = 840;
                             showManageRecUploadedFiles( options );
                                   
                        }else if(entity=='Records'){
                            
-                            options.edit_dialog = false;
                             options.height = 600;
                             options.width = 840;
                             showManageRecords( options );      
