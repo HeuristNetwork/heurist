@@ -169,6 +169,7 @@ top.HEURIST.ratings = {"0": "not rated",
 
 ?>
 if (typeof top.HEURIST.fireEvent == "function") top.HEURIST.fireEvent(window, "heurist-obj-common-loaded");
+console.log('loadCommonInfo done');
 <?php
 	ob_end_flush();
 ?>

@@ -149,7 +149,11 @@
                     showReps.insertSelectedVars( null, isloop, isif );
                 }
             }
-
+/*
+            if(!top.HEURIST.rectypes){
+                top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadCommonInfo.php")
+            }
+*/            
         </script>
     </head>
 
@@ -706,10 +710,16 @@
             }
 
             if(!top.HEURIST.rectypes){
-                top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadCommonInfo.php")
+                if(top.HEURIST4 && top.HEURIST4.rectypes){
+                    top.HEURIST.rectypes = top.HEURIST4.rectypes;
+                    top.HEURIST.detailTypes = top.HEURIST4.detailtypes;
+                    top.HEURIST.terms = top.HEURIST4.terms;
+                }else{
+                    top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadCommonInfo.php")
+                }
             }
-
             YAHOO.util.Event.addListener(window, "load", loadHandler );
+            
 
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
             $.getScript( top.HEURIST.baseURL+"common/php/loadUserInfo.php?db="+_db, onLoadUserInfoHandler);
