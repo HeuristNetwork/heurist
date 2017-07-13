@@ -540,12 +540,19 @@
         if(!@$params['detail']){
             $params['detail'] = @$params['f']; //backward capability
         }
+        
 
         $fieldtypes_in_res = null;
         $istimemap_request = (@$params['detail']=='timemap');
         $istimemap_counter = 0; //total records with timemap data
         $needThumbField = false;
         $needThumbBackground = false;
+        $needAllHeaderFields = false;
+
+        if(@$params['detail']=='complete'){
+            $params['detail'] = 'detail';
+            $needAllHeaderFields = true;
+        }
         
         $fieldtypes_ids = null;
         if($istimemap_request){
@@ -651,6 +658,13 @@
             .'rec_URLErrorMessage,'
             .'bkm_PwdReminder ';*/
 
+            if($needAllHeaderFields){
+            $select_clause = $select_clause
+            .',rec_Added'
+            .',rec_AddedByUGrpID'
+            .',rec_ScratchPad'
+            .',rec_Popularity ';
+            }
         }
 
         if($currentUser && @$currentUser['ugr_ID']>0){

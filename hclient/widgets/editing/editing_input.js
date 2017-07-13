@@ -511,7 +511,8 @@ $.widget( "heurist.editing_input", {
                             __show_select_dialog = function __show_select_dialog(event){
                                 event.preventDefault();
        
-       //LATEST "ENTITY" SELECTOR  - 
+       //LATEST "ENTITY" SELECTOR - it works, however it requires to load additional js - so it is better to open it in popup url
+                                /*
                                  var options = {
                                     select_mode: 'select_single',
                                     edit_mode: 'popup',
@@ -529,12 +530,8 @@ $.widget( "heurist.editing_input", {
                                  };                                
                                  //public function on manageRecords.js
                                  showManageRecords( options ); 
-                            };
-       //OLD SELECTOR
-                                /*
-                            __show_select_dialog = function __show_select_dialog(event){
-                                event.preventDefault();
-                                
+                                 */
+       //SELECTOR in POPUP URL
                                 var url = window.hWin.HAPI4.baseURL +
                                 'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
@@ -544,13 +541,14 @@ $.widget( "heurist.editing_input", {
                                     callback: function(recordset){
                                         if( window.hWin.HEURIST4.util.isRecordSet(recordset) ){
                                             var record = recordset.getFirstRecord();
-                                            var name = recordset.fld(record,'rec_Title');
+                                            var rec_Title = recordset.fld(record,'rec_Title');
                                             that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                                            $input.val(name).change();
+                                            $input.val(rec_Title).change();
                                         }
                                     }
                                 } );
-                                */
+                                 
+                            };
              
         //OLDEST H3 SELECTOR
         /*

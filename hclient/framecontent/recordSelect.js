@@ -1,4 +1,5 @@
 /**
+* NOT USED ANYMORE
 * Class to search and select record 
 * It can be converted to widget later?
 * 

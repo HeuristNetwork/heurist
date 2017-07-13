@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Search and select record. It is used in relationship editor and pointer selector
+    * Search and select record. It uses manageRecords
     * 
     * It is combination of generic record search by title (maybe it should be separated into widget) abd resultList widget
     *
@@ -23,51 +23,45 @@
 
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
-        <script type="text/javascript" src="recordSelect.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
+
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
+
         
         <script type="text/javascript">
-            // Callback function on map initialization
+            // Callback function on page initialization
             function onPageInit(success){
                 if(success){
-                    var recordSelect = new hRecordSelect(window.hWin.HEURIST4.util.getUrlParameter('rectype_set',window.location.search));
+                    var $container = $("<div>").appendTo($("body"));
+
+                    var rectype_set = window.hWin.HEURIST4.util.getUrlParameter('rectype_set', window.location.search);
+                    
+                    var options = {
+                        select_mode: 'select_single',
+                        select_return_mode: 'recordset',
+                        edit_mode: 'popup',
+                        rectype_set: rectype_set,
+                        onselect:function(event, data){
+                            if(data && data.selection && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
+                                window.close(data.selection);
+                            }
+                        }                        
+                    }
+                    
+                    $container.manageRecords( options );
                 }
-            }
+            }            
         </script>
     </head>
 
     <!-- HTML -->
     <body>
-    
-        <div style="height: 5em; padding:0.2em">
-            <div style="display: table-row;">
-                <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
-                    <label>Find by title</label>
-                </div>
-                <div class="div-table-cell">
-                    <input id="input_search" class="text ui-widget-content ui-corner-all" 
-                            style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
-                    <div id="btn_search_start"></div>        
-                </div>
-                <div class="div-table-cell" style="padding-left:0.5em">
-                    <label>in</label>
-                    <select id="sel_rectypes" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
-                </div>
-            </div>
-            <div style="display: table-row;">
-                <div class="div-table-cell"></div>
-                <div class="div-table-cell heurist-helper1">Select below or search on title here. [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search</div>
-            </div>
-            <div style="display: table-row;">
-                <div class="div-table-cell" style="padding-right:0.5em;text-align:right"><label>or</label></div>
-                <div class="div-table-cell">
-                    <div id="btn_add_record"></div>
-                </div>
-            </div>
-                        
-            
-        </div>
-        <div id="recordList" style="position: absolute;top:5em;bottom:1px;width:99%">
-        </div>    
     </body>
 </html>
