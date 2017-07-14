@@ -22,6 +22,7 @@
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/rec_relation.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
 
@@ -38,18 +39,28 @@
                 if(success){
                     var $container = $("<div>").appendTo($("body"));
                     
+                    var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
+                    
                     //hidden result list, inline edit form
                     var options = {
-                        select_mode:'manager',
-                        edit_mode:'inline',
+                        select_mode: 'manager',
+                        edit_mode: 'inline',
+                        in_popup_dialog: isPopup,  //to place edit action button into button panel and use window.close
                         layout_mode:  '<div class="ent_wrapper">'
-                            +'<div class="ent_header editForm-toolbar"/>'
-                            +'<div class="recordList"  style="display:none;"/>'
-                            +'<div class="ent_content_full editForm" style="padding:10px"/>'
+                              +'<div class="recordList"  style="display:none;"/>'
+                              //+'<div class="ent_content editForm" style="padding:10px"/>'
+                              
+                              + '<div class="editFormDialog ent_content" style="top:0">'
+                                + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                                + '<div class="editFormSummary ui-layout-east">empty</div>'
+                              +'</div>'
+                            
+                            
+                            +'<div class="ent_footer editForm-toolbar"/>'
                             +'</div>'
                     }
                     
-                    $container.manageRecords( options );
+                    $container.manageRecords( options ).addClass('ui-widget');
                     
                     var q = window.hWin.HEURIST4.util.getUrlParameter('q', window.location.search);
                     
@@ -68,9 +79,12 @@
                                     $container.manageRecords('updateRecordList', null, 
                                             {recordset:recset});
                                     $container.manageRecords('addEditRecord', recset.getOrder()[0]);
+                                }else if(isPopup){
+                                    window.close();  //nothing found
                                 }
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
+                                if(isPopup){ window.close(); }
                             }
 
                         });

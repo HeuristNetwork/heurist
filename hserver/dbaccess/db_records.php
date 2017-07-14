@@ -153,7 +153,7 @@
 
         }else{
 
-            $params = array("q"=>"ids:".$newId, "w"=>"e");
+            $params = array("q"=>"ids:".$newId, 'detail'=>'complete', "w"=>"e");
             //retrieve new record with structure
             $response = recordSearch($system, $params, true, true);
         }
@@ -332,11 +332,11 @@
             return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
         }
 
-        recordUpdateTitle($mysqli, $recID, $rectype, @$record['RecTitle']);
+        $newTitle = recordUpdateTitle($mysqli, $recID, $rectype, @$record['RecTitle']);
 
         $mysqli->commit();
 
-        return array("status"=>HEURIST_OK, "data"=> $recID);
+        return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
         /*
         $response = array("status"=>HEURIST_OK,
         "data"=> array(
@@ -574,7 +574,7 @@
             $stmt->close();
         }
 
-        return true;
+        return $new_title;
     }
 
 

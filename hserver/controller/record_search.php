@@ -84,7 +84,7 @@
 
     }else if(@$_REQUEST['a'] == 'related'){
 
-        $response = recordSearchRelated($system, $_REQUEST['ids']);
+        $response = recordSearchRelated($system, $_REQUEST['ids'], @$_REQUEST['direction']);
 
     }else {
 

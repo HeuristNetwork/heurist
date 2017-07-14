@@ -444,6 +444,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         setTimeout(function(){
             $dlg.dialog('close');
             $dlg.parent().find('.ui-dialog-titlebar').show();
+            /*if(callback && $.isFunction(callback)){
+                callback.call();
+            }*/
+            
         }, timeout);
 
     },
@@ -697,7 +701,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         };
                         $dlg.dialog(opts);
                         
-                        if(options['padding'])
+                        if(!window.hWin.HEURIST4.util.isempty(options['padding'])) //by default 2em
                             $dlg.css('padding', options.padding);
                         
                         //start content loading

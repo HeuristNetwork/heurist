@@ -369,24 +369,12 @@
             $direction = 0;
         }
         
-
+        $rel_ids = array();
         $direct = array();
         $reverse = array();
         $headers = array(); //record title and type for main record
 
         $mysqli = $system->get_mysqli();
-        
-        //find all rectitles and record types for main recordset
-        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records where rec_ID in ('.$ids.')';
-        $res = $mysqli->query($query);
-        if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error on search related. Query ".$query, $mysqli->error);
-        }else{
-                while ($row = $res->fetch_row()) {
-                    $headers[$row[0]] = array($row[1], $row[2]);   
-                }
-                $res->close();
-        }
         
         
         //find all target related records
@@ -405,6 +393,8 @@
                     $relation->dtID  = intval($row[3]);
                     $relation->relationID  = intval($row[4]);
                     array_push($direct, $relation);
+                    
+                    array_push($rel_ids, intval($row[1]));
                 }
                 $res->close();
         }
@@ -426,10 +416,29 @@
                     $relation->dtID  = intval($row[3]);
                     $relation->relationID  = intval($row[4]);
                     array_push($reverse, $relation);
+                    
+                    array_push($rel_ids, intval($row[1]));
                 }
                 $res->close();
         }
-
+        
+        
+        //find all rectitles and record types for main recordset AND all related records
+        if(!is_array($ids)){
+            $ids = explode(',',$ids);
+        }
+        $ids = array_merge($ids, $rel_ids);        
+        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records where rec_ID in ('.implode(',',$ids).')';
+        $res = $mysqli->query($query);
+        if (!$res){
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on search related. Query ".$query, $mysqli->error);
+        }else{
+                while ($row = $res->fetch_row()) {
+                    $headers[$row[0]] = array($row[1], $row[2]);   
+                }
+                $res->close();
+        }
+        
         $response = array("status"=>HEURIST_OK,
                      "data"=> array("direct"=>$direct, "reverse"=>$reverse, "headers"=>$headers));
 

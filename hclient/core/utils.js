@@ -423,9 +423,23 @@ window.hWin.HEURIST4.util = {
         return Object.prototype.toString.apply(a) === '[object Array]';
     },
 
+    /*
     htmlEscape: function(s) {
         return s?s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;").replace(/"/g, "&#34;"):'';
     },
+    */
+    
+    htmlEscape: function (text) {
+      var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',  //&#34
+        "'": '&#039;'
+      };
+
+      return text?text.replace(/[&<>"']/g, function(m) { return map[m]; }):'';
+    },    
 
     isObject: function (a)
     {

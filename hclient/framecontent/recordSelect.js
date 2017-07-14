@@ -1,5 +1,5 @@
 /**
-* NOT USED ANYMORE
+* NOT USED ANYMORE _ TO REMOVE
 * Class to search and select record 
 * It can be converted to widget later?
 * 

@@ -194,6 +194,19 @@ window.hWin.HEURIST4.ui = {
         
         return term;
     },
+
+    // get inverse term id
+    //
+    getInverseTermById: function(termID){
+        var term = window.hWin.HEURIST4.ui.getTermById(termID);
+        if(term){
+            var terms = window.hWin.HEURIST4.terms;
+            var invTermID = term[terms.fieldNamesToIndex['trm_InverseTermID']];
+            if(invTermID>0) return invTermID;
+            return termID;
+        }
+        return '';
+    },
     
     //
     // Returns label and code for term by id
