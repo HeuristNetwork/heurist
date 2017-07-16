@@ -381,13 +381,12 @@
     */
     function isWrongOwnership($system, $ownerid)
     {
-
         if( $system->is_member($ownerid) )
         {
             return false;
         }else{
 
-            $system->addError(HEURIST_REQUEST_DENIED, "Cannot set ownership to group without membership");
+            $system->addError(HEURIST_REQUEST_DENIED, "Cannot set ownership of record to the group without membership in this group");
             return true;
 
             /* not used: since only group member can set ownership - it means that it exists
@@ -712,7 +711,8 @@
                             //TODO !!! mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".dtl_UploadedFileID)) <=0 )
 
                         }else{  // new way - URL or JSON string with file data array (structure similar get_uploaded_file_info)
-                            $dtl_UploadedFileID = register_external($dtl_Value);
+                            //TODO!!!!!
+                            // $dtl_UploadedFileID = register_external($dtl_Value);
                         }
 
                         if ($dtl_UploadedFileID!=null)

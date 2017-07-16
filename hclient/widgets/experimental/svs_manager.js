@@ -119,7 +119,6 @@ $.widget( "heurist.svs_manager", {
         }
 
         if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
-
             var that = this;
             //get details about Workgroups (names etc)
             window.hWin.HAPI4.SystemMgr.mygroups(

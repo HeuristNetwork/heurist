@@ -49,7 +49,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];
-$allowed_actions = array('add_detail','replace_detail','delete_detail','merge_term','rectype_change');
+$allowed_actions = array('add_detail','replace_detail','delete_detail','merge_term','rectype_change','ownership');
 if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
@@ -126,6 +126,34 @@ if(!in_array($action_type, $allowed_actions)){
                 <div class="header" style="padding-left: 16px;"><label for="sel_recordtype">Convert to record type:</label></div>
                 <select id="sel_recordtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
+
+            <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
+            
+                <div class="detailRow" style="padding-bottom:2em;"> <!-- pulldown list of potential owner workgroups -->
+                    <label for="sel_Ownership">Record is editable by</label>
+                    <select id="sel_Ownership"></select>
+                </div>
+                <div class="detailRow" style="padding-bottom:1em;">
+                    <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
+                    Only members of this group can view the record</label>
+                </div>
+                <div class="detailRow" style="padding-bottom:1em;">
+                    <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable">
+                    Any logged-in user can view the record</label>
+                </div>
+                <div class="detailRow" style="padding-bottom:1em;">
+                    <label><input type="radio" name="rb_Access" value="pending" id="rb_Access-pending">
+                    Flagged for external publication, any logged-in user</label>
+                    <div style="margin-left: 20px; font-style: italic;">No effect on existing external views - hml, html etc.</div>
+                    <div style="margin-left: 20px; font-style: italic;">Can be auto-set whenever a public record is edited.</div>
+                </div>
+                <div class="detailRow">
+                    <label>
+                    <input type="radio" name="rb_Access" value="public" id="rb_Access-public">
+                    Published - written automatically to external views</label>
+                </div>
+            </div>
+
             
             <div style="padding: 0.2em; width: 100%;" class="input">
                 <div class="header" style="padding-left: 16px;"><label for="cb_add_tags">Tag affected records (auto-generated tag)</label></div>

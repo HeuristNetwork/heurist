@@ -57,17 +57,33 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         //fill header with description
         $('#div_header').html(window.hWin.HR('record_action_'+action_type));
         
+        var btn_start_action = $('#btn-ok').button({label:window.hWin.HR('Go')});
+        
         //fill selector for records: all, selected, by record type
-        selectRecordScope = $('#sel_record_scope')
-        .on('change',
-            function(e){
-                _onRecordScopeChange();
+        if(init_scope_type!=='noscope'){
+            
+            selectRecordScope = $('#sel_record_scope')
+            .on('change',
+                function(e){
+                    _onRecordScopeChange();
+                }
+            );
+            _fillSelectRecordScope();
+            
+            btn_start_action.addClass('ui-state-disabled'); //.click(_startAction);
+        }else{
+            
+            $('#sel_record_scope').parent().hide();
+            $('#cb_add_tags').parent().hide();
+            
+            if(action_type=='ownership'){
+                $('#div_sel_ownership').show();
+                _fillOwnership();
             }
-        );
-        _fillSelectRecordScope();
+            
+            btn_start_action.click(_startAction);
+        }
 
-        //init buttons
-        $('#btn-ok').button({label:window.hWin.HR('Go')}).addClass('ui-state-disabled'); //.click(_startAction);
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).click(function(){window.close();});
     }
 
@@ -233,6 +249,56 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         fieldSelect.onchange = _createInputElements;
         _createInputElements();
     }
+    
+    function _fillOwnership(){
+        
+        if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
+            var that = this;
+            //get details about Workgroups (names etc)
+            window.hWin.HAPI4.SystemMgr.mygroups(
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
+                        _fillOwnership();
+                    }
+            });
+            return;
+        }
+        
+        
+        var fieldSelect = $('#sel_Ownership');
+        
+        var sContent = 
+                '<option value="0">Everyone (no restriction)</option>'
+                +'<option value="'+window.hWin.HAPI4.currentUser['ugr_ID']+'">'
+                +window.hWin.HEURIST4.util.htmlEscape(window.hWin.HAPI4.currentUser['ugr_FullName'])+'</option>';
+        
+        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
+        for (var idx in groups)
+        {
+            if(idx){
+                var groupID = idx;
+                var name = groups[idx][1];
+                if(!window.hWin.HEURIST4.util.isnull(name))
+                {   
+                    sContent = sContent + '<option value="'+groupID+'">'
+                                + window.hWin.HEURIST4.util.htmlEscape(name)+'</option>';
+                }
+            }
+        }
+        fieldSelect.html(sContent);
+        
+        var currentOwner = window.hWin.HEURIST4.util.getUrlParameter('owner', window.location.search);
+        if(currentOwner>=0){
+            fieldSelect.val(currentOwner);
+        }
+        
+        var currentAccess = window.hWin.HEURIST4.util.getUrlParameter('access', window.location.search);
+        if(currentAccess){
+            $('#rb_Access-'+currentAccess).prop('checked', true);
+        }
+        
+    }
 
     //
     // crete editing_input element for selected field type
@@ -353,6 +419,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     //
     function _startAction(){
+        
+        if(init_scope_type=='noscope'){
+            if(action_type=='ownership'){
+                window.close({owner:$('#sel_Ownership').val(), 
+                              access:$('input[type="radio"][name="rb_Access"]:checked').val()});
+            }else{
+                //@todo implement noscope behviour for other types of action
+                window.close();
+            }
+            return;
+        }
 
         
         if(window.hWin.HEURIST4.util.isempty(selectRecordScope.val())){

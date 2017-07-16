@@ -133,7 +133,7 @@ $.widget( "heurist.editing_input", {
         }
 
         //header
-        if(this.options.show_header){
+        if(true || this.options.show_header){
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
@@ -190,6 +190,29 @@ $.widget( "heurist.editing_input", {
 
     /* private function */
     _refresh: function(){
+        if(this.f('rst_Visible')==false){
+            this.element.hide();    
+        }else{
+            this.element.show();    
+        }
+        
+        /*
+        if(this.options.showclear_button){
+            this.element.find('.btn_input_clear').css('visibility','visible');
+        }else{
+            this.element.find('.btn_input_clear').css('visibility','hidden');
+        }
+        */
+        if(this.options.show_header){
+            this.header.show();
+        }else{
+            this.header.hide();
+        }        
+    },
+    
+    _setOptions: function( ) {
+        this._superApply( arguments );
+        this._refresh();
     },
 
     // events bound via _on are removed automatically
@@ -802,7 +825,7 @@ $.widget( "heurist.editing_input", {
 
         //clear button
         //var $btn_clear = $( "<div>")
-        if(this.options.showclear_button)
+        if(false && this.options.showclear_button)
         {
 
             var $btn_clear = $('<button>',{
@@ -925,6 +948,7 @@ $.widget( "heurist.editing_input", {
 
         //clear previous inputs
         this.input_cell.find('.input-div').remove();
+        this.inputs = [];
 
         var isReadOnly = (this.options.readonly || this.f('rst_Display')=='readonly');
 
@@ -1007,25 +1031,33 @@ $.widget( "heurist.editing_input", {
     //
     //
     //
-    isChanged: function(){
+    isChanged: function(value){
 
-        if(this.options.readonly || this.f('rst_Display')=='readonly'){
-            return false;
+        if(value===true){
+            this.options.values = [''];
+            return true;
         }else{
-            if(this.options.values.length!=this.inputs.length){
-                return true;
-            }
-            var idx;
-            for (idx in this.inputs) {
-                var res = this._getValue(this.inputs[idx]);
-                
-                if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))
-                   && (this.options.values[idx]!=res)){
+        
+            if(this.options.readonly || this.f('rst_Display')=='readonly'){
+                return false;
+            }else{
+                if(this.options.values.length!=this.inputs.length){
                     return true;
                 }
+                var idx;
+                for (idx in this.inputs) {
+                    var res = this._getValue(this.inputs[idx]);
+                    
+                    if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))
+                       && (this.options.values[idx]!=res)){
+                        return true;
+                    }
+                }
             }
+        
+            return false;        
+        
         }
-        return false;        
     },
     
     //
@@ -1145,7 +1177,7 @@ $.widget( "heurist.editing_input", {
         var $inputdiv = $( "<div>" ).addClass('input-div').css({'font-weight':'bold'}).insertBefore(this.input_prompt);
 
         $inputdiv.html(disp_value);
-
+        
     }
 
 

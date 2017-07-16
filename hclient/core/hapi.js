@@ -296,6 +296,12 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'usr_get';
                 _callserver('usr_info', request, callback);
             }
+            
+            //get user full names by id
+            ,usr_names:function(request, callback){
+                if(request) request.a = 'usr_names';
+                _callserver('usr_info', request, callback);
+            }
 
             ,user_log: function(activity, suplementary){
                 var request = {a:'usr_log', activity:activity, suplementary:suplementary};

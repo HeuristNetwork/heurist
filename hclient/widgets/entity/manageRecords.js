@@ -376,10 +376,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         +window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
 +'<div class="btn-modify"/><div class="btn-config"/></div>'
 
-+'<div><label class="small-header">Owner:</label>'+that._getField('rec_OwnerUGrpID')+'<div class="btn-access"/></div>'
-+'<div style="padding-bottom:0.5em"><label class="small-header">Access:</label>'+that._getField('rec_NonOwnerVisibility')+'</div>'
++'<div><label class="small-header">Owner:</label><span id="recOwner">'
+    +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access"/></div>'
++'<div style="padding-bottom:0.5em"><label class="small-header">Access:</label><span id="recAccess">'
+    +that._getField('rec_NonOwnerVisibility')+'</span></div>'
 
-+'<div><label class="small-header">Added By:</label>'+that._getField('rec_AddedByUGrpID')+'</div>'
++'<div><label class="small-header">Added By:</label><span id="recAddedBy">'+that._getField('rec_AddedByUGrpID')+'</span></div>'
 +'<div><label class="small-header">Added:</label>'+that._getField('rec_Added')+'</div>'
 +'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')+'</div>';
 
@@ -398,7 +400,59 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access right'),
                         icons:{primary:'ui-icon-eye'}})
                     .css({float: 'right','margin-top': '0.8em', 'font-size': '0.8em', height: '18px'})
-                    .click();
+                    .click(function(){
+                    
+        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database+'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')+'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
+
+        window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:500,
+            padding: '0px',
+            resizeable:false,
+            title: window.hWin.HR('ownership'),
+            callback: function(context){
+
+                if(context && context.owner && context.access){
+                    
+                    var ele = that._editing.getFieldByName('rec_OwnerUGrpID');
+                    var vals = ele.editing_input('getValues');
+                    
+                    if(vals[0]!=context.owner){
+                        ele.editing_input('setValue',[context.owner]);
+                        ele.editing_input('isChanged', true);
+                        
+                        if(context.owner == window.hWin.HAPI4.currentUser['ugr_ID']){
+                            sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
+                        }else{
+                            sUserName = window.hWin.HAPI4.currentUser.usr_GroupsList[Number(context.owner)][1];
+                        }
+                        
+                        panel.find('#recOwner').html(sUserName);
+                    }
+
+                    ele = that._editing.getFieldByName('rec_NonOwnerVisibility');
+                    vals = ele.editing_input('getValues');
+                    if(vals[0]!=context.access){
+                        ele.editing_input('setValue',[context.access]);
+                        ele.editing_input('isChanged', true);
+                        panel.find('#recAccess').html(context.access);
+                    }
+                    that.onEditFormChange();
+                }
+                
+            },
+            class:'ui-heurist-bg-light'} );                    
+                    
+                    });
+            
+
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_OwnerUGrpID'),that._getField('rec_AddedByUGrpID')]},
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        panel.find('#recOwner').text(response.data[that._getField('rec_OwnerUGrpID')]);
+                        panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
+                    }
+            });
+            
+            
             
                 break;
             case 1:   //find all reverse links
@@ -486,6 +540,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 break;
             case 2:   //scrtachpad
             
+                //find field in hEditing
+                var ele = that._editing.getFieldByName('rec_ScratchPad');
+                ele.editing_input('option',{showclear_button:false, show_header:false});
+                ele[0].parentNode.removeChild(ele[0]);                
+                ele.find('textarea').attr('rows', 10).css('width','350px');
+                ele.show().appendTo(panel);
+            
                 break;
             case 3:   //private
             
@@ -542,22 +603,43 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var fieldNames = rectypes.typedefs.dtFieldNames;
                 var fi = rectypes.typedefs.dtFieldNamesToIndex;
 
+                /*
+                function __findFieldIdxById(id){
+                    for(var k in fields){
+                        if(fields[k]['dtID']==id){
+                            return k;
+                        }
+                    }
+                    return -1;
+                }
+                //hide url field
+                var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
+                if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='0'){
+                    fields[__findFieldIdxById('rec_URL')]['rst_Visible'] = false;
+                }
+                */
+                
                 var fi_type = fi['dty_Type'],
                     fi_name = fi['rst_DisplayName'],
                     fi_order = fi['rst_DisplayOrder'],
                     fi_maxval = fi['rst_MaxValues']; //need for proper repeat
                 
                 var s_fields = []; //sorted fields
-                for(var dt_ID in rfrs){
+                for(var dt_ID in rfrs){ //in rt structure
                     if(dt_ID>0){
                         rfrs[dt_ID]['dt_ID'] = dt_ID;
                         s_fields.push(rfrs[dt_ID]);
                     }
                 }
-                
                 //sort by order
                 s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
 
+                
+                //fields that are not included into structure - place them into separate group
+                // @todo
+                
+                
+                
                 var group_fields = null;
                 
                 for(var k=0; k<s_fields.length; k++){
@@ -609,6 +691,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 that._editing.initEditForm(fields, that._currentEditRecordset);
                 that._afterInitEditForm();
+
+                //show rec_URL 
+                var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
+                if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='1'){
+                    var ele = that._editing.getFieldByName('rec_URL');
+                    ele.show();
+                }
                 
                 if(that.editFormSummary && that.editFormSummary.length>0){
                     that.editFormSummary.accordion({
@@ -658,10 +747,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             if(fields==null) return; //validation failed
        
-            var request = {ID: this._currentEditID, RecTypeID: this._currentEditRecTypeID, 'details': fields};
+            var request = {ID: this._currentEditID, 
+                           RecTypeID: this._currentEditRecTypeID, 
+                           URL: fields['rec_URL'],
+                           OwnerUGrpID: fields['rec_OwnerUGrpID'],
+                           NonOwnerVisibility: fields['rec_NonOwnerVisibility'],
+                           ScratchPad: fields['rec_ScratchPad'],
+                           'details': fields};
         
             var that = this;                                    
-            
+
             that.onEditFormChange(true); //forcefully hide all "save" buttons
             
                 //that.loadanimation(true);
@@ -669,8 +764,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     function(response){
                         
                         //that.onEditFormChange();
-                        
-                        
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                             var recID = ''+response.data[0];
@@ -694,6 +787,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been saved'));
                             
                         }else{
+                            that.onEditFormChange(); //restore save buttons visibility
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });

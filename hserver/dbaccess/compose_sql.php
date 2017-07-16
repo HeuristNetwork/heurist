@@ -2572,7 +2572,7 @@ class LinkedToPredicate extends Predicate {
                 return '(1=0)';
             }else{
                 return 'exists (select * from defDetailTypes, recDetails bd '
-                . 'where bd.dtl_RecID in (' . join(',', $ids) .') and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
+                . 'where bd.dtl_RecID in (' . implode(',', $ids) .') and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
                 . '  and bd.dtl_Value=TOPBIBLIO.rec_ID)';
             }
         }
@@ -2587,7 +2587,7 @@ class LinkedToPredicate extends Predicate {
 class RelatedToPredicate extends Predicate {
     function makeSQL() {
         if ($this->value) {
-            $ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
+            $ids = "(" . implode(",", array_map("intval", explode(",", $this->value))) . ")";
             return "exists (select * from recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in $ids)
             or (rrc_SourceRecID=TOPBIBLIO.rec_ID and rrc_TargetRecID in $ids))";
         }
@@ -2602,7 +2602,7 @@ class RelatedToPredicate extends Predicate {
 class RelationsForPredicate extends Predicate {
     function makeSQL() {
         global $mysqli;
-        $ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
+        $ids = "(" . implode(",", array_map("intval", explode(",", $this->value))) . ")";
         /*
         return "exists (select * from recRelationshipsCache where ((rrc_TargetRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_SourceRecID=$id)
         or ((rrc_SourceRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_TargetRecID=$id))";

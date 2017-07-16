@@ -153,7 +153,7 @@ function hEditing(_options) {
             var currGroupType = null; //current accodion or tab control
             var groupTabHeader, groupEle;
             
-            //var groupEle,      //current accodion or tab control
+            //var groupEle,      //current accordion or tab control
             //    fieldContainer, groupTabHeader;
                 
             for (idx=0; idx<fields.length; idx++){

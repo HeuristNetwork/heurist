@@ -844,7 +844,7 @@ $.widget( "heurist.manageEntity", {
         
         if(!this._editing){
             this._editing = new hEditing({container:this.editForm, onchange:function(){
-                that.onEditFormChange()
+                that.onEditFormChange();
             }}); //pass container
             this._initEditForm_step1(recID);
             

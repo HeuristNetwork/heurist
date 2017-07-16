@@ -466,7 +466,7 @@ function hRecordAddLink() {
     $('<div style="line-height:2.5em;padding-left:20px"><input name="link_field" type="radio" id="cbsource_cb_0" '
             + ' data-party="source" value="0"'
     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
-    +'<label style="font-style:italic" for="cbsource_cb_0">Select record of any type and use reverse link</label><div>')
+    +'<label style="font-style:italic;line-height: 1em;" for="cbsource_cb_0">Reverse links: Add links to the target record rather than the current selection<br><span style="width:1.5em;display:inline-block;"/>(where appropriate record pointer or relationship marker fields exist in the target record)</label><div>')
                 .appendTo($('#source_field'))
                 .change(_createInputElement);
         }

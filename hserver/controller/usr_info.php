@@ -50,16 +50,16 @@
     }else{
 
         $mysqli = $system->get_mysqli();
+
+        //allowed actions for guest
+        $quest_allowed = array('login','logout','reset_password','svs_savetree','svs_gettree','usr_save','svs_get');
         
         if ($action=="sysinfo") {
             
             $res = $system->getCurrentUserAndSysInfo();
 
         }else        
-        //no enough permission for guest
-        if ( $system->get_user_id()<1 &&
-            !( $action=='login' || $action=='logout' || $action=='reset_password' || $action=='svs_savetree'  || $action=='svs_gettree'
-               || $action=='usr_save' || $action=='usr_get' || $action=='svs_get' ) ) {
+        if ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
 
             $response = $system->addError(HEURIST_REQUEST_DENIED);
 
@@ -117,7 +117,7 @@
 
                 $ugrID = $_REQUEST['UGrpID'];
 
-                if($system->is_admin2($ugrID)){
+                if($system->is_admin2($ugrID)){  //allowed for itself only
                     $res = user_getById($system->get_mysqli(), $ugrID);
                     if(is_array($res)){
                         $res['ugr_Password'] = '';
@@ -126,6 +126,10 @@
                     $system->addError(HEURIST_REQUEST_DENIED);
                 }
 
+            } else if ($action=="usr_names" && @$_REQUEST['UGrpID']) {
+                
+                $res = user_getNamesByIds($system->get_mysqli(), $_REQUEST['UGrpID']);
+                
             } else if ($action=="groups") {
 
                 $ugr_ID = @$_REQUEST['UGrpID']?$_REQUEST['UGrpID']:$system->get_user_id();

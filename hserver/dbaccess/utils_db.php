@@ -152,7 +152,9 @@
         $matches = null;
         if($mysqli){
             
-            $res = $mysqli->query("SELECT $key_column, $val_column FROM $table WHERE $condition");
+            $query = "SELECT $key_column, $val_column FROM $table WHERE $condition";
+ 
+            $res = $mysqli->query($query);
             if ($res){
                 $matches = array();
                 while ($row = $res->fetch_row()){

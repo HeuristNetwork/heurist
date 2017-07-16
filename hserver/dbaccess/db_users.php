@@ -69,6 +69,23 @@
     function user_getById($mysqli, $ugr_ID){
         return user_getByField($mysqli, 'ugr_ID', $ugr_ID);
     }
+    
+    function user_getNamesByIds($mysqli, $ugr_IDs){
+        
+        if(!is_array($ugr_IDs)){
+            $ugr_IDs = explode(',', $ugr_IDs);
+        }
+        $ugr_IDs = array_map('intval', $ugr_IDs);
+        if(count($ugr_IDs)>0){
+            return mysql__select_assoc($mysqli, 'sysUGrps', 'ugr_ID'
+                , 'IF(ugr_Type=\'workgroup\',ugr_Name,concat(ugr_FirstName, \' \', ugr_LastName))'
+                , 'ugr_ID in ('.implode(',',$ugr_IDs).')');
+        }else{
+            $system->addError(HEURIST_INVALID_REQUEST,'User ids are not defined');
+            return false;
+        }
+    }
+    
 
     /**
     * get db owner user or specific field of this user
