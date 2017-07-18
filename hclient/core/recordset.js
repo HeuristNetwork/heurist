@@ -41,8 +41,9 @@ function hRecordSet(initdata) {
     
     rectypes = [],      // unique list of record types with counts
     structures = null,  //record structure definitions for all rectypes in this record set
-    relationship = null; //relationship records within this recordset
-    
+    relationship = null, //relationship records within this recordset
+    relations_ids = null,  //this is object "direct","reverse","headers"
+
     limit_warning = null;
     
     var _progress = null,
@@ -76,6 +77,7 @@ function hRecordSet(initdata) {
                 records = response.records;  //$.isArray(records)
                 order = response.order;
                 relationship = response.relationship;
+                relations_ids = response.relations;
                 
                 fields_detail = response.fields_detail;
                 
@@ -117,7 +119,7 @@ function hRecordSet(initdata) {
     //
     //
     //
-    function getDetailsFieldTypes(){
+    function _getDetailsFieldTypes(){
         
         var dty_ids = null;
         if(fields_detail){
@@ -159,7 +161,7 @@ function hRecordSet(initdata) {
 
         var geofields = [], timefields = [];
         
-        var dty_ids = getDetailsFieldTypes(); 
+        var dty_ids = _getDetailsFieldTypes(); 
         
         if(!isnull(dty_ids) && window.hWin.HEURIST4){
 
@@ -390,7 +392,7 @@ function hRecordSet(initdata) {
         
         
         var record = records[forRecID];
-        var dty_ids = getDetailsFieldTypes(); 
+        var dty_ids = _getDetailsFieldTypes(); 
         var links = []; //{related, relation:0, rel_rt}
         
         if(!isnull(record) && !isnull(dty_ids) && window.hWin.HEURIST4){
@@ -1215,6 +1217,14 @@ function hRecordSet(initdata) {
                 
                 
             }
+        },
+        
+        getRelations:function(){
+            return relations_ids;    
+        },
+        
+        getDetailsFieldTypes:function(){
+            return _getDetailsFieldTypes();    
         },
         
         //

@@ -85,6 +85,15 @@ require_once(dirname(__FILE__)."/../initPage.php");
             function onPageInit(success){
                 if(success){
                     
+                    
+                // OLD H3 stuff
+                if(window.HEURIST && window.HAPI4.baseURL){
+                    window.HEURIST.baseURL  = window.HAPI4.baseURL;
+                    window.HEURIST.loadScript(window.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
+                    window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
+                    window.HEURIST.database = {  name: window.HAPI4.database };
+                }
+                    
                     //testUsers();
                     //testUsers();
                     
@@ -296,6 +305,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
     <!-- HTML -->
     <body>
+    
+        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
+        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
     
 <?php
             /*

@@ -217,10 +217,12 @@ function hRecordAddLink() {
     var _className = "RecordAddLink",
     _version   = "0.4",
 
-    source_ID, target_ID,
+    source_ID, target_ID, relmarker_dty_ID,
     sSourceName, sTargetName,
+    
+    onlyReverse,
 
-    source_RecTypeID,
+    source_RecTypeID, target_RecTypeID,
     selectRecordScope, allSelectedRectypes;
     
     
@@ -228,6 +230,17 @@ function hRecordAddLink() {
 
         //source record 
         source_ID = window.hWin.HEURIST4.util.getUrlParameter("source_ID", window.location.search);
+        //relmarker field type id 
+        relmarker_dty_ID = window.hWin.HEURIST4.util.getUrlParameter("dty_ID", window.location.search);
+        
+        onlyReverse = (window.hWin.HEURIST4.util.getUrlParameter("reverse", window.location.search)==1);
+        
+        if(source_ID>0 && relmarker_dty_ID>0){
+            $('#helpmsg').text('Select relation type and target record');
+        }else if(target_ID>0 && onlyReverse){
+            $('#helpmsg').text('Select source record and pointer(link) or relation type');
+        }
+        
         //destination record
         target_ID = window.hWin.HEURIST4.util.getUrlParameter("target_ID", window.location.search);
 
@@ -387,6 +400,13 @@ function hRecordAddLink() {
             if(!(field_type=='resource' || field_type=='relmarker')){
                  continue;
             }
+            if(relmarker_dty_ID>0){
+                if(party=='source' && relmarker_dty_ID==dty){
+                    
+                }else{
+                    continue;
+                }
+            }
             
             var details = window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields[dty];
 
@@ -420,7 +440,8 @@ function hRecordAddLink() {
                  dtyName = dtyName + ' [ reverse link, target to source ]';
                 
                 //add UI elements
-    $('<div style="line-height:2.5em;padding-left:20px"><input name="link_field" type="radio" id="cb'+party+'_cb_'+dty+'" '
+    $('<div class="field_item" style="line-height:2.5em;padding-left:20px">'
+    +'<input name="link_field" type="radio" id="cb'+party+'_cb_'+dty+'" '
     +(isAlready?'disabled checked="checked"'
         :' data-party="'+party+'" value="'+dty+'" data-type="'+field_type+'"')
     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
@@ -442,6 +463,7 @@ function hRecordAddLink() {
                     
                     window.hWin.HEURIST4.ui.createTermSelectExt($('#rec'+party+'_sel_'+dty).get(0), 
                             'relation', terms, terms_dis, currvalue, null, false);    
+                    
                 }else{
                     $('#rec'+party+'_sel_'+dty).hide();   //hide relatiion type selector
                 }
@@ -455,6 +477,14 @@ function hRecordAddLink() {
             }
             
         }//for fields
+        
+        if(relmarker_dty_ID>0){
+            //hide radio - since it is the only one field in list
+            $('#source_field').find('.field_item').css('padding-left','0');
+            $('#source_field').find('input[type=radio]').hide().click(); //prop('checked',true).
+            $('#source_field').find('label').text('Relation type:').css('font-style','normal');
+        }
+                            
         
         if(party=='source' && window.hWin.HEURIST4.util.isempty(source_ID)){
 
@@ -561,7 +591,7 @@ function hRecordAddLink() {
         };
 
         $("<div>").attr('id','target_record')
-                    .css({'padding-left':'40px'})
+                    .css({'padding-left':'70px'})
                     .editing_input(ed_options).appendTo($fieldset)
                     .find('input').css({'font-weight':'bold'});
     }
@@ -594,14 +624,17 @@ function hRecordAddLink() {
             
                 var record = resdata.getById(rec_id);
                 var rec_title = resdata.fld(record, 'rec_Title');
+
+                var recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
                 
                 if(party=='source'){
                     sSourceName = rec_title;    
+                    source_RecTypeID = recRecTypeID;
                 }else{
                     sTargetName = rec_title;    
+                    target_RecTypeID = recRecTypeID;
                 }
                 
-                var recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
 
                 rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
                 $('#'+party+'_title').text(rec_title);
@@ -616,6 +649,7 @@ function hRecordAddLink() {
                 $('#div_'+party+'1').css('display','inline-block');
                 if(party=='target'){
                     if(target_ID>0){
+                        target_RecTypeID = recRecTypeID;
                         $('#target_title').show();    
                     }else{
                         $('#target_title').hide();        
@@ -706,6 +740,8 @@ function hRecordAddLink() {
             sourceIDs = currentScope;
             targetIDs = [(target_ID>0) ?target_ID :getFieldValue('target_record')];
         }
+        
+        var res = {};
 
         if(data_type=='resource'){
             
@@ -717,6 +753,9 @@ function hRecordAddLink() {
                             val:    targetIDs[idx]});
                    }
                 }
+                
+                res = {rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID };
+                
         }else{ //relmarker
 
                 var rl_ele = $('#rec'+(isReverce?'target':'source')+'_sel_'+dtyID);
@@ -730,6 +769,7 @@ function hRecordAddLink() {
                     details['t:'+DT_RELATION_TYPE] = [ termID ];
                     details['t:'+DT_TARGET_RESOURCE] = [ isReverce?targetIDs[idx]:targetIDs[0] ];
                     
+                    
                     if(window.hWin.HEURIST4.util.isempty(sSourceName)){
                        var record = window.hWin.HAPI4.currentRecordset.getById( isReverce?sourceIDs[0]:sourceIDs[idx] );
                        sSourceName =  window.hWin.HAPI4.currentRecordset.fld(record, 'rec_Title');
@@ -739,24 +779,25 @@ function hRecordAddLink() {
                        sTargetName =  window.hWin.HAPI4.currentRecordset.fld(record, 'rec_Title');
                     }
                     
+                    
                     requests.push({a: 'save',    //add new relationship record
                         ID:-1, //new record
                         RecTypeID: RT_RELATION,
-                        RecTitle: 'Relationship ('+sSourceName+' '+sRelation+' '+sTargetName+')',
+                        //RecTitle: 'Relationship ('+sSourceName+' '+sRelation+' '+sTargetName+')',
                         details: details });
+                     
                 }//for
+                res = {rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID, 
+                    relation_recID:0, trm_ID:termID };
         }
         
-        addLinkOrRelation(0, requests);
-  
-//console.log(requests);  
-        
+        addLinkOrRelation(0, requests, res);
     }
 
     //
     // individual action
     //
-    function addLinkOrRelation(idx, requests){
+    function addLinkOrRelation(idx, requests, res){
 
         if(idx<requests.length){
 
@@ -766,8 +807,11 @@ function hRecordAddLink() {
             
             function __callBack(response){
                     if(response.status == hWin.HAPI4.ResponseStatus.OK){
+                        if(requests[idx].a=='s'){
+                            res.relation_recID = response.data; //add rec id
+                        }
                         idx = idx + 1;
-                        addLinkOrRelation(idx, requests);
+                        addLinkOrRelation(idx, requests, res);
                     }else{
                         hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -779,7 +823,8 @@ function hRecordAddLink() {
                 window.hWin.HAPI4.RecordMgr.save(request, __callBack);
             }
         }else if(requests.length>0){
-            window.close('Link'+(requests.length>1?'s':'')+' created...');
+            res.count = requests.length;
+            window.close(res);//'Link'+(requests.length>1?'s':'')+' created...');
         }
     }
        

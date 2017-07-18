@@ -37,6 +37,22 @@
             // Callback function on page initialization
             function onPageInit(success){
                 if(success){
+                    
+                    // OLD H3 stuff
+                    if(window.hWin){
+                        win = window.hWin;
+                    }else{
+                        win = window;
+                    }
+                    
+                    if(win.HEURIST && win.HAPI4.baseURL){
+                        win.HEURIST.baseURL  = win.HAPI4.baseURL;
+                        win.HEURIST.loadScript(win.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + win.HAPI4.database);
+                        win.HEURIST.iconBaseURL = win.HAPI4.iconBaseURL;
+                        win.HEURIST.database = {  name: win.HAPI4.database };
+                    }
+                    
+                    
                     var $container = $("<div>").appendTo($("body"));
                     
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
@@ -97,5 +113,8 @@
         </script>
     </head>
     <body>
+        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
+        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
+    
     </body>
 </html>

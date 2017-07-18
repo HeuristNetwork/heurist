@@ -187,6 +187,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var recset_length = recset.length();
 
                 var btn_array = [
+                                  /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+                            click: function() { that._initEditForm_continue(that._currentEditID) }},  //reload edit form*/
                                   {text:window.hWin.HR('Duplicate'), id:'btnRecDuplicate',
                                   css:{'display':((that._currentEditID>0)?'inline-block':'none')},
                             click: function(event) { 
@@ -300,6 +302,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //togglerContent_closed:  '&nbsp;',
                         east:{
                             size: 400,
+                            maxWidth:800,
                             spacing_open:6,
                             spacing_closed:16,  
                             togglerAlign_open:'center',
@@ -370,11 +373,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var recRecTypeID = that._getField('rec_RecTypeID');
                 sContent =  
 '<div style="margin:10px;bacground:none;"><div style="padding-bottom:0.5em">'
-+'<img src="'+ph_gif+'" style="vertical-align:top;margin-left:10px;background-image:url(\''
-                        +top.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
-+'<h2 class="truncate" style="max-width:400px;display:inline-block;margin-left:5px;">'
-                        +window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
-+'<div class="btn-modify"/><div class="btn-config"/></div>'
+
++'<h2 class="truncate rectypeHeader" style="display:inline-block;" style="max-width:400px;margin-left:5px;">'
+                + '<img src="'+ph_gif+'" style="vertical-align:top;margin-left:10px;background-image:url(\''
+                + top.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
+                + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
++'<select class="rectypeSelect" style="display:none"></select>'
++'<div class="btn-config2"/><div class="btn-config"/><div class="btn-modify"/></div>'
 
 +'<div><label class="small-header">Owner:</label><span id="recOwner">'
     +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access"/></div>'
@@ -387,15 +392,48 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 $(sContent).appendTo(panel);
                 //activate buttons
+                panel.find('.btn-config2').button({text:false,label:top.HR('Modify record type structure in new window'),
+                        icons:{primary:'ui-icon-extlink'}})
+                    .css({float: 'right','font-size': '0.8em', height: '18px'})
+                    .click(function(){
+                        that.editRecordTypeOnNewTab();
+                    });
+                    
                 panel.find('.btn-config').button({text:false,label:top.HR('Modify record type structure'),
                         icons:{primary:'ui-icon-gear'}})
                     .css({float: 'right','font-size': '0.8em', height: '18px'})
-                    .click();
-                
-                panel.find('.btn-modify').button({text:false,label:top.HR('Change record type'),
+                    .click(function(){that.editRecordType();});
+
+                    
+                panel.find('.btn-modify').button({text:false, label:top.HR('Change record type'),
                         icons:{primary:'ui-icon-pencil'}})
                     .css({float: 'right','font-size': '0.8em', height: '18px'})
-                    .click();
+                    .click(function(){
+                         var selRt = panel.find('.rectypeSelect');
+                         var selHd = panel.find('.rectypeHeader');
+                         if(selRt.is(':visible')){
+                             selRt.hide();
+                             selHd.css({'display':'inline-block'});
+                             
+                         }else{
+                             selRt.css({'display':'inline-block'});
+                             selHd.hide();
+                             if(selRt.is(':empty')){
+                                window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0));    
+                                selRt.change(function(){
+                                    
+                                      that._editing.assignValuesIntoRecord();
+                                      var record = that._currentEditRecordset.getFirstRecord();
+                                      that._currentEditRecordset.setFld(record, 'rec_RecTypeID', selRt.val());
+                                      that._initEditForm_finalize(null);
+                                });
+                             }
+                             selRt.val(recRecTypeID);
+                         }
+                        
+                         
+                    });
+                    
 
                 panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access right'),
                         icons:{primary:'ui-icon-eye'}})
@@ -456,87 +494,80 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                 break;
             case 1:   //find all reverse links
+            
+                var relations = that._currentEditRecordset.getRelations();    
+                var direct = relations.direct;
+                var reverse = relations.reverse;
+                var headers = relations.headers;
+                var ele1=null, ele2=null;
+                
+                //relations                            
+                var sRel_Ids = [];
+                for(var k in direct){
+                    if(direct[k]['trmID']>0){ //relation    
+                        var targetID = direct[k].targetID;
+                        sRel_Ids.push(targetID);
+                        
+                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
+                            {rec_ID: targetID, 
+                             rec_Title: headers[targetID][0], 
+                             rec_RecTypeID: headers[targetID][1], 
+                             relation_recID: direct[k]['relationID'], 
+                             trm_ID: direct[k]['trmID']}, true);
+                        if(!ele1) ele1 = ele;     
+                    }
+                }
+                for(var k in reverse){
+                    if(reverse[k]['trmID']>0){ //relation    
+                        var sourceID = reverse[k].sourceID;
+                        sRel_Ids.push(sourceID);
+                        
+                        var invTermID = window.hWin.HEURIST4.ui.getInverseTermById(reverse[k]['trmID']);
+                        
+                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
+                            {rec_ID: sourceID, 
+                             rec_Title: headers[sourceID][0], 
+                             rec_RecTypeID: headers[sourceID][1], 
+                             relation_recID: reverse[k]['relationID'], 
+                             trm_ID: invTermID}, true);
+                        if(!ele1) ele1 = ele;     
+                    }
+                }
+
+                var sLink_Ids = [];
+                for(var k in reverse){
+                    if(!(reverse[k]['trmID']>0)){ //links    
+                        var sourceID = reverse[k].sourceID;
+                        sLink_Ids.push(sourceID);
+                        
+                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
+                            {rec_ID: sourceID, 
+                             rec_Title: headers[sourceID][0], 
+                             rec_RecTypeID: headers[sourceID][1]}, true);
+                        if(!ele2) ele2 = ele;     
+                    }
+                }
+                
+                if(sRel_Ids.length>0){
+                    $('<div class="detailRowHeader">Related</div>').insertBefore(ele1);
+                }
+                if(sLink_Ids.length>0){
+                    $('<div class="detailRowHeader">Linked from</div>').insertBefore(ele2);
+                }
+
+                panel.css({'font-size':'0.9em','line-height':'1.5em','overflow':'hidden !important'});
+                            
+/*            
                 window.hWin.HAPI4.RecordMgr.search_related({ids:this._currentEditID}, //direction: -1}, 
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            var direct = response.data.direct;
-                            var reverse = response.data.reverse;
-                            var headers = response.data.headers;
-                            
-                            //relations                            
-                            sRels = '';
-                            sLinks = '';
-                            for(var k in direct){
-                                if(direct[k]['trmID']>0){ //relation    
-                                sRels = sRels + '<div class="detailRow" style="display:table-row">' 
-                + '<div class="detailType">'+window.hWin.HEURIST4.ui.getTermValue(direct[k]['trmID'])+'</div>'
-                + '<div class="detail truncate" style="max-width:250">'
-                + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
-                +top.HAPI4.iconBaseURL+headers[direct[k].targetID][1]
-                +'\');"/><a target=_new href="#" data-recID="'+direct[k].targetID+'">'
-                +window.hWin.HEURIST4.util.htmlEscape(headers[direct[k].targetID][0])+'</a></div></div>';
-                                }
-                            }
-                            
-                            for(var k in reverse){
-
-                                 var s ='';   
-                                 if(reverse[k]['trmID']>0){ //relation
-                                        var invTermID = window.hWin.HEURIST4.ui.getInverseTermById(reverse[k]['trmID']);
-                                        s = window.hWin.HEURIST4.ui.getTermValue(invTermID);
-                                 }
-                                 
-                                s = '<div class="detailRow" style="display:table-row"><div class="detailType">' + s 
-                                + '</div><div class="detail truncate" style="max-width:250">'
-                + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
-                + top.HAPI4.iconBaseURL+headers[reverse[k].sourceID][1]
-                +'\');"/><a target=_new href="#" data-recID="'+reverse[k].sourceID+'">'
-                + window.hWin.HEURIST4.util.htmlEscape(headers[reverse[k].sourceID][0])+'</a></div></div>';
-                                                                   
-                                if(reverse[k]['trmID']>0){ //relation
-                                    sRels = sRels + s;
-                                }else{//link
-                                    sLinks = sLinks + s;   
-                                }
-                            }
-                            
-                            if(sRels!=''){
-                                sRels = '<div class="detailRowHeader">Related'+ sRels + '</div>';
-                            }
-                            if(sLinks!=''){
-                                sLinks = '<div class="detailRowHeader">LINKED FROM'+ sLinks + '</div>';
-                            }
-                            
-                            $(sRels+sLinks).appendTo(panel);
-                            panel.css({'font-size':'0.9em','line-height':'1.5em','overflow':'hidden !important'});
-                            
-                            panel.find('a').click(function(event){
-                                event.preventDefault();
-                                
-                                var url = window.hWin.HAPI4.baseURL +
-                                'hclient/framecontent/recordEdit.php?popup=1&db='+window.hWin.HAPI4.database+
-                                '&q=ids:'+ $(event.target).attr('data-recID');
-                                
-                                window.hWin.HEURIST4.msg.showDialog(url, {height:640, width:1200,
-                                    padding:0,
-                                    title: window.hWin.HR('Edit linked record'),
-                                    class:'ui-heurist-bg-light',
-                                    callback: function(recordset){
-                                        if( window.hWin.HEURIST4.util.isRecordSet(recordset) ){
-                                            var record = recordset.getFirstRecord();
-                                            $(event.target).text(
-                                                window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title')));
-                                        }
-                                    }
-                                } );
-                                
-                            });        
                                     
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     }
                 );
+*/                
                 break;
             case 2:   //scrtachpad
             
@@ -544,7 +575,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var ele = that._editing.getFieldByName('rec_ScratchPad');
                 ele.editing_input('option',{showclear_button:false, show_header:false});
                 ele[0].parentNode.removeChild(ele[0]);                
-                ele.find('textarea').attr('rows', 10).css('width','350px');
+                ele.css({'display':'block','width':'99%'});
+                ele.find('textarea').attr('rows', 10).css('width','100%');
                 ele.show().appendTo(panel);
             
                 break;
@@ -556,6 +588,70 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
 
         if(idx>1) $(sContent).appendTo(panel);
+        
+    },
+
+
+    //
+    // Open Edit record structure on new tab
+    //
+    editRecordTypeOnNewTab: function(){
+
+        var that = this;
+        
+        var smsg = "<p>Changes made to the record type will not become active until you reload this page (hit page reload in your browser).</p>";
+        
+        if(this._editing.isModified()){
+            var smsg = smsg + "<br/>Please SAVE the record first in order not to lose data";
+        }
+        window.hWin.HEURIST4.msg.showMsgDlg(smsg);
+
+        var url = window.hWin.HAPI4.baseURL + 'admin/adminMenuStandalone.php?db='
+            +window.hWin.HAPI4.database
+            +'&mode=rectype&rtID='+that._currentEditRecTypeID;
+        window.open(url, '_blank');
+    },
+    
+    //
+    //
+    //
+    editRecordType: function(){
+
+        var that = this;
+        
+        if(this._editing.isModified()){
+            
+                var sMsg = "Click YES to save changes and modify the record structure.<br>"
+                            +"If you are unable to save changes, click Cancel and open<br>"
+                            +"structure modification in a new tab (button next to clicked one)";
+                window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
+                    
+                        that._saveEditAndClose(function(){
+                            that._editing.initEditForm(null, null); //clear edit form
+                            that._initEditForm_continue(that._currentEditID); //reload edit form                       
+                            that.editRecordType();
+                        })
+                });   
+                return;         
+        }
+        
+
+        var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='+window.hWin.HAPI4.database
+            +'&rty_ID='+that._currentEditRecTypeID;
+
+        var body = $(window.hWin.document).find('body');
+            
+        window.hWin.HEURIST4.msg.showDialog(url, {
+            height: body.innerHeight()*0.9,
+            width: 860,
+            padding: '0px',
+            title: window.hWin.HR('Edit record structure'),
+            callback: function(context){
+                    if(!top.HEURIST.util.isnull(context) && context) {
+                        that._initEditForm_continue(that._currentEditID); //reload form
+                    }
+            }
+        });        
         
     },
     
@@ -583,134 +679,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var that = this;
         
-        function __load(response){
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                
-                //@todo - move navigation for recordset into editing
-                that._currentEditRecordset = new hRecordSet(response.data);
-                
-                var rectypeID = that._getField('rec_RecTypeID');
-                var rectypes = window.hWin.HEURIST4.rectypes;
-                var rfrs = rectypes.typedefs[rectypeID].dtFields;
-                
-                //pass structure and record details
-                that._currentEditID = that._getField('rec_ID');;
-                that._currentEditRecTypeID = rectypeID;
-                
-                //@todo - move it inside editing
-                //convert structure - 
-                var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields);
-                var fieldNames = rectypes.typedefs.dtFieldNames;
-                var fi = rectypes.typedefs.dtFieldNamesToIndex;
-
-                /*
-                function __findFieldIdxById(id){
-                    for(var k in fields){
-                        if(fields[k]['dtID']==id){
-                            return k;
-                        }
-                    }
-                    return -1;
-                }
-                //hide url field
-                var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
-                if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='0'){
-                    fields[__findFieldIdxById('rec_URL')]['rst_Visible'] = false;
-                }
-                */
-                
-                var fi_type = fi['dty_Type'],
-                    fi_name = fi['rst_DisplayName'],
-                    fi_order = fi['rst_DisplayOrder'],
-                    fi_maxval = fi['rst_MaxValues']; //need for proper repeat
-                
-                var s_fields = []; //sorted fields
-                for(var dt_ID in rfrs){ //in rt structure
-                    if(dt_ID>0){
-                        rfrs[dt_ID]['dt_ID'] = dt_ID;
-                        s_fields.push(rfrs[dt_ID]);
-                    }
-                }
-                //sort by order
-                s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
-
-                
-                //fields that are not included into structure - place them into separate group
-                // @todo
-                
-                
-                
-                var group_fields = null;
-                
-                for(var k=0; k<s_fields.length; k++){
-                    
-                    rfr = s_fields[k];
-                    
-                    if(rfr[fi_type]=='separator'){
-                        if(group_fields!=null){
-                            fields[fields.length-1].children = group_fields;
-                        }
-                        var dtGroup = {
-                            groupHeader: rfr[fi_name],
-                            groupType: 'group', //accordion, tabs, group
-                            groupStyle: {},
-                            children:[]
-                        };
-                        fields.push(dtGroup);
-                        group_fields = [];
-                    }else {
-                    
-                        var dtFields = {};
-                        for(idx in rfr){
-                            if(idx>=0){
-                                dtFields[fieldNames[idx]] = rfr[idx];
-                                
-                                if(idx==fi_type){ //fieldNames[idx]=='dty_Type'){
-                                    if(dtFields[fieldNames[idx]]=='file'){
-                                        dtFields['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
-                                    }   
-                                }else if(idx==fi_maxval){
-                                    if(window.hWin.HEURIST4.util.isnull(dtFields[fieldNames[idx]])){
-                                        dtFields[fieldNames[idx]] = 0;
-                                    }
-                                }
-                            }
-                        }//for
-                        
-                        if(group_fields!=null){
-                            group_fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
-                        }else{
-                            fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
-                        }
-                    }
-                }//for rfrs
-                //add children to last group
-                if(group_fields!=null){
-                    fields[fields.length-1].children = group_fields;
-                }
-                
-                that._editing.initEditForm(fields, that._currentEditRecordset);
-                that._afterInitEditForm();
-
-                //show rec_URL 
-                var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
-                if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='1'){
-                    var ele = that._editing.getFieldByName('rec_URL');
-                    ele.show();
-                }
-                
-                if(that.editFormSummary && that.editFormSummary.length>0){
-                    that.editFormSummary.accordion({
-                        active:0
-                    });
-                }
-                
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-            }
-        }        
-        
-
         //clear content of accordion
         if(this.editFormSummary && this.editFormSummary.length>0){
             this.editFormSummary.find('.summary-content').empty();
@@ -721,12 +689,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record
             
-            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"complete", l:1}, __load);
+            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"complete", l:1}, 
+                        function(response){ that._initEditForm_finalize(response); });
 
         }else if(recID<0 && this._currentEditRecTypeID>0){ //add new record
             //this._currentEditRecTypeID is set in add button
             window.hWin.HAPI4.RecordMgr.add( {rt:this._currentEditRecTypeID, temp:1}, //ro - owner,  rv - visibility
-                        __load);
+                        function(response){ that._initEditForm_finalize(response); });
         }
         
         
@@ -734,6 +703,203 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         return;
     },
+    
+    //
+    //
+    //
+    _getFakeRectypeField: function(detailTypeID){
+        
+        var dt = window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]['commonFields'];
+        
+        var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+        var dtyFieldNamesIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+           
+        //init array 
+        var ffr = [];
+        var l = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames.length;
+        var i;
+        for (i=0; i<l; i++){ffr.push("");}
+            
+        ffr[fieldIndexMap['rst_DisplayName']] = dt?dt[dtyFieldNamesIndexMap['dty_Name']]:'Fake field';
+        ffr[fieldIndexMap['dty_FieldSetRectypeID']] = dt?dt[dtyFieldNamesIndexMap['dty_FieldSetRectypeID']] : 0;
+        ffr[fieldIndexMap['dty_TermIDTreeNonSelectableIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
+        ffr[fieldIndexMap['rst_TermIDTreeNonSelectableIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
+        ffr[fieldIndexMap['rst_MaxValues']] = 1;
+        ffr[fieldIndexMap['rst_MinValues']] = 0;
+        ffr[fieldIndexMap['rst_CalcFunctionID']] = null;
+        ffr[fieldIndexMap['rst_DefaultValue']] = null;
+        ffr[fieldIndexMap['rst_DisplayDetailTypeGroupID']] = (dt?dt[dtyFieldNamesIndexMap['dty_DetailTypeGroupID']]:"");
+        ffr[fieldIndexMap['rst_DisplayExtendedDescription']] = (dt?dt[dtyFieldNamesIndexMap['dty_ExtendedDescription']]:"");
+        ffr[fieldIndexMap['rst_DisplayHelpText']] = (dt?dt[dtyFieldNamesIndexMap['dty_HelpText']]:"");
+        ffr[fieldIndexMap['rst_DisplayOrder']] = 999;
+        ffr[fieldIndexMap['rst_DisplayWidth']] = 50;
+        ffr[fieldIndexMap['rst_FilteredJsonTermIDTree']] = (dt?dt[dtyFieldNamesIndexMap['dty_JsonTermIDTree']]:"");
+        ffr[fieldIndexMap['rst_LocallyModified']] = 0;
+        ffr[fieldIndexMap['rst_Modified']] = 0;
+        ffr[fieldIndexMap['rst_NonOwnerVisibility']] = (dt?dt[dtyFieldNamesIndexMap['dty_NonOwnerVisibility']]:"viewable");
+        ffr[fieldIndexMap['rst_OrderForThumbnailGeneration']] = 0;
+        ffr[fieldIndexMap['rst_OriginatingDBID']] = 0;
+        ffr[fieldIndexMap['rst_PtrFilteredIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']]:"");
+        ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
+        ffr[fieldIndexMap['rst_RequirementType']] = 'optional';
+        ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");
+        ffr[fieldIndexMap['dty_Type']] = (dt?dt[dtyFieldNamesIndexMap['dty_Type']]:"freetext");
+        
+        return ffr;
+    },
+    
+    //
+    // prepare fields and init editing
+    //
+    _initEditForm_finalize: function(response){
+        
+        var that = this;
+        
+        if(response==null || response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            
+            if(response){
+                that._currentEditRecordset = new hRecordSet(response.data);
+            }
+            
+            var rectypeID = that._getField('rec_RecTypeID');
+            var rectypes = window.hWin.HEURIST4.rectypes;
+            var rfrs = rectypes.typedefs[rectypeID].dtFields;
+            
+            //pass structure and record details
+            that._currentEditID = that._getField('rec_ID');;
+            that._currentEditRecTypeID = rectypeID;
+            
+            //@todo - move it inside editing
+            //convert structure - 
+            var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields);
+            var fieldNames = rectypes.typedefs.dtFieldNames;
+            var fi = rectypes.typedefs.dtFieldNamesToIndex;
+
+            /*
+            function __findFieldIdxById(id){
+                for(var k in fields){
+                    if(fields[k]['dtID']==id){
+                        return k;
+                    }
+                }
+                return -1;
+            }
+            //hide url field
+            var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
+            if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='0'){
+                fields[__findFieldIdxById('rec_URL')]['rst_Visible'] = false;
+            }
+            */
+            
+            var fi_type = fi['dty_Type'],
+                fi_name = fi['rst_DisplayName'],
+                fi_order = fi['rst_DisplayOrder'],
+                fi_maxval = fi['rst_MaxValues']; //need for proper repeat
+            
+            var s_fields = []; //sorted fields
+            var fields_ids = [];
+            for(var dt_ID in rfrs){ //in rt structure
+                if(dt_ID>0){
+                    rfrs[dt_ID]['dt_ID'] = dt_ID;
+                    s_fields.push(rfrs[dt_ID]);
+                    fields_ids.push(dt_ID);
+                }
+            }
+            //sort by order
+            s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
+
+            //add non-standard fields that are not in structure
+            var field_in_recset = that._currentEditRecordset.getDetailsFieldTypes();
+            var addhead = true;
+            for(var k=0; k<field_in_recset.length; k++){
+                if(fields_ids.indexOf(field_in_recset[k])<0){
+                    if(addhead){                    
+                        var rfr = that._getFakeRectypeField(1);
+                        rfr[fi_name] = 'Non-standard record type fields for this record';
+                        rfr[fi_type] = 'separator';
+                        s_fields.push(rfr);
+                        addhead = false;
+                    }
+                    s_fields.push(that._getFakeRectypeField(field_in_recset[k]));
+                }
+                
+                
+            }           
+            
+             
+            
+            var group_fields = null;
+            
+            for(var k=0; k<s_fields.length; k++){
+                
+                rfr = s_fields[k];
+                
+                if(rfr[fi_type]=='separator'){
+                    if(group_fields!=null){
+                        fields[fields.length-1].children = group_fields;
+                    }
+                    var dtGroup = {
+                        groupHeader: rfr[fi_name],
+                        groupType: 'group', //accordion, tabs, group
+                        groupStyle: {},
+                        children:[]
+                    };
+                    fields.push(dtGroup);
+                    group_fields = [];
+                }else {
+                
+                    var dtFields = {};
+                    for(idx in rfr){
+                        if(idx>=0){
+                            dtFields[fieldNames[idx]] = rfr[idx];
+                            
+                            if(idx==fi_type){ //fieldNames[idx]=='dty_Type'){
+                                if(dtFields[fieldNames[idx]]=='file'){
+                                    dtFields['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
+                                }
+                                
+                            }else if(idx==fi_maxval){
+                                if(window.hWin.HEURIST4.util.isnull(dtFields[fieldNames[idx]])){
+                                    dtFields[fieldNames[idx]] = 0;
+                                }
+                            }
+                        }
+                    }//for
+                    
+                    if(group_fields!=null){
+                        group_fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                    }else{
+                        fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                    }
+                }
+            }//for s_fields
+            //add children to last group
+            if(group_fields!=null){
+                fields[fields.length-1].children = group_fields;
+            }
+            
+            that._editing.initEditForm(fields, that._currentEditRecordset);
+            that._afterInitEditForm();
+
+            //show rec_URL 
+            var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
+            if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='1'){
+                var ele = that._editing.getFieldByName('rec_URL');
+                ele.show();
+            }
+            
+            if(that.editFormSummary && that.editFormSummary.length>0){
+                that.editFormSummary.accordion({
+                    active:0
+                });
+            }
+            
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response);
+        }
+    },        
+    
+
     
     
     //  -----------------------------------------------------
@@ -772,7 +938,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             //that._afterSaveEventHandler( recID, fields);
                             //
                             
-                            if(afterAction=='close'){
+                            if($.isFunction(afterAction)){
+                               
+                               afterAction.call(); 
+                                
+                            }else if(afterAction=='close'){
                                 that._currentEditID = null;
                                 that._currentEditRecordset.setFld(
                                         that._currentEditRecordset.getFirstRecord(),'rec_Title',rec_Title);
@@ -809,6 +979,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ele.find('#btnRecSave').css('visibility', mode);
         ele.find('#btnRecSaveAndClose').css('visibility', mode);
         
+        //ele.find('#btnRecReload').css('visibility', !mode);
     },
     
     //

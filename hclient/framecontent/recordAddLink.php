@@ -44,10 +44,10 @@ require_once(dirname(__FILE__)."/initPage.php");
 <body style="overflow:hidden">
 
         <div id="mainForm" class="popup_content_div" class="ui-widget-content">
-            <label>Choose the field(s) on wich to create the link(s)</label>
+            <label id="helpmsg">Choose the field(s) on wich to create the link(s)</label>
             <br><br>
             
-            <label xstyle="vertical-align: top; padding-top:4px">Source:</label>
+            <label style="vertical-align: top; padding-top:4px">Source:</label>
             <div id="div_source1" style="display:inline-block;">
                 <img src='../assets/16x16.gif' id="source_rectype_img" 
                     style="vertical-align:top;margin-left:10px;" />

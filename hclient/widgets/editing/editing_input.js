@@ -23,7 +23,8 @@ $.widget( "heurist.editing_input", {
     // default options
     options: {
         varid:null,  //id to create imput id, otherwise it is combination of index and detailtype id
-        recID: null,  //record id for current record - required for relation marker, file
+        recID: null,  //record id for current record - required for relation marker and file
+        recordset:null, //reference to parent recordset
 
         //field desription is taken from window.hWin.HEURIST4.rectypes
         rectypes: null,  // reference to window.hWin.HEURIST4.rectypes - defRecStructure
@@ -333,7 +334,7 @@ $.widget( "heurist.editing_input", {
     */
     _addInput: function(value) {
 
-        if(!this.inputs){
+        if(!this.inputs){//init
             this.inputs = [];
         }
 
@@ -413,6 +414,146 @@ $.widget( "heurist.editing_input", {
                 $input.val(value);
             }
 
+        }else if(this.detailType=="relmarker"){ 
+            
+                this.options.showclear_button = false;
+
+                var __show_addlink_dialog = function(){
+                            var url = window.hWin.HAPI4.baseURL 
+                                +'hclient/framecontent/recordAddLink.php?db='+window.hWin.HAPI4.database
+                                +'&source_ID=' + that.options.recID
+                                +'&dty_ID=' + that.options.dtID;
+                            
+                            window.hWin.HEURIST4.msg.showDialog(url, {height:380, width:600,
+                                title: window.hWin.HR('Add relationship'),
+                                class:'ui-heurist-bg-light',
+                                callback: function(context){
+                                    
+                                    //add new element
+                //context = {rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID,                     relation_recID:0, trm_ID:termID };
+                                    if(context && context.count>0){
+                                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
+                                            context, true);
+                                        ele.appendTo($inputdiv);
+                                    }
+                                    
+                                }
+                            } );
+                };
+            
+            
+                if(this.inputs.length==0){ //show current relations
+            
+                var sRels = '';
+                if(that.options.recordset){
+                    
+                    var relations = that.options.recordset.getRelations();
+                    if(relations && relations.direct){
+                        
+                        var ptrset = that.f('rst_PtrFilteredIDs');
+                        var allTerms = this.f('rst_FilteredJsonTermIDTree');        
+                        var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
+                        //var terms = window.hWin.HEURIST4.ui.getPlainTermsList(this.detailType, allTerms, headerTerms, null);
+                        
+                        var headers = relations.headers;
+                        var direct = relations.direct;
+                        
+                        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+                        
+                        for(var k in direct){
+                            //direct[k]['dtID']==this.options.dtID && 
+                            if(direct[k]['trmID']>0){ //relation   
+                            
+                                //verify that target rectype is satisfy to constraints and trmID allowed
+                                var targetID = direct[k].targetID;
+                                var targetRectypeID = headers[targetID][2];
+                                
+                                if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))                                  {
+                                    window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
+                                        {rec_ID: targetID, 
+                                         rec_Title: headers[targetID][0], 
+                                         rec_RecTypeID: headers[targetID][1], 
+                                         relation_recID: direct[k]['relationID'], 
+                                         trm_ID: direct[k]['trmID']}, true);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                    /*
+                    $input = $( "<div>")
+                        .uniqueId()
+                        .html(sRels)
+                        //.addClass('ui-widget-content ui-corner-all')
+                        .appendTo( $inputdiv );
+                   */     
+                   $inputdiv
+                        .uniqueId();
+                   $input = $inputdiv;
+
+                   //define explicit add relationship button
+                   var $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
+                            .addClass("add-rel-button")
+                            .button({icons:{primary: "ui-icon-circle-plus"},label:'Add Relationship'})
+                            .appendTo( $inputdiv )
+                            .click(function(){__show_addlink_dialog()});
+            
+                    if( $inputdiv.find('.link-div').length>0 ){
+                        $btn_add_rel_dialog.hide();
+                    }
+                
+                }else{
+                    //this is second call - some links are already defined
+                    //show popup dialog
+                    __show_addlink_dialog();
+                    return;
+                }
+                
+/*            
+                        $input.css('width','auto');
+
+                        if(!this.rec_relation_dialog){
+                            this.rec_relation_dialog = this.element.rec_relation({
+
+                                rectype_set: this.f('rst_PtrFilteredIDs'), //constraints for target record types
+                                reltype_set: this.f('rst_FilteredJsonTermIDTree'), //contraints for relation types
+                                reltype_headers: this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs'), //subset of headers for relation type pulldown
+
+                                source_ids: [this.options.recID],
+                                isdialog: true
+                            });
+                        }
+
+                        var $btn_rec_relation_dialog = $( "<button>", {title: "Click to define relationship"})
+                        .addClass("smallbutton")
+                        .appendTo( $inputdiv )
+                        .button({icons:{primary: "ui-icon-link"},text:false});
+
+                        function __show_relation_dialog(event){
+                            event.preventDefault();
+
+                            that.rec_relation_dialog.rec_relation("option",{
+                                //retuns selected recrod
+                                onselect: function(event, lbl){ //@todo - work with new relation record
+                                    $input.val(lbl);
+                                    
+                                    //if(recordset && recordset.length()>0){
+                                    //var record = recordset.getFirstRecord();
+                                    //$input.val(recordset.fld(record,'rec_Title'));
+                                    //that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                    //}
+
+                                }
+                            });
+
+                            that.rec_relation_dialog.rec_relation( "show" );
+                        };
+
+                        this._on( $btn_rec_relation_dialog, { click: __show_relation_dialog } );
+                        this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
+*/
+            
         }else{
             $input = $( "<input>")
             .uniqueId()
@@ -506,6 +647,11 @@ $.widget( "heurist.editing_input", {
                             changeMonth: true,
                             changeYear: true,
                             dateFormat: "yy-mm-dd"
+                            /*,beforeShow : function(dateText, inst){
+                                $(inst.dpDiv[0]).find('.ui-datepicker-current').click(function(){
+                                    console.log('today '+$datepicker.datepicker( "getDate" ));  
+                                });
+                            }*/
                         });
 
                         var $btn_datepicker = $( "<button>", {title: "Show calendar"})
@@ -513,12 +659,15 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv )
                         .button({icons:{primary: "ui-icon-calendar"},text:false});
 
+                        
                         this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( "show" ); }} );
                 }  
                         
 
             }else 
             if(this.detailType=="resource"){
+                
+                        $input.css({width:'auto'});
 
                         //old way - by default lookup for Records filtered by Record Types
                         var ptrset = that.f('rst_PtrFilteredIDs');
@@ -595,14 +744,26 @@ $.widget( "heurist.editing_input", {
         */
 
                                 //assign initial display value
-                                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "all", f:"header"}, 
-                                    function(response){
-                                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                            var recordset = new hRecordSet(response.data);
-                                            $input.val( recordset.fld(recordset.getFirstRecord(),'rec_Title') );        
+                                if(Number(value)>0){
+                                    var sTitle = null;
+                                    if(that.options.recordset){
+                                        var relations = that.options.recordset.getRelations();
+                                        if(relations && relations.headers && relations.headers[value]){
+                                            var sTitle = window.hWin.HEURIST4.util.htmlEscape(relations.headers[value][0]);
+                                            $input.val(sTitle);
                                         }
                                     }
-                                );
+                                    if(!sTitle){
+                                        window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "all", f:"header"}, 
+                                            function(response){
+                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                    var recordset = new hRecordSet(response.data);
+                                                    $input.val( recordset.fld(recordset.getFirstRecord(),'rec_Title') );        
+                                                }
+                                            }
+                                        );
+                                    }
+                                }
 
                             //$input.css('width', this.options['input_width']?this.options['input_width']:'300px');
                         }else{ //---------------------------------------------
@@ -648,7 +809,7 @@ $.widget( "heurist.editing_input", {
                                 }
                                 
                                 //assign initial display value
-                                var display_value = window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','));                                   $input.val( display_value.join(',') );
+                                var display_value = window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','));                                         $input.val( display_value.join(',') );
                             }
                         }
 
@@ -659,51 +820,6 @@ $.widget( "heurist.editing_input", {
 
 
             }else 
-            if(false && this.detailType=="relmarker"){  //@TODO!!!!
-
-                        $input.css('width','auto');
-
-                        if(!this.rec_relation_dialog){
-                            this.rec_relation_dialog = this.element.rec_relation({
-
-                                rectype_set: this.f('rst_PtrFilteredIDs'), //constraints for target record types
-                                reltype_set: this.f('rst_FilteredJsonTermIDTree'), //contraints for relation types
-                                reltype_headers: this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs'), //subset of headers for relation type pulldown
-
-                                source_ids: [this.options.recID],
-                                isdialog: true
-                            });
-                        }
-
-                        var $btn_rec_relation_dialog = $( "<button>", {title: "Click to define relationship"})
-                        .addClass("smallbutton")
-                        .appendTo( $inputdiv )
-                        .button({icons:{primary: "ui-icon-link"},text:false});
-
-                        function __show_relation_dialog(event){
-                            event.preventDefault();
-
-                            that.rec_relation_dialog.rec_relation("option",{
-                                //retuns selected recrod
-                                onselect: function(event, lbl){ //@todo - work with new relation record
-                                    $input.val(lbl);
-                                    /*
-                                    if(recordset && recordset.length()>0){
-                                    var record = recordset.getFirstRecord();
-                                    $input.val(recordset.fld(record,'rec_Title'));
-                                    that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                                    }*/
-
-                                }
-                            });
-
-                            that.rec_relation_dialog.rec_relation( "show" );
-                        };
-
-                        this._on( $btn_rec_relation_dialog, { click: __show_relation_dialog } );
-                        this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
-
-            }else
             if( this.detailType=='file' ){
                 
                         //url for thumb
@@ -825,7 +941,7 @@ $.widget( "heurist.editing_input", {
 
         //clear button
         //var $btn_clear = $( "<div>")
-        if(false && this.options.showclear_button)
+        if(this.options.showclear_button)
         {
 
             var $btn_clear = $('<button>',{
@@ -833,9 +949,10 @@ $.widget( "heurist.editing_input", {
                 'data-input-id': $input.attr('id')
             })
             .addClass("smallbutton btn_input_clear")
-            .css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'' })
+            //.css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'' })
             .appendTo( $inputdiv )
             .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
+            //.position( { my: "right top", at: "right top", of: $($input) } );
 
             // bind click events
             this._on( $btn_clear, {
@@ -934,6 +1051,7 @@ $.widget( "heurist.editing_input", {
                 }else{
                     $input.val( display_value?display_value :value);    
                 }
+                that._onChange();
                 return;
             }
 
@@ -959,7 +1077,7 @@ $.widget( "heurist.editing_input", {
             }else{
                 var inpt_id = this._addInput(values[i]);
 
-                if(this.detailType=="resource" || this.detailType=="relmarker"){
+                if(this.detailType=="resource"){
                     this.newvalues[inpt_id] = values[i];
                 }
 
@@ -1103,6 +1221,14 @@ $.widget( "heurist.editing_input", {
                 }
             }
         }
+        if(data_type=='integer' || this.detailType=='year'){
+            //@todo validate 
+            
+        }else if(data_type=='float'){
+            
+            
+        }
+        
 
         if(errorMessage!=''){
             this.error_message.text(errorMessage);

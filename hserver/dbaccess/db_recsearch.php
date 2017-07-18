@@ -556,11 +556,12 @@
         $istimemap_counter = 0; //total records with timemap data
         $needThumbField = false;
         $needThumbBackground = false;
-        $needAllHeaderFields = false;
+        $needCompleteInformation = false; //if true - get all header fields and relations
+        $relations = null;
 
         if(@$params['detail']=='complete'){
             $params['detail'] = 'detail';
-            $needAllHeaderFields = true;
+            $needCompleteInformation = true;
         }
         
         $fieldtypes_ids = null;
@@ -667,12 +668,13 @@
             .'rec_URLErrorMessage,'
             .'bkm_PwdReminder ';*/
 
-            if($needAllHeaderFields){
+            
+            if($needCompleteInformation){
             $select_clause = $select_clause
             .',rec_Added'
             .',rec_AddedByUGrpID'
             .',rec_ScratchPad'
-            .',rec_Popularity ';
+            .',bkm_Rating ';
             }
         }
 
@@ -1225,7 +1227,17 @@ $loop_cnt++;
                             //error_log('maptime. total '.count($records).'  toclnt='.count($tm_records).' tot_tm='.$istimemap_counter);                                   
                                    $records = $tm_records;
                                    $total_count_rows = $istimemap_counter;
+                            }else
+                            if($needCompleteInformation){
+                                $relations = recordSearchRelated($system, $all_rec_ids);
+                                if($relations['status']==HEURIST_OK){
+                                    $relations = $relations['data'];
+                                }
+                                //array("direct"=>$direct, "reverse"=>$reverse, "headers"=>$headers));
                             }
+            
+                            
+                            
                     }//$need_details
 
                         $rectypes = array_keys($rectypes);
@@ -1253,6 +1265,9 @@ $loop_cnt++;
                                 'memory_warning'=>$memory_warning));
                         if(is_array($fieldtypes_in_res)){
                               $response['data']['fields_detail'] =  array_keys($fieldtypes_in_res);
+                        }
+                        if(is_array($relations)){
+                                $response['data']['relations'] =  $relations;
                         }
 
                 }//$is_ids_only

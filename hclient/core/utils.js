@@ -458,7 +458,8 @@ window.hWin.HEURIST4.util = {
     },
 
     //
-    // we have to reduce the usage to minimum. Need to implement method in hapi
+    // we have to reduce the usage to minimum. Need to implement method in hapi via central controller
+    // this method is used for call H3 scripts
     //
     sendRequest: function(url, request, caller, callback){
 

@@ -880,11 +880,12 @@ if (! top.HEURIST.edit) {
         */
         createFakeFieldRequirement:
         function(dt,rstDisplayName,rstDisplayHelpText,rstDefaultValue,rstRequirementType,rstMaxValues,rstTermIDs,rstPtrRectypeIDs,rstTermNonSelectableIDs) {
-            var l = top.HEURIST.rectypes.typedefs.dtFieldNames.length;
-            var i;
             var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
             var fieldIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+
             var ffr = [];
+            var l = top.HEURIST.rectypes.typedefs.dtFieldNames.length;
+            var i;
             for (i=0; i<l; i++){
                 ffr.push("");
             }
@@ -1000,7 +1001,7 @@ console.log('heurist not defined');
                 if (rectypeID) {
                     rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
                 }
-                if (!rfr) {
+                if (!rfr) { //field not found in standard structure
                     rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,
                                         (fieldValues.length?fieldValues.length:null));
                 }

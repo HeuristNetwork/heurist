@@ -61,7 +61,9 @@ if (! is_logged_in()) {
 	jsonError("no logged-in user");
 }
 
-$_REQUEST = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET["data"]), true);
+if(!@$_REQUEST['id']){
+    $_REQUEST = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET["data"]), true);
+}
 
 mysql_connection_overwrite(DATABASE);
 

@@ -48,6 +48,9 @@ Fast access:
 getTermValue - Returns label and code for term by id
 getTermDesc
 getPlainTermsList
+
+
+createRecordLinkInfo - return ui for link and relationship
 */
 
 if (!window.hWin.HEURIST4){
@@ -275,6 +278,25 @@ window.hWin.HEURIST4.ui = {
         return reslist;
     },
 
+    //
+    //
+    //
+    isTermInList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
+        
+        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
+
+        if(selObj){
+            for (var i=0; i<selObj.length; i++){
+                if(!selObj.options[i].disabled){
+                    if(selObj.options[i].value==selectedTermID){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    },
+    
     //
     // return term by selectedTermID and its children as well as comma-separated list of non-disabled ancestors
     // it uses createTermSelectExt to get the entire tree
@@ -1187,8 +1209,157 @@ window.hWin.HEURIST4.ui = {
                  });
                  
                  
-    }
+    },
     
+    //
+    // info {rec_ID,rec_Title,rec_RecTypeID,relation_recID,trm_ID}
+    //
+    createRecordLinkInfo:function(container, info, isEdit){
+        
+        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+        var sRelBtn = '';
+        
+        if(info['trm_ID']>0){
+            sRelBtn = '<div style="float:right"><div class="btn-rel"/><div class="btn-del"/></div>';
+        }
+
+/*        
+        var ele = $('<div class="ui-widget-content ui-corner-all" style="margin-bottom:0.2em"><div class="detailRow" '
+                        + 'style="background:#F4F2F4 !important;display:table-row;">' 
+                        + '<div class="detailType">'
+                        + (info['trm_ID']>0?window.hWin.HEURIST4.ui.getTermValue(info['trm_ID']):'')+'</div>'
+                        + '<div class="detail truncate" style="max-width:250">'
+                        + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
+                        + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
+                        + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']+'">'
+                        + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a></div>'
+                        + sRelBtn + '</div></div>')
+*/
+        var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
+                        +(info['relation_recID']>0?info['relation_recID']:'')+'" '
+                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;padding-bottom:0.2em;">'
+                        + (info['trm_ID']>0
+                           ?'<div class="detailType" style="display:inline-block;width:15ex">'
+                            + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
+                           :'')  
+                        + '<div class="detail truncate" style="display:inline-block;min-width:35ex;max-width:50ex">'
+                        + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
+                        + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
+                        + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']+'">'
+                        + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a></div>'
+                        + sRelBtn + '</div>')
+        .appendTo($(container));
+        
+        function __openRecordInPopup(event, rec_ID){
+            
+            var url = window.hWin.HAPI4.baseURL,
+                dwidth, dtitle;    
+            if(isEdit){
+                url = url + 'hclient/framecontent/recordEdit.php?popup=1&db='+window.hWin.HAPI4.database+
+                    '&q=ids:'+ rec_ID;                                    
+                dtitle = 'Edit linked record';
+                dwidth = 1200;
+            }else{
+                url = url + 'records/view/renderRecordData.php?db='+window.hWin.HAPI4.database+
+                    '&recID='+ rec_ID;                                    
+                dtitle = 'Linked record';
+                dwidth = 800;
+            }        
+            
+            window.hWin.HEURIST4.msg.showDialog(url, {height:640, width:dwidth,
+                padding:0,
+                title: window.hWin.HR(dtitle),
+                class:'ui-heurist-bg-light',
+                callback: function(recordset){
+                    if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
+                        if( $(event.target).is('a') ){
+                            var record = recordset.getFirstRecord();
+                            $(event.target).text(
+                                window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title')));
+                        }else{
+                            //update relationship 
+                            
+                        }
+                    }
+                }
+            } );
+            
+        }
+        
+        
+        if(isEdit){
+            //remove button
+            ele.find('.btn-del').button({text:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
+                            icons:{primary:'ui-icon-circlesmall-close'}})
+            .css({'font-size': '0.8em', height: '18px', 'max-width': '18px'})
+            .click(function(event){
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'You are about to delete link between records<br><br>Are you sure?',
+                     function(){
+                        
+                          var recID = ele.attr('data-relID');
+                         
+                          if(recID>0){  
+                         
+                              var url = window.hWin.HAPI4.baseURL + 'hapi/php/deleteRecord.php';
+
+                              var request = {
+                                db: window.hWin.HAPI4.database,
+                                id: recID
+                              }
+                             
+                              window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
+                                  if(response){
+                                      if(response.error){
+                                          window.hWin.HEURIST4.msg.showMsgErr( response.error );
+                                      }else if(response.deleted>0){
+                                          //link is deleted - remove this element
+                                          ele.remove();
+                                          window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Relation has been deleted'));
+                                          
+                                          if($(container).find('.link-div').length==0){
+                                                $(container).find('.add-rel-button').show();
+                                          }
+                                      }
+                                  }
+                              });
+                          
+                          }else{
+                              //remove link field
+                              
+                              //todo
+                          }
+                     },
+                     {title:'Warning',yes:'Proceed',no:'Cancel'});
+            });
+        }
+        
+        
+
+        if(info['relation_recID']>0){
+            
+            ele.find('.btn-rel').button({text:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),
+                            icons:{primary:'ui-icon-pencil'}})
+            .css({'font-size': '0.8em', height: '18px', 'max-width': '18px'})
+            .click(function(event){
+                event.preventDefault();
+                
+                var recID = ele.attr('data-relID');
+                __openRecordInPopup(event, recID);
+            });
+        
+        }
+            
+        ele.find('a').click(function(event){
+            event.preventDefault();
+            var rec_ID = $(event.target).attr('data-recID');
+            __openRecordInPopup(event, rec_ID);
+        });        
+        
+        $(container).find('.add-rel-button').hide();
+        
+        return ele;
+    }
     
 }//end ui
 

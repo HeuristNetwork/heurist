@@ -103,12 +103,12 @@ function hEditing(_options) {
                 
         var recID = '';
         if(recdata!=null){ //for edit mode
-             record = recdata.getFirstRecord();
+            record = recdata.getFirstRecord();
             //get record ID
             var idx;
             for (idx=0; idx<recstructure.length; idx++){
                if(recstructure[idx]['keyField']){
-                    recID = recdata.fld(record, idx);
+                    recID = recdata.fld(record, recstructure[idx]['dtID']);
                     break;
                }
             }
@@ -245,6 +245,7 @@ function hEditing(_options) {
                         }
                         
                         fields[idx].recID = recID;
+                        fields[idx].recordset = recdata;
                         fields[idx].change = _onChange;
                         
                         var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
@@ -309,6 +310,25 @@ function hEditing(_options) {
         }
         return details;
     }
+    
+    function _assignValuesIntoRecord(){
+    
+        if(recdata!=null){ //for edit mode
+            record = recdata.getFirstRecord();
+
+            var idx, ele, details = {};
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                var vals = ele.editing_input('getValues');
+                if(vals && vals.length>0){
+                    recdata.setFld(record, ele.editing_input('option', 'dtID'), vals);
+                }
+            }
+        }
+    }
+
+
+
     
     function _isModified(){
         
@@ -403,6 +423,10 @@ function hEditing(_options) {
         
         getValues:function(needArrays){
             return _getValues(needArrays);
+        },
+        
+        assignValuesIntoRecord:function(){
+            _assignValuesIntoRecord();
         },
         
         //

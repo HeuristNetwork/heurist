@@ -207,7 +207,7 @@
         }
 
         $recID = intval(@$record['ID']);
-        if ( $recID<1 ) {
+        if ( $recID==0 ) {
             return $system->addError(HEURIST_INVALID_REQUEST, "Record ID is not defined");
         }
 
