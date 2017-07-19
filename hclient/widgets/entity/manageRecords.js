@@ -47,7 +47,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
 
         
-        
         this.options.use_cache = false;
         this.options.edit_height = 640;
         this.options.edit_width = 1200;
@@ -294,6 +293,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
                     
                 if(this.editFormSummary && this.editFormSummary.length>0){    
+                    
+                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_summary', {width:0, activeTabs:["0","1"]});
+        
                     var layout_opts =  {
                         applyDefaultStyles: true,
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
@@ -301,14 +303,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //togglerContent_open:    '&nbsp;',
                         //togglerContent_closed:  '&nbsp;',
                         east:{
-                            size: 400,
+                            size:(usrPreferences.width==0)?400:usrPreferences.width,
                             maxWidth:800,
                             spacing_open:6,
                             spacing_closed:16,  
                             togglerAlign_open:'center',
                             togglerAlign_closed:'top',
                             togglerLength_closed:16,  //makes it square
-                            initClosed:true,
+                            initClosed:(usrPreferences.width==0),
                             slidable:false,  //otherwise it will be over center and autoclose
                             contentSelector: '.editFormSummary'    
                         },
@@ -326,10 +328,26 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         this.editFormSummary.empty();
                         var headers = ['Admin','Links','Scratchpad','Private','Workgroup Tags','Text','Discussion'];
                         for(var idx in headers){
-                            $('<h3>').text(top.HR(headers[idx])).appendTo(this.editFormSummary);
+                            var acc = $('<div>').addClass('summary-accordion').appendTo(this.editFormSummary);
+                            
+                            $('<h3>').text(top.HR(headers[idx])).appendTo(acc);
                             //content
-                                $('<div>').attr('data-id', idx).addClass('summary-content').appendTo(this.editFormSummary);
+                            $('<div>').attr('data-id', idx).addClass('summary-content').appendTo(acc);
+                            
+                            acc.accordion({
+                                collapsible: true,
+                                active: (usrPreferences.activeTabs.indexOf(idx)>=0) ,
+                                heightStyle: "content",
+                                beforeActivate:function(event, ui){
+                                    if(ui.newPanel.text()==''){
+                                        //load content for panel to be activated
+                                        that._fillSummaryPanel(ui.newPanel);
+                                    }
+                                }
+                            });
                         }
+                        
+                        if(false)
                         this.editFormSummary.accordion({
                             collapsible: true,
 /*                            
@@ -390,6 +408,25 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     closeEditDialog:function(){
+        //save preferences
+        var that = this;
+        if(that.editFormSummary && that.editFormSummary.length>0){
+                var activeTabs = [];
+                that.editFormSummary.find('.summary-accordion').each(function(idx,item){
+                    var active = $(item).accordion('option','active');
+                    if(active!==false){
+                        activeTabs.push(idx);
+                    }
+                            
+                });
+                
+                window.hWin.HAPI4.save_pref( 'edit_record_summary', {width:that.editFormSummary.parent().width(), 
+                                            activeTabs:activeTabs} );
+        }
+        
+        
+        
+        
         if(this.options.in_popup_dialog==true){
             window.close(this._currentEditRecordset);
         }else if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
@@ -722,7 +759,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //clear content of accordion
         if(this.editFormSummary && this.editFormSummary.length>0){
             this.editFormSummary.find('.summary-content').empty();
-            this.editFormSummary.accordion({active: false});
+            //this.editFormSummary.accordion({active: false});
         }
         
         if(recID==null){
@@ -929,9 +966,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             if(that.editFormSummary && that.editFormSummary.length>0){
-                that.editFormSummary.accordion({
+                /*@todo that.editFormSummary.accordion({
                     active:0    
+                });*/
+                //@todo restore previous accodion state
+                that.editFormSummary.find('.summary-accordion').each(function(idx,item){
+                    var active = $(item).accordion('option','active');
+                    if(active!==false){
+                        $(item).accordion({active:0});
+                        that._fillSummaryPanel($(item).find('.summary-content'));
+                    }
+                            
                 });
+                
             }
             
         }else{
