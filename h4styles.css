@@ -361,25 +361,29 @@ H2 {
     font-size:1.2em;
 }
 
-h3:hover > #rec_add_link, div.recordDiv:hover > .rec_edit_link, div.recordDiv:hover > .rec_view_link {
+h3:hover > #rec_add_link, 
+    div.recordDiv:hover > .rec_edit_link, 
+    div.recordDiv:hover > .rec_edit_link_ext, 
+    div.recordDiv:hover > .rec_view_link 
+{
     display: block;
 }
-h3 > #rec_add_link, div.recordDiv > .rec_edit_link {
-    position: absolute;
-    display: none;
-    height: 16px;
-    width: 16px;
-    top: 2px;
-    right: 18px;
-}
-
-div.recordDiv > .rec_view_link {
+h3 > #rec_add_link, 
+    div.recordDiv > .rec_edit_link, 
+    div.recordDiv > .rec_edit_link_ext,
+    div.recordDiv > .rec_view_link {
     position: absolute;
     display: none;
     height: 16px;
     width: 16px;
     top: 2px;
     right: 2px;
+}
+div.recordDiv > .rec_edit_link{
+    right: 36px;
+}
+div.recordDiv > .rec_edit_link_ext {
+    right: 18px;
 }
 
 /*
@@ -493,6 +497,10 @@ div .selected_last{
 }
 .thumbs .rec_edit_link {
     bottom: 1px;
+    right:17px;
+}
+.thumbs .rec_edit_link_ext {
+    bottom: 1px;
     right:1px;
 }
 
@@ -554,6 +562,10 @@ div .selected_last{
 }
 
 .icons .rec_edit_link {
+    right: 17px;
+    top: 1px;
+}
+.icons .rec_edit_link_ext {
     right: 1px;
     top: 1px;
 }
@@ -710,6 +722,10 @@ div .selected_last{
     width: auto;
 }
 .thumbs3 .rec_edit_link {
+    bottom: 17px;
+    right:1px;
+}
+.thumbs3 .rec_edit_link_ext {
     bottom: 1px;
     right:1px;
 }
@@ -814,7 +830,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     padding:0;
 }
 .ui-menu{
-    z-index: 9999999 !important;
+    z-index: 99 !important;
 }
 .horizontalmenu > .ui-menu-item {
     display: inline-block;

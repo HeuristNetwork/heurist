@@ -303,8 +303,9 @@ $.widget( "heurist.resultList", {
 
                 var btn_icon = null;
                 if(key=='add') btn_icon = 'ui-icon-plus'
-                else if(key=='edit') btn_icon = 'ui-icon-pencil'
-                    else if(key=='delete') btn_icon = 'ui-icon-minus';
+                    else if(key=='edit') btn_icon = 'ui-icon-pencil'
+                        else if(key=='edit_ext') btn_icon = 'ui-icon-extlink'
+                            else if(key=='delete') btn_icon = 'ui-icon-minus';
 
                 btn_icon = {primary: btn_icon};
                 $('<div>',{'data-key':key}).button({icons: btn_icon, text:true, label:window.hWin.HR(title) })
@@ -996,38 +997,22 @@ $.widget( "heurist.resultList", {
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
         // TODO: add an open-in-new-search icon to the display of a record in the results list
-        + '<div title="Click to edit record (opens in new tab)" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+        + '<div title="Click to edit record" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"/><span class="ui-button-text"/>'
+        + '</div>'
+        + '<div title="Click to edit record (opens in new tab)" class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit_ext">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
         + '</div>'
 
         + '<div title="Click to view record (opens in popup)" '
         + '   class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
         + '   role="button" aria-disabled="false">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"></span><span class="ui-button-text"></span>'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/><span class="ui-button-text"/>'
         + '</div>'
         + '</div>';
 
 
         return html;
-
-
-
-        /*$('<div>',{
-        id: 'rec_edit_link',
-        title: 'Click to edit record'
-        })
-        .addClass('logged-in-only')
-        .button({icons: {
-        primary: "ui-icon-pencil"
-        },
-        text:false})
-        .click(function( event ) {
-        event.preventDefault();
-        window.open(window.hWin.HAPI4.baseURL + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
-        })
-        .appendTo($recdiv);*/
-
-
     },
 
     //
@@ -1070,7 +1055,14 @@ $.widget( "heurist.resultList", {
             //var action = action_btn.attr('data-key');
             if(this.options.renderer){
                 this._trigger( "onaction", null, {action:action, recID:selected_rec_ID});
+                
             }else if (action=='edit'){
+                
+                window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, true, function(){
+                    
+                });
+                
+            }else if (action=='edit_ext'){
                 
                 var url = window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                 window.open(url, "_new");
@@ -1108,15 +1100,15 @@ $.widget( "heurist.resultList", {
                               $target.parents('.rec_view_link').length>0); //this is VIEWER click
                 if(isview){
 
-                    var recInfoUrl = (this._currentRecordset)
-                    ?this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' )
-                    :null;
-
+                    var recInfoUrl = null;
+                    if(this._currentRecordset){
+                        recInfoUrl = this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' );
+                    }
                     if( !recInfoUrl ){
                         recInfoUrl = window.hWin.HAPI4.baseURL + "records/view/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                     }
 
-                    window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { width: 700, height: 800, title:'Record Info', });
+                    window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { width: 700, height: 800, title:'Record Info'});
                     return;
                 }
             }

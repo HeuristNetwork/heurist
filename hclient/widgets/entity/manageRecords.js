@@ -40,7 +40,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                             + '<div class="editFormDialog ent_wrapper">'
                                 + '<div class="ui-layout-center"><div class="editForm"/></div>'
-                                + '<div class="editFormSummary ui-layout-east">empty</div>'
+                                + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
                         
                             +'</div>'
                         +'</div>';
@@ -309,7 +309,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             togglerAlign_closed:'top',
                             togglerLength_closed:16,  //makes it square
                             initClosed:true,
-                            slidable:false  //otherwise it will be over center and autoclose
+                            slidable:false,  //otherwise it will be over center and autoclose
+                            contentSelector: '.editFormSummary'    
                         },
                         center:{
                             minWidth:800,
@@ -327,17 +328,56 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         for(var idx in headers){
                             $('<h3>').text(top.HR(headers[idx])).appendTo(this.editFormSummary);
                             //content
-                            $('<div>').attr('data-id', idx).addClass('summary-content').appendTo(this.editFormSummary);
+                                $('<div>').attr('data-id', idx).addClass('summary-content').appendTo(this.editFormSummary);
                         }
                         this.editFormSummary.accordion({
                             collapsible: true,
+/*                            
+                            beforeActivate: function(event, ui) {
+        
+                                if(ui.newPanel.length>0){
+                                    panelToActivate = ui.newPanel;
+                                }else{
+                                    panelToActivate = ui.oldPanel;
+                                }
+                                if(panelToActivate.text()=='' && Number(panelToActivate.attr('data-id'))>=0 ){
+                                    //load content for panel to be activated
+                                    that._fillSummaryPanel(panelToActivate);
+                                }
+                                
+                                 // The accordion believes a panel is being opened
+                                if (ui.newHeader[0]) {
+                                    var currHeader  = ui.newHeader;
+                                    var currContent = currHeader.next('.ui-accordion-content');
+                                 // The accordion believes a panel is being closed
+                                } else {
+                                    var currHeader  = ui.oldHeader;
+                                    var currContent = currHeader.next('.ui-accordion-content');
+                                }
+                                 // Since we've changed the default behavior, this detects the actual status
+                                var isPanelSelected = currHeader.attr('aria-selected') == 'true';
+
+                                 // Toggle the panel's header
+                                currHeader.toggleClass('ui-corner-all',isPanelSelected).toggleClass('accordion-header-active ui-state-active ui-corner-top',!isPanelSelected).attr('aria-selected',((!isPanelSelected).toString()));
+
+                                // Toggle the panel's icon
+                                currHeader.children('.ui-icon').toggleClass('ui-icon-triangle-1-e',isPanelSelected).toggleClass('ui-icon-triangle-1-s',!isPanelSelected);
+
+                                 // Toggle the panel's content
+                                currContent.toggleClass('accordion-content-active',!isPanelSelected)    
+                                if (isPanelSelected) { currContent.slideUp(); }  else { currContent.slideDown(); }
+
+                                return false; // Cancels the default action
+                            },                            
+*/                            
                             heightStyle: "content",
                             beforeActivate:function(event, ui){
                                 if(ui.newPanel.text()==''){
                                     //load content for panel to be activated
                                     that._fillSummaryPanel(ui.newPanel);
                                 }
-                        }});
+                            }
+                        });
                     }
                 }
             }//!isOpenAready
@@ -802,7 +842,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(dt_ID>0){
                     rfrs[dt_ID]['dt_ID'] = dt_ID;
                     s_fields.push(rfrs[dt_ID]);
-                    fields_ids.push(dt_ID);
+                    fields_ids.push(Number(dt_ID));
                 }
             }
             //sort by order
@@ -890,7 +930,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             if(that.editFormSummary && that.editFormSummary.length>0){
                 that.editFormSummary.accordion({
-                    active:0
+                    active:0    
                 });
             }
             

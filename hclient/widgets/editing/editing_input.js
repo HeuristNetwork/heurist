@@ -197,13 +197,13 @@ $.widget( "heurist.editing_input", {
             this.element.show();    
         }
         
-        /*
+        
         if(this.options.showclear_button){
-            this.element.find('.btn_input_clear').css('visibility','visible');
+            this.element.find('.btn_input_clear').css({'visibility':'visible','max-width':16});
         }else{
-            this.element.find('.btn_input_clear').css('visibility','hidden');
+            this.element.find('.btn_input_clear').css({'visibility':'hidden','max-width':0});
         }
-        */
+        
         if(this.options.show_header){
             this.header.show();
         }else{
