@@ -1158,13 +1158,17 @@ $loop_cnt++;
                                     }else if($row[3]){ //uploaded file
                                     
                                         if($needCompleteInformation){
+
+                                            $params = fileParseParameters($row[8]);//ulf_Parameters
                                             
                                             $val = array('ulf_ID'=>$row[3],
                                                          'ulf_OrigFileName'=>$row[4],
                                                          'ulf_ExternalFileReference'=>$row[5],
                                                          'ulf_ObfuscatedFileID'=>$row[6],
                                                          'ulf_MimeExt'=>$row[7],
-                                                         'ulf_Parameters'=>$row[8] );
+                                                         'mediaType'=>$params['mediaType'],
+                                                         'remoteSource'=>$params['remoteSource']);
+
                                             
                                         }else{
                                             $val = array($row[4], $row[5]); //obfuscated value for fileid and parameters
@@ -1370,6 +1374,25 @@ $loop_cnt++;
     function _getTimemapRecords($res){
         
         
+    }
+
+    //backward capability - remove as soon as old uploadFileOrDefineURL get rid of use
+    function fileParseParameters($params){
+        $res = array();
+        if($params){
+            $pairs = explode('|', $params);
+            foreach ($pairs as $pair) {
+                if(strpos($pair,'=')>0){
+                    list($k, $v) = explode("=", $pair); //array_map("urldecode", explode("=", $pair));
+                    $res[$k] = $v;
+                }
+            }
+        }
+        
+        $res["mediaType"] = (array_key_exists('mediatype', $res))?$res['mediatype']:null;
+        $res["remoteSource"] = (array_key_exists('source', $res))?$res['source']:null;
+        
+        return $res;
     }
     
 ?>

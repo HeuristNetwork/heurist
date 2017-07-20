@@ -46,7 +46,7 @@ $.widget( "heurist.editing_input", {
         change: null  //onchange callback
     },
 
-    newvalues:{},
+    newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
     detailType:null,
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
 
@@ -487,7 +487,7 @@ $.widget( "heurist.editing_input", {
                         .html(sRels)
                         //.addClass('ui-widget-content ui-corner-all')
                         .appendTo( $inputdiv );
-                   */     
+                   */  
                    $inputdiv
                         .uniqueId();
                    $input = $inputdiv;
@@ -667,7 +667,7 @@ $.widget( "heurist.editing_input", {
             }else 
             if(this.detailType=="resource"){
                 
-                        $input.css({width:'auto'});
+                        $input.css({'min-wdith':'40ex', width:'auto'});
 
                         //old way - by default lookup for Records filtered by Record Types
                         var ptrset = that.f('rst_PtrFilteredIDs');
@@ -763,6 +763,7 @@ $.widget( "heurist.editing_input", {
                                             }
                                         );
                                     }
+                                    
                                 }
 
                             //$input.css('width', this.options['input_width']?this.options['input_width']:'300px');
@@ -817,12 +818,105 @@ $.widget( "heurist.editing_input", {
                             this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
                         }
-
+                        
+                        this.newvalues[$input.attr('id')] = value;
 
             }else 
+            if( this.detailType=='file' && this.configMode.entity=='records'){
+                //at the momenet we use H3 file/url selector
+                
+console.log(value); 
+                var urlThumb = '';
+                if(value && value['ulf_ObfuscatedFileID']){
+                    urlThumb = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&thumb='+
+                        value['ulf_ObfuscatedFileID'];
+                    $input.val( value['ulf_OrigFileName'] );
+                }
+                //container for image
+                var $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
+                    + '<img src="'+urlThumb+'" class="image_input"></div>').appendTo( $inputdiv );                
+
+                //browse button    
+                var $btn_fileselect_dialog = $( "<button>", {title: "Click to upload of select file"})
+                        .addClass("smallbutton")
+                        .css('vertical-align','top')
+                        .appendTo( $inputdiv )
+                        .button({icons:{primary: "ui-icon-folder-open"},text:false});
+           
+                var __show_select_fileurl = function(){
+                    
+                    var filed = that.newvalues[$input.attr('id')];
+                    
+                    var fieldata = encodeURIComponent(JSON.stringify({
+                        remoteURL:filed['ulf_ExternalFileReference'],
+                        origName:filed['ulf_OrigFileName'],
+                        URL:  window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database
+                                                        + '&file='+filed['ulf_ObfuscatedFileID'],
+                        ext: filed['ulf_MimeExt'],
+                        mediaType:filed['mediaType'],
+                        remoteSource:filed['remoteSource'],
+                        id: filed['ulf_ID'],
+                        nonce: filed['ulf_ObfuscatedFileID'],
+                    }));
+        
+                    var url = window.hWin.HAPI4.baseURL+'records/files/uploadFileOrDefineURL.html?value='+fieldata 
+                        +'&db='+window.hWin.HAPI4.database+'&recid='+that.options.recID;
+            
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:480, width:640,    
+                        title: window.hWin.HR('Upload file or define URL'),
+                        class:'ui-heurist-bg-light',
+                        callback: function(isChanged, fileJSON) {
+
+                            if(isChanged){
+
+                                if(window.hWin.HEURIST4.isempty(fileJSON)){
+                                    var r = confirm('You uploaded/changed the file data. If you continue, all changes will be lost.');
+                                    return r;
+                                }else{
+                                    var filedata = JSON.parse(fileJSON);
+                                    
+                                    var filed = {
+                                        ulf_ExternalFileReference: filedata['remoteURL'],
+                                        ulf_OrigFileName:     filedata['origName'],
+                                        ulf_MimeExt:          filedata['ext'],
+                                        ulf_ObfuscatedFileID: filedata['nonce'],
+                                        ulf_ID:               filedata['id'],
+                                        URL:                  filedata['URL'],
+                                        mediaType:            filedata['mediaType'],
+                                        remoteSource:         filedata['remoteSource']
+                                    };
+                                    
+                                    var urlThumb = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&thumb='+
+                                                filed['ulf_ObfuscatedFileID'];
+                                    $input.val( (filed.remoteSource=='heurist')
+                                                        ?filed['ulf_OrigFileName']
+                                                        :filed['ulf_ExternalFileReference'] );
+                                    that.newvalues[$input.attr('id')] = filed;
+                                    
+                                    $input_img.find('img').attr('src', urlThumb);
+                                    
+                                }
+
+                            }
+                            //var helpDiv = document.getElementById("ui-pref-showhelp");
+                            //top.HEURIST.util.setHelpDiv(helpDiv,null);
+
+                            return true; //prevent close
+                        }//callback
+                    } );
+           
+                }//__show_select_fileurl
+           
+                this._on( $btn_fileselect_dialog, { click: __show_select_fileurl } );
+                this._on($input_img, {click: __show_select_fileurl }); 
+           
+                if(value && value['ulf_ID']){
+                    that.newvalues[$input.attr('id')] = value;
+                }
+            }
+            else
             if( this.detailType=='file' ){
                 
-console.log(value);                
                         //url for thumb
                         var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumbnail');
                         
@@ -1077,11 +1171,6 @@ console.log(value);
                 this._addReadOnlyContent(values[i]);
             }else{
                 var inpt_id = this._addInput(values[i]);
-
-                if(this.detailType=="resource"){
-                    this.newvalues[inpt_id] = values[i];
-                }
-
             }
         }
         if (isReadOnly) {
@@ -1096,13 +1185,18 @@ console.log(value);
     //
     _getValue: function(input_id){
 
+        if(this.detailType=="relmarker") return null;
+        
         var res = null;
         var $input = $(input_id);
 
-        if(!(this.detailType=="resource" || this.detailType=="relmarker" || this.detailType=="file")){
+        if(!(this.detailType=="resource" || this.detailType=="file")){
             res = $input.val();
         }else if (!window.hWin.HEURIST4.util.isempty( this.newvalues[$input.attr('id')] ) ){
             res = this.newvalues[$input.attr('id')];
+            if (this.detailType=="file"){
+                res = res['ulf_ID'];
+            }
         }
 
         return res;

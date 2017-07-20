@@ -1,9 +1,18 @@
 <?php
 
 /**
-* CRUD for files : recUploadedFiles
+* @todo
+* CRUD for files : recUploadedFiles - REPLACE to dbRecUploadedFiles
 
 * file - prefix for functions
+* 
+* 
+* fileGetByObfuscatedId - get id by obfuscated id
+* fileGetPath_URL_Type  - local paths, external links, mimetypes and parameters (mediatype and source)
+* fileGetThumbnailURL - URL to thumbnail for given record ID
+* getImageFromFile - return image object for given file
+* getPrevailBackgroundColor2  - not used
+* getPrevailBackgroundColor 
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -151,7 +160,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
 }
 
 //
-//
+// return image object for given file
 //
 function getImageFromFile($filename){
     $image = null;

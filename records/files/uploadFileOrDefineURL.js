@@ -34,7 +34,6 @@
 
 
 var viewerObject,
-	Hul = top.HEURIST.util,
 	curr_link,
 	curr_ext,
 	URLInput,
@@ -90,7 +89,7 @@ function findDetailTypeByType(type){
 	var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 	var dt;
 	for (dt in top.HEURIST.detailTypes.typedefs){
-		if(!(Hul.isnull(dt) || isNaN(Number(dt)))) {
+		if(!(top.HEURIST.util.isnull(dt) || isNaN(Number(dt)))) {
 			var dtype= top.HEURIST.detailTypes.typedefs[dt];
 
 			if(dtype['commonFields'][fi.dty_Type]===type){
@@ -103,6 +102,17 @@ function findDetailTypeByType(type){
 
 //
 function initPage() {
+    
+        if(!top.HEURIST.detailTypes){
+            top.HEURIST.rectypes = window.hWin.HEURIST4.rectypes;                        
+            top.HEURIST.detailTypes = window.hWin.HEURIST4.detailtypes;                        
+/*            
+            $.getScript(window.hWin.HAPI4.baseURL + 'common/php/loadCommonInfo.php?db='+window.hWin.HAPI4.database, function(){ initPage(); } );
+            return
+*/            
+        }
+        
+    
 
 		var fieldValues = [];
 
@@ -121,7 +131,7 @@ function initPage() {
 			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
 			_recordID = top.HEURIST.parameters['recid'];
-			_filedata = Hul.expandJsonStructure(top.HEURIST.parameters['value']);
+			_filedata = top.HEURIST.util.expandJsonStructure(top.HEURIST.parameters['value']);
 
             if(_filedata.remoteURL){
                 sUrl    = _filedata.remoteURL;
@@ -133,14 +143,14 @@ function initPage() {
 			sType   = _filedata.mediaType;
 			sSource = _filedata.remoteSource;
 
-			if( !Hul.isempty(sUrl) && (Hul.isempty(sSource) || Hul.isempty(sType)) ){
+			if( !top.HEURIST.util.isempty(sUrl) && (top.HEURIST.util.isempty(sSource) || top.HEURIST.util.isempty(sType)) ){
 				var oType = detectSourceAndType(sUrl, _filedata.ext);
 				sType = oType.type;
 				sSource = oType.source;
 			}
 
 			/*var acfg = top.HEURIST.parameters['value'].split('|');
-			if(Hul.isnull(acfg) || acfg.length<1){
+			if(top.HEURIST.util.isnull(acfg) || acfg.length<1){
 				return;
 			}
 			sUrl = acfg[0];
@@ -187,19 +197,19 @@ function initPage() {
 		$("#rec_url").css({"min-width":"580px"});
 
 		/*
-		if(Hul.isempty(sSource)){
+		if(top.HEURIST.util.isempty(sSource)){
 			document.getElementById("cbSource").selectedIndex = 0;
 		}else{
 			document.getElementById("cbSource").value = sSource;
 		}
-		if(Hul.isempty(sType)){
+		if(top.HEURIST.util.isempty(sType)){
 			document.getElementById("cbType").selectedIndex = 0;
 		}else{
 			document.getElementById("cbType").value = sType;
 		}*/
 
-		if(!Hul.isempty(sUrl)){
-			if(Hul.isempty(sSource) || Hul.isempty(sType)) {
+		if(!top.HEURIST.util.isempty(sUrl)){
+			if(top.HEURIST.util.isempty(sSource) || top.HEURIST.util.isempty(sType)) {
 				onChangeURL(null, null);
 			}else{
  				curr_link = sUrl;
@@ -247,7 +257,7 @@ _filedata = _filedata['file'];
 function isChanged(){
   if(_fileuploaded || _fileselected){
   		return true;
-  }else if (Hul.isempty(_filedata) && Hul.isempty(curr_link)){ //was open and closed without any change
+  }else if (top.HEURIST.util.isempty(_filedata) && top.HEURIST.util.isempty(curr_link)){ //was open and closed without any change
   		return false;
   }else{
   		var src = document.getElementById("cbSource").value;
@@ -255,12 +265,12 @@ function isChanged(){
   		var mt = document.getElementById("cbType").value;
   		if(mt=="unknown") mt = "";
 
-  		if(src!=='heurist' && !Hul.isempty(curr_link)){
+  		if(src!=='heurist' && !top.HEURIST.util.isempty(curr_link)){
 			 return (
 			 _filedata.remoteURL != curr_link ||
 			 _filedata.remoteSource != src ||
 			 _filedata.mediaType != mt);
-			 //(Hul.isnullcurr_ext && _filedata.ext != curr_ext));
+			 //(top.HEURIST.util.isnullcurr_ext && _filedata.ext != curr_ext));
 		}else{
 			return (_filedata.mediaType != mt);
 		}
@@ -270,7 +280,7 @@ function isChanged(){
 
 function onApply(){
 /*
-	if(Hul.isempty(_filedata)){ //new
+	if(top.HEURIST.util.isempty(_filedata)){ //new
 
 		_filedata = {id:0, remoteURL:curr_link,
 					origName:
@@ -286,7 +296,7 @@ function onApply(){
 
 	_filedata = fileUploadInput.getFileId();
 
-	if(_filedata.remoteSource=='heurist' &&  !Hul.isempty(fileId) ){  //!!!!!
+	if(_filedata.remoteSource=='heurist' &&  !top.HEURIST.util.isempty(fileId) ){  //!!!!!
 		//take id from
 		_filedata.id = fileId;
 	}
@@ -300,7 +310,7 @@ function onApply(){
 
 	var src = document.getElementById("cbSource").value;
 
-	if(Hul.isempty(_filedata)){ //new
+	if(top.HEURIST.util.isempty(_filedata)){ //new
 		_filedata = {id:0,
 					remoteURL: (src=='heurist')?null:curr_link,
 					ext:curr_ext,
