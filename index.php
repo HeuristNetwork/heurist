@@ -34,6 +34,9 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] ){
     }
     header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
     return;
+}else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] ){
+    header( 'Location: hserver/dbaccess/file_download.php?'.$_SERVER['QUERY_STRING'] );
+    return;
 }
 
 

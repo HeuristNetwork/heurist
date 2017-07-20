@@ -1114,15 +1114,21 @@ $loop_cnt=1;
                                 
                             }else{
                                 
+                                if($needCompleteInformation){
+                                    $ulf_fields = 'f.ulf_OrigFileName,f.ulf_ExternalFileReference,f.ulf_ObfuscatedFileID,'
+                                                    .'f.ulf_MimeExt, f.ulf_Parameters';  //4,5,6,7,8
+                                }else{
+                                    $ulf_fields = 'f.ulf_ObfuscatedFileID, f.ulf_Parameters';  //4,5
+                                }
+                                
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
                                 .'AsWKT(dtl_Geo),'    // 2
                                 .'dtl_UploadedFileID,'   // 3
-                                .'recUploadedFiles.ulf_ObfuscatedFileID,'   // 4
-                                .'recUploadedFiles.ulf_Parameters '         // 5
-                                .'from recDetails
-                                  left join recUploadedFiles on ulf_ID = dtl_UploadedFileID
+                                .$ulf_fields   
+                                .' from recDetails
+                                  left join recUploadedFiles as f on f.ulf_ID = dtl_UploadedFileID
                                 where dtl_RecID in (' . join(',', $chunk_rec_ids) . ')';
 
                             }
@@ -1149,8 +1155,21 @@ $loop_cnt++;
                                     
                                     if($row[2]){
                                         $val = $row[1].' '.$row[2];     //dtl_Geo @todo convert to JSON
-                                    }else if($row[3]){
-                                        $val = array($row[4], $row[5]); //obfuscated value for fileid
+                                    }else if($row[3]){ //uploaded file
+                                    
+                                        if($needCompleteInformation){
+                                            
+                                            $val = array('ulf_ID'=>$row[3],
+                                                         'ulf_OrigFileName'=>$row[4],
+                                                         'ulf_ExternalFileReference'=>$row[5],
+                                                         'ulf_ObfuscatedFileID'=>$row[6],
+                                                         'ulf_MimeExt'=>$row[7],
+                                                         'ulf_Parameters'=>$row[8] );
+                                            
+                                        }else{
+                                            $val = array($row[4], $row[5]); //obfuscated value for fileid and parameters
+                                        }
+                                    
                                     }else if(@$row[1]) {
                                         $val = $row[1];
                                     }

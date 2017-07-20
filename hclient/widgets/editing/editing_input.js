@@ -822,6 +822,7 @@ $.widget( "heurist.editing_input", {
             }else 
             if( this.detailType=='file' ){
                 
+console.log(value);                
                         //url for thumb
                         var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumbnail');
                         
@@ -890,7 +891,7 @@ $.widget( "heurist.editing_input", {
                                 $input.click();}
                         }); 
             }
-            else 
+            else //------------------------------------------------------------------------------------
             if(this.detailType=="geo"){
                 
                 $input.css('width','20ex');

@@ -261,7 +261,7 @@ if(!$is_map_popup){
                 }
                 
                 //init image viewer
-                //$('.mediacontent').yoxview({ skin: "top_menu", allowedUrls: /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
+                //$('.mediacontent').yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&id=(?:\w+)$/i});
                 
             }
 
@@ -714,7 +714,7 @@ if($is_map_popup){
                         //NEW WAY                        
                         print '<div id="mediarec"'.$thumb['id'].'" style="width:100%,text-align:center,height:auto" class="mediacontent thumbnails">';
                         print '<div style="height:auto;display:inline-block"><a target="yoxview" href="'
-                        .HEURIST_BASE_URL.'redirects/file_download.php?db='.HEURIST_DBNAME.'&id='.$thumb['id'].'">';
+                        .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['id'].'">';
                         print '<img src="'.htmlspecialchars($thumb['thumb']).'"/>';
                         print '</a></div></div>';
                     }else

@@ -392,7 +392,7 @@ $.widget( "heurist.file_manager", {
                 if(obf_recID){
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css({ 'background-image':'url('+ window.hWin.HAPI4.baseURL+'/redirects/file_download.php?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
+                    .css({ 'background-image':'url('+ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
                     .appendTo($recdiv);
                 }else{
                     //@todo - thumbnail and icons for all mediatype

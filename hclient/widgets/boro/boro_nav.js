@@ -1331,8 +1331,8 @@ $.widget( "heurist.boro_nav", {
                     html = html + 
                     '<a class="bor-download" data-type="bor entry pdf" data-name="'
                     + fullName +'" href="'
-                    + window.hWin.HAPI4.baseURL+'redirects/file_download.php?db=' + window.hWin.HAPI4.database 
-                    + '&id=' + that.recset.fld(record, 38) + '"><span style="display:inline-block" class="ui-icon ui-icon-download"></span> Download entry ( PDF '
+                    + window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database 
+                    + '&file=' + that.recset.fld(record, 38) + '"><span style="display:inline-block" class="ui-icon ui-icon-download"></span> Download entry ( PDF '
                     + Math.round(that.recset.fld(record, 67)/1024) +'KB )</a>'
                 }
             }
@@ -1368,10 +1368,10 @@ $.widget( "heurist.boro_nav", {
                     html = html + 
                         '<a class="bor-gallery-link" data-toggle="lightbox" data-gallery="profile-images" data-title="'
                             + filename + '" data-footer="" title="'+ filename +'" href="'
-                            + window.hWin.HAPI4.baseURL+'redirects/file_download.php?db=' + window.hWin.HAPI4.database 
-                            + '&id=' + obf[0] +'">'
+                            + window.hWin.HAPI4.baseURL+ '?db=' + window.hWin.HAPI4.database 
+                            + '&file=' + obf[0] +'">'
                             + '<img class="bor-thumbnail" src="' 
-                            + window.hWin.HAPI4.baseURL+'redirects/file_download.php?db=' + window.hWin.HAPI4.database 
+                            + window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database 
                             + '&thumb=' + obf[0]
                             + '" alt="'+stitle+'">'
                         +'</a>';                    

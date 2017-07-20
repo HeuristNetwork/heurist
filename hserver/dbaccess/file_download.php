@@ -3,6 +3,11 @@
 /**
 *  file_download.php : Download (or proxy) files that are registered in Heurist database
 *
+* db
+* thumb - obfuscated file id - returns existing thumbnail or resize image
+* file - obfuscated file id - uses fileGetPath_URL_Type to get path to file or URL
+*      player - returns html wrap
+* 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2016 University of Sydney
@@ -41,9 +46,9 @@ if($db){
             header("Location: ".$thumb_url);
             exit();
         }
-    }else if(@$_REQUEST['id']) {
+    }else if(@$_REQUEST['file']) {
 
-        $fileid = @$_REQUEST['id'];
+        $fileid = @$_REQUEST['file'];
         
         if(is_numeric($fileid)){
             error_log('Obfuscated id is allowed only');
@@ -72,7 +77,8 @@ if($db){
                 if($url){
                     $filepath = $url;
                 }else{
-                    $filepath = HEURIST_BASE_URL."redirects/file_download.php?db=".HEURIST_DBNAME."&id=".$fileid;
+                    //to itself
+                    $filepath = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileid;
                 }
 
                 ?>

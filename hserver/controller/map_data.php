@@ -41,8 +41,8 @@ $detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, AsWKT(dt
 */
 function getFileURL($system, $fileID) {
 
-    return HEURIST_BASE_URL."redirects/file_download.php?db=".HEURIST_DBNAME."&id=".$fileID;
-
+    return HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileID;
+/*
     $paths = fileGetPath_URL_Type($system, $fileID);
     //print_r($paths);
 
@@ -54,6 +54,7 @@ function getFileURL($system, $fileID) {
         return $paths[0][1];
     }
     return "null";
+*/
 }
 
 /**

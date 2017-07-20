@@ -62,6 +62,8 @@ if($response!=null){
 */    
     //error_reporting(E_ALL | E_STRICT);
 
+//define options for upload handler    
+    
     if($entity_name=="terms"){//for terms from old term management - upload term image
 
     $options = array(
@@ -193,7 +195,7 @@ function postmode_file_selection() {
             
         }
             
-print $error;            
+error_log($error);            
         }
 
         if (!$error) {    // move on to the next stage!

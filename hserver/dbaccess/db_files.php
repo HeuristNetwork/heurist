@@ -44,7 +44,7 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 
 
 /**
-* Get array of local paths, external links, mimtypes and parameters (mediatype and source)
+* Get array of local paths, external links, mimetypes and parameters (mediatype and source)
 * for list of file id (may be obsfucated)
 *
 * @param mixed $system
@@ -130,7 +130,8 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
         if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
             $thumb_url = HEURIST_THUMB_URL.$thumbfile;
         }else{
-            $thumb_url = HEURIST_BASE_URL."redirects/file_download.php?db=".HEURIST_DBNAME."&thumb=".$fileid;
+            //hserver/dbaccess/file_download.php
+            $thumb_url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&thumb=".$fileid;
         }
         
         if($get_bgcolor){

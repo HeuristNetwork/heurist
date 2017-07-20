@@ -131,7 +131,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
 
         var html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
-        window.hWin.HAPI4.baseURL+'redirects/file_download.php?db=' + window.hWin.HAPI4.database + '&thumb='+
+        window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                     fld('ulf_ObfuscatedFileID') + '&quot;);opacity:1"></div>';
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
