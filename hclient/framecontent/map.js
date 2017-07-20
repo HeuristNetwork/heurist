@@ -1676,7 +1676,8 @@ ed_html +
                         }, text:false})
                      .click(function( event ) {
                 event.preventDefault();
-                //window.open(window.hWin.HAPI4.baseURL + "hclient/framecontent/recordEdit.php?db="+window.hWin.HAPI4.database+"&q=ids:"+recID, "_blank");
+                
+                //@todo replce with new method => window.hWin.HEURIST4.ui.openRecordInPopup(recID, true, function(){})
                 window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
                     });
             }

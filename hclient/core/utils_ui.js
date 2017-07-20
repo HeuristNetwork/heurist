@@ -1217,18 +1217,25 @@ window.hWin.HEURIST4.ui = {
             var url = window.hWin.HAPI4.baseURL,
                 dwidth, dtitle;    
             if(isEdit==true){
+                
+                var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
+                        {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
                 url = url + 'hclient/framecontent/recordEdit.php?popup=1&db='+window.hWin.HAPI4.database+
                     '&q=ids:'+ rec_ID;                                    
                 dtitle = 'Edit record';
-                dwidth = 1200;
+                dheight = usrPreferences.height;
+                dwidth = usrPreferences.width;
             }else{
                 url = url + 'records/view/renderRecordData.php?db='+window.hWin.HAPI4.database+
                     '&recID='+ rec_ID;                                    
                 dtitle = 'Record Info';
+                dheight = 640;
                 dwidth = 800;
             }        
             
-            window.hWin.HEURIST4.msg.showDialog(url, {height:640, width:dwidth,
+            window.hWin.HEURIST4.msg.showDialog(url, {height:dheight, width:dwidth,
                 padding:0,
                 title: window.hWin.HR(dtitle),
                 class:'ui-heurist-bg-light',
@@ -1262,18 +1269,6 @@ window.hWin.HEURIST4.ui = {
                         + sRelBtn + '</div>')
         .appendTo($(container));
         
-        var _callback_after_edit = function(recordset){
-            if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
-                if( $(event.target).is('a') ){
-                    var record = recordset.getFirstRecord();
-                    $(event.target).text(
-                        window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title')));
-                }else{
-                    //update relationship 
-                    
-                }
-            }
-        };
         
         if(isEdit){
             //remove button
@@ -1333,15 +1328,30 @@ window.hWin.HEURIST4.ui = {
                 event.preventDefault();
                 
                 var recID = ele.attr('data-relID');
-                window.hWin.HEURIST4.ui.openRecordInPopup(recID, isEdit, _callback_after_edit);
+                window.hWin.HEURIST4.ui.openRecordInPopup(recID, isEdit, function(recordset){
+                        if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
+                            var DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
+                            var record = recordset.getFirstRecord();
+                            var term_ID = recordset.fld(record,DT_RELATION_TYPE);
+                            ele.find('.detailType').text(window.hWin.HEURIST4.ui.getTermValue(term_ID)); //update relation type
+                        }
+                });
             });
         
         }
             
         ele.find('a').click(function(event){
             event.preventDefault();
-            var rec_ID = $(event.target).attr('data-recID');
-            window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, isEdit, _callback_after_edit);
+            var recID = $(event.target).attr('data-recID');
+            window.hWin.HEURIST4.ui.openRecordInPopup(recID, isEdit, 
+                    function(recordset){
+                        if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
+                            var record = recordset.getFirstRecord();
+                            var rec_Title = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title'));
+                            $(event.target).text(rec_Title);
+                        }
+                    }
+                );
         });        
         
         $(container).find('.add-rel-button').hide();

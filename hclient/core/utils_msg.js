@@ -685,7 +685,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 width : options.width,
                                 height: options.height,
                                 modal: (options['modal']!==false),
-                                resizable: (options['no-resize']!=true),
+                                resizable: (options.resizable!==false),
                                 //draggable: false,
                                 title: options["title"],
                                 resizeStop: function( event, ui ) {
@@ -741,7 +741,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     width : dim.w,
                     height: dim.h,
                     modal: true,
-                    resizable: (options['no-resize']==true),
+                    resizable: (options.resizable!==false),
                     //draggable: false,
                     title: options["title"],
                     buttons: options["buttons"],

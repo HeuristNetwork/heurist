@@ -48,8 +48,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         
         this.options.use_cache = false;
-        this.options.edit_height = 640;
-        this.options.edit_width = 1200;
+        //this.options.edit_height = 640;
+        //this.options.edit_width = 1200;
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -164,7 +164,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //override some editing methods
     
     //
-    // open popup edit dialog if need it
+    // open popup edit dialog if we need it
     //
     _initEditForm_step1: function(recID){
     
@@ -229,33 +229,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(this.options.edit_mode=='popup'){
                 
                     this.editForm.css({'top': 0, overflow:'auto !important'});
+
+                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
+                        {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
                  
                     this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
                             window:  window.hWin, //opener is top most heurist window
                             element:  this.editFormPopup[0],
-                            height: this.options['edit_height']?this.options['edit_height']:640,
-                            width:  this.options['edit_width']?this.options['edit_width']:1200,
+                            height: usrPreferences.height,
+                            width:  usrPreferences.width,
+                            resizable: true,
                             title: this.options['edit_title']
                                         ?this.options['edit_title']
                                         :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,                         
                             buttons: btn_array
                         });
                     
-                 
-/*                    this.editFormPopup.dialog({
-                        autoOpen: true,
-                        height: this.options['edit_height']?this.options['edit_height']:400,
-                        width:  this.options['edit_width']?this.options['edit_width']:740,
-                        modal:  true,
-                        title: this.options['edit_title']
-                                    ?this.options['edit_title']
-                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,
-                        resizeStop: function( event, ui ) {//fix bug
-                            that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
-                        },
-                        buttons: btn_array
-                    });        
-*/                    
                     //help and tips buttons on dialog header
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
                      window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
@@ -265,11 +255,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }//popup
                 else if(this.editFormToolbar){ //initialize action buttons
                     
+                    // in_popup_dialog - it means that search(manage) is not visible 
+                    // we works with edit part only
+                    
                     if(!this.options.in_popup_dialog){
+                        //this is standalone window
                         btn_array.pop();btn_array.pop(); //remove to last buttons about close
                     }else{
-                         //this.editFormPopup.css({'top': 0});
-                         this.editFormToolbar
+                        //this is popup dialog
+                       this.editFormToolbar
                          .addClass('ui-dialog-buttonpane')
                          .css({
                             padding: '0.8em 1em .2em .4em',
@@ -294,7 +288,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                 if(this.editFormSummary && this.editFormSummary.length>0){    
                     
-                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_summary', {width:0, activeTabs:["0","1"]});
+                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_summary', {closed:true, width:400, activeTabs:["0","1"]});
         
                     var layout_opts =  {
                         applyDefaultStyles: true,
@@ -303,14 +297,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //togglerContent_open:    '&nbsp;',
                         //togglerContent_closed:  '&nbsp;',
                         east:{
-                            size:(usrPreferences.width==0)?400:usrPreferences.width,
+                            size:(usrPreferences.width>0)?usrPreferences.width:400,
                             maxWidth:800,
                             spacing_open:6,
                             spacing_closed:16,  
                             togglerAlign_open:'center',
                             togglerAlign_closed:'top',
                             togglerLength_closed:16,  //makes it square
-                            initClosed:(usrPreferences.width==0),
+                            initClosed:(usrPreferences.closed==true),
                             slidable:false,  //otherwise it will be over center and autoclose
                             contentSelector: '.editFormSummary'    
                         },
@@ -336,7 +330,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             
                             acc.accordion({
                                 collapsible: true,
-                                active: (usrPreferences.activeTabs.indexOf(idx)>=0) ,
+                                active: (usrPreferences.activeTabs.indexOf(String(idx))>=0) ,
                                 heightStyle: "content",
                                 beforeActivate:function(event, ui){
                                     if(ui.newPanel.text()==''){
@@ -346,56 +340,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 }
                             });
                         }
-                        
-                        if(false)
-                        this.editFormSummary.accordion({
-                            collapsible: true,
-/*                            
-                            beforeActivate: function(event, ui) {
-        
-                                if(ui.newPanel.length>0){
-                                    panelToActivate = ui.newPanel;
-                                }else{
-                                    panelToActivate = ui.oldPanel;
-                                }
-                                if(panelToActivate.text()=='' && Number(panelToActivate.attr('data-id'))>=0 ){
-                                    //load content for panel to be activated
-                                    that._fillSummaryPanel(panelToActivate);
-                                }
-                                
-                                 // The accordion believes a panel is being opened
-                                if (ui.newHeader[0]) {
-                                    var currHeader  = ui.newHeader;
-                                    var currContent = currHeader.next('.ui-accordion-content');
-                                 // The accordion believes a panel is being closed
-                                } else {
-                                    var currHeader  = ui.oldHeader;
-                                    var currContent = currHeader.next('.ui-accordion-content');
-                                }
-                                 // Since we've changed the default behavior, this detects the actual status
-                                var isPanelSelected = currHeader.attr('aria-selected') == 'true';
 
-                                 // Toggle the panel's header
-                                currHeader.toggleClass('ui-corner-all',isPanelSelected).toggleClass('accordion-header-active ui-state-active ui-corner-top',!isPanelSelected).attr('aria-selected',((!isPanelSelected).toString()));
-
-                                // Toggle the panel's icon
-                                currHeader.children('.ui-icon').toggleClass('ui-icon-triangle-1-e',isPanelSelected).toggleClass('ui-icon-triangle-1-s',!isPanelSelected);
-
-                                 // Toggle the panel's content
-                                currContent.toggleClass('accordion-content-active',!isPanelSelected)    
-                                if (isPanelSelected) { currContent.slideUp(); }  else { currContent.slideDown(); }
-
-                                return false; // Cancels the default action
-                            },                            
-*/                            
-                            heightStyle: "content",
-                            beforeActivate:function(event, ui){
-                                if(ui.newPanel.text()==''){
-                                    //load content for panel to be activated
-                                    that._fillSummaryPanel(ui.newPanel);
-                                }
-                            }
-                        });
                     }
                 }
             }//!isOpenAready
@@ -415,21 +360,29 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that.editFormSummary.find('.summary-accordion').each(function(idx,item){
                     var active = $(item).accordion('option','active');
                     if(active!==false){
-                        activeTabs.push(idx);
+                        activeTabs.push(String(idx));
                     }
                             
                 });
+
+                var myLayout = this.editFormPopup.layout();                
+                var sz = myLayout.state.east.size;
+                var isClosed = myLayout.state.east.isClosed;
                 
-                window.hWin.HAPI4.save_pref( 'edit_record_summary', {width:that.editFormSummary.parent().width(), 
+                window.hWin.HAPI4.save_pref( 'edit_record_summary', {closed:isClosed, width:sz, 
                                             activeTabs:activeTabs} );
         }
         
         
         
-        
         if(this.options.in_popup_dialog==true){
+            
+            window.hWin.HAPI4.save_pref('edit_record_dialog', {width:window.innerWidth, height:window.innerHeigth});
             window.close(this._currentEditRecordset);
+            
         }else if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
+            window.hWin.HAPI4.save_pref('edit_record_dialog', {width: this._edit_dialog.dialog('option','width'), 
+                                                               height: this._edit_dialog.dialog('option','height')});
             this._edit_dialog.dialog('close');
         }
     },
@@ -444,6 +397,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         var that = this;
         
         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+        
+        panel.empty();
         
         switch(idx){
             case 0:   //admins
@@ -521,7 +476,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:500,
             padding: '0px',
-            resizeable:false,
+            resizable:false,
             title: window.hWin.HR('ownership'),
             callback: function(context){
 
@@ -974,7 +929,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     var active = $(item).accordion('option','active');
                     if(active!==false){
                         $(item).accordion({active:0});
-                        that._fillSummaryPanel($(item).find('.summary-content'));
+                        if($(item).find('.summary-content').is(':empty'))
+                            that._fillSummaryPanel($(item).find('.summary-content'));
                     }
                             
                 });

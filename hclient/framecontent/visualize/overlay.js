@@ -628,7 +628,7 @@ function _editRecStructure(rty_ID) {
 
     window.hWin.HEURIST4.msg.showDialog(URL, {
             "close-on-blur": false,
-            "no-resize": false,
+            resizable: true,
             title: 'RECORD STRUCTURE',
             height: 600, //dim.h*0.9,
             width: 860,
@@ -737,8 +737,6 @@ function _addNewLinkField(source_ID, target_ID){
             hWin.HEURIST4.msg.showDialog(url, 
                 {
                     "close-on-blur": false,
-                    //"no-resize": true,
-                    //"no-close": true, //hide close button
                     title: dlg_title,
                     height: dim.h,
                     width: dim.w,

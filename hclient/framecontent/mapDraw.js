@@ -1004,7 +1004,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
                 var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                         element: document.getElementById( "get-set-coordinates" ),
-                        'no-resize':true,
+                        resizable:false,
                         width:690, height:400,
                         title:window.hWin.HR('Paste or upload geo data'),
                         buttons:buttons    
@@ -1018,7 +1018,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         
                 var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                         element: document.getElementById( "get-set-coordinates" ),
-                        'no-resize':true,
+                        resizable: false,
                         width:690, height:400,
                         title:window.hWin.HR('Copy the result')
                 });
