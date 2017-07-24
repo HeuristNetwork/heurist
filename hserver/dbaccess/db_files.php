@@ -301,7 +301,9 @@ function getPrevailBackgroundColor($filename){
         return '#FFFFFF';   
     }
 }
+
 /**
+* @todo remove - see dbRecUploadedFiles
 * Returns files for given array of records for specified users
 *
 * @param mixed $system
@@ -383,6 +385,7 @@ function fileSearch($system, $isfull, $recIDs, $mediatype=null, $ugrIDs=null){
 }
 
 /**
+* @todo remove - see dbRecUploadedFiles
 * insert/update file
 *
 * @param mixed $system
@@ -431,6 +434,7 @@ function fileSave($system, $file){
 }
 
 /**
+* @todo remove - see dbRecUploadedFiles
 * Delete files
 *
 * @param mixed $system

@@ -325,15 +325,23 @@
     function mysql__delete($mysqli, $table_name, $table_prefix, $rec_ID){
 
         $ret = null;
+        
+        if(!is_array($rec_ID)){
+            if(is_int($rec_ID)){
+                $rec_ID = array(recID);
+            }else{
+                $rec_ID = explode(',', $rec_ID);
+            }
+        }
+        $rec_ID = array_map('intval', $rec_ID);
 
-        $rec_ID = intval(@$rec_ID);
-        if($rec_ID>0){
+        if(count($rec_ID)>0){
             
             if (substr($table_prefix, -1) !== '_') {
                 $table_prefix = $table_prefix.'_';
             }
 
-            $query = "DELETE from $table_name WHERE ".$table_prefix.'ID = '.$rec_ID;
+            $query = "DELETE from $table_name WHERE ".$table_prefix.'ID in ('.implode(',', $rec_ID).')';
 
             $res = $mysqli->query($query);
             
@@ -357,7 +365,7 @@
     *
     * @param mixed $mysqli
     * @param mixed $table_name
-    * @param mixed $table_prefix
+    * @param mixed $table_prefix  - config array of fields or table prefix
     * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
     *                          fields that don't have specified prefix are ignored
     */
@@ -365,12 +373,43 @@
 
         $ret = null;
 
-        if (substr($table_prefix, -1) !== '_') {
-            $table_prefix = $table_prefix.'_';
+        if(is_array($table_prefix)){
+            
+            $fields = array();  
+            foreach($table_prefix as $fieldname=>$field_config){
+                if(@$field_config['dty_Role']=='virtual') continue;
+                if(@$field_config['dty_Role']=='primary'){
+                    $primary_field = $fieldname;
+                    $primary_field_type = $field_config['dty_Type']; 
+                }
+                $fields[] = $fieldname;
+            }
+            
+        }else{
+            if (substr($table_prefix, -1) !== '_') {
+                $table_prefix = $table_prefix.'_';
+            }
+            $primary_field = $table_prefix.'ID';
+            $primary_field_type = 'integer';
+            
+        }
+    
+        //if integer it is assumed autoincrement
+        if($primary_field_type=='integer'){
+            $rec_ID = intval(@$record[$primary_field]);
+            $isinsert = ($rec_ID<1);
+        }else{
+            $rec_ID = @$record[$primary_field];
+            if($rec_ID==null){
+                //assign guid?
+            }else{
+                //check insert or update
+                $res = mysql__select_value($mysqli, 
+                    "SELECT $primary_field FROM $table_name WHERE $primary_field='".$rec_ID."'");
+                $isinsert = ($res==null);
+            }
         }
 
-        $rec_ID = intval(@$record[$table_prefix.'ID']);
-        $isinsert = ($rec_ID<1);
 
         if($isinsert){
             $query = "INSERT into $table_name (";
@@ -384,7 +423,11 @@
 
         foreach($record as $fieldname => $value){
 
-            if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
+            if(is_array($table_prefix)){
+                
+                if(!in_array($fieldname, $fields)) continue;
+                
+            }else if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
                 //$fieldname = $table_prefix.$fieldname;
                 continue;
             }
@@ -393,13 +436,15 @@
                 $query = $query.$fieldname.', ';
                 $query2 = $query2.'?, ';
             }else{
-                if($fieldname==$table_prefix."ID"){
+                if($fieldname==$primary_field){ //ignore primary field for update
                     continue;
                 }
                 $query = $query.$fieldname.'=?, ';
             }
 
             $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
+            if($fieldname == 'ulf_ObfuscatedFileID') $dtype = 's'; //exception
+            
             $params[0] = $params[0].$dtype;
             if($dtype=='i' && $value==''){
                 $value = null;
@@ -412,7 +457,7 @@
             $query2 = substr($query2,0,strlen($query2)-2).")";
             $query = $query.$query2;
         }else{
-            $query = $query." where ".$table_prefix."ID=".$rec_ID;
+            $query = $query." where ".$primary_field."=".($primary_field_type=='integer'?$rec_ID:"'".$rec_ID."'");
         }
         
 //error_log($query);        
@@ -424,7 +469,9 @@
             if(!$stmt->execute()){
                 $ret = $mysqli->error;
             }else{
-                $ret = ($isinsert)?$stmt->insert_id:$rec_ID;
+                if($primary_field_type=='integer'){
+                    $ret = ($isinsert)?$stmt->insert_id:$rec_ID;
+                }//for non-numeric it returns null
             }
             $stmt->close();
         }else{

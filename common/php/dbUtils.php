@@ -920,7 +920,7 @@ function mysql__usedatabase($mysqli, $dbname){
 *
 * @param mixed $mysqli
 * @param mixed $table_name
-* @param mixed $table_prefix
+* @param mixed $table_prefix 
 * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
 *                          fields that don't have specified prefix are ignored
 */
@@ -934,17 +934,17 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
     if (substr($table_prefix, -1) !== '_') {
         $table_prefix = $table_prefix.'_';
     }
-
-    $rec_ID = intval(@$record[$table_prefix.'ID']);
+    $primary_field = $table_prefix.'ID';
+    $rec_ID = intval(@$record[$primary_field]);
     $isinsert = ($rec_ID<1);
-
+    
     if($isinsert){
         $query = "INSERT into $table_name (";
         $query2 = ') VALUES (';
     }else{
         $query = "UPDATE $table_name set ";
     }
-
+ 
     $params = array();
     $params[0] = '';
 

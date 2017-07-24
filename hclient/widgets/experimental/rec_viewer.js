@@ -316,7 +316,7 @@ $.widget( "heurist.rec_viewer", {
             }else{
 
             }  */
-            $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /?db=(\?:\w+)&id=(?:\w+)$/i});
+            $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
             // /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
         }
     }

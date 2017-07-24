@@ -323,7 +323,7 @@ function onApply(){
 		if(curr_ext) _filedata.ext = curr_ext;
 	}
 
-	var res = top.YAHOO.lang.JSON.stringify(_filedata);
+	var res = JSON.stringify(_filedata); //top.YAHOO.lang.
 	window.close( wasChanged, res );//curr_link, document.getElementById("cbSource").value, document.getElementById("cbType").value);
 }
 

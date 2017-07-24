@@ -204,6 +204,7 @@ class DbEntitySearch
         if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)
         
             if(is_array($value)){
+                $value = array_filter($value, 'is_numeric');
                 $value = implode(',',$value);
             }
             if(strpos($value, '-')===0){

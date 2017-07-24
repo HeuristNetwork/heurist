@@ -24,22 +24,28 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     _currentDomain:null,
     
+    _editing2:null,
+    
     _init: function() {
-        this.options.layout_mode = 'short';
+        this.options.layout_mode = 'basic';
         this.options.use_cache = false;
+        this.options.select_return_mode = 'recordset';
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
-            this.options.width = 390;                    
-            this.options.edit_mode = 'none'
+            this.options.width = 900;                    
+            //this.options.edit_mode = 'none'
         }
     
         this._super();
         
-        if(!(this.options.select_mode!='manager' || this.options.edit_mode!='inline')){
+        if(this.options.edit_mode=='inline'){
+            this.recordList.parent().width(340);
+            this.editForm.css('left',341);
+        }else{
             //edit form is not visible
-            this.recordList.parent().width(300);
-            this.editForm.parent().css('left',301);
+            this.recordList.parent().width('100%');
+            this.editForm.hide();
         }
         
     },
@@ -67,6 +73,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         this.searchForm.css({'height':iheight+'em'});
         this.recordList.css({'top':iheight+0.4+'em'});
+        
+//        this.recordList.resultList('option','view_mode','thumbs');
 
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
@@ -79,27 +87,204 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
        //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
        //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
        if(this.options.edit_mode!='none'){
-/*
-           //define add button on left side
-           this._defineActionButton({key:'add', label:'Add New Vocabulary', title:'', icon:'ui-icon-plus'}, 
-                        this.editFormToolbar, 'full',{float:'left'});
+     
+               var that = this; 
+
+                var btn_array = [
+                        {text:window.hWin.HR('Upload file'), id:'btnRecNewUpload', 
+                              click: function() { that._uploadFileAndRegister(); }},
+                        /*{text:window.hWin.HR('Batch upload'), id:'btnRecNewBatch',
+                              click: function() { that._saveEditAndClose( 'none' ); }},*/
+                        {text:window.hWin.HR('New external'), id:'btnRecNewExt',
+                              click: function() { that.addEditRecord(-1); }},
                 
-           this._defineActionButton({key:'add-child',label:'Add Child', title:'', icon:''},
-                    this.editFormToolbar);
-           this._defineActionButton({key:'add-import',label:'Import Children', title:'', icon:''},
-                    this.editFormToolbar);
-           this._defineActionButton({key:'merge',label:'Merge', title:'', icon:''},
-                    this.editFormToolbar);
-               
-           //define delete on right side
-           this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
-                    this.editFormToolbar,'full',{float:'right'});
-*/                    
+                        {text:window.hWin.HR('Remove'), id:'btnRecDelete', css:{float:'right'},
+                              click: function() { that._deleteAndClose(); }}
+                ];
+                this.editFormToolbar.empty();
+                for(var idx in btn_array){
+                    this._defineActionButton2(btn_array[idx], this.editFormToolbar);
+                }               
        }
         
        return true;
     },
 
+    
+    //
+    // open popup edit dialog if we need it
+    //
+    _initEditForm_step2: function(recID){
+    
+        if(recID==null || this.options.edit_mode=='none') return;
+        
+        var isOpenAready = false;
+        if(this.options.edit_mode=='popup'){
+            if(this._edit_dialog){
+                try{
+                    isOpenAready = this._edit_dialog.dialog('isOpen');
+                }catch(e){}
+            }
+        } else { //inline 
+            //isOpenAready = !this.editFormToolbar.is(':empty');
+        }
+
+
+        this._currentEditID = recID;
+        
+        if(!isOpenAready){   //we always init buttons for inline edit         
+    
+            var that = this; 
+            
+            var recset = this.recordList.resultList('getRecordSet');
+            var recset_length = recset.length();
+
+            var btn_array = [
+                        {text:window.hWin.HR('Upload file'), id:'btnRecNewUpload',
+                              click: function() { that._uploadFileAndRegister(); }},
+                        /*{text:window.hWin.HR('Batch upload'), id:'btnRecNewBatch',
+                              click: function() { that._saveEditAndClose( 'none' ); }},*/
+                        {text:window.hWin.HR('New external'), id:'btnRecNewExt',
+                              click: function() { that.addEditRecord(-1); }},
+
+                        {text:window.hWin.HR('Save'), id:'btnRecSave',
+                              css:{'visibility':'hidden','float':'right'},
+                              click: function() { that._saveEditAndClose( 'none' ); }},
+                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
+                              css:{'visibility':'hidden','float':'right'},
+                              click: function() { that.closeEditDialog(); }}
+                        ]; 
+            
+            if(this.options.edit_mode=='popup'){
+            
+                this.editForm.css({'top': 0, overflow:'auto !important'});
+
+                this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
+                        window:  window.hWin, //opener is top most heurist window
+                        element:  this.editForm[0],
+                        height: this.options['edit_height']?this.options['edit_height']:400,
+                        width:  this.options['edit_width']?this.options['edit_width']:740,
+                        resizable: true,
+                        title: this.options['edit_title']
+                                    ?this.options['edit_title']
+                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,                         
+                        buttons: btn_array
+                    });
+                
+                //help and tips buttons on dialog header
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
+                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+        
+                this._toolbar = this._edit_dialog.parent(); //this.editFormPopup.parent();
+        
+            }//popup
+            else if(this.editFormToolbar){ //initialize action buttons for inline dialog
+               
+               /*this is popup dialog
+               this.editFormToolbar
+                 .addClass('ui-dialog-buttonpane')
+                 .css({
+                    padding: '0.8em 1em .2em .4em',
+                    background: 'none',
+                    'background-color': '#95A7B7 !important',
+                    'text-align':'right'
+                 });
+                */ 
+
+                this._toolbar = this.editFormToolbar;
+                /*
+                */
+            }
+        }//!isOpenAready
+        
+        this._initEditForm_step3(recID); 
+    },
+    
+    _initEditForm_step4: function(recordset){
+        
+        this._currentEditRecordset = recordset; 
+        
+        var isLocal = true;
+        if(recordset!=null){
+            isLocal = window.hWin.HEURIST4.util.isempty(this._getField('ulf_ExternalFileReference'));
+        }else{
+            //new record
+            isLocal = false;
+        }
+        
+        var i_url = this.getEntityFieldIdx('ulf_HeuristURL');
+        var i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
+        var i_filename = this.getEntityFieldIdx('ulf_OrigFileName');
+        
+        if(isLocal){ //local
+            this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL
+                                                    + '?db=' + window.hWin.HAPI4.database 
+                                                    + '&file='+this._getField('ulf_ObfuscatedFileID');
+            this.options.entity.fields[i_url].dtFields['rst_Display'] = 'readonly';
+            this.options.entity.fields[i_url_ext].dtFields['rst_Display'] = 'hidden'; 
+            this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'readonly';
+            
+            
+        }else{ //remote
+            this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
+            this.options.entity.fields[i_url_ext].dtFields['rst_Display'] = 'visible';
+            this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
+        }
+        
+        this._super(recordset);
+    },
+    
+    //
+    // close or cancel edit dialof
+    //
+    closeEditDialog:function(){
+
+        if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
+            this._edit_dialog.dialog('close');
+        }else{ //for inline reload inline forms
+            //reload current
+            that._initEditForm_step3(that._currentEditID)
+        }
+    },    
+    
+    //-----
+    // perform required after edit form init modifications (show/hide fields, assign event listener )
+    // for example hide/show some fields based on value of field
+    //
+    _afterInitEditForm: function(){
+
+        this._super();
+
+        //load media content
+        this.mediaviewer = $('<div>').addClass('media-content').css({
+            'text-align': 'center',
+            padding: '20px',
+            'border-top': '1px solid lightgray',
+            margin: '10px'});
+        this.editForm.append( this.mediaviewer );
+        this.mediaviewer.media_viewer({rec_Files:[[
+                this._editing.getValue('ulf_ObfuscatedFileID'), 
+                this._editing.getValue('ulf_MimeExt')]]}); //nonce + memtype
+    },    
+    
+    //
+    //
+    //
+    onEditFormChange: function(){
+
+        var mode = 'hidden';
+        if(this._editing){
+            var isChanged = this._editing.isModified();
+            mode = isChanged?'visible':'hidden';
+        }
+        //show/hide save buttons
+        var ele = this._toolbar;
+        ele.find('#btnRecCancel').css('visibility', mode);
+        ele.find('#btnRecSave').css('visibility', mode);
+        
+    },
+    
+        
     //----------------------
     //
     //
@@ -182,6 +367,63 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     }
     */  
 
+    
+    //
+    // open empty edit dialog
+    // upload file 
+    // get new ulf_ID
+    // open edit form with this new record
+    //
+    _uploadFileAndRegister: function(){
+        //find file element
+        var that = this;
+        
+            if(!this._editing2){
+
+                var container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
+                
+                this._editing2 = new hEditing({container:container, 
+                 onchange:
+                function(){
+                    var ele = that._editing2.getFieldByName('ulf_FileUpload');
+                    var res = ele.editing_input('getValues'); 
+                    var ulf_ID = res[0];
+
+                    if(ulf_ID>0){
+                        that._currentEditID = null;//to prevent warn about save
+                        that.options.edit_need_load_fullrecord = true;  //force load from server
+                        that.addEditRecord(ulf_ID);
+                        that.options.edit_need_load_fullrecord = false;
+                    }
+                }}); //pass container
+            
+            }
+        
+            this._editing2.initEditForm([                {
+                    "dtID": "ulf_FileUpload",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"File upload:",
+                        "rst_FieldConfig":{"entity":"recUploadedFiles"},
+                        "dty_Role":"virtual"
+                    }
+                }], null);
+            this._editing2.getContainer().hide();
+            var ele = this._editing2.getFieldByName('ulf_FileUpload');    
+            ele.find('.fileupload').click();
+        /*
+        that._initEditForm_step1(-1, function(){
+            var ele = that._editing.getFieldByName('ulf_FileUpload');
+            ele.editing_input('option', 'change', function(){ 
+                var res = this.getValues(); 
+                var ulf_ID = res[0];
+                that._currentEditID = null;//to prevent warn about save
+                that.addEditRecord(ulf_ID);
+            });
+            ele.find('.fileupload').click();
+        });
+        */
+    }
     
 });
 

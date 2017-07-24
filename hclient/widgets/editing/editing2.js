@@ -217,8 +217,9 @@ function hEditing(_options) {
                     
                     if(fields[idx]['dty_Type']=="separator"){
                         $('<h3>').text(fields[idx]['rst_DisplayName']).addClass('separator').appendTo(fieldContainer);
-                    }else  //do not include hidden 
-                    if(fields[idx]['dtFields']['rst_Display']!="hidden") {
+                    }else  
+                    //if(fields[idx]['dtFields']['rst_Display']!="hidden") 
+                    {
                         
                         //assign values from record
                         if(record!=null){
@@ -250,11 +251,6 @@ function hEditing(_options) {
                         
                         var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
                         editing_inputs.push(inpt);  
-                        
-                    }else{
-                        //keep hidden value - to return it back
-                        
-                        
                     }
                 }
                 
@@ -293,6 +289,25 @@ function hEditing(_options) {
         return true;
     }
 
+    //
+    //
+    //
+    function _getValue(dtID){
+        var idx, ele, values = [];
+        for (idx in editing_inputs) {
+            ele = $(editing_inputs[idx]);
+            if(ele.editing_input('option', 'dtID')==dtID){
+                var vals = ele.editing_input('getValues');
+                if(vals && vals.length>0){
+                    return ele.editing_input('getValues');
+                }else{
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+    
     //
     // returns values as object {'xyz_Field':'value','xyz_Field2':['val1','val2','val3]}
     //    
@@ -420,6 +435,10 @@ function hEditing(_options) {
         initEditForm: function(_recstructure, _recdata){
             _initEditForm(_recstructure, _recdata);
         },
+
+        getValue:function(dtID){
+            return _getValue(dtID);
+        },
         
         getValues:function(needArrays){
             return _getValues(needArrays);
@@ -436,17 +455,28 @@ function hEditing(_options) {
             return _getFieldByName(fieldName);
         },
         
-        getFieldByValue:function(fieldName, value){
-            return _getFieldByValue(fieldName, value);
-        },
-        
+        //
+        // returns array of ALL input elements by field name
+        //
         getInputs:function(fieldName){
             return _getInputs(fieldName);
         },
         
+        //
+        // returns array of input elements by value
+        //
+        getFieldByValue:function(fieldName, value){
+            return _getFieldByValue(fieldName, value);
+        },
+        
         isModified: function(){
             return _isModified();
+        },
+        
+        getContainer: function(){
+            return $container;
         }
+        
         
     }
 

@@ -29,11 +29,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>ext/fancytree/jquery.fancytree-all.min.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/yoxview/yoxview-init.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/media_viewer.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
@@ -54,6 +56,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypeGroups.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefFileExtToMimetype.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
@@ -207,6 +210,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             options.height = 400;
                             options.width = 840;
                             showManageDefDetailTypeGroups( options );      
+                       }else if(entity=='DefFileExtToMimetype'){
+                            options.height = 400;
+                            options.width = 840;
+                            showManageDefFileExtToMimetype( options );      
                        }else if(entity=='DefTerms'){
                            
                             options.height = 600;
@@ -216,7 +223,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                        }else if(entity=='RecUploadedFiles'){
                            
                             options.height = 600;
-                            options.width = 840;
+                            options.width = 940;
                             showManageRecUploadedFiles( options );
                                   
                        }else if(entity=='Records'){
@@ -258,6 +265,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                        }else
                        if(entity=='DefDetailTypeGroups'){
                             $content.manageDefDetailTypeGroups( options );      
+                       }else
+                       if(entity=='DefFileExtToMimetype'){
+                            $content.manageDefFileExtToMimetype( options );      
                        }else
                        if(entity=='DefTerms'){
                             $content.manageDefTerms( options );      
@@ -360,11 +370,11 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
-                            <option value="Records"  selected>Records</option>
+                            <option value="Records">Records</option>
                             <option value="SysUsers">Users</option>
                             <option value="SysGroups">Workgroups</option>
                             <option value="Tags">Tags</option>
-                            <option value="RecUploadedFiles">Uploaded Files +</option>
+                            <option value="RecUploadedFiles" selected>Uploaded Files +</option>
                             <option value="Reminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>
@@ -373,6 +383,7 @@ print $targetPath.'<br>';
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
                             <option value="DefTerms">Terms</option>
+                            <option value="DefFileExtToMimetype">Ext To Mimetype</option>
                             <option value="RecComments">Record Comments</option>
                             <option value="Smarty">Smarty Reports</option>
                             <option value="SmartySchedule">Smarty Reports Schedule</option>
@@ -404,8 +415,8 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <span style="padding-left:20px;">
                         <label>Edit mode</label>
-                        <label><input type="radio" name="edit_mode" value="inline">inline</label> 
-                        <label><input type="radio" name="edit_mode" checked=checked value="popup">popup</label> 
+                        <label><input type="radio" name="edit_mode" checked=checked  value="inline">inline</label> 
+                        <label><input type="radio" name="edit_mode" value="popup">popup</label> 
                         <label><input type="radio" name="edit_mode" value="none">none</label> 
                     </span>
                 </div>

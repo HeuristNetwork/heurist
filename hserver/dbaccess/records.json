@@ -48,7 +48,7 @@
                         "dty_Size":63,
                         "rst_DisplayName": "URL",
                         "rst_DisplayHelpText": "" ,
-                        "rst_Visible": false
+                        "rst_Display": "hidden"
                     }
                 },
                 {
@@ -59,17 +59,27 @@
                         "dty_Size":255,
                         "rst_DisplayName": "ScratchPad",
                         "rst_DisplayHelpText": "", 
-                        "rst_Visible": false
+                        "rst_Display": "hidden"
+                    }
+                },
+                {
+                    "dtID": "rec_RecTypeID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Size":5,
+                        "rst_DisplayName": "Record type",
+                        "rst_DisplayHelpText": "" ,
+                        "rst_Display": "hidden"
                     }
                 },
                 {
                     "dtID": "rec_OwnerUGrpID",
                     "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Size":1,
+                        "dty_Type":"integer",
+                        "dty_Size":5,
                         "rst_DisplayName": "Ownership",
                         "rst_DisplayHelpText": "" ,
-                        "rst_Visible": false
+                        "rst_Display": "hidden"
                     }
                 },
                 {
@@ -79,7 +89,7 @@
                         "dty_Size":20,
                         "rst_DisplayName": "Non owner access",
                         "rst_DisplayHelpText": "" ,
-                        "rst_Visible": false
+                        "rst_Display": "hidden"
                     }
                 }
         ]

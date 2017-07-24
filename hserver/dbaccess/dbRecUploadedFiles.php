@@ -25,6 +25,7 @@ require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
+
 class DbRecUploadedFiles extends DbEntityBase
 {
     /*
@@ -55,21 +56,8 @@ class DbRecUploadedFiles extends DbEntityBase
     */
     public function search(){
         
-//error_log('befote '.print_r($this->data, true));        
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
 
-        /*
-        if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
-            return false;
-        }
-        
-        if(!$this->_validateParamsAndCounts()){
-            return false;
-        }else if (count(@$this->recIDs)==0){
-            return $this->result_data;
-        }
-        */
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
             $this->data = $res;
@@ -79,7 +67,7 @@ class DbRecUploadedFiles extends DbEntityBase
 
         //compose WHERE 
         $where = array();
-        $from_table = array('recUploadedFiles');    
+        $from_table = array($this->config['tableName']);  //'recUploadedFiles'
         
         $pred = $this->searchMgr->getPredicate('ulf_ID');
         if($pred!=null) array_push($where, $pred);
@@ -116,11 +104,12 @@ class DbRecUploadedFiles extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_FilePath,ulf_ObfuscatedFileID';
+            //$this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference, ulf_ObfuscatedFileID';
+            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Description,ulf_FileSizeKB,ulf_MimeExt,ulf_Added';
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_FilePath,ulf_ObfuscatedFileID';
+            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Description,ulf_FileSizeKB,ulf_MimeExt,ulf_Added';
             //$this->data['details'] = implode(',', $this->fields );
         }
         
@@ -168,17 +157,118 @@ class DbRecUploadedFiles extends DbEntityBase
         };
         */
         
-        $res = $this->searchMgr->execute($query, $is_ids_only, 'recUploadedFiles', $calculatedFields);
+        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields);
         
         return $res;
 
     }
     
+    
+    //
+    //
+    //    
+    protected function _validatePermission(){
+        
+        if($this->system->is_dbowner() || $this->system->is_member($this->data['fields']['ulf_UploaderUGrpID'])){
+            return true;
+        }else{
+            $this->system->addError(HEURIST_REQUEST_DENIED, 'File uploaded by other user. Cannot modify file info');
+            return false;
+        }
+    }
+    
+    protected function _validateValues(){
+        
+        $ret = parent::_validateValues();
+        
+        if($ret){
+            
+            $fieldvalues = $this->data['fields'];
+            
+            /*
+            if(!@$fieldvalues['ulf_OrigFileName']){
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Name of file not defined");
+                return false;
+            }
+            if (!@$fieldvalues['ulf_ExternalFileReference']){
+                
+                if(!(@$fieldvalues['ulf_FilePath'] && @$fieldvalues['ulf_FileName'])){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Path or link to file not defined");
+                    return false;
+                }else{
+                }
+            }
+            */
+            
+            $mimetypeExt = strtolower($fieldvalues['ulf_MimeExt']);
+            $mimeType = mysql__select_value($this->system->get_mysqli(), 
+                    'select fxm_Mimetype from defFileExtToMimetype where fxm_Extension="'.addslashes($mimetypeExt).'"');
+
+            if(!$mimeType){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, 
+'Error inserting file metadata or unable to recognise uploaded file format. '
+.'This generally means that the mime type for this file has not been defined for this database (common mime types are defined by default). '
+.'Please add mime type from Database > Administration > Structure > Define mime types. '
+.'Otherwise please contact your system administrator or the Heurist developers.');
+                    return false;
+            }
+        }
+        
+        return $ret;
+    }
+
+    
+    //
+    //
+    //    
+    protected function prepareRecords(){
+    
+        $ret = parent::prepareRecords();
+
+        //add specific field values
+        foreach($this->records as $idx=>$record){
+
+            $rec_ID = intval(@$record[$this->primaryField]);
+            $isinsert = ($rec_ID<1);
+        
+        
+            if(@$record['ulf_ExternalFileReference']){
+                $this->records[$idx]['ulf_OrigFileName'] = '_remote';
+            }
+            if($isinsert){
+                $this->records[$idx]['ulf_UploaderUGrpID'] = $this->system->get_user_id();
+                $this->records[$idx]['ulf_Added'] = date('Y-m-d H:i:s');
+                
+                
+                if(@$record['ulf_ExternalFileReference']==null || @$record['ulf_ExternalFileReference']==''){
+                    $this->records[$idx]['ulf_ExternalFileReference'] = null;
+                    unset($this->records[$idx]['ulf_ExternalFileReference']);
+                }
+            }
+            
+            
+            //change mimetype to extension
+            $mimeType = strtolower($record['ulf_MimeExt']);
+            if(strpos($mimeType,'/')>0){ //this is extension
+                $this->records[$idx]['ulf_MimeExt'] = mysql__select_value($this->system->get_mysqli(), 
+                    'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
+            }
+            
+            //$this->records[$idx] = $record;
+/*            
+                'ulf_MimeExt ' => array_key_exists('ext', $filedata)?$filedata['ext']:NULL,
+                'ulf_FileSizeKB' => 0,
+*/            
+        }
+
+        return $ret;
+        
+    }    
     //
     //
     //
     public function save(){
-        
+
         $ret = parent::save();
 /*
         if($ret!==false){
@@ -194,9 +284,63 @@ class DbRecUploadedFiles extends DbEntityBase
                 }
             }
         }
-*/        
+*/   
+        if($ret!==false)
+        foreach($this->records as $rec_idx => $record){
+          
+            if(!@$record['ulf_ObfuscatedFileID']){ //define obfuscation
+            
+                $ulf_ID = $record['ulf_ID'];
+                $nonce = addslashes(sha1($ulf_ID.'.'.rand()));
+                    
+                $file2 = array();
+                $file2['ulf_ID'] = $ulf_ID;
+                $file2['ulf_ObfuscatedFileID'] = $nonce;
+                $this->records[$rec_idx]['ulf_ObfuscatedFileID'] = $nonce;
+                if(!@$record['ulf_ExternalFileReference']){
+                    $file2['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 
+                }
+
+                $res = mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
+                
+            }
+        }//after save loop
         return $ret;
     } 
-    
+
+    //
+    // 1. exclude non numeric
+    // 2. find wrong permission   
+    // 3. find in use 
+    //
+
+    public function delete(){
+        
+        $res = array('deleted'=>array(), no_rights=>array(), 'in_use'=>array());
+
+        
+        $rec_ID = $this->data['recID'];
+        if(!is_array($rec_ID)){
+            if(is_int($rec_ID)){
+                $rec_ID = array(recID);
+            }else{
+                $rec_ID = explode(',', $rec_ID);
+            }
+        }
+        $rec_ID = array_filter($rec_ID, 'is_numeric');
+        
+        if(!$this->system->is_dbowner()){
+            $ugrs = $this->system->get_user_group_ids();
+            
+            $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ID in ('.implode(',',$rec_ID)
+                                    .') AND ulf_UploaderUGrpID not in ('.implode(',',$ugrs).')';
+                     
+            $query = 'SELECT dtl_UploadedFileID, count(*) as cnt FROM recDetails WHERE dtl_UploadedFileID=('
+                        .implode(',',$rec_ID).') HAVING BY cnt>0';;                        
+                                               
+        }
+        
+
+    }
 }
 ?>

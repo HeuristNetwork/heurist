@@ -31,7 +31,7 @@ $.widget( "heurist.resultList", {
         action_select:null,  //array of actions
         action_buttons:null,
 
-        recordview_onselect: false,
+        recordview_onselect: false, //show record viewer on select
         multiselect: true,    //@todo replace to select_mode
         isapplication: true,  //if false it does not listen global events @todo merge with eventbased
 
@@ -63,7 +63,7 @@ $.widget( "heurist.resultList", {
     _query_request: null, //keep current query request
 
     _events: null,
-    _lastSelectedIndex: -1, //required for shift-click selection
+    _lastSelectedIndex: null, //required for shift-click selection
     _count_of_divs: 0,
 
     //navigation-pagination
@@ -625,7 +625,7 @@ $.widget( "heurist.resultList", {
         var allowed = ['list','icons','thumbs','thumbs3'];
         
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
-            newmode = 'list';
+            newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode');
         }
 
         if(!this.div_content.hasClass(newmode)){
@@ -692,7 +692,7 @@ $.widget( "heurist.resultList", {
     _clearAllRecordDivs: function(new_title){
 
         //this._currentRecordset = null;
-        this._lastSelectedIndex = -1;
+        this._lastSelectedIndex = null;
 
         if(this.div_coverall){
             this.div_coverall.hide();
@@ -1138,7 +1138,7 @@ $.widget( "heurist.resultList", {
 
                 if($rdiv.hasClass('selected')){
                     $rdiv.removeClass('selected');
-                    this._lastSelectedIndex = 0;
+                    this._lastSelectedIndex = null;
                     //$rdiv.removeClass('ui-state-highlight');
                 }else{
                     $rdiv.addClass('selected');
@@ -1150,7 +1150,7 @@ $.widget( "heurist.resultList", {
 
             }else if(this.options.multiselect && event.shiftKey){
 
-                if(Number(this._lastSelectedIndex)>0){
+                if(this._lastSelectedIndex!=null){
                     var nowSelectedIndex = selected_rec_ID;
 
                     this.div_content.find('.selected').removeClass('selected');
@@ -1234,7 +1234,7 @@ $.widget( "heurist.resultList", {
                         selected.push(rec_ID);
                     }
                 });
-                if(Number(this._lastSelectedIndex)>0){
+                if(this._lastSelectedIndex!=null){
                     selected.push(""+this._lastSelectedIndex);
                 }
             }
@@ -1802,7 +1802,7 @@ $.widget( "heurist.resultList", {
                 return null;
             }        
     },
-    
+
     //
     // NOT USED
     //

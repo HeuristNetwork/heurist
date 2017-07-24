@@ -39,16 +39,27 @@
                         "dty_Size":500,
                         "rst_DisplayName": "File name:",
                         "rst_DisplayHelpText": "The original name of the file uploaded", 
-                        "rst_Display":"readonly"
+                        "rst_Display":"hidden",
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ulf_HeuristURL",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName": "Download URL:",
+                        "rst_DisplayHelpText": "Heusit URL to download file", 
+                        "rst_Display":"hidden",
+                        "dty_Role":"virtual"
                     }
                 },
                 {
                     "dtID": "ulf_ExternalFileReference",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "rst_DisplayName": "URL:",
+                        "rst_DisplayName": "External URL:",
                         "rst_DisplayHelpText": "URI of an external file, which may or may not be cached locally", 
-                        "rst_Display":"readonly"
+                        "rst_Display":"visible"
                     }
                 },
                 {
@@ -61,17 +72,13 @@
                     }
                 },
                 {
-                    "dtID": "ulf_ObfuscatedFileID",
+                    "dtID": "ulf_MimeExt",
                     "dtFields":{
-                        "dty_Type":"freetext",
-                        "rst_Display":"hidden"
-                    }
-                },
-                {
-                    "dtID": "ulf_Modified",
-                    "dtFields":{
-                        "dty_Type":"date",
-                        "rst_Display":"hidden"
+                        "dty_Type":"resource",
+                        "rst_DisplayName":"Mime type:",
+                        "rst_DisplayHelpText": "Type of resourse", 
+                        "rst_FieldConfig": {"entity":"defFileExtToMimetype"},
+                        "rst_RequirementType":"required"
                     }
                 },
                 {
@@ -84,12 +91,17 @@
                     }
                 },
                 {
+                    "dtID": "ulf_ObfuscatedFileID",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
                     "dtID": "ulf_FilePath",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "rst_DisplayName": "Path:",
-                        "rst_DisplayHelpText": "The path where the uploaded file is stored", 
-                        "rst_Display":"readonly"
+                        "rst_Display":"hidden"
                     }
                 },
                 {
@@ -100,20 +112,20 @@
                     }
                 },
                 {
-                    "dtID": "ulf_PreferredSource",
+                    "dtID": "ulf_Added",
                     "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_Display":"hidden",
-                        "rst_FieldConfig":["local","external"]
+                        "dty_Type":"date",
+                        "rst_DisplayName": "Added:",
+                        "rst_Display":"hidden"
                     }
                 },
                 {
-                    "dtID": "ulf_Parameters",
+                    "dtID": "ulf_UploaderUGrpID",
                     "dtFields":{
-                        "dty_Type":"blocktext",
-                        "rst_DisplayName":"Parameters:",
+                        "dty_Type":"integer",
                         "rst_Display":"hidden"
                     }
                 }
+                
      ]
 }

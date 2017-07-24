@@ -46,7 +46,7 @@ $.widget( "heurist.editing_input", {
         change: null  //onchange callback
     },
 
-    newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
+    //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
     detailType:null,
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
 
@@ -191,7 +191,7 @@ $.widget( "heurist.editing_input", {
 
     /* private function */
     _refresh: function(){
-        if(this.f('rst_Visible')==false){
+        if(this.f('rst_Display')=='hidden'){
             this.element.hide();    
         }else{
             this.element.show();    
@@ -336,7 +336,10 @@ $.widget( "heurist.editing_input", {
 
         if(!this.inputs){//init
             this.inputs = [];
+            this.newvalues = {};
         }
+        
+        var isFileForRecord = (this.detailType=='file' && this.configMode.entity=='records');
 
         var that = this;
 
@@ -665,7 +668,16 @@ $.widget( "heurist.editing_input", {
                         
 
             }else 
-            if(this.detailType=="resource"){
+            if(this.detailType=="resource" || isFileForRecord)
+            {
+                        if(isFileForRecord){
+                            this.configMode = {
+                                entity:'recUploadedFiles',
+                            };
+                            icon_for_button = 'ui-icon-folder-open';
+                        }else{
+                            icon_for_button = 'ui-icon-link';
+                        }
                 
                         $input.css({'min-wdith':'40ex', width:'auto'});
 
@@ -676,7 +688,7 @@ $.widget( "heurist.editing_input", {
                         var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
                         .addClass("smallbutton")
                         .appendTo( $inputdiv )
-                        .button({icons:{primary: "ui-icon-link"},text:false});
+                        .button({icons:{primary: icon_for_button},text:false});
 
                         if(window.hWin.HEURIST4.util.isempty(this.configMode)){
 
@@ -788,12 +800,21 @@ $.widget( "heurist.editing_input", {
                                     filter_groups: this.configMode.filter_group,
                                     onselect:function(event, data){
                                         
-                                        if( data && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) )
-                                        {
+                                        if(data && isFileForRecord){
+                                        
+                                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                                var recordset = data.selection;
+                                                var record = recordset.getFirstRecord();
+                                                var rec_Title = recordset.fld(record,'ulf_OrigFileName');
+                                                that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
+                                                $input.val(rec_Title).change();
+                                            }
+                                            
+                                        }else if( data && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
                                             //config and data are loaded already, since dialog was opened
                                             var display_value = window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, data.selection);
-                                            $input.val( display_value.join(',') );
                                             that.newvalues[$input.attr('id')] = data.selection.join(',');
+                                            $input.val( display_value.join(',') ).change();
                                         }
 
                                     }
@@ -810,7 +831,16 @@ $.widget( "heurist.editing_input", {
                                 }
                                 
                                 //assign initial display value
-                                var display_value = window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','));                                         $input.val( display_value.join(',') );
+                                if(value){
+                                    if(isFileForRecord){
+                                        $input.val( value.ulf_OrigFileName );
+                                    }else{
+                                        var display_value = window.hWin.HAPI4.EntityMgr
+                                                                .getTitlesByIds(entityName, value.split(','));
+                                        $input.val( display_value.join(',') );
+                                    }
+                                }
+                                
                             }
                         }
 
@@ -822,10 +852,11 @@ $.widget( "heurist.editing_input", {
                         this.newvalues[$input.attr('id')] = value;
 
             }else 
-            if( this.detailType=='file' && this.configMode.entity=='records'){
-                //at the momenet we use H3 file/url selector
+/*            
+            if(this.detailType=='file' && this.configMode.entity=='records'){ NOT USED - it tries to call H3 file uploader
+                //for for this entity is kind of resource field
                 
-console.log(value); 
+                //at the momenet we use H3 file/url selector
                 var urlThumb = '';
                 if(value && value['ulf_ObfuscatedFileID']){
                     urlThumb = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&thumb='+
@@ -837,7 +868,7 @@ console.log(value);
                     + '<img src="'+urlThumb+'" class="image_input"></div>').appendTo( $inputdiv );                
 
                 //browse button    
-                var $btn_fileselect_dialog = $( "<button>", {title: "Click to upload of select file"})
+                var $btn_fileselect_dialog = $( "<button>", {title: "Click to select file for upload"})
                         .addClass("smallbutton")
                         .css('vertical-align','top')
                         .appendTo( $inputdiv )
@@ -847,7 +878,8 @@ console.log(value);
                     
                     var filed = that.newvalues[$input.attr('id')];
                     
-                    var fieldata = encodeURIComponent(JSON.stringify({
+                    var fieldata = encodeURIComponent(JSON.stringify(
+                    filed?{
                         remoteURL:filed['ulf_ExternalFileReference'],
                         origName:filed['ulf_OrigFileName'],
                         URL:  window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database
@@ -857,7 +889,7 @@ console.log(value);
                         remoteSource:filed['remoteSource'],
                         id: filed['ulf_ID'],
                         nonce: filed['ulf_ObfuscatedFileID'],
-                    }));
+                    }:{}));
         
                     var url = window.hWin.HAPI4.baseURL+'records/files/uploadFileOrDefineURL.html?value='+fieldata 
                         +'&db='+window.hWin.HAPI4.database+'&recid='+that.options.recID;
@@ -869,7 +901,7 @@ console.log(value);
 
                             if(isChanged){
 
-                                if(window.hWin.HEURIST4.isempty(fileJSON)){
+                                if(window.hWin.HEURIST4.util.isempty(fileJSON)){
                                     var r = confirm('You uploaded/changed the file data. If you continue, all changes will be lost.');
                                     return r;
                                 }else{
@@ -908,13 +940,13 @@ console.log(value);
                 }//__show_select_fileurl
            
                 this._on( $btn_fileselect_dialog, { click: __show_select_fileurl } );
-                this._on($input_img, {click: __show_select_fileurl }); 
+                this._on( $input_img, {click: __show_select_fileurl }); 
            
                 if(value && value['ulf_ID']){
                     that.newvalues[$input.attr('id')] = value;
                 }
             }
-            else
+            else */
             if( this.detailType=='file' ){
                 
                         //url for thumb
@@ -926,7 +958,7 @@ console.log(value);
                             
                         //browse button    
                         var $btn_fileselect_dialog = $( "<button>", {title: "Click to select file for upload"})
-                        .addClass("smallbutton")
+                        .addClass("smallbutton fileupload")
                         .css('vertical-align','top')
                         .appendTo( $inputdiv )
                         .button({icons:{primary: "ui-icon-folder-open"},text:false});
@@ -936,13 +968,14 @@ console.log(value);
                         
                         //temp file name 
                         var newfilename = '~'+window.hWin.HEURIST4.util.random();
-                        
+
                         //init upload widget
                         $input.fileupload({
     url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
+                {name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
                 {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
@@ -954,14 +987,21 @@ console.log(value);
             response = response.result;
             if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
                 var data = response.data;
+
                 $.each(data.files, function (index, file) {
                     if(file.error){ //it is not possible we should cought it on server side - just in case
                         $input_img.find('img').prop('src', '');
                         window.hWin.HEURIST4.msg.showMsgErr(file.error);
                     }else{
+
+                        if(file.ulf_ID>0){
+                            that.newvalues[$input.attr('id')] = file.ulf_ID;
+                        }else{
+                            $input_img.find('img').prop('src', file.thumbnailUrl);
+                            that.newvalues[$input.attr('id')] = newfilename;
+                        }
                         $input.attr('title', file.name);
-                        $input_img.find('img').prop('src', file.thumbnailUrl);
-                        that.newvalues[$input.attr('id')] = newfilename;
+                        that._onChange();//need call it manually since onchange event is redifined by fileupload widget
                     }
                 });
             }else{
@@ -1162,6 +1202,7 @@ console.log(value);
         //clear previous inputs
         this.input_cell.find('.input-div').remove();
         this.inputs = [];
+        this.newvalues = {};
 
         var isReadOnly = (this.options.readonly || this.f('rst_Display')=='readonly');
 
@@ -1192,11 +1233,12 @@ console.log(value);
 
         if(!(this.detailType=="resource" || this.detailType=="file")){
             res = $input.val();
-        }else if (!window.hWin.HEURIST4.util.isempty( this.newvalues[$input.attr('id')] ) ){
+        }else {
+            //if (!window.hWin.HEURIST4.util.isempty( this.newvalues[$input.attr('id')] ) )
             res = this.newvalues[$input.attr('id')];
-            if (this.detailType=="file"){
+            /*if (this.detailType=="file"){
                 res = res['ulf_ID'];
-            }
+            }*/
         }
 
         return res;
@@ -1395,7 +1437,9 @@ console.log(value);
             this.input_cell.css({'padding-top':'0.4em'});
         }
 
-        var $inputdiv = $( "<div>" ).addClass('input-div').css({'font-weight':'bold'}).insertBefore(this.input_prompt);
+        var $inputdiv = $( "<div>" ).addClass('input-div truncate')
+                .css({'font-weight':'bold', 'max-width':'400px'})
+                .insertBefore(this.input_prompt);
 
         $inputdiv.html(disp_value);
         

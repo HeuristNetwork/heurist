@@ -23,11 +23,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _entityName:'records',
     
     _currentEditRecTypeID:null,
-    _currentEditRecordset:null,
-    
-    toolbar:null,
-    
-    _edit_dialog:null, //keep reference to popup dialog
     
     _init: function() {
         if(this.options.layout_mode=='basic'){ //replace default short 
@@ -154,7 +149,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var idx = order.indexOf(Number(this._currentEditID));
                 idx = idx + dest;
                 if(idx>=0 && idx<order.length){
-                    this.toolbar.find('#divNav').html( (idx+1)+' of '+order.length);
+                    this._toolbar.find('#divNav').html( (idx+1)+' of '+order.length);
                     if(dest!=0){
                         this.addEditRecord(order[idx]);
                     }
@@ -166,187 +161,193 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     // open popup edit dialog if we need it
     //
-    _initEditForm_step1: function(recID){
+    _initEditForm_step2: function(recID){
     
-        if(recID!=null && this.options.edit_mode!='none'){ //show in popup 
+        if(recID==null || this.options.edit_mode=='none') return;
         
-            var isOpenAready = false;
-            if(this.options.edit_mode=='popup' && this._edit_dialog){
+        var isOpenAready = false;
+        if(this.options.edit_mode=='popup'){
+            if(this._edit_dialog){
                 try{
                     isOpenAready = this._edit_dialog.dialog('isOpen');
                 }catch(e){}
             }
-
-            if(!isOpenAready){            
-        
-                var that = this; 
-                this._currentEditID = recID;
-                
-                var recset = this.recordList.resultList('getRecordSet');
-                var recset_length = recset.length();
-
-                var btn_array = [
-                                  /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
-                            click: function() { that._initEditForm_continue(that._currentEditID) }},  //reload edit form*/
-                                  {text:window.hWin.HR('Duplicate'), id:'btnRecDuplicate',
-                                  css:{'display':((that._currentEditID>0)?'inline-block':'none')},
-                            click: function(event) { 
-                                var btn = $(event.target);
-                                btn.hide();
-                                window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
-                                    function(response){
-                                        btn.css('display','inline-block');
-                                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                            window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been duplicated'));
-                                            var new_recID = ''+response.data.added;
-                                            that._initEditForm_continue(new_recID);
-                                        }else{
-                                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                                        }
-                                    }); 
-                            }},
-                                  {text:window.hWin.HR('Previous'),icons:{primary:'ui-icon-circle-triangle-w'},
-                                  css:{'display':((recset_length>1 && recID>0)?'inline-block':'none')}, id:'btnPrev',
-                            click: function() { that._navigateToRec(-1); }},
-                                  {text:window.hWin.HR('Next'),icons:{secondary:'ui-icon-circle-triangle-e'},
-                                  css:{'display':((recset_length>1 && recID>0)?'inline-block':'none')},
-                            click: function() { that._navigateToRec(1); }},
-                                  {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
-                                  css:{'visibility':'hidden'},
-                            click: function() { that._initEditForm_continue(that._currentEditID) }},  //reload edit form
-                                  {text:window.hWin.HR('Save and new record'), id:'btnRecSaveAndNew',
-                                  css:{'visibility':'hidden'},
-                            click: function() { that._saveEditAndClose( 'newrecord' ); }},
-                                  {text:window.hWin.HR('Save'), id:'btnRecSave',
-                                  css:{'visibility':'hidden'},
-                            click: function() { that._saveEditAndClose( 'none' ); }},
-                                  {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose',
-                                  css:{'visibility':'hidden'},
-                            click: function() { that._saveEditAndClose( 'close' ); }},
-                                  {text:window.hWin.HR('Close'), 
-                            click: function() { that.closeEditDialog(); }}]; 
-                
-                if(this.options.edit_mode=='popup'){
-                
-                    this.editForm.css({'top': 0, overflow:'auto !important'});
-
-                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
-                        {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
-                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-                 
-                    this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
-                            window:  window.hWin, //opener is top most heurist window
-                            element:  this.editFormPopup[0],
-                            height: usrPreferences.height,
-                            width:  usrPreferences.width,
-                            resizable: true,
-                            title: this.options['edit_title']
-                                        ?this.options['edit_title']
-                                        :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,                         
-                            buttons: btn_array
-                        });
-                    
-                    //help and tips buttons on dialog header
-                    window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
-                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
-            
-                    this.toolbar = this._edit_dialog.parent(); //this.editFormPopup.parent();
-            
-                }//popup
-                else if(this.editFormToolbar){ //initialize action buttons
-                    
-                    // in_popup_dialog - it means that search(manage) is not visible 
-                    // we works with edit part only
-                    
-                    if(!this.options.in_popup_dialog){
-                        //this is standalone window
-                        btn_array.pop();btn_array.pop(); //remove to last buttons about close
-                    }else{
-                        //this is popup dialog
-                       this.editFormToolbar
-                         .addClass('ui-dialog-buttonpane')
-                         .css({
-                            padding: '0.8em 1em .2em .4em',
-                            background: 'none',
-                            'background-color': '#95A7B7 !important',
-                            'text-align':'right'
-                         });
-                    }
-                    
-                    this.toolbar = this.editFormToolbar;
-                    this.editFormToolbar.empty();
-                    for(var idx in btn_array){
-                        this._defineActionButton2(btn_array[idx], this.editFormToolbar);
-                    }
-                }
-
-                if(recset_length>1 && recID>0){
-                    $('<div id="divNav" style="min-width:40px;padding:0 1em 0 0;display:inline-block;text-align:center">')
-                        .insertAfter(this.toolbar.find('#btnPrev'));
-                    this._navigateToRec(0);
-                }
-                    
-                if(this.editFormSummary && this.editFormSummary.length>0){    
-                    
-                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_summary', {closed:true, width:400, activeTabs:["0","1"]});
-        
-                    var layout_opts =  {
-                        applyDefaultStyles: true,
-                        togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
-                        togglerContent_closed:  '<div class="ui-icon ui-icon-triangle-1-w"></div>',
-                        //togglerContent_open:    '&nbsp;',
-                        //togglerContent_closed:  '&nbsp;',
-                        east:{
-                            size:(usrPreferences.width>0)?usrPreferences.width:400,
-                            maxWidth:800,
-                            spacing_open:6,
-                            spacing_closed:16,  
-                            togglerAlign_open:'center',
-                            togglerAlign_closed:'top',
-                            togglerLength_closed:16,  //makes it square
-                            initClosed:(usrPreferences.closed==true),
-                            slidable:false,  //otherwise it will be over center and autoclose
-                            contentSelector: '.editFormSummary'    
-                        },
-                        center:{
-                            minWidth:800,
-                            contentSelector: '.editForm'    
-                        }
-
-                    };
-
-                    this.editFormPopup.addClass('ui-heurist-bg-light').show().layout(layout_opts);
-
-                    //load content for editFormSummary
-                    if(this.editFormSummary.text()=='empty'){
-                        this.editFormSummary.empty();
-                        var headers = ['Admin','Links','Scratchpad','Private','Workgroup Tags','Text','Discussion'];
-                        for(var idx in headers){
-                            var acc = $('<div>').addClass('summary-accordion').appendTo(this.editFormSummary);
-                            
-                            $('<h3>').text(top.HR(headers[idx])).appendTo(acc);
-                            //content
-                            $('<div>').attr('data-id', idx).addClass('summary-content').appendTo(acc);
-                            
-                            acc.accordion({
-                                collapsible: true,
-                                active: (usrPreferences.activeTabs.indexOf(String(idx))>=0) ,
-                                heightStyle: "content",
-                                beforeActivate:function(event, ui){
-                                    if(ui.newPanel.text()==''){
-                                        //load content for panel to be activated
-                                        that._fillSummaryPanel(ui.newPanel);
-                                    }
-                                }
-                            });
-                        }
-
-                    }
-                }
-            }//!isOpenAready
-            
+        } else { //inline 
+            isOpenAready = !this.editFormToolbar.is(':empty');
         }
-        this._initEditForm_continue(recID); 
+
+        if(!isOpenAready){            
+    
+            var that = this; 
+            this._currentEditID = recID;
+            
+            var recset = this.recordList.resultList('getRecordSet');
+            var recset_length = recset.length();
+
+            var btn_array = [
+                              /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+                        click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
+                        {text:window.hWin.HR('Duplicate'), id:'btnRecDuplicate',
+                              css:{'display':((that._currentEditID>0)?'inline-block':'none')},
+                                click: function(event) { 
+                                    var btn = $(event.target);
+                                    btn.hide();
+                                    window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
+                                        function(response){
+                                            btn.css('display','inline-block');
+                                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                window.hWin.HEURIST4.msg.showMsgFlash(
+                                                    window.hWin.HR('Record has been duplicated'));
+                                                var new_recID = ''+response.data.added;
+                                                that._initEditForm_step3(new_recID);
+                                            }else{
+                                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                            }
+                                        }); 
+                                }},
+                        {text:window.hWin.HR('Previous'),icons:{primary:'ui-icon-circle-triangle-w'},
+                              css:{'display':((recset_length>1 && recID>0)?'inline-block':'none')}, id:'btnPrev',
+                              click: function() { that._navigateToRec(-1); }},
+                        {text:window.hWin.HR('Next'),icons:{secondary:'ui-icon-circle-triangle-e'},
+                              css:{'display':((recset_length>1 && recID>0)?'inline-block':'none')},
+                              click: function() { that._navigateToRec(1); }},
+                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
+                              css:{'visibility':'hidden'},
+                              click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
+                              
+                        {text:window.hWin.HR('Save and new record'), id:'btnRecSaveAndNew',
+                              css:{'visibility':'hidden'},
+                              click: function() { that._saveEditAndClose( 'newrecord' ); }},
+                        {text:window.hWin.HR('Save'), id:'btnRecSave',
+                              css:{'visibility':'hidden'},
+                              click: function() { that._saveEditAndClose( 'none' ); }},
+                        {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose',
+                              css:{'visibility':'hidden'},
+                              click: function() { that._saveEditAndClose( 'close' ); }},
+                        {text:window.hWin.HR('Close'), 
+                              click: function() { that.closeEditDialog(); }}]; 
+            
+            if(this.options.edit_mode=='popup'){
+            
+                this.editForm.css({'top': 0, overflow:'auto !important'});
+
+                var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
+                    {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                    height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+             
+                this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
+                        window:  window.hWin, //opener is top most heurist window
+                        element:  this.editFormPopup[0],
+                        height: usrPreferences.height,
+                        width:  usrPreferences.width,
+                        resizable: true,
+                        title: this.options['edit_title']
+                                    ?this.options['edit_title']
+                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,                         
+                        buttons: btn_array
+                    });
+                
+                //help and tips buttons on dialog header
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
+                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+        
+                this._toolbar = this._edit_dialog.parent(); //this.editFormPopup.parent();
+        
+            }//popup
+            else if(this.editFormToolbar){ //initialize action buttons
+                
+                // in_popup_dialog - it means that search(manage) is not visible 
+                // we works with edit part only
+                
+                if(!this.options.in_popup_dialog){
+                    //this is standalone window
+                    btn_array.pop();btn_array.pop(); //remove to last buttons about close
+                }else{
+                    //this is popup dialog
+                   this.editFormToolbar
+                     .addClass('ui-dialog-buttonpane')
+                     .css({
+                        padding: '0.8em 1em .2em .4em',
+                        background: 'none',
+                        'background-color': '#95A7B7 !important',
+                        'text-align':'right'
+                     });
+                }
+                
+                this._toolbar = this.editFormToolbar;
+                this.editFormToolbar.empty();
+                for(var idx in btn_array){
+                    this._defineActionButton2(btn_array[idx], this.editFormToolbar);
+                }
+            }
+
+            if(recset_length>1 && recID>0){
+                $('<div id="divNav" style="min-width:40px;padding:0 1em 0 0;display:inline-block;text-align:center">')
+                    .insertAfter(this._toolbar.find('#btnPrev'));
+                this._navigateToRec(0);
+            }
+            
+            //summary tab - specific for records only    
+            if(this.editFormSummary && this.editFormSummary.length>0){    
+                
+                var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_summary', {closed:true, width:400, activeTabs:["0","1"]});
+    
+                var layout_opts =  {
+                    applyDefaultStyles: true,
+                    togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
+                    togglerContent_closed:  '<div class="ui-icon ui-icon-triangle-1-w"></div>',
+                    //togglerContent_open:    '&nbsp;',
+                    //togglerContent_closed:  '&nbsp;',
+                    east:{
+                        size:(usrPreferences.width>0)?usrPreferences.width:400,
+                        maxWidth:800,
+                        spacing_open:6,
+                        spacing_closed:16,  
+                        togglerAlign_open:'center',
+                        togglerAlign_closed:'top',
+                        togglerLength_closed:16,  //makes it square
+                        initClosed:(usrPreferences.closed==true),
+                        slidable:false,  //otherwise it will be over center and autoclose
+                        contentSelector: '.editFormSummary'    
+                    },
+                    center:{
+                        minWidth:800,
+                        contentSelector: '.editForm'    
+                    }
+
+                };
+
+                this.editFormPopup.addClass('ui-heurist-bg-light').show().layout(layout_opts);
+
+                //load content for editFormSummary
+                if(this.editFormSummary.text()=='empty'){
+                    this.editFormSummary.empty();
+                    var headers = ['Admin','Links','Scratchpad','Private','Workgroup Tags','Text','Discussion'];
+                    for(var idx in headers){
+                        var acc = $('<div>').addClass('summary-accordion').appendTo(this.editFormSummary);
+                        
+                        $('<h3>').text(top.HR(headers[idx])).appendTo(acc);
+                        //content
+                        $('<div>').attr('data-id', idx).addClass('summary-content').appendTo(acc);
+                        
+                        acc.accordion({
+                            collapsible: true,
+                            active: (usrPreferences.activeTabs.indexOf(String(idx))>=0) ,
+                            heightStyle: "content",
+                            beforeActivate:function(event, ui){
+                                if(ui.newPanel.text()==''){
+                                    //load content for panel to be activated
+                                    that._fillSummaryPanel(ui.newPanel);
+                                }
+                            }
+                        });
+                    }
+
+                }
+            }
+        }//!isOpenAready
+            
+        this._initEditForm_step3(recID); 
     },
     
     //
@@ -457,7 +458,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                       that._editing.assignValuesIntoRecord();
                                       var record = that._currentEditRecordset.getFirstRecord();
                                       that._currentEditRecordset.setFld(record, 'rec_RecTypeID', selRt.val());
-                                      that._initEditForm_finalize(null);
+                                      that._initEditForm_step4(null);
                                 });
                              }
                              selRt.val(recRecTypeID);
@@ -660,7 +661,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                         that._saveEditAndClose(function(){
                             that._editing.initEditForm(null, null); //clear edit form
-                            that._initEditForm_continue(that._currentEditID); //reload edit form                       
+                            that._initEditForm_step3(that._currentEditID); //reload edit form                       
                             that.editRecordType();
                         })
                 });   
@@ -680,7 +681,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             title: window.hWin.HR('Edit record structure'),
             callback: function(context){
                     if(!top.HEURIST.util.isnull(context) && context) {
-                        that._initEditForm_continue(that._currentEditID); //reload form
+                        that._initEditForm_step3(that._currentEditID); //reload form
                     }
             }
         });        
@@ -688,23 +689,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    // get field for currently editing record
-    //
-    _getField: function(fname){
-        
-        if(this._currentEditRecordset){
-            var record = this._currentEditRecordset.getFirstRecord();
-            var value  = this._currentEditRecordset.fld(record, fname);
-            return value;
-        }else{
-            return '';
-        }
-    },
-    
     //
     //
-    //
-    _initEditForm_continue: function(recID){
+    _initEditForm_step3: function(recID){
         
         //fill with values
         this._currentEditID = recID;
@@ -722,12 +709,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }else if(recID>0){ //edit existing record
             
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"complete", l:1}, 
-                        function(response){ that._initEditForm_finalize(response); });
+                        function(response){ that._initEditForm_step4(response); });
 
         }else if(recID<0 && this._currentEditRecTypeID>0){ //add new record
             //this._currentEditRecTypeID is set in add button
             window.hWin.HAPI4.RecordMgr.add( {rt:this._currentEditRecTypeID, temp:1}, //ro - owner,  rv - visibility
-                        function(response){ that._initEditForm_finalize(response); });
+                        function(response){ that._initEditForm_step4(response); });
         }
         
         
@@ -783,7 +770,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     // prepare fields and init editing
     //
-    _initEditForm_finalize: function(response){
+    _initEditForm_step4: function(response){
         
         var that = this;
         
@@ -991,10 +978,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         that._currentEditRecordset.getFirstRecord(),'rec_Title',rec_Title);
                                 that.closeEditDialog();            
                             }else if(afterAction=='newrecord'){
-                                that._initEditForm_continue(-1);
+                                that._initEditForm_step3(-1);
                             }else{
                                 //reload after save
-                                that._initEditForm_continue(that._currentEditID)
+                                that._initEditForm_step3(that._currentEditID)
                             }
                             
                             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been saved'));
@@ -1016,7 +1003,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             mode = isChanged?'visible':'hidden';
         }
         //show/hide save buttons
-        var ele = this.toolbar;
+        var ele = this._toolbar;
         ele.find('#btnRecCancel').css('visibility', mode);
         ele.find('#btnRecSaveAndNew').css('visibility', mode);
         ele.find('#btnRecSave').css('visibility', mode);

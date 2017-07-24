@@ -157,9 +157,9 @@ error_log("NOT FOUND ".$tmp_name);
         }
 
         $pos = strpos($tmp_name, HEURIST_FILES_DIR);
-        if( copy($tmp_name, HEURIST_FILES_DIR .  $filename) )  //file is already in upload folder
+        if( copy($tmp_name, HEURIST_FILES_DIR .  $filename) ) 
         {
-            //rename file
+            //remove temp file
             unlink($tmp_name);
             return $file_id;
 

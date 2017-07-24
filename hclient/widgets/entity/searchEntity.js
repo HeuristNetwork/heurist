@@ -65,6 +65,8 @@ $.widget( "heurist.searchEntity", {
                 });
                 return;
             }else{
+                //template for search not defined 
+                // define btn_search_start and input_search at least in manageEntity
                 that._initControls();
             }
             

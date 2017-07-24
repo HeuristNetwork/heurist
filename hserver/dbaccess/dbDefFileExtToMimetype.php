@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * db access to defTerms table
+    * db access to defFileExtToMimetype table
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -25,7 +25,7 @@ require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
-class DbDefTerms extends DbEntityBase
+class DbDefFileExtToMimetype extends DbEntityBase
 {
     /*
     'trm_OriginatingDBID'=>'int',
@@ -90,43 +90,27 @@ class DbDefTerms extends DbEntityBase
         //compose WHERE 
         $where = array();    
         
-        $pred = $this->searchMgr->getPredicate('trm_ID');
+        $pred = $this->searchMgr->getPredicate('fxm_Extension');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('trm_Label');
+        $pred = $this->searchMgr->getPredicate('fxm_MimeType');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('trm_Domain');
-        if($pred!=null) array_push($where, $pred);
-        
-        $pred = $this->searchMgr->getPredicate('trm_Status');
-        if($pred!=null) array_push($where, $pred);
-
-        $pred = $this->searchMgr->getPredicate('trm_Modified');
-        if($pred!=null) array_push($where, $pred);
-
-        $pred = $this->searchMgr->getPredicate('trm_Code');
-        if($pred!=null) array_push($where, $pred);
-        
-        $pred = $this->searchMgr->getPredicate('trm_ParentTermID');
+        $pred = $this->searchMgr->getPredicate('fxm_FiletypeName');
         if($pred!=null) array_push($where, $pred);
 
        
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
-            $this->data['details'] = 'trm_ID';
+            $this->data['details'] = 'fxm_Extension';
             
         }else if(@$this->data['details']=='name'){
 
-            $this->data['details'] = 'trm_ID,trm_Label';
+            $this->data['details'] = 'fxm_Extension,fxm_MimeType';
             
-        }else if(@$this->data['details']=='list'){
-
-            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,trm_Domain,trm_ParentTermID,trm_Code,trm_Status';
+        }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
             
-        }else if(@$this->data['details']=='full'){
-
             $this->data['details'] = implode(',', array_keys($this->fields) );
         }
         
@@ -143,18 +127,18 @@ class DbDefTerms extends DbEntityBase
         }
 
         //ID field is mandatory and MUST be first in the list
-        $idx = array_search('trm_ID', $this->data['details']);
+        $idx = array_search('fxm_Extension', $this->data['details']);
         if($idx>0){
             unset($this->data['details'][$idx]);
             $idx = false;
         }
         if($idx===false){
-            array_unshift($this->data['details'], 'trm_ID');
+            array_unshift($this->data['details'], 'fxm_Extension');
         }
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM defTerms';
+        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM defFileExtToMimetype';
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
@@ -162,7 +146,7 @@ class DbDefTerms extends DbEntityBase
          $query = $query.$this->searchMgr->getOffset()
                         .$this->searchMgr->getLimit();
         
-        $res = $this->searchMgr->execute($query, $is_ids_only, 'defTerms');
+        $res = $this->searchMgr->execute($query, $is_ids_only, 'defFileExtToMimetype');
         return $res;
 
     }
@@ -174,6 +158,7 @@ class DbDefTerms extends DbEntityBase
         
         $ret = parent::save();
 
+        /* @todo fo icon and placeholder
         if($ret!==false){
             //treat thumbnail image
             foreach($this->records as $record){
@@ -187,9 +172,44 @@ class DbDefTerms extends DbEntityBase
                 }
             }
         }
+        */
         
         return $ret;
     } 
+    
+    //
+    // since in this table primary key is varchar need special treatment
+    //
+    public function delete(){
+
+        if(!$this->_validatePermission()){
+            return false;
+        }
+        $ret = null;
+
+        $rec_ID = $this->data['recID'];
+        if($rec_ID!=null){
+            $query = "DELETE from ".$this->config['tableName']." WHERE ".$this->primaryField." = '".$rec_ID."'";
+            
+            $mysqli = $this->system->get_mysqli();
+            $res = $mysqli->query($query);
+            
+            if(!$res){
+                $ret = $mysqli->error;
+                $this->system->addError(HEURIST_INVALID_REQUEST,
+                                 "Cannot delete from table ".$this->config['entityName'], $mysqli->error);
+                return false;
+            }else{
+                $ret = true;
+            }
+        }else{
+            $this->system->addError(HEURIST_INVALID_REQUEST, 
+                                 "Cannot delete from table ".$this->config['entityName'], 
+                                 'Record ID provided is wrong value');
+            return false;
+        }
+        return $ret;
+    }    
     
 }
 ?>

@@ -588,7 +588,7 @@ class System {
     * @param mixed $ug - user ID to check
     */
     public function is_member($ug){
-        return ($ug==0 || $this->get_user_id()==$ug ||  @$this->current_User['ugr_Groups'][$ug]);
+        return ($ug==0 || $ug==null || $this->get_user_id()==$ug ||  @$this->current_User['ugr_Groups'][$ug]);
     }
 
     public function is_logged_in(){

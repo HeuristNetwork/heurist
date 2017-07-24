@@ -80,25 +80,30 @@ class DbEntityBase
         return $this->config;
     }
     
+    
+    public function records(){
+        return $this->records;
+    }
+    
     //
     // save one or several records 
     //
     public function save(){
 
-        //extract records from parameter data
+        //extract records from $_REQUEST data 
         if(!$this->prepareRecords()){
                 return false;    
-        }
-        
-        //validate permission for current user
-        if(!$this->_validatePermission()){
-            return false;
         }
 
         //validate values and check mandatory fields
         foreach($this->records as $record){
         
             $this->data['fields'] = $record;
+
+            //validate permission for current user
+            if(!$this->_validatePermission()){
+                return false;
+            }
             
             //validate mandatory fields
             if(!$this->_validateMandatory()){
@@ -140,9 +145,11 @@ class DbEntityBase
 
             //save data
             $ret = mysql__insertupdate($mysqli, 
-                                    $this->config['tableName'], $this->config['tablePrefix'],
+                                    $this->config['tableName'], $this->fields,
                                     $fields );
-            if(is_numeric($ret)){
+            if($ret==null){ //it return null for non-numeric primary field
+                   $results[] = $record[$this->primaryField];
+            }else if(is_numeric($ret)){
                    $this->records[$rec_idx][$this->primaryField] = $ret;
                    $results[] = $ret;
             }else{
@@ -164,11 +171,14 @@ class DbEntityBase
     //
     // @todo multirecords and transaction
     //
+    // returns - deleted:[], no_rights:[], in_use:[]
+    //
     public function delete(){
 
         if(!$this->_validatePermission()){
             return false;
         }
+        
         $ret = mysql__delete($this->system->get_mysqli(), 
                                 $this->config['tableName'], $this->config['tablePrefix'],
                                 $this->data['recID'] );
@@ -199,7 +209,9 @@ class DbEntityBase
             if(@$field_config['dty_Role']=='virtual') continue;
                 
             $value = @$fieldvalues[$fieldname];
-            if($field_config['dty_Type']=='resource'){
+            
+            //ulf_MimeExt is the only nonnumeric resource
+            if($field_config['dty_Type']=='resource' && $fieldname!='ulf_MimeExt'){ 
                 if(intval($value)<1) $this->data['fields'][$fieldname] = null;
             }
         }
@@ -218,7 +230,7 @@ class DbEntityBase
         if (substr($table_prefix, -1) !== '_') {
             $table_prefix = $table_prefix.'_';
         }
-        $rec_ID = intval(@$fieldvalues[$table_prefix.'ID']);
+        $rec_ID = intval(@$fieldvalues[$this->primaryField]); // $table_prefix.'ID'
         $isinsert = ($rec_ID<1);
             
         foreach($this->fields as $fieldname=>$field_config){
@@ -275,7 +287,7 @@ class DbEntityBase
     }
     
     //
-    //
+    // read fields definition from config file
     //
     private function _readFields($fields){
 
@@ -297,7 +309,7 @@ class DbEntityBase
         
     }
     
-    //
+    // need to rename temporary enity files to permanent
     // $tempfile - file to rename to recID
     //
     protected function renameEntityImage($tempfile, $recID){
