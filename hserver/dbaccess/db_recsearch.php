@@ -1264,7 +1264,7 @@ $loop_cnt++;
                     }//$need_details
 
                         $rectypes = array_keys($rectypes);
-                        if( $params['detail']=='structure' && count($rectypes)>0){ //rarely used in editing.js
+                        if( @$params['detail']=='structure' && count($rectypes)>0){ //rarely used in editing.js
                               //description of recordtype and used detail types
                               $rectype_structures = dbs_GetRectypeStructures($system, $rectypes, 1); //no groups
                         }

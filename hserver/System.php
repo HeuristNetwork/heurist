@@ -85,6 +85,10 @@ class System {
             return false;
         }
 
+        if(!$this->start_my_session()){
+            return false;
+        }
+        
         //dbutils
         $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
         if ( is_array($res) ){
@@ -104,11 +108,11 @@ class System {
                     return false;
                 }
 
+                //load system info from sysIdentification table    
                 if(!$this->get_system()){
                     return false;
                 }
 
-                $this->start_my_session();
 
                 if(!defined('HEURIST_DBNAME')){
                     define('HEURIST_DBNAME', $this->dbname);
@@ -313,6 +317,10 @@ class System {
                 $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
             }
 
+            if(!defined('HEURIST_FILESTORE_ROOT')){
+                define('HEURIST_FILESTORE_ROOT', $defaultRootFileUploadPath );
+            }
+            
             if(!defined('HEURIST_FILESTORE_DIR')){
                 define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
             }
@@ -328,6 +336,10 @@ class System {
 
         }else{
 
+            if(!defined('HEURIST_FILESTORE_ROOT')){
+                define('HEURIST_FILESTORE_ROOT', $documentRoot . $install_path . $dir_Filestore );
+            }
+            
             if(!defined('HEURIST_FILESTORE_DIR')){
                 define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
             }
@@ -672,6 +684,35 @@ class System {
     * Restore session by cookie id, or start new session
     */
     private function start_my_session(){
+        global $defaultRootFileUploadPath;
+        //verify that session folder is writable
+        if(ini_get('session.save_handler')=='files'){
+            $folder = session_save_path();
+            if(file_exists($folder) && !is_writeable($folder)){
+                    $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
+                    
+                    $needSend = true;
+                    $fname = $defaultRootFileUploadPath."lastWarningSent.ini";
+                    if (file_exists($fname)){//check if warning is already sent
+                        $datetime1 = date_create(file_get_contents($fname));
+                        $datetime2 = date_create('now');
+                        $interval = date_diff($datetime1, $datetime2);                    
+                        $needSend = ($interval->format('%h')>4); //in hours
+                    }
+                    if($needSend){
+
+                        $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Session folder access', 
+                                            'The sessions folder has become inaccessible' , null);
+                        if($rv=="ok"){
+                            if (file_exists($fname)) unlink($fname);
+                            file_put_contents($fname, date_create('now')->format('Y-m-d H:i:s'));
+                        }
+                    }
+                    
+                return false;    
+            }
+        }
+        
 
         if (@$_COOKIE['heurist-sessionid']) {
             session_id($_COOKIE['heurist-sessionid']);
@@ -694,6 +735,8 @@ class System {
         session_cache_limiter('none');
         session_start();
         */
+        
+        return true;
     }
 
 
@@ -713,8 +756,11 @@ class System {
             $this->mysqli = null;
             return false;
         }
-        $this->start_my_session();
-        return $this->login_verify()?'1':'0';
+        if($this->start_my_session()){
+            return $this->login_verify()?'1':'0';
+        }else{
+            return false;
+        }
     }
 
 

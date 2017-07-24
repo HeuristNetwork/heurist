@@ -506,7 +506,7 @@ function resolveFilePath($path){
                 }else{
                     //special case to support absolute path on file server
                     if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
-                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
+                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
                         if(file_exists($fpath)){
                             return $fpath;
                         }
