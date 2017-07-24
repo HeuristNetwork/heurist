@@ -945,7 +945,7 @@
 
             
 
-            if($is_count_only || ($is_ids_only && @$params['needall'])){
+            if($is_count_only || ($is_ids_only && @$params['needall']) || !$system->is_logged_in() ){
                 $search_detail_limit = PHP_INT_MAX;
                 $aquery["limit"] = '';
             }else{

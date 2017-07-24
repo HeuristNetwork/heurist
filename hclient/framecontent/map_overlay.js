@@ -146,7 +146,7 @@ console.log('load '+current_map_document_id);
                     if(map_data[0].bookmarks==null){
                         map_data[0].bookmarks = [];
                     }
-                    map_data[0].bookmarks.push([window.hWin.HR('World'),-90,90,-30,50,1800,2050]); //default
+                    map_data[0].bookmarks.push([window.hWin.HR('World'),-80,90,-30,50,1800,2050]); //default
                     _loadMapDocumentById_continue();
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr('Map document #'+current_map_document_id+' not found');

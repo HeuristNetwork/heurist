@@ -783,9 +783,11 @@ $.widget( "heurist.editing_input", {
                             //this is entity selector
                             //detect entity
                             var entityName = this.configMode.entity;
-                            var widgetName = 'manage'+entityName.capitalize();
-                            
-                            if(window.hWin.HEURIST4.util.isempty(entityName)) entityName='Records'; //by default
+                            if(window.hWin.HEURIST4.util.isempty(entityName)) {
+                                entityName='Records'; //by default   
+                            }
+                            var widgetName = 'manage'+entityName.charAt(0).toUpperCase() + entityName.slice(1);
+                            //entityName.capitalize();
 
                             if($.isFunction($('body')[widgetName])){ //OK! widget js has been loaded
 

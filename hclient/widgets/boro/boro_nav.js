@@ -833,8 +833,7 @@ $.widget( "heurist.boro_nav", {
                     html = '<li>Born '+that.__formatDate(sDate)+(place.link?' in '+place.link:'')+'</li>';   
                     
                     if(placeID==0){
-                        that.__setPlaceDesc(place, 'birth', 'Birth '+(sDate?(' on '+that.__formatDate(sDate)):''));                    
-                    }
+                        that.__setPlaceDesc(place, 'birth', 'Birth '+(sDate?(' on '+that.__formatDate(sDate)):''));                                }
                 }
             }
             var birthYear = that.__getYear(sDate,1);
@@ -865,8 +864,7 @@ $.widget( "heurist.boro_nav", {
                     html = html + '<li>'+sDeathType+' '+that.__formatDate(sDate)+ (place.link?' in '+place.link:'') + '</li>';
             
                     if(placeID==0){
-                        that.__setPlaceDesc(place, 'death', sDeathType+(sDate?(' on '+that.__formatDate(sDate)):''));                        
-                    }
+                        that.__setPlaceDesc(place, 'death', sDeathType+(sDate?(' on '+that.__formatDate(sDate)):''));                              }
                     
                 }
             }
@@ -963,8 +961,7 @@ $.widget( "heurist.boro_nav", {
                         } 
                         
                         if(placeID==0){
-                            that.__setPlaceDesc(place, 'tertiary-study', 'Studied '+sDegree+' at '+sEduInst);                    
-                        }
+                            that.__setPlaceDesc(place, 'tertiary-study', 'Studied '+sDegree+' at '+sEduInst);                                          }
 
                     }
                 }
@@ -1328,15 +1325,20 @@ $.widget( "heurist.boro_nav", {
                 if(!that.isempty(fval)){
                     var record = that.recset.getById(fval[idx]);
                     
+                    var nonce = that.recset.fld(record, 38);
+                    if(nonce) nonce = nonce[0];
+                    
                     html = html + 
                     '<a class="bor-download" data-type="bor entry pdf" data-name="'
                     + fullName +'" href="'
                     + window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database 
-                    + '&file=' + that.recset.fld(record, 38) + '"><span style="display:inline-block" class="ui-icon ui-icon-download"></span> Download entry ( PDF '
+                    + '&file=' + nonce + '"><span style="display:inline-block" class="ui-icon ui-icon-download"></span> Download entry ( PDF '
                     + Math.round(that.recset.fld(record, 67)/1024) +'KB )</a>'
                 }
             }
-            $('#p_pdf_entry').empty().append($(html));            
+            $('#p_pdf_entry').empty().append($(html));
+            
+console.log(record);            
             
             
             //Last updated -------------------------------

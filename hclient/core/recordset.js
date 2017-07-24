@@ -257,6 +257,7 @@ function hRecordSet(initdata) {
                                 start: dres[0],
                                 recID:recID
                             }
+                            
                             if(dres[1] && dres[0]!=dres[1]){
                                 titem['end'] = dres[1];
                             }else{
@@ -306,7 +307,8 @@ function hRecordSet(initdata) {
                             placemarks:[],
                             options:{
                                 eventIconImage: iconImgEvt,
-                                icon: iconImg,
+                                //icon: iconImg,
+                                iconId: iconId,
 
                                 description: description,
                                 //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
@@ -314,7 +316,7 @@ function hRecordSet(initdata) {
                                 recid: recID,
                                 bkmid: _getFieldValue(record, 'bkm_ID'),
                                 rectype: recTypeID,
-                                iconId: iconId,
+                                
                                 title: recName,
                                 
                                 //color on dataset level works once only - timemap bug
@@ -334,7 +336,12 @@ function hRecordSet(initdata) {
                                 
                                 //,infoHTML: (infoHTML || ''),
                             }
-                        };  
+                        }; 
+                        
+                        //suppress default icons for boro
+                        if(window.hWin.HAPI4.sysinfo['layout']!='boro'){ 
+                            item.options.icon = iconImg; 
+                        }
                                           
                 if(shapes.length>0){
                     if(mapenabled<=MAXITEMS){
