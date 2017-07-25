@@ -870,6 +870,14 @@ window.hWin.HEURIST4.util = {
       return null;
     },
     
+    getFileExtension:function(filename){
+        // (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
+        // filename.split('.').pop();
+        //filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
+        var res = filename.match(/\.([^\./\?]+)($|\?)/);
+        return (res.length>1)?res[1]:'';
+    },
+    
      versionCompare: function(v1, v2, options) {
          // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
          // used to detect change in version so that user is prompted to clear cache and reload

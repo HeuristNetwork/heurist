@@ -151,6 +151,10 @@ class DbDefFileExtToMimetype extends DbEntityBase
 
     }
     
+    protected function _validatePermission(){
+        return $this->system->is_admin();
+    }
+    
     //
     //
     //

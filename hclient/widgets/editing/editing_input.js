@@ -274,7 +274,7 @@ $.widget( "heurist.editing_input", {
                 else if(fieldname=='dty_Type') val = 'freetext'
                     else if(fieldname=='rst_DisplayWidth'
                         && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
-                            val = 60;
+                            val = 55;
                         }
         }
         return val;
@@ -1205,6 +1205,8 @@ $.widget( "heurist.editing_input", {
         this.input_cell.find('.input-div').remove();
         this.inputs = [];
         this.newvalues = {};
+        
+        if(!$.isArray(values)) values = [values];
 
         var isReadOnly = (this.options.readonly || this.f('rst_Display')=='readonly');
 

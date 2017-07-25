@@ -36,11 +36,9 @@
 
         if ($rec_ids) {
 
-            if(is_string($rec_ids)){
-                $rec_ids = explode(",", $rec_ids);
-            }
-
-            if (is_array($rec_ids) && count($rec_ids)>0) {
+            $rec_ids = prepareIds($rec_ids);
+            
+            if (count($rec_ids)>0) {
 
                 $mysqli = $system->get_mysqli();
                 $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_ID in ('
@@ -166,11 +164,9 @@
             return false;
         }else{
 
-            if(is_string($rec_ids)){
-                $rec_ids = explode(",", $rec_ids);
-            }
+            $rec_ids = prepareIds($rec_ids);
 
-            if (is_array($rec_ids) && count($rec_ids)>0) {
+            if (count($rec_ids)>0) {
 
                 $query = 'delete from usrSavedSearches where svs_ID in ('. join(', ', $rec_ids) .') and svs_UGrpID='.$ugrID;
 

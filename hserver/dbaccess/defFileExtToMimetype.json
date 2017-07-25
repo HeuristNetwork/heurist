@@ -6,7 +6,7 @@
         
         "helpContent": "defFileExtToMimetype.html",
         
-        "searchFormContent": null,
+        "searchFormContent": "searchDefFileExtToMimetype.html",
         
         "entityTitle": "File Type",
         "entityTitlePlural": "File Types",
@@ -30,7 +30,8 @@
                         "dty_Role":"title",
                         "dty_Size":100,
                         "rst_DisplayName": "Mime type:",
-                        "rst_DisplayHelpText": "The standard mime type string"
+                        "rst_DisplayHelpText": "The standard mime type string",
+                        "rst_DisplayWdith": 25
                     }
                 },
                 {

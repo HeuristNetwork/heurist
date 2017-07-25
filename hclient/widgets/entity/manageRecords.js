@@ -73,7 +73,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //-----------------
         this.recordList.css('top','5.5em');
-        if(this.searchForm && this.searchForm.length>0)this.searchForm.height('7.5em').css('border','none');
+        if(this.searchForm && this.searchForm.length>0){
+            this.searchForm.height('7.5em').css('border','none');    
+        }
         
         
     },
@@ -87,7 +89,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
 
         // init search header
-        if(this.searchForm && this.searchForm.length>0)this.searchForm.searchRecords(this.options);
+        if(this.searchForm && this.searchForm.length>0){
+            this.searchForm.searchRecords(this.options);    
+        }
 /*        
         var iheight = 2;
         //if(this.searchForm.width()<200){  - width does not work here  

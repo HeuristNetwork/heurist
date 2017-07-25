@@ -12,6 +12,15 @@
     *  mysql__insertupdate
     *  mysql__delete
     *
+    *  getSysValues - Returns values from sysIdentification
+    *  isFunctionExists - verifies that mysql stored function exists
+    *  checkDatabaseFunctions - checks that all db functions reauired for H4 exists and recreates them if need it
+    *  trim_item
+    *  stripAccents
+    *  prepareIds
+    * 
+    * 
+    * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2016 University of Sydney
@@ -326,14 +335,7 @@
 
         $ret = null;
         
-        if(!is_array($rec_ID)){
-            if(is_int($rec_ID)){
-                $rec_ID = array(recID);
-            }else{
-                $rec_ID = explode(',', $rec_ID);
-            }
-        }
-        $rec_ID = array_map('intval', $rec_ID);
+        $rec_ID = prepareIds($rec_ID);
 
         if(count($rec_ID)>0){
             
@@ -352,7 +354,7 @@
             }
 
         }else{
-            $ret = 'Record ID provided is wrong value';
+            $ret = 'Invalid set of record identificators';
         }
         return $ret;
     }
@@ -569,6 +571,9 @@
     }
 
     
+    //
+    //
+    //
     function trim_item(&$item, $key, $len){
         if($item!=''){
             $item = substr(trim($item),0,$len);
@@ -605,4 +610,28 @@
     function stripAccents($stripAccents){
         return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
     }    
+
+    //
+    // $rec_IDs - may by csv string or array 
+    // return array of integers
+    //
+    function prepareIds($ids){
+        
+        if(!is_array($ids)){
+            if(is_int($ids)){
+                $ids = array($ids);
+            }else{
+                /*if(substr($ids, -1) === ','){//remove last comma
+                    $ids = substr($ids,0,-1);
+                }*/
+                $ids = explode(',', $ids);
+            }
+        }
+        $ids = array_filter($ids, function ($v) {
+             return (is_numeric($v) && $v > 0);
+        });
+        
+        return $ids;
+    }
+
 ?>

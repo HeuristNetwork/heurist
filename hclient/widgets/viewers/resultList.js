@@ -380,6 +380,7 @@ $.widget( "heurist.resultList", {
                     //var view_mode = this.element.find("input[name='list_lo']:checked").val();
                     //console.log(this.element.parent().parent().attr('id')+'  '+rbid+' '+view_mode);
                     this._applyViewMode(view_mode);
+                    window.hWin.HAPI4.save_pref('rec_list_viewmode', view_mode);
                 }
         }});
 
@@ -629,17 +630,12 @@ $.widget( "heurist.resultList", {
         }
 
         if(!this.div_content.hasClass(newmode)){
-
-        
             //var $allrecs = this.div_content.find('.recordDiv');
             if(newmode){
-                var oldmode = this.options.view_mode;
+                //var oldmode = this.options.view_mode;
                 this.options.view_mode = newmode;
-                //this.option("view_mode", newmode);
-                if(oldmode)this.div_content.removeClass(oldmode);
-
                 //save viewmode is session
-                window.hWin.HAPI4.save_pref('rec_list_viewmode', newmode);
+                //moved to change event window.hWin.HAPI4.save_pref('rec_list_viewmode', newmode);
 
             }else{
                 //load saved value
@@ -649,9 +645,9 @@ $.widget( "heurist.resultList", {
                 if(!this.options.view_mode){
                     this.options.view_mode = 'list'; //default value
                 }
-
                 newmode = this.options.view_mode;
             }
+            this.div_content.removeClass('list icons thumbs thumbs3');
             this.div_content.addClass(newmode);
 
             //show hide header

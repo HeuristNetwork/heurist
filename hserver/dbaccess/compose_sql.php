@@ -2015,17 +2015,8 @@ class LinkedFromParentPredicate extends Predicate {
             }
         }
         
-        if($rty_ID){
-            $rty_IDs = array_map('intval', explode(',', $rty_ID));
-        }else{
-            $rty_IDs = array();
-        }
-        if($dty_ID){
-            $dty_IDs = array_map('intval', explode(',', $dty_ID));
-        }else{
-            $dty_IDs = array();
-        }
-        
+        $rty_IDs = prepareIds($rty_ID);
+        $dty_IDs = prepareIds($dty_ID);
         
         
         /*
@@ -2145,16 +2136,8 @@ class LinkedToParentPredicate extends Predicate {
             }
         }
         
-        if($rty_ID){
-            $rty_IDs = array_map('intval', explode(',', $rty_ID));
-        }else{
-            $rty_IDs = array();
-        }
-        if($dty_ID){
-            $dty_IDs = array_map('intval', explode(',', $dty_ID));
-        }else{
-            $dty_IDs = array();
-        }
+        $rty_IDs = prepareIds($rty_ID);
+        $dty_IDs = prepareIds($dty_ID);
 
         /*
         //additions for FROM and WHERE
@@ -2339,7 +2322,7 @@ class RelatedFromParentPredicate extends Predicate {
 
         }else{
 
-            $ids = array_map('intval', explode(',', $source_rty_ID));
+            $ids = prepareIds($source_rty_ID);
             if(count($ids)>1){
                 $add_where = 'rl.rl_SourceID in ('.implode(',',$ids).') and ';
             }else if(count($ids)>0){
@@ -2450,7 +2433,7 @@ class RelatedToParentPredicate extends Predicate {
 
         }else{
 
-            $ids = array_map('intval', explode(',', $source_rty_ID));
+            $ids = prepareIds($source_rty_ID);
             if(count($ids)>1){
                 $add_where = 'rl.rl_TargetID in ('.implode(',',$ids).') and ';
             }else if(count($ids)>0){
@@ -2514,7 +2497,7 @@ class AllLinksPredicate  extends Predicate {
 
         }else{
         
-            $ids = array_map('intval', explode(',', $source_rty_ID));
+            $ids = prepareIds($source_rty_ID);
             if(count($ids)>1){
                 $add_where1 = $add_where1.'and rl1.rl_TargetID in ('.implode(',',$ids).')';
                 $add_where2 = $add_where2.'and rl2.rl_SourceID in ('.implode(',',$ids).')';
@@ -2543,7 +2526,7 @@ class LinkToPredicate extends Predicate {
     function makeSQL() {
         if ($this->value) {
             
-            $ids = array_map('intval', explode(',', $this->value));
+            $ids = prepareIds($this->value);
             if(count($ids)>1){
                 return '(1=0)';
             }else{
@@ -2567,7 +2550,7 @@ class LinkedToPredicate extends Predicate {
     function makeSQL() {
         if ($this->value) {
             
-            $ids = array_map('intval', explode(',', $this->value));
+            $ids = prepareIds($this->value);
             if(count($ids)>1){
                 return '(1=0)';
             }else{
@@ -2587,7 +2570,8 @@ class LinkedToPredicate extends Predicate {
 class RelatedToPredicate extends Predicate {
     function makeSQL() {
         if ($this->value) {
-            $ids = "(" . implode(",", array_map("intval", explode(",", $this->value))) . ")";
+            $ids = prepareIds($this->value);
+            $ids = "(" . implode(",",$ids) . ")";
             return "exists (select * from recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in $ids)
             or (rrc_SourceRecID=TOPBIBLIO.rec_ID and rrc_TargetRecID in $ids))";
         }
@@ -2602,7 +2586,8 @@ class RelatedToPredicate extends Predicate {
 class RelationsForPredicate extends Predicate {
     function makeSQL() {
         global $mysqli;
-        $ids = "(" . implode(",", array_map("intval", explode(",", $this->value))) . ")";
+        $ids = prepareIds($this->value);
+        $ids = "(" . implode(",", $ids) . ")";
         /*
         return "exists (select * from recRelationshipsCache where ((rrc_TargetRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_SourceRecID=$id)
         or ((rrc_SourceRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_TargetRecID=$id))";
@@ -2903,6 +2888,9 @@ $_REQUEST['q'] = $q;
 }
 */
 
+//
+// returns null if some of csv is not integer
+//
 function getCommaSepIds($value)
 {
     if(substr($value, -1) === ','){
@@ -2914,7 +2902,6 @@ function getCommaSepIds($value)
     $n = array_map('intval', $a);
     
     if(!array_diff($a, $n)){
-        //join(',', array_map('intval', explode(',', $this->value)))
         return $value;
     }else{
         return null;

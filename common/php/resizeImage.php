@@ -50,8 +50,8 @@ require_once(dirname(__FILE__).'/../../common/php/utilsMail.php');
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
     $standard_thumb = true;
-    $x = 100;
-    $y = 100;
+    $x = 200;
+    $y = 200;
     $no_enlarge = false;
 } else {
     $standard_thumb = false;
@@ -76,7 +76,10 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     return;
     }*/
 
-    $res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . mysql_real_escape_string($_REQUEST['ulf_ID']) . '"');
+    $res = mysql_query('select recUploadedFiles.*, defFileExtToMimetype.fxm_MimeType '
+    .'from recUploadedFiles,defFileExtToMimetype where (fxm_Extension=ulf_MimeExt) and ulf_ObfuscatedFileID = "' 
+    . mysql_real_escape_string($_REQUEST['ulf_ID']) . '"');
+    
     if (mysql_num_rows($res) != 1) return;
     $file = mysql_fetch_assoc($res);
 
@@ -92,9 +95,21 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         }
         return;
     }
-    $fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php
-    $type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
-    $type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
+    
+    $type_source = null;
+    if(@$file['ulf_Parameters']){
+        $fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php
+        $type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
+        $type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
+    }else{
+        list($type_media, $ext) = explode('/',$file['fxm_MimeType']);
+        
+        if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){
+            $type_source = 'heurist';    
+        }else if( strpos($file['ulf_ExternalFileReference'], 'youtube')>0){ //match('http://(www.)?youtube|youtu\.be')
+            $type_source = 'youtube';
+        }
+    }
 
     if($type_source==null || $type_source=='heurist') {
         if ($file['ulf_FileName']) {

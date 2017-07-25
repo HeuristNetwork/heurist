@@ -415,6 +415,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                 $path_parts = pathinfo($filename);
                 $dirname = $path_parts['dirname']."/";
 
+                //HEURIST_FILESTORE root or file_uploads subfolder  
                 if( $dirname == HEURIST_FILESTORE_DIR || $dirname == HEURIST_FILES_DIR ){
                     //remove physically from file_uploads or db root only
                     if(file_exists($filename)){

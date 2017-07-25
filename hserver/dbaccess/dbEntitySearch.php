@@ -202,26 +202,24 @@ class DbEntitySearch
         
         //special case for ids - several values can be used in IN operator        
         if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)
-        
-            if(is_array($value)){
-                $value = array_filter($value, 'is_numeric');
-                $value = implode(',',$value);
-            }
-            if(strpos($value, '-')===0){
+                       
+            if(!is_array($value) && is_string($value) && strpos($value, '-')===0){
                 $negate = true;
                 $value = substr($value, 1);
+                if($value=='') return null;
             }else{
                 $negate = false;
             }
-            if($value=='') return null;
-            $mysqli = $this->system->get_mysqli();
+        
+            $value = prepareIds($value);
+            if(count($value)==0) return null;
             
-            if(strpos($value, ',')>0){
+            if(count($value)>1){
                 // comma-separated list of ids
                 $in = ($negate)? 'not in' : 'in';
-                $res = " $in (" . $value . ")";
+                $res = " $in (" . implode(',', $value) . ")";
             }else{
-                $res = ($negate)? ' !=' : '='.$value;
+                $res = ($negate)? ' !=' : '='.$value[0];
             }
 
             return $fieldname.$res;    

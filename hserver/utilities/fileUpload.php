@@ -151,7 +151,7 @@ if($response!=null){
 
     foreach($res['files'] as $file){
         if(@$file->error){
-            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "File cannot be processed", $file->error);
+            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "File cannot be processed ".$file->error, null);
             break;            
         }else if($entity_name=="recUploadedFiles"){
             

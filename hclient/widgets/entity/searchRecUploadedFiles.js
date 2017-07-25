@@ -24,6 +24,36 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this._super();
         
         var that = this;
+        
+        
+        this.btn_add_record_loc = this.element.find('#btn_add_record_loc');
+        this.btn_add_record_ext = this.element.find('#btn_add_record_ext');
+        if(this.options.edit_mode=='none'){
+            this.btn_add_record_loc.parent().hide();
+        }else{
+            this.btn_add_record_loc.css({'min-width':'9m','z-index':2})
+                    .button({label: window.hWin.HR("Upload file"), icons: {
+                            primary: "ui-icon-plus"
+                    }})
+                .click(function(e) {
+                    that._trigger( "onaddlocal" );
+                }); 
+            this.btn_add_record_ext.css({'min-width':'9em','z-index':2})
+                    .button({label: window.hWin.HR("New external")})
+                .click(function(e) {
+                    that._trigger( "onaddext" );
+                }); 
+                
+            if(this.options.edit_mode=='inline'){
+                this.btn_add_record_loc.parent().css({'float':'left','border-bottom':'1px lightgray solid',
+                'width':'100%', 'min-height': '2.4em', 'margin-bottom': '0.4em'});    
+            }                       
+        }
+        
+        if(this.options.edit_mode=='inline'){
+            this.btn_search_start.css('float','right');   
+        }
+        
             
         this.selectGroup = this.element.find('#sel_group');
         

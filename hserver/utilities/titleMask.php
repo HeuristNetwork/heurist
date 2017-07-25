@@ -671,7 +671,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
             //get values for resource field
             $pointer_ids = self::__get_field_value( $rdt_id, $rt, $mode, $rec_id);
-            $pointer_ids =  explode(",",$pointer_ids);
+            $pointer_ids = prepareIds($pointer_ids);
             $res = array();
             foreach ($pointer_ids as $rec_id){
 

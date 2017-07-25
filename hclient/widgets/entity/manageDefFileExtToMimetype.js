@@ -28,6 +28,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     _initControls: function() {
         
         this.options.use_cache = true;
+        //this.options.view_mode = 'list';
         
         /*if(this.options.edit_mode=='popup'){ //only inline allowed
             this.options.edit_mode='inline'
@@ -37,10 +38,14 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
             return false;
         }
         
-        //hide header
-        this.searchForm.css('height',0);
+        if(this.searchForm && this.searchForm.length>0){
+            this.searchForm.searchDefFileExtToMimetype(this.options);   
+            if(this.options.edit_mode=='inline') this.searchForm.height('7.5em').css('border','none');    
+        }
         
+        if(this.options.edit_mode=='inline') this.recordList.css('top','7.5em');
         this.recordList.resultList('option', 'show_toolbar', false);
+        this.recordList.resultList('option', 'view_mode', 'list');
 
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
@@ -49,22 +54,13 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
                 that.recordList.resultList('updateResultSet', response);
             });
             
+        this._on( this.searchForm, {
+                "searchdeffileexttomimetypeonfilter": this.filterRecordList
+                });
+        this._on( this.searchForm, {
+                "searchdeffileexttomimetypeonaddrecord": function(){this._onActionListener(null, 'add');}
+                });
         
-       //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
-       //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
-       if(this.options.edit_mode!='none'){
-            
-               //define add button on left side
-               this._defineActionButton({key:'add', label:'Add New File Type', title:'', icon:'ui-icon-plus'}, 
-                        this.editFormToolbar, 'full',{float:'left'});
-       
-               if(this.options.edit_mode=='inline')
-               //define delete on right side
-               this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
-                        this.editFormToolbar,'full',{float:'right'});
-       }
-        
-                
         return true;
     },    
     
@@ -91,7 +87,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         
         html = html + recTitle + '</div>';
         
-        if(this.options.edit_mode=='popup'){ //action button in reclist
+        if(false && this.options.edit_mode=='popup'){ //action button in reclist
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
             + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');

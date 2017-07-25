@@ -27,9 +27,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _editing2:null,
     
     _init: function() {
-        this.options.layout_mode = 'basic';
+        this.options.layout_mode = 'short';
         this.options.use_cache = false;
         this.options.select_return_mode = 'recordset';
+        this.options.edit_need_load_fullrecord = true;
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -38,17 +39,16 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
     
         this._super();
-        
-        if(this.options.edit_mode=='inline'){
-            this.recordList.parent().width(340);
-            this.editForm.css('left',341);
-        }else{
-            //edit form is not visible
-            this.recordList.parent().width('100%');
-            this.editForm.hide();
-        }
-        
     },
+    
+/* @todo - add this selector to search form
+        this.select_order = $( "<select><option value='1'>"+
+            window.hWin.HR("by name")+"</option><option value='5'>"+
+            window.hWin.HR("by size")+"</option><option value='6'>"+
+            window.hWin.HR("by usage")+"</option><option value='7'>"+
+            window.hWin.HR("by date")+"</option><option value='8'>"+
+            window.hWin.HR("marked")+"</option></select>", {'width':'80px'} )
+*/    
     //  
     // invoked from _init after load entity config    
     //
@@ -63,13 +63,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchRecUploadedFiles(this.options);
         
-        var iheight = 2;
+        var iheight = 4;
         //if(this.searchForm.width()<200){  - width does not work here  
-        if(this.options.select_mode=='manager'){            
-            iheight = iheight + 4;
-        }
-        if(window.hWin.HEURIST4.util.isempty(this.options.filter_groups)){
-            iheight = iheight + 2;    
+        if(this.options.edit_mode=='inline'){            
+            iheight = iheight + 8;
         }
         this.searchForm.css({'height':iheight+'em'});
         this.recordList.css({'top':iheight+0.4+'em'});
@@ -83,123 +80,16 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this._on( this.searchForm, {
                 "searchrecuploadedfilesonresult": this.updateRecordList
                 });
-                
-       //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
-       //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
-       if(this.options.edit_mode!='none'){
-     
-               var that = this; 
-
-                var btn_array = [
-                        {text:window.hWin.HR('Upload file'), id:'btnRecNewUpload', 
-                              click: function() { that._uploadFileAndRegister(); }},
-                        /*{text:window.hWin.HR('Batch upload'), id:'btnRecNewBatch',
-                              click: function() { that._saveEditAndClose( 'none' ); }},*/
-                        {text:window.hWin.HR('New external'), id:'btnRecNewExt',
-                              click: function() { that.addEditRecord(-1); }},
-                
-                        {text:window.hWin.HR('Remove'), id:'btnRecDelete', css:{float:'right'},
-                              click: function() { that._deleteAndClose(); }}
-                ];
-                this.editFormToolbar.empty();
-                for(var idx in btn_array){
-                    this._defineActionButton2(btn_array[idx], this.editFormToolbar);
-                }               
-       }
+        this._on( this.searchForm, {
+                "searchrecuploadedfilesonaddext": function() { this.addEditRecord(-1); }
+                });
+        this._on( this.searchForm, {
+                "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister
+                });
         
-       return true;
+        return true;
     },
-
-    
-    //
-    // open popup edit dialog if we need it
-    //
-    _initEditForm_step2: function(recID){
-    
-        if(recID==null || this.options.edit_mode=='none') return;
-        
-        var isOpenAready = false;
-        if(this.options.edit_mode=='popup'){
-            if(this._edit_dialog){
-                try{
-                    isOpenAready = this._edit_dialog.dialog('isOpen');
-                }catch(e){}
-            }
-        } else { //inline 
-            //isOpenAready = !this.editFormToolbar.is(':empty');
-        }
-
-
-        this._currentEditID = recID;
-        
-        if(!isOpenAready){   //we always init buttons for inline edit         
-    
-            var that = this; 
-            
-            var recset = this.recordList.resultList('getRecordSet');
-            var recset_length = recset.length();
-
-            var btn_array = [
-                        {text:window.hWin.HR('Upload file'), id:'btnRecNewUpload',
-                              click: function() { that._uploadFileAndRegister(); }},
-                        /*{text:window.hWin.HR('Batch upload'), id:'btnRecNewBatch',
-                              click: function() { that._saveEditAndClose( 'none' ); }},*/
-                        {text:window.hWin.HR('New external'), id:'btnRecNewExt',
-                              click: function() { that.addEditRecord(-1); }},
-
-                        {text:window.hWin.HR('Save'), id:'btnRecSave',
-                              css:{'visibility':'hidden','float':'right'},
-                              click: function() { that._saveEditAndClose( 'none' ); }},
-                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
-                              css:{'visibility':'hidden','float':'right'},
-                              click: function() { that.closeEditDialog(); }}
-                        ]; 
-            
-            if(this.options.edit_mode=='popup'){
-            
-                this.editForm.css({'top': 0, overflow:'auto !important'});
-
-                this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
-                        window:  window.hWin, //opener is top most heurist window
-                        element:  this.editForm[0],
-                        height: this.options['edit_height']?this.options['edit_height']:400,
-                        width:  this.options['edit_width']?this.options['edit_width']:740,
-                        resizable: true,
-                        title: this.options['edit_title']
-                                    ?this.options['edit_title']
-                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,                         
-                        buttons: btn_array
-                    });
-                
-                //help and tips buttons on dialog header
-                window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
-                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
-        
-                this._toolbar = this._edit_dialog.parent(); //this.editFormPopup.parent();
-        
-            }//popup
-            else if(this.editFormToolbar){ //initialize action buttons for inline dialog
-               
-               /*this is popup dialog
-               this.editFormToolbar
-                 .addClass('ui-dialog-buttonpane')
-                 .css({
-                    padding: '0.8em 1em .2em .4em',
-                    background: 'none',
-                    'background-color': '#95A7B7 !important',
-                    'text-align':'right'
-                 });
-                */ 
-
-                this._toolbar = this.editFormToolbar;
-                /*
-                */
-            }
-        }//!isOpenAready
-        
-        this._initEditForm_step3(recID); 
-    },
-    
+ 
     _initEditForm_step4: function(recordset){
         
         this._currentEditRecordset = recordset; 
@@ -255,35 +145,60 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         this._super();
 
-        //load media content
-        this.mediaviewer = $('<div>').addClass('media-content').css({
-            'text-align': 'center',
-            padding: '20px',
-            'border-top': '1px solid lightgray',
-            margin: '10px'});
-        this.editForm.append( this.mediaviewer );
-        this.mediaviewer.media_viewer({rec_Files:[[
-                this._editing.getValue('ulf_ObfuscatedFileID'), 
-                this._editing.getValue('ulf_MimeExt')]]}); //nonce + memtype
-    },    
-    
-    //
-    //
-    //
-    onEditFormChange: function(){
-
-        var mode = 'hidden';
-        if(this._editing){
-            var isChanged = this._editing.isModified();
-            mode = isChanged?'visible':'hidden';
-        }
-        //show/hide save buttons
-        var ele = this._toolbar;
-        ele.find('#btnRecCancel').css('visibility', mode);
-        ele.find('#btnRecSave').css('visibility', mode);
+        var isLocal = true;
         
-    },
-    
+        if(this._currentEditRecordset){ //edit       
+
+            //add media viewer below edit form and load media content
+            this.mediaviewer = $('<div>').addClass('media-content').css({
+                'text-align': 'center',
+                padding: '20px',
+                'border-top': '1px solid lightgray',
+                margin: '10px'});
+            this.editForm.append( this.mediaviewer );
+            this.mediaviewer.media_viewer({rec_Files:[[
+                    this._editing.getValue('ulf_ObfuscatedFileID'), 
+                    this._editing.getValue('ulf_MimeExt')]]}); //nonce + memtype
+                
+                
+            var relations = this._currentEditRecordset.getRelations();    
+            if(relations && relations.direct && relations.direct.length>0){
+                $('<div class="detailRowHeader">Records that refer this file</div>').appendTo(this.editForm);
+                
+                var direct = relations.direct;
+                var headers = relations.headers;
+                var ele1=null;
+                for(var k in direct){
+                    var targetID = direct[k].targetID;
+                    
+                    window.hWin.HEURIST4.ui.createRecordLinkInfo(this.editForm, 
+                                {rec_ID: targetID, 
+                                 rec_Title: headers[targetID][0], 
+                                 rec_RecTypeID: headers[targetID][1]}, true);
+                }//for
+            }
+            
+            
+            isLocal = window.hWin.HEURIST4.util.isempty(this._getField('ulf_ExternalFileReference'));
+        }else{
+            //new record
+            isLocal = false;
+        }
+        
+        if(!isLocal){
+            var that = this;
+            var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
+            ele.editing_input('option', 'change', function(){ 
+                var res = ele.editing_input('getValues'); 
+                var ext = window.hWin.HEURIST4.util.getFileExtension(res[0]);
+                var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                ele2.editing_input('setValue', ext );
+                that.onEditFormChange();
+            });
+        }        
+                
+                
+    },    
         
     //----------------------
     //
@@ -391,9 +306,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
                     if(ulf_ID>0){
                         that._currentEditID = null;//to prevent warn about save
-                        that.options.edit_need_load_fullrecord = true;  //force load from server
                         that.addEditRecord(ulf_ID);
-                        that.options.edit_need_load_fullrecord = false;
                     }
                 }}); //pass container
             

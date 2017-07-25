@@ -72,10 +72,7 @@
     
     function user_getNamesByIds($mysqli, $ugr_IDs){
         
-        if(!is_array($ugr_IDs)){
-            $ugr_IDs = explode(',', $ugr_IDs);
-        }
-        $ugr_IDs = array_map('intval', $ugr_IDs);
+        $ugr_IDs = prepareIds($ugr_IDs);
         if(count($ugr_IDs)>0){
             return mysql__select_assoc($mysqli, 'sysUGrps', 'ugr_ID'
                 , 'IF(ugr_Type=\'workgroup\',ugr_Name,concat(ugr_FirstName, \' \', ugr_LastName))'

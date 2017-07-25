@@ -163,33 +163,6 @@ $.widget( "heurist.recordDetails", {
                             }
                     });
 
-                    /* it works - but we already have fileids in details
-                    // call for files - on response - draw thumbnails and apply yox viewer
-                    that.options.rec_Files = {}; //reset
-
-                    window.hWin.HAPI4.RecordMgr.file_get({recIDs:this.recIDloaded},
-                    function(response) {
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-
-                    if(that.options.recID == response.data['recIDs']){ //not outdated
-
-                    that.options.rec_Files = [];
-                    var idx;
-                    for(idx in response.data) {
-                    if(idx>0){
-                    that.options.rec_Files.push(response.data[idx]);
-                    }
-                    }
-                    that._renderFiles();
-                    }
-
-                    }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                    });
-                    */
-
-
                     /* dynamic load of required js
                     var that = this;
                     if($.isFunction($('body').editing_input)){

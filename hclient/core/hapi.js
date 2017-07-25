@@ -449,6 +449,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   minmax
     *   get
     *
+    * @todo move those to entity
     *   tag_save
     *   tag_delete
     *   tag_get
@@ -456,9 +457,6 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   tag_replace
     *   tag_rating
     *
-    *   file_save
-    *   file_delete
-    *   file_get
     *
     * @returns {Object}
     */
@@ -683,36 +681,6 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
 
-
-            // add/save file
-            // request  a: save
-            //          ulf_ID (not specified if ADD)
-            //          ulf_OrigFileName
-            //          ulf_Description
-            //          ulf_UploaderUGrpID
-            //          ulf_ExternalFileReference
-            ,file_save: function(request, callback){
-                if(request) request.a = 'save';
-                _callserver('record_files', request, callback);
-            }
-            // remove file
-            // request  a: delete
-            //          ids - list of file ids to be deleted
-            ,file_delete: function(request, callback){
-                if(request) request.a = 'delete';
-                _callserver('record_files', request, callback);
-            }
-            // get list of files for sepcified userid, media type and records
-            // request  a: search
-            //          UGrpID
-            //          mediaType
-            //          recIDs
-            ,file_get: function(request, callback){
-                if(request) request.a = 'search';
-                _callserver('record_files', request, callback);
-            }
-
-
         }
         return that;
     }
@@ -805,7 +773,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = window.hWin.HEURIST4.util.random();
-                //request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
+                request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
                 _callserver('entityScrud', request, callback);
             },
 

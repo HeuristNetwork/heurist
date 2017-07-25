@@ -36,11 +36,12 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"title",
-                        "dty_Size":500,
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
                         "rst_DisplayName": "File name:",
                         "rst_DisplayHelpText": "The original name of the file uploaded", 
                         "rst_Display":"hidden",
-                        "rst_RequirementType":"required"
+                        "xxxxrst_RequirementType":"required"
                     }
                 },
                 {
@@ -59,7 +60,8 @@
                         "dty_Type":"freetext",
                         "rst_DisplayName": "External URL:",
                         "rst_DisplayHelpText": "URI of an external file, which may or may not be cached locally", 
-                        "rst_Display":"visible"
+                        "rst_Display":"visible",
+                        "dty_Size":1000
                     }
                 },
                 {
@@ -67,7 +69,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "rst_DisplayName":"Description:",
-                        "dty_Size":1000,
+                        "dty_Size":65535,
                         "rst_DisplayHelpText": "A user-entered textual description of the file or image contents."
                     }
                 },
@@ -78,7 +80,8 @@
                         "rst_DisplayName":"Mime type:",
                         "rst_DisplayHelpText": "Type of resourse", 
                         "rst_FieldConfig": {"entity":"defFileExtToMimetype"},
-                        "rst_RequirementType":"required"
+                        "rst_RequirementType":"required",
+                        "rst_DisplayWidth":30
                     }
                 },
                 {

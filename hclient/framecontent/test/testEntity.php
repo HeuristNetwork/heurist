@@ -57,6 +57,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypeGroups.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefFileExtToMimetype.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefFileExtToMimetype.js"></script>
+        
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
@@ -383,7 +385,7 @@ print $targetPath.'<br>';
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
                             <option value="DefTerms">Terms</option>
-                            <option value="DefFileExtToMimetype">Ext To Mimetype</option>
+                            <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
                             <option value="RecComments">Record Comments</option>
                             <option value="Smarty">Smarty Reports</option>
                             <option value="SmartySchedule">Smarty Reports Schedule</option>
