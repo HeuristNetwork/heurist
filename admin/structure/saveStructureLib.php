@@ -1506,7 +1506,7 @@
                                 $recCount = $res->num_rows;
                                 if ($recCount>0) { //yes, $termID is in use
                                     $labels = getTermLabels(array($termID));
-                                    $ret['error'] = "You cannot move term $termID [{$labels[$termID]}] to a different vocabulary as it is used by field(s) in existing record(s) which depend on its current vocabulary. We recommend merging the current vocabulary with the target vocabulary instead. Moving the term would invalidate values in $recCount records.";
+                                    $ret['warning'] = "Term $termID [{$labels[$termID]}] is used by field(s) in existing record(s) which depend on its current vocabulary. We recommend merging the current vocabulary with the target vocabulary instead. Moving the term would invalidate values in $recCount records.";
                                     
                                     $ret['error_title'] = 'Warning: Terms in use';
                                     $recIDs = array();
@@ -1515,18 +1515,18 @@
                                         array_push($recIDs, $row[0]);
                                         if(!in_array($row[1], $rtyIDs)) array_push($rtyIDs, $row[1]);
                                     }
-                                    $ret['error'] = $ret['error'].'<br><br>'
+                                    $ret['warning'] = $ret['warning'].'<br><br>'
                                     ."<a href='#' onclick='window.open(\""
                                     .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs)."\",\"_blank\")'>Click here</a> to search for all the records which would be affected.";
 
-                                    $ret['error'] = $ret['error'].'<br><div style="padding:10px 30px;text-align:left">The following record types would be affected: <ul style="padding-top:5px">';
+                                    $ret['warning'] = $ret['warning'].'<br><div style="padding:10px 30px;text-align:left">The following record types would be affected: <ul style="padding-top:5px">';
                                      $labels = getRecTypeNames($rtyIDs);
                                     
                                      foreach  ($labels as $rty_ID=>$rty_Name)  {
-                                         $ret['error'] = $ret['error'].'<li>'.$rty_Name.'</li>';
+                                         $ret['warning'] = $ret['warning'].'<li>'.$rty_Name.'</li>';
                                      }
                                     
-                                     $ret['error'] = $ret['error']."</ul></div>";            
+                                     $ret['warning'] = $ret['warning']."</ul></div>";            
                                 }
                             }
                     }//$dtCount>0

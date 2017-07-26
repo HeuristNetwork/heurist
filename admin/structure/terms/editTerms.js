@@ -2490,10 +2490,31 @@ function EditTerms() {
                     var params = "method=checkTerm&termID=" + data.otherNode.data.id + "&db="+_db;
                     Hul.getJsonData(baseurl, function(context){
                         if(!Hul.isnull(context) && !context.error){
-                            document.getElementById ('edParentId').value = parentNodeId;
-                            _doSave(false, true);
-                            // _updateTermsOnServer(_currentNode,false);
-                            __moveNode();
+                            
+                            function __proceed(){
+                                //everything is OK
+                                document.getElementById('edParentId').value = parentNodeId;
+                                _doSave(false, true);
+                                // _updateTermsOnServer(_currentNode,false);
+                                __moveNode();
+                            }
+                                
+                            if(context.warning){
+                                if(hasH4()){
+                                    //msg = {message:context.warning, error_title:context.error_title};
+                                    //window.hWin.HEURIST4.msg.showMsgErr(msg);
+                                    window.hWin.HEURIST4.msg.showMsgDlg(context.warning, function(){
+                                        __proceed();
+                                    },{title:context.error_title, yes:'Proceed'})
+                                }else{
+                                    if (confirm(context.warning)) {
+                                        __proceed();
+                                    }
+                                }
+                            }else{
+                                __proceed();
+                            }
+                            
                         }}, params);
 
                 }else{
