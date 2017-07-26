@@ -98,7 +98,9 @@ $.widget( "heurist.manageEntity", {
         entity: {},       //configuration
         
         //listeners
-        onInitFinished:null
+        onInitFinished:null,
+        beforeClose:null
+
     },
     
     //system name of entity  - define it to load entity config from server
@@ -615,7 +617,7 @@ $.widget( "heurist.manageEntity", {
     },
     
     //
-    // show dialog
+    // show itself as popup dialog
     //
     popupDialog: function(){
         if(this.options.isdialog){

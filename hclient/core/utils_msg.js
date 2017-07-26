@@ -635,6 +635,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         //functions in internal document
                         //content.close = $dosframe[0].close;    // make window.close() do what we expect
                         
+                        //close diaog from inside of frame
                         content.close = function() {
                             var did = $dlg.attr('id');
 
@@ -691,6 +692,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 resizeStop: function( event, ui ) {
                                     $dosframe.css('width','100%');
                                 },
+                                beforeClose: options.beforeClose,
                                 close: function(event, ui){
                                     var closeCallback = options['afterclose'];
                                     if($.isFunction(closeCallback)){
@@ -745,6 +747,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     //draggable: false,
                     title: options["title"],
                     buttons: options["buttons"],
+                    beforeClose:options.beforeClose,
                     close: function(event, ui){
                         
                         if($.isFunction(onCloseCalback)){

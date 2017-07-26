@@ -212,7 +212,6 @@ console.log('load '+current_map_document_id);
                 }
                 var init_extent = ['Initial extent', cp_long-span_x/2,cp_long+span_x/2, cp_lat-span_y/2,cp_lat+span_y/2 ];
                 doc.bookmarks.unshift(init_extent);
-console.log( doc.bookmarks);                
             }
             
 

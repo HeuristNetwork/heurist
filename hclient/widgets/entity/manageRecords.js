@@ -52,7 +52,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }else{
             this.options.width = 1200;                    
         }
-    
+        
         this._super();
         
         this.editFormSummary = this.element.find('.editFormSummary');
@@ -70,8 +70,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(hasSearchForm) this.searchForm.parent().width('100%');
             this.editFormPopup.css({left:0}).hide(); 
         }
-        
-        
         
         //-----------------
         this.recordList.css('top','5.5em');
@@ -220,6 +218,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
                     {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                     height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+                    
+                if(!this.options.beforeClose){
+                    this.options.beforeClose = this.saveUiPreferences;
+                }
              
                 this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
                         window:  window.hWin, //opener is top most heurist window
@@ -230,7 +232,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         title: this.options['edit_title']
                                     ?this.options['edit_title']
                                     :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,                         
-                        buttons: btn_array
+                        buttons: btn_array,
+                        beforeClose: this.options.beforeClose
                     });
                 
                 //help and tips buttons on dialog header
@@ -276,7 +279,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //summary tab - specific for records only    
             if(this.editFormSummary && this.editFormSummary.length>0){    
                 
-                var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_summary', {closed:true, width:400, activeTabs:["0","1"]});
+                //default values
+                var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_summary', {closed:false, width:400, activeTabs:["0","1"]});
     
                 var layout_opts =  {
                     applyDefaultStyles: true,
@@ -292,7 +296,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         togglerAlign_open:'center',
                         togglerAlign_closed:'top',
                         togglerLength_closed:16,  //makes it square
-                        initClosed:(usrPreferences.closed==true),
+                        initClosed:(usrPreferences.closed==true || usrPreferences.closed=='true'),
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editFormSummary'    
                     },
@@ -346,36 +350,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     closeEditDialog:function(){
+        
         //save preferences
         var that = this;
-        if(that.editFormSummary && that.editFormSummary.length>0){
-                var activeTabs = [];
-                that.editFormSummary.find('.summary-accordion').each(function(idx,item){
-                    var active = $(item).accordion('option','active');
-                    if(active!==false){
-                        activeTabs.push(String(idx));
-                    }
-                            
-                });
-
-                var myLayout = this.editFormPopup.layout();                
-                var sz = myLayout.state.east.size;
-                var isClosed = myLayout.state.east.isClosed;
-                
-                window.hWin.HAPI4.save_pref( 'edit_record_summary', {closed:isClosed, width:sz, 
-                                            activeTabs:activeTabs} );
-        }
-        
-        
-        
         if(this.options.in_popup_dialog==true){
-            
-            window.hWin.HAPI4.save_pref('edit_record_dialog', {width:window.innerWidth, height:window.innerHeigth});
             window.close(this._currentEditRecordset);
-            
         }else if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
-            window.hWin.HAPI4.save_pref('edit_record_dialog', {width: this._edit_dialog.dialog('option','width'), 
-                                                               height: this._edit_dialog.dialog('option','height')});
             this._edit_dialog.dialog('close');
         }
     },
@@ -1010,6 +990,43 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _afterInitEditForm: function(){
         this.onEditFormChange();
     },
+
+
+    //
+    // save width,heigth and summary tab prefs
+    //
+    saveUiPreferences: function(){
+        
+        var that = this;
+        
+        if(that.editFormSummary && that.editFormSummary.length>0){
+                var activeTabs = [];
+                that.editFormSummary.find('.summary-accordion').each(function(idx,item){
+                    var active = $(item).accordion('option','active');
+                    if(active!==false){
+                        activeTabs.push(String(idx));
+                    }
+                            
+                });
+
+                var myLayout = this.editFormPopup.layout();                
+                var sz = myLayout.state.east.size;
+                var isClosed = myLayout.state.east.isClosed;
+                
+                window.hWin.HAPI4.save_pref( 'edit_record_summary', {closed:isClosed, width:sz, 
+                                            activeTabs:activeTabs} );
+        }
+
+        if(this.options.in_popup_dialog==true){
+            window.hWin.HAPI4.save_pref('edit_record_dialog', {width:window.innerWidth, height:window.innerHeigth});
+        }else                
+        if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
+            window.hWin.HAPI4.save_pref('edit_record_dialog', {width: this._edit_dialog.dialog('option','width'), 
+                                                               height: this._edit_dialog.dialog('option','height')});
+        } 
+        
+        return true;
+    }
     
     
 });
@@ -1030,5 +1047,11 @@ function showManageRecords( options ){
                 .manageRecords( options );
     }
 
+    var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
+                    {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                    height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+    this.options.width = usrPreferences['width'];
+    this.options.height = usrPreferences['height'];
+    
     manage_dlg.manageRecords( 'popupDialog' );
 }

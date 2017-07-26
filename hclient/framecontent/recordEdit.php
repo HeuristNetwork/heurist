@@ -34,6 +34,7 @@
         <!--script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script-->
         
         <script type="text/javascript">
+            var $container;
             // Callback function on page initialization
             function onPageInit(success){
                 if(success){
@@ -54,7 +55,7 @@
                     // end OLD H3 stuff
                     
                     
-                    var $container = $("<div>").appendTo($("body"));
+                    $container = $('<div>').appendTo($("body"));
                     
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
                     
@@ -62,7 +63,7 @@
                     var options = {
                         select_mode: 'manager',
                         edit_mode: 'inline',
-                        in_popup_dialog: isPopup,  //to place edit action button into button panel and use window.close
+                        in_popup_dialog: isPopup,  //to place action buttons into button panel and use window.close
                         layout_mode:'<div class="ent_wrapper">'
                             + '<div class="ent_content_full recordList"  style="display:none;"/>'
 
@@ -116,6 +117,10 @@
                     
                     $container.manageRecords( options ).addClass('ui-widget');
                 }
+            }
+            
+            function onBeforeClose(){
+                $container.manageRecords('saveUiPreferences',-1);
             }            
         </script>
     </head>

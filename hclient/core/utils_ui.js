@@ -1247,11 +1247,17 @@ window.hWin.HEURIST4.ui = {
                 dwidth = 800;
             }        
             
-            window.hWin.HEURIST4.msg.showDialog(url, {height:dheight, width:dwidth,
+            var $dosframe = window.hWin.HEURIST4.msg.showDialog(url, {height:dheight, width:dwidth,
                 padding:0,
                 title: window.hWin.HR(dtitle),
                 class:'ui-heurist-bg-light',
-                callback: callback
+                callback: callback,
+                beforeClose: function(){
+                    //access manageRecord within frame within this popup and call close prefs
+                    if($.isFunction($dosframe[0].contentWindow.onBeforeClose)){
+                            $dosframe[0].contentWindow.onBeforeClose();
+                    }
+                }
                 });
     },
     
