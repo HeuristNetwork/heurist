@@ -194,6 +194,27 @@ console.log('load '+current_map_document_id);
 
             map_bookmarks = [];
             window.hWin.HEURIST4.ui.addoption(selBookmakrs, -1, 'bookmarks...');
+            
+            // Longitude,Latitude centrepoint, Initial minor span
+            // add initial bookmarks based on long lat  minorSpan
+            var cp_long = _validateCoord(doc.long,false);
+            var cp_lat = _validateCoord(doc.lat,true);
+            if(!isNaN(cp_long) && !isNaN(cp_lat) && doc.minorSpan>0){
+                
+                var body = $(this.document).find('body');
+                var prop = body.innerWidth()/body.innerHeight();
+                if(body.innerWidth()<body.innerHeight()){
+                    span_x = doc.minorSpan;
+                    span_y = doc.minorSpan/prop;
+                }else{
+                    span_x = doc.minorSpan*prop;
+                    span_y = doc.minorSpan;
+                }
+                var init_extent = ['Initial extent', cp_long-span_x/2,cp_long+span_x/2, cp_lat-span_y/2,cp_lat+span_y/2 ];
+                doc.bookmarks.unshift(init_extent);
+console.log( doc.bookmarks);                
+            }
+            
 
             for(var i=0;i<doc.bookmarks.length;i++){
 
@@ -247,7 +268,7 @@ console.log('load '+current_map_document_id);
                 if(i==doc.bookmarks.length-2 && map_bookmarks.length>0){
                     break; //skip last default bookmark if user define its own extents
                 }
-            }//for
+            }//for map bookmarks
             if(err_msg_all!=''){
                 window.hWin.HEURIST4.msg.showMsgErr('<div>Map-zoom bookmark is not interpretable, set to Label,xmin,xmax,ymin,ymax,tmin,tmax (tmin,tmax are optional)</div>'
                 +'<br>eg. Harlem, -74.000000,-73.900000,40.764134,40.864134,1915,1930<br/> '

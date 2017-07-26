@@ -282,13 +282,12 @@ function getRecordDetails($system, $record) {
                 /* alas timemap understands color only as hex or rgb 
                 else{
                 $record->color = $color->label;   
-                }-*
+                }*/
 
 
-                }else if(defined('DT_MINOR_SPAN') && $type == DT_MINOR_SPAN) {
+            }else if(defined('DT_MINOR_SPAN') && $type == DT_MINOR_SPAN) {
                 // Initial minor span
                 $record->minorSpan = floatval($value);
-
 
                 /* IMAGE INFO */
             } else if(defined('DT_THUMBNAIL') && $type == DT_THUMBNAIL) {
