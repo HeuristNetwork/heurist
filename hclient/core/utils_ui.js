@@ -1212,7 +1212,7 @@ window.hWin.HEURIST4.ui = {
     },
     
     
-    openRecordInPopup:function(rec_ID, isEdit, callback){
+    openRecordInPopup:function(rec_ID, query_request, isEdit, callback){
     
             var url = window.hWin.HAPI4.baseURL,
                 dwidth, dtitle;    
@@ -1222,14 +1222,26 @@ window.hWin.HEURIST4.ui = {
                         {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
 
-                url = url + 'hclient/framecontent/recordEdit.php?popup=1&db='+window.hWin.HAPI4.database+
-                    '&q=ids:'+ rec_ID;                                    
+                url = url + 'hclient/framecontent/recordEdit.php?popup=1&';
+                
+                if(query_request){
+                    if($.isPlainObject(query_request)){
+                        url = url + window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(query_request, true);
+                    }else{
+                        url = url + 'db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query_request);                                    }
+                }else{
+                    url = url + 'db=' + window.hWin.HAPI4.database;
+                }
+                
+                url = url + '&recID='+rec_ID;
+                    
                 dtitle = 'Edit record';
                 dheight = usrPreferences.height;
                 dwidth = usrPreferences.width;
             }else{
-                url = url + 'records/view/renderRecordData.php?db='+window.hWin.HAPI4.database+
-                    '&recID='+ rec_ID;                                    
+                url = url + 'records/view/renderRecordData.php?db='+window.hWin.HAPI4.database
+                +'&recID='+ rec_ID;
+                                                        
                 dtitle = 'Record Info';
                 dheight = 640;
                 dwidth = 800;
@@ -1328,7 +1340,7 @@ window.hWin.HEURIST4.ui = {
                 event.preventDefault();
                 
                 var recID = ele.attr('data-relID');
-                window.hWin.HEURIST4.ui.openRecordInPopup(recID, isEdit, function(recordset){
+                window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit, function(recordset){
                         if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
                             var DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
                             var record = recordset.getFirstRecord();
@@ -1343,7 +1355,7 @@ window.hWin.HEURIST4.ui = {
         ele.find('a').click(function(event){
             event.preventDefault();
             var recID = $(event.target).attr('data-recID');
-            window.hWin.HEURIST4.ui.openRecordInPopup(recID, isEdit, 
+            window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit, 
                     function(recordset){
                         if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
                             var record = recordset.getFirstRecord();

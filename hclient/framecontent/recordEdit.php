@@ -38,7 +38,7 @@
             function onPageInit(success){
                 if(success){
                     
-                    // OLD H3 stuff
+                    // OLD H3 stuff - need to call edit rectype structure
                     if(window.hWin){
                         win = window.hWin;
                     }else{
@@ -51,6 +51,7 @@
                         win.HEURIST.iconBaseURL = win.HAPI4.iconBaseURL;
                         win.HEURIST.database = {  name: win.HAPI4.database };
                     }
+                    // end OLD H3 stuff
                     
                     
                     var $container = $("<div>").appendTo($("body"));
@@ -62,52 +63,58 @@
                         select_mode: 'manager',
                         edit_mode: 'inline',
                         in_popup_dialog: isPopup,  //to place edit action button into button panel and use window.close
-                        layout_mode:  '<div class="ent_wrapper">'
-                              +'<div class="recordList"  style="display:none;"/>'
-                              //+'<div class="ent_content editForm" style="padding:10px"/>'
-                              
-                              + '<div class="editFormDialog ent_content" style="top:0">'
-                                + '<div class="ui-layout-center"><div class="editForm"/></div>'
-                                + '<div class="editFormSummary ui-layout-east">empty</div>'
-                              +'</div>'
+                        layout_mode:'<div class="ent_wrapper">'
+                            + '<div class="ent_content_full recordList"  style="display:none;"/>'
+
+                            + '<div class="ent_header" style="text-align:center;padding:6px 0 0 0;"><h2 style="color:red">EXPERIMENTAL - THIS FUNCTION IS IN COURSE OF DEVELOPMENT</h2></div>'
+                            + '<div class="editFormDialog ent_content">'
+                                    + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                                    + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
+                                    //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
+                            + '</div>'
+                            + '<div class="ent_footer editForm-toolbar"/>'
+                        +'</div>',
+                        onInitFinished:function(){
                             
+                            var q = window.hWin.HEURIST4.util.getUrlParameter('q', window.location.search);
+                            var recID = window.hWin.HEURIST4.util.getUrlParameter('recID', window.location.search);
                             
-                            +'<div class="ent_footer editForm-toolbar"/>'
-                            +'</div>'
+                            if(!q && recID>0){
+                                q = 'ids:'+recID;
+                            }
+                            
+                            if(q){
+                            
+                                window.hWin.HAPI4.RecordMgr.search({q: q, w: "all", 
+                                                limit: 100,
+                                                needall: 1, //it means return all recors - no limits
+                                                detail: 'ids'}, 
+                                function( response ){
+                                    //that.loadanimation(false);
+                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                        
+                                        var recset = new hRecordSet(response.data);
+                                        if(recset.length()>0){
+                                            $container.manageRecords('updateRecordList', null, {recordset:recset});
+                                            $container.manageRecords('addEditRecord', (recID>0)?recID:recset.getOrder()[0]);
+                                        }else if(isPopup){
+                                            window.close();  //nothing found
+                                        }
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                        if(isPopup){ window.close(); }
+                                    }
+
+                                });
+                            
+                            }else{
+                                $container.manageRecords('addEditRecord',-1);
+                            }                            
+                            
+                        }
                     }
                     
                     $container.manageRecords( options ).addClass('ui-widget');
-                    
-                    var q = window.hWin.HEURIST4.util.getUrlParameter('q', window.location.search);
-                    
-                    if(q){
-                    
-                        window.hWin.HAPI4.RecordMgr.search({q: q, w: "all", 
-                                        limit: 100,
-                                        needall: 1,
-                                        detail: 'ids'}, 
-                        function( response ){
-                            //that.loadanimation(false);
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                
-                                var recset = new hRecordSet(response.data);
-                                if(recset.length()>0){
-                                    $container.manageRecords('updateRecordList', null, 
-                                            {recordset:recset});
-                                    $container.manageRecords('addEditRecord', recset.getOrder()[0]);
-                                }else if(isPopup){
-                                    window.close();  //nothing found
-                                }
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
-                                if(isPopup){ window.close(); }
-                            }
-
-                        });
-                    
-                    }else{
-                        $container.manageRecords('addEditRecord',-1);
-                    }
                 }
             }            
         </script>

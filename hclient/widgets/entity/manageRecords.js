@@ -17,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+//EXPERIMENTAL - THIS FUNCTION IS IN COURSE OF DEVELOPMENT
 $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
    
     _entityName:'records',
@@ -25,22 +25,22 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _currentEditRecTypeID:null,
     
     _init: function() {
-        if(this.options.layout_mode=='basic'){ //replace default short 
-        this.options.layout_mode = //slightly modified 'short' layout
+
+        if(this.options.layout_mode=='short'){
+                this.options.layout_mode = //slightly modified 'short' layout
                         '<div class="ent_wrapper">'
-                            +'<div class="ent_wrapper" style="width:200px">'
+                            +'<div class="ent_wrapper">'
                                 +    '<div class="ent_header searchForm"/>'     
                                 +    '<div class="ent_content_full recordList"/>'
                             +'</div>'
 
                             + '<div class="editFormDialog ent_wrapper">'
-                                + '<div class="ui-layout-center"><div class="editForm"/></div>'
-                                + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
-                        
+                                    + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                                    + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
+                                    //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
                             +'</div>'
                         +'</div>';
         }
-
         
         this.options.use_cache = false;
         //this.options.edit_height = 640;
@@ -48,32 +48,34 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
-            if(this.options.edit_mode != 'inline'){
-                this.options.width = 640;      
-            }              
+            this.options.width = 640;      
         }else{
             this.options.width = 1200;                    
         }
     
         this._super();
         
-        /*
-        if(!(this.options.select_mode!='manager' || this.options.edit_mode!='inline')){
-            //edit form is not visible
-            this.recordList.parent().width(640);
-            this.editForm.parent().css('left',641);
-        }
-        */
-        this.editForm.parent().show(); //restore 
-        this.editFormPopup = this.element.find('.editFormDialog').hide();
         this.editFormSummary = this.element.find('.editFormSummary');
-        //this.element.find('#editFormSummary').hide(); //temp
+        this.editFormPopup = this.element.find('.editFormDialog');
         
-        this.element.find('#editFormDialog').hide();
+        var hasSearchForm = (this.searchForm && this.searchForm.length>0);
+        
+        if(this.options.edit_mode=='inline'){
+            // for manager - inline mode means that only editor is visible and we have to search init exterally
+            // see recordEdit.php
+            if(hasSearchForm) this.searchForm.parent().css({width:'0px'});    
+            this.editFormPopup.css({left:0}).show();
+        }else{
+            //for select mode we never will have inline mode
+            if(hasSearchForm) this.searchForm.parent().width('100%');
+            this.editFormPopup.css({left:0}).hide(); 
+        }
+        
+        
         
         //-----------------
         this.recordList.css('top','5.5em');
-        if(this.searchForm && this.searchForm.length>0){
+        if(hasSearchForm){
             this.searchForm.height('7.5em').css('border','none');    
         }
         
@@ -121,27 +123,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         });
         }
                 
-       //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
-       //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
-       if(this.options.edit_mode!='none'){
-/*
-           //define add button on left side
-           this._defineActionButton({key:'add', label:'Add New Vocabulary', title:'', icon:'ui-icon-plus'}, 
-                        this.editFormToolbar, 'full',{float:'left'});
-                
-           this._defineActionButton({key:'add-child',label:'Add Child', title:'', icon:''},
-                    this.editFormToolbar);
-           this._defineActionButton({key:'add-import',label:'Import Children', title:'', icon:''},
-                    this.editFormToolbar);
-           this._defineActionButton({key:'merge',label:'Merge', title:'', icon:''},
-                    this.editFormToolbar);
-               
-           //define delete on right side
-           this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
-                    this.editFormToolbar,'full',{float:'right'});
-*/                    
-       }
-        
        return true;
     },
 
@@ -234,6 +215,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(this.options.edit_mode=='popup'){
             
                 this.editForm.css({'top': 0, overflow:'auto !important'});
+//this.editFormPopup = this.editForm.parent();//this.element.find('.editFormDialog');
 
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
                     {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
@@ -286,7 +268,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
 
             if(recset_length>1 && recID>0){
-                $('<div id="divNav" style="min-width:40px;padding:0 1em 0 0;display:inline-block;text-align:center">')
+                $('<div id="divNav" style="min-width:40px;padding:0 1em;display:inline-block;text-align:center">')
                     .insertAfter(this._toolbar.find('#btnPrev'));
                 this._navigateToRec(0);
             }
@@ -314,6 +296,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editFormSummary'    
                     },
+                    /*south:{
+                        spacing_open:0,
+                        spacing_closed:0,
+                        size:'3em',
+                        contentSelector: '.editForm-toolbar'
+                    },*/
                     center:{
                         minWidth:800,
                         contentSelector: '.editForm'    

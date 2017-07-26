@@ -95,7 +95,10 @@ $.widget( "heurist.manageEntity", {
         select_return_mode: 'ids', //ids or recordset
         
         //it either loaded from server side if _entityName defined or defined explicitely on client side
-        entity: {}       //configuration
+        entity: {},       //configuration
+        
+        //listeners
+        onInitFinished:null
     },
     
     //system name of entity  - define it to load entity config from server
@@ -197,19 +200,27 @@ $.widget( "heurist.manageEntity", {
             else if(this.options.layout_mode=='basic') this.editForm.hide();
         }
         
+        var that = this;
         if(!window.hWin.HEURIST4.util.isempty(this._entityName)){
             //entity should be loaded from server
-            var that = this;
             window.hWin.HAPI4.EntityMgr.getEntityConfig(this._entityName, 
                     function(entity){
                         that.options.entity = entity;
-                        that._initControls();
+                        if(that._initControls()){
+                            if($.isFunction(that.options.onInitFinished)){
+                                that.options.onInitFinished.call();
+                            }        
+                        }
                     });
             return;
         }else{
             //entity already defined or set via options
             this._entityName = this.options.entity['entityName'];
-            this._initControls();
+            if(that._initControls()){
+                if($.isFunction(that.options.onInitFinished)){
+                    that.options.onInitFinished.call();
+                }        
+            }
         }
     },
       
@@ -225,7 +236,6 @@ $.widget( "heurist.manageEntity", {
         }
         
         var that = this;
-
         
         if(this.options.list_mode=='default'){
         
@@ -315,6 +325,7 @@ $.widget( "heurist.manageEntity", {
              }
         }
         
+        
         return true;
         //place this code in extension ===========    
         /* init search header
@@ -325,8 +336,6 @@ $.widget( "heurist.manageEntity", {
                 });
        */         
         //extend ===========    
-        
-        
     },
 
     //Called whenever the option() method is called

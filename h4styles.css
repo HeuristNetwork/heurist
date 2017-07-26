@@ -377,13 +377,15 @@ h3 > #rec_add_link,
     height: 16px;
     width: 16px;
     top: 2px;
-    right: 2px;
 }
-div.recordDiv > .rec_edit_link{
+div.recordDiv > .rec_edit_link_ext{
     right: 36px;
 }
-div.recordDiv > .rec_edit_link_ext {
+div.recordDiv > .rec_view_link {
     right: 18px;
+}
+div.recordDiv > .rec_edit_link{
+    right: 2px;
 }
 
 /*
@@ -495,11 +497,11 @@ div .selected_last{
     right: 30px;
     width: auto;
 }
-.thumbs .rec_edit_link {
+.thumbs .rec_edit_link_ext {
     bottom: 1px;
     right:17px;
 }
-.thumbs .rec_edit_link_ext {
+.thumbs .rec_edit_link {
     bottom: 1px;
     right:1px;
 }
@@ -561,11 +563,11 @@ div .selected_last{
     display: none;
 }
 
-.icons .rec_edit_link {
+.icons .rec_edit_link_ext {
     right: 17px;
     top: 1px;
 }
-.icons .rec_edit_link_ext {
+.icons .rec_edit_link {
     right: 1px;
     top: 1px;
 }
@@ -721,11 +723,11 @@ div .selected_last{
     position: absolute;
     width: auto;
 }
-.thumbs3 .rec_edit_link {
+.thumbs3 .rec_edit_link_ext {
     bottom: 17px;
     right:1px;
 }
-.thumbs3 .rec_edit_link_ext {
+.thumbs3 .rec_edit_link {
     bottom: 1px;
     right:1px;
 }

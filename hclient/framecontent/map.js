@@ -1677,7 +1677,7 @@ ed_html +
                      .click(function( event ) {
                 event.preventDefault();
                 
-                //@todo replce with new method => window.hWin.HEURIST4.ui.openRecordInPopup(recID, true, function(){})
+                //@todo replce with new method => window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, true, function(){})
                 window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
                     });
             }

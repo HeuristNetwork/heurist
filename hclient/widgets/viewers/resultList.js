@@ -993,18 +993,20 @@ $.widget( "heurist.resultList", {
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
         // TODO: add an open-in-new-search icon to the display of a record in the results list
-        + '<div title="Click to edit record" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"/><span class="ui-button-text"/>'
+        + '<div title="EXPEREMENTAL! Click to edit record" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil" style="color:gray"/><span class="ui-button-text"/>'
         + '</div>'
+
         + '<div title="Click to edit record (opens in new tab)" class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit_ext">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
         + '</div>'
-
+        
         + '<div title="Click to view record (opens in popup)" '
         + '   class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
         + '   role="button" aria-disabled="false">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/><span class="ui-button-text"/>'
         + '</div>'
+        
         + '</div>';
 
 
@@ -1054,7 +1056,15 @@ $.widget( "heurist.resultList", {
                 
             }else if (action=='edit'){
                 
-                window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, true, function(){
+                var query = null;
+                if(this._currentRecordset && this._currentRecordset.length()<1000){
+                    query = 'ids:'+this._currentRecordset.getIds().join(',');
+                }else{
+                    query = this._query_request;
+                }
+                
+                window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, function(){
+                    //callback
                     
                 });
                 

@@ -372,11 +372,11 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
-                            <option value="Records">Records</option>
+                            <option value="Records" selected>Records</option>
                             <option value="SysUsers">Users</option>
                             <option value="SysGroups">Workgroups</option>
                             <option value="Tags">Tags</option>
-                            <option value="RecUploadedFiles" selected>Uploaded Files +</option>
+                            <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="Reminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>
