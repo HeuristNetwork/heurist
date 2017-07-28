@@ -745,7 +745,7 @@ $.widget( "heurist.boro_nav", {
         var request = {
             w: 'a',
             detail: [that.DT_NAME, that.DT_GIVEN_NAMES, that.DT_INITIALS, that.DT_HONOR, 'rec_ThumbnailURL', 'rec_ThumbnailBg'], 
-            q: [{"t":"10"},{"f:1":firstChar+'%'},{"sortby":"t"}],//,{"sortby":"t"}
+            q: [{"t":"10"},{"f:196":"4705"},{"f:1":firstChar+'%'},{"sortby":"t"}],//,{"sortby":"t"}
             //sortby:'t',
             //id: random
             source:this.element.attr('id')};

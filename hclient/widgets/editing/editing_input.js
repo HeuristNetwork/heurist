@@ -138,7 +138,7 @@ $.widget( "heurist.editing_input", {
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
-            .css('vertical-align', (this.detailType=="blocktext" || this.detailType=="file")?'top':'')
+            .css('vertical-align', (this.detailType=="blocktext" || this.detailType=='file')?'top':'')
             .html('<label>'
                 + (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
             .appendTo( this.element );
@@ -733,27 +733,6 @@ $.widget( "heurist.editing_input", {
                                 } );
                                  
                             };
-             
-        //OLDEST H3 SELECTOR
-        /*
-        top.HEURIST.rectypes = window.hWin.HEURIST4.rectypes;                        
-                                
-        var url = window.hWin.HAPI4.baseURL+'records/pointer/selectRecordFromSearch.html?' 
-        +'&db='+window.hWin.HAPI4.database+'&t='+that.f('rst_PtrFilteredIDs');
-            
-        window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:600,    
-                                    title: window.hWin.HR('Select linked record'),
-                                    class:'ui-heurist-bg-light',
-                                    callback: function(bibID, bibTitle){
-                                        if(bibID>0){
-                                            var name = bibTitle;
-                                            that.newvalues[$input.attr('id')] = bibID;
-                                            $input.val(bibTitle).change();
-                                        }
-                                    }
-                                } );
-                            };
-        */
 
                                 //assign initial display value
                                 if(Number(value)>0){
@@ -807,7 +786,10 @@ $.widget( "heurist.editing_input", {
                                             if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                                 var recordset = data.selection;
                                                 var record = recordset.getFirstRecord();
-                                                var rec_Title = recordset.fld(record,'ulf_OrigFileName');
+                                                var rec_Title = recordset.fld(record,'ulf_ExternalFileReference');
+                                                if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                                                    rec_Title = recordset.fld(record,'ulf_OrigFileName');
+                                                }
                                                 that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
                                                 $input.val(rec_Title).change();
                                             }
@@ -835,7 +817,13 @@ $.widget( "heurist.editing_input", {
                                 //assign initial display value
                                 if(value){
                                     if(isFileForRecord){
-                                        $input.val( value.ulf_OrigFileName );
+                                        
+                                        var rec_Title = value.ulf_ExternalFileReference;
+                                        if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                                            rec_Title = value.ulf_OrigFileName;
+                                        }
+                                        $input.val( rec_Title );
+                                        
                                     }else{
                                         var display_value = window.hWin.HAPI4.EntityMgr
                                                                 .getTitlesByIds(entityName, value.split(','));
@@ -844,111 +832,21 @@ $.widget( "heurist.editing_input", {
                                 }
                                 
                             }
-                        }
+                        }//configMode
 
                         if(__show_select_dialog!=null){
                             this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
                         }
                         
-                        this.newvalues[$input.attr('id')] = value;
+                        if(isFileForRecord && value){
+                            this.newvalues[$input.attr('id')] = value.ulf_ID;
+                        }else{
+                            this.newvalues[$input.attr('id')] = value;    
+                        }
+                        
 
             }else 
-/*            
-            if(this.detailType=='file' && this.configMode.entity=='records'){ NOT USED - it tries to call H3 file uploader
-                //for for this entity is kind of resource field
-                
-                //at the momenet we use H3 file/url selector
-                var urlThumb = '';
-                if(value && value['ulf_ObfuscatedFileID']){
-                    urlThumb = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&thumb='+
-                        value['ulf_ObfuscatedFileID'];
-                    $input.val( value['ulf_OrigFileName'] );
-                }
-                //container for image
-                var $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
-                    + '<img src="'+urlThumb+'" class="image_input"></div>').appendTo( $inputdiv );                
-
-                //browse button    
-                var $btn_fileselect_dialog = $( "<button>", {title: "Click to select file for upload"})
-                        .addClass("smallbutton")
-                        .css('vertical-align','top')
-                        .appendTo( $inputdiv )
-                        .button({icons:{primary: "ui-icon-folder-open"},text:false});
-           
-                var __show_select_fileurl = function(){
-                    
-                    var filed = that.newvalues[$input.attr('id')];
-                    
-                    var fieldata = encodeURIComponent(JSON.stringify(
-                    filed?{
-                        remoteURL:filed['ulf_ExternalFileReference'],
-                        origName:filed['ulf_OrigFileName'],
-                        URL:  window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database
-                                                        + '&file='+filed['ulf_ObfuscatedFileID'],
-                        ext: filed['ulf_MimeExt'],
-                        mediaType:filed['mediaType'],
-                        remoteSource:filed['remoteSource'],
-                        id: filed['ulf_ID'],
-                        nonce: filed['ulf_ObfuscatedFileID'],
-                    }:{}));
-        
-                    var url = window.hWin.HAPI4.baseURL+'records/files/uploadFileOrDefineURL.html?value='+fieldata 
-                        +'&db='+window.hWin.HAPI4.database+'&recid='+that.options.recID;
-            
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:480, width:640,    
-                        title: window.hWin.HR('Upload file or define URL'),
-                        class:'ui-heurist-bg-light',
-                        callback: function(isChanged, fileJSON) {
-
-                            if(isChanged){
-
-                                if(window.hWin.HEURIST4.util.isempty(fileJSON)){
-                                    var r = confirm('You uploaded/changed the file data. If you continue, all changes will be lost.');
-                                    return r;
-                                }else{
-                                    var filedata = JSON.parse(fileJSON);
-                                    
-                                    var filed = {
-                                        ulf_ExternalFileReference: filedata['remoteURL'],
-                                        ulf_OrigFileName:     filedata['origName'],
-                                        ulf_MimeExt:          filedata['ext'],
-                                        ulf_ObfuscatedFileID: filedata['nonce'],
-                                        ulf_ID:               filedata['id'],
-                                        URL:                  filedata['URL'],
-                                        mediaType:            filedata['mediaType'],
-                                        remoteSource:         filedata['remoteSource']
-                                    };
-                                    
-                                    var urlThumb = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&thumb='+
-                                                filed['ulf_ObfuscatedFileID'];
-                                    $input.val( (filed.remoteSource=='heurist')
-                                                        ?filed['ulf_OrigFileName']
-                                                        :filed['ulf_ExternalFileReference'] );
-                                    that.newvalues[$input.attr('id')] = filed;
-                                    
-                                    $input_img.find('img').attr('src', urlThumb);
-                                    
-                                }
-
-                            }
-                            //var helpDiv = document.getElementById("ui-pref-showhelp");
-                            //top.HEURIST.util.setHelpDiv(helpDiv,null);
-
-                            return true; //prevent close
-                        }//callback
-                    } );
-           
-                }//__show_select_fileurl
-           
-                this._on( $btn_fileselect_dialog, { click: __show_select_fileurl } );
-                this._on( $input_img, {click: __show_select_fileurl }); 
-           
-                if(value && value['ulf_ID']){
-                    that.newvalues[$input.attr('id')] = value;
-                }
-            }
-            else */
             if( this.detailType=='file' ){
                 
                         //url for thumb
@@ -1086,7 +984,10 @@ $.widget( "heurist.editing_input", {
                 'data-input-id': $input.attr('id')
             })
             .addClass("smallbutton btn_input_clear")
-            //.css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'' })
+            .css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'',
+'margin-left': (this.detailType=='relmarker' || this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum')
+                        ?'0px':'-17px'
+            })
             .appendTo( $inputdiv )
             .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
             //.position( { my: "right top", at: "right top", of: $($input) } );
@@ -1235,14 +1136,10 @@ $.widget( "heurist.editing_input", {
         var res = null;
         var $input = $(input_id);
 
-        if(!(this.detailType=="resource" || this.detailType=="file")){
+        if(!(this.detailType=="resource" || this.detailType=='file')){
             res = $input.val();
         }else {
-            //if (!window.hWin.HEURIST4.util.isempty( this.newvalues[$input.attr('id')] ) )
             res = this.newvalues[$input.attr('id')];
-            /*if (this.detailType=="file"){
-                res = res['ulf_ID'];
-            }*/
         }
 
         return res;
@@ -1410,7 +1307,7 @@ $.widget( "heurist.editing_input", {
             if(window.hWin.HEURIST4.util.isempty(value)) {
                 disp_value = 'term missed. id '+termID
             }
-        } else if(this.detailType=="file"){
+        } else if(this.detailType=='file'){
 
             disp_value = "@todo file "+value;
 

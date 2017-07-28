@@ -220,7 +220,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
                     
                 if(!this.options.beforeClose){
-                    this.options.beforeClose = this.saveUiPreferences;
+                    this.options.beforeClose = function(){that.saveUiPreferences();};
                 }
              
                 this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
@@ -1009,7 +1009,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             
                 });
 
-                var myLayout = this.editFormPopup.layout();                
+                var myLayout = that.editFormPopup.layout();                
                 var sz = myLayout.state.east.size;
                 var isClosed = myLayout.state.east.isClosed;
                 
@@ -1017,12 +1017,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             activeTabs:activeTabs} );
         }
 
-        if(this.options.in_popup_dialog==true){
-            window.hWin.HAPI4.save_pref('edit_record_dialog', {width:window.innerWidth, height:window.innerHeigth});
+        if(that.options.in_popup_dialog==true){
+            window.hWin.HAPI4.save_pref('edit_record_dialog', {width: window.innerWidth+20, height:window.innerHeight+46});
         }else                
-        if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
-            window.hWin.HAPI4.save_pref('edit_record_dialog', {width: this._edit_dialog.dialog('option','width'), 
-                                                               height: this._edit_dialog.dialog('option','height')});
+        if(that._edit_dialog && that._edit_dialog.dialog('isOpen')){
+            window.hWin.HAPI4.save_pref('edit_record_dialog', {width: that._edit_dialog.dialog('option','width'), 
+                                                               height: that._edit_dialog.dialog('option','height')});
         } 
         
         return true;
@@ -1039,19 +1039,21 @@ function showManageRecords( options ){
     var manage_dlg; // = $('#heurist-records-dialog');  //@todo - unique ID
 
     if(true){ //manage_dlg.length<1){
-        
-        options.isdialog = true;
 
+
+        /*
+        var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
+            {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+        options.width = usrPreferences['width'];
+        options.height = usrPreferences['height'];
+        */
+        options.isdialog = true;
+        
         manage_dlg = $('<div id="heurist-records-dialog-'+window.hWin.HEURIST4.util.random()+'">')
-                .appendTo( $('body') )
-                .manageRecords( options );
+        .appendTo( $('body') )
+        .manageRecords( options );
     }
 
-    var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
-                    {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
-                    height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-    this.options.width = usrPreferences['width'];
-    this.options.height = usrPreferences['height'];
-    
     manage_dlg.manageRecords( 'popupDialog' );
 }

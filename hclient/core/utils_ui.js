@@ -1215,7 +1215,8 @@ window.hWin.HEURIST4.ui = {
     openRecordInPopup:function(rec_ID, query_request, isEdit, callback){
     
             var url = window.hWin.HAPI4.baseURL,
-                dwidth, dtitle;    
+                dwidth, dheight, dtitle;    
+                
             if(isEdit==true){
                 
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
@@ -1247,7 +1248,9 @@ window.hWin.HEURIST4.ui = {
                 dwidth = 800;
             }        
             
-            var $dosframe = window.hWin.HEURIST4.msg.showDialog(url, {height:dheight, width:dwidth,
+            var $dosframe = window.hWin.HEURIST4.msg.showDialog(url, {
+                height:dheight, 
+                width:dwidth,
                 padding:0,
                 title: window.hWin.HR(dtitle),
                 class:'ui-heurist-bg-light',

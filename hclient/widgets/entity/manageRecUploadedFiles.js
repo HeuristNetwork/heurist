@@ -31,6 +31,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.use_cache = false;
         this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
+        this.options.edit_height = 540;
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -63,7 +64,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchRecUploadedFiles(this.options);
         
-        var iheight = 4;
+        var iheight = 6;
         //if(this.searchForm.width()<200){  - width does not work here  
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 8;
@@ -224,8 +225,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var rectype = fld('ulf_ExternalFileReference')?'external':'local';
         //var isEnabled = (fld('ugr_Enabled')=='y');
         
-        var recTitle = fld2((rectype=='external')?'ulf_ExternalFileReference':'ulf_OrigFileName','20em');
-        var recTitleHint = fld((rectype=='external')?'ulf_ExternalFileReference':'ulf_OrigFileName');
+        var recTitle = fld2((rectype=='external')?'ulf_ExternalFileReference':'ulf_OrigFileName','auto');//,'20em'
+        var recTitleHint;
+        if(rectype=='external'){
+            recTitleHint = recID+' : '+fld('ulf_ExternalFileReference');
+        }else{
+            recTitleHint = recID+' : '+fld('ulf_OrigFileName') + ' @ ' + fld('ulf_FilePath');
+        }
         
         var recIcon = '';//@todo window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
 

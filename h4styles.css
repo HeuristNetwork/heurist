@@ -224,12 +224,14 @@ fieldset.ontop > div > .input-cell{
 .input-cell > input{
     margin-right: 0.4em;
 }
+
 div.input-div:hover > .btn_input_clear, .btn_input_clear:hover {
     display: inline-block;
 }
 div.input-div > .btn_input_clear, .btn_input_clear {
     display: none;
 }
+
 div.input-div{
     padding-bottom:0.2em;
 }
@@ -1320,4 +1322,12 @@ label.small-header{
     display: inline-block;
     text-align: right;
     padding-right: 0.4em;
+}
+
+.resultList-helper{
+    position: absolute;
+    bottom: -24px;
+    font-style: italic;
+    font-size: 0.9em;
+    left: 14px;
 }

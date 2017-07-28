@@ -105,7 +105,7 @@ class DbRecUploadedFiles extends DbEntityBase
         }else if(@$this->data['details']=='list'){
 
             //$this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference, ulf_ObfuscatedFileID';
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID';
+            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath';
             
         }else if(@$this->data['details']=='full'){
 
@@ -422,7 +422,7 @@ class DbRecUploadedFiles extends DbEntityBase
                         unlink($filepath);
                     }
                     //remove thumbnail
-                    $thumbnail_file = "ulf_".$file_id.".png";
+                    $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file_id.".png";
                     if(file_exists($thumbnail_file)){
                         unlink($thumbnail_file);
                     }

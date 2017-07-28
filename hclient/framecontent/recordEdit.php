@@ -31,6 +31,8 @@
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
         <!--script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script-->
         
         <script type="text/javascript">
@@ -120,7 +122,7 @@
             }
             
             function onBeforeClose(){
-                $container.manageRecords('saveUiPreferences',-1);
+                $container.manageRecords('saveUiPreferences');
             }            
         </script>
     </head>

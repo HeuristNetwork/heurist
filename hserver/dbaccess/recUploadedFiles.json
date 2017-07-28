@@ -8,7 +8,7 @@
         
         "searchFormContent": "searchRecUploadedFiles.html",
         
-        "entityTitle": "Uploaded File",
+        "entityTitle": "Uploaded or Referenced File",
         "entityTitlePlural": "Uploaded Files",
         "empty_remark": "Please use the search field above to locate relevant file (partial string match on title)",
 

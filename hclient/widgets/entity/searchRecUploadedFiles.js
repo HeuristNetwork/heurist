@@ -103,12 +103,16 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             var request = {}
         
             var domain = this.currentDomain();
+            
+            
 
             if(domain=='external'){
 
                 this.input_search.parent().hide();
                 this.input_search_path.parent().hide();
                 this.input_search_url.parent().show();
+                this.element.find('span.local').hide();
+                this.element.find('span.external').show();
 
                 if(this.input_search.val()!=''){
                     request['ulf_ExternalFileReference'] = this.input_search_url.val();    
@@ -121,6 +125,9 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 this.input_search_url.parent().hide();
                 this.input_search.parent().show();
                 this.input_search_path.parent().show();
+                this.element.find('span.local').show();
+                this.element.find('span.external').hide();
+                
                 request['ulf_ExternalFileReference'] = 'NULL';
                 
                 if(this.input_search_path.val()!=''){

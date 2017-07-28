@@ -359,7 +359,7 @@ $.widget( "heurist.resultList", {
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
         .css({'float':'right','padding-right':right_padding+'px'})
-        .html('<input id="cb1_'+rnd+'" type="radio" name="list_lo" checked="checked" value="list"/>'
+        .html('<input id="cb1_'+rnd+'" type="radio" name="list_lo" value="list"/>'
             +'<label for="cb1_'+rnd+'">'+window.hWin.HR('list')+'</label>'
             +'<input  id="cb2_'+rnd+'" type="radio" name="list_lo" value="icons"/>'
             +'<label for="cb2_'+rnd+'">'+window.hWin.HR('icons')+'</label>'
@@ -676,10 +676,10 @@ $.widget( "heurist.resultList", {
         }
         //this.btn_view.button( "option", "label", window.hWin.HR(newmode));
         //this.element.find('#list_layout_'+newmode).attr('checked','checked');
-        this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked','checked');
-
+        this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
+console.log('cehcedk '+newmode);
         //if(this.view_mode_selector.data('uiButtonset'))
-        //        this.view_mode_selector.buttonset('refresh');
+        this.view_mode_selector.buttonset('refresh');
     },
 
     //
@@ -1670,7 +1670,8 @@ $.widget( "heurist.resultList", {
         $allrecs = this.div_content.find('.recordDiv');
         this._on( $allrecs, {
             click: this._recordDivOnClick,
-            mouseover: this._recordDivOnHover,
+            mouseover: this._recordDivOnHover
+            /* enable but specify entityName to edit in options
             dblclick: function(event){ //start edit on dblclick
 
                 var $rdiv = $(event.target);
@@ -1681,8 +1682,8 @@ $.widget( "heurist.resultList", {
 
                 event.preventDefault();
                 window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
-
             }
+            */
         });
         var inline_selectors = this.div_content.find('.recordDiv select');
         if(inline_selectors.length>0){
