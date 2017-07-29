@@ -670,11 +670,13 @@ $.widget( "heurist.editing_input", {
             }else 
             if(this.detailType=="resource" || isFileForRecord)
             {
+                        var select_return_mode = 'ids';
                         if(isFileForRecord){
                             this.configMode = {
                                 entity:'recUploadedFiles',
                             };
                             icon_for_button = 'ui-icon-folder-open';
+                            select_return_mode = 'recordset';
                         }else{
                             icon_for_button = 'ui-icon-link';
                         }
@@ -777,6 +779,7 @@ $.widget( "heurist.editing_input", {
                                     //page_size: $('#page_size').val(),
                                     //action_select: false,
                                     //action_buttons: true,
+                                    select_return_mode:select_return_mode, //ids or recordset(for files)
                                     filter_group_selected:null,
                                     filter_groups: this.configMode.filter_group,
                                     onselect:function(event, data){

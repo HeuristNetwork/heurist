@@ -27,9 +27,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _editing2:null,
     
     _init: function() {
+        
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        this.options.select_return_mode = 'recordset';
+        //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 540;
 

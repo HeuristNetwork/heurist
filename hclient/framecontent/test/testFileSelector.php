@@ -52,6 +52,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         height: 840,
                         width: 600,
                         onselect:function(event, data){
+console.log('onselect');                            
                             if(data && data.selection)
                             for(i in data.selection){
                                 if(i>=0){
