@@ -56,7 +56,9 @@ $.widget( "heurist.resultList", {
         //event
         onselect: null,  //on select event for non event based
         
-        navigator:'auto'  //none, buttons, menu, auto
+        navigator:'auto',  //none, buttons, menu, auto
+        
+        entityName:'records'   //records by default
     },
 
 
@@ -1076,25 +1078,6 @@ console.log('cehcedk '+newmode);
             return;
         }
         
-        /* OLD WAY - to remove
-        var isedit = ($target.parents('div[data-key="edit"]').length>0); //this is edit click .rec_edit_link
-        var isdelete = ($target.parents('div[data-key="delete"]').length>0); //this is delete click
-
-        if(isedit){
-            if(this.options.renderer){
-                this._trigger( "onaction", null, {action:'edit', recID:selected_rec_ID});
-            }else{
-                var url = window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
-                window.open(url, "_new");
-            }
-            return;
-        }else if(isdelete){
-            if(this.options.renderer){
-                this._trigger( "onaction", null, {action:'delete', recID:selected_rec_ID});
-            }
-            return;
-        }*/
-            
             var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
             if (ispwdreminder){
                 var pwd = $rdiv.attr('pwd');
@@ -1670,20 +1653,20 @@ console.log('cehcedk '+newmode);
         $allrecs = this.div_content.find('.recordDiv');
         this._on( $allrecs, {
             click: this._recordDivOnClick,
-            mouseover: this._recordDivOnHover
-            /* enable but specify entityName to edit in options
+            mouseover: this._recordDivOnHover,
+            /* enable but specify entityName to edit in options */
             dblclick: function(event){ //start edit on dblclick
+                if(!$.isFunction(this.options.renderer)){
+                    var $rdiv = $(event.target);
+                    if(!$rdiv.hasClass('recordDiv')){
+                        $rdiv = $rdiv.parents('.recordDiv');
+                    }
+                    var recID = $rdiv.attr('recid');
 
-                var $rdiv = $(event.target);
-                if(!$rdiv.hasClass('recordDiv')){
-                    $rdiv = $rdiv.parents('.recordDiv');
+                    event.preventDefault();
+                    window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
                 }
-                var recID = $rdiv.attr('recid');
-
-                event.preventDefault();
-                window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
             }
-            */
         });
         var inline_selectors = this.div_content.find('.recordDiv select');
         if(inline_selectors.length>0){

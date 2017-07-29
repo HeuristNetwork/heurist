@@ -340,6 +340,19 @@ if(_mapdata.limit_warning){
                     forceZoom = true;
                 }
                 
+                if(mapdata.min_zoom>0){
+                    if(maxLat-minLat<mapdata.min_zoom){
+                        var d = minLat+(maxLat-minLat)/2;
+                        maxLat = d + mapdata.min_zoom/2;
+                        minLat = d - mapdata.min_zoom/2;
+                    }
+                    if(maxLng-minLng<mapdata.min_zoom){
+                        var d = minLng+(maxLng-minLng)/2;
+                        maxLng = d + mapdata.min_zoom/2;
+                        minLng = d - mapdata.min_zoom/2;
+                    }
+                }
+                
                 var southWest = new google.maps.LatLng(minLat, minLng);
                 var northEast = new google.maps.LatLng(maxLat, maxLng);
                 mapdata.geoextent = new google.maps.LatLngBounds(southWest, northEast);
@@ -347,7 +360,7 @@ if(_mapdata.limit_warning){
                 dataset.hide();
                 dataset.show();
                 
-                if(forceZoom){
+                if(forceZoom || mapdata.forceZoom){
                     setTimeout( function(){ _zoomDataset( dataset_id );}, pnt_counts>1000?2000:500 );
                 }
     }
@@ -410,6 +423,7 @@ if(_mapdata.limit_warning){
         var mapdata = _getDataset(dataset_id);
         if(mapdata && mapdata.geoextent){
               //zoom to geo extent
+              
               var nativemap = tmap.getNativeMap();
               nativemap.fitBounds(mapdata.geoextent);
         }

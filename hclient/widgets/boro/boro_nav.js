@@ -53,6 +53,7 @@ $.widget( "heurist.boro_nav", {
     DT_END_DATE: 11, //window.hWin.HAPI4.sysinfo['dbconst']['DT_END_DATE'], //11
     DT_ORDER: 261, //window.hWin.HAPI4.sysinfo['dbconst']['DT_ORDER'],
 
+    DT_GEO: 28,
     DT_PARENT_PERSON: 16,
     DT_EVENT_TYPE: 77,
     DT_PLACE: 78,
@@ -397,7 +398,7 @@ $.widget( "heurist.boro_nav", {
 
         var request = {
             w: 'a',
-            detail: 'detail', 
+            detail: 'detail', // '', 
             //id: random
             source:this.element.attr('id')};
         
@@ -480,8 +481,11 @@ $.widget( "heurist.boro_nav", {
                 place = that.__getPlace(place, 0); 
                 if(place.link){
                     title = place['names'][0]; //full place name  
-                    mapids = place.ids;
-                } 
+                    
+                    if(place.hasGeo){
+                        mapids = place.ids;
+                    }
+                }
                 
             }else if (entType=='institution'){
                 var edu_inst = that.recset.getById(recID);
@@ -489,8 +493,9 @@ $.widget( "heurist.boro_nav", {
                 
                 var place = that.__getPlace(edu_inst, 0);
                 if(place.link){
-                    //@todo - check that place has geo field
-                    mapids = place.ids;
+                    if(place.hasGeo){
+                        mapids = place.ids;
+                    }                    
                 }
                 
                 //detect what type of institution we have- school or uni
@@ -689,7 +694,9 @@ $.widget( "heurist.boro_nav", {
                 var params = {id:'main',
                     title: 'Current query',
                     recordset: map_recset,
-                    color: '#ff0000'
+                    color: '#ff0000',
+                    forceZoom:true, //force zoom after addition
+                    min_zoom: 0.06 //in degrees
                 };            
                 $('#cp_mapframe_container').show()
                 var mapping = $('#cp_mapframe')[0].contentWindow.mapping;
@@ -829,7 +836,9 @@ $.widget( "heurist.boro_nav", {
                     var sDate = that.__getDate(birth_rec);
                     
                     place = that.__getPlace(birth_rec, 0);
-                    mapids = mapids.concat(place.ids); 
+                    if(place.hasGeo){
+                        mapids = mapids.concat(place.ids);     
+                    }
                     html = '<li>Born '+that.__formatDate(sDate)+(place.link?' in '+place.link:'')+'</li>';   
                     
                     if(placeID==0){
@@ -855,7 +864,9 @@ $.widget( "heurist.boro_nav", {
                 if(death_rec){
                     sDate = that.__getDate(death_rec);
                     place = that.__getPlace(death_rec, 0);
-                    mapids = mapids.concat(place.ids); 
+                    if(place.hasGeo){
+                        mapids = mapids.concat(place.ids); 
+                    }
                 
                     sDeathType = that.__getTerm(that.recset.fld(death_rec, 143) );
                     if(sDeathType!='Killed in action'){
@@ -899,7 +910,9 @@ $.widget( "heurist.boro_nav", {
                         var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
                         
                         var place = that.__getPlace(edu_record, 1);
-                        mapids = mapids.concat(place.ids); 
+                        if(place.hasGeo){
+                            mapids = mapids.concat(place.ids); 
+                        }
                         
                         html = html + '<li>'+sEduInst
                                     +'<span class="bor-group-date">&nbsp;'+that.__formatDate(sDate)+'</span></li>';
@@ -946,7 +959,9 @@ $.widget( "heurist.boro_nav", {
                         var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
 
                         var place = that.__getPlace(edu_record, 1);
-                        mapids = mapids.concat(place.ids); 
+                        if(place.hasGeo){
+                            mapids = mapids.concat(place.ids); 
+                        }
 
                         html = html + '<li>' 
                                     + sDegree
@@ -993,7 +1008,10 @@ $.widget( "heurist.boro_nav", {
                         
                         var place = that.__getPlace(record, 0);
                         if(termID==4254 || termID==3694){ //married, lived
-                            mapids = mapids.concat(place.ids); 
+                        
+                            if(place.hasGeo){
+                                mapids = mapids.concat(place.ids); 
+                            }
                             
                             if(placeID==0){
                                 that.__setPlaceDesc(place, (termID==4254)?'married':'lived',
@@ -1131,7 +1149,9 @@ $.widget( "heurist.boro_nav", {
                     
                     //places of service
                     var place = that.__getPlace(record, 0);
-                    mapids = mapids.concat(place.ids);
+                    if(place.hasGeo){
+                        mapids = mapids.concat(place.ids);
+                    }
                     
                     var sRankAndUnit = (sRank && sEventType?'as ':'')
                                     + sRank
@@ -1338,7 +1358,7 @@ $.widget( "heurist.boro_nav", {
             }
             $('#p_pdf_entry').empty().append($(html));
             
-console.log(record);            
+//console.log(record);            
             
             
             //Last updated -------------------------------
@@ -1443,7 +1463,9 @@ console.log(record);
                 var params = {id:'main',
                     title: 'Current query',
                     recordset: map_recset,
-                    color: '#ff0000'
+                    color: '#ff0000',
+                    forceZoom:true, //force zoom after addition
+                    min_zoom: 0.06 //in degrees
                 };            
                 $('#p_mapframe_container').show()
                 var mapping = $('#p_mapframe')[0].contentWindow.mapping;
@@ -1632,6 +1654,7 @@ console.log(record);
                 var aRes = [];
                 var place_ids = [];
                 var place_names = [];
+                var hasGeo = false;
                 
                 if($.isArray(places)){
                     for (idx in places){
@@ -1660,6 +1683,8 @@ console.log(record);
                                 if(state)res.push(state);
                                 if(country)res.push(country);
                                 
+                                hasGeo = hasGeo || !this.isempty(this.recset.fld(place_rec, this.DT_GEO));
+                                
                                 var fullName = res.join(', ');
                                 place_names.push(fullName);
                            
@@ -1673,7 +1698,7 @@ console.log(record);
                     sRes = this.__joinAnd(aRes);
                 }
 
-                return {ids:place_ids, names:place_names, link:sRes};
+                return {ids:place_ids, names:place_names, link:sRes, hasGeo:hasGeo};
                 
     },
 

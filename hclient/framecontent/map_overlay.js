@@ -977,7 +977,7 @@ console.log('load '+current_map_document_id);
     * 
     * @todo - unite with mapping.addDataset
     */
-        function _addRecordsetLayer(source, index) {
+    function _addRecordsetLayer(source, index) {
 
         // Show info on map
         var mapdata = source.mapdata;
@@ -1041,6 +1041,9 @@ console.log('load '+current_map_document_id);
                     mapdata = recset.toTimemap(source.id, 99913, source.color, 0); //set to 1 to show main geo only (no links)
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
+                    
+                    mapdata.forceZoom = source.forceZoom;
+                    mapdata.min_zoom = source.min_zoom;
 
                     mapdata.depends = [];
 
@@ -1105,6 +1108,9 @@ console.log('load '+current_map_document_id);
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
 
+                    mapdata.forceZoom = source.forceZoom;
+                    mapdata.min_zoom = source.min_zoom;
+                    
                     if(recset['limit_warning']){
                         /* @todo - show individual warning per layer
                         var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
