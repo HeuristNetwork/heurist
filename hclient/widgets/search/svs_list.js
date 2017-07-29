@@ -1077,21 +1077,11 @@ null, 'Embedding searchs');
 
                         case "addChild":
                             node.editCreateNode("child", "New folder");
-                            // refNode = node.addChildren({
-                            //   title: "New node",
-                            //   isNew: true
-                            // });
-                            // node.setExpanded();
-                            // refNode.editStart();
                             break;
                         case "addSibling":
                             node.editCreateNode("after", "New node");
-                            // refNode = node.getParent().addChildren({
-                            //   title: "New node",
-                            //   isNew: true
-                            // }, node.getNextSibling());
-                            // refNode.editStart();
                             break;
+/*  copy/paste actions disabled since 2017-07-29                        
                         case "cut":
                             CLIPBOARD = {mode: data.cmd, data: node};
                             break;
@@ -1132,6 +1122,7 @@ null, 'Embedding searchs');
                                 }
                             }
                             break;
+*/                            
                         default:
                             alert("Unhandled command: " + data.cmd);
                             return;
@@ -1187,11 +1178,13 @@ null, 'Embedding searchs');
                     {title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }, 
                     {title: "----"},
                     {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
-                    {title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" },  // <kbd>[Del]</kbd>
+                    {title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" }  // <kbd>[Del]</kbd>
+                    /*
                     {title: "----"},
                     {title: "Cut", cmd: "cut", uiIcon: "ui-icon-scissors"}, // <kbd>Ctrl+X</kbd>
                     {title: "Copy", cmd: "copy", uiIcon: "ui-icon-copy"},  // <kbd>Ctrl-C</kbd>
                     {title: "Paste as child", cmd: "paste", uiIcon: "ui-icon-clipboard", disabled: true } //<kbd>Ctrl+V</kbd>
+                    */
                 ],
                 beforeOpen: function(event, ui) {
                     var node = $.ui.fancytree.getNode(ui.target);
