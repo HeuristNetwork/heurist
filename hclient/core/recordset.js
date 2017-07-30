@@ -35,7 +35,7 @@ function hRecordSet(initdata) {
     //limit = 1000, use length()
     fields = [],       //array of field names
     fields_detail = [], //array of fieldtypes ids in details 
-    records = null,      //list of records objects {recID:[], ....}
+    records = {},      //list of records objects {recID:[], ....}
     order = [], //array of record IDs in specified order
     mainset = null, //array of record IDs that belong to main result set (without applied rules)
     
@@ -84,7 +84,7 @@ function hRecordSet(initdata) {
                 _isMapEnabled = response.mapenabled;
                 //@todo - merging
             }else{
-                records = [];
+                records = {};
                 order = response.records;
                 if(response.rectypes) rectypes = response.rectypes;
                 _isMapEnabled = false;
@@ -1198,7 +1198,7 @@ function hRecordSet(initdata) {
             var idx = order.indexOf(recID);
             if(idx<0){ //add new
                 records[recID] = [];
-                records[recID][fields.length-1] = undefined;
+                if(fields.length>0)records[recID][fields.length-1] = undefined;
                 order.push(recID);
                 total_count = total_count+1;
             }

@@ -48,7 +48,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
-            this.options.width = 640;      
+            this.options.width = (isNaN(this.options.width) || this.options.width<640)?640:this.options.width;      
         }else{
             this.options.width = 1200;                    
         }

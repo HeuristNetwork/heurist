@@ -76,13 +76,14 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.input_search_path = this.element.find('#input_search_path');
         this.input_search_type = this.element.find('#input_search_type');
         this.input_search_url =  this.element.find('#input_search_url');
+
+        this.input_search_my = this.element.find('#input_search_my');
+        this.input_search_recent =  this.element.find('#input_search_recent');
         
-        //this._on(this.input_search,  { keyup:this.startSearch });
-        //this._on(this.input_search_path,  { keyup:this.startSearch });
-        //this._on(this.input_search_code,  { keyup:this.startSearch });
         this._on( this.input_search_url, { keypress: this.startSearchOnEnterPress });
         this._on( this.input_search_path, { keypress: this.startSearchOnEnterPress });
-        this._on( this.input_search_code, { keypress: this.startSearchOnEnterPress });
+        this._on(this.input_search_my,  { change:this.startSearch });
+        this._on(this.input_search_recent,  { change:this.startSearch });
 
         
         if(this.options.select_mode=='manager'){
@@ -93,6 +94,23 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.startSearch();            
     },  
 
+    clearInputs: function(){
+        this.input_search.val('');
+        this.input_search_url.val('');
+        this.input_search_path.val('');
+        this.input_search_type.val('');
+    },
+    //
+    // special case to show recently added record
+    //
+    searchRecent: function(domain){
+        this.clearInputs();
+        
+        this.input_search_recent.prop('checked', true);
+        this.selectGroup.tabs('option','active',domain=='external'?1:0);
+        this.startSearch();
+    },
+    
     //
     // public methods
     //
@@ -114,7 +132,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 this.element.find('span.local').hide();
                 this.element.find('span.external').show();
 
-                if(this.input_search.val()!=''){
+                if(this.input_search_url.val()!=''){
                     request['ulf_ExternalFileReference'] = this.input_search_url.val();    
                 }else{
                     request['ulf_ExternalFileReference'] = '-NULL';                        
@@ -137,10 +155,16 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     request['ulf_OrigFileName'] = this.input_search.val();    
                 }
             }
-            if(this.input_search_type.val()!=''){
+            if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
                     request['ulf_Parameters'] = this.input_search_type.val();    
             }
             
+            if(this.input_search_my.is(':checked')){
+                request['ulf_UploaderUGrpID'] = window.hWin.HAPI4.currentUser.ugr_ID; 
+            }
+            if(this.input_search_recent.is(':checked')){
+                request['ulf_Added'] = '-1' 
+            }
             
             if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );

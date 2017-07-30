@@ -808,6 +808,14 @@ $.widget( "heurist.editing_input", {
                                 }//options
 
                                 __show_select_dialog = function(event){
+                                    
+                                        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+entityName, 
+                                            {width: null,  //null triggers default width within particular widget
+                                            height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+                            
+                                        popup_options.width = usrPreferences.width;
+                                        popup_options.height = usrPreferences.height;
+                                    
                                         //init dilaog
                                         var manage_dlg = $('<div>')
                                             .uniqueId()

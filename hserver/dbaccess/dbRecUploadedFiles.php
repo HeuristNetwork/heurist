@@ -84,12 +84,27 @@ class DbRecUploadedFiles extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('ulf_Modified');
         if($pred!=null) array_push($where, $pred);
         
+        $pred = $this->searchMgr->getPredicate('ulf_UploaderUGrpID');
+        if($pred!=null) array_push($where, $pred);
         
+
         $value = @$this->data['ulf_Parameters'];
         if(!($value==null || $value=='any')){
             array_push($where, "(fxm_Extension=ulf_MimeExt) AND (fxm_MimeType like '$value%')");
             array_push($from_table, 'defFileExtToMimetype');
         }
+        //----- order by ------------
+        
+        //compose ORDER BY 
+        $order = array();
+        
+        //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
+        //if($pred!=null) array_push($order, $pred);
+        $value = @$this->data['ulf_Added'];
+        if($value!=null){
+            array_push($order, 'ulf_Added '.($value>1?'ASC':'DESC'));
+        }
+        
         
         $needRelations = false;
 
@@ -144,9 +159,13 @@ class DbRecUploadedFiles extends DbEntityBase
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
+         if(count($order)>0){
+            $query = $query.' ORDER BY '.implode(',',$order);
+         }
+         
          $query = $query.$this->searchMgr->getOffset()
                         .$this->searchMgr->getLimit();
-        
+
         $calculatedFields = null;
         /*compose thumbnail and url fields
         $calculatedFields = function ($fields, $row) {

@@ -26,6 +26,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     _editing2:null,
     
+    _isAdditionOfLocal:false, //special case 
+    
     _init: function() {
         
         this.options.layout_mode = 'short';
@@ -36,7 +38,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
-            this.options.width = 900;                    
+            this.options.width = (isNaN(this.options.width) || this.options.width<815)?900:this.options.width;                    
             //this.options.edit_mode = 'none'
         }
     
@@ -72,6 +74,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         this.searchForm.css({'height':iheight+'em'});
         this.recordList.css({'top':iheight+0.4+'em'});
+        //init viewer 
+        var that = this;
+        this.recordList.resultList('option','onPageRender',function(){
+            //$(that.recordList.find('.ent_content_full'))
+            $(that.recordList.find('.ent_content_full')) //.find('a')
+            .yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
+        });
         
 //        this.recordList.resultList('option','view_mode','thumbs');
 
@@ -107,6 +116,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var i_url = this.getEntityFieldIdx('ulf_HeuristURL');
         var i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
         var i_filename = this.getEntityFieldIdx('ulf_OrigFileName');
+        var i_filesize = this.getEntityFieldIdx('ulf_FileSizeKB');
         
         if(isLocal){ //local
             this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL
@@ -115,12 +125,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             this.options.entity.fields[i_url].dtFields['rst_Display'] = 'readonly';
             this.options.entity.fields[i_url_ext].dtFields['rst_Display'] = 'hidden'; 
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'readonly';
+            this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'readonly';
             
             
         }else{ //remote
             this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_url_ext].dtFields['rst_Display'] = 'visible';
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
+            this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
         }
         
         this._super(recordset);
@@ -197,6 +209,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 ele2.editing_input('setValue', ext );
                 that.onEditFormChange();
             });
+        }else{
+            this.onEditFormChange(false); //force show save button
         }        
                 
                 
@@ -237,9 +251,16 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var recIcon = '';//@todo window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
 
 
+var needplayer = false;//file_param && !(file_param.indexOf('video')<0 && file_param.indexOf('audio')<0);
+
+        
         var html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
         window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                     fld('ulf_ObfuscatedFileID') + '&quot;);opacity:1"></div>';
+            
+        html_thumb = '<a href="'+            
+window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&player=1':'')
+ + '&file='+fld('ulf_ObfuscatedFileID')+'" target="yoxview" class="yoxviewLink">' +  html_thumb + '</a>';                   
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
         + html_thumb
@@ -289,10 +310,15 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     }
     */  
 
+    addEditRecord: function(recID){
+        this._super(recID);
+        this._isAdditionOfLocal = false;
+    },
+    
     
     //
     // open empty edit dialog
-    // upload file 
+    // upload file (editing_input type file - uploads file, register it and get new ulf_ID)
     // get new ulf_ID
     // open edit form with this new record
     //
@@ -314,11 +340,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     if(ulf_ID>0){
                         that._currentEditID = null;//to prevent warn about save
                         that.addEditRecord(ulf_ID);
+                        that._isAdditionOfLocal = true;
                     }
                 }}); //pass container
             
             }
         
+            //init hidden edit form  that contains the only field - file uploader
             this._editing2.initEditForm([                {
                     "dtID": "ulf_FileUpload",
                     "dtFields":{
@@ -343,6 +371,27 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             ele.find('.fileupload').click();
         });
         */
+    },
+    
+    
+    _afterSaveEventHandler: function( recID, fieldvalues ){
+    
+        if(this._currentEditID<0 || this._isAdditionOfLocal){
+            this._isAdditionOfLocal = false;
+            if(this.options.select_mode=='select_single'){
+                this._selection = new hRecordSet();
+                //{fields:{}, order:[recID], records:[fieldvalues]});
+                this._selection.addRecord(recID, fieldvalues);
+                this._selectAndClose();
+                return;        
+            }else{
+                
+                var domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
+                //it was insert - select recent and search
+                this.searchForm.searchRecUploadedFiles('searchRecent', domain);
+            }
+        }
+        this._super( recID, fieldvalues );
     }
     
 });

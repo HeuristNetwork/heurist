@@ -27,6 +27,11 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     //
     _initControls: function() {
         
+        
+        if(this.options.select_mode!='manager'){
+            this.options.width = (isNaN(this.options.width) || this.options.width<600)?600:this.options.width;                    
+        }
+        
         this.options.use_cache = true;
         //this.options.view_mode = 'list';
         

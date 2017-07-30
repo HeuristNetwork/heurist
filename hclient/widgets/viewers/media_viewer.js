@@ -73,7 +73,7 @@ $.widget( "heurist.media_viewer", {
 
                     var $alink = $("<a>",{href: window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&player=1':'') + '&file='+obf_recID, target:"yoxview" })
                     .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
-                    $("<img>", {height:150, src: window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
+                    $("<img>", {height:200, src: window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
 
 
                 }

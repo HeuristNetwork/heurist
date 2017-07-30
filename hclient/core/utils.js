@@ -875,7 +875,7 @@ window.hWin.HEURIST4.util = {
         // filename.split('.').pop();
         //filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
         var res = filename.match(/\.([^\./\?]+)($|\?)/);
-        return (res.length>1)?res[1]:'';
+        return (res && res.length>1)?res[1]:'';
     },
     
      versionCompare: function(v1, v2, options) {

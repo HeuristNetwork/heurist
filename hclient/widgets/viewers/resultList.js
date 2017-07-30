@@ -56,6 +56,8 @@ $.widget( "heurist.resultList", {
         //event
         onselect: null,  //on select event for non event based
         
+        onPageRender: null, //on complete of page render
+        
         navigator:'auto',  //none, buttons, menu, auto
         
         entityName:'records'   //records by default
@@ -1733,6 +1735,11 @@ console.log('cehcedk '+newmode);
             }
 
 
+        }
+        
+        
+        if($.isFunction(this.options.onPageRender)){
+            this.options.onPageRender.call(this);
         }
 
     },

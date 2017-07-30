@@ -641,6 +641,12 @@ $.widget( "heurist.manageEntity", {
     //
     _selectAndClose: function(){
         
+        if(this.options.isdialog){
+            window.hWin.HAPI4.save_pref('select_dialog_'+this._entityName, 
+                            {width: this.element.dialog('option', 'width'), 
+                             height: this.element.dialog('option', 'height')});
+        }
+        
         if(window.hWin.HEURIST4.util.isRecordSet(this._selection)){
             //window.hWin.HAPI4.save_pref('recent_Users', this._selection.getIds(25), 25);      
             this._trigger( "onselect", null, 
@@ -784,10 +790,10 @@ $.widget( "heurist.manageEntity", {
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                             var recID = ''+response.data[0];
+                            fields[ that.options.entity.keyField ] = recID;
                             
                             //update record in cache
                             if(that.options.use_cache){
-                                fields[ that.options.entity.keyField ] = recID;
                                 that._cachedRecordset.addRecord(recID, fields);
                             }
                             
@@ -863,7 +869,10 @@ $.widget( "heurist.manageEntity", {
         
         var mode = 'hidden';
         if(force_hide!==true){
-            var isChanged = this._editing.isModified();
+            var isChanged = true;
+            if(force_hide!==false){
+                isChanged = this._editing.isModified();
+            }
             mode = isChanged?'visible':'hidden';
         }
         //show/hide save buttons
@@ -980,7 +989,7 @@ $.widget( "heurist.manageEntity", {
                         modal:  true,
                         title: this.options['edit_title']
                                     ?this.options['edit_title']
-                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,
+                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityTitle,
                         resizeStop: function( event, ui ) {//fix bug
                             that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                         },
