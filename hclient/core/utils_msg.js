@@ -739,7 +739,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             var onCloseCalback = (options['close'])?options.close:null;
             
             var opts = {
-                    autoOpen: true,
+                    autoOpen:(options['autoOpen']!==false),
                     width : dim.w,
                     height: dim.h,
                     modal: true,

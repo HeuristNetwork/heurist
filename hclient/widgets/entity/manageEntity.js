@@ -57,7 +57,6 @@ $.widget( "heurist.manageEntity", {
     
         //DIALOG section       
         isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), _closeDialog
-        dialogcleanup: true, // remove dialog div on close
         height: 400,
         width:  760,
         modal:  true,
@@ -116,8 +115,11 @@ $.widget( "heurist.manageEntity", {
     _currentEditID:null,
     _currentEditRecordset:null,
     
+    _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _edit_dialog:null, //keep reference to popup dialog
     _toolbar:null,
+    
+    
     
     _afterInitCallback:null,
     
@@ -132,6 +134,7 @@ $.widget( "heurist.manageEntity", {
     //
     _init: function() {
 
+            
         if(this.options.isdialog){  //show this widget as popup dialog
             this._initDialog();
         }
@@ -310,23 +313,6 @@ $.widget( "heurist.manageEntity", {
         var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
         $('.heurist-helper1').css('display',ishelp_on?'block':'none');
 
-        
-        //init hint and help buttons on dialog titlebar
-        if(this.options.isdialog){
-            window.hWin.HEURIST4.ui.initDialogHintButtons(this.element,
-             window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
-             
-             //construct entity from config
-             if(window.hWin.HEURIST4.util.isempty(this.options.title)){
-                    var title = window.hWin.HR(this.options['select_mode']=='manager'?'Manage':'Select') + ' ' +
-                        (this.options['select_mode']=='select_single'
-                                    ?this.options.entity.entityTitle
-                                    :this.options.entity.entityTitlePlural);
-                                    
-                    this.element.dialog('option','title',title);                                     
-             }
-        }
-        
         
         return true;
         //place this code in extension ===========    
@@ -591,12 +577,18 @@ $.widget( "heurist.manageEntity", {
                 btn_array.push({text:window.hWin.HR( options['selectbutton_label'] ),
                         click: function() { that._selectAndClose(); }}); 
             }
-            btn_array.push({text:window.hWin.HR('Close'), 
-                    click: function() { that.closeDialog(); }}); 
+            if(!options['in_popup_dialog']){
+                btn_array.push({text:window.hWin.HR('Close'), 
+                        click: function() { that.closeDialog(); }}); 
+            }
                     
-                    
+
+            //this.options.window = window.hWin;
+            
             var $dlg = this.element.dialog({
+            //window.hWin.HEURIST4.msg.showElementAsDialog({
                 autoOpen: false ,
+                //element: this.element[0],
                 height: options['height'],
                 width:  options['width'],
                 modal:  (options['modal']!==false),
@@ -605,15 +597,12 @@ $.widget( "heurist.manageEntity", {
                 resizeStop: function( event, ui ) {//fix bug
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
-                
-                close: function(event, ui){
-                       if(options['dialogcleanup']){
-                           $dlg.remove();
-                       }
-                            
+                close:function(){
+                    $dlg.remove();        
                 },
                 buttons: btn_array
-            });  
+            }); 
+            this._as_dialog = $dlg; 
             
     },
     
@@ -622,7 +611,25 @@ $.widget( "heurist.manageEntity", {
     //
     popupDialog: function(){
         if(this.options.isdialog){
-            this.element.dialog("open");
+
+            this._as_dialog.dialog("open");
+            
+            //was this.element.dialog("open");
+            
+            //init hint and help buttons on dialog titlebar
+           // window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
+           //     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+             
+            //construct entity from config
+            if(window.hWin.HEURIST4.util.isempty(this.options.title)){
+                    var title = window.hWin.HR(this.options['select_mode']=='manager'?'Manage':'Select') + ' ' +
+                        (this.options['select_mode']=='select_single'
+                                    ?this.options.entity.entityTitle
+                                    :this.options.entity.entityTitlePlural);
+                    
+                    this._as_dialog.dialog('option','title',title);                                     
+            }
+            
         }
     },
     
@@ -631,7 +638,8 @@ $.widget( "heurist.manageEntity", {
     //
     closeDialog: function(){
         if(this.options.isdialog){
-            this.element.dialog('close');
+            this._as_dialog.dialog("close");
+            //this.element.dialog('close');
         }
     },
 
@@ -644,8 +652,8 @@ $.widget( "heurist.manageEntity", {
         
         if(this.options.isdialog){
             window.hWin.HAPI4.save_pref('select_dialog_'+this._entityName, 
-                            {width: this.element.dialog('option', 'width'), 
-                             height: this.element.dialog('option', 'height')});
+                            {width: this._as_dialog.dialog('option', 'width'), 
+                             height: this._as_dialog.dialog('option', 'height')});
         }
         
         if(window.hWin.HEURIST4.util.isRecordSet(this._selection)){

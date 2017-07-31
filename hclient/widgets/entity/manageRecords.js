@@ -353,8 +353,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //save preferences
         var that = this;
+        
         if(this.options.in_popup_dialog==true){
-            window.close(this._currentEditRecordset);
+            if(this.options.isdialog){
+                this._as_dialog.dialog('close');
+            }else{ 
+                window.close(this._currentEditRecordset);
+            }
         }else if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
             this._edit_dialog.dialog('close');
         }
@@ -1018,7 +1023,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
 
         if(that.options.in_popup_dialog==true){
-            window.hWin.HAPI4.save_pref('edit_record_dialog', {width: window.innerWidth+20, height:window.innerHeight+46});
+            if(that.options.isdialog){
+                window.hWin.HAPI4.save_pref('edit_record_dialog', {width: that._as_dialog.dialog('option','width'), 
+                                                               height: that._as_dialog.dialog('option','height')});
+            }else{
+                window.hWin.HAPI4.save_pref('edit_record_dialog', {width: window.innerWidth+20, height:window.innerHeight+46});
+            }            
         }else                
         if(that._edit_dialog && that._edit_dialog.dialog('isOpen')){
             window.hWin.HAPI4.save_pref('edit_record_dialog', {width: that._edit_dialog.dialog('option','width'), 
@@ -1056,4 +1066,6 @@ function showManageRecords( options ){
     }
 
     manage_dlg.manageRecords( 'popupDialog' );
+    
+    return manage_dlg; 
 }

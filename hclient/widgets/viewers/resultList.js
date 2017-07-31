@@ -81,6 +81,8 @@ $.widget( "heurist.resultList", {
 
     _startupInfo:null,
     
+    _init_completed:false,
+    
     // the constructor
     _create: function() {
 
@@ -209,6 +211,8 @@ $.widget( "heurist.resultList", {
         });
         }
         */
+        
+        this._init_completed = true;
 
         this._refresh();
         
@@ -462,6 +466,8 @@ $.widget( "heurist.resultList", {
     /* private function */
     _refresh: function(){
 
+        if(!this._init_completed) return;
+        
         this._applyViewMode(this.options.view_mode);
         
         if(window.hWin.HAPI4.currentUser.ugr_ID>0){
@@ -682,8 +688,10 @@ $.widget( "heurist.resultList", {
         //this.element.find('#list_layout_'+newmode).attr('checked','checked');
         this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
 
-        //if(this.view_mode_selector.data('uiButtonset'))
-        this.view_mode_selector.buttonset('refresh');
+        if(this.view_mode_selector){ //this.view_mode_selector.data('uiButtonset')){
+            this.view_mode_selector.buttonset('refresh'); 
+        }
+           
     },
 
     //

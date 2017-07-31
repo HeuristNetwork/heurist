@@ -112,7 +112,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/resultListMenu.js"></script>
-        <script type="text/javascript" src="hclient/widgets/editing/editing_input.js"></script> <!-- move to common js???? -->
         <!-- todo: load dynamically
         <script type="text/javascript" src="hclient/widgets/editing/rec_search.js"></script>
         <script type="text/javascript" src="hclient/widgets/editing/rec_relation.js"></script>
@@ -120,6 +119,19 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <!-- move to profile.js dynamic load -->
         <script type="text/javascript" src="ext/js/themeswitchertool.js"></script>
+
+        <!-- edit entity (load dynamically?) -->        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/media_viewer.js"></script>
+        
 
         <!--  media viewer - however it is not used at the moment 
         <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>

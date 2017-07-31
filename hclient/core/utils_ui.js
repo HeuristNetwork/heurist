@@ -1210,7 +1210,81 @@ window.hWin.HEURIST4.ui = {
                  
                  
     },
+
+
+    openRecordEdit:function(rec_ID, query_request, isEdit, callback){
+        
+                var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
+                        {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
     
+                var $container;
+                var isPopup = false;
+                
+                var popup_options = {
+                    select_mode: 'manager',
+                    edit_mode: 'inline',
+                    in_popup_dialog: true,
+                    height: usrPreferences.height,
+                    width: usrPreferences.width,
+                    title: window.hWin.HR('Edit record'),
+                    layout_mode:'<div class="ent_wrapper">'
+                        + '<div class="ent_content_full recordList"  style="display:none;"/>'
+
+                        + '<div class="ent_header" style="text-align:center;padding:6px 0 0 0;"><h2 style="color:red">EXPERIMENTAL - THIS FUNCTION IS IN COURSE OF DEVELOPMENT</h2></div>'
+                        + '<div class="editFormDialog ent_content">'
+                                + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                                + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
+                                //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
+                        + '</div>'
+                        + '<div class="ent_footer editForm-toolbar"/>'
+                    +'</div>',
+                    onInitFinished:function(){
+                        
+                        if(query_request){
+                            if(!$.isPlainObject(query_request)){
+                                query_request = {q:query_request, w:'all'};
+                            }
+                        }else if(rec_ID>0){
+                            query_request = {q:'ids:'+rec_ID, w:'all'};
+                        }
+                        
+                        if(query_request){
+                            
+                            query_request['limit'] = 100;
+                            query_request['needall'] = 1;
+                            query_request['detail'] = 'ids';
+                        
+                            window.hWin.HAPI4.RecordMgr.search(query_request, 
+                            function( response ){
+                                //that.loadanimation(false);
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    
+                                    var recset = new hRecordSet(response.data);
+                                    if(recset.length()>0){
+                                        $container.manageRecords('updateRecordList', null, {recordset:recset});
+                                        $container.manageRecords('addEditRecord', 
+                                                        (rec_ID>0)?rec_ID:recset.getOrder()[0]);
+                                    }
+                                    else if(isPopup){
+                                        window.close();  //nothing found
+                                    }
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    if(isPopup){ window.close(); }
+                                }
+
+                            });
+                        
+                        }else{
+                            $container.manageRecords('addEditRecord',-1);
+                        }                            
+                        
+                    }
+                }    
+    
+                $container = showManageRecords(popup_options);
+    },
     
     openRecordInPopup:function(rec_ID, query_request, isEdit, callback){
     
@@ -1218,6 +1292,9 @@ window.hWin.HEURIST4.ui = {
                 dwidth, dheight, dtitle;    
                 
             if(isEdit==true){
+                
+                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, isEdit, callback);
+                return;
                 
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
                         {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
@@ -1229,7 +1306,7 @@ window.hWin.HEURIST4.ui = {
                     if($.isPlainObject(query_request)){
                         url = url + window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(query_request, true);
                     }else{
-                        url = url + 'db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query_request);                                    }
+                        url = url + 'db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query_request);                              }
                 }else{
                     url = url + 'db=' + window.hWin.HAPI4.database;
                 }
