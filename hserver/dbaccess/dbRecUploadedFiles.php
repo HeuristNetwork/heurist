@@ -89,8 +89,12 @@ class DbRecUploadedFiles extends DbEntityBase
         
 
         $value = @$this->data['ulf_Parameters'];
-        if(!($value==null || $value=='any')){
-            array_push($where, "(fxm_Extension=ulf_MimeExt) AND (fxm_MimeType like '$value%')");
+        $needMimeType = !($value==null || $value=='any');
+        if($needMimeType){
+            array_push($where, "(fxm_MimeType like '$value%')");
+        }
+        if($needMimeType || @$this->data['details']=='full'){
+            array_push($where, "(fxm_Extension=ulf_MimeExt)");
             array_push($from_table, 'defFileExtToMimetype');
         }
         //----- order by ------------
@@ -107,7 +111,8 @@ class DbRecUploadedFiles extends DbEntityBase
         
         
         $needRelations = false;
-
+        $needCheck = false;
+        
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
@@ -124,9 +129,11 @@ class DbRecUploadedFiles extends DbEntityBase
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Description,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID';
+            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Description,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType';
             //$this->data['details'] = implode(',', $this->fields );
             $needRelations = true;
+        }else{
+            $needCheck = false;
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -134,6 +141,7 @@ class DbRecUploadedFiles extends DbEntityBase
         }
         
         //validate names of fields
+        if($needCheck)
         foreach($this->data['details'] as $fieldname){
             if(!@$this->fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);

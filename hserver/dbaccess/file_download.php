@@ -34,7 +34,7 @@ $db = @$_REQUEST['db'];
 if($db){
 
     $fileid = @$_REQUEST['thumb'];
-    if($fileid){
+    if($fileid){ 
         $system->initPathConstants($db);
 
         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
@@ -96,7 +96,7 @@ if($db){
 
                         <script type="text/javascript">
                             $(document).ready(function(){
-                                $('video,audio').mediaelementplayer({success: function (mediaElement, domObject) { alert('1'); mediaElement.play(); }  });
+                             //   $('video,audio').mediaelementplayer({success: function (mediaElement, domObject) { alert('1'); mediaElement.play(); }  });
                             });
                         </script>
                     </head>
@@ -112,16 +112,18 @@ if($db){
                             //poster="poster.jpg"
                             $player = HEURIST_BASE_URL."ext/mediaelement/flashmediaelement.swf";
                             ?>
+                            
                             <video width="640" height="360"  controls="controls" preload="none">
                                 <source type="<?=$mimeType?>" src="<?=$filepath?>" />
-                                <!-- Flash fallback for non-HTML5 browsers without JavaScript -->
+                                <!-- Flash fallback for non-HTML5 browsers without JavaScript
                                 <object width="640" height="360" type="application/x-shockwave-flash" data="<?=$player?>">
                                     <param name="movie" value="<?=$player?>" />
                                     <param name="flashvars" value="controls=true&file=<?=$filepath?>" />
-                                    <!-- Image as a last resort
+                                    !-- Image as a last resort
                                     <img src="myvideo.jpg" width="320" height="240" title="No video playback capabilities" />
-                                    -->
+                                    --
                                 </object>
+                                 -->
                             </video>
                             <?php
                         }else{

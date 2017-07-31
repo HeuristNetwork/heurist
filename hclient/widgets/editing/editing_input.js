@@ -926,6 +926,7 @@ $.widget( "heurist.editing_input", {
             },                            
     progressall: function (e, data) { // to implement
         var progress = parseInt(data.loaded / data.total * 100, 10);
+//console.log(progress + '%  '+data.loaded + ' of ' + data.total);
         //$('#progress .bar').css('width',progress + '%');
     }                            
                         });

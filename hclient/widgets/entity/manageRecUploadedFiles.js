@@ -76,11 +76,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.recordList.css({'top':iheight+0.4+'em'});
         //init viewer 
         var that = this;
-        this.recordList.resultList('option','onPageRender',function(){
-            //$(that.recordList.find('.ent_content_full'))
-            $(that.recordList.find('.ent_content_full')) //.find('a')
-            .yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
-        });
+        
+        if(this.options.select_mode=='manager'){
+            this.recordList.resultList('option','onPageRender',function(){
+                //$(that.recordList.find('.ent_content_full'))
+                var ele = $(that.recordList.find('.ent_content_full')); //.find('a')
+                ele.yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
+            });
+        }
         
 //        this.recordList.resultList('option','view_mode','thumbs');
 
@@ -171,8 +174,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 margin: '10px'});
             this.editForm.append( this.mediaviewer );
             this.mediaviewer.media_viewer({rec_Files:[[
-                    this._editing.getValue('ulf_ObfuscatedFileID'), 
-                    this._editing.getValue('ulf_MimeExt')]]}); //nonce + memtype
+                    this._editing.getValue('ulf_ObfuscatedFileID')[0], 
+                    this._editing.getValue('fxm_MimeType')[0]]]}); //nonce + memtype
                 
                 
             var relations = this._currentEditRecordset.getRelations();    
@@ -258,9 +261,11 @@ var needplayer = false;//file_param && !(file_param.indexOf('video')<0 && file_p
         window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                     fld('ulf_ObfuscatedFileID') + '&quot;);opacity:1"></div>';
             
+        if(this.options.select_mode=='manager'){
         html_thumb = '<a href="'+            
 window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&player=1':'')
  + '&file='+fld('ulf_ObfuscatedFileID')+'" target="yoxview" class="yoxviewLink">' +  html_thumb + '</a>';                   
+        }
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
         + html_thumb
@@ -271,22 +276,27 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&pl
         + '</div>'
         + '<div class="recordTitle" title="'+recTitleHint+'">'
         +     recTitle
-        + '</div>'
-        /* @todo
-        + '<div title="Click to edit file" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete file" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        */
+        + '</div>';
+        
+        // add edit/remove action buttons
+        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+            html = html 
+                + '<div title="Click to edit file" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                + '</div>&nbsp;&nbsp;'
+                + '<div title="Click to delete file" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                + '</div>';
+                
+            
+        }
+        
         /*+ '<div title="Click to view record (opens in popup)" '
         + '   class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
         + '   role="button" aria-disabled="false">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"></span><span class="ui-button-text"></span>'
         + '</div>'*/
-        + '</div>';
-
+        html = html + '</div>';
 
         return html;
         

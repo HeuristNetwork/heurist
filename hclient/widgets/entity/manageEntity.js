@@ -383,6 +383,7 @@ $.widget( "heurist.manageEntity", {
                     this.addEditRecord(-1);
                     return true;
              }else if(action=='delete'){
+                    this._currentEditID = recID;
                     this._deleteAndClose(); 
              }
             
@@ -815,17 +816,24 @@ $.widget( "heurist.manageEntity", {
             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been deleted'));
             if(this.options.edit_mode=='popup'){
                 //hide popup edit form 
-                this.editFormPopup.dialog('close');
+                if(this._edit_dialog){
+                    try{
+                        isOpenAready = this._edit_dialog.dialog('isOpen');
+                        if(isOpenAready){
+                            this._edit_dialog.dialog('close');
+                        }
+                    }catch(e){}
+                }
             }else{
                 //hide inline edit form 
                 this.addEditRecord(null);
             }
             
-            if(this.options.use_cache){
-                //refresh item in list
-                if(this.options.list_mode=='default'){
-                    this.recordList.resultList('refreshPage');  
-                }
+            if(this.options.list_mode=='default'){
+                //refresh list
+                var recset = this.recordList.resultList('getRecordSet');
+                recset.removeRecord(recID);
+                this.recordList.resultList('refreshPage');  
             }
     },
     

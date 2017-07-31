@@ -128,7 +128,15 @@
                         "dty_Type":"integer",
                         "rst_Display":"hidden"
                     }
+                },
+                {
+                    "dtID": "fxm_MimeType",
+                    "dtFields":{
+                        "rst_DisplayName": "Mimetype:",
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_Display":"readonly"
+                    }
                 }
-                
      ]
 }

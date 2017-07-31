@@ -67,15 +67,24 @@ $.widget( "heurist.media_viewer", {
                     var file_param = file[1]; //($.isArray(file) ?file[2] :file ) ;
 
                     var needplayer = file_param && !(file_param.indexOf('video')<0 && file_param.indexOf('audio')<0);
+                    var fileURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&player=1':'')
+                                 + '&file='+obf_recID;
+                    
+                    if(needplayer){
+                        
+                        $( "<iframe>").attr('src', fileURL)
+                            .css({xxxoverflow: 'none !important', width:'100% !important'}).appendTo( this.mediacontent );
+                        
+                    }else{
 
                     // <a href="images/large/01.jpg"><img src="images/thumbnails/01.jpg" alt="First" title="The first image" /></a>
                     // <a href="http://dynamic.xkcd.com/random/comic/?width=880" target="yoxview"><img src="../images/items/thumbnails/xkcd.jpg" alt="XKCD" title="Random XKCD comic" /></a>
 
-                    var $alink = $("<a>",{href: window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&player=1':'') + '&file='+obf_recID, target:"yoxview" })
+                    var $alink = $("<a>",{href: fileURL, target:"yoxview" })
                     .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
                     $("<img>", {height:200, src: window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
 
-
+                    }
                 }
             }
 
