@@ -723,6 +723,7 @@ $.widget( "heurist.editing_input", {
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
                                 window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:600,
                                     title: window.hWin.HR('Select linked record'),
+                                    window:  window.hWin, //opener is top most heurist window
                                     class:'ui-heurist-bg-light',
                                     callback: function(recordset){
                                         if( window.hWin.HEURIST4.util.isRecordSet(recordset) ){
@@ -769,7 +770,6 @@ $.widget( "heurist.editing_input", {
                             }
                             var widgetName = 'manage'+entityName.charAt(0).toUpperCase() + entityName.slice(1);
                             //entityName.capitalize();
-
                             if($.isFunction($('body')[widgetName])){ //OK! widget js has been loaded
 
                                 var popup_options = {
@@ -816,9 +816,10 @@ $.widget( "heurist.editing_input", {
                                         popup_options.width = usrPreferences.width;
                                         popup_options.height = usrPreferences.height;
                                     
-                                        //init dilaog
+                                        //init dialog
                                         var manage_dlg = $('<div>')
                                             .uniqueId()
+                                            //.appendTo( $(window.hWin.document).find('body') )
                                             .appendTo( $('body') )
                                             [widgetName]( popup_options );
 
@@ -957,6 +958,7 @@ $.widget( "heurist.editing_input", {
                     
                     window.hWin.HEURIST4.msg.showDialog(url, {height:'800', width:'1000',
                         title: window.hWin.HR('Heurist map digitizer'),
+                        window:  window.hWin, //opener is top most heurist window
                         class:'ui-heurist-bg-light',
                         callback: function(location){
                             if( !window.hWin.HEURIST4.util.isempty(location) ){

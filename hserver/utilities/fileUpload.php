@@ -23,6 +23,14 @@ require_once(dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');
 
 $response = null;
 $system = new System();
+
+$content_length = (int)@$_SERVER['CONTENT_LENGTH'];
+            
+$post_max_size = $system->get_php_bytes('post_max_size');
+if ($post_max_size && ($content_length > $post_max_size)) {
+    $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
+    $response = $system->addError(HEURIST_INVALID_REQUEST, $error);                
+}else
 if($system->init(@$_REQUEST['db'])){
 
     //define upload folder   HEURIST_FILESTORE_DIR/ $_REQUEST['entity'] /
@@ -217,12 +225,14 @@ function registerUploadedFile($system, $file){
                         unlink($tmp_name);
                         
                         //copy thumbnail
-                        $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$file->thumbnailName;
-                        if(file_exists($thumb_name)){
-                            $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                            copy($thumb_name, $new_name);
-                            //remove temp file
-                            unlink($thumb_name);
+                        if(isset($file->thumbnailName)){
+                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$file->thumbnailName;
+                            if(file_exists($thumb_name)){
+                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                                copy($thumb_name, $new_name);
+                                //remove temp file
+                                unlink($thumb_name);
+                            }
                         }
                         
                     }else{

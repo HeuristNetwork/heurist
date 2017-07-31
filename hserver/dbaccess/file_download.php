@@ -23,8 +23,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
@@ -96,7 +94,7 @@ if($db){
 
                         <script type="text/javascript">
                             $(document).ready(function(){
-                             //   $('video,audio').mediaelementplayer({success: function (mediaElement, domObject) { alert('1'); mediaElement.play(); }  });
+                               $('video,audio').mediaelementplayer({success: function (mediaElement, domObject) { alert('1'); mediaElement.play(); }  });
                             });
                         </script>
                     </head>
@@ -115,15 +113,14 @@ if($db){
                             
                             <video width="640" height="360"  controls="controls" preload="none">
                                 <source type="<?=$mimeType?>" src="<?=$filepath?>" />
-                                <!-- Flash fallback for non-HTML5 browsers without JavaScript
+                                <!-- Flash fallback for non-HTML5 browsers without JavaScript -->
                                 <object width="640" height="360" type="application/x-shockwave-flash" data="<?=$player?>">
                                     <param name="movie" value="<?=$player?>" />
                                     <param name="flashvars" value="controls=true&file=<?=$filepath?>" />
-                                    !-- Image as a last resort
+                                    <!-- Image as a last resort
                                     <img src="myvideo.jpg" width="320" height="240" title="No video playback capabilities" />
-                                    --
+                                    -->
                                 </object>
-                                 -->
                             </video>
                             <?php
                         }else{
@@ -146,8 +143,16 @@ if($db){
                 if(file_exists($filepath)){
                     downloadFile($mimeType, $filepath, $originalFileName);
                 }else if($fileinfo[1]){
-//DEBUG error_log('External '.$fileinfo[1]);                
-                    header('Location: '.$fileinfo[1]);  //redirect to URL (external)
+                    
+                    $url = $fileinfo[1];
+                    
+                    if( $mimeType == 'video/youtube' 
+                            || strpos($url, 'youtu.be')>0
+                            || strpos($url, 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
+                        $url = 'https://www.youtube.com/embed/'.youtube_id_from_url($url);
+                    }
+//DEBUG error_log('External '.$url);                
+                    header('Location: '.$url);  //redirect to URL (external)
                 }else{
 //DEBUG
                     error_log('File not found '.$filepath);
@@ -159,6 +164,37 @@ if($db){
         }
 
     }
+}
+
+function youtube_id_from_url($url) {
+/*    
+    $pattern = 
+        '%^# Match any youtube URL
+        (?:https?://)?  # Optional scheme. Either http or https
+        (?:www\.)?      # Optional www subdomain
+        (?:             # Group host alternatives
+          youtu\.be/    # Either youtu.be,
+        | youtube\.com  # or youtube.com
+          (?:           # Group path alternatives
+            /embed/     # Either /embed/
+          | /v/         # or /v/
+          | /watch\?v=  # or /watch\?v=
+          )             # End path alternatives.
+        )               # End host alternatives.
+        ([\w-]{10,12})  # Allow 10-12 for 11 char youtube id.
+        $%x'
+        ;
+        
+    //$url = urldecode(rawurldecode($_GET["q"]));
+    $result = preg_match($pattern, $url, $matches);
+    if ($result) {
+        return $matches[1];
+    }
+    return false;
+*/    
+    # https://www.youtube.com/watch?v=nn5hCEMyE-E
+    preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $url, $matches);
+    return $matches[1];    
 }
 
 ?>

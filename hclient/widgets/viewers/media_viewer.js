@@ -64,26 +64,52 @@ $.widget( "heurist.media_viewer", {
                     var file = this.options.rec_Files[idx];
 
                     var obf_recID = file[0];
-                    var file_param = file[1]; //($.isArray(file) ?file[2] :file ) ;
+                    var mimeType = file[1]; //($.isArray(file) ?file[2] :file ) ;
 
-                    var needplayer = file_param && !(file_param.indexOf('video')<0 && file_param.indexOf('audio')<0);
-                    var fileURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&player=1':'')
+                    var needplayer = mimeType && !(mimeType.indexOf('video')<0 && mimeType.indexOf('audio')<0);
+                    var fileURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database //+ (needplayer?'&player=1':'')
                                  + '&file='+obf_recID;
+                    var thumbURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID
                     
-                    if(needplayer){
+                    if(mimeType && mimeType.indexOf('video')===0){
                         
-                        $( "<iframe>").attr('src', fileURL)
-                            .css({xxxoverflow: 'none !important', width:'100% !important'}).appendTo( this.mediacontent );
+                         if(mimeType=='video/youtube'){
+                            
+                             $('<iframe width="640" height="360" src="'
+                                    +fileURL
+                                    +'" frameborder="0" allowfullscreen></iframe>').appendTo( this.mediacontent );
+                             
+                            //fileURL = 'https://youtu.be/48en7Bl_zCc'; 
+                         }else if(mimeType=='video/mp4' || mimeType=='video/webm' || mimeType=='video/ogg'){
+                             
+                            
+
+                            $('<video width="640" height="360"  controls="controls">'
+                                +'<source type="'+mimeType+'" src="'+fileURL+'" />'
+                                +'I\'m sorry; your browser doesn\'t support HTML5 video in WebM with VP8/VP9 or MP4 with H.264.'
+                                +'</video>').appendTo( this.mediacontent );
+                         }else{
+                            var playerURL = window.hWin.HAPI4.baseURL + 'ext/mediaelement/flashmediaelement.swf';
+                            $('<object width="640" height="360" type="application/x-shockwave-flash" data="'+playerURL+'">'
+                                    +'<param name="movie" value="'+playerURL+'" />'
+                                    +'<param name="flashvars" value="controls=true&file='+fileURL+'" />'
+                                    +'<img src="'+thumbURL+'" width="320" height="240" title="No video playback capabilities" />'
+                                +'</object>').appendTo( this.mediacontent );
+                             
+                         }
+                        
+                        //$( "<iframe>").attr('src', fileURL)
+                        //    .css({xxxoverflow: 'none !important', width:'100% !important'}).appendTo( this.mediacontent );
+                    }else if(mimeType && mimeType.indexOf('audio')===0){
+
+                            $('<audio controls="controls">'
+                                +'<source type="'+mimeType+'" src="'+fileURL+'" />'
+                                +'</audio>').appendTo( this.mediacontent );
                         
                     }else{
-
-                    // <a href="images/large/01.jpg"><img src="images/thumbnails/01.jpg" alt="First" title="The first image" /></a>
-                    // <a href="http://dynamic.xkcd.com/random/comic/?width=880" target="yoxview"><img src="../images/items/thumbnails/xkcd.jpg" alt="XKCD" title="Random XKCD comic" /></a>
-
-                    var $alink = $("<a>",{href: fileURL, target:"yoxview" })
-                    .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
-                    $("<img>", {height:200, src: window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
-
+                        var $alink = $("<a>",{href: fileURL, target:"yoxview" })
+                            .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
+                        $("<img>", {height:200, src: thumbURL, title:title}).appendTo($alink);
                     }
                 }
             }

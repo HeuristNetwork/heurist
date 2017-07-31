@@ -1293,6 +1293,7 @@
 ('movie','video/x-sgi-movie', '0','movie.gif','QuickTime Movie',''),
 ('mp2','audio/mpeg', '0','movie.gif','MPEG audio',''),
 ('mp3','audio/mpeg', '0','movie.gif','MP3 audio',''),
+('mp4','video/mp4', '0','movie.gif','MP4 video',''),
 ('mpe','video/mpeg', '0','movie.gif','MPEG video',''),
 ('mpeg','video/mpeg', '0','movie.gif','MPEG video',''),
 ('mpg','video/mpeg', '0','movie.gif','MPEG video',''),
@@ -1371,6 +1372,7 @@
 ('vsd','application/vnd.visio', '0','','Microsoft Visio Diagram',''),
 ('vxml','application/voicexml+xml', '1','','',''),
 ('wav','audio/x-wav', '0','movie.gif','WAV audio',''),
+('webm','video/webm', '0','','Webm Video',''),
 ('wbmp','image/vnd.wap.wbmp', '1','image.gif','Wireless Bitmap Image',''),
 ('wbxml','application/vnd.wap.wbxml', '1','','',''),
 ('wma','audio/x-ms-wma', '0','','Windows Media Audio',''),
@@ -1393,6 +1395,7 @@
 ('xul','application/vnd.mozilla.xul+xml', '1','','XML User Interface Language Fil',''),
 ('xwd','image/x-xwindowdump', '0','image.gif','X Window Dump',''),
 ('xyz','application/octet-stream', '0','','Tinker Cartesian Coordinates',''),
+('youtube','video/youtube', '0','movie.gif','Youtube video',''),
 ('zip','application/zip', '0','zip.gif','ZIP compressed',''),
 >>EndData>>
 

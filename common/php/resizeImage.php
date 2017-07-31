@@ -106,7 +106,9 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         
         if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){
             $type_source = 'heurist';    
-        }else if( strpos($file['ulf_ExternalFileReference'], 'youtube')>0){ //match('http://(www.)?youtube|youtu\.be')
+        }else if( $file['fxm_MimeType'] == 'video/youtube' 
+            || strpos($file['ulf_ExternalFileReference'], 'youtu.be')>0
+            || strpos($file['ulf_ExternalFileReference'], 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
             $type_source = 'youtube';
         }
     }
@@ -246,9 +248,18 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             //@todo for image services (panoramio, flikr) take thumbnails directly
             $img = get_remote_image($file['ulf_ExternalFileReference']);
         }else if($type_source=='youtube'){
+            
+//@todo - youtube change the way of retrieving thumbs !!!!
             $url = $file['ulf_ExternalFileReference'];
-            $youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
-            $img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail
+            
+            preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $url, $matches);
+            
+            $youtubeid = $matches[1];
+            
+            $img = get_remote_image('http://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
+            
+            //$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
+            //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail
         }
     }
 
