@@ -681,7 +681,7 @@ $.widget( "heurist.resultList", {
         //this.btn_view.button( "option", "label", window.hWin.HR(newmode));
         //this.element.find('#list_layout_'+newmode).attr('checked','checked');
         this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
-console.log('cehcedk '+newmode);
+
         //if(this.view_mode_selector.data('uiButtonset'))
         this.view_mode_selector.buttonset('refresh');
     },

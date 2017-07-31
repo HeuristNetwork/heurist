@@ -842,8 +842,9 @@ $.widget( "heurist.boro_nav", {
                     html = '<li>Born '+that.__formatDate(sDate)+(place.link?' in '+place.link:'')+'</li>';   
                     
                     if(placeID==0){
-                        that.__setPlaceDesc(place, 'birth', 'Birth '+(sDate?(' on '+that.__formatDate(sDate)):''));                                }
-                }
+                        that.__setPlaceDesc(place, 'birth', 'Birth '+(sDate?(' on '+that.__formatDate(sDate)):''));                                         }else{
+                        that.__setPlaceDesc(place);                                         }
+                    }
             }
             var birthYear = that.__getYear(sDate,1);
             timeline.push({year:birthYear,            //for sort
@@ -875,7 +876,9 @@ $.widget( "heurist.boro_nav", {
                     html = html + '<li>'+sDeathType+' '+that.__formatDate(sDate)+ (place.link?' in '+place.link:'') + '</li>';
             
                     if(placeID==0){
-                        that.__setPlaceDesc(place, 'death', sDeathType+(sDate?(' on '+that.__formatDate(sDate)):''));                              }
+                        that.__setPlaceDesc(place, 'death', sDeathType+(sDate?(' on '+that.__formatDate(sDate)):''));                                       }else{
+                        that.__setPlaceDesc(place);                                         
+                    }
                     
                 }
             }
@@ -928,6 +931,8 @@ $.widget( "heurist.boro_nav", {
                         
                         if(placeID==0){
                             that.__setPlaceDesc(place, 'schooling', 'Early education  at '+sEduInst);                    
+                        }else{
+                            that.__setPlaceDesc(place);                                         
                         }
                         
                     }
@@ -976,7 +981,9 @@ $.widget( "heurist.boro_nav", {
                         } 
                         
                         if(placeID==0){
-                            that.__setPlaceDesc(place, 'tertiary-study', 'Studied '+sDegree+' at '+sEduInst);                                          }
+                            that.__setPlaceDesc(place, 'tertiary-study', 'Studied '+sDegree+' at '+sEduInst);                                                   }else{
+                            that.__setPlaceDesc(place);                                         
+                        }
 
                     }
                 }
@@ -1016,6 +1023,8 @@ $.widget( "heurist.boro_nav", {
                             if(placeID==0){
                                 that.__setPlaceDesc(place, (termID==4254)?'married':'lived',
                                                         sEventType+eventDate.desc);                    
+                            }else{
+                                that.__setPlaceDesc(place);                                         
                             }
                         }
                         
@@ -1169,6 +1178,8 @@ $.widget( "heurist.boro_nav", {
                     
                     if(placeID==0){
                         that.__setPlaceDesc(place, 'military-service',  sEventType+' '+sRankAndUnit);                    
+                    }else{
+                        that.__setPlaceDesc(place);                                         
                     }
                     
                 }
@@ -1716,10 +1727,11 @@ $.widget( "heurist.boro_nav", {
                     );   
                 }
                 
-                if(icon) {
-                    var iconPath = window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/bundles/markers/';
-                    this.recset.setFld(place_rec, 'rec_Icon', iconPath+icon+'.png');   
+                if(!icon) {
+                    icon = 'place';
                 }
+                var iconPath = window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/bundles/markers/';
+                this.recset.setFld(place_rec, 'rec_Icon', iconPath+icon+'.png');   
                                 
                 
             }

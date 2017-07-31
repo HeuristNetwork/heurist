@@ -29,7 +29,8 @@ $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTyp
 $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
 . 'rec_OwnerUGrpID = 0 )';
 
-$detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, AsWKT(dtl_Geo) as dtl_Geo FROM recDetails rd WHERE rd.dtl_RecID=";
+$detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, rf.ulf_ObfuscatedFileID, AsWKT(dtl_Geo) as dtl_Geo "
+."FROM recDetails rd LEFT JOIN recUploadedFiles rf on rf.ulf_ID=rd.dtl_UploadedFileID WHERE rd.dtl_RecID=";
 
 
 /**
@@ -187,13 +188,13 @@ function getRecordDetails($system, $record) {
 
         $record->bookmarks = array();
 
-        // [dtl_ID]  [dtl_RecID]  [dtl_DetailTypeID]  [dtl_Value] [dtl_AddedByImport]  [dtl_UploadedFileID]   [dtl_Geo]  [dtl_ValShortened]  [dtl_Modified]
+        // [dtl_ID]  [dtl_RecID]  [dtl_DetailTypeID]  [dtl_Value] [dtl_AddedByImport]  [ulf_ObfuscatedFileID]   [dtl_Geo]  [dtl_ValShortened]  [dtl_Modified]
         while($detail = $details->fetch_assoc()) {
             // Fields
             //print_r($detail);
             $type = $detail["dtl_DetailTypeID"];
             $value = $detail["dtl_Value"];
-            $fileID = $detail["dtl_UploadedFileID"];
+            $fileID = $detail["ulf_ObfuscatedFileID"];
             $geo_value = $detail["dtl_Geo"];
 
             /* GENERAL */
@@ -250,6 +251,10 @@ function getRecordDetails($system, $record) {
 
                 /* ZOOM - from 2017 DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM are used for both maps and map layers, 
                 but older databases may have set DT_MINIMUM_MAP_ZOOM or DT_MAXIMUM_MAP_ZOOM for either maps or for layers */
+                
+            }else if(defined('DT_SYMBOLOGY_POINTMARKER') && $type == DT_SYMBOLOGY_POINTMARKER) {
+                //marker icon url 
+                $record->iconMarker = getFileURL($system, $fileID);;
 
             }else if(defined('DT_MAXIMUM_MAP_ZOOM') && $type == DT_MAXIMUM_MAP_ZOOM) {
                 // Maximum zoom

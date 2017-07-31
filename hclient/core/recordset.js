@@ -144,7 +144,7 @@ function hRecordSet(initdata) {
         * 1 - main geo only
         * 2 - rec_Shape only
     */
-    function _toTimemap(dataset_name, filter_rt, iconColor, geoType){
+    function _toTimemap(dataset_name, filter_rt, symbology, geoType){
 
         var aitems = [], titems = [];
         var item, titem, shape, idx, 
@@ -156,7 +156,13 @@ function hRecordSet(initdata) {
         var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
             
         dataset_name = dataset_name || "main";
-        iconColor = iconColor || 'rgb(255, 0, 0)'; //'#f00';
+        
+        var iconColor, iconMarker = null;
+        if(symbology){
+            iconColor = symbology.iconColor;
+            iconMarker = symbology.iconMarker;
+        }
+        iconColor = iconColor || 'rgb(255, 0, 0)'; //'#f00';    
          
 
         var geofields = [], timefields = [];
@@ -242,6 +248,9 @@ function hRecordSet(initdata) {
                             
                             if(typeof iconId=='string' && iconId.indexOf('http:')==0){
                                 iconImg = iconId;
+                            }else if(iconMarker){
+                                //icon is set per map layer
+                                iconImg = iconMarker;    
                             }else{
                                 iconImg = window.hWin.HAPI4.iconBaseURL + iconId + '.png';
                             }
@@ -292,9 +301,15 @@ function hRecordSet(initdata) {
                 
                         var iconImgEvt, iconImg;
                         if(typeof iconId=='string' && iconId.indexOf('http:')==0){
+                            //icon is set in data (top prioriry)
                             iconImgEvt = iconId;    
                             iconImg = iconId;    
+                        }else if(iconMarker){
+                            //icon is set per map layer
+                            iconImgEvt = iconMarker;    
+                            iconImg = iconMarker;    
                         }else{
+                            //default icon of record type
                             iconImgEvt = iconId + 'm.png';
                             iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor);
                         }
@@ -307,7 +322,7 @@ function hRecordSet(initdata) {
                             placemarks:[],
                             options:{
                                 eventIconImage: iconImgEvt,
-                                //icon: iconImg,
+                                icon: iconImg,
                                 iconId: iconId,
 
                                 description: description,
@@ -338,10 +353,10 @@ function hRecordSet(initdata) {
                             }
                         }; 
                         
-                        //suppress default icons for boro
+                        /*suppress default icons for boro
                         if(window.hWin.HAPI4.sysinfo['layout']!='boro'){ 
                             item.options.icon = iconImg; 
-                        }
+                        }*/
                                           
                 if(shapes.length>0){
                     if(mapenabled<=MAXITEMS){
@@ -1152,8 +1167,8 @@ function hRecordSet(initdata) {
         * 1 - main geo only
         * 2 - rec_Shape only
         */
-        toTimemap: function(dataset_name, filter_rt, iconColor, geoType){
-            return _toTimemap(dataset_name, filter_rt, iconColor, geoType);
+        toTimemap: function(dataset_name, filter_rt, symbology, geoType){
+            return _toTimemap(dataset_name, filter_rt, symbology, geoType);
         },
         
         setProgressInfo: function(data){

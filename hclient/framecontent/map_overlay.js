@@ -562,6 +562,7 @@ console.log('load '+current_map_document_id);
 
             source.color = layer.color;
             source.title = layer.title;
+            source.iconMarker = layer.iconMarker;
 
             /** MAP IMAGE FILE (TILED) */
             if(source.rectypeID == RT_TILED_IMAGE_SOURCE) {
@@ -1038,7 +1039,7 @@ console.log('load '+current_map_document_id);
 
                     //points  DH_RECORDTYPE
                     //change last parameter to 1 - to treat links separately
-                    mapdata = recset.toTimemap(source.id, 99913, source.color, 0); //set to 1 to show main geo only (no links)
+                    mapdata = recset.toTimemap(source.id, 99913, {iconColor:source.color}, 0); //set to 1 to show main geo only (no links)
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
                     
@@ -1050,7 +1051,7 @@ console.log('load '+current_map_document_id);
                     //secondary points  DH_RECORDTYPE_SECONDARY
                     var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
                     //change last parameter to 1 - to treat links separately
-                    var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, source.color, 0); //records with type "secondary"
+                    var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, {iconColor:source.color}, 0); //records with type "secondary"
                     mapdata3.id = random_name_for_secondary;
                     mapdata3.title = 'Secondary locations';
                     //mapdata3.timeenabled = 0;
@@ -1062,7 +1063,7 @@ console.log('load '+current_map_document_id);
                     //residences  DH_RECORDTYPE_RESIDENCES
                     var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
                     //change last parameter to 1 - to treat links separately
-                    var mapdata4 = recset.toTimemap(random_name_for_secondary, 99915, source.color, 0); //records with type "residence"
+                    var mapdata4 = recset.toTimemap(random_name_for_secondary, 99915, {iconColor:source.color}, 0); //records with type "residence"
                     mapdata4.id = random_name_for_secondary;
                     mapdata4.title = 'Residence of participants';
                     if(mapdata4.mapenabled>0){
@@ -1071,7 +1072,7 @@ console.log('load '+current_map_document_id);
                     
                     /* if we wish show links as separate layer need to unremark this section
                     //links
-                    var mapdata2 = recset.toTimemap(source.id, null, source.color, 2); //rec_Shape only
+                    var mapdata2 = recset.toTimemap(source.id, null, {iconColor:source.color}, 2); //rec_Shape only
                     mapdata2.id = "link_"+window.hWin.HEURIST4.util.random();
                     mapdata2.title = 'Links';
                     mapdata2.timeenabled = 0;
@@ -1103,7 +1104,7 @@ console.log('load '+current_map_document_id);
                     }
                     
                     
-                    mapdata = recset.toTimemap(source.id, null, source.color);
+                    mapdata = recset.toTimemap(source.id, null, {iconColor:source.color, iconMarker:source.iconMarker});
                     if(source.color) mapdata.color = source.color;
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
