@@ -344,7 +344,7 @@ function updateUserGroup( $type, $colNames, $recID, $groupID, $values ) {
             $isApprovement = isApprovement($type, $recID);
         }
 
-        if (($type=='user' && $isInsert && !is_logged_in()) || $isApprovement){
+        if (($type=='user' && $isInsert && !is_logged_in()) || $isApprovement) {
 
             if(!checkSmtp()){
 

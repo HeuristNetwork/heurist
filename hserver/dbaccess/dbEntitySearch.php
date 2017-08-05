@@ -27,9 +27,10 @@ class DbEntitySearch
 {
     private $system;  
     
-    private $data = array();
+    private $data = array(); //assigned in validate params
     
     //data types: ids, int, float, date, bool, enum
+    //structure
     private $fields = array();
     
     function __construct( $system, $fields ) {
@@ -196,7 +197,8 @@ class DbEntitySearch
         $value = @$this->data[$fieldname];
         if($value==null) return null;
         
-        $field_config = $this->fields[$fieldname];
+        $field_config = @$this->fields[$fieldname];
+        if($field_config==null) return null;
         $data_type = $field_config['dty_Type'];
         $is_ids = (@$field_config['dty_Role']=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
         

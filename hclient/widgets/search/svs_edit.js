@@ -59,7 +59,8 @@ function hSvsEdit(args) {
 
 
             var selObj = svs_ugrid.get(0);
-            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, null, 
+                    //by default it takes  window.hWin.HAPI4.currentUser.usr_GroupsList,
                 [{key:'bookmark', title:window.hWin.HR('My Bookmarks (private)')},
                     {key:'all', title:window.hWin.HR('My Filters (private)')}
                     //{key:0, title:window.hWin.HR('Searches for guests')}  removed 2016-02-18

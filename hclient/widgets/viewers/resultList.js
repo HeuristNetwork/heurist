@@ -852,6 +852,8 @@ $.widget( "heurist.resultList", {
                     that._startupInfo = '<div style="padding:1em"><h2>'+title+'</h2><div style="padding-top:10px">'
                                         +(summary?summary:'')+'</div><div>'
                                         +(extended?extended:'')+'</div></div>';
+                                        
+                    that.div_coverall.empty();
                     $(that._startupInfo).appendTo(that.div_coverall);
                     that.div_coverall.show();
                 }

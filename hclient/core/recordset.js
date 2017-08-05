@@ -865,7 +865,7 @@ function hRecordSet(initdata) {
         //
         getSubSetByRequest: function(request, structure){
             
-            var _records = {}, _order=[];
+            var _records = {}, _order=[], that = this;
             
             if(fields==null || $.isEmptyObject(fields)) return null;
             if(request==null || $.isEmptyObject(request)) return this;
@@ -880,18 +880,21 @@ function hRecordSet(initdata) {
                 return null;
             }
             
-            var recID, fieldName, dataTypes={};
+            var recID, fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
             //remove empty fields from request
             for (fieldName in request) {
                 if (request.hasOwnProperty(fieldName) ){
                     if(window.hWin.HEURIST4.util.isempty(request[fieldName])) {
                         delete request[fieldName];    
-                    }else{
+                    }else if(fieldName.indexOf('sort:')<0){
                         //find data type
                         dataTypes[fieldName] = __getDataType(fieldName);
                         if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
                             request[fieldName] = request[fieldName].toLowerCase();
                         }
+                    }else{
+                        sortFieldsOrder.push(Number(request[fieldName]));
+                        sortFields.push(fieldName.substr(5));
                     }
                 }
             }            
@@ -903,7 +906,7 @@ function hRecordSet(initdata) {
                 var record = records[recID];
                 var isOK = true;
                 for(fieldName in request){
-                    if(request.hasOwnProperty(fieldName)){
+                    if(fieldName.indexOf('sort:')<0 && request.hasOwnProperty(fieldName)){
                         if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
                             
                             if(this.fld(record,fieldName).toLowerCase().indexOf(request[fieldName])<0){
@@ -921,6 +924,13 @@ function hRecordSet(initdata) {
                     _records[recID] = record;    
                     _order.push(recID);
                 }
+            }
+            
+            if(sortFields.length>0){
+                _order.sort(function(a,b){  
+                    return sortFieldsOrder[0]*(that.fld(records[a], sortFields[0])<that.fld(records[b], sortFields[0])
+                            ?-1:1);
+                });
             }
             
             return this.getSubSet(_records, _order);

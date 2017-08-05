@@ -340,6 +340,18 @@ optgroup {
 /* -------------------------------------------- */
 /*  SEARCH RESULT */
 
+.tagDiv {
+    border:1px solid gray;
+    display: inline-block;
+    border-radius: 4px;
+    margin: 2px;
+    padding: 2px;
+    cursor: pointer;
+}
+.tagDiv > label{
+    cursor: pointer;
+}
+
 .recordDiv {
     -moz-user-select: none;
     user-select: none;
@@ -389,6 +401,19 @@ div.recordDiv > .rec_view_link {
 div.recordDiv > .rec_edit_link{
     right: 2px;
 }
+
+div.recordDiv:hover > .rec_action_link{
+    visibility:visible;
+}
+div.recordDiv > .rec_action_link{
+    visibility:hidden;
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    right: 0px;
+}
+
+
 
 /*
 h3 > #rec_edit_link{
@@ -1318,7 +1343,7 @@ div.coverall-div {
 } 
 
 label.small-header{
-    min-width: 100px;
+    min-width: 80px;
     display: inline-block;
     text-align: right;
     padding-right: 0.4em;

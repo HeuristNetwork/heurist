@@ -1,5 +1,5 @@
 /**
-* manageSysUsers.js - main widget mo manage sys users
+* manageSysUsers.js - main widget to manage sysUGrps users
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -19,37 +19,63 @@
 
 
 $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
+   
+    _entityName:'sysUsers',
 
-    // the widget's constructor
-    _create: function() {
-
-        this._super();
-
-        this._entityTitle = 'User',
-        this._entityTitlePlural = 'Users',
-        this._empty_remark = 'Please use the search field above to locate relevant user (partial string match on name)',
-        
-        this._default_sel_actions = [{key:'edit', title:'Edit'},
-                          {key:'delete', title:'Delete'},
-                          {key:'merge', title:'Merge'},
-                          {key:'import', title:'Import'}];
-                          
-        this._default_btn_actions = [{key:'add', title:'Add New User'}];
-        
-    }, //end _create
-    
-    // Any time the widget is called with no arguments or with only an option hash, 
-    // the widget is initialized; this includes when the widget is created.
+    //
+    //
+    //    
     _init: function() {
         
+        this.options.layout_mode = 'short';
+        this.options.use_cache = false;
+        
+        //this.options.select_return_mode = 'recordset';
+        this.options.edit_need_load_fullrecord = true;
+        //this.options.edit_height = 800;
+
+        //for selection mode set some options
+        if(this.options.select_mode!='manager'){
+            this.options.width = (isNaN(this.options.width) || this.options.width<815)?900:this.options.width;                    
+            //this.options.edit_mode = 'none'
+        }
+    
         this._super();
+    },
+    
+    //  
+    // invoked from _init after load entity config    
+    //
+    _initControls: function() {
+        
+        if(!this._super()){
+            return false;
+        }
 
         // init search header
         this.searchForm.searchSysUsers(this.options);
-            
+        
+        var iheight = 4;
+        if(this.options.edit_mode=='inline'){            
+            iheight = iheight + 6;
+        }
+        this.searchForm.css({'height':iheight+'em'});
+        this.recordList.css({'top':iheight+0.4+'em'});
+        //init viewer 
+        var that = this;
+        
+        if(this.options.select_mode=='manager'){
+            this.recordList.parent().css({'border-right':'lightgray 1px solid'});
+        }
+
         this._on( this.searchForm, {
                 "searchsysusersonresult": this.updateRecordList
                 });
+        this._on( this.searchForm, {
+                "searchsysusersonadd": function() { this.addEditRecord(-1); }
+                });
+        
+        return true;
     },
 
     //----------------------
@@ -72,95 +98,66 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
         var recID   = fld('ugr_ID');
-        var rectype = fld('ugr_Type');
-        var isEnabled = (fld('ugr_Enabled')=='y');
+        var rectype = 'user';//fld('ugr_Type');
         
-        var recTitle = fld2('ugr_Name','10em')+
-        '<div class="item" style="width:25em">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>'+fld2('ugr_Organisation')+fld2('ugl_Role');
+        var recTitle = fld2('ugr_ID','4em')+fld2('ugr_Name','14em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
+        var recTitleHint = recID+' : '+fld('ugr_Organisation');
         
-        
-        var recIcon = window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
-
+        var recIcon = window.hWin.HAPI4.iconBaseURL + rectype + '&entity=sysUGrps';
 
         var html_thumb = '';
         if(fld('ugr_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('ugr_ThumbnailURL') + '&quot;);opacity:1"></div>';
         }else{
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ 
-                window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/thumb/' + rectype + '.png&quot;);"></div>';
+                window.hWin.HAPI4.iconBaseURL + 'thumb/' + rectype + '&entity=sysUGrps&quot;);"></div>';
         }
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
+
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'   //class="rt-icon" 
-        +     '<span class="ui-icon ui-icon-flag" style="color:'+(isEnabled?'#ff8844':'#dddddd')+';display:inline;left:4px">&nbsp;&nbsp;</span>'           
+        +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'
         + '</div>'
-        + '<div class="recordTitle">'
+        + '<div class="recordTitle" title="'+recTitleHint+'">'
         +     recTitle
-        + '</div>'
-        + '<div title="Click to edit user" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete user" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        /*+ '<div title="Click to view record (opens in popup)" '
-        + '   class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
-        + '   role="button" aria-disabled="false">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"></span><span class="ui-button-text"></span>'
-        + '</div>'*/
         + '</div>';
+        
+        // add edit/remove action buttons
+        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+            html = html 
+                + '<div title="Click to edit user" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                + '</div>&nbsp;&nbsp;';
+           if(recID!=2){
+                html = html      
+                + '<div title="Click to delete user" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                + '</div>';
+           }
+        }
+        
 
+        html = html + '</div>';
 
         return html;
         
     },
+    
+    _afterSaveEventHandler: function( recID, fieldvalues ){
 
-    //
-    //
-    //
-    _recordListGetFullData:function(arr_ids, pageno, callback){
-        
-        var request = {
-                'a'          : 'search',
-                'entity'     : 'sysUGrps',
-                'details'    : 'list',
-                'request_id' : pageno,
-                'ugr_ID'     : arr_ids,
-                //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
-        };
-        
-        if(this.searchForm){
-            var selectGroup = this.searchForm.find('#sel_group');
-            if(selectGroup.val()!=''){
-                    request['ugr_Type'] = 'user';
-                    request['ugl_GroupID'] = selectGroup.val();
-            }
+        // close on addition of new record in select_single mode    
+        if(this._currentEditID<0 && this.options.select_mode=='select_single'){
+            
+                this._selection = new hRecordSet();
+                //{fields:{}, order:[recID], records:[fieldvalues]});
+                this._selection.addRecord(recID, fieldvalues);
+                this._selectAndClose();
+                return;        
         }
-        
-        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
+        this._super( recID, fieldvalues );
     }
     
 });
-
-//
-// Show as dialog
-//
-function showManageSysUsers( options ){
-
-    var manage_dlg = $('#heurist-records-dialog');
-
-    if(manage_dlg.length<1){
-        
-        options.isdialog = true;
-
-        manage_dlg = $('<div id="heurist-records-dialog">')
-        .appendTo( $('body') )
-        .manageSysUsers( options );
-    }
-
-    manage_dlg.manageSysUsers( 'popupDialog' );
-}

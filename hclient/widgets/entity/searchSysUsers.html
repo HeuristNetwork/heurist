@@ -1,51 +1,43 @@
-<div style="display: table-row;">
-    <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
-        <label>Find by name</label>
+<div>
+    <div style="float:right" id="btn_add_record"></div>
+
+    <div>
+        <div style="display:inline-block;padding:0.2em">
+            <div class="header4" style="display: inline-block;width:5em;text-align:right;">
+                <label for="input_search" accesskey="N"><U>N</U>ame</label></div>
+            <input id="input_search" class="text ui-widget-content ui-corner-all" 
+                style="width: 130px; margin-right:0.2em"/>
+        </div>
+
+        <div style="display:inline-block;padding:0.2em">
+            <div class="header4" style="display: inline-block;text-align:right;width:6em">
+                <label for="input_search_inactive" accesskey="I"><U>I</U>nactive</label></div>
+            <input id="input_search_inactive" type="checkbox" class="text ui-widget-content ui-corner-all" 
+                style="margin-right:0.2em"/>
+        </div>
+        
+        <div id="btn_search_start" style="display:inline-block;margin-left:6em"></div>   
+    </div>    
+    
+    <div>
+        <div style="display:inline-block;padding:0.2em">
+            <div class="header4" style="display: inline-block;width:5em;text-align:right;">
+                <label for="input_search_group" accesskey="G">in <U>G</U>roup</label></div>
+            <select id="input_search_group" class="text ui-widget-content ui-corner-all" 
+                style="width: 130px; margin-right:0.2em"/>
+        </div>
+        <div style="display:inline-block;padding:0.2em" id="input_search_type_div">
+            <div class="header4" style="display: inline-block;width:6em;text-align:right;">
+                <label for="input_search_role" accesskey="R"><U>R</U>ole</label></div>
+            <select id="input_search_role" class="text ui-widget-content ui-corner-all" 
+                style="width: 130px; margin-right:0.2em">
+                    <option value="any">any</option>            
+                    <option value="admin">admin</option>
+                    <option value="member">member</option>
+                </select>
+        </div>
     </div>
-    <div class="div-table-cell">
-        <input id="input_search" class="text ui-widget-content ui-corner-all" 
-                style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
-        <div id="btn_search_start"></div>        
-    </div>
-    <div class="div-table-cell">
-        <div class="header4"><label>in</label></div>
-        <select id="sel_group" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
-        <div style="float:right">
-            <div id="btn_help_hints"></div>
-            <div id="btn_help_content"></div>
-        </div>    
-    </div>
-    <div class="div-table-cell" id="div-table-right-padding">
-    </div>
-</div>
-<div style="display: table-row;line-height:3em;">
-    <div class="div-table-cell"></div>
-    <div class="div-table-cell ent_search_cb">
-    <!--
-        <input id="cb_inactive" type="checkbox"/><label for="cb_inactive">inactive</label>
-        <input id="cb_selected" type="checkbox"/><label for="cb_selected">recently selected</label>
-        <input id="cb_modified" type="checkbox"/><label for="cb_modified" >modified</label>
-    -->
-        <label><input id="cb_inactive" type="checkbox"/>inactive</label>
-        <label><input id="cb_selected" type="checkbox"/>recently selected</label>
-        <label><input id="cb_modified" type="checkbox"/>modified</label>
-    </div>
-    <div class="div-table-cell">
-        <div class="header4" id="sel_role_lbl"><label>Role</label></div>
-        <select id="sel_role" class="text ui-widget-content ui-corner-all" style="max-width:150px">
-            <option value="">all</option>
-            <option value="admin">admin</option>
-            <option value="member">member</option>
-        </select>
-    </div>
+
+
 </div>
 
-<!-- help tips row -->
-<div style="display: table-row;">  
-    <div class="div-table-cell"></div>
-    <div class="div-table-cell heurist-helper1" style="max-width:290px;vertical-align:top;">
-        Select below or search on title here. [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search</div>
-    <div class="div-table-cell heurist-helper1"  style="max-width:190px;vertical-align:top;">
-        Select work group user belongs to and role in this group
-    </div>
-</div>

@@ -1,5 +1,5 @@
 /**
-* Search header for manageSysGroups manager
+* Search header for DefTerms manager
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -17,47 +17,44 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
+$.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
 
     //
     _initControls: function() {
         this._super();
         
         var that = this;
-        
-        this.btn_add_record = this.element.find('#btn_add_record');
 
-        if(this.options.edit_mode=='none'){
-            this.btn_add_record.hide();
+        
+        this.input_search_group = this.element.find('#input_search_group');
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, 
+                //by default it takes  window.hWin.HAPI4.currentUser.usr_GroupsList,
+            [{key:'any', title:window.hWin.HR('Any')},
+             {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:'Personal tags'}]);
+        
+        this.btn_search_start.css('float','right');   
+        
+
+        this.input_sort_name = this.element.find('#input_sort_name');
+        this.input_sort_popular = this.element.find('#input_sort_popular');
+        this.input_sort_recent =  this.element.find('#input_sort_recent');
+        this._on(this.input_sort_name,  { change:this.startSearch });
+        this._on(this.input_sort_popular,  { change:this.startSearch });
+        this._on(this.input_sort_recent,  { change:this.startSearch });
+        this._on(this.input_search_group,  { change:
+            function(){
+                this._trigger( "ongroupfilter", null, this.input_search_group.val());
+            }
+        });
+        this._on( this.input_search, { keyup: this.startSearch });
+        
+        
+        if(this.options.use_cache){
+            this.startSearchInitial();            
         }else{
-            this.btn_add_record.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Add New Group"), icons: {
-                            primary: "ui-icon-plus"
-                    }})
-                .click(function(e) {
-                    that._trigger( "onadd" );
-                }); 
-                
-            if(this.options.edit_mode=='inline'){
-                this.btn_add_record.css({'float':'left','border-bottom':'1px lightgray solid',
-                'width':'100%', 'min-height': '2.4em', 'margin-bottom': '0.4em'});    
-            }                       
+            this.startSearch();            
         }
-        
-        if(this.options.edit_mode=='inline'){
-            this.btn_search_start.css('float','right');   
-        }
-        
-        this.input_search_type = this.element.find('#input_search_type');
-        this._on(this.input_search_type,  { change:this.startSearch });
-
-        if(this.options.select_mode=='manager'){
-            this.element.find('#input_search_type_div').css('float','left');
-        }
-                      
-        this.startSearch();            
     },  
-
     
     //
     // public methods
@@ -68,25 +65,27 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
             
             var request = {}
         
-            if(this.input_search.val()!=''){
-                request['ugr_Name'] = this.input_search.val();
+            /* we don't filter by group - just hide acccordion
+            if(this.input_search_group.val()!='any'){
+                request['tag_UGrpID'] = this.input_search_group.val();    
             }
-        
-            // actually we may take list of groups from currentUser['ugr_Groups']
-            var gr_role = this.input_search_type.val();
-            if(gr_role!='' && gr_role!='any'){
+            */
+            request['tag_Text'] = this.input_search.val();    
             
-                request['ugl_UserID'] = window.hWin.HAPI4.currentUser['ugr_ID'];
-                
-                if(gr_role=='admin'){
-                    request['ugl_Role'] = 'admin';
-                }else
-                if(gr_role=='member'){  
-                    request['ugl_Role'] = 'member';
-                }
+            if(this.input_sort_popular.is(':checked')){
+                request['sort:tag_Usage'] = '-1';
+            }else
+            if(this.input_sort_recent.is(':checked')){
+                request['sort:tag_Modified'] = '-1' 
+            }else
+            if(this.input_sort_name.is(':checked')){
+                request['sort:tag_Text'] = '1' 
             }
+
+            //if we use cache                
+            this._trigger( "onfilter", null, request);
             
-            
+            /*
             if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );
             }else{
@@ -94,7 +93,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         
                 request['a']          = 'search'; //action
                 request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id'; //'id';
+                request['details']    = 'list';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
@@ -111,6 +110,8 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
                         }
                     });
                     
-            }            
-    }
+            }  
+            */          
+    },
+
 });

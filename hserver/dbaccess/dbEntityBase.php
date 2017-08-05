@@ -42,12 +42,22 @@ class DbEntityBase
 
     /**
     * keeps several records for delete,update actions
-    * it is extracted from $data in begining of method
+    * it is extracted from $data in prepareRecords
     * 
-    * @var mixed
+    * @var array
     */
     protected $records;
     
+    
+    /**
+    * IDs of records to update,delete
+    * it is extracted from $data in prepareRecords
+    * need for permissions validation
+    * 
+    * @var array
+    */
+    protected $recordIDs;
+
     //
     // cconstructor - load configuration from json file
     //    
@@ -95,16 +105,16 @@ class DbEntityBase
                 return false;    
         }
 
+        //validate permission for current user and set of records see $this->recordIDs
+        if(!$this->_validatePermission()){
+            return false;
+        }
+        
         //validate values and check mandatory fields
         foreach($this->records as $record){
         
             $this->data['fields'] = $record;
 
-            //validate permission for current user
-            if(!$this->_validatePermission()){
-                return false;
-            }
-            
             //validate mandatory fields
             if(!$this->_validateMandatory()){
                 return false;
@@ -114,7 +124,6 @@ class DbEntityBase
             if(!$this->_validateValues()){
                 return false;
             }
-        
         }
         
         //array of inserted or updated record IDs
@@ -123,13 +132,7 @@ class DbEntityBase
         //start transaction
         $mysqli = $this->system->get_mysqli();
         
-        $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
-        if($keep_autocommit===true) $mysqli->autocommit(FALSE);
-        if (strnatcmp(phpversion(), '5.5') >= 0) {
-            $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
-        }
-        
-        
+        $keep_autocommit = mysql__begin_transaction($mysqli);
         
         foreach($this->records as $rec_idx => $record){
             
@@ -174,26 +177,65 @@ class DbEntityBase
     // returns - deleted:[], no_rights:[], in_use:[]
     //
     public function delete(){
+        
+        $this->recordIDs = prepareIds($this->data['recID']);
 
+        if(count($this->recordIDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
+            return false;
+        }        
+        
         if(!$this->_validatePermission()){
             return false;
         }
         
-        $ret = mysql__delete($this->system->get_mysqli(), 
-                                $this->config['tableName'], $this->config['tablePrefix'],
-                                $this->data['recID'] );
-        if($ret===true){
-            return true;
-        }else{
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Cannot delete from table ".$this->config['entityName'], $ret);
+        $mysqli->query('SET foreign_key_checks = 0');
+        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField.' in ('.implode(',',$rec_IDs).')';
+        $ret = $mysqli->query($query);
+        $mysqli->query('SET foreign_key_checks = 1');
+        
+        if(!$ret){
+            $this->system->addError(HEURIST_DB_ERROR, 
+                    "Cannot delete from table ".$this->config['entityName'], $mysqli->error);
             return false;
         }
         
+        return true;
+    }
+    
+    //
+    // see specific implemenation for every class 
+    //
+    public function batch_action(){
+    }
+    
+    //
+    //
+    //
+    protected function _validateFieldsForSearch(){
+        
+            foreach($this->data['details'] as $fieldname){
+                if(!@$this->fields[$fieldname]){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
+                    return false;
+                }            
+            }
+            //ID field is mandatory and MUST be first in the list
+            $idx = array_search($this->primaryField, $this->data['details']);
+            if($idx>0){
+                unset($this->data['details'][$idx]);
+                $idx = false;
+            }
+            if($idx===false){
+                array_unshift($this->data['details'], $this->primaryField);
+            }
+            
+            return true;
     }
     
     
     //
-    //@todo
+    //@todo validate permission per record
     //
     protected function _validatePermission(){
         return true;
@@ -349,9 +391,18 @@ class DbEntityBase
         if(array_keys($this->data['fields']) !== range(0, count($this->data['fields']) - 1)){
             $this->records = array();
             $this->records[0] = $this->data['fields']; 
+            //$this->recordIDs = $record[$this->primaryField];           
         }else{
              //this is sequental array 
             $this->records = $this->data['fields'];
+        }
+        
+        //exctract primary keys
+        $this->recordIDs = array();
+        foreach($this->records as $record){
+            if($record[$this->primaryField]>0){
+                $this->recordIDs[] = $record[$this->primaryField];
+            }
         }
        
         return true; 

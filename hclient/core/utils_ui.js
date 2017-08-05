@@ -37,7 +37,10 @@ createRectypeTreeSelect - get SELECT for hierarchy of record types
     
 createUserGroupsSelect - get SELECT for list of given groups, othewise loads list of groups for current user    
 
+ENTITY
+
 createEntitySelector - get id-name selector for specified entity
+showEntityDialog - get id-name selector for specified entity
 
 Other UI functions    
 initDialogHintButtons - add show hint and context buttons into dialog header
@@ -985,95 +988,6 @@ window.hWin.HEURIST4.ui = {
     },
     
     
-    // configMode.entity
-    // configMode.filter_group
-    createEntitySelector: function(selObj, configMode, topOptions, callback){
-       
-        $(selObj).empty();
-        
-        var request = {a:'search','details':'name'};
-        var fieldTitle;
-        
-        if(configMode.entity=='SysUsers'){
-            fieldTitle = 'ugr_Name';
-            request['entity'] = 'sysUGrps';
-            request['ugr_Type'] = 'user';
-            request['ugl_GroupID'] = configMode.filter_group;
-            
-        }else if(configMode.entity=='SysGroups'){
-            fieldTitle = 'ugr_Name';
-            request['entity'] = 'sysUGrps';
-            request['ugr_Type'] = 'workgroup';
-            request['ugl_UserID'] = configMode.filter_group;
-            
-        }else if(configMode.entity=='DefTerms'){
-            fieldTitle = 'trm_Label';
-            request['entity'] = 'defTerms';
-            request['trm_Domain'] = configMode.filter_group;
-            request['trm_ParentTermID'] = [0,'NULL']; //get vocabs only
-            
-        }else if(configMode.entity=='DefRecTypeGroups'){
-            fieldTitle = 'rtg_Name';
-            request['entity'] = 'defRecTypeGroups';
-            
-        }else if(configMode.entity=='DefDetailTypeGroups'){
-            fieldTitle = 'dtg_Name';
-            request['entity'] = 'defDetailTypeGroups';
-            
-        }else if(configMode.entity=='DefRecTypeGroups'){
-            fieldTitle = 'rtg_Name';
-            request['entity'] = 'defRecTypes';
-            request['rty_RecTypeGroupID'] = configMode.filter_group;
-            
-        }else if(configMode.entity=='DefDetailTypeGroups'){
-            fieldTitle = 'dtg_Name';
-            request['entity'] = 'defDetailTypes';
-            request['dty_DetailTypeGroupID'] = configMode.filter_group;
-            
-        }else if(configMode.entity=='SysImportFiles'){
-            fieldTitle = 'sif_TempDataTable';//'imp_table';
-            request['entity'] = 'sysImportFiles';
-            request['ugr_ID'] = configMode.filter_group;
-        }
-        
-        
-        
-        window.hWin.HAPI4.EntityMgr.doRequest(request,
-                    function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            
-                            var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
-                            
-                            if(!window.hWin.HEURIST4.util.isArray(topOptions)){
-                                if(topOptions==true){
-                                    topOptions = [{key:'',title:window.hWin.HR('select...')}];
-                                }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
-                                    if(topOptions===true) topOptions ='';
-                                    topOptions = [{key:'',title:topOptions}];
-                                }
-                            }
-                            if(window.hWin.HEURIST4.util.isArray(topOptions) && window.hWin.HEURIST4.util.isArray(groups)){
-                                groups = topOptions.concat(groups);
-                            }else if(window.hWin.HEURIST4.util.isArray(topOptions)){
-                                groups = topOptions;
-                            }
-
-                            window.hWin.HEURIST4.ui.createSelector(selObj, groups);
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                        
-                        if($.isFunction(callback)){
-                            callback();
-                        }
-                        
-                    });
-                              
-        
-        
-    },
-
     // Init button that show/hide help tips
     initDialogHintButtons: function($dialog, helpcontent_url, hideHelpButton){
         
@@ -1211,7 +1125,9 @@ window.hWin.HEURIST4.ui = {
                  
     },
 
-
+    //
+    // important manageRecords.js and selectRecords.js must be loaded
+    //
     openRecordEdit:function(rec_ID, query_request, isEdit, callback){
         
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
@@ -1283,7 +1199,7 @@ window.hWin.HEURIST4.ui = {
                     }
                 }    
     
-                $container = showManageRecords(popup_options);
+                $container = window.hWin.HEURIST4.ui.showEntityDialog('Records', popup_options);
     },
     
     openRecordInPopup:function(rec_ID, query_request, isEdit, callback){
@@ -1455,6 +1371,141 @@ window.hWin.HEURIST4.ui = {
         $(container).find('.add-rel-button').hide();
         
         return ele;
+    },
+    
+    //------------------------------------
+    // configMode.entity
+    // configMode.filter_group
+    createEntitySelector: function(selObj, configMode, topOptions, callback){
+       
+        $(selObj).empty();
+        
+        var request = {a:'search','details':'name'};
+        var fieldTitle;
+        
+        if(configMode.entity=='SysUsers'){
+            fieldTitle = 'ugr_Name';
+            request['entity'] = 'sysUGrps';
+            request['ugr_Type'] = 'user';
+            request['ugl_GroupID'] = configMode.filter_group;
+            
+        }else if(configMode.entity=='SysGroups'){
+            fieldTitle = 'ugr_Name';
+            request['entity'] = 'sysUGrps';
+            request['ugr_Type'] = 'workgroup';
+            request['ugl_UserID'] = configMode.filter_group;
+            
+        }else if(configMode.entity=='DefTerms'){
+            fieldTitle = 'trm_Label';
+            request['entity'] = 'defTerms';
+            request['trm_Domain'] = configMode.filter_group;
+            request['trm_ParentTermID'] = [0,'NULL']; //get vocabs only
+            
+        }else if(configMode.entity=='DefRecTypeGroups'){
+            fieldTitle = 'rtg_Name';
+            request['entity'] = 'defRecTypeGroups';
+            
+        }else if(configMode.entity=='DefDetailTypeGroups'){
+            fieldTitle = 'dtg_Name';
+            request['entity'] = 'defDetailTypeGroups';
+            
+        }else if(configMode.entity=='DefRecTypeGroups'){
+            fieldTitle = 'rtg_Name';
+            request['entity'] = 'defRecTypes';
+            request['rty_RecTypeGroupID'] = configMode.filter_group;
+            
+        }else if(configMode.entity=='DefDetailTypeGroups'){
+            fieldTitle = 'dtg_Name';
+            request['entity'] = 'defDetailTypes';
+            request['dty_DetailTypeGroupID'] = configMode.filter_group;
+            
+        }else if(configMode.entity=='SysImportFiles'){
+            fieldTitle = 'sif_TempDataTable';//'imp_table';
+            request['entity'] = 'sysImportFiles';
+            request['ugr_ID'] = configMode.filter_group;
+        }
+        
+        
+        
+        window.hWin.HAPI4.EntityMgr.doRequest(request,
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            
+                            var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
+                            
+                            if(!window.hWin.HEURIST4.util.isArray(topOptions)){
+                                if(topOptions==true){
+                                    topOptions = [{key:'',title:window.hWin.HR('select...')}];
+                                }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
+                                    if(topOptions===true) topOptions ='';
+                                    topOptions = [{key:'',title:topOptions}];
+                                }
+                            }
+                            if(window.hWin.HEURIST4.util.isArray(topOptions) && window.hWin.HEURIST4.util.isArray(groups)){
+                                groups = topOptions.concat(groups);
+                            }else if(window.hWin.HEURIST4.util.isArray(topOptions)){
+                                groups = topOptions;
+                            }
+
+                            window.hWin.HEURIST4.ui.createSelector(selObj, groups);
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                        
+                        if($.isFunction(callback)){
+                            callback();
+                        }
+                        
+                    });
+                              
+        
+        
+    },
+
+    //
+    // checks wether the appropriate javascript is loaded
+    //
+    showEntityDialog: function(entityName, options){
+
+        entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1); //entityName.capitalize();
+                            
+        var widgetName = 'manage'+entityName;
+
+        if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
+        
+            var manage_dlg;
+            if(!options.container){
+                manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
+                    .appendTo( $('body') )
+                    [widgetName]( options );
+            }else{
+                manage_dlg = $(options.container)[widgetName]( options );
+            }
+            
+            if(options.isdialog){
+                manage_dlg[widgetName]( 'popupDialog' );
+            }
+        
+            return manage_dlg;
+        
+        }else{
+            
+            var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
+            
+            //load missed javascripts
+            $.getMultiScripts([ path+widgetName+'.js', path+'search'+entityName+'.js'])
+            .done(function() {
+                // all done
+                window.hWin.HEURIST4.ui.showEntityDialog(entityName, options);
+            }).fail(function(error) {
+                // one or more scripts failed to load
+                window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+            }).always(function() {
+                // always called, both on success and error
+            });
+            
+        }
     }
     
 }//end ui

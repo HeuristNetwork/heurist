@@ -79,6 +79,8 @@
             download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif');
         }
         exit();
+    }else if(@$_REQUEST['entity']){
+        $filename = HEURIST_FILESTORE_DIR . 'entity-icons/'.@$_REQUEST['entity'].'/'.$rectype_id;    
     }else{
         $filename = HEURIST_ICON_DIR . $rectype_id;
     }

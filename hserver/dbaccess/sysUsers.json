@@ -1,0 +1,170 @@
+{
+        "entityName": "sysUsers",
+
+        "tableName": "sysUGrps",
+        "tablePrefix": "ugr",
+        
+        "helpContent": "sysUsers.html",
+        
+        "searchFormContent": "searchSysUsers.html",
+        
+        "entityTitle": "User",
+        "entityTitlePlural": "Users",
+        "empty_remark": "Please use the search field above to locate relevant user",
+
+        "fields": [
+                {
+                    "dtID": "ugr_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "ugr_Type",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ugr_FirstName",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":40,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "First name",
+                        "rst_DisplayHelpText": "Person's first name", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_LastName",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Last name",
+                        "rst_DisplayHelpText": "Person's last name", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_eMail",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":100,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Email:",
+                        "rst_DisplayHelpText": "Contact email address", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Password",
+                    "dtFields":{
+                        "dty_Type":"password",
+                        "dty_Size":40,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Password:",
+                        "rst_DisplayHelpText": "Leave blank if you do not want to change your password", 
+                        "rst_RequirementType":"required",
+                        "rst_FieldConfig":[]
+                    }
+                },
+                {
+                    "dtID": "ugr_Name",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Login name:",
+                        "rst_DisplayHelpText": "The unique user name, user name defaults to email address", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Organisation",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":120,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Institution/company",
+                        "rst_DisplayHelpText": "Enter 'None' if not affiliated with an institution or company", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Interests",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Research interests",
+                        "rst_DisplayHelpText": "Enter a concise description (up to 250 characters) of your research interests", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Enabled",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName": "Enabled:",
+                        "rst_DisplayHelpText": "Check to enable the user, unchecked users will not be able to log in",
+                        "rst_FieldConfig":[
+                            {"key":"y","title":"Yes"},
+                            {"key":"n","title":"No"}
+                        ]
+                    }
+                }, 
+                {
+                    "dtID": "ugr_Department",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":120,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Department",
+                        "rst_DisplayHelpText": "", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_City",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":120,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Suburb/City",
+                        "rst_DisplayHelpText": "", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_State",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":40,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "State",
+                        "rst_DisplayHelpText": "", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Postcode",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":20,
+                        "rst_DisplayWidth":20,
+                        "rst_DisplayName": "Zip/postcode",
+                        "rst_DisplayHelpText": "", 
+                        "rst_RequirementType":"required"
+                    }
+                }
+                
+     ]
+}

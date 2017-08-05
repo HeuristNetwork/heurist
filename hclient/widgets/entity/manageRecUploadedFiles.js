@@ -1,5 +1,5 @@
 /**
-* manageDefTerms.js - main widget to manage defTerms
+* manageRecUploadedFiles.js - main widget to manage recUploadedFiles
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,12 +22,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
    
     _entityName:'recUploadedFiles',
     
-    _currentDomain:null,
+    _editing2:null, //hidden edit form to upload file
     
-    _editing2:null,
+    _isAdditionOfLocal:false, //flag to enabel "Save" button on file upload completion
     
-    _isAdditionOfLocal:false, //special case 
-    
+    //
+    //
+    //
     _init: function() {
         
         this.options.layout_mode = 'short';
@@ -58,17 +59,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _initControls: function() {
         
-        //this.options.list_mode = 'treeview';
-        
         if(!this._super()){
             return false;
         }
 
         // init search header
         this.searchForm.searchRecUploadedFiles(this.options);
-        
         var iheight = 6;
-        //if(this.searchForm.width()<200){  - width does not work here  
+        
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 8;
         }
@@ -78,6 +76,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var that = this;
         
         if(this.options.select_mode=='manager'){
+            //init image viewer for result list
             this.recordList.resultList('option','onPageRender',function(){
                 //$(that.recordList.find('.ent_content_full'))
                 var ele = $(that.recordList.find('.ent_content_full')); //.find('a')
@@ -140,19 +139,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
         this._super(recordset);
     },
-    
-    //
-    // close or cancel edit dialof
-    //
-    closeEditDialog:function(){
-
-        if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
-            this._edit_dialog.dialog('close');
-        }else{ //for inline reload inline forms
-            //reload current
-            that._initEditForm_step3(that._currentEditID)
-        }
-    },    
     
     //-----
     // perform required after edit form init modifications (show/hide fields, assign event listener )
@@ -407,20 +393,17 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&pl
 });
 
 //
-// Show as dialog - to remove
+// Show as dialog - to remove in HEURIST.ui
 //
 function showManageRecUploadedFiles( options ){
 
-    var manage_dlg = $('#heurist-records-dialog');  //@todo - unique ID
+    var manage_dlg = $('<div id="heurist-files-dialog-'+window.hWin.HEURIST4.util.random()+'">')
+        .appendTo( $('body') )
+        .manageUsrTags( options );
 
-    if(manage_dlg.length<1){
+    options.isdialog = true;    
         
-        options.isdialog = true;
-
-        manage_dlg = $('<div id="heurist-records-dialog">')
-                .appendTo( $('body') )
-                .manageRecUploadedFiles( options );
-    }
-
     manage_dlg.manageRecUploadedFiles( 'popupDialog' );
+    
+    return manage_dlg;
 }

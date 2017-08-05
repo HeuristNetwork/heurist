@@ -141,7 +141,7 @@ $.widget( "heurist.manageEntity", {
         
         //init layout
         var layout = '';
-        if(this.options.layout_mode=='basic'){  //tooolbar on top, list on left, edit form on right side
+        if(this.options.layout_mode=='basic'){  //coomon tooolbar on top, list on left, edit form on right side
             layout = 
                 '<div class="ent_wrapper">'
                     +'<div class="ent_header editForm-toolbar"/>'
@@ -152,7 +152,7 @@ $.widget( "heurist.manageEntity", {
                     +'<div class="ent_content_full editForm" style="left:251px"/>'
                 +'</div>';
         
-        }else if(this.options.layout_mode=='short'){ //short search form above the list, viewer/editor on right side
+        }else if(this.options.layout_mode=='short'){ //the same as above, short toolbar above edit on right side
         
             layout = 
                 '<div class="ent_wrapper">'
@@ -656,11 +656,13 @@ $.widget( "heurist.manageEntity", {
                              height: this._as_dialog.dialog('option', 'height')});
         }
         
-        if(window.hWin.HEURIST4.util.isRecordSet(this._selection)){
+        var res = this.selectedRecords();
+        
+        if(window.hWin.HEURIST4.util.isRecordSet(res)){
             //window.hWin.HAPI4.save_pref('recent_Users', this._selection.getIds(25), 25);      
             this._trigger( "onselect", null, 
                 {selection:  
-                    (this.options.select_return_mode=='recordset') ?this._selection:this._selection.getIds()});
+                    (this.options.select_return_mode=='recordset') ?res :res.getIds()});
         }else{        
             this._trigger( "onselect", null, null );
         }
@@ -779,9 +781,11 @@ $.widget( "heurist.manageEntity", {
     //
     //  send update request and close popup if edit is in dialog
     //
-    _saveEditAndClose: function(){
+    _saveEditAndClose: function( fields, afteraction ){
 
-            var fields = this._getValidatedValues(); 
+            if(!fields){
+                fields = this._getValidatedValues(); 
+            }
             
             if(fields==null) return; //validation failed
         

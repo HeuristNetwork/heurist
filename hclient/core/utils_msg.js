@@ -500,7 +500,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     message_text = message_text + (len-max) + window.hWin.HR(" characters over");
                 }
 
-
+            }else if(min>1){
+               message_text = window.hWin.HR(title)+" "+window.hWin.HR('. At least '+min+' characters required'); 
             }else if(min==1){
                 message_text = window.hWin.HR(title)+" "+window.hWin.HR(" is required field");
             }
@@ -508,6 +509,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             return message_text;
 
         } else {
+            input.removeClass( "ui-state-error" );
             return '';
         }
     },
@@ -747,7 +749,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     //draggable: false,
                     title: options["title"],
                     buttons: options["buttons"],
-                    beforeClose:options.beforeClose,
+                    beforeClose: options.beforeClose,
                     close: function(event, ui){
                         
                         if($.isFunction(onCloseCalback)){

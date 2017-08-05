@@ -43,30 +43,22 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
-        
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysUsers.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysUsers.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysGroups.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysGroups.js"></script>
-
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypes.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypes.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypeGroups.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypeGroups.js"></script>
-
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypes.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypes.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypeGroups.js"></script>
+<!--      
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefFileExtToMimetype.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefFileExtToMimetype.js"></script>
-        
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
-        
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrTags.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysGroups.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysGroups.js"></script>
+-->
         <style>
             .fancytree-hide{
                 display: none;
@@ -195,24 +187,22 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 
                 if(mode){//popup
                 
+                    options.isdialog = true;
+                
+/*                
                     var func_name = 'showManage'+entity;
                     
                     if($.isFunction(window[func_name])){
-                        
-                       if(entity=='SysUsers'){
-                            showManageSysUsers( options );      
+                   
+                       if(entity=='UsrTags'){
+                            showManageUsrTags( options );      
+
                        }else if(entity=='SysGroups'){
-                            showManageSysGroups( options );      
-                       }else if(entity=='DefRecTypes'){
-                            showManageDefRecTypes( options );      
-                       }else if(entity=='DefRecTypeGroups'){
-                            showManageDefRecTypeGroups( options );      
-                       }else if(entity=='DefDetailTypes'){
-                            showManageDefDetailTypes( options );      
-                       }else if(entity=='DefDetailTypeGroups'){
-                            options.height = 400;
+                            
+                           options.height = 640;
                             options.width = 840;
-                            showManageDefDetailTypeGroups( options );      
+                            showManageSysGroups( options );      
+                                
                        }else if(entity=='DefFileExtToMimetype'){
                             options.height = 400;
                             options.width = 840;
@@ -240,9 +230,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     }else{
                         window.hWin.HEURIST4.msg.showMsgWorkInProgress();
                     }
-                    
+*/
                 }else{//on this page
-                
+
+                    options.container = '#main_div';
+/*                
                     var widgetname = 'manage'+entity,
                         $content = $('#main_div');
 
@@ -251,23 +243,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
                        $content.empty();
                        //$content[widgetname]( options );   //call constructor
                        
-                       if(entity=='SysUsers'){
-                            $content.manageSysUsers( options );      
-                       }else
-                       if(entity=='SysGroups'){
-                            $content.manageSysGroups( options );      
-                       }else
-                       if(entity=='DefRecTypes'){
-                            $content.manageDefRecTypes( options );      
-                       }else
-                       if(entity=='DefRecTypeGroups'){
-                            $content.manageDefRecTypeGroups( options );      
-                       }else
-                       if(entity=='DefDetailTypes'){
-                            $content.manageDefDetailTypes( options );      
-                       }else
-                       if(entity=='DefDetailTypeGroups'){
-                            $content.manageDefDetailTypeGroups( options );      
+                       if(entity=='UsrTags'){
+                            $content.manageUsrTags( options );      
                        }else
                        if(entity=='DefFileExtToMimetype'){
                             $content.manageDefFileExtToMimetype( options );      
@@ -286,11 +263,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     }else{
                         window.hWin.HEURIST4.msg.showMsgWorkInProgress();
                     }
-
-                    
+*/                
                 }
                 
-                
+                window.hWin.HEURIST4.ui.showEntityDialog(entity, options);
                 
             }
             
@@ -374,17 +350,17 @@ print $targetPath.'<br>';
                     <label>Entity:
                         <select id="entity-sel">
                             <option value="Records">Records</option>
-                            <option value="SysUsers">Users</option>
-                            <option value="SysGroups">Workgroups</option>
-                            <option value="Tags">Tags</option>
-                            <option value="RecUploadedFiles" selected>Uploaded Files +</option>
+                            <option value="SysUsers" selected>Users +</option>
+                            <option value="SysGroups">Workgroups +</option>
+                            <option value="UsrTags">Tags +</option>
+                            <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="Reminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>
                             <option value="DefRecTypeGroups">Record Type Groups</option>
                             <option value="DefDetailTypes">Field Types</option>
-                            <option value="DefDetailTypeGroups">Field Type Groups +</option>
+                            <option value="DefDetailTypeGroups">Field Type Groups</option>
                             <option value="DefTerms">Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
                             <option value="RecComments">Record Comments</option>

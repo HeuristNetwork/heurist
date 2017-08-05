@@ -11,6 +11,7 @@
     *  mysql__select_array   - returns first row
     *  mysql__insertupdate
     *  mysql__delete
+    *  mysql__begin_transaction
     *
     *  getSysValues - Returns values from sysIdentification
     *  isFunctionExists - verifies that mysql stored function exists
@@ -632,6 +633,21 @@
         });
         
         return $ids;
+    }
+    
+    //
+    //
+    //
+    function mysql__begin_transaction($mysqli){
+        
+        $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
+        if($keep_autocommit===true) $mysqli->autocommit(FALSE);
+        if (strnatcmp(phpversion(), '5.5') >= 0) {
+            $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
+        }
+        
+        return $keep_autocommit;
+        
     }
 
 ?>

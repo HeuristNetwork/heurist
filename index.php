@@ -234,7 +234,8 @@ _time_debug = new Date().getTime() / 1000;
                //@todo define parameter in layout "production=true"
                if(!(window.hWin.HAPI4.sysinfo['layout']=='boro' ||
                       window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' || 
-                         window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
+                        window.hWin.HAPI4.sysinfo['layout']=='WebSearch' ||
+                            window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
                
                 var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
                 

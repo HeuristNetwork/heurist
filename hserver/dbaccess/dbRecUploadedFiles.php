@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * db access to defTerms table
+    * db access to recUploadedFiles table
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -28,20 +28,6 @@ require_once (dirname(__FILE__).'/db_files.php');
 
 class DbRecUploadedFiles extends DbEntityBase
 {
-    /*
-    'trm_OriginatingDBID'=>'int',
-    'trm_NameInOriginatingDB'=>63,
-    'trm_IDInOriginatingDB'=>'int',
-
-    'trm_AddedByImport'=>'bool2',
-    'trm_IsLocalExtension'=>'bool2',
-
-    'trm_OntID'=>'int',
-    'trm_ChildCount'=>'int',
-    
-    'trm_Depth'=>'int',
-    'trm_LocallyModified'=>'bool2',
-    */
 
     /**
     *  search uploaded fils
@@ -104,7 +90,7 @@ class DbRecUploadedFiles extends DbEntityBase
         
         //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
         //if($pred!=null) array_push($order, $pred);
-        $value = @$this->data['ulf_Added'];
+        $value = @$this->data['sort:ulf_Added'];
         if($value!=null){
             array_push($order, 'ulf_Added '.($value>1?'ASC':'DESC'));
         }
@@ -133,7 +119,7 @@ class DbRecUploadedFiles extends DbEntityBase
             //$this->data['details'] = implode(',', $this->fields );
             $needRelations = true;
         }else{
-            $needCheck = false;
+            $needCheck = true;
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -141,23 +127,11 @@ class DbRecUploadedFiles extends DbEntityBase
         }
         
         //validate names of fields
-        if($needCheck)
-        foreach($this->data['details'] as $fieldname){
-            if(!@$this->fields[$fieldname]){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
-                return false;
-            }            
+        //validate names of fields
+        if($needCheck && !$this->_validateFieldsForSearch()){
+            return false;
         }
 
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('ulf_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
-        }
-        if($idx===false){
-            array_unshift($this->data['details'], 'ulf_ID');
-        }
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
@@ -229,12 +203,29 @@ class DbRecUploadedFiles extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if($this->system->is_dbowner() || $this->system->is_member($this->data['fields']['ulf_UploaderUGrpID'])){
-            return true;
-        }else{
-            $this->system->addError(HEURIST_REQUEST_DENIED, 'File uploaded by other user. Cannot modify file info');
-            return false;
+        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){
+            
+            $ugr_ID = $this->system->get_user_id();
+            
+            $mysqli = $this->system->get_mysqli();
+            
+            $recIDs_norights = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField, 
+                    $this->primaryField.' in ('.implode(',', $this->recordIDs).') AND ulf_UploaderUGrpID != '.$ugr_ID.')');
+
+            $cnt = count($recIDs_norights);       
+                    
+            if($cnt>0){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                (($cnt==1 && (!isset($this->records) || count($this->records)==1) )
+                    ? 'File is'
+                    : $cnt.' files are')
+                    .' uploaded by other user. Insufficient rights for this operation');
+                return false;
+            }
         }
+        
+        return true;
+        
     }
     
     protected function _validateValues(){
@@ -291,7 +282,6 @@ class DbRecUploadedFiles extends DbEntityBase
             $rec_ID = intval(@$record[$this->primaryField]);
             $isinsert = ($rec_ID<1);
         
-        
             if(@$record['ulf_ExternalFileReference']){
                 $this->records[$idx]['ulf_OrigFileName'] = '_remote';
             }
@@ -307,7 +297,6 @@ class DbRecUploadedFiles extends DbEntityBase
                 $this->records[$idx]['ulf_ExternalFileReference'] = null;
                 unset($this->records[$idx]['ulf_ExternalFileReference']);
             }
-        
             
             //change mimetype to extension
             $mimeType = strtolower($record['ulf_MimeExt']);
@@ -326,6 +315,7 @@ class DbRecUploadedFiles extends DbEntityBase
         return $ret;
         
     }    
+
     //
     //
     //
@@ -370,96 +360,86 @@ class DbRecUploadedFiles extends DbEntityBase
         return $ret;
     } 
 
-    /**
-    * 1. exclude non numeric
-    * 2. find wrong permission   
-    * 3. find in use 
-    * 
-    * @returns  array of 'deleted', 'no enough right' and 'in use' ids
-    */
+    //
+    //
+    //
     public function delete(){
         
-        $result = array('deleted'=>array(), 'no_rights'=>array(), 'in_use'=>array());
+        $this->recordIDs = prepareIds($this->data['recID']);
+
+        if(count($this->recordIDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
+            return false;
+        }        
         
+        if(!$this->_validatePermission()){
+            return false;
+        }
+            
         $mysqli = $this->system->get_mysqli();
         
-        $rec_IDs = prepareIds($this->data['recID']);
+        $recIDs_inuse = mysql__select_list($mysqli, 'recDetails', 'dtl_UploadedFileID', 
+                    'dtl_UploadedFileID in ('.implode(',', $this->recordIDs).')');
         
-        if(count($rec_IDs)==0){             
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of record identificators');
+        $cnt = count($recIDs_inuse);       
+                    
+        if($cnt>0){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+            (($cnt==1 && count($this->records)==1)
+                ? 'File is'
+                : $cnt.' files are')
+                .' in use. Detach records first');
             return false;
         }
         
-        //find 'no enough rights'
-        if(!$this->system->is_dbowner()){
-            $ugrs = $this->system->get_user_group_ids();
-            
-            $result['no_rights'] = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField, 
-                    'ulf_ID in ('.implode(',',$rec_IDs).') AND ulf_UploaderUGrpID not in ('.implode(',',$ugrs).')');
-
-            $rec_IDs = array_diff($rec_IDs, $result['no_rights']);            
-        }
-
-        //find in use        
-        if(count($rec_IDs)>0){             
-            
-            $result['in_use'] = mysql__select_list($mysqli, 'recDetails', 'dtl_UploadedFileID', 
-                    'dtl_UploadedFileID in ('.implode(',',$rec_IDs).')');
-                                               
-            $rec_IDs = array_diff($rec_IDs, $result['no_rights']);            
-        }
         
-        if(count($rec_IDs)>0){        
-        
-            //gather data to remove files
-            $query = 'SELECT ulf_ObfuscatedFileID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_ID in ('
-                    .implode(',',$rec_IDs).')';
+        //gather data to remove files
+        $query = 'SELECT ulf_ObfuscatedFileID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_ID in ('
+                .implode(',',$this->recordIDs).')';
 
-            $res = $mysqli->query($query);
-            if ($res){
-                $file_data = array();
-                while ($row = $res->fetch_row()){
-                    if(@$row[1] || @$row[2]){
-                        $fullpath = @$row[1] . @$row[2];
-                        //add database media storage folder for relative paths
-                        $fullpath = resolveFilePath($fullpath);
-                        if(!file_exists($fullpath)) $fullpath=null;
-                    }else{
-                        $fullpath = null; //remote
-                    }
-                    $file_data[$row[0]] = $fullpath;
+        $res = $mysqli->query($query);
+        if ($res){
+            $file_data = array();
+            while ($row = $res->fetch_row()){
+                if(@$row[1] || @$row[2]){
+                    $fullpath = @$row[1] . @$row[2];
+                    //add database media storage folder for relative paths
+                    $fullpath = resolveFilePath($fullpath);
+                    if(!file_exists($fullpath)) $fullpath=null;
+                }else{
+                    $fullpath = null; //remote
                 }
-                $res->close();
+                $file_data[$row[0]] = $fullpath;
             }
+            $res->close();
+        }
 
+        
+        $mysqli->query('SET foreign_key_checks = 0');
+        $ret = $mysqli->query('DELETE FROM '.$this->config['tableName']
+                               .' WHERE '.$this->primaryField.' in ('.implode(',',$this->recordIDs).')');
+        $mysqli->query('SET foreign_key_checks = 1');
+        
+        if(!$ret){
+            $this->system->addError(HEURIST_DB_ERROR, 
+                    "Cannot delete from table ".$this->config['entityName'], $mysqli->error);
+            return false;
+        }else{
             
-            $mysqli->query('SET foreign_key_checks = 0');
-            $ret = $mysqli->query('DELETE FROM recUploadedFiles WHERE ulf_ID in ('.implode(',',$rec_IDs).')');
-            $mysqli->query('SET foreign_key_checks = 1');
-            
-            if(!$ret){
-                $this->system->addError(HEURIST_DB_ERROR, 
-                        "Cannot delete from table ".$this->config['entityName'], $mysqli->error);
-                return false;
-            }else{
-                
-                //remove files
-                foreach ($file_data as $file_id=>$filepath){
-                    if($filepath!=null){
-                        unlink($filepath);
-                    }
-                    //remove thumbnail
-                    $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file_id.".png";
-                    if(file_exists($thumbnail_file)){
-                        unlink($thumbnail_file);
-                    }
+            //remove files
+            foreach ($file_data as $file_id=>$filepath){
+                if($filepath!=null){
+                    unlink($filepath);
                 }
-                $result['deleted'] = $rec_IDs;
+                //remove thumbnail
+                $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file_id.".png";
+                if(file_exists($thumbnail_file)){
+                    unlink($thumbnail_file);
+                }
             }
-            
         }
         
-        return $result;
+        return true;
     }
 }
 ?>

@@ -163,7 +163,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 request['ulf_UploaderUGrpID'] = window.hWin.HAPI4.currentUser.ugr_ID; 
             }
             if(this.input_search_recent.is(':checked')){
-                request['ulf_Added'] = '-1' 
+                request['sort:ulf_Added'] = '-1' 
             }
             
             if(false && $.isEmptyObject(request)){
@@ -176,7 +176,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 request['details']    = 'id'; //'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
+                //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
                 

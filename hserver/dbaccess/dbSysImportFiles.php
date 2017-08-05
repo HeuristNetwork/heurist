@@ -114,6 +114,8 @@ class DbSysImportFiles extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('sif_UGrpID');
         if($pred!=null) array_push($where, $pred);
 
+        $needCheck = false;
+        
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
@@ -130,6 +132,8 @@ class DbSysImportFiles extends DbEntityBase
         }else if(@$this->data['details']=='full'){
 
             $this->data['details'] = implode(',', $this->fields );
+        }else{
+            $needCheck = true;
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -137,22 +141,10 @@ class DbSysImportFiles extends DbEntityBase
         }
         
         //validate names of fields
-        foreach($this->data['details'] as $fieldname){
-            if(!@$this->fields[$fieldname]){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
-                return false;
-            }            
+        if($needCheck && !$this->_validateFieldsForSearch()){
+            return false;
         }
 
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('sif_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
-        }
-        if($idx===false){
-            array_unshift($this->data['details'], 'sif_ID');
-        }
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query

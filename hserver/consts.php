@@ -100,6 +100,7 @@ define("HEURIST_NOT_FOUND", "notfound");         // The requested object not fou
 define("HEURIST_ERROR", "error");                // General error: wrong data, file i/o
 define("HEURIST_OK", "ok");                      // The response contains a valid Result.
 define("HEURIST_REQUEST_DENIED", "denied");      // The webpage is not allowed to use the service.
+define("HEURIST_ACTION_BLOCKED", "blocked");     // No enough rights or action is blocked by constraints
 define("HEURIST_UNKNOWN_ERROR", "unknown");      // A request could not be processed due to a server error. The request may succeed if you try again.
 define("HEURIST_DB_ERROR", "database");          // A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
 define("HEURIST_SYSTEM_CONFIG", "syscfg");       // System not-fatal configuration error. Contact system admin

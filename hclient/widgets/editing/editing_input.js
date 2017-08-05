@@ -205,7 +205,7 @@ $.widget( "heurist.editing_input", {
         }
         
         if(this.options.show_header){
-            this.header.show();
+            this.header.css('display','table-cell');//show();
         }else{
             this.header.hide();
         }        
@@ -768,11 +768,8 @@ $.widget( "heurist.editing_input", {
                             if(window.hWin.HEURIST4.util.isempty(entityName)) {
                                 entityName='Records'; //by default   
                             }
-                            var widgetName = 'manage'+entityName.charAt(0).toUpperCase() + entityName.slice(1);
-                            //entityName.capitalize();
-                            if($.isFunction($('body')[widgetName])){ //OK! widget js has been loaded
-
-                                var popup_options = {
+                            
+                            var popup_options = {
                                     isdialog: true,
                                     select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
                                     //selectbutton_label: '',
@@ -805,45 +802,39 @@ $.widget( "heurist.editing_input", {
                                         }
 
                                     }
-                                }//options
+                            }//options
 
-                                __show_select_dialog = function(event){
+                            __show_select_dialog = function(event){
                                     
-                                        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+entityName, 
-                                            {width: null,  //null triggers default width within particular widget
-                                            height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-                            
-                                        popup_options.width = usrPreferences.width;
-                                        popup_options.height = usrPreferences.height;
+                                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+entityName, 
+                                        {width: null,  //null triggers default width within particular widget
+                                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+                        
+                                    popup_options.width = usrPreferences.width;
+                                    popup_options.height = usrPreferences.height;
                                     
-                                        //init dialog
-                                        var manage_dlg = $('<div>')
-                                            .uniqueId()
-                                            //.appendTo( $(window.hWin.document).find('body') )
-                                            .appendTo( $('body') )
-                                            [widgetName]( popup_options );
-
-                                        manage_dlg[widgetName]( 'popupDialog' );
-                                }
-                                
-                                //assign initial display value
-                                if(value){
-                                    if(isFileForRecord){
-                                        
-                                        var rec_Title = value.ulf_ExternalFileReference;
-                                        if(window.hWin.HEURIST4.util.isempty(rec_Title)){
-                                            rec_Title = value.ulf_OrigFileName;
-                                        }
-                                        $input.val( rec_Title );
-                                        
-                                    }else{
-                                        var display_value = window.hWin.HAPI4.EntityMgr
-                                                                .getTitlesByIds(entityName, value.split(','));
-                                        $input.val( display_value.join(',') );
-                                    }
-                                }
-                                
+                                    //init dialog
+                                    window.hWin.HEURIST4.ui.showEntityDialog(entityName, popup_options);
                             }
+                                
+                            //assign initial display value
+                            if(value){
+                                if(isFileForRecord){
+                                    
+                                    var rec_Title = value.ulf_ExternalFileReference;
+                                    if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                                        rec_Title = value.ulf_OrigFileName;
+                                    }
+                                    $input.val( rec_Title );
+                                    
+                                }else{
+                                    var display_value = window.hWin.HAPI4.EntityMgr
+                                                            .getTitlesByIds(entityName, value.split(','));
+                                    $input.val( display_value.join(',') );
+                                }
+                            }
+                                
+                            
                         }//configMode
 
                         if(__show_select_dialog!=null){
@@ -1214,13 +1205,21 @@ $.widget( "heurist.editing_input", {
                 if(this.options.values.length!=this.inputs.length){
                     return true;
                 }
+                var isFileForRecord = (this.detailType=='file' && this.configMode.entity=='recUploadedFiles');
+                
                 var idx;
                 for (idx in this.inputs) {
                     var res = this._getValue(this.inputs[idx]);
                     
-                    if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))
-                       && (this.options.values[idx]!=res)){
-                        return true;
+                    //both original and current values are not empty
+                    if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))){
+                        if(isFileForRecord){
+                            if(this.options.values[idx].ulf_ID!=res){
+                                return true;
+                            }
+                        }else if (this.options.values[idx]!=res){
+                                return true;
+                        }
                     }
                 }
             }

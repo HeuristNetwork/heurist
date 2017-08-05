@@ -200,13 +200,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               
                         {text:window.hWin.HR('Save and new record'), id:'btnRecSaveAndNew',
                               css:{'visibility':'hidden'},
-                              click: function() { that._saveEditAndClose( 'newrecord' ); }},
+                              click: function() { that._saveEditAndClose( null, 'newrecord' ); }},
                         {text:window.hWin.HR('Save'), id:'btnRecSave',
                               css:{'visibility':'hidden'},
-                              click: function() { that._saveEditAndClose( 'none' ); }},
+                              click: function() { that._saveEditAndClose( null, 'none' ); }},
                         {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose',
                               css:{'visibility':'hidden'},
-                              click: function() { that._saveEditAndClose( 'close' ); }},
+                              click: function() { that._saveEditAndClose( null, 'close' ); }},
                         {text:window.hWin.HR('Close'), 
                               click: function() { that.closeEditDialog(); }}]; 
             
@@ -318,7 +318,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //load content for editFormSummary
                 if(this.editFormSummary.text()=='empty'){
                     this.editFormSummary.empty();
-                    var headers = ['Admin','Links','Scratchpad','Private','Workgroup Tags','Text','Discussion'];
+                    var headers = ['Admin','Links','Scratchpad','Private','Tags','Text','Discussion'];
                     for(var idx in headers){
                         var acc = $('<div>').addClass('summary-accordion').appendTo(this.editFormSummary);
                         
@@ -379,13 +379,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         panel.empty();
         
         switch(idx){
-            case 0:   //admins
+            case 0:   //admins -------------------------------------------------------
                 var recRecTypeID = that._getField('rec_RecTypeID');
                 sContent =  
-'<div style="margin:10px;bacground:none;"><div style="padding-bottom:0.5em">'
+'<div style="margin:4px;bacground:none;"><div style="padding-bottom:0.5em">'
 
-+'<h2 class="truncate rectypeHeader" style="display:inline-block;" style="max-width:400px;margin-left:5px;">'
-                + '<img src="'+ph_gif+'" style="vertical-align:top;margin-left:10px;background-image:url(\''
++'<h2 class="truncate rectypeHeader" style="display:inline-block;" style="max-width:400px;margin-left:0px;">'
+                + '<img src="'+ph_gif+'" style="vertical-align:top;margin-left:0px;background-image:url(\''
                 + top.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
                 + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
 +'<select class="rectypeSelect" style="display:none"></select>'
@@ -593,12 +593,106 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             case 3:   //private
             
                 break;
+            case 4:   //tags
+            
+                if(panel.text()!='') return;
+                
+                panel.text('....');
+            
+                var request = {};
+                request['a']          = 'search'; //action
+                request['entity']     = 'usrTags';
+                request['details']    = 'name';
+                request['request_id'] = window.hWin.HEURIST4.util.random();
+                request['rtl_RecID']  = this._currentEditID;
+                
+                //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
+
+                var that = this;                                                
+                
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            var recordset = new hRecordSet(response.data);
+                            that._renderSummaryTags(recordset, panel);
+                        }
+                    });
+                
+            
+                break;
             default:
                 sContent = '<p>to be implemented</p>';
         }
 
-        if(idx>1) $(sContent).appendTo(panel);
+        if(idx>1 && sContent) $(sContent).appendTo(panel);
         
+    },
+    
+    
+    _renderSummaryTags: function(recordset, panel){
+        
+            var that = this, idx;
+            
+            panel.empty().css({'font-size': '0.9em'});
+            
+            $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>')
+                .css({'padding':'2px 4px 16px 4px'})
+                .attr('data-id', window.hWin.HAPI4.currentUser['ugr_ID'])
+                .hide().appendTo(panel);
+            
+            var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
+            if(groups)
+            for (idx in groups)
+            {
+                if(idx){
+                    var groupID = idx;
+                    var name = groups[idx][1];
+                    if(!window.hWin.HEURIST4.util.isnull(name))
+                    {
+                        $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>')
+                            .css({'padding':'0 2 4 2px'})
+                            .attr('data-id', groupID).hide().appendTo(panel);
+                    }
+                }
+            }
+            
+            var records = recordset.getRecords();
+            var order = recordset.getOrder();
+            var recID, label, groupid, record, grp;
+            
+            for (idx=0;idx<order.length;idx++){
+                recID = order[idx];
+                if(recID && records[recID]){
+                    record = records[recID];
+                    label = recordset.fld(record,'tag_Text');
+                    groupid = recordset.fld(record,'tag_UGrpID');
+                 
+                    grp = panel.find('div[data-id='+groupid+']').show();
+                    $('<a href="'
+                         + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=tag:'+label
+                         + '" target="_blank" style="display:inline-block; padding-right:4px">'+label+'</a>')
+                         .appendTo(grp);
+                     
+                }
+            }
+            
+            //append manage button
+            $('<div>').button({label:top.HR('Manage record tags'),
+                icons:{primary:'ui-icon-tag'}})
+                .css({float:'right', height: '18px'})
+                .click(function(){
+                        showManageUsrTags({
+                                select_mode:'select_multi', 
+                                selection_ids:order,
+                                select_return_mode:'recordset', //ids by default
+                                onselect:function(event, data){
+                                    if(data && data.selection)
+                                        that._renderSummaryTags(data.selection, panel);
+                                }
+                        } );
+                })
+             .appendTo(panel);        
+                             
     },
 
 
@@ -636,7 +730,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             +"structure modification in a new tab (button next to clicked one)";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
                     
-                        that._saveEditAndClose(function(){
+                        that._saveEditAndClose( null, function(){
                             that._editing.initEditForm(null, null); //clear edit form
                             that._initEditForm_step3(that._currentEditID); //reload edit form                       
                             that.editRecordType();
@@ -914,9 +1008,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //  send update request and close popup if edit is in dialog
     // OVERRIDE
     //
-    _saveEditAndClose: function( afterAction ){
+    _saveEditAndClose: function( fields, afterAction ){
 
-            var fields = this._getValidatedValues(); 
+            if(!fields){
+                fields = this._getValidatedValues(); 
+            }
             
             if(fields==null) return; //validation failed
        
