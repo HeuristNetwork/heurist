@@ -74,8 +74,15 @@ $.widget( "heurist.manageEntity", {
         filter_group_selected:null,
         filter_groups: null,
 
+        in_popup_dialog: false, //rare case when it is opened in popup iframe
+        
         //EDIT section
-        edit_mode:'inline', //'popup', 'none'  
+        // none - edit from and buttons are hiiden
+        // popup - edit form is opened in as popup
+        // inline - edit form next to list on the same screen
+        // only  - list is hidden onle edit form is visible
+        //  NOTE if select_mode is not manager edit mode is changed to popup forcefully
+        edit_mode:'inline', // none, popup, inline, only 
         edit_height:null,
         edit_width :null,
         edit_title :null,
@@ -97,7 +104,7 @@ $.widget( "heurist.manageEntity", {
         entity: {},       //configuration
         
         //listeners
-        onInitFinished:null,
+        onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
         beforeClose:null
 
     },
@@ -197,12 +204,21 @@ $.widget( "heurist.manageEntity", {
             };
         }
         
-        //for select and select mode - editor is always popup    
-        if(this.options.edit_mode!='inline'){
-            this.recordList.parent().css('width','100%');
-            //hide edit form 
-            if(this.options.layout_mode=='short') this.editForm.parent().hide();
-            else if(this.options.layout_mode=='basic') this.editForm.hide();
+        if(this.options.layout_mode=='short' || this.options.layout_mode=='basic'){
+        
+            //for select and select mode - editor is always popup    
+            if(this.options.edit_mode=='none' || this.options.edit_mode=='popup'){ //hide edit form
+                this.recordList.parent().css('width','100%');
+                //hide edit form 
+                if(this.options.layout_mode=='short') this.editForm.parent().hide();
+                else if(this.options.layout_mode=='basic') this.editForm.hide();
+                
+            }else if(this.options.edit_mode=='only'){  //hide list
+                this.recordList.parent().hide();
+                if(this.options.layout_mode=='short') this.editForm.parent().css('width','100%');
+                else if(this.options.layout_mode=='basic') this.editForm.css('width','100%');
+            }
+        
         }
         
         var that = this;
@@ -213,7 +229,7 @@ $.widget( "heurist.manageEntity", {
                         that.options.entity = entity;
                         if(that._initControls()){
                             if($.isFunction(that.options.onInitFinished)){
-                                that.options.onInitFinished.call();
+                                that.options.onInitFinished.call(that);
                             }        
                         }
                     });
@@ -223,7 +239,7 @@ $.widget( "heurist.manageEntity", {
             this._entityName = this.options.entity['entityName'];
             if(that._initControls()){
                 if($.isFunction(that.options.onInitFinished)){
-                    that.options.onInitFinished.call();
+                    that.options.onInitFinished.call( that );
                 }        
             }
         }
@@ -577,7 +593,8 @@ $.widget( "heurist.manageEntity", {
                 btn_array.push({text:window.hWin.HR( options['selectbutton_label'] ),
                         click: function() { that._selectAndClose(); }}); 
             }
-            if(!options['in_popup_dialog']){
+            //if(options.in_popup_dialog===false){ //use usual close dialog
+            if(options.edit_mode!='only'){ //use usual close dialog
                 btn_array.push({text:window.hWin.HR('Close'), 
                         click: function() { that.closeDialog(); }}); 
             }
@@ -1122,7 +1139,7 @@ $.widget( "heurist.manageEntity", {
     //
     _afterInitEditForm: function(){
 
-        if(this.options.edit_mode=='inline'){
+        if(this.options.edit_mode=='inline'){ //make labels in edit form narrower
             //@todo reduce it in css                 
             this.editForm.find('.header').css({'min-width':'100px','width':'100px'});
 /*            

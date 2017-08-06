@@ -127,22 +127,3 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     
     
 });
-
-//
-// Show as dialog
-//
-function showManageDefFileExtToMimetype( options ){
-
-    var manage_dlg = $('#heurist-records-dialog');  //@todo - unique ID
-
-    if(manage_dlg.length<1){
-        
-        options.isdialog = true;
-
-        manage_dlg = $('<div id="heurist-records-dialog">')
-        .appendTo( $('body') )
-        .manageDefFileExtToMimetype( options );
-    }
-
-    manage_dlg.manageDefFileExtToMimetype( 'popupDialog' );
-}

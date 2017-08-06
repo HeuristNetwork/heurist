@@ -36,7 +36,7 @@ class DbEntityBase
     protected $primaryField; 
     
     /*
-        fields structure description (used in validataion and access)
+        fields structure description from json (used in validataion and access)
     */
     protected $fields;  
 
@@ -59,7 +59,7 @@ class DbEntityBase
     protected $recordIDs;
 
     //
-    // cconstructor - load configuration from json file
+    // constructor - load configuration from json file
     //    
     function __construct( $system, $data ) {
        $this->system = $system;
@@ -339,7 +339,7 @@ class DbEntityBase
                 $this->_readFields($field['children']);
                 
             }else{
-                if(@$field['dtFields']['dty_Role']=='virtual') continue; //skip
+                //if(@$field['dtFields']['dty_Role']=='virtual') continue;
                 $this->fields[ $field['dtID'] ] = $field['dtFields'];
                 
                 if(@$field['dtFields']['dty_Role']=='primary'){

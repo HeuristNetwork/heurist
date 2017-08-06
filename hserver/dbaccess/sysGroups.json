@@ -105,7 +105,7 @@
                     "dtID": "ugr_eMail",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "rst_Display":"readonly"
+                        "rst_Display":"hidden"
                     }
                 }
      ]

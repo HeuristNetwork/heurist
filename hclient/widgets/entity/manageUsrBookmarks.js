@@ -429,19 +429,3 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         return this._super();
     }
 });
-
-//
-// Show as dialog - to remove
-//
-function showManageUsrTags( options ){
-
-    options.isdialog = true;
-    
-    var manage_dlg = $('<div id="heurist-tags-dialog-'+window.hWin.HEURIST4.util.random()+'">')
-        .appendTo( $('body') )
-        .manageUsrTags( options );
-    
-    manage_dlg.manageUsrTags( 'popupDialog' );
-    
-    return manage_dlg;
-}

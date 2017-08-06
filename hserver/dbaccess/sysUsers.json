@@ -26,7 +26,7 @@
                 {
                     "dtID": "ugr_Type",
                     "dtFields":{
-                        "dty_Type":"freetext",
+                        "dty_Type":"enum",
                         "rst_Display":"hidden"
                     }
                 },
@@ -70,9 +70,7 @@
                         "dty_Size":40,
                         "rst_DisplayWidth":40,
                         "rst_DisplayName": "Password:",
-                        "rst_DisplayHelpText": "Leave blank if you do not want to change your password", 
-                        "rst_RequirementType":"required",
-                        "rst_FieldConfig":[]
+                        "rst_DisplayHelpText": "Leave blank if you do not want to change your password"
                     }
                 },
                 {
@@ -128,8 +126,7 @@
                         "dty_Size":120,
                         "rst_DisplayWidth":40,
                         "rst_DisplayName": "Department",
-                        "rst_DisplayHelpText": "", 
-                        "rst_RequirementType":"required"
+                        "rst_DisplayHelpText": ""
                     }
                 },
                 {
@@ -139,8 +136,7 @@
                         "dty_Size":120,
                         "rst_DisplayWidth":40,
                         "rst_DisplayName": "Suburb/City",
-                        "rst_DisplayHelpText": "", 
-                        "rst_RequirementType":"required"
+                        "rst_DisplayHelpText": ""
                     }
                 },
                 {
@@ -150,8 +146,7 @@
                         "dty_Size":40,
                         "rst_DisplayWidth":40,
                         "rst_DisplayName": "State",
-                        "rst_DisplayHelpText": "", 
-                        "rst_RequirementType":"required"
+                        "rst_DisplayHelpText": ""
                     }
                 },
                 {
@@ -161,10 +156,28 @@
                         "dty_Size":20,
                         "rst_DisplayWidth":20,
                         "rst_DisplayName": "Zip/postcode",
-                        "rst_DisplayHelpText": "", 
-                        "rst_RequirementType":"required"
+                        "rst_DisplayHelpText": ""
+                    }
+                },
+                {
+                    "dtID": "ugl_GroupID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ugl_Role",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "Role:",
+                        "rst_FieldConfig":["admin","member"],
+                        "rst_Display":"hidden"
                     }
                 }
+                
                 
      ]
 }

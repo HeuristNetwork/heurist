@@ -510,22 +510,3 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     }
 
 });
-
-//
-// Show as dialog - to remove
-//
-function showManageDefTerms( options ){
-
-    var manage_dlg = $('#heurist-records-dialog');  //@todo - unique ID
-
-    if(manage_dlg.length<1){
-        
-        options.isdialog = true;
-
-        manage_dlg = $('<div id="heurist-records-dialog">')
-                .appendTo( $('body') )
-                .manageDefTerms( options );
-    }
-
-    manage_dlg.manageDefTerms( 'popupDialog' );
-}

@@ -1138,9 +1138,9 @@ window.hWin.HEURIST4.ui = {
                 var isPopup = false;
                 
                 var popup_options = {
+                    isdialog: true,
                     select_mode: 'manager',
-                    edit_mode: 'inline',
-                    in_popup_dialog: true,
+                    edit_mode: 'only', //only edit form is visible, list is hidden
                     height: usrPreferences.height,
                     width: usrPreferences.width,
                     title: window.hWin.HR('Edit record'),
@@ -1155,7 +1155,7 @@ window.hWin.HEURIST4.ui = {
                         + '</div>'
                         + '<div class="ent_footer editForm-toolbar"/>'
                     +'</div>',
-                    onInitFinished:function(){
+                    onInitFinished:function( ){
                         
                         if(query_request){
                             if(!$.isPlainObject(query_request)){
@@ -1164,6 +1164,8 @@ window.hWin.HEURIST4.ui = {
                         }else if(rec_ID>0){
                             query_request = {q:'ids:'+rec_ID, w:'all'};
                         }
+                        
+                        var widget = this;
                         
                         if(query_request){
                             
@@ -1178,28 +1180,36 @@ window.hWin.HEURIST4.ui = {
                                     
                                     var recset = new hRecordSet(response.data);
                                     if(recset.length()>0){
-                                        $container.manageRecords('updateRecordList', null, {recordset:recset});
-                                        $container.manageRecords('addEditRecord', 
+/*                                        
+                                        widget.manageRecords('updateRecordList', null, {recordset:recset});
+                                        widget.manageRecords('addEditRecord', 
                                                         (rec_ID>0)?rec_ID:recset.getOrder()[0]);
+*/                                                        
+                                        widget.updateRecordList(null, {recordset:recset});
+                                        widget.addEditRecord( (rec_ID>0)?rec_ID:recset.getOrder()[0] );
+                                                        
                                     }
-                                    else if(isPopup){
-                                        window.close();  //nothing found
+                                    else {
+                                        widget.closeEditDialog();
+                                        //window.close();  //nothing found
                                     }
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
-                                    if(isPopup){ window.close(); }
+                                    widget.closeEditDialog();
+                                    //window.close();
                                 }
 
                             });
                         
                         }else{
-                            $container.manageRecords('addEditRecord',-1);
+                            widget.addEditRecord(-1);
+                            //$container.manageRecords('addEditRecord',-1);
                         }                            
                         
                     }
                 }    
     
-                $container = window.hWin.HEURIST4.ui.showEntityDialog('Records', popup_options);
+                window.hWin.HEURIST4.ui.showEntityDialog('Records', popup_options);
     },
     
     openRecordInPopup:function(rec_ID, query_request, isEdit, callback){

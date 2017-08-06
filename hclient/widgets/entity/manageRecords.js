@@ -245,13 +245,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }//popup
             else if(this.editFormToolbar){ //initialize action buttons
                 
-                // in_popup_dialog - it means that search(manage) is not visible 
+                // in_popup_dialog - it means that list is not visible 
                 // we works with edit part only
                 
-                if(!this.options.in_popup_dialog){
+                if(this.options.in_popup_dialog===false){
                     //this is standalone window
-                    btn_array.pop();btn_array.pop(); //remove to last buttons about close
-                }else{
+                    btn_array.pop();btn_array.pop(); //remove two last buttons about close edit form
+                }
+                if(this.options.edit_mode=='only'){
                     //this is popup dialog
                    this.editFormToolbar
                      .addClass('ui-dialog-buttonpane')
@@ -354,12 +355,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //save preferences
         var that = this;
         
-        if(this.options.in_popup_dialog==true){
-            if(this.options.isdialog){
-                this._as_dialog.dialog('close');
-            }else{ 
+        if(this.options.edit_mode=='only'){
+            
+            if(this.options.in_popup_dialog==true){
                 window.close(this._currentEditRecordset);
+            } else if(this.options.isdialog){
+                this._as_dialog.dialog('close');
             }
+            
         }else if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
             this._edit_dialog.dialog('close');
         }
@@ -681,7 +684,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 icons:{primary:'ui-icon-tag'}})
                 .css({float:'right', height: '18px'})
                 .click(function(){
-                        showManageUsrTags({
+                    
+                        window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                                isdialog: true,
                                 select_mode:'select_multi', 
                                 selection_ids:order,
                                 select_return_mode:'recordset', //ids by default
@@ -689,7 +694,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     if(data && data.selection)
                                         that._renderSummaryTags(data.selection, panel);
                                 }
-                        } );
+                        });
                 })
              .appendTo(panel);        
                              
@@ -1118,11 +1123,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             activeTabs:activeTabs} );
         }
 
-        if(that.options.in_popup_dialog==true){
+        
+        if(this.options.edit_mode=='only'){
             if(that.options.isdialog){
                 window.hWin.HAPI4.save_pref('edit_record_dialog', {width: that._as_dialog.dialog('option','width'), 
                                                                height: that._as_dialog.dialog('option','height')});
-            }else{
+            }else if(that.options.in_popup_dialog==true){
                 window.hWin.HAPI4.save_pref('edit_record_dialog', {width: window.innerWidth+20, height:window.innerHeight+46});
             }            
         }else                
@@ -1136,32 +1142,3 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     
 });
-
-//
-// Show as dialog - to remove
-//
-function showManageRecords( options ){
-
-    var manage_dlg; // = $('#heurist-records-dialog');  //@todo - unique ID
-
-    if(true){ //manage_dlg.length<1){
-
-
-        /*
-        var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
-            {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
-                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-        options.width = usrPreferences['width'];
-        options.height = usrPreferences['height'];
-        */
-        options.isdialog = true;
-        
-        manage_dlg = $('<div id="heurist-records-dialog-'+window.hWin.HEURIST4.util.random()+'">')
-        .appendTo( $('body') )
-        .manageRecords( options );
-    }
-
-    manage_dlg.manageRecords( 'popupDialog' );
-    
-    return manage_dlg; 
-}

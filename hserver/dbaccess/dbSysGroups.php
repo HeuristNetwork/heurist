@@ -45,8 +45,6 @@ class DbSysGroups extends DbEntityBase
                 
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
 
-        $this->data['ugr_Type'] = 'workgroup';
-        
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
             $this->data = $res;
@@ -59,7 +57,7 @@ class DbSysGroups extends DbEntityBase
         $needCount = false;
 
         //compose WHERE 
-        $where = array();
+        $where = array('ugr_Type="workgroup"');
         $from_table = array($this->config['tableName']);
         
         $pred = $this->searchMgr->getPredicate('ugr_ID');
@@ -67,10 +65,6 @@ class DbSysGroups extends DbEntityBase
 
         $pred = $this->searchMgr->getPredicate('ugr_Name');
         if($pred!=null) array_push($where, $pred);
-        
-        $pred = $this->searchMgr->getPredicate('ugr_Type');
-        if($pred!=null) array_push($where, $pred);
-        
         
         //find groups where this user is member or admin
         $pred = $this->searchMgr->getPredicate('ugl_UserID');

@@ -391,19 +391,3 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&pl
     }
     
 });
-
-//
-// Show as dialog - to remove in HEURIST.ui
-//
-function showManageRecUploadedFiles( options ){
-
-    var manage_dlg = $('<div id="heurist-files-dialog-'+window.hWin.HEURIST4.util.random()+'">')
-        .appendTo( $('body') )
-        .manageUsrTags( options );
-
-    options.isdialog = true;    
-        
-    manage_dlg.manageRecUploadedFiles( 'popupDialog' );
-    
-    return manage_dlg;
-}

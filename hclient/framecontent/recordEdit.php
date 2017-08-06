@@ -68,8 +68,8 @@
                     //hidden result list, inline edit form
                     var options = {
                         select_mode: 'manager',
-                        edit_mode: 'inline',
-                        in_popup_dialog: isPopup,  //to place action buttons into button panel and use window.close
+                        edit_mode: 'only',
+                        in_popup_dialog: isPopup,
                         layout_mode:'<div class="ent_wrapper">'
                             + '<div class="ent_content_full recordList"  style="display:none;"/>'
 

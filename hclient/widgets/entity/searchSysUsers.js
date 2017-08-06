@@ -101,9 +101,8 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             }
             
             if(this.input_search_inactive.is(':checked')){
-                request['ugl_Enabled'] = 'n';
+                request['ugr_Enabled'] = 'n';
             }
-            request['ugr_Type'] = 'user';
             
 /*
             if(this.element.find('#cb_selected').is(':checked')){
