@@ -1475,7 +1475,6 @@
     Report as above
 */    
         $ret = array();
-
         $vocab_id = getTermTopMostParent($termID);
         if($vocab_id>0){ //not vocab itself
          
@@ -1483,6 +1482,7 @@
                           .'dty_JsonTermIDTree='.$vocab_id
                           .' AND (dty_Type=\'enum\' or dty_Type=\'relationtype\')';
                 $res = $mysqli->query($query);
+                
                 if ($mysqli->error) {
                     $ret['error'] = "SQL error in checkTerms retreiving field types which use vocabulary $vocab_id: ".$mysqli->error;
                     return $ret;
@@ -1499,6 +1499,7 @@
                                 .'(dtl_Value='.$termID.')';
 
                             $res = $mysqli->query($query);
+                            
                             if ($mysqli->error) {
                                 $ret['error'] = "SQL error in checkTerms retreiving records which use term $termID: ".$query.$mysqli->error;
                                 return $ret;

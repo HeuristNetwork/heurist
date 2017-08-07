@@ -555,7 +555,7 @@ $.widget( "heurist.search_faceted", {
                     inpt.appendTo($fieldset);
                     that._input_fields['$X'+field['var']] = inpt;
                     
-                    inpt.find('.header').attr('title', field['help']); //@todo define option in editing_input
+                    inpt.find('.header').attr('title', field['help']).css('display','block'); //change from table-cell
                     
                     inpt.find('.input-div').css('display','inline-block');
                     

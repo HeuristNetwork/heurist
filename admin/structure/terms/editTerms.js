@@ -37,6 +37,16 @@ function getParentLabel(_node){
     }
 }
 
+function getVocabId(_node){
+    //if(_node.parent._type==="RootNode"){
+    if(_node.getLevel()==1){
+        return _node.data.id;
+    }else{
+        return getVocabId(_node.parent);
+    }
+}
+
+
 //aliases
 var Hul = top.HEURIST.util;
 
@@ -2460,6 +2470,9 @@ function EditTerms() {
 
                 var parentNodeId = null;
                 
+                //data.otherNode - dragging node
+                //node target node
+                
                 var isAddChild = (data.otherNode.getLevel()>1 && node.getLevel()===1 && !node.hasChildren());
                 if(isAddChild){
                     //add fist child to empty vocab
@@ -2480,9 +2493,13 @@ function EditTerms() {
                             data.otherNode.moveTo(node,data.hitMode);    
                         }                    
                 }
+                
+                //find vocabs for source and destination
+                vocab_id_Source = getVocabId(node);
+                vocab_id_Target = getVocabId(data.otherNode);
 
                 //move to another vocab
-                if (parentNodeId!=null && document.getElementById ('edParentId').value != parentNodeId){
+                if (parentNodeId!=null && vocab_id_Source != vocab_id_Target){
 
                     // verify whether term is in use in field that uses vocabulry
                     // if yes it means it can not be moved into different vocabulary
