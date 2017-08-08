@@ -189,8 +189,10 @@ class DbEntityBase
             return false;
         }
         
+        $mysqli = $this->system->get_mysqli();
+        
         $mysqli->query('SET foreign_key_checks = 0');
-        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField.' in ('.implode(',',$rec_IDs).')';
+        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField.' in ('.implode(',', $this->recordIDs).')';
         $ret = $mysqli->query($query);
         $mysqli->query('SET foreign_key_checks = 1');
         
@@ -407,6 +409,25 @@ class DbEntityBase
        
         return true; 
     }    
+    
+    public function search_title(){
+
+        $this->data[$this->primaryField] = $this->data['recID'];
+        $this->data['details'] = 'name'; 
+
+        $ret = $this->search(); 
+        if($ret!==false){
+            $res = array();
+            foreach($ret['records'] as $record){
+                //$record[0]
+                $res[] = $record[1];    
+            }
+            return $res;
+        }else{
+            return false;
+        }
+
+    }
     
 }  
 ?>

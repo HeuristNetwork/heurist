@@ -1212,6 +1212,9 @@ window.hWin.HEURIST4.ui = {
                 window.hWin.HEURIST4.ui.showEntityDialog('Records', popup_options);
     },
     
+    //
+    //  
+    //
     openRecordInPopup:function(rec_ID, query_request, isEdit, callback){
     
             var url = window.hWin.HAPI4.baseURL,
@@ -1221,6 +1224,9 @@ window.hWin.HEURIST4.ui = {
                 
                 window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, isEdit, callback);
                 return;
+                
+                // section below NOT USED
+                // it loads manageRecords in popup iframe
                 
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
                         {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
@@ -1502,9 +1508,14 @@ window.hWin.HEURIST4.ui = {
         }else{
             
             var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
+            var scripts = [ path+widgetName+'.js'];
+            
+            if(!(entityName=='UsrBookmarks' || entityName=='UsrReminders')){ //entities without search option
+                scripts.push(path+'search'+entityName+'.js');
+            }
             
             //load missed javascripts
-            $.getMultiScripts([ path+widgetName+'.js', path+'search'+entityName+'.js'])
+            $.getMultiScripts(scripts)
             .done(function() {
                 // all done
                 window.hWin.HEURIST4.ui.showEntityDialog(entityName, options);

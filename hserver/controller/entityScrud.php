@@ -39,6 +39,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/dbSysImportFiles.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecords.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbUsrBookmarks.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbUsrReminders.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
@@ -65,6 +66,8 @@
     if($entity && $entity->isvalid()){
         if(@$_REQUEST['a'] == 'search'){
             $res = $entity->search();
+        }else  if(@$_REQUEST['a'] == 'title'){ //search for entity title by id
+            $res = $entity->search_title();
         }else if(@$_REQUEST['a'] == 'save'){
             $res = $entity->save();
         }else if(@$_REQUEST['a'] == 'delete'){

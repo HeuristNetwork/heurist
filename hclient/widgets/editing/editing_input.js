@@ -679,6 +679,10 @@ $.widget( "heurist.editing_input", {
                             select_return_mode = 'recordset';
                         }else{
                             icon_for_button = 'ui-icon-link';
+                            if(this.configMode && this.configMode.select_return_mode &&
+                               this.configMode.select_return_mode!='ids'){
+                                 select_return_mode = 'recordset'
+                            }
                         }
                 
                         $input.css({'min-wdith':'40ex', width:'auto'});
@@ -794,11 +798,22 @@ $.widget( "heurist.editing_input", {
                                                 $input.val(rec_Title).change();
                                             }
                                             
-                                        }else if( data && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
-                                            //config and data are loaded already, since dialog was opened
-                                            var display_value = window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, data.selection);
-                                            that.newvalues[$input.attr('id')] = data.selection.join(',');
-                                            $input.val( display_value.join(',') ).change();
+                                        }else if( data ){
+                                        
+                                            if(select_return_mode=='ids'
+                                                && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
+                                                //config and data are loaded already, since dialog was opened
+                                                window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, data.selection,
+                                                    function( display_value ){
+                                                            $input.val( display_value.join(',') );           
+                                                    });
+                                                that.newvalues[$input.attr('id')] = data.selection.join(',');
+                                                
+                                            }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                                //todo
+                                                
+                                            }
+                                            
                                         }
 
                                     }
@@ -828,9 +843,13 @@ $.widget( "heurist.editing_input", {
                                     $input.val( rec_Title );
                                     
                                 }else{
-                                    var display_value = window.hWin.HAPI4.EntityMgr
-                                                            .getTitlesByIds(entityName, value.split(','));
-                                    $input.val( display_value.join(',') );
+                                    
+                                    window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','),
+                                           function( display_value ){
+                                                $input.val( display_value.join(',') );           
+                                           });
+                                                         
+                                    
                                 }
                             }
                                 
@@ -990,7 +1009,7 @@ $.widget( "heurist.editing_input", {
             })
             .addClass("smallbutton btn_input_clear")
             .css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'',
-'margin-left': (this.detailType=='relmarker' || this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum')
+'margin-left': (this.detailType=='relmarker' || this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum'  || this.detailType=='date')
                         ?'0px':'-17px'
             })
             .appendTo( $inputdiv )

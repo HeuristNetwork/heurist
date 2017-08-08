@@ -26,8 +26,9 @@
                 {
                     "dtID": "rem_RecID",
                     "dtFields":{
-                        "dty_Type":"resource",
-                        "rst_DisplayName": "Record:"
+                        "dty_Type":"integer",
+                        "rst_DisplayName": "Record:",
+                        "rst_Display":"hidden"
                     }
                 },
                 {
@@ -44,7 +45,7 @@
                         "dty_Type":"resource",
                         "rst_DisplayName": "Workgroup:",
                         "rst_DisplayHelpText": "The workgroup to which the reminder should be sent", 
-                        "rst_FieldConfig": {"entity":"sysUGrps","filter_group":"workgroup"},
+                        "rst_FieldConfig": {"entity":"sysGroups"},
                         "rst_DisplayWidth":30
                     }
                 },  
@@ -52,9 +53,9 @@
                     "dtID": "rem_ToUserID",
                     "dtFields":{
                         "dty_Type":"resource",
-                        "rst_DisplayName": "User:",
+                        "rst_DisplayName": "Or user:",
                         "rst_DisplayHelpText": "The individual user to whom the reminder should be sent", 
-                        "rst_FieldConfig": {"entity":"sysUGrps","filter_group":"workgroup"},
+                        "rst_FieldConfig": {"entity":"sysUsers"},
                         "rst_DisplayWidth":30
                     }
                 },
@@ -64,7 +65,7 @@
                         "dty_Type":"freetext",
                         "dty_Size":254,
                         "rst_DisplayWidth":40,
-                        "rst_DisplayName": "Email:",
+                        "rst_DisplayName": "Or email:",
                         "rst_DisplayHelpText": "The individual email address(es) to which the reminder should be sent"
                     }
                 },
@@ -79,11 +80,23 @@
                     }
                 },
                 {
+                    "dtID": "rem_IsPeriodic",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"When:",
+                        "rst_DisplayWidth":20,
+                        "rst_FieldConfig":[
+                            {"key":"now","title":"Send manually"},
+                            {"key":"later","title":"Send later/periodic"}],
+                        "dty_Role":"virtual"
+                    }
+                },
+                {
                     "dtID": "rem_StartDate",
                     "dtFields":{
                         "dty_Type":"date",
-                        "rst_DisplayName": "Date:",
-                        "rst_DisplayHelpText": "The first (or only) date for sending the reminder"
+                        "rst_DisplayName": "Start date:",
+                        "rst_DisplayHelpText": "The first (or only) date for sending the reminder. Leave it empty to disable auto sending"
                     }
                 },
                 {

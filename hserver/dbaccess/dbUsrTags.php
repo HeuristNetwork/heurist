@@ -265,7 +265,7 @@ class DbUsrTags extends DbEntityBase
             return false;
         }
         
-        $mysqli = $system->get_mysqli();
+        $mysqli = $this->system->get_mysqli();
 
         $keep_autocommit = mysql__begin_transaction($mysqli);
         
@@ -280,7 +280,7 @@ class DbUsrTags extends DbEntityBase
             $system->addError(HEURIST_DB_ERROR,"Cannot detach tags from records", $mysqli->error );
             return false;
         }
-
+        
         //create new assignments
         $insert_query = 'INSERT IGNORE INTO usrRecTagLinks (rtl_RecID, rtl_TagID) '
             . 'SELECT rec_ID, tag_ID FROM usrTags, Records '
@@ -299,7 +299,7 @@ class DbUsrTags extends DbEntityBase
         
         //if at least one tag is private
         //add bookmarks if tags are private and record is not bookmarked yet
-        $ugrID = $system->get_user_id();
+        $ugrID = $this->system->get_user_id();
         
         if(null != mysql__select_value($mysqli, 'SELECT ugr_Type from usrTags where tag_ID in (' 
             . implode(',', $this->recordIDs) . ') AND tag_UGrpID ='.$ugrID.' LIMIT 1')){

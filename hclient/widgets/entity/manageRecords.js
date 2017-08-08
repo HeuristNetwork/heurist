@@ -248,11 +248,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 // in_popup_dialog - it means that list is not visible 
                 // we works with edit part only
                 
-                if(this.options.in_popup_dialog===false){
+                if(this.options.edit_mode=='editonly' && this.options.in_popup_dialog!==false){
                     //this is standalone window
                     btn_array.pop();btn_array.pop(); //remove two last buttons about close edit form
                 }
-                if(this.options.edit_mode=='only'){
+                if(this.options.edit_mode=='editonly'){
                     //this is popup dialog
                    this.editFormToolbar
                      .addClass('ui-dialog-buttonpane')
@@ -355,7 +355,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //save preferences
         var that = this;
         
-        if(this.options.edit_mode=='only'){
+        if(this.options.edit_mode=='editonly'){
             
             if(this.options.in_popup_dialog==true){
                 window.close(this._currentEditRecordset);
@@ -494,7 +494,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                     });
             
-
+            //old way! need to use getTitlesByIds
             window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_OwnerUGrpID'),that._getField('rec_AddedByUGrpID')]},
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
@@ -595,11 +595,20 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 break;
             case 3:   //private
             
+                if(panel.text()!='') return;
+                
+                panel.append('<div class="bookmark" style="min-height:2em;padding:4px 2px"/>'
+                +'<div class="reminders" style="min-height:2em;padding:4px 2px"/>');
+                
+                //find bookmarks and reminders
+                that._renderSummaryBookmarks(null, panel);
+                that._renderSummaryReminders(null, panel);
+            
+            
                 break;
             case 4:   //tags
             
                 if(panel.text()!='') return;
-                
                 panel.text('....');
             
                 var request = {};
@@ -631,7 +640,142 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
     },
     
+    //
+    //
+    //
+    _renderSummaryReminders: function(recordset, panel){
+        
+            var that = this, sContent = '',
+                pnl = panel.find('.reminders');
+                
+            pnl.empty().css({'font-size': '0.9em'});
+        
+            if(recordset==null){
+                
+                var request = {};
+                request['rem_RecID']  = this._currentEditID;
+                request['a']          = 'search'; //action
+                request['entity']     = 'usrReminders';
+                request['details']    = 'name';
+                request['request_id'] = window.hWin.HEURIST4.util.random();
+                var that = this;                                                
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            var recordset = new hRecordSet(response.data);
+                            that._renderSummaryReminders(recordset, panel);
+                        }
+                    });        
+      
+                return;
+            }
+        
+            if(recordset.length()==0){
+                sContent = 'no reminders';
+            }else{
+                
+                var rec = recordset.getFirstRecord();
+                var val = recordset.fld(rec, 'rem_ToWorkgroupID');
+                if(val){
+                    sContent = val;
+                }else{
+                    val = recordset.fld(rec, 'rem_ToUserID');    
+                    if(val) {
+                        sContent = val;
+                    } else{
+                        sContent = recordset.fld(rec, 'rem_ToEmail');    
+                    }
+                }
+                val = recordset.fld(rec, 'rem_Message');
+                if(val.length>30){
+                    val = val.subs(0,30)+'...';
+                }
+                sContent = 'Reminder to: '+sContent+' '+val;
+                //sContent = 'found :'+recordset.length();
+            }
+            pnl.append(sContent);
+
+            //append/manage button
+            $('<div>').button({label:top.HR('Manage reminders'), text:false,
+                icons:{primary:'ui-icon-mail'}})
+                .css({float:'right', height: '18px'})
+                .click(function(){
+                    
+                        window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
+                                isdialog: true,
+                                rem_RecID: that._currentEditID,
+                                onClose:function(){
+                                    //refresh
+                                    that._renderSummaryReminders(null, panel);
+                                }
+                        });
+                })
+             .appendTo(pnl);        
+            
+    },
     
+    //
+    //
+    //
+    _renderSummaryBookmarks: function(recordset, panel){
+
+            var that = this, sContent = '',
+                pnl = panel.find('.bookmark');
+                
+            pnl.empty().css({'font-size': '0.9em'});
+        
+            if(recordset==null){
+                
+                var request = {};
+                request['bkm_RecID']  = this._currentEditID;
+                request['a']          = 'search'; //action
+                request['entity']     = 'usrBookmarks';
+                request['details']    = 'name';
+                request['request_id'] = window.hWin.HEURIST4.util.random();
+                var that = this;                                                
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            var recordset = new hRecordSet(response.data);
+                            that._renderSummaryBookmarks(recordset, panel);
+                        }
+                    });        
+                return;
+            }
+        
+            //rating and password reminder
+            if(recordset.length()==0){
+                sContent = 'not bookmarked';
+            }else{
+                var rec = recordset.getFirstRecord();
+                var val = recordset.fld(rec, 'bkm_Rating');
+                sContent = (!window.hWin.HEURIST4.util.isempty(val))?('Rating: '+val+'. '):''; 
+                val = recordset.fld(rec, 'bkm_PwdReminder');
+                sContent = sContent + ((!window.hWin.HEURIST4.util.isempty(val))?('Password reminder: '+val):''); 
+            }
+            pnl.append(sContent);
+            
+            //append/manage button
+            $('<div>').button({label:top.HR('Manage bookmark info'), text:false,
+                icons:{primary:'ui-icon-bookmark'}})
+                .css({float:'right', height: '18px'})
+                .click(function(){
+                    
+                        window.hWin.HEURIST4.ui.showEntityDialog('usrBookmarks', {
+                                isdialog: true,
+                                bkm_RecID: that._currentEditID,
+                                onClose:function(){
+                                    //refresh
+                                    that._renderSummaryBookmarks(null, panel);
+                                }
+                                
+                        });
+                })
+             .appendTo(pnl);        
+    },
+    //
+    //
+    //
     _renderSummaryTags: function(recordset, panel){
         
             var that = this, idx;
@@ -680,7 +824,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             //append manage button
-            $('<div>').button({label:top.HR('Manage record tags'),
+            $('<div>').button({label:top.HR('Manage record tags'), text:false,
                 icons:{primary:'ui-icon-tag'}})
                 .css({float:'right', height: '18px'})
                 .click(function(){
@@ -691,8 +835,24 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 selection_ids:order,
                                 select_return_mode:'recordset', //ids by default
                                 onselect:function(event, data){
-                                    if(data && data.selection)
+                                    if(data && data.selection){
+                                        //assign new set of tags to record
+                                        
+                                        var request = {};
+                                        request['a']          = 'action'; //batch action
+                                        request['entity']     = 'usrTags';
+                                        request['tagIDs']  = data.selection.getOrder();
+                                        request['recIDs']  = that._currentEditID;
+                                        request['request_id'] = window.hWin.HEURIST4.util.random();
+                                        
+                                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                            function(response){
+                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                }
+                                            });
+                                        //update panel
                                         that._renderSummaryTags(data.selection, panel);
+                                    }
                                 }
                         });
                 })
@@ -1124,7 +1284,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
 
         
-        if(this.options.edit_mode=='only'){
+        if(this.options.edit_mode=='editonly'){
             if(that.options.isdialog){
                 window.hWin.HAPI4.save_pref('edit_record_dialog', {width: that._as_dialog.dialog('option','width'), 
                                                                height: that._as_dialog.dialog('option','height')});

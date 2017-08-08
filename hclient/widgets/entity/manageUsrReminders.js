@@ -1,5 +1,5 @@
 /**
-* manageUsrBookmarks.js - main widget to manage users bookmarks
+* manageUsrReminders.js - main widget to manage users reminders
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -18,11 +18,11 @@
 */
 
 //
-// there is no search, select mode for bookmarks - only edit
+// there is no search, select mode for reminders - only edit
 //
-$.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
+$.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
    
-    _entityName:'usrBookmarks',
+    _entityName:'usrReminders',
     
     //keep to refresh after modifications
     _keepRequest:null,
@@ -32,8 +32,8 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
-        this.options.width = 540;
-        this.options.height = 220;
+        this.options.width = 790;
+        this.options.height = 380;
         
 
         this._super();
@@ -48,11 +48,12 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
             return false;
         }
       
-//console.log('....'+this.options.bkm_RecID);        
+//
+console.log('....'+this.options.rem_RecID);        
         //load bookmark for given record id
-        if(this.options.bkm_RecID>0){
+        if(this.options.rem_RecID>0){
                 var request = {};
-                request['bkm_RecID']  = this.options.bkm_RecID;
+                request['rem_RecID']  = this.options.rem_RecID;
                 request['a']          = 'search'; //action
                 request['entity']     = this.options.entity.entityName;
                 request['details']    = 'full';
@@ -91,8 +92,8 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
 
     _saveEditAndClose: function( fields, afteraction ){
         
-        var ele2 = this._editing.getFieldByName('bkm_RecID');
-        ele2.editing_input('setValue', this.options.bkm_RecID );
+        var ele2 = this._editing.getFieldByName('rem_RecID');
+        ele2.editing_input('setValue', this.options.rem_RecID );
         
         this._super();// null, afteraction );
     },
@@ -103,5 +104,35 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         this.closeDialog();
     },
     
+    _afterInitEditForm: function(){
+
+        this._super();
+    
+        var that = this;
+        var ele = this._editing.getFieldByName('rem_IsPeriodic');
+        var val = this._getField('rem_StartDate');
+        
+        var isManual = window.hWin.HEURIST4.util.isempty(val) || val=='0000-00-00';
+        
+        function __onChangeType(){ 
+            var ele1 = that._editing.getFieldByName('rem_Freq');
+            var ele2 = that._editing.getFieldByName('rem_StartDate');
+            
+            var res = ele.editing_input('getValues'); 
+            if(res[0]=='now'){
+                    ele2.editing_input('setValue', '');
+                    ele1.hide();
+                    ele2.hide();
+            }else{
+                    ele1.show();
+                    ele2.show();
+            }
+        }
+        
+        ele.editing_input('option', 'change', __onChangeType);
+        ele.editing_input('setValue', isManual?'now':'later');
+        __onChangeType();
+    
+    }
     
 });

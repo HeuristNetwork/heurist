@@ -26,7 +26,7 @@ require_once (dirname(__FILE__).'/dbEntitySearch.php');
 require_once (dirname(__FILE__).'/db_files.php');
 
 
-class DbUsrBoomarks extends DbEntityBase
+class DbUsrBookmarks extends DbEntityBase
 {
 
     /**
@@ -167,5 +167,29 @@ class DbUsrBoomarks extends DbEntityBase
         
     }    
     
+    //
+    //
+    //
+    public function delete(){
+
+        $this->recordIDs = prepareIds($this->data['recID']);
+        
+        $mysqli = $this->system->get_mysqli();
+       
+        
+        $query = 'SELECT count(tag_ID) FROM usrBookmarks, usrTags, usrRecTagLinks where tag_ID=rtl_TagID AND tag_UGrpID='
+            .$this->system->get_user_id()
+            .' AND rtl_RecID=bkm_RecID AND bkm_ID in (' . implode(',', $this->recordIDs). ')';
+                       
+        $cnt = mysql__select_value($mysqli, $query);
+
+        if($cnt>0){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                    'It is not possible to remove bookmark. Bookmarked record has personal tags');
+                return false;
+        }
+    
+        $ret = parent::delete();    
+    }
 }
 ?>

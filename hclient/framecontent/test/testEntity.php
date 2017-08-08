@@ -349,8 +349,8 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
-                            <option value="Records">Records</option>
-                            <option value="SysUsers" selected>Users +</option>
+                            <option value="Records" selected>Records</option>
+                            <option value="SysUsers">Users +</option>
                             <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
@@ -394,6 +394,7 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <span style="padding-left:20px;">
                         <label>Edit mode</label>
+                        <label><input type="radio" name="edit_mode" value="editonly">edit only</label> 
                         <label><input type="radio" name="edit_mode" value="inline">inline</label> 
                         <label><input type="radio" name="edit_mode" checked=checked  value="popup">popup</label> 
                         <label><input type="radio" name="edit_mode" value="none">none</label> 

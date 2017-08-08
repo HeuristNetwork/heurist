@@ -777,7 +777,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('entityScrud', request, callback);
             },
 
-            getTitlesByIds:function(entityName, recIDs){
+            getTitlesByIds:function(entityName, recIDs, callback){
                 var idx, display_value = [];
                 if(entity_data[entityName]){
                    var ecfg = entity_configs[entityName];
@@ -787,10 +787,29 @@ function hAPI(_db, _oninit) { //, _currentUser
                         display_value.push(
                             edata.fld(edata.getById(recIDs[idx]), ecfg.titleField));
                    }
+                   
+                   callback.call(this, display_value);
                 }else{
-                   display_value = recIDs;
+                    
+                    
+                        var request = {};
+                        request['recID']  = recIDs;
+                        request['a']          = 'title'; //action
+                        request['entity']     = entityName;
+                        request['request_id'] = window.hWin.HEURIST4.util.random();
+                        
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                        function(response){
+                                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                
+                                                callback.call(this, response.data ); //array of titles
+                                            }else{
+                                                callback.call(this, recIDs);
+                                            }
+                                        }
+                                    );
+                                    
                 }
-                return display_value;
             }
 
         }

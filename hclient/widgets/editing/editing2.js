@@ -326,6 +326,9 @@ function hEditing(_options) {
         return details;
     }
     
+    //
+    // get values from editing form and assign to underlaying recordset
+    //
     function _assignValuesIntoRecord(){
     
         if(recdata!=null){ //for edit mode
@@ -444,6 +447,9 @@ function hEditing(_options) {
             return _getValues(needArrays);
         },
         
+        //
+        // get values from editing form and assign to underlaying recordset
+        //
         assignValuesIntoRecord:function(){
             _assignValuesIntoRecord();
         },

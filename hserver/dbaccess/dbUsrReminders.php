@@ -83,7 +83,7 @@ class DbUsrReminders extends DbEntityBase
             
         }else if(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
 
-            $this->data['details'] = 'rem_RecID,rem_OwnerUGrpID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq';
+            $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq';
             
         }else{
             $needCheck = true;
