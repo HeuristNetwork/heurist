@@ -70,7 +70,7 @@
                         select_mode: 'manager',
                         edit_mode: 'only',
                         in_popup_dialog: isPopup,
-                        layout_mode:'<div class="ent_wrapper">'
+                        layout_mode:'<div class="ent_wrapper editor">'
                             + '<div class="ent_content_full recordList"  style="display:none;"/>'
 
                             + '<div class="ent_header" style="text-align:center;padding:6px 0 0 0;"><h2 style="color:red">EXPERIMENTAL - THIS FUNCTION IS IN COURSE OF DEVELOPMENT</h2></div>'

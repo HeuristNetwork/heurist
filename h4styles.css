@@ -201,7 +201,6 @@ fieldset > div > .header_narrow{
     display:table-cell;
     text-align:right;
     padding-top:0.4em;
-    padding-right:1em;
 }
 fieldset.ontop > div > .header{
     display:block;
@@ -293,7 +292,7 @@ input.text, select.text {
 .smallbutton{
     width: 16px !important;
     height: 16px !important;
-    margin-left: 0.4em;
+    margin: 0.4em;
 }
 
 /* FOR SELECT */
@@ -1059,6 +1058,47 @@ background: #8ea9b9
 
 .ent_content_full{position:absolute; top:2.8em;bottom:0; left:0;right:1px;overflow-y:auto}
 .ent_footer{bottom:0px; height:2.6em}
+
+.ent_wrapper.editor{
+    background-color:#ECF1FB !important; /*rgba(142,169,185,0.8);*/
+    font-size:0.9em;
+}
+
+.ent_wrapper.editor fieldset > div{
+    border-bottom: 1px solid RGBA(255,255,255,0.5);
+    display: table;
+    padding-top: 0.5em;
+}
+
+.ent_wrapper.editor .header{
+    color:#6A7C99; /*#354F75*/
+}
+
+.ent_wrapper.editor .text{
+    background: none repeat scroll 0 0 #FFF  !important;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    margin: 2px 0;
+    padding: 3px;    
+}
+
+.ent_wrapper.editor .separator{
+    text-transform: uppercase;
+    color:#999;
+    border-top: 1px solid #A4B4CB;
+}
+
+.ent_wrapper.editor .smallbutton{
+    color:black;
+}
+
+.ent_wrapper.editor .heurist-helper1{
+    color: #999999;
+    font-style: normal;
+    font-size: 10px;
+    font-weight: normal;
+    padding-top: 0.1em;    
+}
+
 
 .div-result-list-toolbar{padding:0.2em 0.5em}
 /*

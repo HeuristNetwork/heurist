@@ -249,7 +249,7 @@ $.widget( "heurist.resultList", {
         //------------------------------------------       
 
         //if(this.options.innerHeader || this.options.select_mode=='select_multi'){
-        this.div_header =  $( "<div>" ).css('height','2.2em').appendTo( this.element );
+        this.div_header =  $( "<div>" ).css('height','2.2em').addClass('ui-widget-content').appendTo( this.element );
 
         $('<h3>'+window.hWin.HR('Filtered Result')+'</h3>')
         .css('padding','1em 0 0 0.7em')

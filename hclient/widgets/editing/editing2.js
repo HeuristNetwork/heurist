@@ -193,15 +193,23 @@ function hEditing(_options) {
                     //add header and field container
                     if(currGroupType == 'accordion'){
                          $('<h3>').text(headerText).appendTo(groupEle);
-                         fieldContainer.addClass('ui-heurist-bg-light').appendTo($('<div>').appendTo(groupEle));
+                         fieldContainer.appendTo($('<div>').appendTo(groupEle));
+                         
+                         if(groupEle.parents('.editor').length==0){
+                                fieldContainer.addClass('ui-heurist-bg-light');
+                         }
                          
                     }else if(currGroupType == 'tabs'){
                          $('<li>').html('<a href="#'+fieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
                                 .appendTo(groupTabHeader);
-                         $(fieldContainer).addClass('ui-heurist-bg-light').appendTo(groupEle);
+                         $(fieldContainer).appendTo(groupEle);
+                         
+                         if(groupEle.parents('.editor').length==0){
+                                fieldContainer.addClass('ui-heurist-bg-light');
+                         }
                          //.css({'font-size':'1em'})
                     }else{
-                         $('<h3>').text(headerText).appendTo(groupContainer);
+                         $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
                          fieldContainer.appendTo(groupContainer);
                     }
                         
@@ -216,7 +224,7 @@ function hEditing(_options) {
                     }
                     
                     if(fields[idx]['dty_Type']=="separator"){
-                        $('<h3>').text(fields[idx]['rst_DisplayName']).addClass('separator').appendTo(fieldContainer);
+                        $('<h4>').text(fields[idx]['rst_DisplayName']).addClass('separator').appendTo(fieldContainer);
                     }else  
                     //if(fields[idx]['dtFields']['rst_Display']!="hidden") 
                     {
@@ -267,7 +275,10 @@ function hEditing(_options) {
             
         }//end of function
 
-        $container.addClass('ui-heurist-bg-light');        
+        if($container.parents('.editor').length==0){
+               $container.addClass('ui-heurist-bg-light');
+        }
+        
         __createGroup(recstructure, $container, null);
         
         $container.fadeIn(250);

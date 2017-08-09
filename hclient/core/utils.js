@@ -878,6 +878,50 @@ window.hWin.HEURIST4.util = {
         return (res && res.length>1)?res[1]:'';
     },
     
+    wktValueToDescription:function(wkt){
+        
+        // parse a well-known-text value and return the standard description (type + summary)
+        var matches = wkt.match(/^(p|c|r|pl|l) (?:point|polygon|linestring)\s?\(?\(([-0-9.+, ]+?)\)/i);
+        if(matches && matches.length>1){
+            
+        var typeCode = matches[1];
+
+        var pointPairs = matches[2].split(/,/);
+        var X = [], Y = [];
+        for (var i=0; i < pointPairs.length; ++i) {
+            var point = pointPairs[i].split(/\s+/);
+            X.push(parseFloat(point[0]));
+            Y.push(parseFloat(point[1]));
+        }
+
+        if (typeCode == "p") {
+            return { type: "Point", summary: X[0].toFixed(5)+", "+Y[0].toFixed(5) };
+        }
+        else if (typeCode == "l") {
+            return { type: "Path", summary: "X,Y ("+ X.shift().toFixed(5)+","+Y.shift().toFixed(5)+") - ("+X.pop().toFixed(5)+","+Y.pop().toFixed(5)+")" };
+        }
+        else {
+            X.sort();
+            Y.sort();
+
+            var type = "Unknown";
+            if (typeCode == "pl") type = "Polygon";
+            else if (typeCode == "r") type = "Rectangle";
+                else if (typeCode == "c") type = "Circle";
+                    else if (typeCode == "l") type = "Path";
+
+            var minX = X[0];
+            var minY = Y[0];
+            var maxX = X.pop();
+            var maxY = Y.pop();
+            return { type: type, summary: "X "+minX.toFixed(5)+","+maxX.toFixed(5)+" Y "+minY.toFixed(5)+","+maxY.toFixed(5) };
+        }
+        }else{
+            return {type:'',summary:''};
+        }
+        
+    },
+    
      versionCompare: function(v1, v2, options) {
          // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
          // used to detect change in version so that user is prompted to clear cache and reload

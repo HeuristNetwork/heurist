@@ -197,7 +197,7 @@ $.widget( "heurist.manageEntity", {
         this.editForm        = this.element.find('.editForm');
         this.editFormToolbar = this.element.find('.editForm-toolbar');
         
-        this.element.addClass('ui-heurist-bg-light');
+        //this.element.addClass('ui-heurist-bg-light');
         
         this.editForm.html('<div class="center-message">Select an entity in the list to edit</div>');
 
@@ -1028,8 +1028,8 @@ $.widget( "heurist.manageEntity", {
                     isOpenAready = this._edit_dialog.dialog('isOpen');
                 }catch(e){}
             }
-        } else { //inline 
-            isOpenAready = !this.editFormToolbar.is(':empty');
+        } else if(this.options.edit_mode=='inline') { //inline 
+            isOpenAready = this._toolbar && !this._toolbar.is(':empty');
         }
         
         if(!isOpenAready){            
@@ -1063,7 +1063,7 @@ $.widget( "heurist.manageEntity", {
                      
                 this._toolbar = this._edit_dialog.parent();     
                      
-            }else if(this.editFormToolbar){ //initialize action buttons
+            }else if(this.editFormToolbar.length>0){ //initialize action buttons
                 
                 this._toolbar = this.editFormToolbar;
                 this.editFormToolbar.empty();

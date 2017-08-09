@@ -87,6 +87,25 @@ $.widget( "heurist.editing_input", {
         var required = "";
         if(this.options.readonly || this.f('rst_Display')=='readonly') {
             required = "readonly";
+        }else{
+            if(!this.options.suppress_prompts){
+                required = this.f('rst_RequirementType');
+            }
+        }
+
+        //header
+        if(true || this.options.show_header){
+            this.header = $( "<div>")
+            .addClass('header '+required)
+            //.css('width','150px')
+            .css('vertical-align', (this.detailType=="blocktext" || this.detailType=='file')?'top':'')
+            .html('<label>'
+                + (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
+            .appendTo( this.element );
+        }
+        
+        //repeat button        
+        if(this.options.readonly || this.f('rst_Display')=='readonly') {
 
             //spacer
             $( "<span>")
@@ -95,13 +114,6 @@ $.widget( "heurist.editing_input", {
             .appendTo( this.element );
 
         }else{
-            if(!this.options.suppress_prompts){
-                required = this.f('rst_RequirementType');
-            }
-            /*if (required == 'optional') required = "optional";
-            else if (required == 'required') required = "required";
-            else if (required == 'recommended') required = "recommended";
-            else required = "";*/
 
             var repeatable = (Number(this.f('rst_MaxValues')) != 1)? true : false; //saw TODO this really needs to check many exist
 
@@ -131,18 +143,8 @@ $.widget( "heurist.editing_input", {
                     }
                 });
             }
-        }
-
-        //header
-        if(true || this.options.show_header){
-            this.header = $( "<div>")
-            .addClass('header '+required)
-            //.css('width','150px')
-            .css('vertical-align', (this.detailType=="blocktext" || this.detailType=='file')?'top':'')
-            .html('<label>'
-                + (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
-            .appendTo( this.element );
-        }
+        }        
+        
 
 
         //input cell
@@ -685,7 +687,7 @@ $.widget( "heurist.editing_input", {
                             }
                         }
                 
-                        $input.css({'min-wdith':'40ex', width:'auto'});
+                        $input.css({'min-wdith':'20ex'});
 
                         //old way - by default lookup for Records filtered by Record Types
                         var ptrset = that.f('rst_PtrFilteredIDs');
@@ -734,7 +736,7 @@ $.widget( "heurist.editing_input", {
                                             var record = recordset.getFirstRecord();
                                             var rec_Title = recordset.fld(record,'rec_Title');
                                             that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                                            $input.val(rec_Title).change();
+                                            $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex')).change();
                                         }
                                     }
                                 } );
@@ -747,8 +749,8 @@ $.widget( "heurist.editing_input", {
                                     if(that.options.recordset){
                                         var relations = that.options.recordset.getRelations();
                                         if(relations && relations.headers && relations.headers[value]){
-                                            var sTitle = window.hWin.HEURIST4.util.htmlEscape(relations.headers[value][0]);
-                                            $input.val(sTitle);
+                                            var rec_Title = window.hWin.HEURIST4.util.htmlEscape(relations.headers[value][0]);
+                                            $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));
                                         }
                                     }
                                     if(!sTitle){
@@ -756,7 +758,8 @@ $.widget( "heurist.editing_input", {
                                             function(response){
                                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                     var recordset = new hRecordSet(response.data);
-                                                    $input.val( recordset.fld(recordset.getFirstRecord(),'rec_Title') );        
+                                                    var rec_Title = recordset.fld(recordset.getFirstRecord(),'rec_Title');
+                                                    $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));     
                                                 }
                                             }
                                         );
@@ -795,7 +798,8 @@ $.widget( "heurist.editing_input", {
                                                     rec_Title = recordset.fld(record,'ulf_OrigFileName');
                                                 }
                                                 that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
-                                                $input.val(rec_Title).change();
+                                                
+                                                $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex')).change();
                                             }
                                             
                                         }else if( data ){
@@ -805,7 +809,8 @@ $.widget( "heurist.editing_input", {
                                                 //config and data are loaded already, since dialog was opened
                                                 window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, data.selection,
                                                     function( display_value ){
-                                                            $input.val( display_value.join(',') );           
+                                                            var rec_Title = display_value.join(',')
+                                                            $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));           
                                                     });
                                                 that.newvalues[$input.attr('id')] = data.selection.join(',');
                                                 
@@ -840,13 +845,14 @@ $.widget( "heurist.editing_input", {
                                     if(window.hWin.HEURIST4.util.isempty(rec_Title)){
                                         rec_Title = value.ulf_OrigFileName;
                                     }
-                                    $input.val( rec_Title );
+                                    $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));
                                     
                                 }else{
                                     
                                     window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','),
                                            function( display_value ){
-                                                $input.val( display_value.join(',') );           
+                                                var rec_Title  = display_value.join(',');           
+                                                $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));
                                            });
                                                          
                                     
@@ -958,13 +964,22 @@ $.widget( "heurist.editing_input", {
                         .css('vertical-align','top')
                         .appendTo( $inputdiv )
                         .button({icons:{primary: "ui-icon-globe"},text:false});
+                var $link_digitizer_dialog = $( '<a>', {title: "Click to draw map location"})
+                        .text( window.hWin.HR('Edit'))
+                        .css('cursor','pointer')
+                        .appendTo( $inputdiv );
+            
+                var geovalue = window.hWin.HEURIST4.util.wktValueToDescription(value);
+            
+                that.newvalues[$input.attr('id')] = value;
+                $input.val(geovalue.type+'  '+geovalue.summary);
                       
                 __show_mapdigit_dialog = function __show_select_dialog(event){
                     event.preventDefault();
 
                     var url = window.hWin.HAPI4.baseURL +
                     'hclient/framecontent/mapDraw.php?db='+window.hWin.HAPI4.database+
-                    '&wkt='+$input.val();
+                    '&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
                     
                     window.hWin.HEURIST4.msg.showDialog(url, {height:'800', width:'1000',
                         title: window.hWin.HR('Heurist map digitizer'),
@@ -973,12 +988,17 @@ $.widget( "heurist.editing_input", {
                         callback: function(location){
                             if( !window.hWin.HEURIST4.util.isempty(location) ){
                                 //that.newvalues[$input.attr('id')] = location
-                                $input.val(location.type+' '+location.wkt).change();
+                                that.newvalues[$input.attr('id')] = location.type+' '+location.wkt;
+                                var geovalue = window.hWin.HEURIST4.util.wktValueToDescription(location.type+' '+location.wkt);
+                                
+                                $input.val(geovalue.type+'  '+geovalue.summary).change();
+                                //$input.val(location.type+' '+location.wkt)
                             }
                         }
                     } );
                 };
 
+                this._on( $link_digitizer_dialog, { click: __show_mapdigit_dialog } );
                 this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
                 this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
             }
@@ -990,7 +1010,7 @@ $.widget( "heurist.editing_input", {
 
         if (parseFloat( this.f('rst_DisplayWidth') ) > 0 
             && this.detailType!='boolean' && this.detailType!='date') {    //if the size is greater than zero
-            $input.css('width', Math.round(2 + Math.min(100, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
+            $input.css('width', Math.round(2 + Math.min(80, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
         }
 
 
@@ -1009,7 +1029,8 @@ $.widget( "heurist.editing_input", {
             })
             .addClass("smallbutton btn_input_clear")
             .css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'',
-'margin-left': (this.detailType=='relmarker' || this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum'  || this.detailType=='date')
+'margin-left': (this.detailType=='relmarker' || this.detailType=='geo' || 
+                this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum'  || this.detailType=='date')
                         ?'0px':'-17px'
             })
             .appendTo( $inputdiv )
@@ -1160,7 +1181,7 @@ $.widget( "heurist.editing_input", {
         var res = null;
         var $input = $(input_id);
 
-        if(!(this.detailType=="resource" || this.detailType=='file')){
+        if(!(this.detailType=="resource" || this.detailType=='file' || this.detailType=='geo')){
             res = $input.val();
         }else {
             res = this.newvalues[$input.attr('id')];
