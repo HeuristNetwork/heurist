@@ -37,6 +37,8 @@ createRectypeTreeSelect - get SELECT for hierarchy of record types
     
 createUserGroupsSelect - get SELECT for list of given groups, othewise loads list of groups for current user    
 
+setValueAndWidth assign value to input and adjust its width
+
 ENTITY
 
 createEntitySelector - get id-name selector for specified entity
@@ -65,6 +67,12 @@ if (!window.hWin.HEURIST4.ui)
 
 window.hWin.HEURIST4.ui = {
 
+    setValueAndWidth: function(input, value){
+        if(window.hWin.HEURIST4.util.isempty(value)) value='';
+        input.val( value )
+            .css('width', (Math.min(80,Math.max(20,value.length))+4+'ex'));
+    },
+    
     //
     // helper function to add option to select element
     //
@@ -76,12 +84,16 @@ window.hWin.HEURIST4.ui = {
         if(disabled===true){
             option.disabled = true;
         }
+        
+        //$(option).appendTo($(sel));
+        
         try {
             // for IE earlier than version 8
             sel.add(option, sel.options[null]);
         }catch (ex2){
             sel.add(option, null);
         }
+        
         return option;
     },
 

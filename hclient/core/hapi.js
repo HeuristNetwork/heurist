@@ -389,7 +389,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('sys_structure', request, callback);
             }
 
-            ,get_defs_all: function(is_message, document){
+            ,get_defs_all: function(is_message, document, callback){
                 
                 window.hWin.HEURIST4.msg.bringCoverallToFront();
                 
@@ -416,6 +416,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                             window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
                         }      
+                        
+                        if($.isFunction(callback)) callback.call();
 
                         $(document).trigger(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                     }

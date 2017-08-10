@@ -32,8 +32,8 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
-        this.options.width = 540;
-        this.options.height = 220;
+        this.options.width = 620;
+        this.options.height = 280;
         
 
         this._super();

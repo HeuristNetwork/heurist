@@ -284,10 +284,11 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" )
         .addClass('div-result-list-toolbar ent_header')
-        .css({'border-bottom':'1px solid #cccccc'})
+        //.css({'border-bottom':'1px solid #cccccc'})
         .appendTo( this.element );
         this.div_content = $( "<div>" )
         .addClass('div-result-list-content ent_content_full')
+        .css({'border-top':'1px solid #cccccc','padding-top':'1em'})
         .css({'overflow-y':'scroll'})
         .appendTo( this.element );
 

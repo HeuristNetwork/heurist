@@ -703,6 +703,7 @@ CREATE TABLE usrBookmarks (
   bkm_Rating tinyint(3) unsigned NOT NULL default '0' COMMENT 'Five point rating for interest/quality/content',
   bkm_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Set to 1 if bookmark added by import, 0 if added by data entry',
   bkm_ZoteroID int(10) unsigned default NULL COMMENT 'Records your Zotero ID for this record for synchronisation with Zotero',
+  bkm_Notes text COMMENT 'Personal notes',
   PRIMARY KEY  (bkm_ID),
   UNIQUE KEY bkm_RecID (bkm_RecID,bkm_UGrpID),
   KEY bkm_UGrpID (bkm_UGrpID),

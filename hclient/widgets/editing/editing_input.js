@@ -736,7 +736,8 @@ $.widget( "heurist.editing_input", {
                                             var record = recordset.getFirstRecord();
                                             var rec_Title = recordset.fld(record,'rec_Title');
                                             that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                                            $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex')).change();
+                                            window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                            $input.change();
                                         }
                                     }
                                 } );
@@ -750,7 +751,7 @@ $.widget( "heurist.editing_input", {
                                         var relations = that.options.recordset.getRelations();
                                         if(relations && relations.headers && relations.headers[value]){
                                             var rec_Title = window.hWin.HEURIST4.util.htmlEscape(relations.headers[value][0]);
-                                            $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));
+                                            window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                         }
                                     }
                                     if(!sTitle){
@@ -759,7 +760,7 @@ $.widget( "heurist.editing_input", {
                                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                     var recordset = new hRecordSet(response.data);
                                                     var rec_Title = recordset.fld(recordset.getFirstRecord(),'rec_Title');
-                                                    $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));     
+                                                    window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                                 }
                                             }
                                         );
@@ -798,8 +799,8 @@ $.widget( "heurist.editing_input", {
                                                     rec_Title = recordset.fld(record,'ulf_OrigFileName');
                                                 }
                                                 that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
-                                                
-                                                $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex')).change();
+                                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                                $input.change();
                                             }
                                             
                                         }else if( data ){
@@ -809,8 +810,8 @@ $.widget( "heurist.editing_input", {
                                                 //config and data are loaded already, since dialog was opened
                                                 window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, data.selection,
                                                     function( display_value ){
-                                                            var rec_Title = display_value.join(',')
-                                                            $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));           
+                                                            var rec_Title = display_value.join(',');
+                                                            window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                                     });
                                                 that.newvalues[$input.attr('id')] = data.selection.join(',');
                                                 
@@ -845,14 +846,14 @@ $.widget( "heurist.editing_input", {
                                     if(window.hWin.HEURIST4.util.isempty(rec_Title)){
                                         rec_Title = value.ulf_OrigFileName;
                                     }
-                                    $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));
+                                    window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                     
                                 }else{
                                     
                                     window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','),
                                            function( display_value ){
                                                 var rec_Title  = display_value.join(',');           
-                                                $input.val( rec_Title ).css('width', (Math.min(80,Math.max(20,rec_Title.length))+4+'ex'));
+                                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                            });
                                                          
                                     
@@ -1009,8 +1010,8 @@ $.widget( "heurist.editing_input", {
         }
 
         if (parseFloat( this.f('rst_DisplayWidth') ) > 0 
-            && this.detailType!='boolean' && this.detailType!='date') {    //if the size is greater than zero
-            $input.css('width', Math.round(2 + Math.min(80, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
+            &&  this.detailType!='boolean' && this.detailType!='date') {    //if the size is greater than zero
+                $input.css('width', Math.round(2 + Math.min(80, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
         }
 
 

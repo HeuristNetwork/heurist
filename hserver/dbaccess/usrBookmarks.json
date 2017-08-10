@@ -78,6 +78,15 @@
                             {"key":5,"title":"*****"}
                         ]
                     }
+                },
+                {
+                    "dtID": "bkm_Notes",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":65535,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Personal notes:"
+                    }
                 }
      ]
 }
