@@ -92,6 +92,8 @@ $.widget( "heurist.editing_input", {
                 required = this.f('rst_RequirementType');
             }
         }
+        
+        var lblTitle = (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title);
 
         //header
         if(true || this.options.show_header){
@@ -99,8 +101,7 @@ $.widget( "heurist.editing_input", {
             .addClass('header '+required)
             //.css('width','150px')
             .css('vertical-align', (this.detailType=="blocktext" || this.detailType=='file')?'top':'')
-            .html('<label>'
-                + (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
+            .html('<label>' + lblTitle + '</label>')
             .appendTo( this.element );
         }
         
@@ -128,12 +129,15 @@ $.widget( "heurist.editing_input", {
             }else{ //multiplier button
                 this.btn_add = $( "<button>")
                 .addClass("smallbutton editint-inout-repeat-button")
+                //.css({'font-size':'2em'})
                 //.css('display','table-cell')
                 //.css({width:'16px', height:'16px', display:'table-cell'})
                 .appendTo( this.element )
-                .button({icons:{primary: "ui-icon-circlesmall-plus"}, text:false})
+                .button({icons:{primary: "ui-icon-circlesmall-plus"}, text:false, label:'Add another ' + lblTitle +' value'})
                 .css({display:'table-cell'});
-
+                
+                this.btn_add.find('span.ui-icon').css({'font-size':'2em'});
+                
                 // bind click events
                 this._on( this.btn_add, {
                     click: function(){
@@ -359,6 +363,7 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
+            .keyup(function(){that._onChange();})
             .change(function(){that._onChange();})
             .appendTo( $inputdiv );
 
@@ -564,6 +569,7 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
+            .keyup(function(){that._onChange();})
             .change(function(){
                     that._onChange();
             })
@@ -1011,7 +1017,7 @@ $.widget( "heurist.editing_input", {
 
         if (parseFloat( this.f('rst_DisplayWidth') ) > 0 
             &&  this.detailType!='boolean' && this.detailType!='date') {    //if the size is greater than zero
-                $input.css('width', Math.round(2 + Math.min(80, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
+                $input.css('width', Math.round(2 + Math.min(120, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
         }
 
 

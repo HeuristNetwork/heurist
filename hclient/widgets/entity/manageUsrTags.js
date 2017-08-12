@@ -49,6 +49,11 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     
             this._on( this.btn_show_usage, {"click": this.showHideUsage});
         
+        
+            this.searchForm.find('.heurist-helper1').hide();
+        }else{
+            this.searchForm.css('height','10em');    
+            this.recordList.css('top','10em');    
         }
         
     },
@@ -233,8 +238,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 
                 var item = '<div  recid="'+recID+'" class="recordDiv tagDiv"'
                     //(this.options.selection_ids.indexOf(recID)<0?'in-available':'in-selected')+'"
-                            +'><label>'+ label + '</label>' + (usage>0?(' ('+usage+')'):'')
-                            +'<div class="rec_action_link" data-key="delete"/>'
+                            +'><label>'+ label + (usage>0?(' ('+usage+')'):'')
+                            +'</label><div class="rec_action_link" data-key="delete"/>'
                             +'</div>';
                         
                 if(this.options.select_mode=='select_multi'){
@@ -403,7 +408,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 
                 
             }else{
-                this.recordList.find('div[recid='+recID+'] > label').text(fields['tag_Text']);
+                this.recordList.find('div[recid='+recID+'] > label').text(fields['tag_Text']
+                (fields['tag_Usage']>0?(' ('+fields['tag_Usage']+')'):''));
                 //reload
                 var recordset = this.getRecordSet([recID]);
                 this._initEditForm_step4(recordset);

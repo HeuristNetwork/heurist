@@ -70,10 +70,11 @@
         return user_getByField($mysqli, 'ugr_ID', $ugr_ID);
     }
     
-    function user_getNamesByIds($mysqli, $ugr_IDs){
+    function user_getNamesByIds($system, $ugr_IDs){
         
         $ugr_IDs = prepareIds($ugr_IDs);
         if(count($ugr_IDs)>0){
+            $mysqli = $system->get_mysqli();
             return mysql__select_assoc($mysqli, 'sysUGrps', 'ugr_ID'
                 , 'IF(ugr_Type=\'workgroup\',ugr_Name,concat(ugr_FirstName, \' \', ugr_LastName))'
                 , 'ugr_ID in ('.implode(',',$ugr_IDs).')');

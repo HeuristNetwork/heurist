@@ -627,6 +627,9 @@ $.widget( "heurist.manageEntity", {
 
             if(options.edit_mode == 'editonly'){
                 btn_array =  this._getEditDialogButtons();
+                if(!options.beforeClose){
+                    options.beforeClose = function(){that.saveUiPreferences();};
+                }
             }else {
                 //if(options.in_popup_dialog===false){ 
                 btn_array.push({text:window.hWin.HR('Close'), 
@@ -644,6 +647,7 @@ $.widget( "heurist.manageEntity", {
                 modal:  (options['modal']!==false),
                 title: window.hWin.HEURIST4.util.isempty(options['title'])?'':options['title'], //title will be set in  initControls as soon as entity config is loaded
 
+                beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {//fix bug
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
@@ -685,6 +689,7 @@ $.widget( "heurist.manageEntity", {
             this._as_dialog.dialog("open");
             
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
+                'prefs_'+this._entityName,
                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
             
         }
@@ -698,6 +703,10 @@ $.widget( "heurist.manageEntity", {
             this._as_dialog.dialog("close");
             //this.element.dialog('close');
         }
+    },
+    
+    saveUiPreferences:function(){
+        
     },
 
     //
@@ -1059,6 +1068,7 @@ $.widget( "heurist.manageEntity", {
                     
                     //help and tips buttons on dialog header
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this.editFormPopup,
+                        'prefs_'+this._entityName,
                      window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
                      
                 this._toolbar = this._edit_dialog.parent();     

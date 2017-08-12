@@ -107,11 +107,6 @@ $.widget( "heurist.searchEntity", {
                 this._on( this.btn_summary, { click: this.startSearch });
             }
                 
-            // help buttons
-            window.hWin.HEURIST4.ui.initHintButton(this.element.find('#btn_help_hints'));
-            window.hWin.HEURIST4.ui.initHelper(this.element.find('#btn_help_content'),'Help',
-                window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
-            
             var right_padding = window.hWin.HEURIST4.util.getScrollBarWidth()+4;
             this.element.find('#div-table-right-padding').css('min-width',right_padding);
         

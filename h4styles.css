@@ -340,12 +340,17 @@ optgroup {
 /*  SEARCH RESULT */
 
 .tagDiv {
-    border:1px solid gray;
     display: inline-block;
-    border-radius: 4px;
-    margin: 2px;
-    padding: 2px;
     cursor: pointer;
+    border: none;
+    background: none !important;
+    margin: 2px;
+    text-decoration: underline;
+    /*
+    border:1px solid gray;
+    border-radius: 4px;
+    padding: 2px;
+    */
 }
 .tagDiv > label{
     cursor: pointer;

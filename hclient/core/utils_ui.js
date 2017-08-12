@@ -1001,7 +1001,7 @@ window.hWin.HEURIST4.ui = {
     
     
     // Init button that show/hide help tips
-    initDialogHintButtons: function($dialog, helpcontent_url, hideHelpButton){
+    initDialogHintButtons: function($dialog, usrPrefKey, helpcontent_url, hideHelpButton){
         
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         
@@ -1010,7 +1010,9 @@ window.hWin.HEURIST4.ui = {
                     .addClass('dialog-title-button')
                     .css({'right':'48px'})
                     .appendTo(titlebar)
-                    .on('click', window.hWin.HEURIST4.ui.switchHintState);
+                    .on('click', function(event){
+                            window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog)   
+                    });
         }
 
         if(helpcontent_url){                    
@@ -1023,41 +1025,48 @@ window.hWin.HEURIST4.ui = {
         }
                     
     },
-                        
-    switchHintState: function switchState(event){
+      
+    //
+    //
+    //                  
+    switchHintState: function(usrPrefKey, $dialog){
             
-            var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
-
-            if(event!=null){ //need to change
-                ishelp_on = (ishelp_on==1 || ishelp_on==true)?0:1;
-                window.hWin.HAPI4.save_pref('help_on',ishelp_on);
-            }
-            
-            if(ishelp_on){
-                //$help_button.addClass('ui-state-focus');    
-                $('.heurist-helper1').css('display','block');
-                $('div.div-table-cell.heurist-helper1').css('display','table-cell');
+            var ishelp_on, prefs;
+            if(usrPrefKey==null){
+                ishelp_on = window.hWin.HAPI4.get_prefs('help_on');   
             }else{
-                //$help_button.removeClass('ui-state-focus');
-                $('.heurist-table-helper1').css('display','none');
-                $('.heurist-helper1').css('display','none');
+                prefs = window.hWin.HAPI4.get_prefs(usrPrefKey);   
+                ishelp_on = prefs ?prefs.help_on:true;
             }
+
+            //change to reverse
+            ishelp_on = !(ishelp_on==1 || ishelp_on==true || ishelp_on=='true');
+            if(usrPrefKey==null){
+                window.hWin.HAPI4.save_pref('help_on',ishelp_on);
+            }else{
+                if(!prefs) prefs = {};
+                prefs.help_on = ishelp_on;
+                window.hWin.HAPI4.save_pref(usrPrefKey, prefs);
+            }
+            
+            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $dialog);
+            
     },
     
-    // to remove?
     //
-    initHintButton: function(help_button){
-
-        var $help_button = $(help_button);
+    //
+    //
+    switchHintState2: function(state, $container){
         
-        var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
-        
-        
-        $help_button.button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
-                    .attr('data-state', ishelp_on)
-                    .on('click', window.hWin.HEURIST4.ui.switchHintState);
-        
-        window.hWin.HEURIST4.ui.switchHintState(null);
+            if(state){
+                //$help_button.addClass('ui-state-focus');    
+                $container.find('.heurist-helper1').css('display','block');
+                $container.find('div.div-table-cell.heurist-helper1').css('display','table-cell');
+            }else{
+                //$help_button.removeClass('ui-state-focus');
+                $container.find('.heurist-table-helper1').css('display','none');
+                $container.find('.heurist-helper1').css('display','none');
+            }
     },
     
     //
@@ -1503,6 +1512,13 @@ window.hWin.HEURIST4.ui = {
         if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
+            
+            if(options.isdialog){
+                options.onInitFinished = function(){
+                    manage_dlg[widgetName]( 'popupDialog' );    
+                }
+            }
+            
             if(!options.container){
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
@@ -1511,10 +1527,6 @@ window.hWin.HEURIST4.ui = {
                 manage_dlg = $(options.container)[widgetName]( options );
             }
             
-            if(options.isdialog){
-                manage_dlg[widgetName]( 'popupDialog' );
-            }
-        
             return manage_dlg;
         
         }else{

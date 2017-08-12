@@ -26,7 +26,7 @@
 function hAPI(_db, _oninit) { //, _currentUser
     var _className = "HAPI",
     _version   = "0.4",
-    _database = null, //same as public property  @toremove      s
+    _database = null, //same as public property  @toremove      
     _region = 'en',
     _regional = null, //localization resources
     _guestUser = {ugr_ID:0, ugr_FullName:'Guest' };
@@ -299,8 +299,26 @@ function hAPI(_db, _oninit) { //, _currentUser
             
             //get user full names by id
             ,usr_names:function(request, callback){
-                if(request) request.a = 'usr_names';
-                _callserver('usr_info', request, callback);
+
+                var sUserName = null;
+                var usr_ID = Number(request.UGrpID);
+                if(usr_ID==0){
+                    sUserName = window.hWin.HR('Everyone');
+                }else if(usr_ID == window.hWin.HAPI4.currentUser['ugr_ID']){
+                    sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
+                }else if(window.hWin.HAPI4.currentUser.usr_GroupsList 
+                        && window.hWin.HAPI4.currentUser.usr_GroupsList[usr_ID]){
+                    sUserName = window.hWin.HAPI4.currentUser.usr_GroupsList[usr_ID][1];
+                }
+                
+                if(sUserName){
+                    var res = {};
+                    res[usr_ID] = sUserName;
+                    callback.call(this, {status:window.hWin.HAPI4.ResponseStatus.OK, data:res} );
+                }else{
+                    if(request) request.a = 'usr_names';
+                    _callserver('usr_info', request, callback);
+                }
             }
 
             ,user_log: function(activity, suplementary){
@@ -779,7 +797,11 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('entityScrud', request, callback);
             },
 
+            //
+            //
+            //
             getTitlesByIds:function(entityName, recIDs, callback){
+                
                 var idx, display_value = [];
                 if(entity_data[entityName]){
                    var ecfg = entity_configs[entityName];

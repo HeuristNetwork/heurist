@@ -91,6 +91,8 @@ $.widget( "heurist.resultList", {
         if(this.options.pagesize<50 || this.options.pagesize>5000){
             this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
         }
+        
+        this.element.addClass('ui-heurist-bg-light');
 
         this._initControls();
 
@@ -248,8 +250,8 @@ $.widget( "heurist.resultList", {
 
         //------------------------------------------       
 
-        //if(this.options.innerHeader || this.options.select_mode=='select_multi'){
-        this.div_header =  $( "<div>" ).css('height','2.2em').addClass('ui-widget-content').appendTo( this.element );
+        //if(this.options.innerHeader || this.options.select_mode=='select_multi'){  .addClass('ui-widget-content')
+        this.div_header =  $( "<div>" ).css('height','3em').appendTo( this.element );
 
         $('<h3>'+window.hWin.HR('Filtered Result')+'</h3>')
         .css('padding','1em 0 0 0.7em')
@@ -257,7 +259,7 @@ $.widget( "heurist.resultList", {
 
         if(this.options.select_mode=='select_multi'){
             this.show_selected_only = $( "<div>" )
-            .addClass('ui-widget-content ent_select_multi')
+            .addClass('ent_select_multi')  //ui-widget-content 
             .css({'right':right_padding+2})
             .html(
                 '<label style="padding:0 0.4em;">'
@@ -283,11 +285,11 @@ $.widget( "heurist.resultList", {
         // -------------------------------------------
 
         this.div_toolbar = $( "<div>" )
-        .addClass('div-result-list-toolbar ent_header')
+        .addClass('div-result-list-toolbar ent_header ui-heurist-bg-light')
         //.css({'border-bottom':'1px solid #cccccc'})
         .appendTo( this.element );
         this.div_content = $( "<div>" )
-        .addClass('div-result-list-content ent_content_full')
+        .addClass('div-result-list-content ent_content_full ui-heurist-bg-light')
         .css({'border-top':'1px solid #cccccc','padding-top':'1em'})
         .css({'overflow-y':'scroll'})
         .appendTo( this.element );
@@ -672,7 +674,7 @@ $.widget( "heurist.resultList", {
                     if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
                         this.div_content_header = $('<div>')
                         .css({'height':'1.5em','width':'100%','padding-left':'0.8em'})
-                        .addClass('ui-widget-content"') //ui-widget ui-widget-header
+                        //.addClass('ui-widget-content"') //ui-widget ui-widget-header
                         .insertBefore(this.div_content);
                     }
                     this.div_content.css('top',(this.div_header!=null)?'7em':'4em');
