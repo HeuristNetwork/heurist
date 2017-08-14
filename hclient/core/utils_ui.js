@@ -1011,8 +1011,10 @@ window.hWin.HEURIST4.ui = {
                     .css({'right':'48px'})
                     .appendTo(titlebar)
                     .on('click', function(event){
-                            window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog)   
+                            window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, true);   
                     });
+                    
+           window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, false);         
         }
 
         if(helpcontent_url){                    
@@ -1029,7 +1031,7 @@ window.hWin.HEURIST4.ui = {
     //
     //
     //                  
-    switchHintState: function(usrPrefKey, $dialog){
+    switchHintState: function(usrPrefKey, $dialog, needReverse){
             
             var ishelp_on, prefs;
             if(usrPrefKey==null){
@@ -1040,13 +1042,16 @@ window.hWin.HEURIST4.ui = {
             }
 
             //change to reverse
-            ishelp_on = !(ishelp_on==1 || ishelp_on==true || ishelp_on=='true');
-            if(usrPrefKey==null){
-                window.hWin.HAPI4.save_pref('help_on',ishelp_on);
-            }else{
-                if(!prefs) prefs = {};
-                prefs.help_on = ishelp_on;
-                window.hWin.HAPI4.save_pref(usrPrefKey, prefs);
+            ishelp_on = (ishelp_on==1 || ishelp_on==true || ishelp_on=='true');
+            if(needReverse){
+                ishelp_on = !ishelp_on;
+                if(usrPrefKey==null){
+                    window.hWin.HAPI4.save_pref('help_on',ishelp_on);
+                }else{
+                    if(!prefs) prefs = {};
+                    prefs.help_on = ishelp_on;
+                    window.hWin.HAPI4.save_pref(usrPrefKey, prefs);
+                }
             }
             
             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $dialog);
@@ -1307,12 +1312,13 @@ window.hWin.HEURIST4.ui = {
         }
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
-                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;padding-bottom:0.2em;">'
+                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
                         + (info['trm_ID']>0
-                           ?'<div class="detailType" style="display:inline-block;width:15ex">'
+                           ?'<div class="detailType" style="display:inline-block;width:15ex;padding-top:4px;float:left;">'
                             + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
                            :'')  
-                        + '<div class="detail truncate" style="display:inline-block;min-width:35ex;max-width:50ex">'
+                        + '<div class="detail truncate" '
+                        + 'style="display:inline-block;min-width:35ex;max-width:50ex;padding:2px;">'
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
                         + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']+'">'
@@ -1512,12 +1518,6 @@ window.hWin.HEURIST4.ui = {
         if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
-            
-            if(options.isdialog){
-                options.onInitFinished = function(){
-                    manage_dlg[widgetName]( 'popupDialog' );    
-                }
-            }
             
             if(!options.container){
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')

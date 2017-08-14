@@ -88,7 +88,7 @@ $.widget( "heurist.editing_input", {
         if(this.options.readonly || this.f('rst_Display')=='readonly') {
             required = "readonly";
         }else{
-            if(!this.options.suppress_prompts){
+            if(!this.options.suppress_prompts && this.f('rst_Display')!='hidden'){
                 required = this.f('rst_RequirementType');
             }
         }
@@ -170,7 +170,7 @@ $.widget( "heurist.editing_input", {
         var help_text = this.f('rst_DisplayHelpText');
         this.input_prompt = $( "<div>")
         .text( help_text && !this.options.suppress_prompts ?help_text:'' )
-        .addClass('heurist-helper1');
+        .addClass('heurist-helper1').css('padding-bottom','1em');
         if(window.hWin.HAPI4.get_prefs('help_on')!=1){
             this.input_prompt.hide();
         }
@@ -328,7 +328,7 @@ $.widget( "heurist.editing_input", {
     
     _onChange: function(event){
         if($.isFunction(this.options.change)){
-            this.options.change.call();    
+            this.options.change.call( this );    
         }
     },
 
@@ -574,8 +574,56 @@ $.widget( "heurist.editing_input", {
                     that._onChange();
             })
             .appendTo( $inputdiv );
+            
+            
+            if(this.options.dtID=='rec_URL'){
+                
+                    var $btn_extlink = null, $btn_editlink = null;
+                
+                    function __url_input_state(force_edit){
+                    
+                        if($input.val()=='' || force_edit===true){
+                            $input.removeClass('rec_URL').addClass('text').removeAttr("readonly");
+                            that._off( $input, 'click');
+                            if(!window.hWin.HEURIST4.util.isnull( $btn_extlink)){
+                                $btn_extlink.remove();
+                                $btn_editlink.remove();
+                                $btn_extlink = null;
+                                $btn_editlink = null;
+                            }
+                            if(force_edit===true){
+                                $input.focus();   
+                            }
+                        }else if(window.hWin.HEURIST4.util.isnull($btn_extlink)){
+                            
+                            if(!($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0)){
+                                $input.val( 'http://'+$input.val());
+                            }
+                            $input.addClass('rec_URL').removeClass('text').attr('readonly','readonly');
+                            
+                            $btn_extlink = $( '<button>', {title: 'Open URL in new window'})
+                                .addClass('smallbutton')
+                                .appendTo( $inputdiv )
+                                .button({icons:{primary: 'ui-icon-extlink'},text:false});
+                        
+                            that._on( $btn_extlink, { click: function(){ window.open($input.val(), '_blank') }} );
+                            that._on( $input, { click: function(){ window.open($input.val(), '_blank') }} );
 
-            if(this.detailType=="integer" || this.detailType=="year"){
+                            $btn_editlink = $( '<button>', {title: 'Edit URL'})
+                                .addClass('smallbutton')
+                                .appendTo( $inputdiv )
+                                .button({icons:{primary: 'ui-icon-pencil'},text:false});
+                        
+                            that._on( $btn_editlink, { click: function(){ __url_input_state(true) }} );
+                        }
+                
+                    }
+                
+                    $input.focusout( __url_input_state ); 
+                    
+                    __url_input_state();               
+                
+            }else if(this.detailType=="integer" || this.detailType=="year"){
 
                 $input.keypress(function (e) {
                     var code = (e.keyCode ? e.keyCode : e.which);
@@ -657,23 +705,75 @@ $.widget( "heurist.editing_input", {
                             showButtonPanel: true,
                             changeMonth: true,
                             changeYear: true,
-                            dateFormat: "yy-mm-dd"
+                            dateFormat: 'yy-mm-dd',
+                            onSelect: function(dateText, inst){
+                                $input.change();
+                            }
                             /*,beforeShow : function(dateText, inst){
                                 $(inst.dpDiv[0]).find('.ui-datepicker-current').click(function(){
-                                    console.log('today '+$datepicker.datepicker( "getDate" ));  
+                                    console.log('today '+$datepicker.datepicker( 'getDate' ));  
                                 });
                             }*/
                         });
 
-                        var $btn_datepicker = $( "<button>", {title: "Show calendar"})
-                        .addClass("smallbutton")
+                        var $btn_datepicker = $( '<button>', {title: 'Show calendar'})
+                        .addClass('smallbutton')
                         .appendTo( $inputdiv )
-                        .button({icons:{primary: "ui-icon-calendar"},text:false});
+                        .button({icons:{primary: 'ui-icon-calendar'},text:false});
 
                         
-                        this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( "show" ); }} );
-                }  
+                        this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( 'show' ); }} );
+                } 
+
+                if(this.options.dtID>0){ //this is details of records
+                
+                    var $btn_temporal = $( '<button>', 
+                        {title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)'})
+                    .addClass('smallbutton')
+                    .appendTo( $inputdiv )
+                    .button({icons:{primary: 'ui-icon-clock'}, text:false});
+                    
+                    this._on( $btn_temporal, { click: function(){
                         
+                                var url = window.hWin.HAPI4.baseURL 
+                                    + 'common/html/editTemporalObject.html?'
+                                    + that.newvalues[$input.attr('id')]?that.newvalues[$input.attr('id')]:$input.val();
+                                
+                                window.hWin.HEURIST4.msg.showDialog(url, {height:550, width:750,
+                                    title: 'Temporal Object',
+                                    class:'ui-heurist-bg-light',
+                                    callback: function(str){
+                                        if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
+                                            $input.val(str);    
+                                            $input.change();
+                                        }
+                                    }
+                                } );
+                    
+                    }} );
+                    
+                    $input.change(
+                        function(){
+                            var value = $input.val();
+                            that.newvalues[$input.attr('id')] = value; 
+                            
+                            var isTemporalValue = value && value.search(/\|VER/) != -1; 
+                            if(isTemporalValue) {
+                                window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
+                                
+                                $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
+                            }else{
+                                $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
+                            }
+                            
+                            that._onChange();
+                        }                    
+                    );
+                   
+                }//temporal allowed
+                        
+                $input.val(value);    
+                $input.change();   
 
             }else 
             if(this.detailType=="resource" || isFileForRecord)
@@ -820,7 +920,7 @@ $.widget( "heurist.editing_input", {
                                                             window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                                     });
                                                 that.newvalues[$input.attr('id')] = data.selection.join(',');
-                                                
+                                                $input.change();
                                             }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                                 //todo
                                                 
@@ -1027,7 +1127,7 @@ $.widget( "heurist.editing_input", {
 
         //clear button
         //var $btn_clear = $( "<div>")
-        if(this.options.showclear_button)
+        if(this.options.showclear_button && this.options.dtID!='rec_URL')
         {
 
             var $btn_clear = $('<button>',{
@@ -1141,7 +1241,11 @@ $.widget( "heurist.editing_input", {
                 }else{
                     $input.val( display_value?display_value :value);    
                 }
-                that._onChange();
+                if(that.detailType=='date'){
+                    $input.change();
+                }else{
+                    that._onChange();
+                }
                 return;
             }
 
@@ -1188,7 +1292,7 @@ $.widget( "heurist.editing_input", {
         var res = null;
         var $input = $(input_id);
 
-        if(!(this.detailType=="resource" || this.detailType=='file' || this.detailType=='geo')){
+        if(!(this.detailType=="resource" || this.detailType=='file' || this.detailType=='date' || this.detailType=='geo')){
             res = $input.val();
         }else {
             res = this.newvalues[$input.attr('id')];

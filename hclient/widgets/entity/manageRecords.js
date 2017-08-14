@@ -66,6 +66,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         this._super();
         
+        this.editForm.empty();
         this.editFormSummary = this.element.find('.editFormSummary');
         this.editFormPopup = this.element.find('.editFormDialog');
         
@@ -307,8 +308,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
             
             var recset = this.recordList.resultList('getRecordSet');
-            var recset_length = recset.length();
-            if(recset_length>1 && recID>0){
+            if(recset && recset.length()>1 && recID>0){
                 this._toolbar.find('#btnPrev').css({'display':'inline-block'});
                 this._toolbar.find('#btnNext').css({'display':'inline-block'});
                 if(this._toolbar.find('#divNav').length===0){
@@ -1092,10 +1092,60 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"complete", l:1}, 
                         function(response){ that._initEditForm_step4(response); });
 
-        }else if(recID<0 && this._currentEditRecTypeID>0){ //add new record
-            //this._currentEditRecTypeID is set in add button
-            window.hWin.HAPI4.RecordMgr.add( {rt:this._currentEditRecTypeID, temp:1}, //ro - owner,  rv - visibility
+        }else if(recID<0){ //add new record
+        
+            if(!that.options.new_record_params) that.options.new_record_params = {};
+        
+            if(this._currentEditRecTypeID>0){
+                that.options.new_record_params['rt'] = this._currentEditRecTypeID;
+            }        
+            
+            that.options.new_record_params['temp'] = 1;
+            
+            if(!(that.options.new_record_params['rt']>0)){
+
+                //select record type first
+                if(!this._rt_select_dialog){
+                    this._rt_select_dialog = $('<div>').css({'text-align': 'center'}).appendTo(this.element);
+                    var selRt = $('<select>').appendTo(this._rt_select_dialog);
+                    window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0));    
+                }
+                
+                var $dlg, btns = [
+                {text:window.hWin.HR('Add Record'),
+                                click: function(){  
+                                    
+                that._currentEditRecTypeID = that._rt_select_dialog.find('select').val();
+                that.options.new_record_params['rt'] = this._currentEditRecTypeID;
+                                    
+                window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
                         function(response){ that._initEditForm_step4(response); });
+                                
+                $dlg.dialog('close');
+                                    
+                                } },
+                {text:window.hWin.HR('Cancel'),
+                                click:function(){
+                                      $dlg.dialog('close');
+                                      that.closeDialog();
+                                } } ];
+                       
+                $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
+                        window:  window.hWin, //opener is top most heurist window
+                        element:  this._rt_select_dialog[0],
+                        height: 120,
+                        width:  400,
+                        resizable: false,
+                        title: window.hWin.HR('Select record type for new record'),                         
+                        buttons: btns
+                    });
+                       
+               
+            }else{
+                //this._currentEditRecTypeID is set in add button
+                window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                        function(response){ that._initEditForm_step4(response); });
+            }
         }
         
         
@@ -1408,6 +1458,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
+        
+        //add record title at the top
+        
+        if(this._getField('rec_Title')!=''){
+            this.element.find('.ui-heurist-header2').remove();
+            $('<div class="ui-heurist-header2"><span style="display:inline-block;padding-right:20px">ID: '+this._currentEditID
+                +'</span><h3 style="display:inline-block">'+ this._getField('rec_Title')+'</h3></div>')
+                .css({'padding':'10px 0 10px 30px'})
+                .insertBefore(this.editForm.first('fieldset'));
+        }
         
         this.onEditFormChange();
     },

@@ -329,9 +329,13 @@ $.widget( "heurist.manageEntity", {
 
         //--------------------------------------------------------------------    
 
-        var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
-        $('.heurist-helper1').css('display',ishelp_on?'block':'none');
+        //var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
+        //$('.heurist-helper1').css('display',ishelp_on?'block':'none');
 
+        
+        if(this.options.isdialog){
+            this.popupDialog();
+        }
         
         return true;
         //place this code in extension ===========    
@@ -1186,6 +1190,9 @@ $.widget( "heurist.manageEntity", {
                        this.editForm,'full',{display:'inline-block', margin:'0 35% 0 0'});
 */                       
         }
+        
+        window.hWin.HEURIST4.ui.switchHintState('prefs_'+this._entityName, this.element, false);
+        
 
         this.onEditFormChange();
         // to EXTEND         

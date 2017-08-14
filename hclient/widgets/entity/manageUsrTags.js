@@ -318,10 +318,11 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                                     //move duplication to picked
                                     this.recordList.find('div.recordDiv[recid='+subset.getOrder()[0]+']')
                                         .appendTo(this.recordList.find('div[data-id="'+groupid+'"] > .picked'));
+                                    inpt.val('').focus();
                                 }else{
                                 /*
                                 inpt.addClass( "ui-state-error" );*/
-                                window.hWin.HEURIST4.msg.showMsgFlash('<span class="ui-state-error" style="padding:10px">Duplication</span>', 2000);
+                                    window.hWin.HEURIST4.msg.showMsgFlash('<span class="ui-state-error" style="padding:10px">Duplication</span>', 2000);
                                 }
                                //todo select tag instead of warning
                                

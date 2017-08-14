@@ -290,7 +290,7 @@ $.widget( "heurist.resultList", {
         .appendTo( this.element );
         this.div_content = $( "<div>" )
         .addClass('div-result-list-content ent_content_full ui-heurist-bg-light')
-        .css({'border-top':'1px solid #cccccc','padding-top':'1em'})
+        .css({'border-top':'1px solid #cccccc'})  //,'padding-top':'1em'
         .css({'overflow-y':'scroll'})
         .appendTo( this.element );
 
@@ -946,7 +946,7 @@ $.widget( "heurist.resultList", {
         var html_pwdrem = '';
         var pwd = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
         if(pwd){
-            html_pwdrem =  '<span class="ui-icon ui-icon-key rec_pwdrem" style="display: inline-block;"></span>';
+            html_pwdrem =  '<span class="ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:10px"></span>';
             pwd = ' pwd="'+pwd+'" ';
         }else{
             pwd = '';

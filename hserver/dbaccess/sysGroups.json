@@ -47,7 +47,7 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":128,
-                        "rst_DisplayWidth":40,
+                        "rst_DisplayWidth":60,
                         "rst_DisplayName": "Long name",
                         "rst_DisplayHelpText": "An extended name for the group, up to 128 characters"
                     }
@@ -57,7 +57,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":1000,
-                        "rst_DisplayWidth":40,
+                        "rst_DisplayWidth":60,
                         "rst_DisplayName": "Description",
                         "rst_DisplayHelpText": "A description of the group, up to 1000 characters" 
                     }

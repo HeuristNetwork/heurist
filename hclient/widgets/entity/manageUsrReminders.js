@@ -33,7 +33,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
         this.options.width = 790;
-        this.options.height = 380;
+        this.options.height = 600;
         
 
         this._super();
@@ -132,6 +132,29 @@ console.log('....'+this.options.rem_RecID);
         ele.editing_input('option', 'change', __onChangeType);
         ele.editing_input('setValue', isManual?'now':'later');
         __onChangeType();
+        
+        
+        var ele1 = this._editing.getFieldByName('rem_ToWorkgroupID');
+        var ele2 = this._editing.getFieldByName('rem_ToUserID');
+        var ele3 = this._editing.getFieldByName('rem_ToEmail');
+        
+        
+        function __onChange2( ){
+//console.log($(this.element).editing_input('option','dtID'));
+           
+           var res = $(this.element).editing_input('getValues')
+           if(res[0]!=''){
+               var dtID = $(this.element).editing_input('option','dtID');
+               if(dtID!='rem_ToWorkgroupID') ele1.editing_input('setValue', '');
+               if(dtID!='rem_ToUserID') ele2.editing_input('setValue', '');
+               if(dtID!='rem_ToEmail') ele3.editing_input('setValue', '');
+           }
+        }
+    
+        ele1.editing_input('option', 'change', __onChange2);
+        ele2.editing_input('option', 'change', __onChange2);
+        ele3.editing_input('option', 'change', __onChange2);
+
     
     }
     

@@ -197,6 +197,27 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         $(this).trigger( 'myOnShowEvent' );
         return this;
     }
+    
+    //
+    // overwrite datepciker method
+    //
+    $.datepicker._gotoToday = function(event){
+        
+        var target = $(event),
+            inst = this._getInst(target[0]);
+        
+        var date = new Date();
+        
+        inst.selectedDay = date.getDate();
+        inst.drawMonth = inst.selectedMonth = date.getMonth();
+        inst.drawYear = inst.selectedYear = date.getFullYear();
+        
+        $.datepicker._selectDate(event,
+            $.datepicker._formatDate(inst, 
+                inst.selectedDay, inst.selectedMonth, inst.selectedYear));
+        
+    }
+    
 
     var onAboutInit, onPageInit;
 

@@ -39,6 +39,9 @@
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/media_viewer.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/yoxview/yoxview-init.js"></script>
         
+        <script type="text/javascript" src="<?php echo PDIR;?>common/js/temporalObjectLibrary.js"></script>
+        
+        
         <script type="text/javascript">
             var $container;
             // Callback function on page initialization
@@ -64,12 +67,23 @@
                     $container = $('<div>').appendTo($("body"));
                     
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
+
+
+                    var rec_rectype = window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search);
+                    var new_record_params = {};
+                    if(rec_rectype>0){
+                        new_record_params['rt'] = rec_rectype;
+                        new_record_params['ro'] = window.hWin.HEURIST4.util.getUrlParameter('rec_owner', window.location.search);
+                        new_record_params['rv'] = window.hWin.HEURIST4.util.getUrlParameter('rec_visibility', window.location.search);
+                        new_record_params['tag'] = window.hWin.HEURIST4.util.getUrlParameter('tag', window.location.search);
+                    }
                     
                     //hidden result list, inline edit form
                     var options = {
                         select_mode: 'manager',
                         edit_mode: 'only',
                         in_popup_dialog: isPopup,
+                        new_record_params: new_record_params,
                         layout_mode:'<div class="ent_wrapper editor">'
                             + '<div class="ent_content_full recordList"  style="display:none;"/>'
 
@@ -115,6 +129,7 @@
                                 });
                             
                             }else{
+                                
                                 $container.manageRecords('addEditRecord',-1);
                             }                            
                             

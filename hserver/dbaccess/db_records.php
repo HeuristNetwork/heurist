@@ -115,7 +115,7 @@
             $access = 'viewable';
         }
 
-        if(isWrongOwnership($system, $ownerid) || isWrongAccessRights($access)){
+        if(isWrongOwnership($system, $ownerid) || isWrongAccessRights($system, $access)){
             return $system->getError();
         }
 
@@ -364,12 +364,12 @@
     // verify ACCESS RIGHTS -------------
     //
     //
-    function isWrongAccessRights($access){
-        if (!($access=='viewable' || $access=='hidden' || $access=='public' || $access=='pending')) {
-            $system->addError(HEURIST_INVALID_REQUEST, "Access rights not defined or has wrong value");
-            return true;
-        }else{
+    function isWrongAccessRights($system, $access){
+        if ($access=='viewable' || $access=='hidden' || $access=='public' || $access=='pending') {
             return false;
+        }else{
+            $system->addError(HEURIST_INVALID_REQUEST, 'Non owner visibility is not defined or has wrong value');
+            return true;
         }
     }
 
@@ -386,7 +386,7 @@
             return false;
         }else{
 
-            $system->addError(HEURIST_REQUEST_DENIED, "Cannot set ownership of record to the group without membership in this group");
+            $system->addError(HEURIST_REQUEST_DENIED, 'Cannot set ownership of record to the group without membership in this group');
             return true;
 
             /* not used: since only group member can set ownership - it means that it exists
@@ -415,7 +415,7 @@
 
         //if defined and wrong it fails
         if(($ownerid && isWrongOwnership($system, $ownerid)) ||
-            ($access && isWrongAccessRights($access)))
+            ($access && isWrongAccessRights($system, $access)))
         {
             return false;
         }
