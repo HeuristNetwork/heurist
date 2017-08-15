@@ -249,7 +249,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 //this.editFormPopup = this.editForm.parent();//this.element.find('.editFormDialog');
 
                 if(!this.options.beforeClose){
-                    this.options.beforeClose = function(){that.saveUiPreferences();};
+                    this.options.beforeClose = function(){
+                            that.saveUiPreferences();
+                    };
                 }
              
                 this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({

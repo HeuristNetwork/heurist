@@ -57,7 +57,7 @@ $.widget( "heurist.manageEntity", {
     options: {
     
         //DIALOG section       
-        isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), _closeDialog
+        isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), closeDialog
         height: 400,
         width:  760,
         modal:  true,
@@ -632,7 +632,24 @@ $.widget( "heurist.manageEntity", {
             if(options.edit_mode == 'editonly'){
                 btn_array =  this._getEditDialogButtons();
                 if(!options.beforeClose){
-                    options.beforeClose = function(){that.saveUiPreferences();};
+                    options.beforeClose = function(){
+                        //show warning in case of modification
+                        if(that._editing.isModified() && that._currentEditID!=null){
+                            var $dlg, buttons = {};
+                            buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
+                            buttons['Ignore and close'] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
+                            
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
+                                    buttons,
+                                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                                        //
+                                        
+                            return false;   
+                        }
+                        that.saveUiPreferences();
+                        return true;
+                    };
                 }
             }else {
                 //if(options.in_popup_dialog===false){ 
@@ -1013,9 +1030,10 @@ $.widget( "heurist.manageEntity", {
         }else{
             
             if(this._currentEditID!=null && this._editing.isModified()){
-                window.hWin.HEURIST4.msg.showMsgDlg('Data were modified in edit form. Ignore modifications and start edit the new data',
-                function(){ that._initEditForm_step2(recID); },
-                'Confirm');
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Data were modified in edit form. Ignore modifications and start edit the new data',
+                        function(){ that._initEditForm_step2(recID); },
+                    'Confirm');
             }else{
                 this._initEditForm_step2(recID);            
             }
