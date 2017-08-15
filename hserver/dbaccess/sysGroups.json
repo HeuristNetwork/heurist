@@ -68,6 +68,7 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Enabled:",
                         "rst_DisplayHelpText": "Uncheck this box to disable the group - disabled groups are eliminated from menus etc",
+                        "rst_DefaultValue": "y",
                         "rst_FieldConfig":[
                             {"key":"y","title":"Yes"},
                             {"key":"n","title":"No"}
@@ -107,6 +108,15 @@
                         "dty_Type":"freetext",
                         "rst_Display":"hidden"
                     }
+                },
+                {
+                    "dtID": "ugr_Password",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue": "PASSWORD NOT REQUIRED"
+                    }
                 }
+                
      ]
 }

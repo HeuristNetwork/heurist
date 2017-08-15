@@ -374,10 +374,89 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .change(function(){that._onChange();})
+            .change(function(){
+                
+                $input.find('option[term-view]').each(function(idx,opt){
+                    $(opt).text($(opt).attr('term-view'));
+                });
+                
+                var opt = $input.find( "option:selected" );
+                var parentTerms = opt.attr('parents');
+                if(parentTerms){
+                     opt.text(parentTerms+'.'+opt.attr('term-orig'));
+                }
+                that._onChange();
+            })
             .appendTo( $inputdiv );
 
             this._recreateSelector($input, value);
+            
+            var allTerms = this.f('rst_FieldConfig');    
+            //allow edit terms only for true defTerms enum
+            if(window.hWin.HEURIST4.util.isempty(allTerms)){
+                
+                allTerms = this.f('rst_FilteredJsonTermIDTree');        
+
+                var isVocabulary = !isNaN(Number(allTerms)); 
+
+                var $btn_termedit = $( '<button>', {title: 'Add new term to this list'})
+                .addClass('smallbutton')
+                .appendTo( $inputdiv )
+                .button({icons:{primary: 'ui-icon-gear'},text:false});
+                
+                this._on( $btn_termedit, { click: function(){
+                    
+                if(isVocabulary){
+
+                    var type = (this.detailType!='enum')?'relation':'enum';
+                    
+                    var url = window.hWin.HAPI4.baseURL 
+                        + 'admin/structure/terms/editTermForm.php?db='+window.hWin.HAPI4.database
+                        + '&treetype='+type+'&parent='+Number(allTerms);
+                    
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:320, width:650,
+                        title: 'Add Term',
+                        //class:'ui-heurist-bg-light',
+                        callback: function(context){
+                            if(context=="ok") {
+                                window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
+                                that._recreateSelector($input, true);
+                            }
+                        }
+                    } );
+                    
+
+                }else{
+                    
+                    var url = window.hWin.HAPI4.baseURL 
+                        + 'admin/structure/terms/selectTerms.html?mode=editrecord&db='
+                        + window.hWin.HAPI4.database
+                        + '&detailTypeID='+this.options.dtID;
+
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:540, width:750,
+                        title: 'Select Term',
+                        //class:'ui-heurist-bg-light',
+                        callback: function(editedTermTree, editedDisabledTerms){
+                            if(editedTermTree || editedDisabledTerms) {
+                                window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
+                                
+                                that.options['dtFields']['rst_FilteredJsonTermIDTree'] = editedTermTree;
+                                that.options['dtFields']['rst_TermIDTreeNonSelectableIDs'] = editedDisabledTerms
+                                                                
+                                that._recreateSelector($input, true);
+                            }
+                        }
+                    });
+
+
+                }                
+                
+                
+                
+                }} ); //end btn onclick
+            
+            }//allow edit terms only for true defTerms enum
+            
 
         }else if(this.detailType=='boolean'){
 
@@ -424,7 +503,8 @@ $.widget( "heurist.editing_input", {
                 $input.val(value);
             }
 
-        }else if(this.detailType=="relmarker"){ 
+        }
+        else if(this.detailType=="relmarker"){ 
             
                 this.options.showclear_button = false;
 
@@ -564,7 +644,8 @@ $.widget( "heurist.editing_input", {
                         this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
 */
             
-        }else{
+        }
+        else{
             $input = $( "<input>")
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
@@ -673,9 +754,28 @@ $.widget( "heurist.editing_input", {
                     });
 
             }else
-            if(this.detailType=="date"){
+            if(this.detailType=='date'){
                 
                 $input.css('width','20ex');
+                
+
+                function __onDateChange(){
+                            var value = $input.val();
+                            
+                            that.newvalues[$input.attr('id')] = value; 
+                            
+                            var isTemporalValue = value && value.search(/\|VER/) != -1; 
+                            if(isTemporalValue) {
+                                window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
+                                
+                                $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
+                            }else{
+                                $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
+                            }
+                            
+                            that._onChange();
+                }
+                
                 
                 if($.isFunction($('body').calendarsPicker)){
                         
@@ -706,8 +806,9 @@ $.widget( "heurist.editing_input", {
                             changeMonth: true,
                             changeYear: true,
                             dateFormat: 'yy-mm-dd',
-                            onSelect: function(dateText, inst){
-                                $input.change();
+                            onClose: function(dateText, inst){
+                                __onDateChange();
+                                //$input.change();
                             }
                             /*,beforeShow : function(dateText, inst){
                                 $(inst.dpDiv[0]).find('.ui-datepicker-current').click(function(){
@@ -741,7 +842,7 @@ $.widget( "heurist.editing_input", {
                                 
                                 window.hWin.HEURIST4.msg.showDialog(url, {height:550, width:750,
                                     title: 'Temporal Object',
-                                    class:'ui-heurist-bg-light',
+                                    //class:'ui-heurist-bg-light',
                                     callback: function(str){
                                         if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
                                             $input.val(str);    
@@ -752,23 +853,7 @@ $.widget( "heurist.editing_input", {
                     
                     }} );
                     
-                    $input.change(
-                        function(){
-                            var value = $input.val();
-                            that.newvalues[$input.attr('id')] = value; 
-                            
-                            var isTemporalValue = value && value.search(/\|VER/) != -1; 
-                            if(isTemporalValue) {
-                                window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
-                                
-                                $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
-                            }else{
-                                $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
-                            }
-                            
-                            that._onChange();
-                        }                    
-                    );
+                    $input.change(__onDateChange);
                    
                 }//temporal allowed
                         
@@ -1167,6 +1252,11 @@ $.widget( "heurist.editing_input", {
     // recreate SELECT for enum/relation type
     //
     _recreateSelector: function($input, value){
+        
+        if(value===true){
+            //keep current
+            value = $input.val();
+        }
 
         $input.empty();
 
@@ -1221,7 +1311,7 @@ $.widget( "heurist.editing_input", {
                     defaultTermID:value, topOptions:true, supressTermCode:true});
         }
     },
-
+    
     //
     // internal - assign display value for specific input element
     //

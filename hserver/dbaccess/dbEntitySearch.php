@@ -137,6 +137,7 @@ class DbEntitySearch
         
         $this->data = $data;
         
+        //loop for config
         foreach($this->fields as $fieldname=>$field_config){
             $value = @$this->data[$fieldname];
             

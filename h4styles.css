@@ -198,9 +198,10 @@ input.Temporal {
 fieldset {
     padding:1em; border:0;
 }
+
 fieldset > div, .input-row{
-    display:table-row;
     padding-top:0.2em;
+    display:table-row;
     /*padding-bottom:0.2em;*/
 }
 
@@ -311,7 +312,7 @@ input.text, select.text {
 .smallbutton{
     width: 16px !important;
     height: 16px !important;
-    margin: 0.4em;
+    margin-left: 0.4em;
 }
 
 /* FOR SELECT */

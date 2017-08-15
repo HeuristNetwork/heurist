@@ -48,9 +48,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             return false;
         }
       
-//
-console.log('....'+this.options.rem_RecID);        
-        //load bookmark for given record id
+        //load reminder for given record id
         if(this.options.rem_RecID>0){
                 var request = {};
                 request['rem_RecID']  = this.options.rem_RecID;
@@ -89,15 +87,69 @@ console.log('....'+this.options.rem_RecID);
     },
     
 //----------------------------------------------------------------------------------    
-
-    _saveEditAndClose: function( fields, afteraction ){
+    _getValidatedValues: function(){
         
+        var fields = this._super();
+        
+        if(fields!=null){
+            //validate that at least on recipient is defined
+            if(!(fields['rem_ToWorkgroupID'] || fields['rem_ToUserID'] || fields['rem_ToEmail'])){
+                  window.hWin.HEURIST4.msg.showMsgFlash('You have to fill one of recipients field');
+                  return null;
+            }
+        }
+        
+        return fields;
+    },
+
+    //
+    //
+    //
+    _saveEditAndClose: function( fields, afteraction ){
+
+        //assign record id    
         var ele2 = this._editing.getFieldByName('rem_RecID');
         ele2.editing_input('setValue', this.options.rem_RecID );
         
-        this._super();// null, afteraction );
+        
+        var ele = this._editing.getFieldByName('rem_IsPeriodic');
+        var res = ele.editing_input('getValues'); 
+        if(res[0]=='now'){
+            
+            this._sendReminder();
+        
+        }else{    
+            this._super();// null, afteraction );
+        }
     },
     
+    //
+    //
+    //
+    _sendReminder: function(){
+
+        var fields = this._getValidatedValues(); 
+        if(fields==null) return; //validation failed
+        
+        var request = {
+            'a'          : 'action',
+            'entity'     : this.options.entity.entityName,
+            'request_id' : window.hWin.HEURIST4.util.random(),
+            'fields'     : fields                     
+            };
+            
+            var that = this;                                                
+            //that.loadanimation(true);
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        window.hWin.HEURIST4.msg.showMsgFlash(that.options.entity.entityTitle+' '+window.hWin.HR('has been sent'));
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+        
+    },    
     
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );
@@ -118,14 +170,23 @@ console.log('....'+this.options.rem_RecID);
             var ele1 = that._editing.getFieldByName('rem_Freq');
             var ele2 = that._editing.getFieldByName('rem_StartDate');
             
+            var btn_save;
+            if(that._toolbar){
+                btn_save = that._toolbar.find('#btnRecSave');
+            }
+            
             var res = ele.editing_input('getValues'); 
             if(res[0]=='now'){
                     ele2.editing_input('setValue', '');
                     ele1.hide();
                     ele2.hide();
+                    
+                    if(btn_save) btn_save.button('option','label','Send');
             }else{
                     ele1.show();
                     ele2.show();
+                    
+                    if(btn_save) btn_save.button('option','label','Save');
             }
         }
         

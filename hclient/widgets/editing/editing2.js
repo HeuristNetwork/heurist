@@ -260,7 +260,8 @@ function hEditing(_options) {
                         fields[idx].recordset = recdata;
                         fields[idx].change = _onChange;
                         
-                        var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
+                        var inpt = $('<div>').css('display','block !important')
+                                .appendTo(fieldContainer).editing_input(fields[idx]);     
                         editing_inputs.push(inpt);  
                     }
                 }

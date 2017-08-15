@@ -29,6 +29,10 @@ getChildrenTerms - returns entire terms tree or only part of it for selected ter
 getChildrenLabels - returns all tems labels of children terms for given term
 createTermSelectExt   - create/fill SELECT for terms or returns JSON array 
 createTermSelectExt2  - the same but parameters are passed as options object
+getTermValue - Returns label and code for term by id
+getTermDesc
+getPlainTermsList
+getFullTermLabel
 
 createRectypeGroupSelect - get SELECT for record type groups
 createRectypeSelect - get SELECT for record types   
@@ -48,11 +52,6 @@ Other UI functions
 initDialogHintButtons - add show hint and context buttons into dialog header
 initHintButton - button to show/hide hints
 initHelper - Inits helper div (slider) and button   
-
-Fast access:
-getTermValue - Returns label and code for term by id
-getTermDesc
-getPlainTermsList
 
 
 createRecordLinkInfo - return ui for link and relationship
@@ -421,7 +420,7 @@ window.hWin.HEURIST4.ui = {
         //
         var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
 
-        function createSubTreeOptions(optgroup, depth, termSubTree, termLookupInner, defaultTermID) {
+        function createSubTreeOptions(optgroup, parents, termSubTree, termLookupInner, defaultTermID) {
             var termID;
             var localLookup = termLookupInner;
             var termName,
@@ -461,11 +460,18 @@ window.hWin.HEURIST4.ui = {
                 termID = arrterm[i][0];
                 termName = arrterm[i][1];
                 termCode = arrterm[i][2];
+                var termParents = '';
+                var origName = arrterm[i][1];
+                
+                var depth = parents.length;
 
                 if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
                     //for non mozilla add manual indent
                     var a = new Array( ((depth<7)?depth:7)*2 );
-                    termName = a.join('. ') + termName;
+                    termName = a.join('. ') + termName;       
+                }
+                if(depth>0){
+                    termParents = parents.join('.');
                 }
 
                 var isDisabled = (headerTerms[termID]? true:false);
@@ -499,6 +505,11 @@ window.hWin.HEURIST4.ui = {
                         opt.className = "depth" + (depth<7)?depth:7;
                         opt.depth = depth;
                         opt.disabled = isDisabled;
+                        if(termParents!=''){
+                            $(opt).attr('parents', termParents);
+                            $(opt).attr('term-orig', origName);  
+                            $(opt).attr('term-view', termName+termCode);  
+                        } 
 
                         if (termID == defaultTermID ||
                             termName == defaultTermID) {
@@ -514,7 +525,12 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
 
-                var children = (hasChildren)?createSubTreeOptions( new_optgroup, depth+1, termSubTree[termID], localLookup, defaultTermID):[];
+                var children = [];
+                if(hasChildren){
+                    var parents2 = parents.slice();
+                    parents2.push(termName);      //depth+1
+                    children = createSubTreeOptions( new_optgroup, parents2, termSubTree[termID], localLookup, defaultTermID);
+                }
                 var k=0, cnt2 = children.length, termssearch=[];
                 for(;k<cnt2;k++){
                     /*if(!children[k].disabled || children[k].children.length>0){
@@ -567,7 +583,7 @@ window.hWin.HEURIST4.ui = {
                 }
             }
 
-            var reslist = createSubTreeOptions(null, 0, termTree, termLookup, defaultTermID);
+            var reslist = createSubTreeOptions(null, [], termTree, termLookup, defaultTermID);
             if(!selObj){
                 reslist_final = reslist_final.concat( reslist);
             }
