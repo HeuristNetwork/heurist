@@ -856,7 +856,10 @@ $.widget( "heurist.editing_input", {
                     $input.change(__onDateChange);
                    
                 }//temporal allowed
-                        
+                else{
+                    that.newvalues[$input.attr('id')] = value;            
+                }
+                
                 $input.val(value);    
                 $input.change();   
 

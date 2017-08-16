@@ -6,7 +6,7 @@
         
         "helpContent": "usrReminders.html",
         
-        "searchFormContent": "searchUsrTags.html",
+        "searchFormContent": "searchUsrReminders.html",
         
         "entityTitle": "Reminder",
         "entityTitlePlural": "User Reminders",
@@ -126,8 +126,15 @@
                                     "rst_DisplayHelpText": "The frequency of sending reminders",
                                     "rst_FieldConfig":["once","daily","weekly","monthly","annually"]
                                 }
+                            },
+                            {
+                                "dtID": "rem_RecTitle",
+                                "dtFields":{
+                                    "dty_Type":"freetext",
+                                    "dty_Role":"virtual",
+                                    "rst_Display":"hidden"
+                                }
                             }
-                            
                     ]
                 }
      ]

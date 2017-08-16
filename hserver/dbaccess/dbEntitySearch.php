@@ -205,6 +205,12 @@ class DbEntitySearch
         
         //special case for ids - several values can be used in IN operator        
         if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)
+                    
+            if($value == 'NULL'){
+                return '(NOT ('.$fieldname.'>0))';
+            }else if($value == '-NULL'){
+                return '('.$fieldname.'>0)';
+            }
                        
             if(!is_array($value) && is_string($value) && strpos($value, '-')===0){
                 $negate = true;
@@ -242,7 +248,7 @@ class DbEntitySearch
                 array_push($or_predicates, $fieldname.' IS NULL');
                 continue;
             }else if($value == '-NULL'){
-                array_push($or_predicates, $fieldname.' IS NOT NULL');
+                array_push($or_predicates, '('.$fieldname.' IS NOT NULL AND '.$fieldname.'<>"")');
                 continue;
             }
         

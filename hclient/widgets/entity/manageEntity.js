@@ -196,6 +196,10 @@ $.widget( "heurist.manageEntity", {
         this.searchForm      = this.element.find('.searchForm');
         this.editForm        = this.element.find('.editForm');
         this.editFormToolbar = this.element.find('.editForm-toolbar');
+
+        //specific for records        
+        this.editFormSummary = this.element.find('.editFormSummary');
+        this.editFormPopup = this.element.find('.editFormDialog');
         
         //this.element.addClass('ui-heurist-bg-light');
         
@@ -262,6 +266,7 @@ $.widget( "heurist.manageEntity", {
         var that = this;
         
         if(this.options.list_mode=='default'){
+
         
                 //init record list
                 this.recordList

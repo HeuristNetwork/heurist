@@ -512,6 +512,11 @@ $.widget( "heurist.resultList", {
 
         top = top + (this.options.show_toolbar?2.5:0);
         top = top + (this.options.show_savefilter?2.5:0);
+        
+        
+        if(this.div_content_header && this.div_content_header.is(':visible')){
+            top = top + 2;    
+        }
 
         this.div_content.css({'top': (top+0.4)+'em'});
 
@@ -673,15 +678,15 @@ $.widget( "heurist.resultList", {
                 if(header_html!=''){
                     if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
                         this.div_content_header = $('<div>')
-                        .css({'height':'1.5em','width':'100%','padding-left':'0.8em'})
+                        .css({'height':'2em','width':'100%'})
                         //.addClass('ui-widget-content"') //ui-widget ui-widget-header
                         .insertBefore(this.div_content);
                     }
-                    this.div_content.css('top',(this.div_header!=null)?'7em':'4em');
+                    //this.div_content.css('top',(this.div_header!=null)?'7em':'4em');
                     this.div_content_header.show(); 
                     this.div_content_header.html( header_html );       
                 }else if(!window.hWin.HEURIST4.util.isnull(this.div_content_header)){
-                    this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
+                    //this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
                     this.div_content_header.hide();        
                 }   
             }

@@ -1170,21 +1170,30 @@ window.hWin.HEURIST4.ui = {
     //
     // important manageRecords.js and selectRecords.js must be loaded
     //
-    openRecordEdit:function(rec_ID, query_request, isEdit, callback){
+    openRecordEdit:function(rec_ID, query_request, new_record_params){
         
+        /*
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
                         {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+        */
     
                 var $container;
                 var isPopup = false;
+                
+                if($.isPlainObject(new_record_params) && new_record_params['rt']>0){
+                    rec_ID = -1;
+                    query_request = null;
+                }
+                
                 
                 var popup_options = {
                     isdialog: true,
                     select_mode: 'manager',
                     edit_mode: 'editonly', //only edit form is visible, list is hidden
-                    height: usrPreferences.height,
-                    width: usrPreferences.width,
+                    //height: usrPreferences.height,
+                    //width: usrPreferences.width,
+                    new_record_params:new_record_params,
                     title: window.hWin.HR('Edit record'),
                     layout_mode:'<div class="ent_wrapper editor">'
                         + '<div class="ent_content_full recordList"  style="display:none;"/>'
@@ -1200,14 +1209,14 @@ window.hWin.HEURIST4.ui = {
                     onInitFinished:function( ){
                         
                         if(query_request){
-                            if(!$.isPlainObject(query_request)){
+                            if(!$.isPlainObject(query_request)){ //just string
                                 query_request = {q:query_request, w:'all'};
                             }
                         }else if(rec_ID>0){
                             query_request = {q:'ids:'+rec_ID, w:'all'};
                         }
                         
-                        var widget = this;
+                        var widget = this; //reference to manageRecords
                         
                         if(query_request){
                             
@@ -1264,12 +1273,12 @@ window.hWin.HEURIST4.ui = {
                 
             if(isEdit==true){
                 
-                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, isEdit, callback);
+                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request);
                 return;
                 
                 // section below NOT USED
                 // it loads manageRecords in popup iframe
-                
+                /*  
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
                         {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
@@ -1290,6 +1299,7 @@ window.hWin.HEURIST4.ui = {
                 dtitle = 'Edit record';
                 dheight = usrPreferences.height;
                 dwidth = usrPreferences.width;
+                */
             }else{
                 url = url + 'records/view/renderRecordData.php?db='+window.hWin.HAPI4.database
                 +'&recID='+ rec_ID;
@@ -1550,7 +1560,7 @@ window.hWin.HEURIST4.ui = {
             var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
             var scripts = [ path+widgetName+'.js'];
             
-            if(!(entityName=='UsrBookmarks' || entityName=='UsrReminders')){ //entities without search option
+            if(!(entityName=='UsrBookmarks')){ //entities without search option
                 scripts.push(path+'search'+entityName+'.js');
             }
             

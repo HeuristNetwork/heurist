@@ -44,6 +44,10 @@ class DbUsrReminders extends DbEntityBase
                 
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
         
+        if(!@$this->data['rem_OwnerUGrpID']){
+            $this->data['rem_OwnerUGrpID'] = $this->system->get_user_id();
+        }
+        
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
             $this->data = $res;
@@ -52,6 +56,7 @@ class DbUsrReminders extends DbEntityBase
         }        
         
         $needCheck = false;
+        $needRecords = false;
         
         //compose WHERE 
         $where = array();
@@ -66,6 +71,9 @@ class DbUsrReminders extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('rem_RecID');
         if($pred!=null) array_push($where, $pred);
 
+        $pred = $this->searchMgr->getPredicate('rem_Message');
+        if($pred!=null) array_push($where, $pred);
+        
         $pred = $this->searchMgr->getPredicate('rem_ToWorkgroupID');
         if($pred!=null) array_push($where, $pred);
 
@@ -81,7 +89,17 @@ class DbUsrReminders extends DbEntityBase
         
             $this->data['details'] = 'rem_ID';
             
-        }else if(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
+        }else if(@$this->data['details']=='name' || @$this->data['details']=='list'){
+
+            $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName';
+
+            $needRecords = true;//($this->data['details']=='list');
+
+            $from_table[0] = $from_table[0]
+                    .' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
+                    .' LEFT JOIN sysUGrps u2 on rem_ToUserID=u2.ugr_ID ';
+        
+        }else if(@$this->data['details']=='full'){
 
             $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq';
             
@@ -101,10 +119,33 @@ class DbUsrReminders extends DbEntityBase
         //----- order by ------------
         //compose ORDER BY 
         $order = array();
-        array_push($order, 'rem_Modified DESC');
+        
+        $value = @$this->data['sort:rem_Modified'];
+        if($value!=null){
+            array_push($order, 'rem_Modified '.($value==1?'ASC':'DESC'));
+        }else{
+            $value = @$this->data['sort:rem_RecTitle'];
+            if($value!=null){
+                array_push($order, 'rec_Title '.($value==1?'ASC':'DESC'));
+                $needRecords = true;
+            }else{
+                $value = @$this->data['sort:rem_StartDate'];
+                if($value!=null){
+                    array_push($order, 'rem_StartDate '.($value==1?'ASC':'DESC'));
+                }
+            }
+        }           
+        
         
         
         $is_ids_only = (count($this->data['details'])==1);
+        
+        if($needRecords){
+              array_push($this->data['details'], 'rec_Title as rem_RecTitle');
+              array_push($from_table,'Records');
+              array_push($where, 'rec_ID=rem_RecID');
+        }
+        
             
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
@@ -169,8 +210,10 @@ class DbUsrReminders extends DbEntityBase
         foreach($this->records as $idx=>$record){
             $rec_ID = intval(@$record[$this->primaryField]);
             $isinsert = ($rec_ID<1);
-            if($isinsert && !($this->records[$idx]['tag_UGrpID']>0)){
-                $this->records[$idx]['rem_OwnerUGrpID'] = $this->system->get_user_id();
+            if($isinsert){
+                if(!($this->records[$idx]['rem_OwnerUGrpID']>0)){
+                    $this->records[$idx]['rem_OwnerUGrpID'] = $this->system->get_user_id();
+                }
                 $this->records[$idx]['rem_Nonce'] = dechex(rand());
                 $this->fields['rem_Nonce'] = array(); //to pass data to save 
             }
@@ -212,6 +255,7 @@ class DbUsrReminders extends DbEntityBase
                     "u"        => null));
             }
             else if (@$record['rem_ToUserID']) {
+                
                 $row = mysql__select_array($mysqli,
                     'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']);
                 if ($row) {
@@ -222,10 +266,21 @@ class DbUsrReminders extends DbEntityBase
                 }
             }
             else if (@$record['rem_ToWorkgroupID']) {
-                $recs = mysql__select_all($mysqli,
-                    'select usr.ugr_FirstName,usr.ugr_LastName,ugr_eMail,usr.ugr_ID
-                                       from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID
-                                       where ugl_GroupID='.$record['rem_ToWorkgroupID']);
+                
+                if($record['rem_ID']>0){
+                    
+                    $query = 'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail,usr.ugr_ID '
+                               .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
+                               .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.$record['rem_ID']
+                               .' where ugl_GroupID = '.$record['rem_ToWorkgroupID'].' and isnull(rbl_ID)';
+                }else{
+                    $query = 'select usr.ugr_FirstName,usr.ugr_LastName,ugr_eMail,usr.ugr_ID'
+                                       .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
+                                       .'where ugl_GroupID='.$record['rem_ToWorkgroupID'];
+                }
+                
+                $recs = mysql__select_all($mysqli, $query);
+                
                 foreach ($recs as $row)
                     array_push($recipients, array(
                         "email" => $row[0].' '.$row[1].' <'.$row[2].'>',

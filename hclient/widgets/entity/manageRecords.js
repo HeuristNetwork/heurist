@@ -63,16 +63,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }else{
             this.options.width = 1200;                    
         }
+
+        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+        
         
         this._super();
         
-        this.editForm.empty();
-        this.editFormSummary = this.element.find('.editFormSummary');
-        this.editFormPopup = this.element.find('.editFormDialog');
+        //this.editForm.empty();
         
         var hasSearchForm = (this.searchForm && this.searchForm.length>0);
         
-        if(this.options.edit_mode=='inline'){
+        if(this.options.edit_mode=='inline' || this.options.edit_mode=='editonly'){
             // for manager - inline mode means that only editor is visible and we have to search init exterally
             // see recordEdit.php
             if(hasSearchForm) this.searchForm.parent().css({width:'0px'});    
@@ -88,8 +89,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(hasSearchForm){
             this.searchForm.height('9.5em').css('border','none');    
         }
-        
-        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
         
     },
     //  
@@ -359,6 +358,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 };
 
                 this.editFormPopup.show().layout(layout_opts); //.addClass('ui-heurist-bg-light')
+                if(!this.usrPreferences.summary_tabs) this.usrPreferences.summary_tabs = ['0','1'];
 
                 //load content for editFormSummary
                 if(this.editFormSummary.text()=='empty'){
@@ -826,6 +826,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
                                 isdialog: true,
+                                edit_mode: 'editonly',
                                 rem_RecID: that._currentEditID,
                                 onClose:function(){
                                     //refresh

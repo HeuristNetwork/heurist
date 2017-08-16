@@ -207,7 +207,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
     //----------------------
     //
-    //
+    //  overwrite standard render for resultList
     //
     _recordListItemRenderer:function(recordset, record){
         

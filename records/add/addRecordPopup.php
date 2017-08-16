@@ -178,7 +178,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 return '';
             }
 
-            function addRecord(e) {
+            function addRecord(e, is_new_editor) {
                 if (! e) e = window.event;
 
                 var extra_parms = '',
@@ -228,11 +228,11 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                     return;
                 }
 
-
                 if (tags) {
                     extra_parms += (extra_parms.match(/&tag=/))  ?  "," + tags  :  "&tag=" + encodeURIComponent(tags) ;
                     // warning! code assumes that &tag= is at the end of string
                 }
+                
                 if ( <?= @$_REQUEST['related'] ? '1' : '0' ?> ) {
                     extra_parms += '&related=<?= @$_REQUEST['related'] ?>';
                     if (<?= @$_REQUEST['reltype'] ? '1' : '0' ?>) {
@@ -254,7 +254,19 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 }
 
 
-                window.open('<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='+rt + extra_parms);
+                if(is_new_editor && window.hWin && window.hWin.HEURIST4){
+                    
+                    var new_record_params = {};
+                    new_record_params['rt'] = rt;
+                    new_record_params['ro'] = wg_id;
+                    new_record_params['rv'] = vis;
+                    if(tags) new_record_params['tag'] = tags;
+                                        
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, new_record_params);
+                }else{
+                    window.open('<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='
+                            +rt + extra_parms);
+                }
 
             }
 
@@ -310,7 +322,10 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                     // class="actionButtons"
                     ?>
                     <span style="float:right; margin:3 0 0 30" >
-                        <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event);">Add Record</button>
+                        <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event, false);">Add Record</button>
+                    </span>
+                    <span style="float:right; margin:3 0 0 30" >
+                        <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event, true);">Add Record in New Editor</button>
                     </span>
                 </div>
             </div>
