@@ -972,7 +972,7 @@ function getTermByLabel($label){
 }
 
 
-function getFullTermLabel($dtTerms, $term, $domain, $withVocab=false){
+function getFullTermLabel($dtTerms, $term, $domain, $withVocab, $parents=null){
 
     $fi = $dtTerms['fieldNamesToIndex'];
     $parent_id = $term[ $fi['trm_ParentTermID'] ];
@@ -989,8 +989,16 @@ function getFullTermLabel($dtTerms, $term, $domain, $withVocab=false){
                 }
             }
             
-            $parent_label = getFullTermLabel($dtTerms, $term_parent, $domain, $withVocab);    
-            if($parent_label) $parent_label = $parent_label.'.';
+            if($parents==null){
+                $parents = array();
+            }
+            
+            if(array_search($parent_id, $parents)===false){
+                array_push($parents, $parent_id);
+                
+                $parent_label = getFullTermLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);    
+                if($parent_label) $parent_label = $parent_label.'.';
+            }
         }    
     }
     return $parent_label.$term[ $fi['trm_Label']];
