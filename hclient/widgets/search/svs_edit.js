@@ -53,6 +53,7 @@ function hSvsEdit(args) {
             var svs_query = $dlg.find('#svs_Query');
             var svs_ugrid = $dlg.find('#svs_UGrpID');
             var svs_rules = $dlg.find('#svs_Rules');
+            var svs_rules_only = $dlg.find('#svs_RulesOnly');
             var svs_notes = $dlg.find('#svs_Notes');
             //svs_query.parent().show();
             //svs_ugrid.parent().show();
@@ -88,6 +89,7 @@ function hSvsEdit(args) {
                 svs_name.val(svs[_NAME]);
                 svs_query.val( $.isArray(request.q)?JSON.stringify(request.q):request.q );
                 svs_rules.val( request.rules );
+                svs_rules_only.prop('checked', (request.rulesonly==1 || request.rulesonly==true));
                 svs_notes.val( request.notes );
 
 
@@ -98,6 +100,7 @@ function hSvsEdit(args) {
                 svs_id.val('');
                 svs_name.val('');
                 svs_rules.val('');
+                svs_rules_only.prop('checked', false);
                 svs_notes.val('');
                 svs_ugrid.parent().show();
 
@@ -134,11 +137,13 @@ function hSvsEdit(args) {
 
             var isRules = window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val());
 
-            if(isRules){
+            if(isRules){ //ruleset only
                 svs_query.parent().hide();
+                svs_rules_only.parent().hide();
                 return true;
             }else{
                 svs_query.parent().show();
+                svs_rules_only.parent().show();
                 return false;
             }
 
@@ -352,6 +357,7 @@ function hSvsEdit(args) {
                     var svs_query = $dlg.find('#svs_Query');
                     var svs_ugrid = $dlg.find('#svs_UGrpID');
                     var svs_rules = $dlg.find('#svs_Rules');
+                    var svs_rules_only = $dlg.find('#svs_RulesOnly');
                     var svs_notes = $dlg.find('#svs_Notes');
 
                     allFields.removeClass( "ui-state-error" );
@@ -390,7 +396,9 @@ function hSvsEdit(args) {
 
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
-                            svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery(svs_query.val(), domain, svs_rules.val(), svs_notes.val(), false),
+                            svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery(svs_query.val(), 
+                                    domain, svs_rules.val(), svs_rules_only.is(':checked'), svs_notes.val(), false),
+                                    
                             svs_UGrpID: svs_ugrid,
                             domain:domain};
 

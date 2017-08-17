@@ -177,7 +177,9 @@ window.hWin.HEURIST4.util = {
                 if(!window.hWin.HEURIST4.util.isempty(query_request.rules)){
                     //@todo simplify rules array - rempove redundant info
                     query_string = query_string + '&rules=' + 
-                        (encode?encodeURIComponent(query_request.rules):query_request.rules);
+                        (encode?encodeURIComponent(query_request.rules):query_request.rules) + 
+                        ((query_request.rulesonly==1 || query_request.rulesonly==true)?'&rulesonly=1':'');
+                        
                 }
             }else{
                 query_string = query_string + '&w=all';
@@ -195,12 +197,12 @@ window.hWin.HEURIST4.util = {
             }
         
             return window.hWin.HEURIST4.util.composeHeuristQuery(params.q, 
-                                        params.w, rules, params.notes, encode);
+                                        params.w, rules, params.rulesonly, params.notes, encode);
         }else
             return '?';
     },
 
-    composeHeuristQuery: function(query, domain, rules, notes, encode){
+    composeHeuristQuery: function(query, domain, rules, rulesonly, notes, encode){
             var query_to_save = [];
             if(!(window.hWin.HEURIST4.util.isempty(domain) || domain=="all")){
                 query_to_save.push('w='+domain);
@@ -210,6 +212,9 @@ window.hWin.HEURIST4.util = {
             }
             if(!window.hWin.HEURIST4.util.isempty(rules)){
               query_to_save.push('rules='+ (encode?encodeURIComponent(rules):rules));
+              if(rulesonly==1 || rulesonly==true){
+                  query_to_save.push('rulesonly=1');
+              }
             }
             if(!window.hWin.HEURIST4.util.isempty(notes)){
                query_to_save.push('notes='+ (encode?encodeURIComponent(notes):notes));
@@ -330,16 +335,17 @@ window.hWin.HEURIST4.util = {
     //
     parseHeuristQuery: function(qsearch)
     {
-        var domain = null, rules = '', notes = '';
+        var domain = null, rules = '', rulesonly = 0, notes = '';
         if(qsearch && qsearch.indexOf('?')==0){
             domain  = window.hWin.HEURIST4.util.getUrlParameter('w', qsearch);
             rules   = window.hWin.HEURIST4.util.getUrlParameter('rules', qsearch);
+            rulesonly = window.hWin.HEURIST4.util.getUrlParameter('rulesonly', qsearch);
             notes   = window.hWin.HEURIST4.util.getUrlParameter('notes', qsearch);
             qsearch = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
         }
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-        return {q:qsearch, w:domain, rules:rules, notes:notes};
+        return {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes};
     },
 
     //
