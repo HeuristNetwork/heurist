@@ -37,6 +37,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/dbDefFileExtToMimetype.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbDefTerms.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysImportFiles.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbRecThreadedComments.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecords.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbUsrBookmarks.php');
