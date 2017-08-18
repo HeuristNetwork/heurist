@@ -495,9 +495,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
         if(newstep==0 && this.options.svsID>0 && 
             this.options.params.rectypes && this.options.params.rectypes[0]==this.originalRectypeID){
-            $("#btnSave").show();
+            $("#btnSave").css('visibility','visible');//show();
         }else{
-            $("#btnSave").hide();
+            $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
         }
         
         
@@ -574,7 +574,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(this.options.params.rectypes) {
                     $(opt_rectypes).val(this.options.params.rectypes[0]);
                     
-                    $(opt_rectypes).change(function(){that.originalRectypeID=null; $("#btnSave").hide();});
+                    $(opt_rectypes).change(function(){
+                            that.originalRectypeID=null; 
+                            $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
+                    });
                     
                     if(this.originalRectypeID==null){//init flag
                         this.originalRectypeID = this.options.params.rectypes[0];    
@@ -603,9 +606,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
             if(isEdit && this.options.params.rectypes[0]==this.originalRectypeID)
             {
-                $("#btnSave").show();
+                $("#btnSave").css('visibility','visible');//$("#btnSave").show();
             }else{
-                $("#btnSave").hide();
+                $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
             }
         
 

@@ -866,6 +866,7 @@ $.widget( "heurist.editing_input", {
             }else 
             if(this.detailType=="resource" || isFileForRecord)
             {
+                        var $input_img;
                         var select_return_mode = 'ids';
                         if(isFileForRecord){
                             this.configMode = {
@@ -873,6 +874,37 @@ $.widget( "heurist.editing_input", {
                             };
                             icon_for_button = 'ui-icon-folder-open';
                             select_return_mode = 'recordset';
+                            
+                            //container for image
+                            $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
+                            + '<img class="image_input"></div>').css({'position':'absolute','display':'none','z-index':9999})
+                            .appendTo( $inputdiv ); 
+                            
+                            $input.change(function(){
+                                if(!(that.newvalues[$input.attr('id')]>0)){
+                                    $input.val('');
+                                }
+                                if(window.hWin.HEURIST4.util.isempty($input.val())){
+                                     $input_img.find('img').attr('src','');    
+                                }
+                                that._onChange(); 
+                            });
+                            
+                            var hideTimer = 0;
+                            $input.mouseover(function(){
+                                if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'))){
+                                    if (hideTimer) {
+                                        window.clearTimeout(hideTimer);
+                                        hideTimer = 0;
+                                    }
+                                    $input_img.show();
+                                }
+                            });
+                            $input.mouseout(function(){
+                                if($input_img.is(':visible')){
+                                    hideTimer = window.setTimeout(function(){$input_img.hide(1000);}, 500);
+                                }});
+                            
                         }else{
                             icon_for_button = 'ui-icon-link';
                             if(this.configMode && this.configMode.select_return_mode &&
@@ -994,6 +1026,12 @@ $.widget( "heurist.editing_input", {
                                                 }
                                                 that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
                                                 window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                                
+                                                //url for thumb
+                                                $input_img.find('img').attr('src',
+                                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                                                        recordset.fld(record,'ulf_ObfuscatedFileID'));
+                                                
                                                 $input.change();
                                             }
                                             
@@ -1041,6 +1079,13 @@ $.widget( "heurist.editing_input", {
                                         rec_Title = value.ulf_OrigFileName;
                                     }
                                     window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                    
+                                    //url for thumb
+                                    $input_img.find('img').attr('src',
+                                        window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                                            value.ulf_ObfuscatedFileID);
+                                    
+console.log(value);                                    
                                     
                                 }else{
                                     
@@ -1098,7 +1143,7 @@ $.widget( "heurist.editing_input", {
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
-                {name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
+                //{name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
                 {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
@@ -1156,7 +1201,7 @@ $.widget( "heurist.editing_input", {
                 //browse button    
                 var $btn_digitizer_dialog = $( "<button>", {title: "Click to draw map location"})
                         .addClass("smallbutton")
-                        .css('vertical-align','top')
+                        //.css('vertical-align','top')
                         .appendTo( $inputdiv )
                         .button({icons:{primary: "ui-icon-globe"},text:false});
                 var $link_digitizer_dialog = $( '<a>', {title: "Click to draw map location"})
@@ -1334,7 +1379,7 @@ $.widget( "heurist.editing_input", {
                 }else{
                     $input.val( display_value?display_value :value);    
                 }
-                if(that.detailType=='date'){
+                if(that.detailType=='date' || that.detailType=='file'){
                     $input.change();
                 }else{
                     that._onChange();

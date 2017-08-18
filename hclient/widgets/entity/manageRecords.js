@@ -23,6 +23,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _entityName:'records',
     
     _currentEditRecTypeID:null,
+    _isInsert: false,
 
     usrPreferences:{},
     defaultPrefs:{
@@ -208,6 +209,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
                        
                         {text:window.hWin.HR('Save'), id:'btnRecSave',
+                              accesskey:"S",
                               css:{'visibility':'hidden','margin-right':'5px'},
                               click: function() { that._saveEditAndClose( null, 'none' ); }},
                         {text:window.hWin.HR('Save / Close'), id:'btnRecSaveAndClose',
@@ -252,18 +254,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             that.saveUiPreferences();
                     };
                 }
-             
+                
                 this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
                         window:  window.hWin, //opener is top most heurist window
                         element:  this.editFormPopup[0],
                         height: this.usrPreferences.height,
                         width:  this.usrPreferences.width,
                         resizable: true,
-                        title: this.options['edit_title']
-                                    ?this.options['edit_title']
-                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,                         
-                        buttons: this._getEditDialogButtons(),
-                        beforeClose: this.options.beforeClose
+                        //title: dialog_title,
+                        buttons: this._getEditDialogButtons()
+                        //do not save prefs for popup addition beforeClose: this.options.beforeClose
+                        //save only for main edit record (editonly)
                     });
                 
                 //help and tips buttons on dialog header
@@ -1093,7 +1094,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }else if(recID>0){ //edit existing record
         
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"complete", l:1}, 
-                        function(response){ that._initEditForm_step4(response); });
+                        function(response){ response.is_insert=false; that._initEditForm_step4(response); });
 
         }else if(recID<0){ //add new record
         
@@ -1116,17 +1117,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 var $dlg, btns = [
                 {text:window.hWin.HR('Add Record'),
-                                click: function(){  
+                    click: function(){  
                                     
-                that._currentEditRecTypeID = that._rt_select_dialog.find('select').val();
-                that.options.new_record_params['rt'] = this._currentEditRecTypeID;
-                                    
-                window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
-                        function(response){ that._initEditForm_step4(response); });
-                                
-                $dlg.dialog('close');
-                                    
-                                } },
+                            that._currentEditRecTypeID = that._rt_select_dialog.find('select').val();
+                            that.options.new_record_params['rt'] = this._currentEditRecTypeID;
+                                                
+                            window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                                    function(response){  response.is_insert=true; that._initEditForm_step4(response); });
+                                            
+                            $dlg.dialog('close');
+                                                    
+                    } },
                 {text:window.hWin.HR('Cancel'),
                                 click:function(){
                                       $dlg.dialog('close');
@@ -1147,7 +1148,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }else{
                 //this._currentEditRecTypeID is set in add button
                 window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
-                        function(response){ that._initEditForm_step4(response); });
+                        function(response){ response.is_insert=true; that._initEditForm_step4(response); });
             }
         }
         
@@ -1158,7 +1159,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
+    // get record field structure. It needs to addition of non-standard fields
     //
     _getFakeRectypeField: function(detailTypeID){
         
@@ -1210,8 +1211,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         if(response==null || response.status == window.hWin.HAPI4.ResponseStatus.OK){
             
+            //response==null means reload/refresh edit form
+            
             if(response){
                 that._currentEditRecordset = new hRecordSet(response.data);
+                that._isInsert = response.is_insert; 
             }
             
             var rectypeID = that._getField('rec_RecTypeID');
@@ -1221,6 +1225,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //pass structure and record details
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
+            
+            var dialog_title = this.options['edit_title'];
+            if(!dialog_title){
+                 
+                 dialog_title = window.hWin.HR(that._isInsert ?'Add':'Edit') + ' '
+                                    + window.hWin.HEURIST4.rectypes.names[rectypeID];                         
+                                    
+            }
+            
+            if(this.options.edit_mode=='popup' && this._edit_dialog){
+                that._edit_dialog.dialog('option','title', dialog_title); 
+            }else if(this.options.edit_mode=='editonly' && this._as_dialog){
+                that._as_dialog.dialog('option','title', dialog_title); 
+            }
+                
+             
+            
             
             //@todo - move it inside editing
             //convert structure - 
@@ -1464,10 +1485,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //add record title at the top
         
-        if(this._getField('rec_Title')!=''){
+        if(!this._isInsert){  //addition
+        
+            var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+        
             this.element.find('.ui-heurist-header2').remove();
-            $('<div class="ui-heurist-header2"><span style="display:inline-block;padding-right:20px">ID: '+this._currentEditID
-                +'</span><h3 style="display:inline-block">'+ this._getField('rec_Title')+'</h3></div>')
+            $('<div class="ui-heurist-header2">'
+                + '<img src="'+ph_gif
+                    + '" width=25 height=25 style="vertical-align:middle;margin-right: 10px;background-image:url(\''
+                    + top.HAPI4.iconBaseURL+this._currentEditRecTypeID
+                    + 'm&color=rgb(255,255,255)\');"/><h3 style="display:inline-block;">'
+                    + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
+                + '</h3>&nbsp;<span style="display:inline-block;padding:0 20px">ID: '+this._currentEditID
+                + '</span><h3 style="display:inline-block">'+ this._getField('rec_Title')+'</h3></div>')
                 .css({'padding':'10px 0 10px 30px'})
                 .insertBefore(this.editForm.first('fieldset'));
         }

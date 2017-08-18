@@ -1086,7 +1086,7 @@ $.widget( "heurist.manageEntity", {
                         modal:  true,
                         title: this.options['edit_title']
                                     ?this.options['edit_title']
-                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityTitle,
+                                    :window.hWin.HR(recID<0?'Add':'Edit') + ' ' + this.options.entity.entityTitle,
                         resizeStop: function( event, ui ) {//fix bug
                             that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                         },

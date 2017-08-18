@@ -8,7 +8,7 @@
         
         "searchFormContent": "searchRecords.html",
         
-        "entityTitle": "Records",
+        "entityTitle": "Record",
         "entityTitlePlural": "Records",
         "empty_remark": "Please use the search field above to locate relevant record (partial string match on title)",
 
