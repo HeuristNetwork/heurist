@@ -130,6 +130,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 "searchrecordsonaddrecord": function( event, _rectype_id ){
                     this._currentEditRecTypeID = _rectype_id;
                     this.addEditRecord(-1);
+                    
+                    //@todo pass this.option.parententity
                 }
         });
         }
@@ -1194,6 +1196,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ffr[fieldIndexMap['rst_OrderForThumbnailGeneration']] = 0;
         ffr[fieldIndexMap['rst_OriginatingDBID']] = 0;
         ffr[fieldIndexMap['rst_PtrFilteredIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']]:"");
+        ffr[fieldIndexMap['rst_CreateChildIfRecPtr']] = 0;
         ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
         ffr[fieldIndexMap['rst_RequirementType']] = 'optional';
         ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");

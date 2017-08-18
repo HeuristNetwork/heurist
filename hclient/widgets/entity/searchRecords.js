@@ -80,33 +80,54 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
         var request = {}
 
-        var qstr = '', domain = 'a';
+        var qstr = '', domain = 'a', qobj = [];
         if(this.selectRectype.val()!=''){
             qstr = qstr + 't:'+this.selectRectype.val();
+            
+            qobj.push({"t":this.selectRectype.val()});
         }   
         if(this.input_search.val()!=''){
             qstr = qstr + ' title:'+this.input_search.val();
+            
+            qobj.push({"title":this.input_search.val()});
         }
 
         if(this.element.find('#cb_selected').is(':checked')){
             qstr = qstr + ' ids:' + window.hWin.HAPI4.get_prefs('recent_Records');
+            
+            qobj.push({"ids":window.hWin.HAPI4.get_prefs('recent_Records')});
         }
+        
+        if(this.options.parententity>0){
+            //filter out records with 247 field
+            var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+            var pred = {}; pred["f:"+DT_PARENT_ENTITY]="";
+            qobj.push(pred);
+        }
+        
         if(this.element.find('#cb_modified').is(':checked')){
             qstr = qstr + ' sortby:-m after:"1 week ago"';
+            
+            qobj.push({"sortby":"-m after:\"1 week ago\""});
         }
         if(this.element.find('#cb_bookmarked').is(':checked')){
             domain = 'b';
             if(qstr==''){
                 qstr = 'sortby:t';
+                qobj.push({"sortby":"t"});
             }
         }            
+        
+        
 
         if(qstr==''){
             this._trigger( "onresult", null, {recordset:new hRecordSet()} );
         }else{
             this._trigger( "onstart" );
 
-            var request = { q: qstr,
+            var request = { 
+                //q: qstr, 
+                q: qobj,
                 w: domain,
                 limit: 100000,
                 needall: 1,

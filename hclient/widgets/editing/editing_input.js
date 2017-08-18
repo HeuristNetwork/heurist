@@ -822,8 +822,14 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv )
                         .button({icons:{primary: 'ui-icon-calendar'},text:false});
 
+                       
+                       
                         
-                        this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( 'show' ); }} );
+                        this._on( $btn_datepicker, { click: function(){
+                                $datepicker.datepicker( 'show' ); 
+                                $("#ui-datepicker-div").css("z-index", "999999 !important"); 
+                                //$(".ui-datepicker").css("z-index", "999999 !important");   
+                        }} );
                 } 
 
                 if(this.options.dtID>0){ //this is details of records
@@ -838,7 +844,8 @@ $.widget( "heurist.editing_input", {
                         
                                 var url = window.hWin.HAPI4.baseURL 
                                     + 'common/html/editTemporalObject.html?'
-                                    + that.newvalues[$input.attr('id')]?that.newvalues[$input.attr('id')]:$input.val();
+                                    + encodeURIComponent(that.newvalues[$input.attr('id')]
+                                                ?that.newvalues[$input.attr('id')]:$input.val());
                                 
                                 window.hWin.HEURIST4.msg.showDialog(url, {height:550, width:750,
                                     title: 'Temporal Object',
@@ -950,9 +957,39 @@ $.widget( "heurist.editing_input", {
                                  showManageRecords( options ); 
                                  */
        //SELECTOR in POPUP URL
+       
+                    var popup_options = {
+                        isdialog: true,
+                        select_mode: 'select_single',
+                        select_return_mode: 'recordset',
+                        edit_mode: 'popup',
+                        title: window.hWin.HR('Select linked record'),
+                        rectype_set: that.f('rst_PtrFilteredIDs'),
+                        parententity: (that.f('rst_PtrFilteredIDs')==1)?that.options.recID:0,
+                        onselect:function(event, data){
+                            if(data && data.selection && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
+                                        var recordset = data.selection;
+                                        var record = recordset.getFirstRecord();
+                                        var rec_Title = recordset.fld(record,'rec_Title');
+                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                        window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                        $input.change();
+                            }
+                        }                        
+                    }
+                    
+                    window.hWin.HEURIST4.ui.showEntityDialog('Records', popup_options);
+       
+/*       
                                 var url = window.hWin.HAPI4.baseURL +
                                 'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
+                                
+                                if(that.f('rst_PtrFilteredIDs')==1){
+                                    url =  url + '&parententity=' + that.options.recID;
+                                }
+                                
+                                
                                 window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:600,
                                     title: window.hWin.HR('Select linked record'),
                                     window:  window.hWin, //opener is top most heurist window
@@ -967,7 +1004,7 @@ $.widget( "heurist.editing_input", {
                                         }
                                     }
                                 } );
-                                 
+*/                                 
                             };
 
                                 //assign initial display value
@@ -1084,8 +1121,6 @@ $.widget( "heurist.editing_input", {
                                     $input_img.find('img').attr('src',
                                         window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                                             value.ulf_ObfuscatedFileID);
-                                    
-console.log(value);                                    
                                     
                                 }else{
                                     
