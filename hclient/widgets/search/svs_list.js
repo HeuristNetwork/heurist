@@ -104,12 +104,12 @@ $.widget( "heurist.svs_list", {
 
                 //toppos = toppos + 2.5
             }
-        }
 
-        this.helper_top = $( '<div>'+window.hWin.HR('right-click in list for menu')+'</div>' )
-        //.addClass('logged-in-only heurist-helper1')
-        .appendTo( $( "<div>" )
-        .css({'padding':'0.2em 0 0 1.2em','color':'rgb(142, 169, 185)','font-size':'1em','font-style':'italic'}).appendTo(this.div_header) )
+            this.helper_top = $( '<div>'+window.hWin.HR('right-click in list for menu')+'</div>' )
+            //.addClass('logged-in-only heurist-helper1')
+            .appendTo( $( "<div>" )
+            .css({'padding':'0.2em 0 0 1.2em','color':'rgb(142, 169, 185)','font-size':'1em','font-style':'italic'}).appendTo(this.div_header) )
+        }
         //.appendTo( this.accordeon ); 'height':'1.3em', 
         //if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
 

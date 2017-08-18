@@ -139,6 +139,11 @@ function EditTerms() {
         }
 
         _initFileUploader();
+        
+        $('#edName').click(function(){
+           if( $('#edName').val()=="new term") edName.select(); 
+        });
+
     }
 
     //
@@ -307,12 +312,14 @@ function EditTerms() {
                 $('#edParentId').val(node.data.parent_id);
                 var edName = $('#edName');
                 edName.val(node.data.label);
-                if(node.data.label==="new term"){
+                /*if(node.data.label==="new term"){
                     //highlight all text
                     edName.selectionStart = 0;
                     edName.selectionEnd = 8;
                 }
+                */
                 edName.focus();
+                if(node.data.label==="new term") edName.select();
                 if(Hul.isnull(node.data.description)) {
                     node.data.description="";
                 }
