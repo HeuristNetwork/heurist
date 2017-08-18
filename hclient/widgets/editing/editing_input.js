@@ -936,28 +936,7 @@ $.widget( "heurist.editing_input", {
                             __show_select_dialog = function __show_select_dialog(event){
                                 event.preventDefault();
        
-       //LATEST "ENTITY" SELECTOR - it works, however it requires to load additional js - so it is better to open it in popup url
-                                /*
-                                 var options = {
-                                    select_mode: 'select_single',
-                                    edit_mode: 'popup',
-                                    select_return_mode: 'recordset',
-                                    rectype_set: that.f('rst_PtrFilteredIDs'),
-                                    onselect:function(event, data){
-
-                                        if(data && data.selection && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
-                                            var record = data.selection.getFirstRecord();
-                                            var rec_Title = data.selection.fld(record,'rec_Title');
-                                            that.newvalues[$input.attr('id')] = data.selection.fld(record,'rec_ID');
-                                            $input.val(rec_Title).change();
-                                        }
-                                    }
-                                 };                                
-                                 //public function on manageRecords.js
-                                 showManageRecords( options ); 
-                                 */
-       //SELECTOR in POPUP URL
-       
+            //LATEST "ENTITY" SELECTOR
                     var popup_options = {
                         isdialog: true,
                         select_mode: 'select_single',
@@ -965,7 +944,7 @@ $.widget( "heurist.editing_input", {
                         edit_mode: 'popup',
                         title: window.hWin.HR('Select linked record'),
                         rectype_set: that.f('rst_PtrFilteredIDs'),
-                        parententity: (that.f('rst_PtrFilteredIDs')==1)?that.options.recID:0,
+                        parententity: (that.f('rst_CreateChildIfRecPtr')==1)?that.options.recID:0,
                         onselect:function(event, data){
                             if(data && data.selection && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
                                         var recordset = data.selection;
@@ -980,7 +959,8 @@ $.widget( "heurist.editing_input", {
                     
                     window.hWin.HEURIST4.ui.showEntityDialog('Records', popup_options);
        
-/*       
+/*          //SELECTOR in POPUP URL
+    
                                 var url = window.hWin.HAPI4.baseURL +
                                 'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
@@ -1030,6 +1010,7 @@ $.widget( "heurist.editing_input", {
                                     }
                                     
                                 }
+                                
 
                             //$input.css('width', this.options['input_width']?this.options['input_width']:'300px');
                         }else{ //---------------------------------------------
@@ -1633,6 +1614,10 @@ $.widget( "heurist.editing_input", {
 
         var disp_value ='';
 
+        var $inputdiv = $( "<div>" ).addClass('input-div truncate')
+                .css({'font-weight':'bold', 'max-width':'400px'})
+                .insertBefore(this.input_prompt);
+
         if($.isArray(value)){
 
             disp_value = value[1]; //record title, relation description, filename, human readable date and geo
@@ -1650,7 +1635,32 @@ $.widget( "heurist.editing_input", {
 
         } else if(this.detailType=="resource"){
 
-            disp_value = "@todo resource "+value;
+            disp_value = "....resource "+value;
+            
+            var entityName='Records'; //by default           
+            if(!window.hWin.HEURIST4.util.isempty(this.configMode) &&
+               !window.hWin.HEURIST4.util.isempty(this.configMode.entity)){
+                entityName = this.configMode.entity;
+            }    
+            if(entityName=='Records') {
+                
+                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "all", f:"header"}, 
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            var recordset = new hRecordSet(response.data);
+                            var rec_Title = recordset.fld(recordset.getFirstRecord(),'rec_Title');
+                            $inputdiv.html(rec_Title);
+                        }
+                    }
+                );
+            }else{     
+                                               
+                window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value,
+                    function( display_value ){
+                            var rec_Title = display_value.join(',');
+                            $inputdiv.html(rec_Title);
+                    });
+            }
 
         } else if(this.detailType=="relmarker"){  //combination of enum and resource
 
@@ -1674,10 +1684,6 @@ $.widget( "heurist.editing_input", {
         if(this.detailType=="blocktext"){
             this.input_cell.css({'padding-top':'0.4em'});
         }
-
-        var $inputdiv = $( "<div>" ).addClass('input-div truncate')
-                .css({'font-weight':'bold', 'max-width':'400px'})
-                .insertBefore(this.input_prompt);
 
         $inputdiv.html(disp_value);
         
