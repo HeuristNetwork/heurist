@@ -455,6 +455,7 @@ function print_row($row,$fmt,$flds) {
             "<rst_DisplayDetailTypeGroupID>$row[rst_DisplayDetailTypeGroupID]</rst_DisplayDetailTypeGroupID>".
             "<rst_FilteredJsonTermIDTree>$rst_FilteredJsonTermIDTree</rst_FilteredJsonTermIDTree>".
             "<rst_PtrFilteredIDs>$rst_PtrFilteredIDs</rst_PtrFilteredIDs>".
+            "<rst_CreateChildIfRecPtr>$row[rst_CreateChildIfRecPtr]</rst_CreateChildIfRecPtr>".
             "<rst_OrderForThumbnailGeneration>$row[rst_OrderForThumbnailGeneration]</rst_OrderForThumbnailGeneration>".
             "<rst_TermIDTreeNonSelectableIDs>$rst_TermIDTreeNonSelectableIDs</rst_TermIDTreeNonSelectableIDs>".
             "<rst_LocallyModified>$row[rst_LocallyModified]</rst_LocallyModified>";

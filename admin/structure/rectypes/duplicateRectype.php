@@ -73,12 +73,14 @@
     $query= "INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue,
 rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDB,
-rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs, rst_OrderForThumbnailGeneration,
+rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
+rst_CreateChildIfRecPtr, rst_OrderForThumbnailGeneration,
 rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified)
-select $new_rt_id, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
+SELECT $new_rt_id, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue,
 rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDB,
-rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs, rst_OrderForThumbnailGeneration,
+rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
+rst_CreateChildIfRecPtr, rst_OrderForThumbnailGeneration,
 rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified
 from defRecStructure where rst_RecTypeID=$old_rt_id";
     $res = mysql_query($query);

@@ -245,6 +245,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_FILE_DURATION' => array(2, 66),
     'DT_FILE_SIZE' => array(2, 67),
     'DT_FILE_MD5' => array(2, 68),
+    'DT_PARENT_ENTITY' => array(2, 247),
     'DT_EDITOR' => array(3, 1013),
     'DT_OTHER_FILE' => array(3, 62), //TODO: remove from code
     'DT_LOGO_IMAGE' => array(3, 222), //TODO: remove from code

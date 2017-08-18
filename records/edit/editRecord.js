@@ -910,6 +910,7 @@ if (! top.HEURIST.edit) {
             ffr[fieldIndexMap['rst_OrderForThumbnailGeneration']] = 0;
             ffr[fieldIndexMap['rst_OriginatingDBID']] = 0;
             ffr[fieldIndexMap['rst_PtrFilteredIDs']] = rstPtrRectypeIDs ? rstPtrRectypeIDs : (dt?dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']]:"");
+            ffr[fieldIndexMap['rst_CreateChildIfRecPtr']] = 0;
             ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
             ffr[fieldIndexMap['rst_RequirementType']] = rstRequirementType ? rstRequirementType :'optional';
             ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");

@@ -91,6 +91,24 @@
 
         $mysqli = $system->get_mysqli();
         $dbID = $system->get_system('sys_dbRegisteredID');
+        
+
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        $res->close();
+        if(!$row_cnt){
+            //alter table
+             $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;";
+             
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_CreateChildIfRecPtr', $mysqli->error);
+            }
+            return false;
+        }
+        
 
         /*ARTEM $cacheKey = DATABASE . ":AllRecTypeInfo";
         if ($useCachedData) {
@@ -115,6 +133,7 @@
             "if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
             //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
             "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
+            "rst_CreateChildIfRecPtr",
             "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified",
             "dty_TermIDTreeNonSelectableIDs",
             "dty_FieldSetRectypeID",
@@ -469,7 +488,7 @@
         return array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DisplayOrder", "rst_DisplayWidth",
             "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType", "rst_NonOwnerVisibility",
             "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues", "rst_DisplayDetailTypeGroupID",
-            "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
+            "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_CreateChildIfRecPtr", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
             "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID", "dty_Type");
     }
 

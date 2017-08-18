@@ -54,7 +54,6 @@
     ALTER TABLE `defRecStructure` ADD `rst_ShowDetailAnnotation` TinyInt default 0
     COMMENT 'When editing the field, allow editng of the dtl_Annotation value (off by default)';
 
-
 -- Provision for an image or PDF or external URL to define or illustrate the term
     ALTER TABLE  `defTerms`
     ADD  `trm_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
@@ -101,3 +100,10 @@
     ADD rst_NumericLargestValueUsed INTEGER NULL
     COMMENT 'For numeric fields, Null = no auto increment, 0 or more indicates largest value used so far. Set to 0 to switch on incrementing';
     -- Note: need to set initial value if not 0 and protect numeric auto-increment fields against manual editing
+    
+    ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;    
+
+    ALTER TABLE `usrBookmarks` ADD `bkm_Notes` text COMMENT 'Personal notes';
+
+    ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` text COMMENT 'JSON array that describes treeview for filters'
+    

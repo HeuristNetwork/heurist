@@ -538,6 +538,13 @@ function EditRecStructure() {
                         '<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition" and then "Select Record Types"</span>'+
                         '</div></div>'+
 
+                        '<div class="input-row"><div class="input-header-cell">Create new records as children:</div>'+
+                        
+                        '<div class="input-cell" title="Help me!">'+
+                        '<input id="ed'+rst_ID+'_rst_CreateChildIfRecPtr" type="checkbox" value="1" />'+
+                        '</div></div>'+
+                        
+                        
                         // Base field definitions  (button)
                         '<div>'+
                         '<div style="margin-left:190px; padding-top:5px; padding-bottom:15px;">'+
@@ -980,6 +987,8 @@ function EditRecStructure() {
                     
                     if(fieldnames[k]=="rst_DefaultValue" && $('#incValue_'+__rst_ID+'_2').is(':checked')){
                             edt.value = 'increment_new_values_by_1';
+                    }else if(fieldnames[k]=="rst_CreateChildIfRecPtr"){
+                            edt.value = $(edt).is(':checked')?1:0;
                     }
                     
                     if(values[k] !== edt.value){
@@ -1174,6 +1183,21 @@ function EditRecStructure() {
                         edt.parentNode.parentNode.style.display = "none";
                     }
 
+                }else if(fieldnames[k] === "rst_CreateChildIfRecPtr"){
+
+                    if(rst_type === "resource"){
+                        //$(edt).parent('.input-row').show();
+                        edt.parentNode.parentNode.style.display = "block";
+                        
+                        $('#'+ed_name).attr('checked', values[k]==1);
+                        
+                        
+                    }else{
+                        edt.parentNode.parentNode.style.display = "none";
+                        //$(edt).parent('.input-row').hide();
+                    }
+                    
+                    
                 }else if(rst_type === "relationtype"){
 
                 }else if(rst_type === "resource"){
@@ -1445,6 +1469,7 @@ function EditRecStructure() {
                 arr_target[rst.rst_DisplayDetailTypeGroupID] = "1";
                 arr_target[rst.rst_FilteredJsonTermIDTree] = null;
                 arr_target[rst.rst_PtrFilteredIDs] = null;
+                arr_target[rst.rst_CreateChildIfRecPtr] = 0;
                 arr_target[rst.rst_TermIDTreeNonSelectableIDs] = null;
                 arr_target[rst.rst_CalcFunctionID] = null;
                 arr_target[rst.rst_Status] = "open";

@@ -1074,7 +1074,8 @@ function getRectypeStructureFieldColNames() {
     return array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DisplayOrder", "rst_DisplayWidth",
         "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType", "rst_NonOwnerVisibility",
         "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues", "rst_DisplayDetailTypeGroupID",
-        "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
+        "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_CreateChildIfRecPtr",
+        "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
         "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID", "dty_Type");
 }
 /**
@@ -1083,6 +1084,23 @@ function getRectypeStructureFieldColNames() {
 * @return    object index by detatilType array of field definitions ordered the same as getRectypeStructureFieldColNames()
 */
 function getRectypeFields($rtID) {
+    
+    
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
+        $res = mysql_query($query);
+        if($res && mysql_num_rows($res)==0){
+            //alter table
+            $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`";
+
+            $res = mysql_query($query);
+            if(!$res){
+                error_log('Cannot modify defRecStructure to add rst_CreateChildIfRecPtr');
+            }
+            return false;
+        }
+    
+    
     $rtFieldDefs = array();
     // NOTE: these are ordered to match the order of getRectypeStructureFieldColNames from DisplayName on
     $colNames = array("rst_DetailTypeID",
@@ -1102,6 +1120,7 @@ function getRectypeFields($rtID) {
         //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
         //ARTEM we never use rst_PtrFilteredIDs "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
         "dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs",
+        "rst_CreateChildIfRecPtr",
         "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs",
         "dty_FieldSetRectypeID", "dty_Type");
     // get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
@@ -1225,6 +1244,7 @@ function getAllRectypeStructures($useCachedData = false) {
         //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
         //ARTEM WE NEVER USE "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
         "dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs",
+        "rst_CreateChildIfRecPtr",
         "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs",
         "dty_FieldSetRectypeID", "dty_Type");
     $query = "select " . join(",", $colNames) .
