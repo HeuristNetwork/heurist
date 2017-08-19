@@ -1538,8 +1538,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
                 if(this.usrPreferences.width<600) this.usrPreferences.width=600;
                 if(this.usrPreferences.height<300) this.usrPreferences.height=300;
-                if (this.usrPreferences.width>defaultPrefs.width) this.usrPreferences.width=defaultPrefs.width;
-                if (this.usrPreferences.height>defaultPrefs.height) this.usrPreferences.height=defaultPrefs.height;
+                if (this.usrPreferences.width>this.defaultPrefs.width) this.usrPreferences.width=this.defaultPrefs.width;
+                if (this.usrPreferences.height>this.defaultPrefs.height) this.usrPreferences.height=this.defaultPrefs.height;
         
     },
     
