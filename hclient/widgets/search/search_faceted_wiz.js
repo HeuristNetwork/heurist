@@ -1098,7 +1098,9 @@ $.widget( "heurist.search_faceted_wiz", {
                     if(isNaN(Number(linktype))){
                         dtid = dtid.substr(2);
                         
-                        if(linktype=='lt'){
+                        if(dtid>0){
+                        
+                        if(linktype=='lt' || linktype=='rt'){
                             harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]+' &gt ');
                         }else{
                             var from_rtid = codes[j+2];
@@ -1106,6 +1108,8 @@ $.widget( "heurist.search_faceted_wiz", {
                             (window.hWin.HEURIST4.rectypes.typedefs[from_rtid]
                                 ?window.hWin.HEURIST4.rectypes.typedefs[from_rtid].dtFields[dtid][dispname_idx]+' . '
                                 :'') );
+                        }
+                        
                         }
                         
                     }else{
