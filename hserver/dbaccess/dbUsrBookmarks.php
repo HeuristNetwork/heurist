@@ -29,31 +29,6 @@ require_once (dirname(__FILE__).'/db_files.php');
 class DbUsrBookmarks extends DbEntityBase
 {
 
-    public function init(){
-        parent::init();
-        
-        //verify that NEW field exists in database
-        
-        $mysqli = $this->system->get_mysqli();
-        //verify that required column exists in sysUGrps
-        $query = "SHOW COLUMNS FROM `usrBookmarks` LIKE 'bkm_Notes'";
-
-        $res = $mysqli->query($query);
-
-        $row_cnt = $res->num_rows;
-        $res->close();
-        if(!$row_cnt){
-            //alter table
-            $query = "ALTER TABLE `usrBookmarks` ADD `bkm_Notes` text COMMENT 'Personal notes'";
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify table to store Personal notes', $mysqli->error);
-            }
-            return false;
-        }
-        
-    }
-    
     /**
     *  search bookmarks
     * 

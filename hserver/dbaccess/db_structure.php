@@ -92,24 +92,6 @@
         $mysqli = $system->get_mysqli();
         $dbID = $system->get_system('sys_dbRegisteredID');
         
-
-        //verify that required column exists in sysUGrps
-        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
-        $res = $mysqli->query($query);
-        $row_cnt = $res->num_rows;
-        $res->close();
-        if(!$row_cnt){
-            //alter table
-             $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;";
-             
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_CreateChildIfRecPtr', $mysqli->error);
-            }
-            return false;
-        }
-        
-
         /*ARTEM $cacheKey = DATABASE . ":AllRecTypeInfo";
         if ($useCachedData) {
         $rtStructs = getCachedData($cacheKey);
