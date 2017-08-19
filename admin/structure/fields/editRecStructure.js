@@ -540,8 +540,11 @@ function EditRecStructure() {
 
                         '<div class="input-row"><div class="input-header-cell">Create new records as children:</div>'+
                         
-                        '<div class="input-cell" title="Help me!">'+
+                        '<div class="input-cell">'+
                         '<input id="ed'+rst_ID+'_rst_CreateChildIfRecPtr" type="checkbox" value="1" />'+
+                        
+                        '<a href="#" class="help_rst_CreateChildIfRecPtr" onclick="onCreateChildIfRecPtrInfo(event)" style="vertical-align:bottom">'+
+                            '<img src="../../../common/images/info.png" width="14" height="14" border="0" title="Info"></a>'+
                         '</div></div>'+
                         
                         
@@ -2622,6 +2625,14 @@ function onRepeatValueChange(evt){
     }
 }
 
+function onCreateChildIfRecPtrInfo(evt){
+  evt.preventDefault();
+    
+  top.HEURIST.util.popupElement(hasH4()
+        ?top:window.hWin, document.getElementById('info_rst_CreateChildIfRecPtr'));
+    
+  return false;
+}
 
 function _preventSel(event){
     event.target.selectedIndex=0;
