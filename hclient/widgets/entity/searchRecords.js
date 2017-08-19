@@ -99,7 +99,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
         
         if(this.options.parententity>0){
-            //filter out records with 247 field
+            //filter out records with parent entiy (247) field
             var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
             var pred = {}; pred["f:"+DT_PARENT_ENTITY]="NULL";
             qobj.push(pred);

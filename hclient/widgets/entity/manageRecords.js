@@ -65,8 +65,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this.options.width = 1200;                    
         }
 
-        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
-        
+        this.getUiPreferences();
         
         this._super();
         
@@ -141,16 +140,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
         return true;
     },
-
     
     _initDialog: function(){
         
             if(this.options.edit_mode == 'editonly'){
-                this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+                this.getUiPreferences();
                 this.options['width']  = this.usrPreferences['width'];
                 this.options['height'] = this.usrPreferences['height'];
-                if(this.options['width']<600) this.options['width']=600;
-                if(this.options['height']<300) this.options['height']=300;
             }
         
             this._super();
@@ -1534,6 +1530,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         this.onEditFormChange();
     },
 
+    
+    //
+    //
+    //
+    getUiPreferences: function(){
+                this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+                if(this.usrPreferences.width<600) this.usrPreferences.width=600;
+                if(this.usrPreferences.height<300) this.usrPreferences.height=300;
+                if (this.usrPreferences.width>defaultPrefs.width) this.usrPreferences.width=defaultPrefs.width;
+                if (this.usrPreferences.height>defaultPrefs.height) this.usrPreferences.height=defaultPrefs.height;
+        
+    },
+    
     //
     // save width,heigth and summary tab prefs
     //
