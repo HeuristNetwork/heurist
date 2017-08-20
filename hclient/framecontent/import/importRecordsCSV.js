@@ -2461,7 +2461,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         sWarning = '';
                     }else{
                         sWarning = '<h3>WARNING</h3>'
-     + (isSkipMatch?'':'You have not selected any colulm to field mappping<br><br>')                   
+     + (matchMode==2?'':'You have not selected any colulm to field mappping<br><br>')                   
      +'By choosing not to match the incoming data, you will create '
      +imp_session['reccount']+' new records - that is one record for every row.<br><br>Proceed without matching?';
                     }
