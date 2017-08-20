@@ -47,7 +47,7 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":128,
-                        "rst_DisplayWidth":40,
+                        "rst_DisplayWidth":60,
                         "rst_DisplayName": "Long name",
                         "rst_DisplayHelpText": "An extended name for the group, up to 128 characters"
                     }
@@ -57,7 +57,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":1000,
-                        "rst_DisplayWidth":40,
+                        "rst_DisplayWidth":60,
                         "rst_DisplayName": "Description",
                         "rst_DisplayHelpText": "A description of the group, up to 1000 characters" 
                     }
@@ -68,6 +68,7 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Enabled:",
                         "rst_DisplayHelpText": "Uncheck this box to disable the group - disabled groups are eliminated from menus etc",
+                        "rst_DefaultValue": "y",
                         "rst_FieldConfig":[
                             {"key":"y","title":"Yes"},
                             {"key":"n","title":"No"}
@@ -107,6 +108,15 @@
                         "dty_Type":"freetext",
                         "rst_Display":"hidden"
                     }
+                },
+                {
+                    "dtID": "ugr_Password",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue": "PASSWORD NOT REQUIRED"
+                    }
                 }
+                
      ]
 }

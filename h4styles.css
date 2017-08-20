@@ -173,17 +173,38 @@ iframe {
 input[type=checkbox], input[type=radio]{
     vertical-align:-0.3em;
     margin-right:0.2em;
+
+}
+
+input.rec_URL {
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    margin: 2px 0;
+    padding: 3px;
+    background:#F4F2F4 !important;
+}
+
+input.Temporal {
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    margin: 2px 0;
+    padding: 3px;
+    background:#F4F2F4 !important;
 }
 
 /* INPUT FORM ----------------------------------   */
 fieldset {
     padding:1em; border:0;
 }
+
 fieldset > div, .input-row{
-    display:table-row;
     padding-top:0.2em;
+    display:table-row;
     /*padding-bottom:0.2em;*/
 }
+
 
 fieldset > div > input.text, fieldset > div > select.text{
     margin-top: 0.3em;
@@ -200,7 +221,7 @@ fieldset > div > .header,
 fieldset > div > .header_narrow{
     display:table-cell;
     text-align:right;
-    padding-top:0.4em;
+    padding:0.4em 0.4em 0 0;
 }
 fieldset.ontop > div > .header{
     display:block;
@@ -215,7 +236,7 @@ fieldset > div > .header{
 fieldset > div > .input-cell{
     display:table-cell;
     min-width:120px;
-    padding-bottom:0.2em;
+    /*padding-bottom:0.2em;*/
 }
 fieldset.ontop > div > .input-cell{
     display:block;
@@ -232,7 +253,7 @@ div.input-div > .btn_input_clear, .btn_input_clear {
 }
 
 div.input-div{
-    padding-bottom:0.2em;
+    /*padding-bottom:0.2em;*/
 }
 
 div.image_input{
@@ -284,15 +305,14 @@ input.text, select.text {
 
 .separator {
     border-top: 1px solid #A4B4CB;
-    padding: 10px 0;
+    padding: 10px 0 10px 20px;
     text-align:left;
-    width:100%;
 }
 
 .smallbutton{
     width: 16px !important;
     height: 16px !important;
-    margin: 0.4em;
+    margin-left: 0.4em;
 }
 
 /* FOR SELECT */
@@ -340,12 +360,17 @@ optgroup {
 /*  SEARCH RESULT */
 
 .tagDiv {
-    border:1px solid gray;
     display: inline-block;
-    border-radius: 4px;
-    margin: 2px;
-    padding: 2px;
     cursor: pointer;
+    border: none;
+    background: none !important;
+    margin: 2px;
+    text-decoration: underline;
+    /*
+    border:1px solid gray;
+    border-radius: 4px;
+    padding: 2px;
+    */
 }
 .tagDiv > label{
     cursor: pointer;
@@ -374,6 +399,12 @@ H2 {
     font-size:1.2em;
 }
 
+div.recordDiv:hover  .rec_edit_link, 
+    div.recordDiv:hover  .rec_edit_link_ext, 
+    div.recordDiv:hover  .rec_view_link 
+{
+    display: inline-block;
+}
 h3:hover > #rec_add_link, 
     div.recordDiv:hover > .rec_edit_link, 
     div.recordDiv:hover > .rec_edit_link_ext, 
@@ -382,23 +413,34 @@ h3:hover > #rec_add_link,
     display: block;
 }
 h3 > #rec_add_link, 
-    div.recordDiv > .rec_edit_link, 
-    div.recordDiv > .rec_edit_link_ext,
-    div.recordDiv > .rec_view_link {
-    position: absolute;
+    div.recordDiv  .rec_edit_link, 
+    div.recordDiv  .rec_edit_link_ext,
+    div.recordDiv  .rec_view_link {
     display: none;
     height: 16px;
     width: 16px;
+}
+div.recordDiv > .rec_edit_link, 
+div.recordDiv > .rec_edit_link_ext,
+div.recordDiv > .rec_view_link {
+    position: absolute;
     top: 2px;
 }
+
 div.recordDiv > .rec_edit_link_ext{
-    right: 36px;
+    right: 48px;
 }
 div.recordDiv > .rec_view_link {
-    right: 18px;
+    right: 24px;
 }
 div.recordDiv > .rec_edit_link{
     right: 2px;
+}
+
+.list > .rec_edit_link, 
+.list > .rec_edit_link_ext,
+.list > .rec_view_link {
+    top: 5px !important;
 }
 
 div.recordDiv:hover > .rec_action_link{
@@ -533,7 +575,7 @@ div .selected_last{
 }
 
 .thumbs .recordDiv .rec_owner{
-    display: inline-block;
+    display: inline;
     padding-left:5px;
 }
 
@@ -620,7 +662,7 @@ div .selected_last{
 }
 
 .list .recordDiv .rec_owner{
-    display: inline-block;
+    display: inline;
 }
 
 .list .recordDiv .recTypeThumb {
@@ -629,7 +671,7 @@ div .selected_last{
 .list .recordDiv .recordTitle {
     left: 74px;
     right: 3px;
-    top: 3px;
+    top: 8px;
 
     vertical-align: middle;
     white-space: nowrap;
@@ -759,7 +801,7 @@ div .selected_last{
 }
 
 .thumbs3 .recordDiv .rec_owner{
-    display: inline-block;
+    display: inline;
     padding-left:5px;
 }
 

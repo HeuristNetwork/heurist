@@ -30,6 +30,10 @@
 * @subpackage  Records/Add
 */
 
+if (@$_REQUEST['h4']==1){
+    header( 'Location: ../../hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'] );
+    return;
+}
 
 // translate variable names
 if (@$_REQUEST['t']) $_REQUEST['bkmrk_bkmk_title'] = $_REQUEST['t'];

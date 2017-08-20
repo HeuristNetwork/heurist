@@ -254,22 +254,6 @@
     function svsGetTreeData($system, $grpID=null){
 
         $mysqli = $system->get_mysqli();
-        //verify that required column exists in sysUGrps
-        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_NavigationTree'";
-
-        $res = $mysqli->query($query);
-
-        $row_cnt = $res->num_rows;
-        $res->close();
-        if(!$row_cnt){
-            //alter table
-            $query = "ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` text COMMENT 'JSON array that describes treeview for filters'";
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify table to store filters treeview', $mysqli->error);
-            }
-            return false;
-        }
 
         $ugrID = $system->get_user_id();
         //load personal treeviews - rules, my filters (all) and bookmarks

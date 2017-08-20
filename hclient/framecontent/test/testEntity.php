@@ -276,7 +276,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             {"key":"SysGroups",title:"Workgroups",icon:'ui-icon-group'},
                             {"key":"Tags",title:"Tags",icon:'ui-icon-tag'},
                             {"key":"RecUploadedFiles",title:"Uploaded Files",icon:'ui-icon-image'},
-                            {"key":"Reminders",title:"Reminders",icon:'ui-icon-mail-closed'},
+                            {"key":"usrReminders",title:"Reminders",icon:'ui-icon-mail-closed'},
                             {"key":"Databases",title:"Databases",icon:'ui-icon-database'},
                             {"key":"",title:"Saved Searches",icon:'ui-icon-search'},
                             {"key":"DefRecTypes",title:"Record Types",icon:'ui-icon-image'},
@@ -349,12 +349,12 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
-                            <option value="Records" selected>Records</option>
+                            <option value="Records">Records</option>
                             <option value="SysUsers">Users +</option>
                             <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
-                            <option value="Reminders">Reminders</option>
+                            <option value="UsrReminders" selected>Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>

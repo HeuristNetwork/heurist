@@ -42,12 +42,14 @@ require_once(dirname(__FILE__)."/initPage.php");
                     var $container = $("<div>").appendTo($("body"));
 
                     var rectype_set = window.hWin.HEURIST4.util.getUrlParameter('rectype_set', window.location.search);
+                    var parententity = window.hWin.HEURIST4.util.getUrlParameter('parententity', window.location.search);
                     
                     var options = {
                         select_mode: 'select_single',
                         select_return_mode: 'recordset',
                         edit_mode: 'popup',
                         rectype_set: rectype_set,
+                        parententity: parententity,
                         onselect:function(event, data){
                             if(data && data.selection && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
                                 window.close(data.selection);

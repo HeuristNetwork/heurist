@@ -57,7 +57,7 @@ $.widget( "heurist.manageEntity", {
     options: {
     
         //DIALOG section       
-        isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), _closeDialog
+        isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), closeDialog
         height: 400,
         width:  760,
         modal:  true,
@@ -196,6 +196,10 @@ $.widget( "heurist.manageEntity", {
         this.searchForm      = this.element.find('.searchForm');
         this.editForm        = this.element.find('.editForm');
         this.editFormToolbar = this.element.find('.editForm-toolbar');
+
+        //specific for records        
+        this.editFormSummary = this.element.find('.editFormSummary');
+        this.editFormPopup = this.element.find('.editFormDialog');
         
         //this.element.addClass('ui-heurist-bg-light');
         
@@ -262,6 +266,7 @@ $.widget( "heurist.manageEntity", {
         var that = this;
         
         if(this.options.list_mode=='default'){
+
         
                 //init record list
                 this.recordList
@@ -329,9 +334,13 @@ $.widget( "heurist.manageEntity", {
 
         //--------------------------------------------------------------------    
 
-        var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
-        $('.heurist-helper1').css('display',ishelp_on?'block':'none');
+        //var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
+        //$('.heurist-helper1').css('display',ishelp_on?'block':'none');
 
+        
+        if(this.options.isdialog){
+            this.popupDialog();
+        }
         
         return true;
         //place this code in extension ===========    
@@ -627,6 +636,26 @@ $.widget( "heurist.manageEntity", {
 
             if(options.edit_mode == 'editonly'){
                 btn_array =  this._getEditDialogButtons();
+                if(!options.beforeClose){
+                    options.beforeClose = function(){
+                        //show warning in case of modification
+                        if(that._editing.isModified() && that._currentEditID!=null){
+                            var $dlg, buttons = {};
+                            buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
+                            buttons['Ignore and close'] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
+                            
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
+                                    buttons,
+                                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                                        //
+                                        
+                            return false;   
+                        }
+                        that.saveUiPreferences();
+                        return true;
+                    };
+                }
             }else {
                 //if(options.in_popup_dialog===false){ 
                 btn_array.push({text:window.hWin.HR('Close'), 
@@ -644,6 +673,7 @@ $.widget( "heurist.manageEntity", {
                 modal:  (options['modal']!==false),
                 title: window.hWin.HEURIST4.util.isempty(options['title'])?'':options['title'], //title will be set in  initControls as soon as entity config is loaded
 
+                beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {//fix bug
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
@@ -685,6 +715,7 @@ $.widget( "heurist.manageEntity", {
             this._as_dialog.dialog("open");
             
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
+                'prefs_'+this._entityName,
                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
             
         }
@@ -698,6 +729,10 @@ $.widget( "heurist.manageEntity", {
             this._as_dialog.dialog("close");
             //this.element.dialog('close');
         }
+    },
+    
+    saveUiPreferences:function(){
+        
     },
 
     //
@@ -1000,9 +1035,10 @@ $.widget( "heurist.manageEntity", {
         }else{
             
             if(this._currentEditID!=null && this._editing.isModified()){
-                window.hWin.HEURIST4.msg.showMsgDlg('Data were modified in edit form. Ignore modifications and start edit the new data',
-                function(){ that._initEditForm_step2(recID); },
-                'Confirm');
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Data were modified in edit form. Ignore modifications and start edit the new data',
+                        function(){ that._initEditForm_step2(recID); },
+                    'Confirm');
             }else{
                 this._initEditForm_step2(recID);            
             }
@@ -1050,7 +1086,7 @@ $.widget( "heurist.manageEntity", {
                         modal:  true,
                         title: this.options['edit_title']
                                     ?this.options['edit_title']
-                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityTitle,
+                                    :window.hWin.HR(recID<0?'Add':'Edit') + ' ' + this.options.entity.entityTitle,
                         resizeStop: function( event, ui ) {//fix bug
                             that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                         },
@@ -1059,6 +1095,7 @@ $.widget( "heurist.manageEntity", {
                     
                     //help and tips buttons on dialog header
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this.editFormPopup,
+                        'prefs_'+this._entityName,
                      window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
                      
                 this._toolbar = this._edit_dialog.parent();     
@@ -1176,6 +1213,9 @@ $.widget( "heurist.manageEntity", {
                        this.editForm,'full',{display:'inline-block', margin:'0 35% 0 0'});
 */                       
         }
+        
+        window.hWin.HEURIST4.ui.switchHintState('prefs_'+this._entityName, this.element, false);
+        
 
         this.onEditFormChange();
         // to EXTEND         

@@ -244,10 +244,11 @@ foreach ($rec_types as $rec_type) {
             $rstC2I['rst_TermIDTreeNonSelectableIDs']?$rdr[$rstC2I['rst_TermIDTreeNonSelectableIDs']]:null,		//14-Extended Disabled Term IDs
             $rstC2I['dty_TermIDTreeNonSelectableIDs']?$rdr[$rstC2I['dty_TermIDTreeNonSelectableIDs']]:null,		//15-Detail Type Disabled Term IDs
             $rstC2I['rst_PtrFilteredIDs']?$rdr[$rstC2I['rst_PtrFilteredIDs']]:null,								//16-Filtered Pointer Constraint Rectype IDs
-            $rstC2I['rst_CalcFunctionID']?$rdr[$rstC2I['rst_CalcFunctionID']]:null,								//17-Calc Function ID
-            $rstC2I['rst_OrderForThumbnailGeneration']?$rdr[$rstC2I['rst_OrderForThumbnailGeneration']]:null,	//18-Thumbnail selection Order
-            $rstC2I['rst_Status']?$rdr[$rstC2I['rst_Status']]:null,												//19-Status
-            $rstC2I['rst_NonOwnerVisibility']?$rdr[$rstC2I['rst_NonOwnerVisibility']]:null,));					//20-Non-Owner Visibility
+            $rstC2I['rst_CreateChildIfRecPtr']?$rdr[$rstC2I['rst_CreateChildIfRecPtr']]:0,                      //17- Create child record
+            $rstC2I['rst_CalcFunctionID']?$rdr[$rstC2I['rst_CalcFunctionID']]:null,								//18-Calc Function ID
+            $rstC2I['rst_OrderForThumbnailGeneration']?$rdr[$rstC2I['rst_OrderForThumbnailGeneration']]:null,	//19-Thumbnail selection Order
+            $rstC2I['rst_Status']?$rdr[$rstC2I['rst_Status']]:null,												//20-Status
+            $rstC2I['rst_NonOwnerVisibility']?$rdr[$rstC2I['rst_NonOwnerVisibility']]:null,));					//21-Non-Owner Visibility
     }
 }
 

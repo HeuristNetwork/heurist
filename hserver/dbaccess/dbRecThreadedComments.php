@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * db access to usrBoomarks table
+    * db access to recThreadedComments.php table
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -23,14 +23,12 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
-require_once (dirname(__FILE__).'/db_files.php');
 
-
-class DbUsrBookmarks extends DbEntityBase
+class DbRecThreadedComments extends DbEntityBase
 {
 
     /**
-    *  search bookmarks
+    *  search usrReminders
     * 
     *  other parameters :
     *  details - id|name|list|all or list of table fields
@@ -41,9 +39,12 @@ class DbUsrBookmarks extends DbEntityBase
     *  @todo overwrite
     */
     public function search(){
-
                 
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
+        
+        if(!@$this->data['cmt_OwnerUgrpID']){
+            $this->data['cmt_OwnerUgrpID'] = $this->system->get_user_id();
+        }
         
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
@@ -53,32 +54,34 @@ class DbUsrBookmarks extends DbEntityBase
         }        
         
         $needCheck = false;
+        $needRecords = false;
         
         //compose WHERE 
         $where = array();
         $from_table = array($this->config['tableName']);
         
-        $pred = $this->searchMgr->getPredicate('bkm_ID');
+        $pred = $this->searchMgr->getPredicate('cmt_ID');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('bkm_UGrpID');
+        $pred = $this->searchMgr->getPredicate('cmt_OwnerUgrpID');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('bkm_RecID');
+        $pred = $this->searchMgr->getPredicate('cmt_RecID');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('bkm_Rating');
+        $pred = $this->searchMgr->getPredicate('cmt_Text');
         if($pred!=null) array_push($where, $pred);
 
-        
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
-            $this->data['details'] = 'bkm_ID';
+            $this->data['details'] = 'cmt_ID';
             
         }else if(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
 
-            $this->data['details'] = 'bkm_ID,bkm_UGrpID,bkm_RecID,bkm_Rating,bkm_PwdReminder,bkm_Notes';
+            $this->data['details'] = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,cmt_Text,cmt_Modified';
+
+            $needRecords = (@$this->data['details']=='list');
             
         }else{
             $needCheck = true;
@@ -93,7 +96,31 @@ class DbUsrBookmarks extends DbEntityBase
             return false;
         }
 
+        //----- order by ------------
+        //compose ORDER BY 
+        $order = array();
+        
+        $value = @$this->data['sort:cmt_Modified'];
+        if($value!=null){
+            array_push($order, 'rem_Modified '.($value==1?'ASC':'DESC'));
+        }else{
+            $value = @$this->data['sort:cmt_RecTitle'];
+            if($value!=null){
+                array_push($order, 'rec_Title '.($value==1?'ASC':'DESC'));
+                $needRecords = true;
+            }
+        }           
+        
+        
+        
         $is_ids_only = (count($this->data['details'])==1);
+        
+        if($needRecords){
+              array_push($this->data['details'], 'rec_Title as cmt_RecTitle');
+              array_push($from_table,'Records');
+              array_push($where, 'rec_ID=cmt_RecID');
+        }
+        
             
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
@@ -101,6 +128,9 @@ class DbUsrBookmarks extends DbEntityBase
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
+         }
+         if(count($order)>0){
+            $query = $query.' ORDER BY '.implode(',',$order);
          }
          
          $query = $query.$this->searchMgr->getOffset()
@@ -113,38 +143,36 @@ class DbUsrBookmarks extends DbEntityBase
         return $result;
     }
     
-    
     //
-    // validate permission for edit/delete bookmark
+    // validate permission for edit comment
     // for delete and assign see appropriate methods
     //    
     protected function _validatePermission(){
         
         if(!$this->system->is_dbowner() && count($this->recordIDs)>0){ //there are records to update/delete
             
-            //$ugrs = $this->system->get_user_group_ids();
             $ugrID = $this->system->get_user_id();
             
             $mysqli = $this->system->get_mysqli();
              
             $recIDs_norights = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField, 
-                    'bkm_ID in ('.implode(',', $this->recordIDs).') AND bkm_UGrpID!='.$ugrID); //' not in ('.implode(',',$ugrs).')');
-            
+                    'cmt_ID in ('.implode(',', $this->recordIDs).') AND cmt_OwnerUgrpID!='.$ugrID);
             
             $cnt = count($recIDs_norights);       
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 
                 (($cnt==1 && (!isset($this->records) || count($this->records)==1))
-                    ? 'Bookmark belongs'
-                    : $cnt.' Bookmark belong')
-                    .' to other user. Insufficient rights for this operation'); // or workgroup you are not a member
+                    ? 'Comment belongs'
+                    : $cnt.' Comments belong')
+                    .' to other user. Insufficient rights for this operation');
                 return false;
             }
         }
         
         return true;
     }
+    
     
     //
     //
@@ -157,10 +185,12 @@ class DbUsrBookmarks extends DbEntityBase
         foreach($this->records as $idx=>$record){
             $rec_ID = intval(@$record[$this->primaryField]);
             $isinsert = ($rec_ID<1);
-            if($isinsert && !($this->records[$idx]['bkm_UGrpID']>0)){
-                $this->records[$idx]['bkm_UGrpID'] = $this->system->get_user_id();
+            if($isinsert){
+                if(!($this->records[$idx]['cmt_OwnerUgrpID']>0)){
+                    $this->records[$idx]['cmt_OwnerUgrpID'] = $this->system->get_user_id();
+                }
             }
-            $this->records[$idx]['bkm_Modified'] = null; //reset
+            $this->records[$idx]['cmt_Modified'] = null; //reset
         }
 
         return $ret;
@@ -168,28 +198,34 @@ class DbUsrBookmarks extends DbEntityBase
     }    
     
     //
+    // batch action for comments - changing flag cmt_Deleted
     //
-    //
-    public function delete(){
-
-        $this->recordIDs = prepareIds($this->data['recID']);
+    public function batch_action(){
+        
+        $recordIDs = prepareIds($this->data['recIDs']);
+        if(count($recordIDs)>0){
+            //find record by ids  - todo
+            
+        }
+        
+        if(!$this->prepareRecords()){
+                return false;    
+        }
         
         $mysqli = $this->system->get_mysqli();
-       
         
-        $query = 'SELECT count(tag_ID) FROM usrBookmarks, usrTags, usrRecTagLinks where tag_ID=rtl_TagID AND tag_UGrpID='
-            .$this->system->get_user_id()
-            .' AND rtl_RecID=bkm_RecID AND bkm_ID in (' . implode(',', $this->recordIDs). ')';
-                       
-        $cnt = mysql__select_value($mysqli, $query);
-
-        if($cnt>0){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                    'It is not possible to remove bookmark. Bookmarked record has personal tags');
-                return false;
-        }
-    
-        $ret = parent::delete();    
+        foreach($this->records as $record){
+            
+            if($record[$this->primaryField]>0){
+                $this->recordIDs[] = $record[$this->primaryField];
+            }
+                    
+            
+        }//for comments
+        
+        
+        return true;
     }
+    
 }
 ?>

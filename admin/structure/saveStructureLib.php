@@ -87,6 +87,7 @@
         "rst_DisplayDetailTypeGroupID"=>"i",
         "rst_FilteredJsonTermIDTree"=>"s",
         "rst_PtrFilteredIDs"=>"s",
+        "rst_CreateChildIfRecPtr"=>"i",
         "rst_OrderForThumbnailGeneration"=>"i",
         "rst_TermIDTreeNonSelectableIDs"=>"s",
         "rst_Modified"=>"s",
@@ -505,6 +506,7 @@
 		$arr_target[$ri['rst_DisplayDetailTypeGroupID']] = "1";
 		$arr_target[$ri['rst_FilteredJsonTermIDTree']] = null;
 		$arr_target[$ri['rst_PtrFilteredIDs']] = null;
+        $arr_target[$ri['rst_CreateChildIfRecPtr']] = '0';
 		$arr_target[$ri['rst_TermIDTreeNonSelectableIDs']] = null;
 		$arr_target[$ri['rst_CalcFunctionID']] = null;
 		$arr_target[$ri['rst_Status']] = "open";

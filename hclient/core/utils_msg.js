@@ -607,7 +607,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             $dlg.dialog( "option", "title", content.document.title );
                         }      
                         if(options["context_help"]){
-                            window.hWin.HEURIST4.ui.initDialogHintButtons($dlg, options["context_help"], true);
+                            window.hWin.HEURIST4.ui.initDialogHintButtons($dlg, null, options["context_help"], true);
                         }
                         
                         

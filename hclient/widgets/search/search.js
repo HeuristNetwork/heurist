@@ -365,7 +365,7 @@ $.widget( "heurist.search", {
                 window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
                     window.hWin.HEURIST4.msg.showDialog(window.HAPI4.baseURL + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+window.hWin.HAPI4.database,
                     { width:1200, height:600, title:'Manage Structure', 
-                      afterclose: function(){window.hWin.HAPI4.SystemMgr.get_defs_all( false, that.document)}})
+                      afterclose: function(){ window.hWin.HAPI4.SystemMgr.get_defs_all( false, that.document)}} )
                 });
             });
         }    

@@ -138,18 +138,18 @@ class DbEntityBase
             
             //exclude virtual fields
             $fieldvalues = $record;
-            $fields = array();
+            $values = array();
             foreach($this->fields as $fieldname=>$field_config){
                 if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) continue;
-                $fields[$fieldname] = $record[$fieldname];
+                $values[$fieldname] = $record[$fieldname];
             }
             
-//error_log(print_r($fields,true));            
+//error_log(print_r($values,true));            
 
             //save data
             $ret = mysql__insertupdate($mysqli, 
                                     $this->config['tableName'], $this->fields,
-                                    $fields );
+                                    $values );
             if($ret==null){ //it return null for non-numeric primary field
                    $results[] = $record[$this->primaryField];
             }else if(is_numeric($ret)){
@@ -389,7 +389,7 @@ class DbEntityBase
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Missed 'fields' parameter. Fields are not defined");
                 return false;    
         }
-        //detect wheter this is milti record save
+        //detect wheter this is multi record save
         if(array_keys($this->data['fields']) !== range(0, count($this->data['fields']) - 1)){
             $this->records = array();
             $this->records[0] = $this->data['fields']; 

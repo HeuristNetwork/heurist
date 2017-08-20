@@ -236,6 +236,7 @@ CREATE TABLE defRecStructure (
   rst_DisplayDetailTypeGroupID tinyint(3) unsigned default NULL COMMENT 'If set, places detail in specified group instead of according to dty_DetailTypeGroup',
   rst_FilteredJsonTermIDTree varchar(500) default NULL COMMENT 'JSON encoded tree of allowed terms, subset of those defined in defDetailType',
   rst_PtrFilteredIDs varchar(250) default NULL COMMENT 'Allowed Rectypes (CSV) within list defined by defDetailType (for pointer details)',
+  rst_CreateChildIfRecPtr tinyint(1) unsigned NOT NULL default '0' COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record',
   rst_OrderForThumbnailGeneration tinyint(3) unsigned default NULL COMMENT 'Priority order of fields to use in generating thumbnail, null = do not use',
   rst_TermIDTreeNonSelectableIDs varchar(255) default NULL COMMENT 'Term IDs to use as non-selectable headers for this field',
   rst_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
@@ -704,6 +705,7 @@ CREATE TABLE usrBookmarks (
   bkm_Rating tinyint(3) unsigned NOT NULL default '0' COMMENT 'Five point rating for interest/quality/content',
   bkm_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Set to 1 if bookmark added by import, 0 if added by data entry',
   bkm_ZoteroID int(10) unsigned default NULL COMMENT 'Records your Zotero ID for this record for synchronisation with Zotero',
+  bkm_Notes text COMMENT 'Personal notes',
   PRIMARY KEY  (bkm_ID),
   UNIQUE KEY bkm_RecID (bkm_RecID,bkm_UGrpID),
   KEY bkm_UGrpID (bkm_UGrpID),
@@ -828,6 +830,7 @@ CREATE TABLE usrSavedSearches (
   svs_Query text NOT NULL COMMENT 'The text of the saved search - added to search URL',
   svs_UGrpID smallint(5) unsigned NOT NULL COMMENT 'The creator/owner or workgroup for the saved search',
   svs_ExclusiveXSL varchar(250) default '' COMMENT 'Name of XSL to which to lock this publish format, blank = any XSL OK',
+  ugr_NavigationTree  text COMMENT 'JSON array that describes treeview for filters',
   PRIMARY KEY  (svs_ID),
   KEY svs_UGrpID (svs_UGrpID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing';

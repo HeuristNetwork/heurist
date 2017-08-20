@@ -517,6 +517,68 @@
         }
         return $sysValues;
     }
+    
+    function updateDatabseToLatest($mysqli){
+        
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        $res->close();
+        if(!$row_cnt){
+            //alter table
+             $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;";
+             
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_CreateChildIfRecPtr', $mysqli->error);
+            }
+            return false;
+        }
+        
+
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_NavigationTree'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        $res->close();
+        if(!$row_cnt){
+            //alter table
+            $query = "ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` text COMMENT 'JSON array that describes treeview for filters'";
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_NavigationTree', $mysqli->error);
+            }
+            return false;
+        }
+        
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `usrBookmarks` LIKE 'bkm_Notes'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        $res->close();
+        if(!$row_cnt){
+            //alter table
+            $query = "ALTER TABLE `usrBookmarks` ADD `bkm_Notes` text COMMENT 'Personal notes'";
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify usrBookmarks to add bkm_Notes', $mysqli->error);
+            }
+            return false;
+        }
+        
+        $dty_ID = mysql__select_value($mysqli,  
+            "SELECT dty_ID FROM `defDetailTypes` WHERE dty_OriginatingDBID=2  dty_IDInOriginatingDB=247");
+        if(!($dty_ID>0)){
+            
+            $mysqli->query("INSERT INTO `defDetailTypes`
+(`dty_Name`, `dty_Documentation`, `dty_Type`, `dty_HelpText`, `dty_ExtendedDescription`, `dty_EntryMask`, `dty_Status`, `dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`, `dty_DetailTypeGroupID`, `dty_OrderInGroup`, `dty_JsonTermIDTree`, `dty_TermIDTreeNonSelectableIDs`, `dty_PtrTargetRectypeIDs`, `dty_FieldSetRecTypeID`, `dty_ShowInLists`, `dty_NonOwnerVisibility` ,`dty_LocallyModified`) VALUES
+('Parent entity','Please document the nature of this detail type (field)) ...','resource','The parent of a child record (a record which is specifically linked to one and only one parent record by a pointer field in each direction)', '','','approved','2', '','247','99', '0','','', '','','1','viewable','0')");
+        }
+        
+        
+        return true;
+    }
 
 
     /**

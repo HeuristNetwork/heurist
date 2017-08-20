@@ -23,8 +23,7 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
-require_once (dirname(__FILE__).'/db_files.php');
-
+require_once (dirname(__FILE__).'/utils_mail.php');
 
 class DbUsrReminders extends DbEntityBase
 {
@@ -44,6 +43,10 @@ class DbUsrReminders extends DbEntityBase
                 
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
         
+        if(!@$this->data['rem_OwnerUGrpID']){
+            $this->data['rem_OwnerUGrpID'] = $this->system->get_user_id();
+        }
+        
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
             $this->data = $res;
@@ -52,6 +55,7 @@ class DbUsrReminders extends DbEntityBase
         }        
         
         $needCheck = false;
+        $needRecords = false;
         
         //compose WHERE 
         $where = array();
@@ -66,6 +70,9 @@ class DbUsrReminders extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('rem_RecID');
         if($pred!=null) array_push($where, $pred);
 
+        $pred = $this->searchMgr->getPredicate('rem_Message');
+        if($pred!=null) array_push($where, $pred);
+        
         $pred = $this->searchMgr->getPredicate('rem_ToWorkgroupID');
         if($pred!=null) array_push($where, $pred);
 
@@ -81,7 +88,17 @@ class DbUsrReminders extends DbEntityBase
         
             $this->data['details'] = 'rem_ID';
             
-        }else if(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
+        }else if(@$this->data['details']=='name' || @$this->data['details']=='list'){
+
+            $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName';
+
+            $needRecords = true;//($this->data['details']=='list');
+
+            $from_table[0] = $from_table[0]
+                    .' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
+                    .' LEFT JOIN sysUGrps u2 on rem_ToUserID=u2.ugr_ID ';
+        
+        }else if(@$this->data['details']=='full'){
 
             $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq';
             
@@ -101,10 +118,33 @@ class DbUsrReminders extends DbEntityBase
         //----- order by ------------
         //compose ORDER BY 
         $order = array();
-        array_push($order, 'rem_Modified DESC');
+        
+        $value = @$this->data['sort:rem_Modified'];
+        if($value!=null){
+            array_push($order, 'rem_Modified '.($value==1?'ASC':'DESC'));
+        }else{
+            $value = @$this->data['sort:rem_RecTitle'];
+            if($value!=null){
+                array_push($order, 'rec_Title '.($value==1?'ASC':'DESC'));
+                $needRecords = true;
+            }else{
+                $value = @$this->data['sort:rem_StartDate'];
+                if($value!=null){
+                    array_push($order, 'rem_StartDate '.($value==1?'ASC':'DESC'));
+                }
+            }
+        }           
+        
         
         
         $is_ids_only = (count($this->data['details'])==1);
+        
+        if($needRecords){
+              array_push($this->data['details'], 'rec_Title as rem_RecTitle');
+              array_push($from_table,'Records');
+              array_push($where, 'rec_ID=rem_RecID');
+        }
+        
             
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
@@ -169,8 +209,12 @@ class DbUsrReminders extends DbEntityBase
         foreach($this->records as $idx=>$record){
             $rec_ID = intval(@$record[$this->primaryField]);
             $isinsert = ($rec_ID<1);
-            if($isinsert && !($this->records[$idx]['tag_UGrpID']>0)){
-                $this->records[$idx]['rem_OwnerUGrpID'] = $this->system->get_user_id();
+            if($isinsert){
+                if(!($this->records[$idx]['rem_OwnerUGrpID']>0)){
+                    $this->records[$idx]['rem_OwnerUGrpID'] = $this->system->get_user_id();
+                }
+                $this->records[$idx]['rem_Nonce'] = dechex(rand());
+                $this->fields['rem_Nonce'] = array(); //to pass data to save 
             }
             $this->records[$idx]['rem_Modified'] = null; //reset
         }
@@ -184,19 +228,140 @@ class DbUsrReminders extends DbEntityBase
     //
     public function batch_action(){
         
-        //tags ids
-        $this->recordIDs = prepareIds($this->data['remIDs']);
-        if(count($this->recordIDs)==0){             
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of remainder identificators');
-            return false;
+        $recordIDs = prepareIds($this->data['recIDs']);
+        if(count($recordIDs)>0){
+            //find record by ids  - todo
+            
         }
         
-        //record ids
-        $recordIDs = prepareIds($this->data['recIDs']);
-        if(count($assignIDs)==0){             
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of record identificators');
-            return false;
+        if(!$this->prepareRecords()){
+                return false;    
         }
+        
+        $mysqli = $this->system->get_mysqli();
+        
+        foreach($this->records as $record){
+            
+            if($record[$this->primaryField]>0){
+                $this->recordIDs[] = $record[$this->primaryField];
+            }
+                    
+            $recipients = array();
+            if (@$record['rem_ToEmail']) {
+                array_push($recipients, array(
+                    "email" => $record['rem_ToEmail'],
+                    "e"        => $record['rem_ToEmail'],
+                    "u"        => null));
+            }
+            else if (@$record['rem_ToUserID']) {
+                
+                $row = mysql__select_array($mysqli,
+                    'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']);
+                if ($row) {
+                    array_push($recipients, array(
+                        "email" => $row[0].' '.$row[1].' <'.$row[2].'>',
+                        "e"        => null,
+                        "u"        => $record['rem_ToUserID']));
+                }
+            }
+            else if (@$record['rem_ToWorkgroupID']) {
+                
+                if($record['rem_ID']>0){
+                    
+                    $query = 'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail,usr.ugr_ID '
+                               .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
+                               .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.$record['rem_ID']
+                               .' where ugl_GroupID = '.$record['rem_ToWorkgroupID'].' and isnull(rbl_ID)';
+                }else{
+                    $query = 'select usr.ugr_FirstName,usr.ugr_LastName,ugr_eMail,usr.ugr_ID'
+                                       .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
+                                       .'where ugl_GroupID='.$record['rem_ToWorkgroupID'];
+                }
+                
+                $recs = mysql__select_all($mysqli, $query);
+                
+                foreach ($recs as $row)
+                    array_push($recipients, array(
+                        "email" => $row[0].' '.$row[1].' <'.$row[2].'>',
+                        "e"        => null,
+                        "u"        => $row[3]));
+            }
+            
+            if(count($recipients)>0){
+
+            $email_headers = 'From: Heurist reminder service <no-reply@'.HEURIST_SERVER_NAME.'>';
+
+            //sender params - reminder owner
+            $owner = mysql__select_array($mysqli,
+                'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='
+                        .$record['rem_OwnerUGrpID']);
+            if ($owner) {
+                
+                $email_owner = $owner[0].' '.$owner[1].' <'.$owner[2].'>';
+                
+                if (@$record['rem_ToEmail']!=$owner[2]  || @$record['rem_ToUserID'] != @$record['rem_OwnerUGrpID']){
+                    $email_headers .= "\r\nCc: ".$email_owner;
+                }
+                $email_headers .= "\r\nReply-To: ".$email_owner;
+
+                //find associated record
+                $bib = mysql__select_array($mysqli,
+                    'select rec_Title, rec_OwnerUGrpID, rec_NonOwnerVisibility, grp.ugr_Name from Records '.
+                                    'left join sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type!="user" '.
+                                    'where rec_ID = '.$record['rem_RecID']);
+
+                $email_title = '"'.$bib[0].'"'; //rec_Title
+
+                if (@$record['rem_ToUserID'] != @$record['rem_OwnerUGrpID']){
+                    $email_title .= ' from ' . $owner[0].' '.$owner[1];
+                }
+                
+
+                foreach($recipients as $recipient) {
+                    $email_text = 'Reminder From: ' . ($record['rem_ToUserID'] == $record['rem_OwnerUGrpID'] ? 'you'
+                                                        : $email_owner) . "\n\n"
+                                . 'For: "'.$bib[0].'"' . "\n\n" //rec_Title
+                                . 'URL: '.HEURIST_BASE_URL.'?w=all&db='.HEURIST_DBNAME.'&q=ids:'.$record['rem_RecID'] . "\n\n";
+
+                    if ($bib[1] && $bib[2] == 'hidden') { //rec_OwnerUGrpID  rec_NonOwnerVisibility
+                        $email_text .= "Note: Record belongs to workgroup ".$bib[3] . "\n"   //ugr_Name
+                                        ."You must be logged in to Heurist and a member of this workgroup to view it". "\n\n";
+                    }
+
+                    $email_text .= 'Message: '.$record['rem_Message'] . "\n\n";
+
+                    if (@$record['rem_ID']  &&  $record['rem_Freq'] != "once") {
+                        $email_text .= "-------------------------------------------\n\n"
+                                    .  "You will receive this reminder " . $record['rem_Freq'] . "\n"
+                                    .  "Click below if you do not wish to receive this reminder again:\n\n"
+                                    .  $BASE_URL."records/reminders/deleteReminder.php?r=".$record['rem_ID']
+                                    . "db=".HEURIST_DBNAME
+                                    .  ($recipient['u'] ? "&u=".$recipient['u'] : "&e=".$recipient['e']) . "&h=".$record['rem_Nonce'] . "\n\n";
+                    } else {
+                        $email_text .= "-------------------------------------------\n\n"
+                                    .  "You will not receive this reminder again.\n\n";
+                    }
+                    
+                    $res = sendEmail($recipient['email'], $email_title, $email_text, $email_headers, true);
+                    if($res!='ok'){
+                        $this->system->addError(HEURIST_SYSTEM_CONFIG, $res);
+                        return false;
+                    }
+                    
+                }//for recipients
+            
+            }else{
+                //can get owner data
+                $this->system->addError(HEURIST_DB_ERROR, 'Can\'t get reminder\'s owner information');
+                return false;
+            }
+            }else{
+                //no recipients found
+                $this->system->addError(HEURIST_DB_ERROR, 'Can\'t get reminder\'s recipients');
+                return false;
+            }
+            
+        }//for reminders        
         
         
         return true;

@@ -128,7 +128,7 @@
 
             } else if ($action=="usr_names" && @$_REQUEST['UGrpID']) {
                 
-                $res = user_getNamesByIds($system->get_mysqli(), $_REQUEST['UGrpID']);
+                $res = user_getNamesByIds($system, $_REQUEST['UGrpID']);
                 
             } else if ($action=="groups") {
 

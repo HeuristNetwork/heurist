@@ -495,9 +495,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
         if(newstep==0 && this.options.svsID>0 && 
             this.options.params.rectypes && this.options.params.rectypes[0]==this.originalRectypeID){
-            $("#btnSave").show();
+            $("#btnSave").css('visibility','visible');//show();
         }else{
-            $("#btnSave").hide();
+            $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
         }
         
         
@@ -574,7 +574,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(this.options.params.rectypes) {
                     $(opt_rectypes).val(this.options.params.rectypes[0]);
                     
-                    $(opt_rectypes).change(function(){that.originalRectypeID=null; $("#btnSave").hide();});
+                    $(opt_rectypes).change(function(){
+                            that.originalRectypeID=null; 
+                            $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
+                    });
                     
                     if(this.originalRectypeID==null){//init flag
                         this.originalRectypeID = this.options.params.rectypes[0];    
@@ -603,9 +606,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
             if(isEdit && this.options.params.rectypes[0]==this.originalRectypeID)
             {
-                $("#btnSave").show();
+                $("#btnSave").css('visibility','visible');//$("#btnSave").show();
             }else{
-                $("#btnSave").hide();
+                $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
             }
         
 
@@ -1095,7 +1098,9 @@ $.widget( "heurist.search_faceted_wiz", {
                     if(isNaN(Number(linktype))){
                         dtid = dtid.substr(2);
                         
-                        if(linktype=='lt'){
+                        if(dtid>0){
+                        
+                        if(linktype=='lt' || linktype=='rt'){
                             harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]+' &gt ');
                         }else{
                             var from_rtid = codes[j+2];
@@ -1103,6 +1108,8 @@ $.widget( "heurist.search_faceted_wiz", {
                             (window.hWin.HEURIST4.rectypes.typedefs[from_rtid]
                                 ?window.hWin.HEURIST4.rectypes.typedefs[from_rtid].dtFields[dtid][dispname_idx]+' . '
                                 :'') );
+                        }
+                        
                         }
                         
                     }else{

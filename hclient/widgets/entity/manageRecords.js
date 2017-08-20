@@ -23,6 +23,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _entityName:'records',
     
     _currentEditRecTypeID:null,
+    _isInsert: false,
+
+    usrPreferences:{},
+    defaultPrefs:{
+        width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+        height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
+        help_on:true, 
+        optfields:true, 
+        summary_closed:false, 
+        summary_width:400, 
+        summary_tabs:['0','1']},
+    
     
     _init: function() {
 
@@ -52,15 +64,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }else{
             this.options.width = 1200;                    
         }
+
+        this.getUiPreferences();
         
         this._super();
         
-        this.editFormSummary = this.element.find('.editFormSummary');
-        this.editFormPopup = this.element.find('.editFormDialog');
+        //this.editForm.empty();
         
         var hasSearchForm = (this.searchForm && this.searchForm.length>0);
         
-        if(this.options.edit_mode=='inline'){
+        if(this.options.edit_mode=='inline' || this.options.edit_mode=='editonly'){
             // for manager - inline mode means that only editor is visible and we have to search init exterally
             // see recordEdit.php
             if(hasSearchForm) this.searchForm.parent().css({width:'0px'});    
@@ -72,11 +85,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
         
         //-----------------
-        this.recordList.css('top','5.5em');
+        this.recordList.css('top','7em');
         if(hasSearchForm){
-            this.searchForm.height('7.5em').css('border','none');    
+            this.searchForm.height('9.5em').css('border','none');    
         }
-        
         
     },
     //  
@@ -117,13 +129,28 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 "searchrecordsonaddrecord": function( event, _rectype_id ){
                     this._currentEditRecTypeID = _rectype_id;
                     this.addEditRecord(-1);
+                    
+                    //@todo pass this.option.parententity
                 }
         });
         }
                 
-       return true;
-    },
 
+        this.editForm.css({'overflow-y':'auto !important', 'overflow-x':'hidden'});
+            
+        return true;
+    },
+    
+    _initDialog: function(){
+        
+            if(this.options.edit_mode == 'editonly'){
+                this.getUiPreferences();
+                this.options['width']  = this.usrPreferences['width'];
+                this.options['height'] = this.usrPreferences['height'];
+            }
+        
+            this._super();
+    },
 
     _navigateToRec: function(dest){
         if(this._currentEditID>0){
@@ -148,7 +175,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                               
                         {text:window.hWin.HR('Duplicate'), id:'btnRecDuplicate',
-                              css:{'display':((that._currentEditID>0)?'inline-block':'none')},
                                 click: function(event) { 
                                     var btn = $(event.target);
                                     btn.hide();
@@ -165,27 +191,32 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             }
                                         }); 
                                 }},
+                        {text:window.hWin.HR('Save + new'), id:'btnRecSaveAndNew',
+                              css:{'visibility':'hidden', 'margin-right':'60px'},
+                              click: function() { that._saveEditAndClose( null, 'newrecord' ); }},
+                                
                         {text:window.hWin.HR('Previous'),icons:{primary:'ui-icon-circle-triangle-w'},
                               css:{'display':'none'}, id:'btnPrev',
                               click: function() { that._navigateToRec(-1); }},
                         {text:window.hWin.HR('Next'),icons:{secondary:'ui-icon-circle-triangle-e'},
-                              css:{'display':'none'}, id:'btnNext',
+                              css:{'display':'none','margin-right':'60px'}, id:'btnNext',
                               click: function() { that._navigateToRec(1); }},
-                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
-                              css:{'visibility':'hidden'},
-                              click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
                               
-                        {text:window.hWin.HR('Save and new record'), id:'btnRecSaveAndNew',
-                              css:{'visibility':'hidden'},
-                              click: function() { that._saveEditAndClose( null, 'newrecord' ); }},
+                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
+                              css:{'visibility':'hidden','margin-right':'15px'},
+                              click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
+                       
                         {text:window.hWin.HR('Save'), id:'btnRecSave',
-                              css:{'visibility':'hidden'},
+                              accesskey:"S",
+                              css:{'visibility':'hidden','margin-right':'5px'},
                               click: function() { that._saveEditAndClose( null, 'none' ); }},
-                        {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose',
-                              css:{'visibility':'hidden'},
+                        {text:window.hWin.HR('Save / Close'), id:'btnRecSaveAndClose',
+                              css:{'visibility':'hidden','margin-right':'15px'},
                               click: function() { that._saveEditAndClose( null, 'close' ); }},
                         {text:window.hWin.HR('Close'), 
-                              click: function() { that.closeEditDialog(); }}]; 
+                              click: function() { 
+                                  that.closeEditDialog(); 
+                              }}]; 
     },
     
     //
@@ -211,37 +242,33 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var that = this; 
             this._currentEditID = recID;
             
-            this.editForm.css({'overflow-y':'auto !important', 'overflow-x':'hidden'});
-            
             if(this.options.edit_mode=='popup'){
             
                 this.editForm.css({'top': 0});//, 'overflow-y':'auto !important', 'overflow-x':'hidden'});
 //this.editFormPopup = this.editForm.parent();//this.element.find('.editFormDialog');
 
-                var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
-                    {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
-                    height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-                    
                 if(!this.options.beforeClose){
-                    this.options.beforeClose = function(){that.saveUiPreferences();};
+                    this.options.beforeClose = function(){
+                            that.saveUiPreferences();
+                    };
                 }
-             
+                
                 this._edit_dialog =  window.hWin.HEURIST4.msg.showElementAsDialog({
                         window:  window.hWin, //opener is top most heurist window
                         element:  this.editFormPopup[0],
-                        height: usrPreferences.height,
-                        width:  usrPreferences.width,
+                        height: this.usrPreferences.height,
+                        width:  this.usrPreferences.width,
                         resizable: true,
-                        title: this.options['edit_title']
-                                    ?this.options['edit_title']
-                                    :window.hWin.HR('Edit') + ' ' +  this.options.entity.entityName,                         
-                        buttons: this._getEditDialogButtons(),
-                        beforeClose: this.options.beforeClose
+                        //title: dialog_title,
+                        buttons: this._getEditDialogButtons()
+                        //do not save prefs for popup addition beforeClose: this.options.beforeClose
+                        //save only for main edit record (editonly)
                     });
                 
                 //help and tips buttons on dialog header
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
-                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+                    'prefs_'+this._entityName,
+                    window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
         
                 this._toolbar = this._edit_dialog.parent(); //this.editFormPopup.parent();
         
@@ -281,8 +308,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
             
             var recset = this.recordList.resultList('getRecordSet');
-            var recset_length = recset.length();
-            if(recset_length>1 && recID>0){
+            if(recset && recset.length()>1 && recID>0){
                 this._toolbar.find('#btnPrev').css({'display':'inline-block'});
                 this._toolbar.find('#btnNext').css({'display':'inline-block'});
                 if(this._toolbar.find('#divNav').length===0){
@@ -299,9 +325,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //summary tab - specific for records only    
             if(this.editFormSummary && this.editFormSummary.length>0){    
                 
-                //default values
-                var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_summary', {closed:false, width:400, activeTabs:["0","1"]});
-    
                 var layout_opts =  {
                     applyDefaultStyles: true,
                     togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
@@ -309,14 +332,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
                     east:{
-                        size:(usrPreferences.width>0)?usrPreferences.width:400,
+                        size: this.usrPreferences.summary_width,
                         maxWidth:800,
                         spacing_open:6,
                         spacing_closed:16,  
                         togglerAlign_open:'center',
                         togglerAlign_closed:'top',
                         togglerLength_closed:16,  //makes it square
-                        initClosed:(usrPreferences.closed==true || usrPreferences.closed=='true'),
+                        initClosed:(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'),
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editFormSummary'    
                     },
@@ -334,11 +357,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 };
 
                 this.editFormPopup.show().layout(layout_opts); //.addClass('ui-heurist-bg-light')
+                if(!this.usrPreferences.summary_tabs) this.usrPreferences.summary_tabs = ['0','1'];
 
                 //load content for editFormSummary
                 if(this.editFormSummary.text()=='empty'){
                     this.editFormSummary.empty();
-                    var headers = ['Admin','Links','Scratchpad','Private','Tags','Text','Discussion'];
+                    var headers = ['Admin','Linked records','Scratchpad','Private','Tags','Discussion','Dates']; //'Text',
                     for(var idx in headers){
                         var acc = $('<div>').addClass('summary-accordion').appendTo(this.editFormSummary);
                         
@@ -348,7 +372,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         
                         acc.accordion({
                             collapsible: true,
-                            active: (usrPreferences.activeTabs.indexOf(String(idx))>=0) ,
+                            active: (this.usrPreferences.summary_tabs.indexOf(String(idx))>=0) ,
                             heightStyle: "content",
                             beforeActivate:function(event, ui){
                                 if(ui.newPanel.text()==''){
@@ -357,6 +381,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 }
                             }
                         });
+                        
+                        acc.find('.summary-content').removeClass('ui-widget-content');
                     }
 
                 }
@@ -402,30 +428,39 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         switch(idx){
             case 0:   //admins -------------------------------------------------------
+            
                 var recRecTypeID = that._getField('rec_RecTypeID');
                 sContent =  
-'<div style="margin:4px;bacground:none;"><div style="padding-bottom:0.5em">'
+'<div style="margin:4px;"><div style="padding-bottom:0.5em;display: inline-block;width: 100%;">'
 
-+'<h2 class="truncate rectypeHeader" style="display:inline-block;" style="max-width:400px;margin-left:0px;">'
-                + '<img src="'+ph_gif+'" style="vertical-align:top;margin-left:0px;background-image:url(\''
++'<h2 class="truncate rectypeHeader" style="float:left;max-width:400px;margin-right:8px;">'
+                + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
                 + top.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
                 + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
-+'<select class="rectypeSelect" style="display:none"></select>'
-+'<div class="btn-config2"/><div class="btn-config"/><div class="btn-modify"/></div>'
++'<select class="rectypeSelect" style="display:none;z-index: 20;background:white;position: absolute;border: 1px solid gray;'
++'top: 5.7em;" size="20"></select><div class="btn-modify"/>'
++'<div style="display:inline-block;float:right;">'
+    +'<div class="btn-config2"/><div class="btn-config"/>'
+    +'<span style="display:inline-block;float:right;color:#7D9AAA;padding:2px 4px;">Modify structure</span>'
++'</div>'
++'</div>'
 
-+'<div><label class="small-header">Owner:</label><span id="recOwner">'
-    +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access"/></div>'
-+'<div style="padding-bottom:0.5em"><label class="small-header">Access:</label><span id="recAccess">'
++'<div style="display:inline-block;padding:0 8px 0 27px;float:left"><label class="small-header" style="min-width:0">Owner:</label><span id="recOwner">'
+    +that._getField('rec_OwnerUGrpID')+'</span><br>'
++'<label class="small-header" style="min-width:0">Access:</label><span id="recAccess">'
     +that._getField('rec_NonOwnerVisibility')+'</span></div>'
-
-+'<div><label class="small-header">Added By:</label><span id="recAddedBy">'+that._getField('rec_AddedByUGrpID')+'</span></div>'
-+'<div><label class="small-header">Added:</label>'+that._getField('rec_Added')+'</div>'
-+'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')+'</div>';
++'<div class="btn-access"/>'    
+    
++'<div style="display:inline-block;float:right;">'
+    +'<label><input type="checkbox" class="chb_show_help"/>Show help</label><br>'
+    +'<label><input type="checkbox" class="chb_opt_fields"/>Optional fields</label>'
++'</div>';
 
                 $(sContent).appendTo(panel);
                 //activate buttons
                 panel.find('.btn-config2').button({text:false,label:top.HR('Modify record type structure in new window'),
                         icons:{primary:'ui-icon-extlink'}})
+                    .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px'})
                     .click(function(){
                         that.editRecordTypeOnNewTab();
@@ -433,34 +468,66 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                 panel.find('.btn-config').button({text:false,label:top.HR('Modify record type structure'),
                         icons:{primary:'ui-icon-gear'}})
+                    .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px'})
                     .click(function(){that.editRecordType();});
 
                     
-                panel.find('.btn-modify').button({text:false, label:top.HR('Change record type'),
-                        icons:{primary:'ui-icon-pencil'}})
-                    .css({float: 'right','font-size': '0.8em', height: '18px'})
+                var btn_change_rt = panel.find('.btn-modify');                        
+                btn_change_rt.button({text:false, label:top.HR('Change record type'),
+                        icons:{primary:'ui-icon-triangle-1-s'}})
+                    //.addClass('ui-heurist-btn-header1')
+                    .css({float: 'left','font-size': '0.8em', height: '14px', width: '14px'})
                     .click(function(){
                          var selRt = panel.find('.rectypeSelect');
                          var selHd = panel.find('.rectypeHeader');
                          if(selRt.is(':visible')){
+                             btn_change_rt.button('option',{icons:{primary:'ui-icon-triangle-1-s'}});
                              selRt.hide();
-                             selHd.css({'display':'inline-block'});
+                             //selHd.css({'display':'inline-block'});
                              
                          }else{
-                             selRt.css({'display':'inline-block'});
-                             selHd.hide();
+                             btn_change_rt.button('option',{icons:{primary:'ui-icon-triangle-1-n'}});
+                             selRt.show();
+                             //
                              if(selRt.is(':empty')){
                                 window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0));    
                                 selRt.change(function(){
                                     
-                                      that._editing.assignValuesIntoRecord();
-                                      var record = that._currentEditRecordset.getFirstRecord();
-                                      that._currentEditRecordset.setFld(record, 'rec_RecTypeID', selRt.val());
-                                      that._initEditForm_step4(null);
+                                    if(that._getField('rec_RecTypeID')!=selRt.val()){
+                                                                         
+                                    window.hWin.HEURIST4.msg.showMsgDlg(
+                                        '<h4>Changing record type</h4><br>'+
+                                        'Data will be re-allocated to appropriate fields, where available. '+
+                                        'Not all data may fit in the new record structure, but these data '+
+                                        'are retained and shown at the end of the form. No data will be lost, '+
+                                        'even when the record is saved. Proceed?', 
+                                        function() {
+                                        
+                                              that._editing.assignValuesIntoRecord();
+                                              var record = that._currentEditRecordset.getFirstRecord();
+                                              that._currentEditRecordset.setFld(record, 'rec_RecTypeID', selRt.val());
+                                              that._initEditForm_step4(null); //reload form
+                                              
+                                              that._editing.setModified(true);
+                                              that.onEditFormChange();
+                                              
+                                              selHd.html(
+                        '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
+                        + top.HAPI4.iconBaseURL+selRt.val()+'\');"/>'
+                        + window.hWin.HEURIST4.rectypes.names[selRt.val()]                                      
+                                              );
+                                                                                      
+                                        },
+                                        {title:'Warning',yes:'Proceed',no:'Cancel'});
+                                    } 
+                                    btn_change_rt.button('option',{icons:{primary:'ui-icon-triangle-1-s'}});
+                                    //selRt.val(-1);
+                                    selRt.hide();
+                                    
                                 });
                              }
-                             selRt.val(recRecTypeID);
+                             //selRt.val(recRecTypeID);
                          }
                         
                          
@@ -468,8 +535,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
 
                 panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access right'),
-                        icons:{primary:'ui-icon-eye'}})
-                    .css({float: 'right','margin-top': '0.8em', 'font-size': '0.8em', height: '18px'})
+                        icons:{primary:'ui-icon-lock'}})
+                    .addClass('ui-heurist-btn-header1')
+                    .css({float: 'left','margin': '0.8em 7px 0 0', 'font-size': '0.8em', height: '18px'})
                     .click(function(){
                     
         var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database+'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')+'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
@@ -489,7 +557,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         ele.editing_input('setValue',[context.owner]);
                         ele.editing_input('isChanged', true);
                         
-                        if(context.owner == window.hWin.HAPI4.currentUser['ugr_ID']){
+                        if(Number(context.owner)==0){
+                            sUserName = window.hWin.HR('Everyone');
+                        }else if(context.owner == window.hWin.HAPI4.currentUser['ugr_ID']){
                             sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
                         }else{
                             sUserName = window.hWin.HAPI4.currentUser.usr_GroupsList[Number(context.owner)][1];
@@ -512,15 +582,27 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                     });
             
-            //old way! need to use getTitlesByIds
-            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_OwnerUGrpID'),that._getField('rec_AddedByUGrpID')]},
+            //
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_OwnerUGrpID')]},
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         panel.find('#recOwner').text(response.data[that._getField('rec_OwnerUGrpID')]);
-                        panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
                     }
             });
             
+            
+                panel.find('.chb_show_help').attr('checked', this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true')
+                    .change(function( event){
+                        var ishelp_on = $(event.target).is(':checked');
+                        that.usrPreferences['help_on'] = ishelp_on;
+                        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element));
+                    });
+                panel.find('.chb_opt_fields').attr('checked', this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true')
+                    .change(function( event){
+                        var isfields_on = $(event.target).is(':checked');
+                        that.usrPreferences['optfields'] = isfields_on;
+                        $(that.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
+                    });
             
             
                 break;
@@ -580,11 +662,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
                 
                 if(sRel_Ids.length>0){
-                    $('<div class="detailRowHeader">Related</div>').insertBefore(ele1);
+                    $('<div class="detailRowHeader" style="border:none">Related</div>').insertBefore(ele1);
                 }
                 if(sLink_Ids.length>0){
                     $('<div class="detailRowHeader">Linked from</div>').insertBefore(ele2);
                 }
+                if(sRel_Ids.length==0 && sLink_Ids.length==0){
+                    $('<div class="detailRowHeader">none</div>').appendTo(panel);
+                }
+                
 
                 panel.css({'font-size':'0.9em','line-height':'1.5em','overflow':'hidden !important'});
                             
@@ -609,7 +695,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 ele.css({'display':'block','width':'99%'});
                 ele.find('textarea').attr('rows', 10).css('width','100%');
                 ele.show().appendTo(panel);
-            
+                
                 break;
             case 3:   //private
             
@@ -650,11 +736,28 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
             
                 break;
+            case 6:   //dates
+                
+ $('<div><label class="small-header">Added By:</label><span id="recAddedBy">'+that._getField('rec_AddedByUGrpID')+'</span></div>'
++'<div><label class="small-header">Added:</label>'+that._getField('rec_Added')+'</div>'
++'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')+'</div>').appendTo(panel);
+
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_AddedByUGrpID')]},
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
+                    }
+            });
+
+                break;
             default:
                 sContent = '<p>to be implemented</p>';
         }
 
         if(idx>1 && sContent) $(sContent).appendTo(panel);
+        if(idx>0 && idx<6){
+            panel.css({'margin-left':'27px'});
+        }
         
     },
     
@@ -717,10 +820,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             $('<div>').button({label:top.HR('Manage reminders'), text:false,
                 icons:{primary:'ui-icon-mail'}})
                 .css({float:'right', height: '18px'})
+                .addClass('ui-heurist-btn-header1')
                 .click(function(){
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
                                 isdialog: true,
+                                edit_mode: 'editonly',
                                 rem_RecID: that._currentEditID,
                                 onClose:function(){
                                     //refresh
@@ -770,12 +875,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 sContent = (!window.hWin.HEURIST4.util.isempty(val))?('Rating: '+val+'. '):''; 
                 val = recordset.fld(rec, 'bkm_PwdReminder');
                 sContent = sContent + ((!window.hWin.HEURIST4.util.isempty(val))?('Password reminder: '+val):''); 
+                val = recordset.fld(rec, 'bkm_Notes');
+                sContent = sContent + ((!window.hWin.HEURIST4.util.isempty(val))
+                        ?('<br>Notes: '+val.substr(0,500)+(val.length>500?'...':'')):''); 
+                
             }
             pnl.append(sContent);
             
             //append/manage button
             $('<div>').button({label:top.HR('Manage bookmark info'), text:false,
                 icons:{primary:'ui-icon-bookmark'}})
+                .addClass('ui-heurist-btn-header1')
                 .css({float:'right', height: '18px'})
                 .click(function(){
                     
@@ -796,7 +906,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     _renderSummaryTags: function(recordset, panel){
         
-            var that = this, idx;
+            var that = this, idx, isnone=true;
             
             panel.empty().css({'font-size': '0.9em'});
             
@@ -837,18 +947,33 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                          + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=tag:'+label
                          + '" target="_blank" style="display:inline-block; padding-right:4px">'+label+'</a>')
                          .appendTo(grp);
-                     
+                   
+                   isnone = false;  
                 }
+            }
+            
+            
+            if(isnone){
+                $('<div class="detailRowHeader">none</div>').appendTo(panel);
             }
             
             //append manage button
             $('<div>').button({label:top.HR('Manage record tags'), text:false,
                 icons:{primary:'ui-icon-tag'}})
+                .addClass('ui-heurist-btn-header1')
                 .css({float:'right', height: '18px'})
                 .click(function(){
                     
+                        /*
+                        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+                        this.options['width']  = this.usrPreferences['width'];
+                        this.options['height'] = this.usrPreferences['height'];
+                        */
+                    
                         window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
                                 isdialog: true,
+                                width: 800,
+                                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
                                 select_mode:'select_multi', 
                                 selection_ids:order,
                                 select_return_mode:'recordset', //ids by default
@@ -935,7 +1060,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             title: window.hWin.HR('Edit record structure'),
             callback: function(context){
                     if(!top.HEURIST.util.isnull(context) && context) {
-                        that._initEditForm_step3(that._currentEditID); //reload form
+                        //reload structure definitions w/o message
+                        window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, function(){
+                            that._initEditForm_step3(that._currentEditID); //reload form    
+                        } );
+                        
                     }
             }
         });        
@@ -961,14 +1090,64 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(recID==null){
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record
-            
+        
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"complete", l:1}, 
-                        function(response){ that._initEditForm_step4(response); });
+                        function(response){ response.is_insert=false; that._initEditForm_step4(response); });
 
-        }else if(recID<0 && this._currentEditRecTypeID>0){ //add new record
-            //this._currentEditRecTypeID is set in add button
-            window.hWin.HAPI4.RecordMgr.add( {rt:this._currentEditRecTypeID, temp:1}, //ro - owner,  rv - visibility
-                        function(response){ that._initEditForm_step4(response); });
+        }else if(recID<0){ //add new record
+        
+            if(!that.options.new_record_params) that.options.new_record_params = {};
+        
+            if(this._currentEditRecTypeID>0){
+                that.options.new_record_params['rt'] = this._currentEditRecTypeID;
+            }        
+            
+            that.options.new_record_params['temp'] = 1;
+            
+            if(!(that.options.new_record_params['rt']>0)){
+
+                //select record type first
+                if(!this._rt_select_dialog){
+                    this._rt_select_dialog = $('<div>').css({'text-align': 'center'}).appendTo(this.element);
+                    var selRt = $('<select>').appendTo(this._rt_select_dialog);
+                    window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0));    
+                }
+                
+                var $dlg, btns = [
+                {text:window.hWin.HR('Add Record'),
+                    click: function(){  
+                                    
+                            that._currentEditRecTypeID = that._rt_select_dialog.find('select').val();
+                            that.options.new_record_params['rt'] = this._currentEditRecTypeID;
+                                                
+                            window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                                    function(response){  response.is_insert=true; that._initEditForm_step4(response); });
+                                            
+                            $dlg.dialog('close');
+                                                    
+                    } },
+                {text:window.hWin.HR('Cancel'),
+                                click:function(){
+                                      $dlg.dialog('close');
+                                      that.closeDialog();
+                                } } ];
+                       
+                $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
+                        window:  window.hWin, //opener is top most heurist window
+                        element:  this._rt_select_dialog[0],
+                        height: 120,
+                        width:  400,
+                        resizable: false,
+                        title: window.hWin.HR('Select record type for new record'),                         
+                        buttons: btns
+                    });
+                       
+               
+            }else{
+                //this._currentEditRecTypeID is set in add button
+                window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                        function(response){ response.is_insert=true; that._initEditForm_step4(response); });
+            }
         }
         
         
@@ -978,7 +1157,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
+    // get record field structure. It needs to addition of non-standard fields
     //
     _getFakeRectypeField: function(detailTypeID){
         
@@ -1013,10 +1192,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ffr[fieldIndexMap['rst_OrderForThumbnailGeneration']] = 0;
         ffr[fieldIndexMap['rst_OriginatingDBID']] = 0;
         ffr[fieldIndexMap['rst_PtrFilteredIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']]:"");
+        ffr[fieldIndexMap['rst_CreateChildIfRecPtr']] = 0;
         ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
         ffr[fieldIndexMap['rst_RequirementType']] = 'optional';
         ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");
         ffr[fieldIndexMap['dty_Type']] = (dt?dt[dtyFieldNamesIndexMap['dty_Type']]:"freetext");
+        
+        ffr['dt_ID'] = detailTypeID;
         
         return ffr;
     },
@@ -1030,8 +1212,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         if(response==null || response.status == window.hWin.HAPI4.ResponseStatus.OK){
             
+            //response==null means reload/refresh edit form
+            
             if(response){
                 that._currentEditRecordset = new hRecordSet(response.data);
+                that._isInsert = response.is_insert; 
             }
             
             var rectypeID = that._getField('rec_RecTypeID');
@@ -1041,6 +1226,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //pass structure and record details
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
+            
+            var dialog_title = this.options['edit_title'];
+            if(!dialog_title){
+                 
+                 dialog_title = window.hWin.HR(that._isInsert ?'Add':'Edit') + ' '
+                                    + window.hWin.HEURIST4.rectypes.names[rectypeID];                         
+                                    
+            }
+            
+            if(this.options.edit_mode=='popup' && this._edit_dialog){
+                that._edit_dialog.dialog('option','title', dialog_title); 
+            }else if(this.options.edit_mode=='editonly' && this._as_dialog){
+                that._as_dialog.dialog('option','title', dialog_title); 
+            }
+                
+             
+            
             
             //@todo - move it inside editing
             //convert structure - 
@@ -1067,6 +1269,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var fi_type = fi['dty_Type'],
                 fi_name = fi['rst_DisplayName'],
                 fi_order = fi['rst_DisplayOrder'],
+                fi_defval = fi['rst_DefaultValue'],
                 fi_maxval = fi['rst_MaxValues']; //need for proper repeat
             
             var s_fields = []; //sorted fields
@@ -1078,28 +1281,51 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     fields_ids.push(Number(dt_ID));
                 }
             }
-            //sort by order
-            s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
-
+            
+            var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+            
+            //add special 2-247 field "Parent Entity"
+            if(this.options.parententity>0){
+                var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
+                rfr[fi_name] = 'Child record of';
+                rfr[fi_defval] = this.options.parententity;
+                rfr[fi_order] = -1;//top most
+                rfr[fieldNames.length] = 'readonly';
+                fieldNames.push('rst_Display');
+                s_fields.push(rfr);
+            }
+            
             //add non-standard fields that are not in structure
             var field_in_recset = that._currentEditRecordset.getDetailsFieldTypes();
             var addhead = true;
             for(var k=0; k<field_in_recset.length; k++){
                 if(fields_ids.indexOf(field_in_recset[k])<0){
-                    if(addhead){                    
-                        var rfr = that._getFakeRectypeField(1);
-                        rfr[fi_name] = 'Non-standard record type fields for this record';
-                        rfr[fi_type] = 'separator';
+                    if(field_in_recset[k]==DT_PARENT_ENTITY){
+
+                        var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
+                        rfr[fi_name] = 'Child record of';
+                        rfr[fi_order] = -1;//top most
+                        rfr[fieldNames.length] = 'readonly';
+                        fieldNames.push('rst_Display');
                         s_fields.push(rfr);
-                        addhead = false;
+                        
+                    }else{
+                    
+                        if(addhead){                    
+                            var rfr = that._getFakeRectypeField(1);
+                            rfr[fi_name] = 'Non-standard record type fields for this record';
+                            rfr[fi_type] = 'separator';
+                            s_fields.push(rfr);
+                            addhead = false;
+                        }
+                        s_fields.push(that._getFakeRectypeField(field_in_recset[k]));
                     }
-                    s_fields.push(that._getFakeRectypeField(field_in_recset[k]));
                 }
-                
-                
-            }           
-            
-             
+            }//for           
+
+            //sort by order
+            s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
+
             
             var group_fields = null;
             
@@ -1265,6 +1491,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ele.find('#btnRecSave').css('visibility', mode);
         ele.find('#btnRecSaveAndClose').css('visibility', mode);
         
+        ele.find('#btnRecDuplicate').css({'display':((this._currentEditID>0)?'inline-block':'none')});
+        
         //ele.find('#btnRecReload').css('visibility', !mode);
     },
     
@@ -1272,10 +1500,49 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //    
     _afterInitEditForm: function(){
+        
+        //$(this.element).find('.chb_show_help').is(':checked');        
+        var ishelp_on = this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true';
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
+        
+        var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
+        $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
+        
+        //add record title at the top
+        
+        if(!this._isInsert){  //addition
+        
+            var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+        
+            this.element.find('.ui-heurist-header2').remove();
+            $('<div class="ui-heurist-header2">'
+                + '<img src="'+ph_gif
+                    + '" width=25 height=25 style="vertical-align:middle;margin-right: 10px;background-image:url(\''
+                    + top.HAPI4.iconBaseURL+this._currentEditRecTypeID
+                    + 'm&color=rgb(255,255,255)\');"/><h3 style="display:inline-block;">'
+                    + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
+                + '</h3>&nbsp;<span style="display:inline-block;padding:0 20px">ID: '+this._currentEditID
+                + '</span><h3 style="display:inline-block">'+ this._getField('rec_Title')+'</h3></div>')
+                .css({'padding':'10px 0 10px 30px'})
+                .insertBefore(this.editForm.first('fieldset'));
+        }
+        
         this.onEditFormChange();
     },
 
-
+    
+    //
+    //
+    //
+    getUiPreferences: function(){
+                this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+                if(this.usrPreferences.width<600) this.usrPreferences.width=600;
+                if(this.usrPreferences.height<300) this.usrPreferences.height=300;
+                if (this.usrPreferences.width>this.defaultPrefs.width) this.usrPreferences.width=this.defaultPrefs.width;
+                if (this.usrPreferences.height>this.defaultPrefs.height) this.usrPreferences.height=this.defaultPrefs.height;
+        
+    },
+    
     //
     // save width,heigth and summary tab prefs
     //
@@ -1283,8 +1550,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var that = this;
         
+        var dwidth = this.defaultPrefs['width'],
+            dheight = this.defaultPrefs['height'],
+            isClosed = false,
+            activeTabs = [],
+            sz = 400,
+            optfields = true,
+            help_on = true;
+            
+            
         if(that.editFormSummary && that.editFormSummary.length>0){
-                var activeTabs = [];
+            
                 that.editFormSummary.find('.summary-accordion').each(function(idx,item){
                     var active = $(item).accordion('option','active');
                     if(active!==false){
@@ -1294,26 +1570,33 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 });
 
                 var myLayout = that.editFormPopup.layout();                
-                var sz = myLayout.state.east.size;
-                var isClosed = myLayout.state.east.isClosed;
+                sz = myLayout.state.east.size;
+                isClosed = myLayout.state.east.isClosed;
                 
-                window.hWin.HAPI4.save_pref( 'edit_record_summary', {closed:isClosed, width:sz, 
-                                            activeTabs:activeTabs} );
+                help_on = that.editFormSummary.find('.chb_show_help').is(':checked');
+                optfields = that.editFormSummary.find('.chb_opt_fields').is(':checked');
         }
-
+            
         
         if(this.options.edit_mode=='editonly'){
             if(that.options.isdialog){
-                window.hWin.HAPI4.save_pref('edit_record_dialog', {width: that._as_dialog.dialog('option','width'), 
-                                                               height: that._as_dialog.dialog('option','height')});
+                dwidth  = that._as_dialog.dialog('option','width');
+                dheight = that._as_dialog.dialog('option','height');
             }else if(that.options.in_popup_dialog==true){
-                window.hWin.HAPI4.save_pref('edit_record_dialog', {width: window.innerWidth+20, height:window.innerHeight+46});
+                dwidth  = window.innerWidth+20;
+                dheight = window.innerHeight+46;
             }            
         }else                
         if(that._edit_dialog && that._edit_dialog.dialog('isOpen')){
-            window.hWin.HAPI4.save_pref('edit_record_dialog', {width: that._edit_dialog.dialog('option','width'), 
-                                                               height: that._edit_dialog.dialog('option','height')});
+            dwidth  = that._edit_dialog.dialog('option','width'); 
+            dheight = that._edit_dialog.dialog('option','height');
         } 
+
+
+        window.hWin.HAPI4.save_pref('prefs_'+this._entityName, 
+            {width:dwidth, height:dheight, help_on:help_on, optfields:optfields, 
+                summary_closed:isClosed, summary_width:sz, summary_tabs:activeTabs} );
+
         
         return true;
     }

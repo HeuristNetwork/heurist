@@ -1,20 +1,20 @@
 {
-        "entityName": "usrBookmarks",
+        "entityName": "recThreadedComments",
 
-        "tableName": "usrBookmarks",
-        "tablePrefix": "bkm",
+        "tableName": "recThreadedComments",
+        "tablePrefix": "cmt",
         
         "helpContent": "",
         
         "searchFormContent": "",
         
-        "entityTitle": "Bookmark",
-        "entityTitlePlural": "Bookmarks",
+        "entityTitle": "Comment",
+        "entityTitlePlural": "Comments",
         "empty_remark": "",
 
         "fields": [
                 {
-                    "dtID": "bkm_ID",
+                    "dtID": "cmt_ID",
                     "keyField": true,
                     "dtFields":{
                         "dty_Type":"integer",
@@ -24,7 +24,7 @@
                     }
                 },
                 {
-                    "dtID": "bkm_Added",
+                    "dtID": "cmt_Added",
                     "dtFields":{
                         "dty_Type":"date",
                         "rst_DisplayName": "Added:",
@@ -32,7 +32,7 @@
                     }
                 },
                 {
-                    "dtID": "bkm_Modified",
+                    "dtID": "cmt_Modified",
                     "dtFields":{
                         "dty_Type":"date",
                         "rst_DisplayName": "Modified:",
@@ -40,53 +40,56 @@
                     }
                 },
                 {
-                    "dtID": "bkm_UGrpID",
+                    "dtID": "cmt_OwnerUgrpID",
                     "dtFields":{
                         "dty_Type":"integer",
                         "rst_Display":"hidden"
                     }
                 },
                 {
-                    "dtID": "bkm_RecID",
+                    "dtID": "cmt_RecID",
                     "dtFields":{
                         "dty_Type":"integer",
                         "rst_Display":"hidden"
                     }
                 },
                 {
-                    "dtID": "bkm_PwdReminder",
+                    "dtID": "cmt_ParentCmtID",
                     "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Size":250,
-                        "rst_DisplayWidth":60,
-                        "rst_DisplayName": "Password reminder:",
-                        "rst_DisplayHelpText": "Note: content is not encrypted. DO NOT enter important passwords verbatim. We suggest using a prompt whih is meaningful only to you, rather than an actual password." 
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
                     }
                 },
                 {
-                    "dtID": "bkm_Rating",
+                    "dtID": "cmt_Deleted",
                     "dtFields":{
                         "dty_Type":"enum",
-                        "rst_DisplayName": "Rating:",
-                        "rst_DisplayHelpText": "Select a personal star rating for this record",
+                        "rst_DisplayName": "Deleted:",
+                        "rst_DisplayHelpText": "Flag deleted comments",
                         "rst_FieldConfig":[
-                            {"key":0,"title":"no rated"},
-                            {"key":1,"title":"*"},
-                            {"key":2,"title":"**"},
-                            {"key":3,"title":"***"},
-                            {"key":4,"title":"****"},
-                            {"key":5,"title":"*****"}
+                            {"key":"y","title":"Yes"},
+                            {"key":"n","title":"No"}
                         ]
                     }
                 },
                 {
-                    "dtID": "bkm_Notes",
+                    "dtID": "cmt_Text",
                     "dtFields":{
                         "dty_Type":"blocktext",
-                        "dty_Size":65535,
+                        "dty_Size":5000,
                         "rst_DisplayWidth":60,
-                        "rst_DisplayName": "Personal notes:"
+                        "rst_DisplayName": "Text:",
+                        "rst_DisplayHelpText": "Text of comment"
+                    }
+                },
+                {
+                    "dtID": "cmt_RecTitle",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden"
                     }
                 }
+                
      ]
 }

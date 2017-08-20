@@ -732,7 +732,7 @@
             
             $resSearch = recordSearch($system, $params);
 
-            $keepMainSet = true;
+            $keepMainSet = (@$params['rulesonly']!=1);
             
             if($keepMainSet){
                 //find main query results
@@ -741,10 +741,15 @@
                 $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] 
                                                      :array_keys($fin_result['data']['records']); //get ids
             }else{
-                //empty main result set
-                
                 //remove from $fin_result! but keep in $flat_rules[0]['results']?
+                $flat_rules[0]['results'] = $is_ids_only ?$resSearch['data']['records'] 
+                                                     :array_keys($resSearch['data']['records']); //get ids
                 
+                //empty main result set
+                $fin_result = $resSearch;
+                $fin_result['data']['records'] = array();
+                $fin_result['data']['reccount'] = 0;
+                $fin_result['data']['count'] = 0;
             }
 
             $is_get_relation_records = (@$params['getrelrecs']==1); //get all related and relationship records

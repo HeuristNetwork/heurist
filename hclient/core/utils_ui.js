@@ -29,6 +29,10 @@ getChildrenTerms - returns entire terms tree or only part of it for selected ter
 getChildrenLabels - returns all tems labels of children terms for given term
 createTermSelectExt   - create/fill SELECT for terms or returns JSON array 
 createTermSelectExt2  - the same but parameters are passed as options object
+getTermValue - Returns label and code for term by id
+getTermDesc
+getPlainTermsList
+getFullTermLabel
 
 createRectypeGroupSelect - get SELECT for record type groups
 createRectypeSelect - get SELECT for record types   
@@ -36,6 +40,8 @@ createRectypeDetailSelect - get SELECT for details of given recordtype
 createRectypeTreeSelect - get SELECT for hierarchy of record types   
     
 createUserGroupsSelect - get SELECT for list of given groups, othewise loads list of groups for current user    
+
+setValueAndWidth assign value to input and adjust its width
 
 ENTITY
 
@@ -46,11 +52,6 @@ Other UI functions
 initDialogHintButtons - add show hint and context buttons into dialog header
 initHintButton - button to show/hide hints
 initHelper - Inits helper div (slider) and button   
-
-Fast access:
-getTermValue - Returns label and code for term by id
-getTermDesc
-getPlainTermsList
 
 
 createRecordLinkInfo - return ui for link and relationship
@@ -65,6 +66,12 @@ if (!window.hWin.HEURIST4.ui)
 
 window.hWin.HEURIST4.ui = {
 
+    setValueAndWidth: function(input, value){
+        if(window.hWin.HEURIST4.util.isempty(value)) value='';
+        input.val( value )
+            .css('width', (Math.min(80,Math.max(20,value.length))+4+'ex'));
+    },
+    
     //
     // helper function to add option to select element
     //
@@ -76,12 +83,16 @@ window.hWin.HEURIST4.ui = {
         if(disabled===true){
             option.disabled = true;
         }
+        
+        //$(option).appendTo($(sel));
+        
         try {
             // for IE earlier than version 8
             sel.add(option, sel.options[null]);
         }catch (ex2){
             sel.add(option, null);
         }
+        
         return option;
     },
 
@@ -409,7 +420,7 @@ window.hWin.HEURIST4.ui = {
         //
         var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
 
-        function createSubTreeOptions(optgroup, depth, termSubTree, termLookupInner, defaultTermID) {
+        function createSubTreeOptions(optgroup, parents, termSubTree, termLookupInner, defaultTermID) {
             var termID;
             var localLookup = termLookupInner;
             var termName,
@@ -449,11 +460,18 @@ window.hWin.HEURIST4.ui = {
                 termID = arrterm[i][0];
                 termName = arrterm[i][1];
                 termCode = arrterm[i][2];
+                var termParents = '';
+                var origName = arrterm[i][1];
+                
+                var depth = parents.length;
 
                 if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
                     //for non mozilla add manual indent
                     var a = new Array( ((depth<7)?depth:7)*2 );
-                    termName = a.join('. ') + termName;
+                    termName = a.join('. ') + termName;       
+                }
+                if(depth>0){
+                    termParents = parents.join('.');
                 }
 
                 var isDisabled = (headerTerms[termID]? true:false);
@@ -487,6 +505,11 @@ window.hWin.HEURIST4.ui = {
                         opt.className = "depth" + (depth<7)?depth:7;
                         opt.depth = depth;
                         opt.disabled = isDisabled;
+                        if(termParents!=''){
+                            $(opt).attr('parents', termParents);
+                            $(opt).attr('term-orig', origName);  
+                            $(opt).attr('term-view', termName+termCode);  
+                        } 
 
                         if (termID == defaultTermID ||
                             termName == defaultTermID) {
@@ -502,7 +525,12 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
 
-                var children = (hasChildren)?createSubTreeOptions( new_optgroup, depth+1, termSubTree[termID], localLookup, defaultTermID):[];
+                var children = [];
+                if(hasChildren){
+                    var parents2 = parents.slice();
+                    parents2.push(termName);      //depth+1
+                    children = createSubTreeOptions( new_optgroup, parents2, termSubTree[termID], localLookup, defaultTermID);
+                }
                 var k=0, cnt2 = children.length, termssearch=[];
                 for(;k<cnt2;k++){
                     /*if(!children[k].disabled || children[k].children.length>0){
@@ -555,7 +583,7 @@ window.hWin.HEURIST4.ui = {
                 }
             }
 
-            var reslist = createSubTreeOptions(null, 0, termTree, termLookup, defaultTermID);
+            var reslist = createSubTreeOptions(null, [], termTree, termLookup, defaultTermID);
             if(!selObj){
                 reslist_final = reslist_final.concat( reslist);
             }
@@ -989,7 +1017,7 @@ window.hWin.HEURIST4.ui = {
     
     
     // Init button that show/hide help tips
-    initDialogHintButtons: function($dialog, helpcontent_url, hideHelpButton){
+    initDialogHintButtons: function($dialog, usrPrefKey, helpcontent_url, hideHelpButton){
         
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         
@@ -998,7 +1026,11 @@ window.hWin.HEURIST4.ui = {
                     .addClass('dialog-title-button')
                     .css({'right':'48px'})
                     .appendTo(titlebar)
-                    .on('click', window.hWin.HEURIST4.ui.switchHintState);
+                    .on('click', function(event){
+                            window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, true);   
+                    });
+                    
+           window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, false);         
         }
 
         if(helpcontent_url){                    
@@ -1011,41 +1043,51 @@ window.hWin.HEURIST4.ui = {
         }
                     
     },
-                        
-    switchHintState: function switchState(event){
+      
+    //
+    //
+    //                  
+    switchHintState: function(usrPrefKey, $dialog, needReverse){
             
-            var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
-
-            if(event!=null){ //need to change
-                ishelp_on = (ishelp_on==1 || ishelp_on==true)?0:1;
-                window.hWin.HAPI4.save_pref('help_on',ishelp_on);
-            }
-            
-            if(ishelp_on){
-                //$help_button.addClass('ui-state-focus');    
-                $('.heurist-helper1').css('display','block');
-                $('div.div-table-cell.heurist-helper1').css('display','table-cell');
+            var ishelp_on, prefs;
+            if(usrPrefKey==null){
+                ishelp_on = window.hWin.HAPI4.get_prefs('help_on');   
             }else{
-                //$help_button.removeClass('ui-state-focus');
-                $('.heurist-table-helper1').css('display','none');
-                $('.heurist-helper1').css('display','none');
+                prefs = window.hWin.HAPI4.get_prefs(usrPrefKey);   
+                ishelp_on = prefs ?prefs.help_on:true;
             }
+
+            //change to reverse
+            ishelp_on = (ishelp_on==1 || ishelp_on==true || ishelp_on=='true');
+            if(needReverse){
+                ishelp_on = !ishelp_on;
+                if(usrPrefKey==null){
+                    window.hWin.HAPI4.save_pref('help_on',ishelp_on);
+                }else{
+                    if(!prefs) prefs = {};
+                    prefs.help_on = ishelp_on;
+                    window.hWin.HAPI4.save_pref(usrPrefKey, prefs);
+                }
+            }
+            
+            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $dialog);
+            
     },
     
-    // to remove?
     //
-    initHintButton: function(help_button){
-
-        var $help_button = $(help_button);
+    //
+    //
+    switchHintState2: function(state, $container){
         
-        var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
-        
-        
-        $help_button.button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
-                    .attr('data-state', ishelp_on)
-                    .on('click', window.hWin.HEURIST4.ui.switchHintState);
-        
-        window.hWin.HEURIST4.ui.switchHintState(null);
+            if(state){
+                //$help_button.addClass('ui-state-focus');    
+                $container.find('.heurist-helper1').css('display','block');
+                $container.find('div.div-table-cell.heurist-helper1').css('display','table-cell');
+            }else{
+                //$help_button.removeClass('ui-state-focus');
+                $container.find('.heurist-table-helper1').css('display','none');
+                $container.find('.heurist-helper1').css('display','none');
+            }
     },
     
     //
@@ -1128,21 +1170,30 @@ window.hWin.HEURIST4.ui = {
     //
     // important manageRecords.js and selectRecords.js must be loaded
     //
-    openRecordEdit:function(rec_ID, query_request, isEdit, callback){
+    openRecordEdit:function(rec_ID, query_request, new_record_params){
         
+        /*
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
                         {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+        */
     
                 var $container;
                 var isPopup = false;
+                
+                if($.isPlainObject(new_record_params) && new_record_params['rt']>0){
+                    rec_ID = -1;
+                    query_request = null;
+                }
+                
                 
                 var popup_options = {
                     isdialog: true,
                     select_mode: 'manager',
                     edit_mode: 'editonly', //only edit form is visible, list is hidden
-                    height: usrPreferences.height,
-                    width: usrPreferences.width,
+                    //height: usrPreferences.height,
+                    //width: usrPreferences.width,
+                    new_record_params:new_record_params,
                     title: window.hWin.HR('Edit record'),
                     layout_mode:'<div class="ent_wrapper editor">'
                         + '<div class="ent_content_full recordList"  style="display:none;"/>'
@@ -1158,14 +1209,14 @@ window.hWin.HEURIST4.ui = {
                     onInitFinished:function( ){
                         
                         if(query_request){
-                            if(!$.isPlainObject(query_request)){
+                            if(!$.isPlainObject(query_request)){ //just string
                                 query_request = {q:query_request, w:'all'};
                             }
                         }else if(rec_ID>0){
                             query_request = {q:'ids:'+rec_ID, w:'all'};
                         }
                         
-                        var widget = this;
+                        var widget = this; //reference to manageRecords
                         
                         if(query_request){
                             
@@ -1222,12 +1273,12 @@ window.hWin.HEURIST4.ui = {
                 
             if(isEdit==true){
                 
-                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, isEdit, callback);
+                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request);
                 return;
                 
                 // section below NOT USED
                 // it loads manageRecords in popup iframe
-                
+                /*  
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
                         {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
@@ -1248,6 +1299,7 @@ window.hWin.HEURIST4.ui = {
                 dtitle = 'Edit record';
                 dheight = usrPreferences.height;
                 dwidth = usrPreferences.width;
+                */
             }else{
                 url = url + 'records/view/renderRecordData.php?db='+window.hWin.HAPI4.database
                 +'&recID='+ rec_ID;
@@ -1286,12 +1338,13 @@ window.hWin.HEURIST4.ui = {
         }
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
-                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;padding-bottom:0.2em;">'
+                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
                         + (info['trm_ID']>0
-                           ?'<div class="detailType" style="display:inline-block;width:15ex">'
+                           ?'<div class="detailType" style="display:inline-block;width:15ex;padding-top:4px;float:left;">'
                             + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
                            :'')  
-                        + '<div class="detail truncate" style="display:inline-block;min-width:35ex;max-width:50ex">'
+                        + '<div class="detail truncate" '
+                        + 'style="display:inline-block;min-width:35ex;max-width:50ex;padding:2px;">'
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
                         + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']+'">'
@@ -1491,6 +1544,7 @@ window.hWin.HEURIST4.ui = {
         if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
+            
             if(!options.container){
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
@@ -1499,10 +1553,6 @@ window.hWin.HEURIST4.ui = {
                 manage_dlg = $(options.container)[widgetName]( options );
             }
             
-            if(options.isdialog){
-                manage_dlg[widgetName]( 'popupDialog' );
-            }
-        
             return manage_dlg;
         
         }else{
@@ -1510,7 +1560,7 @@ window.hWin.HEURIST4.ui = {
             var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
             var scripts = [ path+widgetName+'.js'];
             
-            if(!(entityName=='UsrBookmarks' || entityName=='UsrReminders')){ //entities without search option
+            if(!(entityName=='UsrBookmarks')){ //entities without search option
                 scripts.push(path+'search'+entityName+'.js');
             }
             

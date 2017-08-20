@@ -32,8 +32,8 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
-        this.options.width = 540;
-        this.options.height = 220;
+        this.options.width = 620;
+        this.options.height = 320;
         
 
         this._super();
@@ -85,6 +85,27 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         }
         
         return true;
+    },
+    
+    // change label for remove
+    _getEditDialogButtons: function(){
+        var btns = this._super();
+        
+        var that = this;
+        for(var idx in btns){
+            if(btns[idx].id=='btnRecRemove'){
+                btns[idx].text = window.hWin.HR('Delete bookmark');
+                btns[idx].click = function(){
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+            'Are you sure you wish to delete this bookmark? Proceed?', function(){
+                that._deleteAndClose();
+                }, {title:'Warning',yes:'Proceed',no:'Cancel'});        
+                }
+                break;
+            }
+        }
+        
+        return btns;
     },
     
 //----------------------------------------------------------------------------------    

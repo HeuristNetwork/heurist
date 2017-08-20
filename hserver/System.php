@@ -962,6 +962,10 @@ class System {
                 $this->addError(HEURIST_SYSTEM_FATAL, "Unable to read sysIdentification", $mysqli->error);
                 return null;
             }
+            //verify and add newest db changes
+            if(!updateDatabseToLatest($mysqli)){
+                return null;    
+            }
 
             // it is required for main page only - so call this request on index.php
             //$this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');

@@ -156,6 +156,7 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
     if(substr($rectype_id,-5,5) == "m.png") { //for mapping
         $rectype_id = substr($rectype_id, 0, -5);
         $bg_color = array(200,200,200);   //gray
+        //$bg_color = array(0,0,0);   //black
         $filename2 = $path . $rectype_id . "m.png";
         $alpha = 127; //0-127
     }else if(substr($rectype_id,-5,5) == "s.png") { //for selection
@@ -213,7 +214,7 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
         // load icon
         $img_icon = @imagecreatefrompng($filename);
 
-        $color_old = array(54,100,139);      
+        $color_old = array(0,0,0);//???? 54,100,139);      
         $color_new = (!$color_new)?array(255, 0, 0):$color_new;      
         /* RGB of your inside color */
         $rgb = $color_new; //array(0,0,255);

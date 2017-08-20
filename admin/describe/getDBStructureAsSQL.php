@@ -511,7 +511,7 @@ function print_row($row,$fmt) {
             '$row[rst_RequirementType]','$row[rst_NonOwnerVisibility]','$row[rst_Status]','$row[rst_MayModify]',
             '$row[rst_OriginatingDBID]','$row[rst_IDInOriginatingDB]',
             '$row[rst_MaxValues]','$row[rst_MinValues]','$row[rst_DisplayDetailTypeGroupID]',
-            '$rst_FilteredJsonTermIDTree','$rst_PtrFilteredIDs',
+            '$rst_FilteredJsonTermIDTree','$rst_PtrFilteredIDs','$row[rst_CreateChildIfRecPtr]',
             '$row[rst_OrderForThumbnailGeneration]','$rst_TermIDTreeNonSelectableIDs','$row[rst_LocallyModified]'),";
             break;
 

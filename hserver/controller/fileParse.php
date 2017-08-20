@@ -355,7 +355,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     
     $memos = array();  //multiline fields
     $multivals = array();
-    $values = array();
+    $parsed_values = array();
     $keyfields  = @$_REQUEST["keyfield"];
     $datefields = @$_REQUEST["datefield"];
     $memofields = @$_REQUEST["memofield"];
@@ -584,7 +584,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                     }
                     
                 }else {
-                    array_push($values, $line_values);
+                    array_push($parsed_values, $line_values);
                     if($line_no>$limit){
                         break; //for preview
                     }
@@ -622,7 +622,7 @@ function parse_step2($encoded_filename, $original_filename, $limit){
                 'num_fields'=>$num_fields,
                 'empty75_fields'=>$empty75, 
                 
-                'fields'=>$header, 'values'=>$values );    
+                'fields'=>$header, 'values'=>$parsed_values );    
     }else{
       
         if( count($err_colnums)>0 || count($err_encoding)>0 || count($err_keyfields)>0){
