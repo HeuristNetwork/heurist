@@ -31,7 +31,7 @@
 -- Source version: 1.1.0
 -- Target version: 1.2.0
 -- Safety rating: SAFE
--- Description: Add Certainty rating and Annotation text to every key-value (detail) pair
+-- Description: Add Child record functions, Add Certainty rating and Annotation text to every key-value (detail) pair
 
 -- Extend sys_SyncDefsWithDB from 63 --> 1000 to hold up to about 20 Zotero keys
  ALTER TABLE `sysIdentification`
@@ -48,12 +48,14 @@
     COMMENT'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value';
 
 -- Default behaviour is not to show these, for compatibility with DB version 1.1.0 and before
-    ALTER TABLE `defRecStructure` ADD `rst_ShowDetailCertainty` TinyInt default 0
+    ALTER TABLE `defRecStructure` ADD `rst_ShowDetailCertainty` TinyInt(1) NOT NULL  default 0
     COMMENT 'When editing the field, allow editng of the dtl_Certainty value (off by default)';
 
-    ALTER TABLE `defRecStructure` ADD `rst_ShowDetailAnnotation` TinyInt default 0
+    ALTER TABLE `defRecStructure` ADD `rst_ShowDetailAnnotation` TinyInt(1) unsigned TinyInt(1) NOT NULL default 0
     COMMENT 'When editing the field, allow editng of the dtl_Annotation value (off by default)';
 
+        ALTER TABLE `defRecStructure` ADD `rst_DisplayHeight` TinyInt(2) unsigned NOT NULL default 3
+    COMMENT 'The field height for this detail type in this record type, only relevant for memo fields';
 
 -- Provision for an image or PDF or external URL to define or illustrate the term
     ALTER TABLE  `defTerms`
@@ -69,25 +71,6 @@
     ADD  `dty_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
     COMMENT 'The URL to a semantic definition or web page describing the base field type';
 
-
--- Store user profile information for use in H4 framework
-    ALTER TABLE  `sysUGrps`
-    ADD  `ugr_UsrPreferences` TEXT NULL
-    COMMENT 'JSon array containing user profile available across machines. If blank, profile is specific to local session';
-
--- Unique composite key indexing (by record type), needed by FAIMS among others, on the way to replacing Tom's fuzzy matching methods
--- which were more bibliogeraphy-oruiented and never terribly successful, with a clear-cut unique key system by record type
-
-    ALTER TABLE Records
-    Add rec_KeyfieldsComposite VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
-    COMMENT 'Contains a composite field constructed from record details flagged for indexing by rst_UseInUniqueIndex';
-
-    ALTER TABLE Records
-    ADD UNIQUE KEY rec_UniqueRectypeKeyfields (rec_RecTypeID,rec_KeyfieldsComposite);
-
-    ALTER TABLE defRecStructure
-    ADD rst_UseInUniqueIndex TINYINT NOT NULL DEFAULT 0
-    COMMENT 'Indicates whether field is to be used in the composite index which controls record uniqueness by record type';
 
 -- It would of course be better to have a proper plugin architecture for calculated fields, but this provides a good stopgap
 -- method for combining fields eg. to create a unique item identifier for hierarchichally organised entities such as excavated artefacts

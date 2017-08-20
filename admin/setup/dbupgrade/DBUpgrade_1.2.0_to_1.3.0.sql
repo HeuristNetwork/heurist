@@ -42,6 +42,29 @@
 -- Safety rating: SAFE
 -- Description: Add table to hold user-defined analysis functions
 
+-- Unique composite key indexing (by record type), needed by FAIMS among others, on the way to replacing Tom's fuzzy matching methods
+-- which were more bibliogeraphy-oruiented and never terribly successful, with a clear-cut unique key system by record type
+
+-- Aug 2017 The problem here is that using a unique key will invalidate record addition until such time as a unique key comgination is specified
+-- it is probably better to use Elastic search indexes to determine whether there is duplication. tbd. 
+
+    ALTER TABLE Records
+    Add rec_KeyfieldsComposite VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
+    COMMENT 'Contains a composite field constructed from record details flagged for indexing by rst_UseInUniqueIndex';
+
+    // see notes above  ALTER TABLE Records
+    //                 ADD UNIQUE KEY rec_UniqueRectypeKeyfields (rec_RecTypeID,rec_KeyfieldsComposite);
+
+    ALTER TABLE defRecStructure
+    ADD rst_UseInUniqueIndex TINYINT NOT NULL DEFAULT 0
+    COMMENT 'Indicates whether field is to be used in the composite index which controls record uniqueness by record type';
+
+-- Store user profile information for use in H4 framework
+    ALTER TABLE  `sysUGrps`
+    ADD  `ugr_UsrPreferences` TEXT NULL
+    COMMENT 'JSon array containing user profile available across machines. If blank, profile is specific to local session';
+
+    
     -- Addition of 
     CREATE TABLE usrAnalyses (
       uan_ID mediumint(8) unsigned NOT NULL auto_increment 
