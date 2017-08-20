@@ -480,6 +480,9 @@ function print_row($row,$fmt) {
             break;
 
         case 'defDetailTypes': // Data from the recDetails table
+        
+            $dty_FieldSetRecTypeID = $row['dty_FieldSetRecTypeID']>0?$row['dty_FieldSetRecTypeID']:0;
+        
             $dty_Name = mysql_real_escape_string($row['dty_Name']);
             $dty_Documentation = mysql_real_escape_string($row['dty_Documentation']);
             $dty_HelpText = mysql_real_escape_string($row['dty_HelpText']);
@@ -493,7 +496,7 @@ function print_row($row,$fmt) {
             '$dty_ExtendedDescription','$dty_EntryMask','$row[dty_Status]','$row[dty_OriginatingDBID]',
             '$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
             '$row[dty_OrderInGroup]','$dty_JsonTermIDTree','$dty_TermIDTreeNonSelectableIDs',
-            '$dty_PtrTargetRectypeIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]','$row[dty_NonOwnerVisibility]','$row[dty_LocallyModified]'),";
+            '$dty_PtrTargetRectypeIDs',$dty_FieldSetRecTypeID,'$row[dty_ShowInLists]','$row[dty_NonOwnerVisibility]','$row[dty_LocallyModified]'),";
             break;
 
         case 'defRecStructure': // Data from the defRecStructure table
