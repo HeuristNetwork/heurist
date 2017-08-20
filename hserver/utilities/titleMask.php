@@ -291,7 +291,7 @@ private static function __get_detail_types() {
     if (! self::$rdt) {
         self::$rdt = array();
 
-        self::$rdt = self::$mysqli->query('select dty_ID, lower(dty_Name) as dty_Name, dty_Name as originalName, dty_Type, '
+        $res = self::$mysqli->query('select dty_ID, lower(dty_Name) as dty_Name, dty_Name as originalName, dty_Type, '
             .' dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs, dty_Name as dty_NameOrig, '
             .' dty_OriginatingDBID, dty_IDInOriginatingDB from defDetailTypes');
 
