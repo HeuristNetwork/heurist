@@ -66,10 +66,16 @@ if (!window.hWin.HEURIST4.ui)
 
 window.hWin.HEURIST4.ui = {
 
-    setValueAndWidth: function(input, value){
+    setValueAndWidth: function(ele, value){
+        
         if(window.hWin.HEURIST4.util.isempty(value)) value='';
-        input.val( value )
-            .css('width', (Math.min(80,Math.max(20,value.length))+4+'ex'));
+        ele = $(ele);
+        if(ele.is('input')){
+            ele.val( value )
+                .css('width', (Math.min(80,Math.max(20,value.length))+4+'ex'));
+        }else{
+            ele.html( value );
+        }
     },
     
     //

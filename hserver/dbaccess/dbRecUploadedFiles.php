@@ -263,6 +263,11 @@ class DbRecUploadedFiles extends DbEntityBase
 .'Otherwise please contact your system administrator or the Heurist developers.');
                     return false;
             }
+            
+            if($fieldvalues['ulf_FileSizeKB']<0 || !is_int($fieldvalues['ulf_FileSizeKB'])){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid file size value: '.$fieldvalues['ulf_FileSizeKB']);
+                    return false;
+            }
         }
         
         return $ret;
@@ -303,6 +308,10 @@ class DbRecUploadedFiles extends DbEntityBase
             if(strpos($mimeType,'/')>0){ //this is extension
                 $this->records[$idx]['ulf_MimeExt'] = mysql__select_value($this->system->get_mysqli(), 
                     'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
+            }
+
+            if(!$record['ulf_FileSizeKB']) {
+                $this->records[$idx]['ulf_FileSizeKB'] = 0;
             }
             
             //$this->records[$idx] = $record;

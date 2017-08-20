@@ -22,6 +22,15 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     
     
     _entityName:'defFileExtToMimetype',
+    
+    _init: function() {
+        
+        this.options.width = 570;
+        this.options.height = 600;
+
+        this._super();
+    },
+    
     //  
     // invoked from _init after load entity config    
     //

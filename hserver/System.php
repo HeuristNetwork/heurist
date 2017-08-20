@@ -963,7 +963,7 @@ class System {
                 return null;
             }
             //verify and add newest db changes
-            if(!updateDatabseToLatest($mysqli)){
+            if(!updateDatabseToLatest($this)){
                 return null;    
             }
 

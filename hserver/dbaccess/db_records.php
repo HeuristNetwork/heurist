@@ -289,8 +289,8 @@
         //ADD DETAILS
         $addedByImport = ($modeImport?1:0);
 
-        $query = "INSERT INTO recDetails ".
-        "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo) ".
+        $query = 'INSERT INTO recDetails '.
+        '(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo) '.
         "VALUES ($recID, ?, ?, $addedByImport, ?, geomfromtext(?) )";
         $stmt = $mysqli->prepare($query);
 
@@ -323,6 +323,32 @@
                 $stmt->bind_param('isi', $dtyID, $dtl_Value, $dtl_UploadedFileID);
                 $stmt->execute();
                 }*/
+                
+                //add reverce field "Parent Entity" (#247) in resource record
+                if(@$values['dtl_ParentChild']==true){
+                        $dtl_ID = mysql__select_value($mysqli,
+                            'SELECT dtl_ID FROM recDetail WHERE dtl_RecID='
+                            .$dtl_Value.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY);
+                        
+                        if($dtl_ID>0){
+                            $mysqli->query('UPDATE recDetails '.
+                                "SET dtl_Value=$recID WHERE dtl_ID=$dtl_ID");                    
+                            $res = ($mysqli->affected_rows>0);
+                                
+                        }else{
+                            $mysqli->query('INSERT INTO recDetails '.
+                                "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
+                                "VALUES ($dtl_Value, ".DT_PARENT_ENTITY.", $recID, $addedByImport )");                    
+                            $res = ($mysqli->insert_id>0);
+                        }
+                        if(!$res){
+                            $syserror = $mysqli->error;
+                            $mysqli->rollback();
+                            return $system->addError(HEURIST_DB_ERROR, 
+                                'Cannot save details. Cannot insert reverse pointer for child record', $syserror);
+                        }
+                }
+                
             }
             $stmt->close();
             //$stmt_geo->close();
@@ -634,6 +660,11 @@
                 "rst_RecTypeID=$rectype and rst_RequirementType='required'");
         }
 
+        $det_childpointers =  mysql__select_list($mysqli, "defRecStructure",
+                "rst_DetailTypeID",
+                "rst_RecTypeID=$rectype and rst_CreateChildIfRecPtr=1");
+        
+        
         //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
         $insertValues = array();
         $errorValues = array();
@@ -698,6 +729,10 @@
                             }
                         }else{
                             $isValid = (intval($dtl_Value)>0);
+                        }
+                        //this is parent-child resource
+                        if($isValid && in_array($dtyID, $det_childpointers)){
+                            $dval['dtl_ParentChild'] = true;
                         }
 
                         break;

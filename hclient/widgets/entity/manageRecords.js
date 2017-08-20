@@ -129,8 +129,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 "searchrecordsonaddrecord": function( event, _rectype_id ){
                     this._currentEditRecTypeID = _rectype_id;
                     this.addEditRecord(-1);
-                    
-                    //@todo pass this.option.parententity
                 }
         });
         }
@@ -171,7 +169,21 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _getEditDialogButtons: function(){
                                     
             var that = this;        
-            return [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+            var btns = [];
+
+            if(this.options.parententity>0){
+                var btns = [
+                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
+                              css:{'visibility':'hidden','margin-right':'15px'},
+                              click: function() { that.closeEditDialog(); }},
+                       
+                        {text:window.hWin.HR('Save / Select'), id:'btnRecSaveAndClose',
+                              css:{'visibility':'hidden','margin-right':'15px'},
+                              click: function() { that._saveEditAndClose( null, 'close' ); }}
+                
+                ];
+            }else{
+                var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
                         click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                               
                         {text:window.hWin.HR('Duplicate'), id:'btnRecDuplicate',
@@ -217,6 +229,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               click: function() { 
                                   that.closeEditDialog(); 
                               }}]; 
+                              
+            }
+            return btns;
     },
     
     //
@@ -1278,33 +1293,28 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(dt_ID>0){
                     rfrs[dt_ID]['dt_ID'] = dt_ID;
                     s_fields.push(rfrs[dt_ID]);
-                    fields_ids.push(Number(dt_ID));
+                    fields_ids.push(Number(dt_ID));  //fields in structure
                 }
             }
-            
-            var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
-            
-            //add special 2-247 field "Parent Entity"
-            if(this.options.parententity>0){
-                var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
-                rfr[fi_name] = 'Child record of';
-                rfr[fi_defval] = this.options.parententity;
-                rfr[fi_order] = -1;//top most
-                rfr[fieldNames.length] = 'readonly';
-                fieldNames.push('rst_Display');
-                s_fields.push(rfr);
-            }
-            
+
             //add non-standard fields that are not in structure
             var field_in_recset = that._currentEditRecordset.getDetailsFieldTypes();
+
+            //add special 2-247 field "Parent Entity"
+            var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+            if(this.options.parententity>0 && field_in_recset.indexOf(DT_PARENT_ENTITY)<0){
+                field_in_recset.push(DT_PARENT_ENTITY);
+            }
+            
             var addhead = true;
             for(var k=0; k<field_in_recset.length; k++){
-                if(fields_ids.indexOf(field_in_recset[k])<0){
+                if(fields_ids.indexOf(field_in_recset[k])<0){ //field in recset is not in structure
                     if(field_in_recset[k]==DT_PARENT_ENTITY){
 
                         var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
                         rfr[fi_name] = 'Child record of';
                         rfr[fi_order] = -1;//top most
+                        rfr[fi_defval] = this.options.parententity;
                         rfr[fieldNames.length] = 'readonly';
                         fieldNames.push('rst_Display');
                         s_fields.push(rfr);
@@ -1455,10 +1465,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                afterAction.call(); 
                                 
                             }else if(afterAction=='close'){
-                                that._currentEditID = null;
+
                                 that._currentEditRecordset.setFld(
                                         that._currentEditRecordset.getFirstRecord(),'rec_Title',rec_Title);
-                                that.closeEditDialog();            
+                                that.closeEditDialog();
+                                
+                                if(that.options.parententity>0){
+                                    that.selectedRecords(that._currentEditRecordset);
+                                    that._selectAndClose();
+                                }else{
+                                    that._currentEditID = null;
+                                    that.closeEditDialog();            
+                                }
+                                
                             }else if(afterAction=='newrecord'){
                                 that._initEditForm_step3(-1);
                             }else{
@@ -1514,7 +1533,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
             var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         
-            this.element.find('.ui-heurist-header2').remove();
+            this.editForm.parent().find('.ui-heurist-header2').remove();
             $('<div class="ui-heurist-header2">'
                 + '<img src="'+ph_gif
                     + '" width=25 height=25 style="vertical-align:middle;margin-right: 10px;background-image:url(\''

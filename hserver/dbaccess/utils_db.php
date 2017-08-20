@@ -518,7 +518,9 @@
         return $sysValues;
     }
     
-    function updateDatabseToLatest($mysqli){
+    function updateDatabseToLatest($system){
+        
+        $mysqli = $system->get_mysqli();
         
         //verify that required column exists in sysUGrps
         $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
@@ -569,11 +571,13 @@
         
         $dty_ID = mysql__select_value($mysqli,  
             "SELECT dty_ID FROM `defDetailTypes` WHERE dty_OriginatingDBID=2  dty_IDInOriginatingDB=247");
-        if(!($dty_ID>0)){
+
+        if($dty_ID==null || !($dty_ID>0)){
             
             $mysqli->query("INSERT INTO `defDetailTypes`
 (`dty_Name`, `dty_Documentation`, `dty_Type`, `dty_HelpText`, `dty_ExtendedDescription`, `dty_EntryMask`, `dty_Status`, `dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`, `dty_DetailTypeGroupID`, `dty_OrderInGroup`, `dty_JsonTermIDTree`, `dty_TermIDTreeNonSelectableIDs`, `dty_PtrTargetRectypeIDs`, `dty_FieldSetRecTypeID`, `dty_ShowInLists`, `dty_NonOwnerVisibility` ,`dty_LocallyModified`) VALUES
-('Parent entity','Please document the nature of this detail type (field)) ...','resource','The parent of a child record (a record which is specifically linked to one and only one parent record by a pointer field in each direction)', '','','approved','2', '','247','99', '0','','', '','','1','viewable','0')");
+('Parent entity','Please document the nature of this detail type (field)) ...','resource','The parent of a child record (a record which is specifically linked to one and only one parent record by a pointer field in each direction)', '','','approved','2', '','247','99', '0','','', '','0','1','viewable','0')");
+
         }
         
         

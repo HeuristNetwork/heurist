@@ -49,6 +49,8 @@ $.widget( "heurist.editing_input", {
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
     detailType:null,
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
+    
+    isFileForRecord:false,
 
     // the constructor
     _create: function() {
@@ -65,7 +67,6 @@ $.widget( "heurist.editing_input", {
             return;
         }
 
-
         this.configMode = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(this.configMode)){
             if($.type(this.configMode) === "string"){
@@ -79,10 +80,22 @@ $.widget( "heurist.editing_input", {
                 this.configMode = null;
             }
         }
+        //by default
+        if(window.hWin.HEURIST4.util.isempty(this.configMode)){
+            this.configMode= {entity:'records'};
+        }
 
-        var that = this;
 
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
+        
+        this.isFileForRecord = (this.detailType=='file' && this.configMode.entity=='records');
+        if(this.isFileForRecord){
+            this.configMode = {
+                    entity:'recUploadedFiles',
+            };
+        }
+
+        var that = this;
 
         var required = "";
         if(this.options.readonly || this.f('rst_Display')=='readonly') {
@@ -345,8 +358,6 @@ $.widget( "heurist.editing_input", {
             this.newvalues = {};
         }
         
-        var isFileForRecord = (this.detailType=='file' && this.configMode.entity=='records');
-
         var that = this;
 
         var $input = null;
@@ -871,14 +882,12 @@ $.widget( "heurist.editing_input", {
                 $input.change();   
 
             }else 
-            if(this.detailType=="resource" || isFileForRecord)
+            if(this.detailType=="resource" || this.isFileForRecord)
             {
                         var $input_img;
                         var select_return_mode = 'ids';
-                        if(isFileForRecord){
-                            this.configMode = {
-                                entity:'recUploadedFiles',
-                            };
+                        if(this.isFileForRecord){
+                            
                             icon_for_button = 'ui-icon-folder-open';
                             select_return_mode = 'recordset';
                             
@@ -911,10 +920,10 @@ $.widget( "heurist.editing_input", {
                                 if($input_img.is(':visible')){
                                     hideTimer = window.setTimeout(function(){$input_img.hide(1000);}, 500);
                                 }});
-                            
+                                
                         }else{
                             icon_for_button = 'ui-icon-link';
-                            if(this.configMode && this.configMode.select_return_mode &&
+                            if(this.configMode.select_return_mode &&
                                this.configMode.select_return_mode!='ids'){
                                  select_return_mode = 'recordset'
                             }
@@ -931,34 +940,7 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv )
                         .button({icons:{primary: icon_for_button},text:false});
 
-                        if(window.hWin.HEURIST4.util.isempty(this.configMode)){
 
-                            __show_select_dialog = function __show_select_dialog(event){
-                                event.preventDefault();
-       
-            //LATEST "ENTITY" SELECTOR
-                    var popup_options = {
-                        isdialog: true,
-                        select_mode: 'select_single',
-                        select_return_mode: 'recordset',
-                        edit_mode: 'popup',
-                        title: window.hWin.HR('Select linked record'),
-                        rectype_set: that.f('rst_PtrFilteredIDs'),
-                        parententity: (that.f('rst_CreateChildIfRecPtr')==1)?that.options.recID:0,
-                        onselect:function(event, data){
-                            if(data && data.selection && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
-                                        var recordset = data.selection;
-                                        var record = recordset.getFirstRecord();
-                                        var rec_Title = recordset.fld(record,'rec_Title');
-                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                                        window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                        $input.change();
-                            }
-                        }                        
-                    }
-                    
-                    window.hWin.HEURIST4.ui.showEntityDialog('Records', popup_options);
-       
 /*          //SELECTOR in POPUP URL
     
                                 var url = window.hWin.HAPI4.baseURL +
@@ -985,145 +967,112 @@ $.widget( "heurist.editing_input", {
                                     }
                                 } );
 */                                 
-                            };
+                         
+                        var popup_options = {
+                            isdialog: true,
+                            select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
+                            
+                            select_return_mode:select_return_mode, //ids or recordset(for files)
+                            filter_group_selected:null,
+                            filter_groups: this.configMode.filter_group,
+                            onselect:function(event, data){
 
-                                //assign initial display value
-                                if(Number(value)>0){
-                                    var sTitle = null;
-                                    if(that.options.recordset){
-                                        var relations = that.options.recordset.getRelations();
-                                        if(relations && relations.headers && relations.headers[value]){
-                                            var rec_Title = window.hWin.HEURIST4.util.htmlEscape(relations.headers[value][0]);
-                                            window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                        }
-                                    }
-                                    if(!sTitle){
-                                        window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "all", f:"header"}, 
-                                            function(response){
-                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                                    var recordset = new hRecordSet(response.data);
-                                                    var rec_Title = recordset.fld(recordset.getFirstRecord(),'rec_Title');
-                                                    window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                                }
-                                            }
-                                        );
-                                    }
+                                if(data){
+                                
+                                 if(that.configMode.entity=='records'){   
+                                     
+                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                        var recordset = data.selection;
+                                        var record = recordset.getFirstRecord();
+                                        var rec_Title = recordset.fld(record,'rec_Title');
+                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                        window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                        $input.change();
+                                        
+                                        //special action for parententity
+                                        //1. remove flag_temp for main record
+                                        //2. add parent entity field to selected
+                                        
+                                        
+                                     }
                                     
+                                 }else if(that.isFileForRecord){
+
+                                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                        var recordset = data.selection;
+                                        var record = recordset.getFirstRecord();
+                                        var rec_Title = recordset.fld(record,'ulf_ExternalFileReference');
+                                        if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                                            rec_Title = recordset.fld(record,'ulf_OrigFileName');
+                                        }
+                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
+                                        window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+
+                                        //url for thumb
+                                        $inputdiv.find('.image_input > img').attr('src',
+                                            window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                                            recordset.fld(record,'ulf_ObfuscatedFileID'));
+
+                                        $input.change();
+                                    }
+
+                                }else if( data ){
+
+                                    if(select_return_mode=='ids'
+                                        && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
+                                        //config and data are loaded already, since dialog was opened
+                                        window.hWin.HAPI4.EntityMgr.getTitlesByIds(that.configMode.entity, data.selection,
+                                            function( display_value ){
+                                                var rec_Title = display_value.join(',');
+                                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                        });
+                                        that.newvalues[$input.attr('id')] = data.selection.join(',');
+                                        $input.change();
+                                    }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                        //todo
+
+                                    }
+
                                 }
                                 
+                                }//data
 
-                            //$input.css('width', this.options['input_width']?this.options['input_width']:'300px');
-                        }else{ //---------------------------------------------
-                            //this is entity selector
-                            //detect entity
-                            var entityName = this.configMode.entity;
-                            if(window.hWin.HEURIST4.util.isempty(entityName)) {
-                                entityName='Records'; //by default   
                             }
-                            
-                            var popup_options = {
-                                    isdialog: true,
-                                    select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
-                                    //selectbutton_label: '',
-                                    //page_size: $('#page_size').val(),
-                                    //action_select: false,
-                                    //action_buttons: true,
-                                    select_return_mode:select_return_mode, //ids or recordset(for files)
-                                    filter_group_selected:null,
-                                    filter_groups: this.configMode.filter_group,
-                                    onselect:function(event, data){
-                                        
-                                        if(data && isFileForRecord){
-                                        
-                                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                                var recordset = data.selection;
-                                                var record = recordset.getFirstRecord();
-                                                var rec_Title = recordset.fld(record,'ulf_ExternalFileReference');
-                                                if(window.hWin.HEURIST4.util.isempty(rec_Title)){
-                                                    rec_Title = recordset.fld(record,'ulf_OrigFileName');
-                                                }
-                                                that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
-                                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                                
-                                                //url for thumb
-                                                $input_img.find('img').attr('src',
-                                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                                                        recordset.fld(record,'ulf_ObfuscatedFileID'));
-                                                
-                                                $input.change();
-                                            }
-                                            
-                                        }else if( data ){
-                                        
-                                            if(select_return_mode=='ids'
-                                                && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
-                                                //config and data are loaded already, since dialog was opened
-                                                window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, data.selection,
-                                                    function( display_value ){
-                                                            var rec_Title = display_value.join(',');
-                                                            window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                                    });
-                                                that.newvalues[$input.attr('id')] = data.selection.join(',');
-                                                $input.change();
-                                            }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                                //todo
-                                                
-                                            }
-                                            
-                                        }
-
-                                    }
-                            }//options
-
-                            __show_select_dialog = function(event){
-                                    
-                                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+entityName, 
-                                        {width: null,  //null triggers default width within particular widget
-                                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+                        };//popup_options
                         
-                                    popup_options.width = usrPreferences.width;
-                                    popup_options.height = usrPreferences.height;
-                                    
-                                    //init dialog
-                                    window.hWin.HEURIST4.ui.showEntityDialog(entityName, popup_options);
-                            }
-                                
-                            //assign initial display value
-                            if(value){
-                                if(isFileForRecord){
-                                    
-                                    var rec_Title = value.ulf_ExternalFileReference;
-                                    if(window.hWin.HEURIST4.util.isempty(rec_Title)){
-                                        rec_Title = value.ulf_OrigFileName;
-                                    }
-                                    window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                    
-                                    //url for thumb
-                                    $input_img.find('img').attr('src',
-                                        window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                                            value.ulf_ObfuscatedFileID);
-                                    
-                                }else{
-                                    
-                                    window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','),
-                                           function( display_value ){
-                                                var rec_Title  = display_value.join(',');           
-                                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                           });
-                                                         
-                                    
-                                }
-                            }
-                                
-                            
-                        }//configMode
+                        if(this.configMode.entity=='records'){
 
+                            popup_options.select_return_mode = 'recordset';
+                            popup_options.edit_mode = 'popup';
+                            popup_options.title = window.hWin.HR('Record pointer: Select or create a linked record');
+                            popup_options.rectype_set = that.f('rst_PtrFilteredIDs');
+                            popup_options.parententity = (that.f('rst_CreateChildIfRecPtr')==1)?that.options.recID:0;
+
+                        }
+
+                        __show_select_dialog = function(event){
+                            
+                                event.preventDefault();
+                                
+                                var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
+                                    {width: null,  //null triggers default width within particular widget
+                                    height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+                    
+                                popup_options.width = usrPreferences.width;
+                                popup_options.height = usrPreferences.height;
+                                
+                                //init dialog
+                                window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
+                        }
+                        
+                        that._findAndAssignTitle($input, value);
+                            
                         if(__show_select_dialog!=null){
                             this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
                         }
                         
-                        if(isFileForRecord && value){
+                        if(this.isFileForRecord && value){
                             this.newvalues[$input.attr('id')] = value.ulf_ID;
                         }else{
                             this.newvalues[$input.attr('id')] = value;    
@@ -1311,6 +1260,69 @@ $.widget( "heurist.editing_input", {
 
     },
 
+    //
+    //
+    //
+    _findAndAssignTitle: function(ele, value){
+        
+        if(!value){
+            window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
+            return;
+        }
+        
+        var that = this;
+        
+        if(this.isFileForRecord){
+            
+            var rec_Title = value.ulf_ExternalFileReference;
+            if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                rec_Title = value.ulf_OrigFileName;
+            }
+            window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+            
+            //url for thumb
+            ele.parent().find('.image_input > img').attr('src',
+                window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                    value.ulf_ObfuscatedFileID);
+                    
+        }else if(this.detailType=='file'){
+            
+            window.hWin.HEURIST4.ui.setValueAndWidth(ele, value);
+            
+        }else if(this.configMode.entity==='records'){
+                //assign initial display value
+                if(Number(value)>0){
+                    var sTitle = null;
+                    if(that.options.recordset){
+                        var relations = that.options.recordset.getRelations();
+                        if(relations && relations.headers && relations.headers[value]){
+                            var rec_Title = window.hWin.HEURIST4.util.htmlEscape(relations.headers[value][0]);
+                            window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+                        }
+                    }
+                    if(!sTitle){
+                        window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "all", f:"header"}, 
+                            function(response){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    var recordset = new hRecordSet(response.data);
+                                    var rec_Title = recordset.fld(recordset.getFirstRecord(),'rec_Title');
+                                    window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+                                }
+                            }
+                        );
+                    }
+                }else{
+                    window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
+                }
+        }else{                     
+            window.hWin.HAPI4.EntityMgr.getTitlesByIds(this.configMode.entity, value.split(','),
+                   function( display_value ){
+                        var rec_Title  = display_value.join(',');           
+                        window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+                   });
+        }
+        
+    },
 
     //
     // recreate SELECT for enum/relation type
@@ -1510,7 +1522,6 @@ $.widget( "heurist.editing_input", {
                 if(this.options.values.length!=this.inputs.length){
                     return true;
                 }
-                var isFileForRecord = (this.detailType=='file' && this.configMode.entity=='recUploadedFiles');
                 
                 var idx;
                 for (idx in this.inputs) {
@@ -1518,7 +1529,7 @@ $.widget( "heurist.editing_input", {
                     
                     //both original and current values are not empty
                     if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))){
-                        if(isFileForRecord){
+                        if(this.isFileForRecord){
                             if(this.options.values[idx].ulf_ID!=res){
                                 return true;
                             }
@@ -1631,36 +1642,13 @@ $.widget( "heurist.editing_input", {
             }
         } else if(this.detailType=='file'){
 
-            disp_value = "@todo file "+value;
+            this._findAndAssignTitle($inputdiv, value);
 
         } else if(this.detailType=="resource"){
 
             disp_value = "....resource "+value;
-            
-            var entityName='Records'; //by default           
-            if(!window.hWin.HEURIST4.util.isempty(this.configMode) &&
-               !window.hWin.HEURIST4.util.isempty(this.configMode.entity)){
-                entityName = this.configMode.entity;
-            }    
-            if(entityName=='Records') {
-                
-                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "all", f:"header"}, 
-                    function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            var recordset = new hRecordSet(response.data);
-                            var rec_Title = recordset.fld(recordset.getFirstRecord(),'rec_Title');
-                            $inputdiv.html(rec_Title);
-                        }
-                    }
-                );
-            }else{     
-                                               
-                window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, value,
-                    function( display_value ){
-                            var rec_Title = display_value.join(',');
-                            $inputdiv.html(rec_Title);
-                    });
-            }
+
+            this._findAndAssignTitle($inputdiv, value);
 
         } else if(this.detailType=="relmarker"){  //combination of enum and resource
 
