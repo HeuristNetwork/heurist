@@ -1309,9 +1309,10 @@
 
 				$rows = execSQL($ext_db, $query, $parameters, true);
 
-				if ($rows==0 || is_string($rows) ) {      //ERROR
+				if (is_string($rows) ) {      //ERROR
 					$oper = (($isInsert)?"inserting":"updating term ".$trmID);
-					$ret = "SQL error $oper in updateTerms: ".$rows.'   '.$query; //."  ".htmlspecialchars($query);
+					$ret = "SQL error $oper in updateTerms: ".$rows
+                        .'   '.$query.'  params='.implode(',',$parameters); //."  ".htmlspecialchars($query);
 				} else {
 					if($isInsert){
 						$trmID = $ext_db->insert_id;  // new id
@@ -1406,15 +1407,24 @@
 	* @param $ret -- array of child
 	* @param $trmID - term id to be find all children
 	*/
-	function getTermsChilds($ret, $trmID) {
+	function getTermsChilds($ret, $trmID, $terms=null) {
         global $mysqli;
 
+         if(!$terms) $terms = array($trmID); //to prevent recursion
+        
 		$query = "select trm_ID from defTerms where trm_ParentTermID = $trmID";
 		$res = $mysqli->query($query);
 		while ($row = $res->fetch_row()) {
 			$child_trmID = $row[0];
-			$ret = getTermsChilds($ret, $child_trmID);
-			array_push($ret, $child_trmID);
+            
+            if(in_array($child_trmID, $terms)){
+                $ret = array($child_trmID);
+            }else{
+                array_push($terms, $child_trmID);
+                
+                $ret = getTermsChilds($ret, $child_trmID, $terms);
+                array_push($ret, $child_trmID);
+            }
 		}
 		return $ret;
 	}
@@ -1447,15 +1457,24 @@
     //
     //
     //
-    function getTermTopMostParent($termId){
+    function getTermTopMostParent($termId, $terms=null){
         global $mysqli;
+        
+        
+        if(!$terms) $terms = array($termId); //to prevent recursion
 
         $query = "select trm_ParentTermID from defTerms where trm_ID = ".$termId;
 
         $res = $mysqli->query($query);
         $parentId = $res->fetch_row();
         if($parentId && @$parentId[0]){
-            return getTermTopMostParent($parentId[0]);
+            
+            if(in_array($parentId[0], $terms)){
+                return $termId;
+            }else{
+                array_push($terms, $parentId[0]);
+                return getTermTopMostParent($parentId[0]);
+            }
         }else{
             return $termId;
         }
