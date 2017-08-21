@@ -2027,7 +2027,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
             //loop all id values - because on index field may have multivalue ID
             foreach($id_field_values as $idx2 => $recordId_in_import){
 
-                if(@$pairs[$recordId_in_import]){ //already imported
+                if($recordId_in_import!=null && @$pairs[$recordId_in_import]){ //already imported
                     $recordId_in_import = $pairs[$recordId_in_import];
                 }
 
