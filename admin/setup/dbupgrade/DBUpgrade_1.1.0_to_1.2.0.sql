@@ -80,6 +80,12 @@
     ADD rst_NumericLargestValueUsed INTEGER NULL
     COMMENT 'For numeric fields, Null = no auto increment, 0 or more indicates largest value used so far. Set to 0 to switch on incrementing';
 
+    ALTER TABLE `defRecStructure` ADD `rst_DisplayHeight` TinyInt(2) unsigned NOT NULL default 3
+    COMMENT 'The field height for this detail type in this record type, only relevant for memo fields';
+    
+    ALTER TABLE `defRecStructure` ADD `rst_EntryMask` Varchar(250) NULL
+    COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc. for this record type - future implementation Aug 2017';
+
     -- Note: need to set initial value if not 0 and protect numeric auto-increment fields against manual editing
     
     ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;    
@@ -87,10 +93,4 @@
     ALTER TABLE `usrBookmarks` ADD `bkm_Notes` text COMMENT 'Personal notes';
 
     ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` text COMMENT 'JSON array that describes treeview for filters'
-    
--- Add a height setting for memo fields
-    
-    ALTER TABLE `defRecStructure` ADD `rst_DisplayHeight` TinyInt(2) unsigned NOT NULL default 3
-    COMMENT 'The field height for this detail type in this record type, only relevant for memo fields';
-    
     
