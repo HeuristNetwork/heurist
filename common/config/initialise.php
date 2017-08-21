@@ -164,7 +164,8 @@ define('HEURIST_DIR', $documentRoot . HEURIST_SITE_PATH ); //  /var/www/html/h4/
 // Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
 // DO NOT CHANGE THIS URL
 define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/heurist/");
-define('HEURIST_INDEX_DBNAME', "HeuristMasterIndex");
+// 21aug17: This name ommitted the underscores, so didn't reference an existing database, so prob. not used
+define('HEURIST_INDEX_DBNAME', "Heurist_Master_Index");
 
 //-------------------------------------------------------------------------- MEMCACHE AND PROXY
 
