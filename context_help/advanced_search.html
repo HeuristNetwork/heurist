@@ -249,6 +249,8 @@
                         <br>
                         <span class="search_term">field:<i>xxx</i></span>
                         <br>
+                        <span class="search_term">fc:<i>abc</i>:<i>xxx</i></span>
+                        <br>
                         <span class="search_term">f:<i>abc</i>:<i>xxx</i></span>
                     </td>
                     <td>
@@ -260,6 +262,10 @@
                         Search for records that have value <i>xxx</i> in <u>any</u> field. 
                         <span class="search_term">-field:<i>xxx</i>:</span> searches for records with value <i>xxx</i> in <u>no</u> fields.<span></span>
                         <br>                        
+                        Search for records that have <i>xxx</i> values in field <i>abc</i>. Also use 
+                        <span class="search_term">fc:<i>abc</i>:<i>&gt;xxx</i></span> or 
+                        <span class="search_term">fc:<i>abc</i>:<i>xxx&lt;&gt;yyy</i></span> for ranges.<span></span>
+                        <br>                        
                         <b>field</b> can be shortened to <b>f</b>. The field identifier <i>abc</i> may be the name of the field, for example
                         <span class="search_term">field:"AuthorEditor":Hill</span>,
                         or the field's numerical identifier, <span class="search_term">field:196:Hill</span>.
@@ -269,7 +275,7 @@
                         <span class="search_term">f:123=456</span>, <span class="search_term">f:"date added"&lt;yesterday</span>.
                         <br>Less than and greater than can also be used with text fields, so the following will retrieve all records
                         with a name/title field (field 1) starting with "B" <span class="search+term">f:1&gt;B f:1&lt;C</span>
-                        <br>
+
                         <!-- For a list of field IDs and names, click here [TO BE CREATED].  -->
                         <br> Note that the same field eg. 196 (Author/Editor), may be used in different
                         record types and may appear to be labeled differently in different record types;
