@@ -35,7 +35,7 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"title",
-                        "dty_Size":63,
+                        "dty_Size":1023,
                         "rst_DisplayName": "Record title",
                         "rst_DisplayHelpText": "", 
                         "rst_Display":"hidden"
@@ -45,7 +45,7 @@
                     "dtID": "rec_URL",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "dty_Size":63,
+                        "dty_Size":2000,
                         "rst_DisplayName": "URL",
                         "rst_DisplayHelpText": "" ,
                         "rst_Display": "hidden"
@@ -56,7 +56,7 @@
                     "titleField": true,
                     "dtFields":{
                         "dty_Type":"blocktext",
-                        "dty_Size":255,
+                        "dty_Size":65535,
                         "rst_DisplayName": "ScratchPad",
                         "rst_DisplayHelpText": "", 
                         "rst_Display": "hidden"

@@ -843,6 +843,9 @@ $.widget( "heurist.manageEntity", {
         if(this._editing.validate()){
             return this._editing.getValues(false);    
         }else{
+            window.hWin.HEURIST4.msg.showMsgFlash('Entered data are missing or not valid. Check fields marked with red',3000);
+            $(this.editForm.find('input.ui-state-error')[0]).focus();
+            
             return null;
         }
     },

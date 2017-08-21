@@ -1554,6 +1554,9 @@ $.widget( "heurist.editing_input", {
 
     validate: function(){
 
+        if (this.options.dtFields.rst_Display=='hidden' ||
+        this.options.dtFields.rst_Display=='readonly') return true;
+        
         var req_type = this.f('rst_RequirementType');
         var max_length = this.f('dty_Size');
         var data_type = this.f('dty_Type');
