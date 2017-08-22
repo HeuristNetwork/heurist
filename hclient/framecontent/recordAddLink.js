@@ -562,7 +562,7 @@ function hRecordAddLink() {
         dtFields[fi['rst_RequirementType']] = 'optional';
         dtFields[fi['rst_RequirementType']] = 'optional';
         dtFields[fi['rst_MaxValues']] = 1;
-        dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resource
+        //dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resource
         //dtFields[fi['rst_DisplayWidth']] = 50;
         
         //if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';

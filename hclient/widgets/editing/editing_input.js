@@ -85,6 +85,8 @@ $.widget( "heurist.editing_input", {
             this.configMode= {entity:'records'};
         }
 
+//console.log('create '+this.options.dtID);        
+//console.log('vals='+this.options.values);
 
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         
@@ -518,7 +520,14 @@ $.widget( "heurist.editing_input", {
         else if(this.detailType=="relmarker"){ 
             
                 this.options.showclear_button = false;
+                $inputdiv.css({'display':'inline-block','vertical-align':'middle'});
 
+               //define explicit add relationship button
+               var $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
+                        .addClass("rel_link")
+                        .button({icons:{primary: "ui-icon-circle-plus"},label:'Add Relationship'})
+                        .appendTo( $inputdiv );
+                
                 var __show_addlink_dialog = function(){
                             var url = window.hWin.HAPI4.baseURL 
                                 +'hclient/framecontent/recordAddLink.php?db='+window.hWin.HAPI4.database
@@ -536,12 +545,18 @@ $.widget( "heurist.editing_input", {
                                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
                                             context, true);
                                         ele.appendTo($inputdiv);
+                                        
+                                        if( that.element.find('.link-div').length>0 ){ //hide this button if there are links
+                                            that.element.find('.rel_link').hide();
+                                        }                                        
                                     }
                                     
                                 }
                             } );
                 };
-            
+                
+                
+                $btn_add_rel_dialog.click(function(){__show_addlink_dialog()});
             
                 if(this.inputs.length==0){ //show current relations
             
@@ -576,6 +591,11 @@ $.widget( "heurist.editing_input", {
                                          rec_RecTypeID: headers[targetID][1], 
                                          relation_recID: direct[k]['relationID'], 
                                          trm_ID: direct[k]['trmID']}, true);
+                                         
+                                        if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
+                                            $btn_add_rel_dialog.hide();
+                                        }
+                                         
                                 }
                             }
                         }
@@ -593,69 +613,133 @@ $.widget( "heurist.editing_input", {
                         .uniqueId();
                    $input = $inputdiv;
 
-                   //define explicit add relationship button
-                   var $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
-                            .addClass("add-rel-button")
-                            .button({icons:{primary: "ui-icon-circle-plus"},label:'Add Relationship'})
-                            .appendTo( $inputdiv )
-                            .click(function(){__show_addlink_dialog()});
-            
-                    if( $inputdiv.find('.link-div').length>0 ){
-                        $btn_add_rel_dialog.hide();
-                    }
                 
                 }else{
                     //this is second call - some links are already defined
-                    //show popup dialog
+                    //show popup dialog at once
                     __show_addlink_dialog();
                     return;
                 }
                 
-/*            
-                        $input.css('width','auto');
+            if( this.element.find('.link-div').length>0){ //hide this button if there are links
+                $inputdiv.find('.rel_link').hide();
+            }else{
+                $inputdiv.find('.rel_link').show();
+            }                
+                
 
-                        if(!this.rec_relation_dialog){
-                            this.rec_relation_dialog = this.element.rec_relation({
-
-                                rectype_set: this.f('rst_PtrFilteredIDs'), //constraints for target record types
-                                reltype_set: this.f('rst_FilteredJsonTermIDTree'), //contraints for relation types
-                                reltype_headers: this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs'), //subset of headers for relation type pulldown
-
-                                source_ids: [this.options.recID],
-                                isdialog: true
-                            });
-                        }
-
-                        var $btn_rec_relation_dialog = $( "<button>", {title: "Click to define relationship"})
-                        .addClass("smallbutton")
-                        .appendTo( $inputdiv )
-                        .button({icons:{primary: "ui-icon-link"},text:false});
-
-                        function __show_relation_dialog(event){
-                            event.preventDefault();
-
-                            that.rec_relation_dialog.rec_relation("option",{
-                                //retuns selected recrod
-                                onselect: function(event, lbl){ //@todo - work with new relation record
-                                    $input.val(lbl);
-                                    
-                                    //if(recordset && recordset.length()>0){
-                                    //var record = recordset.getFirstRecord();
-                                    //$input.val(recordset.fld(record,'rec_Title'));
-                                    //that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                                    //}
-
-                                }
-                            });
-
-                            that.rec_relation_dialog.rec_relation( "show" );
-                        };
-
-                        this._on( $btn_rec_relation_dialog, { click: __show_relation_dialog } );
-                        this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
-*/
-            
         }
+        else if(this.detailType=="resource" && this.configMode.entity=='records'){
+
+            //replace input with div
+            $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'20ex'})
+                            .uniqueId().appendTo( $inputdiv );
+            
+            //define explicit add relationship button
+            $( "<button>", {title: "Select record to be linked"})
+                        .button({icons:{primary: "ui-icon-circle-plus"},label:'Select Record'})
+                        .addClass('sel_link2')
+                        .appendTo( $inputdiv );
+            
+            //var $btn_rec_search_dialog = 
+            
+            var popup_options = {
+                            isdialog: true,
+                            select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
+                            
+                            select_return_mode: 'recordset',
+                            edit_mode: 'popup',
+                            title: window.hWin.HR('Record pointer: Select or create a linked record'),
+                            rectype_set: that.f('rst_PtrFilteredIDs'),
+                            parententity: (that.f('rst_CreateChildIfRecPtr')==1)?that.options.recID:0,
+                            
+                            onselect:function(event, data){
+                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                        var recordset = data.selection;
+                                        var record = recordset.getFirstRecord();
+                                        var targetID = recordset.fld(record,'rec_ID');
+                                        var rec_Title = recordset.fld(record,'rec_Title');
+                                        var rec_RecType = recordset.fld(record,'rec_RecTypeID');
+                                        that.newvalues[$input.attr('id')] = targetID;
+                                        //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                        
+                                        $input.empty();
+                                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
+                                            {rec_ID: targetID, 
+                                             rec_Title: rec_Title, 
+                                             rec_RecTypeID: rec_RecType}, true);
+                                        //ele.appendTo($inputdiv);
+                                        that._onChange();
+                                        
+                                        if($inputdiv.find('.sel_link').length==0){
+                                            var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
+                                                        .addClass("smallbutton sel_link")
+                                                        .insertAfter( $input )
+                                                        .button({icons:{primary: 'ui-icon-link'},text:false});
+                                            that._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+                                        }else{
+                                            $inputdiv.find('.sel_link').show();
+                                        }
+                                        
+                                        if( that.element.find('.link-div').length>0 ){ //hide this button if there are links
+                                            that.element.find('.sel_link2').hide();
+                                        }
+                                        
+                                     }
+                            }
+            };
+
+
+            var __show_select_dialog = function(event){
+                
+                    if(event) event.preventDefault();
+                    
+                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+that.configMode.entity, 
+                        {width: null,  //null triggers default width within particular widget
+                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+        
+                    popup_options.width = usrPreferences.width;
+                    popup_options.height = usrPreferences.height;
+                    
+                    //init dialog
+                    window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);
+            }
+
+            that._findAndAssignTitle($input, value);
+            
+            if(value>0){
+                        var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
+                                    .addClass("smallbutton sel_link")
+                                    .insertAfter( $input )
+                                    .button({icons:{primary: 'ui-icon-link'},text:false});
+                        this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+            }
+            
+            this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
+           
+            //if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
+            if( this.inputs.length>0 || this.element.find('.link-div').length>0){ //hide this button if there are links
+                $inputdiv.find('.sel_link2').hide();
+            }else{
+                $inputdiv.find('.sel_link2').show();
+            }
+            
+            if(this.inputs.length>0 && !(value>0))  __show_select_dialog();
+            
+            /*
+            if(this.inputs.length==0){
+                if(!(value>0)) $btn_add_link_dialog.show();
+            }else{
+                that.element.find('.sel_link2').hide();
+                if(!(value>0))  __show_select_dialog();
+            }
+            */
+            
+            this.newvalues[$input.attr('id')] = value;    
+
+
+            
+        } 
         else{
             $input = $( "<input>")
             .uniqueId()
@@ -715,7 +799,8 @@ $.widget( "heurist.editing_input", {
                     
                     __url_input_state();               
                 
-            }else if(this.detailType=="integer" || this.detailType=="year"){
+            }
+            else if(this.detailType=="integer" || this.detailType=="year"){
 
                 $input.keypress(function (e) {
                     var code = (e.keyCode ? e.keyCode : e.which);
@@ -928,10 +1013,9 @@ $.widget( "heurist.editing_input", {
                                  select_return_mode = 'recordset'
                             }
                         }
-                
+
                         $input.css({'min-wdith':'20ex'});
 
-                        //old way - by default lookup for Records filtered by Record Types
                         var ptrset = that.f('rst_PtrFilteredIDs');
 
                         var __show_select_dialog = null;
@@ -977,26 +1061,9 @@ $.widget( "heurist.editing_input", {
                             filter_groups: this.configMode.filter_group,
                             onselect:function(event, data){
 
-                                if(data){
+                             if(data){
                                 
-                                 if(that.configMode.entity=='records'){   
-                                     
-                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                        var recordset = data.selection;
-                                        var record = recordset.getFirstRecord();
-                                        var rec_Title = recordset.fld(record,'rec_Title');
-                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                                        window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                        $input.change();
-                                        
-                                        //special action for parententity
-                                        //1. remove flag_temp for main record
-                                        //2. add parent entity field to selected
-                                        
-                                        
-                                     }
-                                    
-                                 }else if(that.isFileForRecord){
+                                if(that.isFileForRecord){
 
                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                         var recordset = data.selection;
@@ -1016,7 +1083,8 @@ $.widget( "heurist.editing_input", {
                                         $input.change();
                                     }
 
-                                }else if( data ){
+                                }
+                                else if( data ){
 
                                     if(select_return_mode=='ids'
                                         && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
@@ -1035,20 +1103,13 @@ $.widget( "heurist.editing_input", {
 
                                 }
                                 
-                                }//data
+                             }//data
 
                             }
                         };//popup_options
                         
-                        if(this.configMode.entity=='records'){
 
-                            popup_options.select_return_mode = 'recordset';
-                            popup_options.edit_mode = 'popup';
-                            popup_options.title = window.hWin.HR('Record pointer: Select or create a linked record');
-                            popup_options.rectype_set = that.f('rst_PtrFilteredIDs');
-                            popup_options.parententity = (that.f('rst_CreateChildIfRecPtr')==1)?that.options.recID:0;
-
-                        }
+                        that._findAndAssignTitle($input, value);
 
                         __show_select_dialog = function(event){
                             
@@ -1065,8 +1126,6 @@ $.widget( "heurist.editing_input", {
                                 window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
                         }
                         
-                        that._findAndAssignTitle($input, value);
-                            
                         if(__show_select_dialog!=null){
                             this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
@@ -1296,8 +1355,15 @@ $.widget( "heurist.editing_input", {
                     if(that.options.recordset){
                         var relations = that.options.recordset.getRelations();
                         if(relations && relations.headers && relations.headers[value]){
+                            
                             var rec_Title = window.hWin.HEURIST4.util.htmlEscape(relations.headers[value][0]);
-                            window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+                            ele.empty();
+                            window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
+                                            {rec_ID: value, 
+                                             rec_Title: rec_Title, 
+                                             rec_RecTypeID: relations.headers[value][1]}, true);
+
+                            //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
                         }
                     }
                     if(!sTitle){
@@ -1305,8 +1371,16 @@ $.widget( "heurist.editing_input", {
                             function(response){
                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                     var recordset = new hRecordSet(response.data);
-                                    var rec_Title = recordset.fld(recordset.getFirstRecord(),'rec_Title');
-                                    window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+                                    var record = recordset.getFirstRecord();
+                                    var rec_Title = recordset.fld(record,'rec_Title');
+                                    var rec_RecType = recordset.fld(record,'rec_RecTypeID');
+                                    ele.empty();
+                                    window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
+                                            {rec_ID: value, 
+                                             rec_Title: rec_Title, 
+                                             rec_RecTypeID: rec_RecType}, true);
+
+                                    //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
                                 }
                             }
                         );
@@ -1404,6 +1478,12 @@ $.widget( "heurist.editing_input", {
                 
                 if(that.detailType=='file'){
                     that.input_cell.find('img.image_input').prop('src','');
+                }else if(that.detailType=='resource' && that.configMode.entity == 'records'){
+                    $input.parent().find('.sel_link').hide();
+                    $input.parent().find('.sel_link2').show();
+                    $input.empty();
+                }else if(that.detailType=='relmarker'){    
+                    this.element.find('.rel_link').show();
                 }else{
                     $input.val( display_value?display_value :value);    
                 }

@@ -97,7 +97,7 @@ function hEditing(_options) {
         record = null;
         
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_recstructure) && _recdata==null){
-            $('<div class="center-message">Select an entity in the list to edit</div>').appendTo($container);
+            //$('<div class="center-message">Select an entity in the list to edit</div>').appendTo($container);
             $container.show();
             return;     
         } 

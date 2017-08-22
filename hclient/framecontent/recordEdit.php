@@ -33,6 +33,7 @@
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
         <!--script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script-->
@@ -81,7 +82,7 @@
                     //hidden result list, inline edit form
                     var options = {
                         select_mode: 'manager',
-                        edit_mode: 'only',
+                        edit_mode: 'editonly',
                         in_popup_dialog: isPopup,
                         new_record_params: new_record_params,
                         layout_mode:'<div class="ent_wrapper editor">'

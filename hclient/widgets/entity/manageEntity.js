@@ -203,13 +203,18 @@ $.widget( "heurist.manageEntity", {
         
         //this.element.addClass('ui-heurist-bg-light');
         
-        this.editForm.html('<div class="center-message">Select an entity in the list to edit</div>');
-
         if(this.options.select_mode!='manager'){ //for select mode we allow only popup edit
             if(this.options.edit_mode!='none'){ 
                 this.options.edit_mode='popup'; 
             };
         }
+
+        if(this.options.edit_mode=='inline'){
+            smsg = 'Select an entity in the list to edit';
+        }else{
+            smsg = 'loading...';
+        }
+        this.editForm.html('<div class="center-message">'+window.hWin.HR(smsg)+'</div>');
         
         if(this.options.layout_mode=='short' || this.options.layout_mode=='basic'){
         
