@@ -1503,6 +1503,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var isChanged = this._editing.isModified();
             mode = isChanged?'visible':'hidden';
         }
+        
         //show/hide save buttons
         var ele = this._toolbar;
         ele.find('#btnRecCancel').css('visibility', mode);

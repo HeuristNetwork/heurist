@@ -193,19 +193,23 @@ $.widget( "heurist.editing_input", {
 
 
         //values are not defined - assign default value
+        var values_to_set;
 
         if( !window.hWin.HEURIST4.util.isArray(this.options.values) ){
             var def_value = this.f('rst_DefaultValue');
             if(window.hWin.HEURIST4.util.isempty(def_value)){
-                this.options.values = [''];        
+                values_to_set = [''];        
             }else if(window.hWin.HEURIST4.util.isArray(def_value)){
-                this.options.values = def_value;
+                values_to_set = def_value;
             }else{
-                this.options.values = [def_value];
+                values_to_set = [def_value];
             }
+        }else{
+            values_to_set = this.options.values.slice();
         }
         //recreate input elements and assign given values
-        this.setValue(this.options.values);
+        this.setValue(values_to_set);
+        this.options.values = this.getValues();
 
         this._refresh();
     }, //end _create
@@ -404,6 +408,10 @@ $.widget( "heurist.editing_input", {
 
             this._recreateSelector($input, value);
             
+            if($input.val()!=value){ //value is not allowed
+                
+            }
+            
             var allTerms = this.f('rst_FieldConfig');    
             //allow edit terms only for true defTerms enum
             if(window.hWin.HEURIST4.util.isempty(allTerms)){
@@ -412,10 +420,10 @@ $.widget( "heurist.editing_input", {
 
                 var isVocabulary = !isNaN(Number(allTerms)); 
 
-                var $btn_termedit = $( '<button>', {title: 'Add new term to this list'})
-                .addClass('smallbutton')
-                .appendTo( $inputdiv )
-                .button({icons:{primary: 'ui-icon-gear'},text:false});
+                var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
+                .addClass('smallicon ui-icon ui-icon-gear')
+                .appendTo( $inputdiv );
+                //.button({icons:{primary: 'ui-icon-gear'},text:false});
                 
                 this._on( $btn_termedit, { click: function(){
                     
@@ -637,7 +645,7 @@ $.widget( "heurist.editing_input", {
             
             //define explicit add relationship button
             $( "<button>", {title: "Select record to be linked"})
-                        .button({icons:{primary: "ui-icon-circle-plus"},label:'Select Record'})
+                        .button({icons:{primary: "ui-icon-triangle-1-e"},label:'&nbsp;&nbsp;&nbsp;Select Record'})
                         .addClass('sel_link2')
                         .appendTo( $inputdiv );
             
@@ -672,13 +680,13 @@ $.widget( "heurist.editing_input", {
                                         that._onChange();
                                         
                                         if($inputdiv.find('.sel_link').length==0){
-                                            var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
-                                                        .addClass("smallbutton sel_link")
-                                                        .insertAfter( $input )
-                                                        .button({icons:{primary: 'ui-icon-link'},text:false});
+                                            var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
+                                                .addClass('smallicon sel_link ui-icon ui-icon-pencil')
+                                                        .insertAfter( $input );
+                                                        
                                             that._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                                         }else{
-                                            $inputdiv.find('.sel_link').show();
+                                            $inputdiv.find('.sel_link').css({display:'inline-block'});
                                         }
                                         
                                         if( that.element.find('.link-div').length>0 ){ //hide this button if there are links
@@ -708,10 +716,10 @@ $.widget( "heurist.editing_input", {
             that._findAndAssignTitle($input, value);
             
             if(value>0){
-                        var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
-                                    .addClass("smallbutton sel_link")
-                                    .insertAfter( $input )
-                                    .button({icons:{primary: 'ui-icon-link'},text:false});
+                        var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
+                            .addClass('smallicon sel_link ui-icon ui-icon-pencil')
+                                    .insertAfter( $input );
+                            //.button({icons:{primary: 'ui-icon-pencil'},text:false}); //wasui-icon-link
                         this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
             }
             
@@ -777,18 +785,18 @@ $.widget( "heurist.editing_input", {
                             }
                             $input.addClass('rec_URL').removeClass('text').attr('readonly','readonly');
                             
-                            $btn_extlink = $( '<button>', {title: 'Open URL in new window'})
-                                .addClass('smallbutton')
-                                .appendTo( $inputdiv )
-                                .button({icons:{primary: 'ui-icon-extlink'},text:false});
+                            $btn_extlink = $( '<span>', {title: 'Open URL in new window'})
+                                .addClass('smallicon ui-icon ui-icon-extlink')
+                                .appendTo( $inputdiv );
+                                //.button({icons:{primary: 'ui-icon-extlink'},text:false});
                         
                             that._on( $btn_extlink, { click: function(){ window.open($input.val(), '_blank') }} );
                             that._on( $input, { click: function(){ window.open($input.val(), '_blank') }} );
 
-                            $btn_editlink = $( '<button>', {title: 'Edit URL'})
-                                .addClass('smallbutton')
-                                .appendTo( $inputdiv )
-                                .button({icons:{primary: 'ui-icon-pencil'},text:false});
+                            $btn_editlink = $( '<span>', {title: 'Edit URL'})
+                                .addClass('smallicon ui-icon ui-icon-pencil')
+                                .appendTo( $inputdiv );
+                                //.button({icons:{primary: 'ui-icon-pencil'},text:false});
                         
                             that._on( $btn_editlink, { click: function(){ __url_input_state(true) }} );
                         }
@@ -913,10 +921,10 @@ $.widget( "heurist.editing_input", {
                             }*/
                         });
 
-                        var $btn_datepicker = $( '<button>', {title: 'Show calendar'})
-                        .addClass('smallbutton')
-                        .appendTo( $inputdiv )
-                        .button({icons:{primary: 'ui-icon-calendar'},text:false});
+                        var $btn_datepicker = $( '<span>', {title: 'Show calendar'})
+                            .addClass('smallicon ui-icon ui-icon-calendar')
+                            .appendTo( $inputdiv );
+                        //.button({icons:{primary: 'ui-icon-calendar'},text:false});
 
                        
                        
@@ -930,11 +938,11 @@ $.widget( "heurist.editing_input", {
 
                 if(this.options.dtID>0){ //this is details of records
                 
-                    var $btn_temporal = $( '<button>', 
+                    var $btn_temporal = $( '<span>', 
                         {title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)'})
-                    .addClass('smallbutton')
-                    .appendTo( $inputdiv )
-                    .button({icons:{primary: 'ui-icon-clock'}, text:false});
+                    .addClass('smallicon ui-icon ui-icon-clock')
+                    .appendTo( $inputdiv );
+                    //.button({icons:{primary: 'ui-icon-clock'}, text:false});
                     
                     this._on( $btn_temporal, { click: function(){
                         
@@ -1019,10 +1027,10 @@ $.widget( "heurist.editing_input", {
                         var ptrset = that.f('rst_PtrFilteredIDs');
 
                         var __show_select_dialog = null;
-                        var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
-                        .addClass("smallbutton")
-                        .appendTo( $inputdiv )
-                        .button({icons:{primary: icon_for_button},text:false});
+                        var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
+                        .addClass('smallicon ui-icon '+icon_for_button)
+                        .appendTo( $inputdiv );
+                        //.button({icons:{primary: icon_for_button},text:false});
 
 
 /*          //SELECTOR in POPUP URL
@@ -1149,11 +1157,11 @@ $.widget( "heurist.editing_input", {
                             + '<img src="'+urlThumb+'" class="image_input"></div>').appendTo( $inputdiv );                
                             
                         //browse button    
-                        var $btn_fileselect_dialog = $( "<button>", {title: "Click to select file for upload"})
-                        .addClass("smallbutton fileupload")
+                        var $btn_fileselect_dialog = $( "<span>", {title: "Click to select file for upload"})
+                        .addClass('smallicon fileupload ui-icon ui-icon-folder-open')
                         .css('vertical-align','top')
-                        .appendTo( $inputdiv )
-                        .button({icons:{primary: "ui-icon-folder-open"},text:false});
+                        .appendTo( $inputdiv );
+                        //.button({icons:{primary: "ui-icon-folder-open"},text:false});
                         
                         //set input as file and hide
                         $input.prop('type','file').hide();
@@ -1221,13 +1229,16 @@ $.widget( "heurist.editing_input", {
             else //------------------------------------------------------------------------------------
             if(this.detailType=="geo"){
                 
-                $input.css('width','20ex');
+                $input.css({'width':'20ex','padding-left':'30px'});
                 //browse button    
-                var $btn_digitizer_dialog = $( "<button>", {title: "Click to draw map location"})
-                        .addClass("smallbutton")
-                        //.css('vertical-align','top')
-                        .appendTo( $inputdiv )
-                        .button({icons:{primary: "ui-icon-globe"},text:false});
+                $('<span>').addClass('ui-icon ui-icon-globe')
+                    .css({position:'absolute',margin:'5px 0 0 6px'})
+                    .insertBefore($input);
+                
+                var $btn_digitizer_dialog = $( "<span>", {title: "Click to draw map location"})
+                        .addClass('smallicon ui-icon ui-icon-pencil')
+                        .appendTo( $inputdiv );
+                        //.button({icons:{primary: "ui-icon-pencil"},text:false});
                 var $link_digitizer_dialog = $( '<a>', {title: "Click to draw map location"})
                         .text( window.hWin.HR('Edit'))
                         .css('cursor','pointer')
@@ -1447,7 +1458,9 @@ $.widget( "heurist.editing_input", {
                     window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                 }
             }
-            if(!window.hWin.HEURIST4.util.isnull(value))  $input.val(value);
+            if(!window.hWin.HEURIST4.util.isnull(value)){
+                $input.val(value); 
+            }  
 
         }else{ //this is usual enumeration from defTerms
 

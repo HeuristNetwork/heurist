@@ -296,7 +296,7 @@ input.text, select.text {
     color: #999999;
 }
 .required {
-    color: #CC0000;
+    color: #CC0000 !important;
     font-weight: bold;
 }
 .recommended {
@@ -309,10 +309,15 @@ input.text, select.text {
     text-align:left;
 }
 
-.smallbutton{
+.smallbutton, .smallicon{
     width: 16px !important;
     height: 16px !important;
     margin-left: 0.4em;
+}
+.smallicon{
+    display: inline-block;
+    vertical-align:middle;
+    color:gray;
 }
 
 /* FOR SELECT */
