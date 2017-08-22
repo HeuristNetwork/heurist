@@ -788,12 +788,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         
         treeElement.empty();
+        var btn = $dlg.parent().find('.ui-dialog-buttonset > button').first();
+        window.hWin.HEURIST4.util.setDisabled(btn, !(preview_rty_ID>0));
+        
+        if(preview_rty_ID>0){                
+
         treeElement.addClass('loading');
         treeElement.html('<div style="font-style:italic;padding-bottom:20px">loading...</div>');
-        var btn = $dlg.parent().find('.ui-dialog-buttonset > button').first();
-        window.hWin.HEURIST4.util.setDisabled(btn, true);
-                        
-
         window.hWin.HAPI4.parseCSV(request, function( response ){
 
             treeElement.removeClass('loading');
@@ -1186,6 +1187,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
         });        
 
+        }
     }   
 
     //
