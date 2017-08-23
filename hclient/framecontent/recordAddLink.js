@@ -275,7 +275,7 @@ function hRecordAddLink() {
             //show record selector
 
             $('#div_target1').hide();
-            $('#div_target2').show();//css('display','inline-block');
+            $('#div_target2').css('display','inline-block');
         }
 
     }
@@ -446,7 +446,7 @@ function hRecordAddLink() {
         :' data-party="'+party+'" value="'+dty+'" data-type="'+field_type+'"')
     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
     +'<label style="font-style:italic" for="cb'+party+'_cb_'+dty+'">'+dtyName+'</label>&nbsp;'
-    +'<select id="rec'+party+'_sel_'+dty+'" class="text ui-widget-content ui-corner-all">'  
+    +'<select id="rec'+party+'_sel_'+dty+'" class="text ui-widget-content ui-corner-all" style="margin-left:30px;">'  
         +'<option>relation type</option>'
     +'</select><div>').appendTo($('#'+party+'_field'));
     
@@ -482,7 +482,8 @@ function hRecordAddLink() {
             //hide radio - since it is the only one field in list
             $('#source_field').find('.field_item').css('padding-left','0');
             $('#source_field').find('input[type=radio]').hide().click(); //prop('checked',true).
-            $('#source_field').find('label').text('Relation type:').css('font-style','normal');
+            $('#source_field').find('label').text('Relationship type:')
+                .css({'font-style':'normal',display:'inline-block',width:'95px'});
         }
                             
         
@@ -591,7 +592,7 @@ function hRecordAddLink() {
         };
 
         $("<div>").attr('id','target_record')
-                    .css({'padding-left':'70px'})
+                    //.css({'padding-left':'130px'})
                     .editing_input(ed_options).appendTo($fieldset)
                     .find('input').css({'font-weight':'bold'});
     }
@@ -652,7 +653,12 @@ function hRecordAddLink() {
                         target_RecTypeID = recRecTypeID;
                         $('#target_title').show();    
                     }else{
-                        $('#target_title').hide();        
+                        $('#target_title').hide();    
+                        $('#target_rectype_img').hide(); 
+                        $('#target_rectype').css({'margin-top':0,'margin-left':'5px'}); 
+                        $('#div_target1').css({'display':'block','padding-left':'120px'}); 
+                        $('#div_target2').find('.link-div').css({'background':'none','border':'none'});
+                        $('#div_target2').find('a').css({'font-weight':'bold','font-size':'1.05em'});
                     }
                 }else{
                     if(source_ID>0){

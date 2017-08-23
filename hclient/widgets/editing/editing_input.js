@@ -529,14 +529,17 @@ $.widget( "heurist.editing_input", {
             
                 this.options.showclear_button = false;
                 $inputdiv.css({'display':'inline-block','vertical-align':'middle'});
-
-               //define explicit add relationship button
-               var $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
-                        .addClass("rel_link")
-                        .button({icons:{primary: "ui-icon-circle-plus"},label:'Add Relationship'})
-                        .appendTo( $inputdiv );
+            
+                if(this.inputs.length==0){ //show current relations
                 
-                var __show_addlink_dialog = function(){
+                    function __onRelRemove(){
+                        //console.log('>>>>'+that.element.find('.link-div').length);
+                        if( that.element.find('.link-div').length==0){ //hide this button if there are links
+                            that.element.find('.rel_link').show()
+                        }
+                    }
+                
+                    var __show_addlink_dialog = function(){
                             var url = window.hWin.HAPI4.baseURL 
                                 +'hclient/framecontent/recordAddLink.php?db='+window.hWin.HAPI4.database
                                 +'&source_ID=' + that.options.recID
@@ -552,24 +555,18 @@ $.widget( "heurist.editing_input", {
                                     if(context && context.count>0){
                                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
                                             context, true);
-                                        ele.appendTo($inputdiv);
-                                        
-                                        if( that.element.find('.link-div').length>0 ){ //hide this button if there are links
-                                            that.element.find('.rel_link').hide();
-                                        }                                        
+                                        ele.insertBefore(that.element.find('.rel_link'));
+                                        that.element.find('.rel_link').hide();//hide this button if there are links
+                                        ele.on('remove', __onRelRemove);
                                     }
                                     
                                 }
                             } );
-                };
+                    };
                 
                 
-                $btn_add_rel_dialog.click(function(){__show_addlink_dialog()});
-            
-                if(this.inputs.length==0){ //show current relations
-            
-                var sRels = '';
-                if(that.options.recordset){
+                    var sRels = '';
+                    if(that.options.recordset){
                     
                     var relations = that.options.recordset.getRelations();
                     if(relations && relations.direct){
@@ -592,18 +589,14 @@ $.widget( "heurist.editing_input", {
                                 var targetID = direct[k].targetID;
                                 var targetRectypeID = headers[targetID][2];
                                 
-                                if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))                                  {
-                                    window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
+                                if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))                               {
+                                    var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                         {rec_ID: targetID, 
                                          rec_Title: headers[targetID][0], 
                                          rec_RecTypeID: headers[targetID][1], 
                                          relation_recID: direct[k]['relationID'], 
                                          trm_ID: direct[k]['trmID']}, true);
-                                         
-                                        if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
-                                            $btn_add_rel_dialog.hide();
-                                        }
-                                         
+                                    ele.on('remove', __onRelRemove);
                                 }
                             }
                         }
@@ -621,19 +614,35 @@ $.widget( "heurist.editing_input", {
                         .uniqueId();
                    $input = $inputdiv;
 
+                   
+                   //define explicit add relationship button
+                   var $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
+                        .addClass("rel_link") //.css({display:'block'})
+                        .button({icons:{primary: "ui-icon-circle-plus"},label:'Add Relationship'})
+                        .appendTo( $inputdiv );
+                
+                   $btn_add_rel_dialog.click(function(){__show_addlink_dialog()});
+                   
+                   if( this.element.find('.link-div').length>0){ //hide this button if there are links
+                        $btn_add_rel_dialog.hide();
+                   }
+
                 
                 }else{
                     //this is second call - some links are already defined
                     //show popup dialog at once
-                    __show_addlink_dialog();
+                    //IJ ASKS to disbale it __show_addlink_dialog();
+                    this.element.find('.rel_link').show();
                     return;
                 }
-                
+
+            /* IJ asks to show button                 
             if( this.element.find('.link-div').length>0){ //hide this button if there are links
                 $inputdiv.find('.rel_link').hide();
             }else{
                 $inputdiv.find('.rel_link').show();
             }                
+            */
                 
 
         }
@@ -689,8 +698,8 @@ $.widget( "heurist.editing_input", {
                                             $inputdiv.find('.sel_link').css({display:'inline-block'});
                                         }
                                         
-                                        if( that.element.find('.link-div').length>0 ){ //hide this button if there are links
-                                            that.element.find('.sel_link2').hide();
+                                        if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
+                                            $inputdiv.find('.sel_link2').hide(); //was that.element
                                         }
                                         
                                      }
@@ -724,23 +733,20 @@ $.widget( "heurist.editing_input", {
             }
             
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
+
+            if($inputdiv.find('.link-div').length>0){
+                $inputdiv.find('.sel_link2').hide();
+            }
            
-            //if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
+            /* IJ asks to disable this feature 
             if( this.inputs.length>0 || this.element.find('.link-div').length>0){ //hide this button if there are links
                 $inputdiv.find('.sel_link2').hide();
             }else{
                 $inputdiv.find('.sel_link2').show();
             }
             
+            //open dialog for second and further            
             if(this.inputs.length>0 && !(value>0))  __show_select_dialog();
-            
-            /*
-            if(this.inputs.length==0){
-                if(!(value>0)) $btn_add_link_dialog.show();
-            }else{
-                that.element.find('.sel_link2').hide();
-                if(!(value>0))  __show_select_dialog();
-            }
             */
             
             this.newvalues[$input.attr('id')] = value;    

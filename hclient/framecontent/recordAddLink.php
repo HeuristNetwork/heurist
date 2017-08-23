@@ -47,42 +47,41 @@ require_once(dirname(__FILE__)."/initPage.php");
             <label id="helpmsg">Choose the field(s) on wich to create the link(s)</label>
             <br><br>
             
-            <label style="vertical-align: top; padding-top:4px">Source:</label>
+            <label style="vertical-align: top; padding-top:4px;display:inline-block;width:95px;">Source record:</label>
             <div id="div_source1" style="display:inline-block;">
                 <img src='../assets/16x16.gif' id="source_rectype_img" 
-                    style="vertical-align:top;margin-left:10px;" />
+                    style="vertical-align:top;margin-left:0px;" />
             
-                <h2 id="source_rectype" class="truncate" 
-                    style="max-width:400px;display:inline-block;margin-left:5px;"></h2>
-                    
                 <h2 class="header truncate" id="source_title" 
-                    style="max-width:400px;color:black;vertical-align:top; margin-top:5px;margin-left:35px">
+                    style="max-width:400px;display:inline-block;color:black;vertical-align:top;margin-left:10px">
                 </h2>
+                
+                <h2 id="source_rectype" class="truncate" 
+                    style="max-width:400px;margin-top:5px;margin-left:30px;"></h2>
+                    
             </div>    
             <div id="div_source2" style="display:none;">
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
             
             <!-- field selector -->
-            <div id="source_field" style="margin-top:10px;margin-bottom:20px;max-height: 40%;overflow: auto;">
+            <div id="source_field" style="margin-top:30px;margin-bottom:40px;max-height: 40%;overflow: auto;">
             </div>
 
-            <label style="vertical-align: top; padding-top:4px">Target:</label>
+            <label style="vertical-align: top; padding-top:4px;display:inline-block;width:95px;">Target record:</label>
+            <div id="div_target2" style="display:none; padding-top:4px">
+            </div>
             <div id="div_target1" style="display:inline-block;">
                 <img src='../assets/16x16.gif' id="target_rectype_img" 
-                    style="vertical-align:top;margin-left:10px;" />
+                    style="vertical-align:top;margin-left:0px;" />
             
-                <h2 id="target_rectype" class="truncate" 
-                    style="max-width:400px;display:inline-block;margin-left:5px;"></h2>
-                    
-                    
                 <h2 class="header truncate" id="target_title" 
-                    style="max-width:400px;color:black;vertical-align:top; margin-top:5px;margin-left:35px">
+                    style="display:inline-block;max-width:400px;color:black;vertical-align:top;margin-left:10px">
                 </h2>
+
+                <h2 id="target_rectype" class="truncate" 
+                    style="max-width:400px;margin-top:5px;margin-left:30px;"></h2>
             </div>    
-            <div id="div_target2" style="display:none; padding-top:4px">
-            
-            </div>
                 
                 <!-- 
                 <div id="rec1_hint" style="display:none;padding-top:15px">
@@ -113,7 +112,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         <div class="popup_buttons_div" style="text-align:right">
 
             <button id="btn_save">Create links</button>
-            <button id="btn_cancel">Cancel</button>
+            <button id="btn_cancel" style="margin-left:30px;">Cancel</button>
         </div>
 
 </body>

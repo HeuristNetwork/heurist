@@ -1386,6 +1386,7 @@ window.hWin.HEURIST4.ui = {
                                           window.hWin.HEURIST4.msg.showMsgErr( response.error );
                                       }else if(response.deleted>0){
                                           //link is deleted - remove this element
+                                          ele.trigger('remove');
                                           ele.remove();
                                           window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Relation has been deleted'));
                                           
