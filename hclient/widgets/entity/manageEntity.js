@@ -90,7 +90,7 @@ $.widget( "heurist.manageEntity", {
         edit_need_load_fullrecord: false, //if for edit form we need to load full(all data) record
         
         layout_mode:'short', //short wide  or valid html snippet
-        
+    
         // manager - all selection ui (buttons, checkboxes, label with number of sel.records) is hidden
         //        highlight in list works as usual and selected records are used in actions
         // select_single - in list only one item can be highlighted, in dialog mode it will be closed
@@ -100,6 +100,8 @@ $.widget( "heurist.manageEntity", {
         selectbutton_label: 'Select',  //@todo remove?? 
         
         select_return_mode: 'ids', //ids or recordset
+        
+        selectOnSave:false, //edit/save of record triggers onselect and close dialog
         
         //it either loaded from server side if _entityName defined or defined explicitely on client side
         entity: {},       //configuration
@@ -747,7 +749,7 @@ $.widget( "heurist.manageEntity", {
     //
     _selectAndClose: function(){
         
-        if(this.options.isdialog){
+        if(this.options.isdialog && this.options.edit_mode!='editonly'){
             window.hWin.HAPI4.save_pref('select_dialog_'+this._entityName, 
                             {width: this._as_dialog.dialog('option', 'width'), 
                              height: this._as_dialog.dialog('option', 'height')});

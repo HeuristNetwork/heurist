@@ -324,17 +324,23 @@
                 $stmt->execute();
                 }*/
                 
-                //add reverce field "Parent Entity" (#247) in resource record
+                //add reverce field "Parent Entity" (#247) in child resource record
                 if(@$values['dtl_ParentChild']==true){
-                        $dtl_ID = mysql__select_value($mysqli,
-                            'SELECT dtl_ID FROM recDetail WHERE dtl_RecID='
+                        list($dtl_ID, $parentID) = mysql__select_array($mysqli,
+                            'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
                             .$dtl_Value.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY);
                         
-                        if($dtl_ID>0){
-                            $mysqli->query('UPDATE recDetails '.
-                                "SET dtl_Value=$recID WHERE dtl_ID=$dtl_ID");                    
-                            $res = ($mysqli->affected_rows>0);
-                                
+                        //$recID - parent rec_ID
+                        //$dtl_Value - child record id
+                        
+                        if($dtl_ID>0){ //parent will be changed
+                            if($parentID!=$recID){
+                                $mysqli->query('UPDATE recDetails '.
+                                    "SET dtl_Value=$recID WHERE dtl_ID=$dtl_ID");                    
+                                $res = !$mysqli->error; //($mysqli->affected_rows>0);
+                            }else{
+                                $res = true;
+                            }
                         }else{
                             $mysqli->query('INSERT INTO recDetails '.
                                 "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".

@@ -171,7 +171,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var that = this;        
             var btns = [];
 
-            if(this.options.parententity>0){
+            if(this.options.selectOnSave==true){
                 var btns = [
                         {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
                               css:{'visibility':'hidden','margin-right':'15px'},
@@ -1468,9 +1468,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                                 that._currentEditRecordset.setFld(
                                         that._currentEditRecordset.getFirstRecord(),'rec_Title',rec_Title);
-                                that.closeEditDialog();
                                 
-                                if(that.options.parententity>0){
+                                that._currentEditID = null;
+                                if(that.options.selectOnSave==true){
                                     that.selectedRecords(that._currentEditRecordset);
                                     that._selectAndClose();
                                 }else{

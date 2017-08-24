@@ -262,7 +262,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                     new_record_params['rv'] = vis;
                     if(tags) new_record_params['tag'] = tags;
                                         
-                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, new_record_params);
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
                 }else{
                     window.open('<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='
                             +rt + extra_parms);

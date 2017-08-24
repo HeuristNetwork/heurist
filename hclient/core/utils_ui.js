@@ -1175,8 +1175,9 @@ window.hWin.HEURIST4.ui = {
 
     //
     // important manageRecords.js and selectRecords.js must be loaded
+    // if callback is defined it returns added/edited record as recordset
     //
-    openRecordEdit:function(rec_ID, query_request, new_record_params){
+    openRecordEdit:function(rec_ID, query_request, popup_options){
         
         /*
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
@@ -1187,19 +1188,20 @@ window.hWin.HEURIST4.ui = {
                 var $container;
                 var isPopup = false;
                 
-                if($.isPlainObject(new_record_params) && new_record_params['rt']>0){
+                if(popup_options && 
+                    $.isPlainObject(popup_options.new_record_params) && popup_options.new_record_params['rt']>0){
                     rec_ID = -1;
                     query_request = null;
                 }
                 
-                
-                var popup_options = {
+                popup_options = $.extend(popup_options, {
                     isdialog: true,
                     select_mode: 'manager',
                     edit_mode: 'editonly', //only edit form is visible, list is hidden
                     //height: usrPreferences.height,
                     //width: usrPreferences.width,
-                    new_record_params:new_record_params,
+                    select_return_mode:'recordset',
+                    
                     title: window.hWin.HR('Edit record'),
                     layout_mode:'<div class="ent_wrapper editor">'
                         + '<div class="ent_content_full recordList"  style="display:none;"/>'
@@ -1263,8 +1265,10 @@ window.hWin.HEURIST4.ui = {
                             //$container.manageRecords('addEditRecord',-1);
                         }                            
                         
-                    }
-                }    
+                    },
+                    //selectOnSave: $.isFunction(callback),
+                    //onselect: callback
+                });    
     
                 window.hWin.HEURIST4.ui.showEntityDialog('Records', popup_options);
     },
@@ -1279,7 +1283,7 @@ window.hWin.HEURIST4.ui = {
                 
             if(isEdit==true){
                 
-                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request);
+                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, null, {onselect:callback});
                 return;
                 
                 // section below NOT USED

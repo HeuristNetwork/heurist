@@ -666,6 +666,7 @@ $.widget( "heurist.editing_input", {
                             
                             select_return_mode: 'recordset',
                             edit_mode: 'popup',
+                            selectOnSave: true,
                             title: window.hWin.HR('Record pointer: Select or create a linked record'),
                             rectype_set: that.f('rst_PtrFilteredIDs'),
                             parententity: (that.f('rst_CreateChildIfRecPtr')==1)?that.options.recID:0,
@@ -709,7 +710,68 @@ $.widget( "heurist.editing_input", {
 
             var __show_select_dialog = function(event){
                 
-                    if(event) event.preventDefault();
+                    if(event!==false){
+                
+                        if(event) event.preventDefault();
+                        
+                        if(popup_options.parententity>0){
+                            //show preliminary dialog that offer to create new record instead 
+                            
+                            var popele = that.element.find('.child_info_dlg');
+                            if(popele.length==0){
+                                var sdiv = '<div class="child_info_dlg"><p style="padding:15px 0">You are creating a parent-child (whole-part,containership) connection. We normally recommend creating a new record whcih becomes the child of the current record</p><p>If child records have already been uploaded to the database, you may select one</p><p style="padding:15px 0"><label>Record type: </label><select id="sel_rectypes"></select></p></div>';
+                                popele = $(sdiv).appendTo(that.element);
+                            }
+                            
+                            var new_rec_param = null;
+                            var selector_rectype = popele.find('select');
+                            
+                            if(popup_options.rectype_set.indexOf(',')>0){ //multiconstraint need to show selector
+                                selector_rectype.empty().parent().show();
+                                window.hWin.HEURIST4.ui.createRectypeSelect(selector_rectype.get(0), 
+                                                popup_options.options.rectype_set,null);
+                                btn_add_title = window.hWin.HR('Create new record');
+                            }else{
+                                new_rec_param = {rt:popup_options.rectype_set};
+                                selector_rectype.empty().parent().hide();
+                                btn_add_title = window.hWin.HR('Create new')
+                                    +' '+window.hWin.HEURIST4.rectypes.names[popup_options.rectype_set];
+                            }
+                            
+                            var $dlg_pce = null;
+                            
+                            var btns = [
+                                    {text: btn_add_title,
+                                          click: function() { 
+                                              
+                                              if(new_rec_param==null){
+                                                  new_rec_param = {rt:selector_rectype.val()};
+                                              }
+                                              
+                                              window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                    {new_record_params:new_rec_param, onselect:popup_options.onselect, selectOnSave:true});
+                                              $dlg_pce.dialog('close'); 
+                                          }},
+                                    {text:window.hWin.HR('Select'),
+                                          click: function() { __show_select_dialog(false); $dlg_pce.dialog('close'); }},
+                                    {text:window.hWin.HR('Cancel'),
+                                          click: function() { $dlg_pce.dialog('close'); }}
+                            ];
+                            
+                            
+                            $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+                                window:  window.hWin, //opener is top most heurist window
+                                title: window.hWin.HR('Create or select child record'),
+                                width: 400,
+                                height: 250,
+                                element:  popele[0],
+                                resizable: false,
+                                buttons: btns
+                            })
+                            
+                            return;
+                        }
+                    }
                     
                     var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+that.configMode.entity, 
                         {width: null,  //null triggers default width within particular widget
@@ -1628,11 +1690,7 @@ $.widget( "heurist.editing_input", {
                     
                     //both original and current values are not empty
                     if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))){
-                        if(this.isFileForRecord){
-                            if(this.options.values[idx].ulf_ID!=res){
-                                return true;
-                            }
-                        }else if (this.options.values[idx]!=res){
+                        if (this.options.values[idx]!=res){
                                 return true;
                         }
                     }
