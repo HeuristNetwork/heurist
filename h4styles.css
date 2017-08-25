@@ -205,6 +205,15 @@ fieldset > div, .input-row{
     /*padding-bottom:0.2em;*/
 }
 
+fieldset input:focus,
+fieldset select:focus,
+fieldset textarea:focus,
+fieldset button:focus {
+    outline: none;
+    outline-style:none;
+    box-shadow:none;
+    border-color:transparent;    
+}
 
 fieldset > div > input.text, fieldset > div > select.text{
     margin-top: 0.3em;

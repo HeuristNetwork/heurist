@@ -456,7 +456,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 +'top: 5.7em;" size="20"></select><div class="btn-modify"/>'
 +'<div style="display:inline-block;float:right;">'
     +'<div class="btn-config2"/><div class="btn-config"/>'
-    +'<span style="display:inline-block;float:right;color:#7D9AAA;padding:2px 4px;">Modify structure</span>'
+    +'<span class="btn-config3" style="cursor:pointer;display:inline-block;float:right;color:#7D9AAA;padding:2px 4px;">Modify structure</span>'
 +'</div>'
 +'</div>'
 
@@ -486,7 +486,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px'})
                     .click(function(){that.editRecordType();});
-
+                panel.find('.btn-config3').click(function(){that.editRecordType();});
                     
                 var btn_change_rt = panel.find('.btn-modify');                        
                 btn_change_rt.button({text:false, label:top.HR('Change record type'),
@@ -887,12 +887,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }else{
                 var rec = recordset.getFirstRecord();
                 var val = recordset.fld(rec, 'bkm_Rating');
-                sContent = (!window.hWin.HEURIST4.util.isempty(val))?('Rating: '+val+'. '):''; 
+                sContent = 'Rating: '+(!window.hWin.HEURIST4.util.isempty(val)?val:''); 
                 val = recordset.fld(rec, 'bkm_PwdReminder');
-                sContent = sContent + ((!window.hWin.HEURIST4.util.isempty(val))?('Password reminder: '+val):''); 
+                sContent = sContent + '&nbsp;&nbsp;&nbsp;Pwd: '+((!window.hWin.HEURIST4.util.isempty(val))?val:''); 
                 val = recordset.fld(rec, 'bkm_Notes');
-                sContent = sContent + ((!window.hWin.HEURIST4.util.isempty(val))
-                        ?('<br>Notes: '+val.substr(0,500)+(val.length>500?'...':'')):''); 
+                sContent = sContent + ' &nbsp;&nbsp;&nbsp;Notes: '+((!window.hWin.HEURIST4.util.isempty(val))
+                        ?(val.substr(0,500)+(val.length>500?'...':'')):''); 
                 
             }
             pnl.append(sContent);

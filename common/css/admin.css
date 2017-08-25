@@ -337,6 +337,16 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 	font-size:10px
 }
 
+.input-cell input:focus,
+.input-row select:focus,
+.input-row textarea:focus,
+.input-row button:focus {
+    outline: none;
+    outline-style:none;
+    box-shadow:none;
+    border-color:transparent;
+}
+
 
 input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]),.input-row textarea {
 	background-color: #ECF1FB;

@@ -48,13 +48,13 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
             return false;
         }
       
-//console.log('....'+this.options.bkm_RecID);        
+console.log('....'+this.options.bkm_RecID+'   '+this._entityName+'   '+this.options.entity.entityName);        
         //load bookmark for given record id
         if(this.options.bkm_RecID>0){
                 var request = {};
                 request['bkm_RecID']  = this.options.bkm_RecID;
                 request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
+                request['entity']     = this._entityName;//options.entity.entityName;
                 request['details']    = 'full';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 

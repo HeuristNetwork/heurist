@@ -603,6 +603,7 @@ div.temporal-div input.temporal-button:hover {
 	display:inline-block;
     margin-bottom: 0.5ex;
 }
+
 .popup .input-row select {
 	max-width:400px;
 	background-color:#ECF1FB;

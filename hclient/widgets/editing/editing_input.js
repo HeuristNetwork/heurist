@@ -66,6 +66,8 @@ $.widget( "heurist.editing_input", {
         if(this.options.dtFields==null){ //field description is not defined
             return;
         }
+        this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
+        
 
         this.configMode = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(this.configMode)){
@@ -81,15 +83,15 @@ $.widget( "heurist.editing_input", {
             }
         }
         //by default
-        if(window.hWin.HEURIST4.util.isempty(this.configMode)){
+        if((this.detailType=="resource" || this.detailType=='file') 
+            && window.hWin.HEURIST4.util.isempty(this.configMode))
+        {
             this.configMode= {entity:'records'};
         }
 
 //console.log('create '+this.options.dtID);        
 //console.log('vals='+this.options.values);
 
-        this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
-        
         this.isFileForRecord = (this.detailType=='file' && this.configMode.entity=='records');
         if(this.isFileForRecord){
             this.configMode = {

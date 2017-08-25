@@ -1503,6 +1503,8 @@ window.hWin.HEURIST4.ui = {
             fieldTitle = 'sif_TempDataTable';//'imp_table';
             request['entity'] = 'sysImportFiles';
             request['ugr_ID'] = configMode.filter_group;
+        }else{
+            return;
         }
         
         

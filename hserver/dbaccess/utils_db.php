@@ -526,8 +526,8 @@
         $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;
-        $res->close();
-        if(!$row_cnt){
+        if($res) $res->close();
+        if(!$row_cnt){ //column not defined
             //alter table
              $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;";
              
@@ -543,7 +543,7 @@
         $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_NavigationTree'";
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;
-        $res->close();
+        if($res) $res->close();
         if(!$row_cnt){
             //alter table
             $query = "ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` text COMMENT 'JSON array that describes treeview for filters'";
@@ -558,7 +558,7 @@
         $query = "SHOW COLUMNS FROM `usrBookmarks` LIKE 'bkm_Notes'";
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;
-        $res->close();
+        if($res) $res->close();
         if(!$row_cnt){
             //alter table
             $query = "ALTER TABLE `usrBookmarks` ADD `bkm_Notes` text COMMENT 'Personal notes'";
