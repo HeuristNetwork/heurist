@@ -69,6 +69,7 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Rating:",
                         "rst_DisplayHelpText": "Select a personal star rating for this record",
+                        "rst_DefaultValue": 0,
                         "rst_FieldConfig":[
                             {"key":0,"title":"no rated"},
                             {"key":1,"title":"*"},

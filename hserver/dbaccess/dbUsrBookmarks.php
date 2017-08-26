@@ -160,6 +160,9 @@ class DbUsrBookmarks extends DbEntityBase
             if($isinsert && !($this->records[$idx]['bkm_UGrpID']>0)){
                 $this->records[$idx]['bkm_UGrpID'] = $this->system->get_user_id();
             }
+            if($isinsert || !$this->records[$idx]['bkm_Added']){
+                $this->records[$idx]['bkm_Added'] = date('Y/m/d H:i:s');
+            }
             $this->records[$idx]['bkm_Modified'] = null; //reset
         }
 

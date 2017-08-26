@@ -48,7 +48,6 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
             return false;
         }
       
-console.log('....'+this.options.bkm_RecID+'   '+this._entityName+'   '+this.options.entity.entityName);        
         //load bookmark for given record id
         if(this.options.bkm_RecID>0){
                 var request = {};

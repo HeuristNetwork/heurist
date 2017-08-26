@@ -144,7 +144,7 @@ class DbEntityBase
                 $values[$fieldname] = $record[$fieldname];
             }
             
-//error_log(print_r($values,true));            
+//error_log(print_r($values,true));        
 
             //save data
             $ret = mysql__insertupdate($mysqli, 
