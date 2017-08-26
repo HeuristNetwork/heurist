@@ -334,7 +334,7 @@ class AndLimb {
 			$this->negate = false;
 		}
 
-		$this->pred = &$this->createPredicate($text);
+		$this->pred = $this->createPredicate($text); //was &$this
 	}
 
 

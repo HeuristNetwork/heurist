@@ -30,7 +30,7 @@
         recordSetOwnerwhipAndAccess - change access rights and ownership for record
         
     
-        recordUpdateTitle - TODO!!!
+        recordUpdateTitle
         prepareDetails - validate records detail (need to combine with validators in fileParse)
     
     */
@@ -165,7 +165,7 @@
     *   1) prepareDetails
     *   2) add or update header
     *   3) remove old details, add new details
-    *   4) recordUpdateTitle   - todo
+    *   4) recordUpdateTitle 
     *
     * @param mixed $system
     * @param mixed $record
@@ -326,6 +326,8 @@
                 
                 //add reverce field "Parent Entity" (#247) in child resource record
                 if(@$values['dtl_ParentChild']==true){
+                    
+                        //find child record
                         list($dtl_ID, $parentID) = mysql__select_array($mysqli,
                             'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
                             .$dtl_Value.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY);
@@ -347,6 +349,14 @@
                                 "VALUES ($dtl_Value, ".DT_PARENT_ENTITY.", $recID, $addedByImport )");                    
                             $res = ($mysqli->insert_id>0);
                         }
+                        
+                        //update record title for child record
+                        list($child_rectype, $child_title) = mysql__select_array($mysqli,
+                            'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
+                            .$dtl_Value);
+                        recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title);
+                        
+                        
                         if(!$res){
                             $syserror = $mysqli->error;
                             $mysqli->rollback();
@@ -364,7 +374,7 @@
             return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
         }
 
-        $newTitle = recordUpdateTitle($mysqli, $recID, $rectype, @$record['RecTitle']);
+        $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['RecTitle']);
 
         $mysqli->commit();
 
@@ -576,8 +586,10 @@
     * @param mixed $recID
     * @param mixed $rectype
     */
-    function recordUpdateTitle($mysqli, $recID, $rectype, $recTitleDefault)
+    function recordUpdateTitle($system, $recID, $rectype, $recTitleDefault)
     {
+        
+        $mysqli = $system->get_mysqli();
 
         $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
         if(!$mask){

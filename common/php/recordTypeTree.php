@@ -159,7 +159,51 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
             $recTypeId = null;
     }    
     
+    
+    
+    //find parent recordtype
+    $rst_fi = $rtStructs['typedefs']['dtFieldNamesToIndex'];
+    $parent_Rt = null;
+    
+    foreach ($rtStructs['typedefs'] as $rtKey => $recstruct){
+        $details =  $recstruct['dtFields'];
+        foreach ($details as $dtKey => $dtValue){
+            if($dtValue[$rst_fi['dty_Type']]=='resource' && $dtValue[$rst_fi['rst_CreateChildIfRecPtr']]==1){
+                
+                $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
+                if($constraint && in_array($recTypeId, explode(',',$constraint))){
+                    $parent_Rt = $rtKey;    
+                    break;
+                }
+                
+            }
+        }
+    }
+    if($parent_Rt){
+        
+        //$res['recParent'] = 'Record Parent';
+        $dtKey = DT_PARENT_ENTITY;
+        
+        //create fake rectype structure field
+        $ffr = array();
+        $ffr[$rst_fi['rst_DisplayName']] = 'Record Parent ('.$rtStructs['names'][$parent_Rt].')';
+        $ffr[$rst_fi['rst_PtrFilteredIDs']] = $parent_Rt;
+        $ffr[$rst_fi['dty_Type']] = 'resource';
+        $ffr[$rst_fi['rst_DisplayHelpText']] = 'Reverse pointer to parent record';
 
+        $rtStructs['typedefs'][$recTypeId][DT_PARENT_ENTITY] = $ffr;
+        
+        $res_dt = getDetailSection($dtKey, $ffr, $recursion_depth);
+        if($res_dt){
+           if(is_array($res_dt) && count($res_dt)==1){
+               $res["f".$dtKey] = $res_dt[0];    
+           }else{
+               //multi-constrained pointers or simple variable
+               $res["f".$dtKey] = $res_dt;
+           }
+        }
+    }
+    
     //get the list of details from record structure
     if($recTypeId && @$rtStructs['typedefs'][$recTypeId] && @$rtStructs['typedefs'][$recTypeId]['dtFields'])
     {
@@ -169,7 +213,6 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
 
             $res_dt = getDetailSection($dtKey, $dtValue, $recursion_depth);
             if($res_dt){
-            
                    if(is_array($res_dt) && count($res_dt)==1){
                        $res["f".$dtKey] = $res_dt[0];    
                    }else{
@@ -208,7 +251,7 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
     $res = null;
 
     if(true){//}@$dtStructs['typedefs'][$dtKey]){
-                
+    
             $rtNames = $rtStructs['names']; //???need
             $rst_fi = $rtStructs['typedefs']['dtFieldNamesToIndex'];
         

@@ -279,6 +279,7 @@ function _titlemask__get_detail_types() {
 
             $row['dty_ConceptCode'] = $dt_cc;
 
+            //two indexes - by id and by name
             $rdt[$row['dty_ID']] = $row;
             $rdt[$row['dty_Name']] = $row;
             $rdt[$dt_cc] = $row;
@@ -502,6 +503,14 @@ function _titlemask__get_dt_field($rt, $search_fieldname, $mode, $result_fieldna
     $search_fieldname = mb_strtolower($search_fieldname, 'UTF-8');
     //$search_fieldname = strtolower($search_fieldname);
 
+    if(strpos($search_fieldname, 'record parent')===0 
+        || $search_fieldname==DT_PARENT_ENTITY 
+        || $search_fieldname=='2-247'){ 
+        $rdt = _titlemask__get_detail_types();
+        if(@$rdt[DT_PARENT_ENTITY]){
+            return $rdt[DT_PARENT_ENTITY][$result_fieldname];
+        }
+    }else
     //search in record type structure
     if(@$rdr[$search_fieldname]){  //search by dty_ID, rst_DisplayName, dty_ConceptCode
         return $rdr[$search_fieldname][$result_fieldname];
