@@ -1240,7 +1240,7 @@ window.hWin.HEURIST4.ui = {
                         + '<div class="ent_content_full recordList"  style="display:none;"/>'
 
                         + '<div class="ent_header" style="text-align:center;padding:6px 0 0 0;"><h2 style="color:red">EXPERIMENTAL - THIS FUNCTION IS IN COURSE OF DEVELOPMENT</h2></div>'
-                        + '<div class="editFormDialog ent_content_full">'
+                        + '<div class="editFormDialog ent_content_full" style="top:6em">'
                                 + '<div class="ui-layout-center"><div class="editForm"/></div>'
                                 + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
                                 //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'

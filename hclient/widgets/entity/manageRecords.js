@@ -368,7 +368,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         minWidth:800,
                         contentSelector: '.editForm'    
                     }
-
                 };
 
                 this.editFormPopup.show().layout(layout_opts); //.addClass('ui-heurist-bg-light')
@@ -1548,8 +1547,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
             var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         
-            this.editForm.parent().find('.ui-heurist-header2').remove();
-            $('<div class="ui-heurist-header2">'
+            //this.editForm.parent().find('.ui-heurist-header2').remove();
+            //.insertBefore(this.editForm.first('fieldset'));
+            var header = this.element.find('.ent_header');
+            
+            header.find('.ui-heurist-header2').remove();
+            
+            $('<div class="ui-heurist-header2" style="text-align:left">'
                 + '<img src="'+ph_gif
                     + '" width=25 height=25 style="vertical-align:middle;margin-right: 10px;background-image:url(\''
                     + top.HAPI4.iconBaseURL+this._currentEditRecTypeID
@@ -1558,7 +1562,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 + '</h3>&nbsp;<span style="display:inline-block;padding:0 20px">ID: '+this._currentEditID
                 + '</span><h3 style="display:inline-block">'+ this._getField('rec_Title')+'</h3></div>')
                 .css({'padding':'10px 0 10px 30px'})
-                .insertBefore(this.editForm.first('fieldset'));
+                .appendTo(header);
+            this.element.find('.editFormDialog').css({'top':'6em'});
+        }else{
+            this.element.find('.editFormDialog').css({'top':'2.8em'});
         }
         
         this.onEditFormChange();
