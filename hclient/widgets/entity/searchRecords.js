@@ -118,8 +118,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
         }            
         
-        
-
         if(qstr==''){
             this._trigger( "onresult", null, {recordset:new hRecordSet()} );
         }else{

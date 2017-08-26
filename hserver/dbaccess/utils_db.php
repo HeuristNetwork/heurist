@@ -178,11 +178,10 @@
     /**
     * returns array of column values
     */
-    function mysql__select_list($mysqli, $table, $column, $condition) {
+    function mysql__select_list2($mysqli, $query) {
 
         $matches = null;
-        if($mysqli){
-            $query = "SELECT $column FROM $table WHERE $condition";
+        if($mysqli && $query){
             $res = $mysqli->query($query);
 
             if ($res){
@@ -195,6 +194,10 @@
         }
 
         return $matches;
+    }
+    function mysql__select_list($mysqli, $table, $column, $condition) {
+        $query = "SELECT $column FROM $table WHERE $condition";
+        return mysql__select_list2($mysqli, $query);
     }
     
     /**

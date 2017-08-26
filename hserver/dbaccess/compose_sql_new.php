@@ -565,7 +565,7 @@ class HPredicate {
     var $lessthan = false;
     var $greaterthan = false;
 
-    var $allowed = array('title','t','url','notes','type','ids','id',
+    var $allowed = array('title','t','modified','url','notes','type','ids','id',
             'f','field','linked_to','linkedfrom','related_to','relatedfrom','links','plain');
     /*
     notes, n:        record heder notes (scratchpad)
@@ -681,6 +681,14 @@ class HPredicate {
                     return $this->predicateField();
                 }
 
+            case 'title':
+            case 'modified':
+            case 'url':
+            case 'notes':
+            
+                $this->pred_type = strtolower($this->pred_type);
+                return $this->predicateField();
+                
             case 'ids':
             case 'id':
 
@@ -746,20 +754,20 @@ class HPredicate {
         if(!$val) return null;
         
         $sHeaderField = null;
-
-        if($this->field_id=="title"){
+        
+        if($this->pred_type=='title'){
 
             $sHeaderField = "rec_Title";
 
-        }else if($this->field_id=="modified"){
+        }else if($this->pred_type=='modified'){
 
             $sHeaderField = "rec_Modified";
             
-        }else if($this->field_id=='url'){
+        }else if($this->pred_type=='url'){
             
             $sHeaderField = "rec_URL";
 
-        }else if($this->field_id=='notes'){
+        }else if($this->pred_type=='notes'){
             
             $sHeaderField = "rec_ScratchPad";
         }

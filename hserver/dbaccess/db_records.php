@@ -230,8 +230,10 @@
         }  else {
             return $system->addError(HEURIST_INVALID_REQUEST, "Details not defined");
         }
+        
+        $is_insert = ($recID<1);
 
-        if($recID<1){   // ADD NEW RECORD
+        if($is_insert){   // ADD NEW RECORD
 
             // start transaction
             $mysqli->autocommit(FALSE);
@@ -376,6 +378,10 @@
 
         $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['RecTitle']);
 
+        if(!$is_insert){
+            removeReverseChildToParentPointer($mysqli, $recID, $rectype);    
+        }
+        
         $mysqli->commit();
 
         return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
@@ -401,7 +407,26 @@
 
         $response = array("status"=>HEURIST_UNKNOWN_ERROR, "data"=>"action to be implemented");
     }
+    
+    //
+    // remove reverse pointer detail field from child record in case ther is not direct pointer to child record
+    //
+    function removeReverseChildToParentPointer($mysqli, $parent_id, $rectype){
 
+       //get list of valid record 
+       $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
+        .$parent_id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
+       
+       $recids = mysql__select_list2($mysqli, $query);
+               
+       $query = 'DELETE FROM recDetails WHERE dtl_Value='.$parent_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
+       
+       if(is_array($recids) && count($recids)>0){
+            $query = $query.' AND dtl_RecID NOT IN ('.implode(',',$recids).')';
+       }
+        
+       $mysqli->query($query);
+    }
 
     // verify ACCESS RIGHTS -------------
     //

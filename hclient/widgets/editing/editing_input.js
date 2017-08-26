@@ -731,7 +731,7 @@ $.widget( "heurist.editing_input", {
                             if(popup_options.rectype_set.indexOf(',')>0){ //multiconstraint need to show selector
                                 selector_rectype.empty().parent().show();
                                 window.hWin.HEURIST4.ui.createRectypeSelect(selector_rectype.get(0), 
-                                                popup_options.options.rectype_set,null);
+                                                popup_options.rectype_set,null);
                                 btn_add_title = window.hWin.HR('Create new record');
                             }else{
                                 new_rec_param = {rt:popup_options.rectype_set};

@@ -786,11 +786,13 @@ window.hWin.HEURIST4.ui = {
         var requriedHighlight = false;
         var selectedValue = null;
         var showLatLongForGeo = false;
+        var show_parent_rt = false;
         if(options){  //at the moment it is implemented for single rectype only
-            showDetailType    = options['show_dt_name'];
-            addLatLongForGeo  = options['show_latlong'];
-            requriedHighlight = options['show_required'];
+            showDetailType    = options['show_dt_name']==true;
+            addLatLongForGeo  = options['show_latlong']==true;
+            requriedHighlight = options['show_required']==true;
             selectedValue     = options['selected_value'];
+            show_parent_rt    = options['show_parent_rt']==true;
         }
         
         var dtyID, details;
@@ -807,10 +809,12 @@ window.hWin.HEURIST4.ui = {
             var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 
                 fi_type = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
             
+
             //for all rectypes find all fields as Detail names sorted
             for (i in rtyIDs) {
                 rty = rtyIDs[i];
                 rtyName = window.hWin.HEURIST4.rectypes.names[rty];
+                
                 for (dty in window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields) {
                     
                   var field_type = window.hWin.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type];
@@ -823,13 +827,13 @@ window.hWin.HEURIST4.ui = {
                   if (!dtys[dtyName]){
                     dtys[dtyName] = [];
                     dtyNameToID[dtyName] = dty;
-                    dtyNameToRty[dty] = rty;
+                    dtyNameToRty[dty] = rty; //not used
                     dtyNames.push(dtyName);
                   }
                   fieldName = rtyName + "." + window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields[dty][fi_name];
                   dtys[dtyName].push(fieldName);
                 }
-            }
+            }//for rectypes
             if (dtyNames.length >0) {
                 dtyNames.sort();
                 //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
@@ -870,7 +874,36 @@ window.hWin.HEURIST4.ui = {
             fit = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'],
             fir = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType'];
 
+            var rst_fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+
             var arrterm = [];
+            
+            var child_rectypes = [];
+            if(show_parent_rt){
+                var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+                //get all child rectypes
+                for (rty in window.hWin.HEURIST4.rectypes.typedefs) {
+                    for (dty in window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields) {
+                        var dtValue = window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields[dty];
+                        if(dtValue[rst_fi['dty_Type']]=='resource' && dtValue[rst_fi['rst_CreateChildIfRecPtr']]==1){
+                            var constraint = dtValue[rst_fi['rst_PtrFilteredIDs']];
+                            if(constraint.split(',').indexOf((''+rectype))>=0){
+                            
+                                var name = 'Parent record ('+window.hWin.HEURIST4.rectypes.names[rty]+')';
+                                
+                                if(showDetailType){
+                                    name = name + ' [resource]';
+                                }
+
+                                arrterm.push([DT_PARENT_ENTITY, name, false]);    
+                                
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+                        
 
             for (dtyID in details){
                 if(dtyID){

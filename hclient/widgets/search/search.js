@@ -843,8 +843,9 @@ $.widget( "heurist.search", {
                         bottomOptions = [{key:'latitude',title:window.hWin.HR('geo: Latitude')},
                                          {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
                     }
+                    
                     window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), 
-                                rectype, allowed, topOptions2, {show_latlong:true, bottom_options:bottomOptions});
+                                rectype, allowed, topOptions2, {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions});
 
                     var topOptions = [{key:'t', title:window.hWin.HR("record title")},
                         {key:'id', title:window.hWin.HR("record id")},

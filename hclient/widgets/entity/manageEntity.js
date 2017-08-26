@@ -991,7 +991,9 @@ $.widget( "heurist.manageEntity", {
     //
     // to override
     //
-    onEditFormChange: function( force_hide ){
+    onEditFormChange: function( changed_element ){
+        
+        var force_hide = (changed_element===true);
         
         var mode = 'hidden';
         if(force_hide!==true){
@@ -1038,7 +1040,7 @@ $.widget( "heurist.manageEntity", {
 
         if(!this._editing){
             this._editing = new hEditing({container:this.editForm, onchange:function(){
-                that.onEditFormChange();
+                that.onEditFormChange(this); //this is changed_element
             }}); //pass container
             this._initEditForm_step2(recID);
             

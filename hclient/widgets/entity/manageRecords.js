@@ -102,7 +102,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         // init search header
         if(this.searchForm && this.searchForm.length>0){
-            this.searchForm.searchRecords(this.options);    
+            this.searchForm.addClass('ui-heurist-bg-light').searchRecords(this.options);    
         }
 /*        
         var iheight = 2;
@@ -1497,11 +1497,25 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     //
-    onEditFormChange:function(force_hide){
+    onEditFormChange:function(changed_element){
+        
+        var force_hide = (changed_element===true);
+        
         var mode = 'hidden';
         if(force_hide!==true){
             var isChanged = this._editing.isModified();
             mode = isChanged?'visible':'hidden';
+            
+            if(isChanged && changed_element){
+                //if this is parent-child pointer AUTOSAVE
+                var parententity = changed_element.f('rst_CreateChildIfRecPtr');                
+                if(parententity==1){
+                    //get values without validation
+                    var fields = this._editing.getValues(false);
+                    this._saveEditAndClose( fields, 'none' );
+                    return;                    
+                }
+            }
         }
         
         //show/hide save buttons

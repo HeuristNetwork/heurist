@@ -380,7 +380,7 @@ function hEditing(_options) {
     
     function _onChange(){
         if($.isFunction(onChangeCallBack)){
-            onChangeCallBack.call();    
+            onChangeCallBack.call(this);    
         }
     }
     

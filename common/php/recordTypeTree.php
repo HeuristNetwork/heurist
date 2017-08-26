@@ -180,7 +180,6 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
         }
     }
     if($parent_Rt){
-        
         //$res['recParent'] = 'Record Parent';
         $dtKey = DT_PARENT_ENTITY;
         
