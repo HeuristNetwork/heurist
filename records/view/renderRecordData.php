@@ -356,10 +356,12 @@ function print_header_line($bib) {
                 <?= $bib['rec_Title'] ?>
             </h2>
     <div id=footer>
-    <?php if(!$is_map_popup){ ?>
+    <?php 
+    if(!$is_map_popup){ 
+    ?>
         <h3>
             <div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url(".HEURIST_ICON_URL.$bib['rty_ID'].".png)'"?> >
-                <?= htmlspecialchars($bib['rty_Name'])." [".$bib['rty_ID']."]" ?>
+                <?= htmlspecialchars($bib['rty_Name'])." [".$bib['rty_ID']."] AAAA" ?>
             </div>
         </h3>
         <br>
@@ -369,8 +371,8 @@ function print_header_line($bib) {
                 <a target="_new" class="external-link" href="<?=htmlspecialchars($url)?>"><?= output_chunker($url) ?></a>
                 <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
             </span>
-            <?php } ?>
-    <?php }else{
+        <?php } 
+    }else{
         print '&nbsp;';
     } 
     print '</div>'; //footer
@@ -699,6 +701,17 @@ function print_private_details($bib) {
 if($is_map_popup){
     echo '<div>';  
 }else{  
+    
+            //print info about parent record
+            foreach ($bds as $bd) {
+                if($bd['dty_ID']==DT_PARENT_ENTITY){
+                    print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
+                        .'<div class=detailType>Parent record</div><div class="detail">'
+                        .' '.$bd['val'].'</div></div>';
+                    break;
+                }
+            }
+    
     echo '<div class=detailRowHeader>Shared';
 }
 ?>
@@ -748,6 +761,7 @@ if($is_map_popup){
             
             $prevLbl = null;
             foreach ($bds as $bd) {
+                if($bd['dty_ID']==DT_PARENT_ENTITY) continue;
                 print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;'
                     .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
                     .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
