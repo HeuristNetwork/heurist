@@ -224,7 +224,9 @@ $rec_types = mysql__select_array("defRecTypes","distinct rty_ID", "1 order by rt
 // dty_TermIDTreeNonSelectableIDs, dty_FieldSetRectypeID, rst_NonOwnerVisibility] ...]
 $rstC2I = getColumnNameToIndex(getRectypeStructureFieldColNames());
 foreach ($rec_types as $rec_type) {
-    foreach (getRectypeFields($rec_type) as $dtyID => $rdr) {
+    $rectype_fields = getRectypeFields($rec_type);
+    if($rectype_fields && is_array($rectype_fields))
+    foreach ($rectype_fields as $dtyID => $rdr) {
         // saw TODO need to represent the trm ids  and rectype pointer ids that are valid for this rectype.detailtype.
         array_push($detailRequirements, array(
             $rec_type,																							// 0-recTypeID

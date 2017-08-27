@@ -1263,6 +1263,7 @@ function getAllRectypeStructures($useCachedData = false) {
         'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
         'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
         'dtFieldNames' => getRectypeStructureFieldColNames());
+    if($res)
     while ($row = mysql_fetch_row($res)) {
         if (!array_key_exists($row[0], $rtStructs['typedefs'])) {
             $rtStructs['typedefs'][$row[0]] = array('dtFields' => array($row[1] => array_slice($row, 2)));

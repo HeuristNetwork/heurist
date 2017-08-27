@@ -446,8 +446,7 @@ class HLimb {
         $this->conjunction = $conjunction;
 
         //echo "<br>".(print_r($query_json, true));
-        
-
+        if(is_array($query_json))
         foreach ($query_json as $key => $value){
 
             //echo "<br>key=".$key."  ".(print_r($value,true));
