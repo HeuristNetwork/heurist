@@ -90,6 +90,20 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this.searchForm.height('9.5em').css('border','none');    
         }
         
+        var that = this;
+        
+        jQuery(document).keydown(function(event) {
+                // If Control or Command key is pressed and the S key is pressed
+                // run save function. 83 is the key code for S.
+                if((event.ctrlKey || event.metaKey) && event.which == 83) {
+                    // Save Function
+                    event.preventDefault();
+                    that._saveEditAndClose( null, 'none' );
+                    return false;
+                }
+            }
+        );        
+        
     },
     //  
     // invoked from _init after load entity config    
@@ -1428,8 +1442,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     _saveEditAndClose: function( fields, afterAction ){
 
+            if(!(this._currentEditID>0)) return;
+        
             if(!fields){
-                fields = this._getValidatedValues(); 
+                try{
+                    fields = this._getValidatedValues(); 
+                }catch(e){
+                    fields = null;
+                }
             }
             
             if(fields==null) return; //validation failed
@@ -1563,9 +1583,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 + '</span><h3 style="display:inline-block">'+ this._getField('rec_Title')+'</h3></div>')
                 .css({'padding':'10px 0 10px 30px'})
                 .appendTo(header);
-            this.element.find('.editFormDialog').css({'top':'6em'});
+            //this.element.find('.editFormDialog').css({'top':'6em'});
         }else{
-            this.element.find('.editFormDialog').css({'top':'2.8em'});
+            //this.element.find('.editFormDialog').css({'top':'2.8em'});
         }
         
         this.onEditFormChange();
