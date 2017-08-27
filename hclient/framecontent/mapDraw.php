@@ -165,10 +165,10 @@ require_once(dirname(__FILE__)."/initPage.php");
                     <button id="get-geometry-button">Get Geometry</button>
                 </div> 
                 <div>
-                    <button id="save-button">Save</button>
+                    <button id="save-button" style="font-weight:bold">Save</button>
                 </div> 
                 <div>
-                    <button id="cancel-button">Cancel</button>
+                    <button id="cancel-button" style="font-weight:bold">Cancel</button>
                 </div>
             </div>            
         </div>
