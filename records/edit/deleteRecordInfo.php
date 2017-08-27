@@ -153,11 +153,11 @@ function deleteRecord($id, $needDeleteFile=true) {
 					$error = $res["error"];
 					break;
 				}else{
-					$rels_count += $res["bkmk_count"];
-					$bkmk_count += $res["rel_count"];
+					$rels_count += $res["rel_count"];
+					$bkmk_count += $res["bkmk_count"];
 				}
 			}
-
+                
 			break;
 		}
 

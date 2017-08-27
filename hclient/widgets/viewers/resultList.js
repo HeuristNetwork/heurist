@@ -315,7 +315,7 @@ $.widget( "heurist.resultList", {
                 var btn_icon = null;
                 if(key=='add') btn_icon = 'ui-icon-plus'
                 else if(key=='edit') btn_icon = 'ui-icon-pencil'
-                    else if(key=='edit_ext') btn_icon = 'ui-icon-extlink'
+                    else if(key=='edit_ext') btn_icon = 'ui-icon-newwin'
                         else if(key=='delete') btn_icon = 'ui-icon-minus';
 
                 btn_icon = {primary: btn_icon};
@@ -1019,7 +1019,7 @@ $.widget( "heurist.resultList", {
         + '<div title="Click to edit record (opens in new tab)" '
         + ' class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
         + ' role="button" aria-disabled="false" data-key="edit_ext">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"/><span class="ui-button-text"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/><span class="ui-button-text"/>'
         + '</div>'  <!-- Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished -->
 
         + '<div title="Click to view record (opens in popup)" '
@@ -1031,7 +1031,7 @@ $.widget( "heurist.resultList", {
         + '<div title="EXPERIMENTAL! Click to edit record" '
         + 'class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
         + 'role="button" aria-disabled="false" data-key="edit">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-wrench" style="color:gray"/><span class="ui-button-text"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil" style="color:gray"/><span class="ui-button-text"/>'
         + '</div>'
 
         + '</div>';
@@ -1092,7 +1092,6 @@ $.widget( "heurist.resultList", {
 
                 window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, function(){
                     //callback
-
                 });
 
             }else if (action=='edit_ext'){
@@ -1686,10 +1685,23 @@ $.widget( "heurist.resultList", {
                     if(!$rdiv.hasClass('recordDiv')){
                         $rdiv = $rdiv.parents('.recordDiv');
                     }
-                    var recID = $rdiv.attr('recid');
+                    var selected_rec_ID = $rdiv.attr('recid');
 
                     event.preventDefault();
-                    window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
+                    //window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID, "_new");
+                    
+                    var query = null;
+                    if(this._currentRecordset && this._currentRecordset.length()<1000){
+                        query = 'ids:'+this._currentRecordset.getIds().join(',');
+                    }else{
+                        query = this._query_request;
+                    }
+
+                    window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, function(){
+                        //callback
+                    });
+                    
+                    
                 }
             }
         });

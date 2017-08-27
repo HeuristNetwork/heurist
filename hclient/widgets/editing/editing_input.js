@@ -343,7 +343,11 @@ $.widget( "heurist.editing_input", {
                 }
 
             });
+
+        }else{  //and clear last one
+            this._clearValue(input_id, '');
         }
+        
     },
     
     
@@ -661,7 +665,7 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv );
             
             //var $btn_rec_search_dialog = 
-            
+            var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
             var popup_options = {
                             isdialog: true,
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
@@ -671,7 +675,7 @@ $.widget( "heurist.editing_input", {
                             selectOnSave: true,
                             title: window.hWin.HR('Record pointer: Select or create a linked record'),
                             rectype_set: that.f('rst_PtrFilteredIDs'),
-                            parententity: (that.f('rst_CreateChildIfRecPtr')==1)?that.options.recID:0,
+                            parententity: (isparententity)?that.options.recID:0,
                             
                             onselect:function(event, data){
                                      if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
@@ -710,6 +714,8 @@ $.widget( "heurist.editing_input", {
             };
 
 
+            // event is false for confirmation of select mode for parententity
+            // 
             var __show_select_dialog = function(event){
                 
                     if(event!==false){
@@ -717,8 +723,15 @@ $.widget( "heurist.editing_input", {
                         if(event) event.preventDefault();
                         
                         if(popup_options.parententity>0){
-                            //show preliminary dialog that offer to create new record instead 
                             
+                            if(that.newvalues[$input.attr('id')]>0){
+                                
+                                window.hWin.HEURIST4.msg.showMsgFlash('Points to a child record; value cannot be changed (delete it or edit the child record itself)', 2500);
+                                return;
+                            }
+                            
+                            
+                            //show preliminary dialog that offer to create new record instead 
                             var popele = that.element.find('.child_info_dlg');
                             if(popele.length==0){
                                 var sdiv = '<div class="child_info_dlg"><p style="padding:15px 0">You are creating a parent-child (whole-part,containership) connection. We normally recommend creating a new record whcih becomes the child of the current record</p><p>If child records have already been uploaded to the database, you may select one</p><p style="padding:15px 0"><label>Record type: </label><select id="sel_rectypes"></select></p></div>';
@@ -782,7 +795,7 @@ $.widget( "heurist.editing_input", {
                     popup_options.width = usrPreferences.width;
                     popup_options.height = usrPreferences.height;
                     
-                    //init dialog
+                    //init selection dialog
                     window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);
             }
 
@@ -1385,11 +1398,14 @@ $.widget( "heurist.editing_input", {
             // bind click events
             this._on( $btn_clear, {
                 click: function(e){
+
                     var input_id = $(e.target).parent().attr('data-input-id');
-                    if(that.inputs.length>1){  //remove supplementary 
+                    
+                    if(that.detailType=="resource" && that.configMode.entity=='records' 
+                            && that.f('rst_CreateChildIfRecPtr')==1){
+                        that._clearChildRecordPointer( input_id );
+                    }else{
                         that._removeInput( input_id );
-                    }else{  //and clear last one
-                        that._clearValue(input_id, '');
                     }
                 }
             });
@@ -1398,6 +1414,74 @@ $.widget( "heurist.editing_input", {
 
         return $input.attr('id');
 
+    }, //addInput
+    
+    //
+    //
+    //
+    _clearChildRecordPointer: function( input_id ){
+        
+            var that = this;
+        
+            var popele = that.element.find('.child_delete_dlg');
+            if(popele.length==0){
+                var sdiv = '<div class="child_delete_dlg"><p style="padding:15px 0">You are deleting a pointer to a child record, that is a record which is owned by/an integral part of the current record, as identified by a pointer back from the child to the current record.</p><p>Actions:<br><label><input type="radio" value="1" name="delete_mode"/>Delete parent pointer in the child record</label><br><label><input type="radio" value="2" name="delete_mode" checked="checked"/>Delete the child record completely</label></p><p style="padding:15px 0">Warning: If you delete the parent pointer in the child record, this will generally render the record useless as it will lack identifying information.</p></div>';
+                
+//<label><input type="radio" value="0" name="delete_mode"/>Leave child record as-is</label><br>
+//<p style="padding:0 0 15px 0">If you leave the child record as-is, it will remain as a child of the current record and retain a pointer allowing the parent record information to be used in the child\'s record title, custom reports etc.</p>                
+                popele = $(sdiv).appendTo(that.element);
+            }
+            
+            var $dlg_pce = null;
+            
+            var btns = [
+                    {text:window.hWin.HR('Proceed'),
+                          click: function() { 
+                          
+                          var mode = popele.find('input[name="delete_mode"]:checked').val();     
+                          if(mode==2){
+                              //remove child record
+                              var child_rec_to_delete = that.newvalues[input_id];
+                              window.hWin.HAPI4.RecordMgr.remove({ids: child_rec_to_delete}, 
+                                function(response){
+                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                        
+                                        var delcnt = response.data.deleted.length, msg = '';
+                                        if(delcnt>1){
+                                            msg = delcnt + ' records have been removed.';
+                                            if(response.data.bkmk_count>0 || response.data.rels_count>0){
+                                               msg = ' as well as '+
+                                                (response.data.bkmk_count>0?(response.data.bkmk_count+' bookmarks'):'')+' '+
+                                                (response.data.rels_count>0?(response.data.rels_count+' relationships'):'');
+                                            }
+                                        }else{
+                                            msg = 'Child record has been removed';
+                                        }
+                                        window.hWin.HEURIST4.msg.showMsgFlash(msg, 2500);
+                                        
+                                        that._removeInput( input_id );
+                                    }
+                                });
+                          } else {
+                              that._removeInput( input_id );
+                          }
+                          
+                          $dlg_pce.dialog('close'); 
+                    }},
+                    {text:window.hWin.HR('Cancel'),
+                          click: function() { $dlg_pce.dialog('close'); }}
+            ];            
+            
+            $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+                window:  window.hWin, //opener is top most heurist window
+                title: window.hWin.HR('Child record pointer removal'),
+                width: 500,
+                height: 300,
+                element:  popele[0],
+                resizable: false,
+                buttons: btns
+            });
+        
     },
 
     //

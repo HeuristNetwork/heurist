@@ -236,13 +236,14 @@
         if($is_insert){   // ADD NEW RECORD
 
             // start transaction
-            $mysqli->autocommit(FALSE);
+            $keep_autocommit = mysql__begin_transaction($mysqli);
 
             $response = recordAdd($system, $record, true);
             if($response['status'] == HEURIST_OK){
                 $recID = intval($response['data']);
             }else{
                 $mysqli->rollback();
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 return $response;
             }
 
@@ -250,13 +251,14 @@
 
             $ownerid = @$record['OwnerUGrpID'];
             $access = @$record['NonOwnerVisibility'];
+            $rectypes = array();
 
-            if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access)){
+            if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
                 return $system->getError();
             }
 
             // start transaction
-            $mysqli->autocommit(FALSE);
+            $keep_autocommit = mysql__begin_transaction($mysqli);
 
             $query = "UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,"
             ."rec_URL=?, rec_ScratchPad=?, rec_FlagTemporary=0 "
@@ -274,6 +276,7 @@
                 $syserror = $mysqli->error;
                 $stmt->close();
                 $mysqli->rollback();
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 return $system->addError(HEURIST_DB_ERROR, 'Cannot save record', $syserror);
             }
             $stmt->close();
@@ -283,6 +286,7 @@
             if(!$mysqli->query($query)){
                 $syserror = $mysqli->error;
                 $mysqli->rollback();
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 return $system->addError(HEURIST_DB_ERROR, 'Cannot delete old details', $syserror);
             }
         }
@@ -314,7 +318,7 @@
                 $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
-                    $mysqli->rollback();
+                    $mysqli->rollback();if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                     return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
                 }
 
@@ -362,6 +366,7 @@
                         if(!$res){
                             $syserror = $mysqli->error;
                             $mysqli->rollback();
+                            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                             return $system->addError(HEURIST_DB_ERROR, 
                                 'Cannot save details. Cannot insert reverse pointer for child record', $syserror);
                         }
@@ -373,6 +378,7 @@
         }else{
             $syserror = $mysqli->error;
             $mysqli->rollback();
+            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
             return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
         }
 
@@ -383,6 +389,7 @@
         }
         
         $mysqli->commit();
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
 
         return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
         /*
@@ -403,9 +410,175 @@
     * @param mixed $user
     * @param mixed $recids
     */
-    function recordDelete($mysqli, $user, $recids){
+    function recordDelete($system, $recids){
 
-        $response = array("status"=>HEURIST_UNKNOWN_ERROR, "data"=>"action to be implemented");
+        $recids = prepareIds($recids);
+        if(count($recids)>0){
+            
+            $rectypes = array();
+        
+            //check permission
+            foreach ($recids as $recID) {
+                $ownerid = null;
+                $access = null;
+                if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
+                    return $system->getError();
+                }
+            }
+            
+            $is_error = false;
+            $mysqli = $system->get_mysqli();
+            $keep_autocommit = mysql__begin_transaction($mysqli);
+
+
+            $bkmk_count = 0;
+            $rels_count = 0;
+            $deleted = array();
+            $msg_error = '';
+                        
+            foreach ($recids as $id) {
+                $stat = deleteOneRecord($mysqli, $id, $rectypes[$id]);
+                
+                if( array_key_exists('error', $stat) ){
+                    $msg_error = $stat['error'];
+                    break;
+                }else{
+                    $deleted = array_merge($deleted, $stat['deleted']);
+                    $rels_count += $stat['rels_count'];
+                    $bkmk_count += $stat['bkmk_count'];
+                }
+                
+            }//foreach
+            
+            if($msg_error){
+                $mysqli->rollback();
+                $res = $system->addError(HEURIST_DB_ERROR, 'Cannot delete record. '.$msg_error);
+            }else{
+                $mysqli->commit();
+                $res = array("status"=>HEURIST_OK, 
+                    "data"=> array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count));
+            }
+            
+            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            return $res;
+            
+        }else{
+            return $system->addError(HEURIST_INVALID_REQUEST, 'Record IDs not defined');
+        }
+    }
+    
+    //
+    //
+    //
+    function deleteOneRecord($mysqli, $id, $rectype){
+        
+        $bkmk_count = 0;
+        $rels_count = 0;
+        $deleted = array();
+        $msg_error = '';
+        
+        //get list if child records
+        $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
+        .$id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
+        $child_records = mysql__select_list2($mysqli, $query);
+        if(count($child_records)>0){
+            //$query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE rec_ID in ('.implode(',',$child_records).')';    
+            $child_records = mysql__select_assoc($mysqli, 'Records', 'rec_ID', 'rec_RecTypeID', 
+                    'rec_ID in ('.implode(',',$child_records).')');
+        }
+
+        while(true){
+                $mysqli->query('SET foreign_key_checks = 0');
+                //
+                $mysqli->query('delete from recDetails where dtl_RecID = ' . $id);
+                if ($mysqli->error) break;
+
+                //
+                $mysqli->query('delete from Records where rec_ID = ' . $id);
+                if ($mysqli->error) break;
+                array_push($deleted, $id);
+               
+//ELASTIC todo !!!!1   deleteRecordIndexEntry(DATABASE, $recTypeID, $id);
+                
+                $mysqli->query('delete from usrReminders where rem_RecID = ' . $id);
+                if ($mysqli->error) break;
+
+                $mysqli->query('delete from usrRecTagLinks where rtl_RecID = ' . $id);
+                if ($mysqli->error) break;
+
+                $mysqli->query('delete from recThreadedComments where cmt_RecID = ' . $id);
+                if ($mysqli->error) break;
+
+
+                //change all woots with title bookmark: to user:
+                $mysqli->query('update woots set woot_Title="user:" where woot_Title in (select concat("boomark:",bkm_ID) as title from usrBookmarks where bkm_recID = ' . $id.')');
+                if ($mysqli->error) break;
+
+
+                $mysqli->query('delete from usrBookmarks where bkm_recID = ' . $id);
+                if ($mysqli->error) break;
+                $bkmk_count = $bkmk_count + $mysqli->affected_rows;
+
+                //delete from woot
+                $mysqli->query('delete from woot_ChunkPermissions where wprm_ChunkID in '.
+                '(SELECT chunk_ID FROM woots, woot_Chunks where chunk_WootID=woot_ID and woot_Title="record:'.$id.'")');
+                if ($mysqli->error) break;
+
+                $mysqli->query('delete from woot_Chunks where chunk_WootID in '.
+                '(SELECT woot_ID FROM woots where woot_Title="record:'.$id.'")');
+                if ($mysqli->error) break;
+
+                $mysqli->query('delete from woot_RecPermissions where wrprm_WootID in '.
+                '(SELECT woot_ID FROM woots where woot_Title="record:'.$id.'")');
+                if ($mysqli->error) break;
+
+                $mysqli->query('delete from woots where woot_Title="record:'.$id.'"');
+                if ($mysqli->error) break;
+
+                $mysqli->query('SET foreign_key_checks = 1');
+
+                //remove special kind of record - relationship
+                $refs_res = $mysqli->query('select rec_ID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records on rec_ID=dtl_RecID where dty_Type="resource" and dtl_Value='.$id.' and rec_RecTypeID='.RT_RELATION);
+                if($refs_res){
+                    while ($row = $refs_res->fetch_assoc()) {
+                        $res = deleteOneRecord($mysqli, $row['rec_ID'], RT_RELATION);
+                        if( array_key_exists('error', $res) ){
+                            $msg_error = $res['error'];
+                            break;
+                        }else{
+                            $deleted = array_merge($deleted, $res['deleted']);
+                            $rels_count += $res['rels_count'];
+                            $bkmk_count += $res['bkmk_count'];
+                        }
+                    }
+                    $refs_res->close();
+                } else {
+                    $msg_error = 'Cannot get relationship records';
+                    break;
+                }
+                
+                
+                if(count($child_records)>0){
+                    foreach ($child_records as $recid => $rectypeid) {
+                        $res = deleteOneRecord($mysqli, $recid, $rectypeid);
+                        if( array_key_exists('error', $res) ){
+                            $msg_error = 'Cannot delete child records'.$res['error'];
+                            break;
+                        }else{
+                            $deleted = array_merge($deleted, $res['deleted']);
+                            $rels_count += $res['rels_count'];
+                            $bkmk_count += $res['bkmk_count'];
+                        }
+                    }
+                }
+                break;
+        }//while
+        
+        if($mysqli->error || $msg_error){
+            return array("error" => $msg_error.'  '.$mysqli->error);
+        }else{
+            return array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count);
+        }
     }
     
     //
@@ -477,7 +650,7 @@
     * @param mixed $ownerid
     * @param mixed $access
     */
-    function recordCanChangeOwnerwhipAndAccess($system, $recID, &$ownerid, &$access)
+    function recordCanChangeOwnerwhipAndAccess($system, $recID, &$ownerid, &$access, &$rectypes)
     {
 
         //if defined and wrong it fails
@@ -490,7 +663,7 @@
 
         $mysqli = $system->get_mysqli();
         //get current values
-        $query = 'select rec_OwnerUGrpID, rec_NonOwnerVisibility from Records where rec_ID = '.$recID;
+        $query = 'select rec_OwnerUGrpID, rec_NonOwnerVisibility, rec_RecTypeID from Records where rec_ID = '.$recID;
         $res = $mysqli->query($query);
         if($res){
             $record = $res->fetch_assoc();
@@ -499,7 +672,25 @@
             $system->addError(HEURIST_DB_ERROR, 'Cannot get record', $mysqli->error);
             return false;
         }
+        
+        $ownerid_old = $record["rec_OwnerUGrpID"]; //current ownership
+        $res = true;
+        if(!($system->is_admin() || $ownerid == $ownerid_old)){
 
+            if($ownerid_old>0 && !$system->is_admin('group', $ownerid_old)) {  //changing ownership
+
+                $system->addError(HEURIST_REQUEST_DENIED,
+                    $ownerid>0?'Cannot change ownership. User is not a group admin'
+                    :'Cannot change record. User does not have ownership rights');
+                $res = false;
+
+            }else if($ownerid_old == 0 && $ownerid>0) {
+                $system->addError(HEURIST_REQUEST_DENIED,
+                    'User does not have sufficient authority to change public record to group record');
+                $res = false;
+            }
+        }
+        
         //if not defined set current values
         if(!$ownerid){
             $ownerid = $record["rec_OwnerUGrpID"];
@@ -507,22 +698,8 @@
         if(!$access){
             $access = $record["rec_NonOwnerVisibility"];
         }
-
-        $ownerid_old = $record["rec_OwnerUGrpID"];
-        $res = true;
-        if(!($system->is_admin() || $ownerid == $ownerid_old)){
-
-            if($ownerid_old>0 && !$system->is_admin('group', $ownerid_old)) {  //changing ownership
-
-                $system->addError(HEURIST_REQUEST_DENIED,
-                    'Cannot change ownership. User is not a group admin');
-                $res = false;
-
-            }else if($ownerid_old == 0) {
-                $system->addError(HEURIST_REQUEST_DENIED,
-                    'User does not have sufficient authority to change public record to group record');
-                $res = false;
-            }
+        if(is_array($rectypes)){
+            $rectypes[$recID] = $record["rec_RecTypeID"];
         }
         return $res;
 
@@ -539,8 +716,9 @@
     */
     function recordSetOwnerwhipAndAccess($system, $recID, $ownerid, $access)
     {
+        $rectypes = array();
 
-        if(recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access))
+        if(recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes))
         {
             $query = "UPDATE Records (rec_OwnerUGrpID, rec_NonOwnerVisibility)"
             ." VALUES (?, ?) where rec_ID=".$recID;
