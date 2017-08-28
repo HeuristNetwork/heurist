@@ -46,6 +46,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 +    '<div class="ent_content_full recordList"/>'
                             +'</div>'
 
+                            //for inline edit - todo remove and not use!    
                             + '<div class="editFormDialog ent_wrapper editor">'
                                     + '<div class="ui-layout-center"><div class="editForm"/></div>'
                                     + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
@@ -67,9 +68,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         this.getUiPreferences();
         
+        
         this._super();
         
         //this.editForm.empty();
+
+        this.editHeader = this.element.find('.editHeader');
         
         var hasSearchForm = (this.searchForm && this.searchForm.length>0);
         
@@ -187,9 +191,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
             if(this.options.selectOnSave==true){
                 var btns = [
-                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
+                        {text:window.hWin.HR('Cancel'), 
+                              css:{'margin-right':'15px'},
+                              click: function() { 
+                                  that.closeEditDialog(); 
+                              }},
+                        /*{text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
                               css:{'visibility':'hidden','margin-right':'15px'},
-                              click: function() { that.closeEditDialog(); }},
+                              click: function() { that.closeEditDialog(); }},*/
                        
                         {text:window.hWin.HR('Save / Select'), id:'btnRecSaveAndClose',
                               css:{'visibility':'hidden','margin-right':'15px'},
@@ -248,6 +257,28 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             return btns;
     },
     
+    _initEditForm_step1: function(recID, afterInitCallback){
+        if(this.options.edit_mode=='popup'){
+
+            var query = null, popup_options={};
+            //NEW WAY open as another widget 
+            if(recID<0){
+                popup_options = {new_record_params:{rt:this._currentEditRecTypeID}};
+            }else{
+                var recset = this.recordList.resultList('getRecordSet');
+                if(recset && recset.length()<1000){
+                    query = 'ids:'+recset.getIds().join(',');
+                }else{
+                    query = null;
+                }
+            }
+            window.hWin.HEURIST4.ui.openRecordEdit( recID, query, popup_options);
+            
+        }else{
+            this._super( recID, afterInitCallback );
+        }
+    },
+    
     //
     // open popup edit dialog if we need it
     //
@@ -272,7 +303,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this._currentEditID = recID;
             
             if(this.options.edit_mode=='popup'){
-            
+                //OLD WAY - NOT USED
                 this.editForm.css({'top': 0});//, 'overflow-y':'auto !important', 'overflow-x':'hidden'});
 //this.editFormPopup = this.editForm.parent();//this.element.find('.editFormDialog');
 
@@ -289,11 +320,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         width:  this.usrPreferences.width,
                         resizable: true,
                         //title: dialog_title,
-                        buttons: this._getEditDialogButtons()
+                        buttons: this._getEditDialogButtons(),
                         //do not save prefs for popup addition beforeClose: this.options.beforeClose
                         //save only for main edit record (editonly)
                     });
-                
+                    
+                //assign unique identificator to get proper position of child edit dialogs
+                //this._edit_dialog.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());
+                    
                 //help and tips buttons on dialog header
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
                     'prefs_'+this._entityName,
@@ -1563,31 +1597,29 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //add record title at the top
         
-        if(!this._isInsert){  //addition
-        
-            var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-        
-            //this.editForm.parent().find('.ui-heurist-header2').remove();
-            //.insertBefore(this.editForm.first('fieldset'));
-            var header = this.element.find('.ent_header');
+        if(this.editHeader && this.editHeader.length>0){ 
+
+            this.editHeader.find('.ui-heurist-header2').remove();
             
-            header.find('.ui-heurist-header2').remove();
+            if(!this._isInsert){
             
-            $('<div class="ui-heurist-header2" style="text-align:left">'
-                + '<img src="'+ph_gif
-                    + '" width=25 height=25 style="vertical-align:middle;margin-right: 10px;background-image:url(\''
-                    + top.HAPI4.iconBaseURL+this._currentEditRecTypeID
-                    + 'm&color=rgb(255,255,255)\');"/><h3 style="display:inline-block;">'
-                    + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
-                + '</h3>&nbsp;<span style="display:inline-block;padding:0 20px">ID: '+this._currentEditID
-                + '</span><h3 style="display:inline-block">'+ this._getField('rec_Title')+'</h3></div>')
-                .css({'padding':'10px 0 10px 30px'})
-                .appendTo(header);
-            //this.element.find('.editFormDialog').css({'top':'6em'});
-        }else{
-            //this.element.find('.editFormDialog').css({'top':'2.8em'});
+                var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+                //this.editForm.parent().find('.ui-heurist-header2').remove();
+                //.insertBefore(this.editForm.first('fieldset'));
+                $('<div class="ui-heurist-header2" style="text-align:left">'
+                    + '<img src="'+ph_gif
+                        + '" width=25 height=25 style="vertical-align:middle;margin-right: 10px;background-image:url(\''
+                        + top.HAPI4.iconBaseURL+this._currentEditRecTypeID
+                        + 'm&color=rgb(255,255,255)\');"/><h3 style="display:inline-block;vertical-align:middle">'
+                        + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
+                    + '</h3>&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
+                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle" class="truncate">'+ this._getField('rec_Title')+'</h3></div>')
+                    .appendTo(this.editHeader);
+
+            }else{
+
+            }
         }
-        
         this.onEditFormChange();
     },
 

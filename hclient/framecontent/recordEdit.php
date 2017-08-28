@@ -68,8 +68,7 @@
                     $container = $('<div>').appendTo($("body"));
                     
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
-
-
+                        
                     var rec_rectype = window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search);
                     var new_record_params = {};
                     if(rec_rectype>0){
@@ -78,7 +77,8 @@
                         new_record_params['rv'] = window.hWin.HEURIST4.util.getUrlParameter('rec_visibility', window.location.search);
                         new_record_params['tag'] = window.hWin.HEURIST4.util.getUrlParameter('tag', window.location.search);
                     }
-                    
+
+//todo use ui.openRecordEdit                    
                     //hidden result list, inline edit form
                     var options = {
                         select_mode: 'manager',
@@ -88,8 +88,8 @@
                         layout_mode:'<div class="ent_wrapper editor">'
                             + '<div class="ent_content_full recordList"  style="display:none;"/>'
 
-                            + '<div class="ent_header" style="text-align:center;padding:6px 0 0 0;"><h2 style="color:red">EXPERIMENTAL - THIS FUNCTION IS IN COURSE OF DEVELOPMENT</h2></div>'
-                            + '<div class="editFormDialog ent_content" style="top:6em">'
+                            + '<div class="ent_header editHeader"></div>'
+                            + '<div class="editFormDialog ent_content">'
                                     + '<div class="ui-layout-center"><div class="editForm"/></div>'
                                     + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
                                     //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'

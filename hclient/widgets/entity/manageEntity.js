@@ -632,7 +632,8 @@ $.widget( "heurist.manageEntity", {
     _initDialog: function(){
         
             var options = this.options,
-                btn_array = [],
+                btn_array = [], 
+                position = null,
                     that = this;
         
             //dialog buttons SELECT and CLOSE
@@ -655,14 +656,15 @@ $.widget( "heurist.manageEntity", {
                                     'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
                                     buttons,
                                     {title:'Confirm',yes:'Save',no:'Ignore and close'});
-                                        //
-                                        
                             return false;   
                         }
                         that.saveUiPreferences();
                         return true;
                     };
                 }
+                
+                position = this._getDialogPosition();                
+                
             }else {
                 //if(options.in_popup_dialog===false){ 
                 btn_array.push({text:window.hWin.HR('Close'), 
@@ -679,14 +681,15 @@ $.widget( "heurist.manageEntity", {
                 width:  options['width'],
                 modal:  (options['modal']!==false),
                 title: window.hWin.HEURIST4.util.isempty(options['title'])?'':options['title'], //title will be set in  initControls as soon as entity config is loaded
-
+                position: position,
                 beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {//fix bug
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
                 close:function(){
                     if($.isFunction(that.options.onClose)) that.options.onClose.call();
-                    $dlg.remove();        
+                    $dlg.parent().remove();    
+                        
                 },
                 buttons: btn_array
             }); 
@@ -694,6 +697,8 @@ $.widget( "heurist.manageEntity", {
             
             if(options.edit_mode == 'editonly'){
                 this._toolbar = this._as_dialog.parent();
+                //assign unique identificator to get proper position of child edit dialogs
+                this._toolbar.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());
             }
                 
             
@@ -736,6 +741,36 @@ $.widget( "heurist.manageEntity", {
             this._as_dialog.dialog("close");
             //this.element.dialog('close');
         }
+    },
+    
+    //
+    //
+    //
+    _getDialogPosition: function(){
+        
+            var position = null;
+            var tm = 0;
+//console.log($('div.ui-dialog[posid^="edit'+this._entityName+'"]').length);
+            //detect position
+            $('div.ui-dialog[posid^="edit'+this._entityName+'"]')
+            //get the latest
+            .each(function(i, dlg){
+                tm = Math.max(tm, $(dlg).attr('posid').split('-')[1]);
+            });
+            var dlg = $('div.ui-dialog[posid="edit'+this._entityName+'-'+tm+'"]');
+            
+            if(dlg.length>0){
+                
+                /* it does not work properly
+                var offset = $(dlg).offset();
+                var stop = offset.top+h> $(document).height()?'0':offset.top+20; 
+                var sleft = offset.left+w> $(document).width()?'0':offset.left+20; 
+                position = { my: "left top", at: sleft+' '+stop, within:window};
+                */
+                position = { my: "left top", at:'left+20 top+20', of:dlg};
+            }
+            
+            return position;
     },
     
     saveUiPreferences:function(){

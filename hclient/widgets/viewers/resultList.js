@@ -1028,7 +1028,7 @@ $.widget( "heurist.resultList", {
         + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/><span class="ui-button-text"/>'
         + '</div>'
 
-        + '<div title="EXPERIMENTAL! Click to edit record" '
+        + '<div title="Click to edit record" '
         + 'class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
         + 'role="button" aria-disabled="false" data-key="edit">'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil" style="color:gray"/><span class="ui-button-text"/>'
