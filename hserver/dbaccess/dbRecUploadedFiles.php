@@ -264,7 +264,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     return false;
             }
             
-            if($fieldvalues['ulf_FileSizeKB']<0 || !is_int($fieldvalues['ulf_FileSizeKB'])){
+            if($fieldvalues['ulf_FileSizeKB']<0 || !is_numeric($fieldvalues['ulf_FileSizeKB'])){
                     $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid file size value: '.$fieldvalues['ulf_FileSizeKB']);
                     return false;
             }

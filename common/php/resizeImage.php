@@ -86,7 +86,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     if ($standard_thumb  &&  $file['ulf_Thumbnail']) {
 
         //save as file
-        $img = imagecreatefromstring($file['ulf_Thumbnail']);
+        $img = @imagecreatefromstring($file['ulf_Thumbnail']);
         if($img){
             imagepng($img, $thumbnail_file);
 
