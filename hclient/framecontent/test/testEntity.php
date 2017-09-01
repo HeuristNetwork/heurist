@@ -354,7 +354,7 @@ print $targetPath.'<br>';
                             <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
-                            <option value="UsrReminders" selected>Reminders</option>
+                            <option value="UsrReminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>
@@ -363,7 +363,7 @@ print $targetPath.'<br>';
                             <option value="DefDetailTypeGroups">Field Type Groups</option>
                             <option value="DefTerms">Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
-                            <option value="RecComments">Record Comments</option>
+                            <option value="RecThreadedComments" selected>Record Comments</option>
                             <option value="Smarty">Smarty Reports</option>
                             <option value="SmartySchedule">Smarty Reports Schedule</option>
                         </select></label>

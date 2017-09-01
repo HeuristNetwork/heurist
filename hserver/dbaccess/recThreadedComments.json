@@ -6,7 +6,7 @@
         
         "helpContent": "",
         
-        "searchFormContent": "",
+        "searchFormContent": "searchRecThreadedComments.html",
         
         "entityTitle": "Comment",
         "entityTitlePlural": "Comments",
@@ -36,7 +36,7 @@
                     "dtFields":{
                         "dty_Type":"date",
                         "rst_DisplayName": "Modified:",
-                        "rst_Display":"hidden"
+                        "rst_Display":"readonly"
                     }
                 },
                 {

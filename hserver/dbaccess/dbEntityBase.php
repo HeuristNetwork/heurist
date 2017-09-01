@@ -402,7 +402,7 @@ class DbEntityBase
         //exctract primary keys
         $this->recordIDs = array();
         foreach($this->records as $record){
-            if($record[$this->primaryField]>0){
+            if(@$record[$this->primaryField]>0){
                 $this->recordIDs[] = $record[$this->primaryField];
             }
         }
