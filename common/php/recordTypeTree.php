@@ -193,7 +193,7 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
         
         //create fake rectype structure field
         $ffr = array();
-        $ffr[$rst_fi['rst_DisplayName']] = 'Record Parent ('.$rtStructs['names'][$parent_Rt].')';
+        $ffr[$rst_fi['rst_DisplayName']] = 'Parent entity';//'Record Parent ('.$rtStructs['names'][$parent_Rt].')';
         $ffr[$rst_fi['rst_PtrFilteredIDs']] = $parent_Rt;
         $ffr[$rst_fi['dty_Type']] = 'resource';
         $ffr[$rst_fi['rst_DisplayHelpText']] = 'Reverse pointer to parent record';
