@@ -638,7 +638,11 @@ $.widget( "heurist.editing_input", {
                     //this is second call - some links are already defined
                     //show popup dialog at once
                     //IJ ASKS to disbale it __show_addlink_dialog();
+                    if(this.element.find('.rel_link').is(':visible')){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please define the first relationship before adding another');                          }
+                    
                     this.element.find('.rel_link').show();
+                    
                     return;
                 }
 
@@ -654,6 +658,10 @@ $.widget( "heurist.editing_input", {
         }
         else if(this.detailType=="resource" && this.configMode.entity=='records'){
 
+            if(value=='' && this.element.find('.sel_link2').is(':visible')){
+                window.hWin.HEURIST4.msg.showMsgFlash('Please select record before adding another pointer');                              return;
+            }
+            
             //replace input with div
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'20ex'})
                             .uniqueId().appendTo( $inputdiv );
@@ -764,7 +772,10 @@ $.widget( "heurist.editing_input", {
                                               }
                                               
                                               window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                                    {new_record_params:new_rec_param, onselect:popup_options.onselect, selectOnSave:true});
+                                    {new_record_params:new_rec_param, 
+                                        onselect:popup_options.onselect, 
+                                        parententity:popup_options.parententity,
+                                        selectOnSave:true});
                                               $dlg_pce.dialog('close'); 
                                           }},
                                     {text:window.hWin.HR('Select'),
@@ -1532,12 +1543,13 @@ $.widget( "heurist.editing_input", {
                         }
                     }
                     if(!sTitle){
-                        window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "all", f:"header"}, 
+                        window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "e", f:"header"},  //search for temp also
                             function(response){
                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                     var recordset = new hRecordSet(response.data);
                                     var record = recordset.getFirstRecord();
                                     var rec_Title = recordset.fld(record,'rec_Title');
+                                    if(!rec_Title) {rec_Title = 'New record. Title is not defined yet.';}
                                     var rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                     ele.empty();
                                     window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 

@@ -200,7 +200,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               css:{'visibility':'hidden','margin-right':'15px'},
                               click: function() { that.closeEditDialog(); }},*/
                        
-                        {text:window.hWin.HR('Save / Select'), id:'btnRecSaveAndClose',
+                        {text:window.hWin.HR('Save'), id:'btnRecSaveAndClose',
                               css:{'visibility':'hidden','margin-right':'15px'},
                               click: function() { that._saveEditAndClose( null, 'close' ); }}
                 
@@ -433,8 +433,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         $('<div>').attr('data-id', idx).addClass('summary-content').appendTo(acc);
                         
                         acc.accordion({
-                            collapsible: true,
-                            active: (this.usrPreferences.summary_tabs.indexOf(String(idx))>=0) ,
+                            collapsible: idx>0, //admin is always open
+                            active: (idx==0 || this.usrPreferences.summary_tabs.indexOf(String(idx))>=0) ,
                             heightStyle: "content",
                             beforeActivate:function(event, ui){
                                 if(ui.newPanel.text()==''){
@@ -1227,7 +1227,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     // get record field structure. It needs to addition of non-standard fields
     //
-    _getFakeRectypeField: function(detailTypeID){
+    _getFakeRectypeField: function(detailTypeID, order){
         
         var dt = window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]['commonFields'];
         
@@ -1251,7 +1251,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ffr[fieldIndexMap['rst_DisplayDetailTypeGroupID']] = (dt?dt[dtyFieldNamesIndexMap['dty_DetailTypeGroupID']]:"");
         ffr[fieldIndexMap['rst_DisplayExtendedDescription']] = (dt?dt[dtyFieldNamesIndexMap['dty_ExtendedDescription']]:"");
         ffr[fieldIndexMap['rst_DisplayHelpText']] = (dt?dt[dtyFieldNamesIndexMap['dty_HelpText']]:"");
-        ffr[fieldIndexMap['rst_DisplayOrder']] = 999;
+        ffr[fieldIndexMap['rst_DisplayOrder']] = (order>0)?order:999;
         ffr[fieldIndexMap['rst_DisplayWidth']] = 50;
         ffr[fieldIndexMap['rst_FilteredJsonTermIDTree']] = (dt?dt[dtyFieldNamesIndexMap['dty_JsonTermIDTree']]:"");
         ffr[fieldIndexMap['rst_LocallyModified']] = 0;
@@ -1359,7 +1359,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 field_in_recset.push(DT_PARENT_ENTITY);
             }
             
-            var addhead = true;
+            var addhead = 0;
             for(var k=0; k<field_in_recset.length; k++){
                 if(fields_ids.indexOf(field_in_recset[k])<0){ //field in recset is not in structure
                     if(field_in_recset[k]==DT_PARENT_ENTITY){
@@ -1374,14 +1374,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         
                     }else{
                     
-                        if(addhead){                    
+                        if(addhead==0){                    
                             var rfr = that._getFakeRectypeField(1);
                             rfr[fi_name] = 'Non-standard record type fields for this record';
                             rfr[fi_type] = 'separator';
                             s_fields.push(rfr);
-                            addhead = false;
+                            addhead++;
                         }
-                        s_fields.push(that._getFakeRectypeField(field_in_recset[k]));
+                        
+                        var rfr = that._getFakeRectypeField(field_in_recset[k], 999+addhead);
+                        s_fields.push(rfr);
                     }
                 }
             }//for           

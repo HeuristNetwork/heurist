@@ -161,8 +161,8 @@ function hEditing(_options) {
                 
             for (idx=0; idx<fields.length; idx++){
                 
-                if( $.isPlainObject(fields[idx]) && 
-                    window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children)){ //this is group
+                if( $.isPlainObject(fields[idx]) && fields[idx].groupType){ //this is group
+                //  window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children)
                     
                     if(fields[idx].groupType != currGroupType){ //create new group container and init previous
                         //init previous one 

@@ -1390,11 +1390,13 @@ window.hWin.HEURIST4.ui = {
                            ?'<div class="detailType" style="display:inline-block;width:15ex;padding-top:4px;float:left;">'
                             + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
                            :'')  
-                        + '<div class="detail truncate" '
-                        + 'style="display:inline-block;min-width:35ex;max-width:50ex;padding:2px;">'
+                        + '<div class="detail" '  // truncate
+                        + 'style="display:inline-block;min-width:35ex;padding:2px;max-width:60ex;">'
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
-                        + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']+'">'
+                        + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']
+                        //+'" title="' + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])
+                        +'">'
                         + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a></div>'
                         + sRelBtn + '</div>')
         .appendTo($(container));

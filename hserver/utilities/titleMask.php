@@ -534,7 +534,8 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
     $search_fieldname = mb_strtolower($search_fieldname, 'UTF-8');
     //$search_fieldname = strtolower($search_fieldname);
 
-    if(strpos($search_fieldname, 'record parent')===0 
+    if(strpos($search_fieldname, 'parent entity')===0 
+        || strpos($search_fieldname, 'record parent')===0 
         || $search_fieldname==DT_PARENT_ENTITY 
         || $search_fieldname=='2-247'){ 
             

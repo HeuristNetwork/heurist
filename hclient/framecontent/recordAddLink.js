@@ -613,7 +613,7 @@ function hRecordAddLink() {
 
     function getRecordValue(rec_id, party) {
         
-        var request = {q:'ids:'+rec_id, w:'a',f:'detail'};
+        var request = {q:'ids:'+rec_id, w:'e',f:'detail'};  //w=e everything including temporary
         
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
@@ -625,6 +625,7 @@ function hRecordAddLink() {
             
                 var record = resdata.getById(rec_id);
                 var rec_title = resdata.fld(record, 'rec_Title');
+                if(!rec_title) rec_title = 'Record title is not defined yet';
 
                 var recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
                 
