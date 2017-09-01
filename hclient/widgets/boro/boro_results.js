@@ -57,8 +57,6 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
    //
   _searchFullRecords: function(rec_toload, current_page, callback){
       
-      console.log('_searchFullRecords');
-      
     var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
         DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
         DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
@@ -134,7 +132,7 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 '<div class="bor-search-result bor-stop bor-stop-large">'
                 + html_thumb
                 + '<div class="bor-stop-description">'
-                +     '<h3><a '+profileLink+'>'+fullName+'</a></h3>'
+                +     '<h3 style="margin-bottom: 10px;"><a '+profileLink+'>'+fullName+'</a></h3>'
                 +     '<p class="bor-search-result-text">'+fld(DT_EXTENDED_DESCRIPTION)+'</p>'
                 + '</div>'
                 +'</div>';
@@ -151,8 +149,6 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
  
  _renderSearchInfoMsg: function(data){
      
-//console.log('_renderSearchInfoMsg empty:'+(data==null));     
-
     this._super( data ); 
     
     if(data==null){
@@ -177,10 +173,10 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
     if(iFacetedSearch!=null){
             //get faceted search values
             var values = iFacetedSearch.search_faceted('getFacetsValues');    
-            var add_filter = iFacetedSearch.search_faceted('option','add_filter');
             var f_params = iFacetedSearch.search_faceted('option','params');
+            var add_filter = f_params?f_params.add_filter:null;
             var primary_rt = f_params.rectypes[0];
-        
+
             var idx=0, len = values.length;
 
             if (len>0 || !window.hWin.HEURIST4.util.isempty(add_filter)) {            

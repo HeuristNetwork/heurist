@@ -397,6 +397,7 @@ $.widget( "heurist.dh_search", {
        }else{
             //add filter to existing faceted search
             this.search_faceted.search_faceted('option', 'add_filter', this.add_filter);
+            this.search_faceted.search_faceted('doReset');
        }
     },
 

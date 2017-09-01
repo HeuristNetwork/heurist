@@ -121,7 +121,9 @@ $.widget( "heurist.media_viewer", {
             }else{
 
             }  */
-            $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
+            if($.isFunction(yoxview)){
+                $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
+            }
             // /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
         }
     }

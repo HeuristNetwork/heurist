@@ -123,11 +123,13 @@ $.widget( "heurist.search_faceted", {
         this.div_header = $( "<div>" ).appendTo( this.element );
         
         if(!this.options.ispreview){                       //padding-top:1.4em;
-            this.div_title = $("<h3 style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
+            this.div_title = $('<div>')
+            .css({padding:'1em 0em 0 1em','font-size':'1.4em','font-weight':'bold',color:'rgb(142, 169, 185)','max-width':'90%'})
+//style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
                     .addClass('truncate').appendTo( this.div_header );
         }
 
-        this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","float":"right","padding-top":"1.8em","padding-right":"0.6em"})
+        this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","float":"right","padding-top":"0.3em","padding-right":"0.6em"})
                 .appendTo( this.div_header );
 
         this.btn_submit = $( "<button>", { text: window.hWin.HR("Submit") })
@@ -208,7 +210,7 @@ $.widget( "heurist.search_faceted", {
         this._super( key, value );
         if(key=='add_filter'){
             this.options.params.add_filter = value;
-            this.doSearch();
+            //this.doSearch();
         }
     },
     
@@ -546,8 +548,6 @@ $.widget( "heurist.search_faceted", {
                        };
                    }
 
-//console.log('inpt added '+"fv_"+field['var']+'   '+field['id']);                   
-                     
                     var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
                             ed_options
                         );
@@ -555,7 +555,9 @@ $.widget( "heurist.search_faceted", {
                     inpt.appendTo($fieldset);
                     that._input_fields['$X'+field['var']] = inpt;
                     
-                    inpt.find('.header').attr('title', field['help']).css('display','block'); //change from table-cell
+                    inpt.find('.header').attr('title', field['help'])
+                        .css('display','block')
+                        .html('<h4 style="display:inline-block;">'+field['title']+'</h4>');
                     
                     inpt.find('.input-div').css('display','inline-block');
                     
@@ -618,7 +620,8 @@ $.widget( "heurist.search_faceted", {
            }
        });
        
-       $fieldset.find('.header').css({width: '100%', 'background-color': 'lightgray', padding: '5px', width:'100%'})
+       //'background-color': 'lightgray', 
+       $fieldset.find('.header').css({width: '100%', padding: '5px', width:'100%'})
        $fieldset.find('.input-cell').css({ 'padding':'5px' });
        
        $fieldset.find('.bor-tooltip').tooltip({

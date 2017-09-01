@@ -77,7 +77,7 @@ $.widget( "heurist.svs_list", {
         var toppos = 1;
 
         if(window.hWin.HAPI4.sysinfo['layout']!='original' && !this.options.buttons_mode){
-            toppos = toppos + 3;
+            toppos = toppos + 4;
             $('<div>'+window.hWin.HR('Saved Filters')+'</div>')
             .css({'padding': '0.5em 1em', 'font-size': '1.4em', 'font-weight': 'bold', 'color':'rgb(142, 169, 185)'})
             .appendTo(this.div_header);
@@ -481,6 +481,7 @@ $.widget( "heurist.svs_list", {
             this.helper_btm.before(
                 $('<div>')
                 .addClass('svs-acordeon-group')
+                .css({"border-bottom": '#8ea9b9 1px solid'})
                 .html('&nbsp;')); //window.hWin.HR('PERSONAL')
 
             this.helper_btm.before(
@@ -494,18 +495,20 @@ $.widget( "heurist.svs_list", {
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'all').addClass('svs-acordeon')
-                .css('border','none')
+                //.css('border','none')
                 .append( this._defineHeader(window.hWin.HR('My Searches'), 'all'))
                 .append( this._defineContent('all') ));
 
             var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
 
             if(groups){
-
+            
+                /*    
                 this.helper_btm.before(
                     $('<div>')
                     .addClass('svs-acordeon-group')
                     .html('&nbsp;')); //window.hWin.HR('WORKGROUPS')
+                */
 
                 for (var groupID in groups)
                 {
