@@ -493,7 +493,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                 var recRecTypeID = that._getField('rec_RecTypeID');
                 sContent =  
-'<div style="margin:4px;"><div style="padding-bottom:0.5em;display: inline-block;width: 100%;">'
+'<div style="margin:10px 4px;"><div style="padding-bottom:0.5em;display: inline-block;width: 100%;">'
 
 +'<h2 class="truncate rectypeHeader" style="float:left;max-width:400px;margin-right:8px;">'
                 + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
@@ -507,7 +507,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 +'</div>'
 +'</div>'
 
-+'<div style="display:inline-block;padding:0 8px 0 27px;float:left"><label class="small-header" style="min-width:0">Owner:</label><span id="recOwner">'
++'<div style="display:inline-block;padding:10px 8px 10px 27px;float:left"><label class="small-header" style="min-width:0">Owner:</label><span id="recOwner">'
     +that._getField('rec_OwnerUGrpID')+'</span><br>'
 +'<label class="small-header" style="min-width:0">Access:</label><span id="recAccess">'
     +that._getField('rec_NonOwnerVisibility')+'</span></div>'
@@ -523,7 +523,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 panel.find('.btn-config2').button({text:false,label:top.HR('Modify record type structure in new window'),
                         icons:{primary:'ui-icon-extlink'}})
                     .addClass('ui-heurist-btn-header1')
-                    .css({float: 'right','font-size': '0.8em', height: '18px'})
+                    .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
                     .click(function(){
                         that.editRecordTypeOnNewTab();
                     });
@@ -531,7 +531,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 panel.find('.btn-config').button({text:false,label:top.HR('Modify record type structure'),
                         icons:{primary:'ui-icon-gear'}})
                     .addClass('ui-heurist-btn-header1')
-                    .css({float: 'right','font-size': '0.8em', height: '18px'})
+                    .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
                     .click(function(){that.editRecordType();});
                 panel.find('.btn-config3').click(function(){that.editRecordType();});
                     
@@ -597,9 +597,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
 
                 panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access right'),
-                        icons:{primary:'ui-icon-lock'}})
-                    .addClass('ui-heurist-btn-header1')
-                    .css({float: 'left','margin': '0.8em 7px 0 0', 'font-size': '0.8em', height: '18px'})
+                        icons:{primary:'ui-icon-pencil'}})
+                    //.addClass('ui-heurist-btn-header1')
+                    .css({float: 'left','margin': '0.8em 7px 0 0', 'font-size': '0.8em', height: '14px', width: '14px'})
                     .click(function(){
                     
         var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database+'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')+'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
@@ -734,7 +734,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
                 
 
-                panel.css({'font-size':'0.9em','line-height':'1.5em','overflow':'hidden !important'});
+                panel.css({'font-size':'0.9em','line-height':'1.5em','overflow':'hidden !important', margin:'10px 0'});
+                panel.find('.link-div').css({background:'none',border:'none'});
                             
 /*            
                 window.hWin.HAPI4.RecordMgr.search_related({ids:this._currentEditID}, //direction: -1}, 
@@ -797,6 +798,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
                 
             
+                break;
+            case 5:   //discussion
+                if(panel.text()!='') return;
+                
+                sContent = '<p>Contact Heurist team if you need this function</p>';
                 break;
             case 6:   //dates
                 

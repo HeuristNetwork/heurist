@@ -166,16 +166,24 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     $parent_Rt = null;
     
     foreach ($rtStructs['typedefs'] as $rtKey => $recstruct){
-        $details =  $recstruct['dtFields'];
-        foreach ($details as $dtKey => $dtValue){
-            if($dtValue[$rst_fi['dty_Type']]=='resource' && $dtValue[$rst_fi['rst_CreateChildIfRecPtr']]==1){
-                
-                $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
-                if($constraint && in_array($recTypeId, explode(',',$constraint))){
-                    $parent_Rt = $rtKey;    
-                    break;
+        if($rtKey>0){
+            $details =  @$recstruct['dtFields'];
+            
+            if(!$details){
+//error_log($rtKey.'  '.print_r($recstruct, true));
+                continue;
+            }
+            
+            foreach ($details as $dtKey => $dtValue){
+                if($dtValue[$rst_fi['dty_Type']]=='resource' && $dtValue[$rst_fi['rst_CreateChildIfRecPtr']]==1){
+                    
+                    $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
+                    if($constraint && in_array($recTypeId, explode(',',$constraint))){
+                        $parent_Rt = $rtKey;    
+                        break;
+                    }
+                    
                 }
-                
             }
         }
     }

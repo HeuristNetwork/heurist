@@ -128,7 +128,7 @@ $.widget( "heurist.editing_input", {
             //spacer
             $( "<span>")
             .addClass('editint-inout-repeat-button')
-            .css({width:'16px', display:'table-cell'})
+            .css({'min-width':'16px', display:'table-cell'})
             .appendTo( this.element );
 
         }else{
@@ -140,7 +140,7 @@ $.widget( "heurist.editing_input", {
                 //spacer
                 $( "<span>")
                 .addClass('editint-inout-repeat-button')
-                .css({width:'16px', display:'table-cell'})
+                .css({'min-width':'16px', display:'table-cell'})
                 .appendTo( this.element );
                 
             }else{ //multiplier button

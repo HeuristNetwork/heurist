@@ -574,24 +574,28 @@ window.hWin.HEURIST4.ui = {
         for(m=0;m<lenn;m++){
 
             var termTree = toparray[m];
+            
+            if(!window.hWin.HEURIST4.util.isempty(termTree)){
 
-            //
-            //prepare tree
-            //
-            if(window.hWin.HEURIST4.util.isNumber(termTree)){
-                //this is vocabulary id - show list of all terms for this vocab
-                var tree = terms.treesByDomain[datatype];
-                termTree = (termTree>0)?tree[termTree]:tree;
-            }else{
-                termTree = (typeof termTree == "string") ? $.parseJSON(termTree) : null;
-                if(termTree==null){
-                    termTree = terms.treesByDomain[datatype];
+                //
+                //prepare tree
+                //
+                if(window.hWin.HEURIST4.util.isNumber(termTree)){
+                    //this is vocabulary id - show list of all terms for this vocab
+                    var tree = terms.treesByDomain[datatype];
+                    termTree = (termTree>0)?tree[termTree]:tree;
+                }else{
+                    termTree = (typeof termTree == "string") ? $.parseJSON(termTree) : null;
+                    if(termTree==null){
+                        termTree = terms.treesByDomain[datatype];
+                    }
                 }
-            }
 
-            var reslist = createSubTreeOptions(null, [], termTree, termLookup, defaultTermID);
-            if(!selObj){
-                reslist_final = reslist_final.concat( reslist);
+                var reslist = createSubTreeOptions(null, [], termTree, termLookup, defaultTermID);
+                if(!selObj){
+                    reslist_final = reslist_final.concat( reslist);
+                }
+            
             }
         }
 

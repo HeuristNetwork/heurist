@@ -245,7 +245,7 @@ fieldset > div > .header{
 fieldset > div > .input-cell{
     display:table-cell;
     min-width:120px;
-    /*padding-bottom:0.2em;*/
+    padding-bottom:0.2em;
 }
 fieldset.ontop > div > .input-cell{
     display:block;

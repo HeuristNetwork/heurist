@@ -767,7 +767,7 @@ $.widget( "heurist.manageEntity", {
                 var sleft = offset.left+w> $(document).width()?'0':offset.left+20; 
                 position = { my: "left top", at: sleft+' '+stop, within:window};
                 */
-                position = { my: "left top", at:'left+20 top+20', of:dlg};
+                position = { my: "left top", at:'left+20 top+60', of:dlg};
             }
             
             return position;
