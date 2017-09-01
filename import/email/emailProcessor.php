@@ -34,9 +34,9 @@
 
 set_time_limit(0); //no limit
 
-require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../common/php/getRecordInfoLibrary.php');
-require_once(dirname(__FILE__)."/../records/files/uploadFile.php");
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 if (! is_logged_in()) {
     header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -44,7 +44,7 @@ if (! is_logged_in()) {
 }
 
 $_POST["save-mode"] = "none";
-require_once(dirname(__FILE__).'/../records/edit/saveRecordDetails.php');
+require_once(dirname(__FILE__).'/../../records/edit/saveRecordDetails.php');
 
 require_once(dirname(__FILE__). '/classEmailProcessor.php');
 
