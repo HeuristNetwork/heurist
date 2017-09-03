@@ -976,7 +976,23 @@ window.hWin.HEURIST4.util = {
         }
 
         return 0;
-    }    
+    },
+    
+    uniqueArray: function(arr){
+        
+            var n = {},r=[];
+            for(var i = 0; i < arr.length; i++) 
+            {
+                if (!n[arr[i]]) 
+                {
+                    n[arr[i]] = true; 
+                    r.push(arr[i]); 
+                }
+            }
+            return r;            
+    }
+    
+        
 
 }//end util
 
@@ -1010,6 +1026,30 @@ if (!Array.prototype.indexOf)
     };
 }
 
+/*
+if (!Array.prototype.unique){
+
+    Array.prototype.unique = function()
+    {
+        
+        //return $.grep(this, function(el, index) {
+        //    return index === $.inArray(el, this);
+        //});
+        
+        
+            var n = {},r=[];
+            for(var i = 0; i < this.length; i++) 
+            {
+                if (!n[this[i]]) 
+                {
+                    n[this[i]] = true; 
+                    r.push(this[i]); 
+                }
+            }
+            return r;        
+    };
+}
+*/
 }
 
 

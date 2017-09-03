@@ -777,11 +777,18 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 msg+'</div>';
     },
     
-    bringCoverallToFront: function() {
+    bringCoverallToFront: function(ele) {
         if (!  window.hWin.HEURIST4.msg.coverall ) {
             window.hWin.HEURIST4.msg.coverall = 
-                $('<div>').addClass('coverall-div').css('zIndex',99999999999).appendTo('body');
+                $('<div>').addClass('coverall-div').css('zIndex',99999999999);
         }
+        
+        if(ele){
+            if($(ele).find('.coverall-div').length==0) window.hWin.HEURIST4.msg.coverall.appendTo($(ele));
+        }else{
+            if($('body').find('.coverall-div').length==0) window.hWin.HEURIST4.msg.coverall.appendTo('body');
+        }
+        
         $(window.hWin.HEURIST4.msg.coverall).show();
     },    
     

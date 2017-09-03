@@ -128,7 +128,7 @@ $.widget( "heurist.editing_input", {
             //spacer
             $( "<span>")
             .addClass('editint-inout-repeat-button')
-            .css({'min-width':'16px', display:'table-cell'})
+            .css({'min-width':'20px', display:'table-cell'})
             .appendTo( this.element );
 
         }else{
@@ -202,12 +202,13 @@ $.widget( "heurist.editing_input", {
             if(window.hWin.HEURIST4.util.isempty(def_value)){
                 values_to_set = [''];        
             }else if(window.hWin.HEURIST4.util.isArray(def_value)){
-                values_to_set = def_value;
+                //exclude duplication
+                values_to_set = window.hWin.HEURIST4.util.uniqueArray(def_value);//.unique();
             }else{
                 values_to_set = [def_value];
             }
         }else{
-            values_to_set = this.options.values.slice();
+            values_to_set = window.hWin.HEURIST4.util.uniqueArray(this.options.values); //.slice();//.unique();
         }
         //recreate input elements and assign given values
         this.setValue(values_to_set);

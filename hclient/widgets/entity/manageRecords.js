@@ -184,6 +184,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },    
     //override some editing methods
     
+    _getEditDialog: function(){
+            if(this.options.edit_mode=='popup' && this._edit_dialog){
+                return this._edit_dialog; 
+            }else if(this.options.edit_mode=='editonly' && this._as_dialog){
+                return this._as_dialog; 
+            }else{
+                return null;
+            }
+    },
+    
     _getEditDialogButtons: function(){
                                     
             var that = this;        
@@ -213,8 +223,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 click: function(event) { 
                                     var btn = $(event.target);
                                     btn.hide();
+                                    
+                                    var dlged = that._getEditDialog();
+                                    window.hWin.HEURIST4.msg.bringCoverallToFront(dlged.parents('.ui-dialog'));
+                                    
                                     window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
                                         function(response){
+
+                                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                            
                                             btn.css('display','inline-block');
                                             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                 window.hWin.HEURIST4.msg.showMsgFlash(
@@ -1508,11 +1525,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
             that.onEditFormChange(true); //forcefully hide all "save" buttons
             
-                //that.loadanimation(true);
-                window.hWin.HAPI4.RecordMgr.save(request, 
+            var dlged = that._getEditDialog();
+            window.hWin.HEURIST4.msg.bringCoverallToFront(dlged.parents('.ui-dialog'));
+
+            window.hWin.HAPI4.RecordMgr.save(request, 
                     function(response){
                         
-                        //that.onEditFormChange();
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                             var recID = ''+response.data[0];
@@ -1636,12 +1655,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     getUiPreferences: function(){
-                this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
-                if(this.usrPreferences.width<600) this.usrPreferences.width=600;
-                if(this.usrPreferences.height<300) this.usrPreferences.height=300;
-                if (this.usrPreferences.width>this.defaultPrefs.width) this.usrPreferences.width=this.defaultPrefs.width;
-                if (this.usrPreferences.height>this.defaultPrefs.height) this.usrPreferences.height=this.defaultPrefs.height;
-        
+        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+        if(this.usrPreferences.width<600) this.usrPreferences.width=600;
+        if(this.usrPreferences.height<300) this.usrPreferences.height=300;
+        if (this.usrPreferences.width>this.defaultPrefs.width) this.usrPreferences.width=this.defaultPrefs.width;
+        if (this.usrPreferences.height>this.defaultPrefs.height) this.usrPreferences.height=this.defaultPrefs.height;
+        return this.usrPreferences;
     },
     
     //
@@ -1659,6 +1678,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             optfields = true,
             help_on = true;
             
+        var params = this.getUiPreferences();    
             
         if(that.editFormSummary && that.editFormSummary.length>0){
             
@@ -1683,21 +1703,34 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(that.options.isdialog){
                 dwidth  = that._as_dialog.dialog('option','width');
                 dheight = that._as_dialog.dialog('option','height');
+                
+                var cnt = $('div.ui-dialog[posid^="edit'+this._entityName+'"]').length;
+                if(cnt==1){ //save position
+                    var dlged = that._as_dialog.parent('.ui-dialog');
+                    params['top'] = parseInt(dlged.css('top'),10);
+                    params['left'] = parseInt(dlged.css('left'), 10);
+                }
+                
             }else if(that.options.in_popup_dialog==true){
                 dwidth  = window.innerWidth+20;
                 dheight = window.innerHeight+46;
-            }            
+            }      
+                  
         }else                
         if(that._edit_dialog && that._edit_dialog.dialog('isOpen')){
             dwidth  = that._edit_dialog.dialog('option','width'); 
             dheight = that._edit_dialog.dialog('option','height');
         } 
 
+        params.width = dwidth;
+        params.height = dheight;
+        params.help_on = help_on;
+        params.optfields = optfields;
+        params.summary_closed = isClosed;
+        params.summary_width = sz;
+        params.summary_tabs = activeTabs;
 
-        window.hWin.HAPI4.save_pref('prefs_'+this._entityName, 
-            {width:dwidth, height:dheight, help_on:help_on, optfields:optfields, 
-                summary_closed:isClosed, summary_width:sz, summary_tabs:activeTabs} );
-
+        window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         
         return true;
     }

@@ -1090,9 +1090,8 @@ $.widget( "heurist.resultList", {
                     query = this._query_request;
                 }
 
-                window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, function(){
-                    //callback
-                });
+                window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, null);
+                //@todo callback to change rectitle
 
             }else if (action=='edit_ext'){
 
@@ -1697,9 +1696,8 @@ $.widget( "heurist.resultList", {
                         query = this._query_request;
                     }
 
-                    window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, function(){
-                        //callback
-                    });
+                    window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, null);
+                    //@todo callback to change rectitle
                     
                     
                 }

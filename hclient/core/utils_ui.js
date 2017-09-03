@@ -1313,14 +1313,14 @@ window.hWin.HEURIST4.ui = {
     //
     //  
     //
-    openRecordInPopup:function(rec_ID, query_request, isEdit, callback){
+    openRecordInPopup:function(rec_ID, query_request, isEdit, popup_options){
     
             var url = window.hWin.HAPI4.baseURL,
                 dwidth, dheight, dtitle;    
                 
             if(isEdit==true){
-                
-                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, null, {onselect:callback});
+                if(!popup_options) popup_options = {};
+                window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, popup_options);
                 return;
                 
                 // section below NOT USED
@@ -1461,29 +1461,35 @@ window.hWin.HEURIST4.ui = {
                 event.preventDefault();
                 
                 var recID = ele.attr('data-relID');
-                window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit, function(recordset){
-                        if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
+                window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
+                {selectOnSave:true, onselect:
+                    function(event, res){
+                        if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
+                            var recordset = res.selection;
                             var DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
                             var record = recordset.getFirstRecord();
                             var term_ID = recordset.fld(record,DT_RELATION_TYPE);
                             ele.find('.detailType').text(window.hWin.HEURIST4.ui.getTermValue(term_ID)); //update relation type
                         }
-                });
+                }});
             });
         
         }
             
         ele.find('a').click(function(event){
             event.preventDefault();
-            var recID = $(event.target).attr('data-recID');
-            window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit, 
-                    function(recordset){
-                        if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
+            var inpt = $(event.target);
+            var recID = inpt.attr('data-recID');
+            window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
+            {selectOnSave:true, onselect: 
+                    function(event, res){
+                        if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
+                            var recordset = res.selection;
                             var record = recordset.getFirstRecord();
                             var rec_Title = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title'));
-                            $(event.target).text(rec_Title);
+                            inpt.text(rec_Title);
                         }
-                    }
+                    }}
                 );
         });        
         

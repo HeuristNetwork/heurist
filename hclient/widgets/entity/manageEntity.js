@@ -687,7 +687,10 @@ $.widget( "heurist.manageEntity", {
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
                 close:function(){
-                    if($.isFunction(that.options.onClose)) that.options.onClose.call();
+                    if($.isFunction(that.options.onClose)){
+                      //that.options.onClose(that._currentEditRecordset);  
+                      that.options.onClose.call();
+                    } 
                     $dlg.parent().remove();    
                         
                 },
@@ -768,9 +771,23 @@ $.widget( "heurist.manageEntity", {
                 position = { my: "left top", at: sleft+' '+stop, within:window};
                 */
                 position = { my: "left top", at:'left+20 top+60', of:dlg};
+            }else{
+                
+                var prefs = this.getUiPreferences();
+                if(prefs && prefs.top>=0 && prefs.left>=0){
+                    position = { my: "left top", at:'left+'+prefs.left+' top+'+prefs.top}; //relative to window    
+                }
             }
             
+            
+            
+            
             return position;
+    },
+    
+    
+    getUiPreferences:function(){
+        return null;
     },
     
     saveUiPreferences:function(){
