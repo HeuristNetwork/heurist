@@ -234,34 +234,59 @@ _time_debug = new Date().getTime() / 1000;
                
                //@todo define parameter in layout "production=true"
                if(!(window.hWin.HAPI4.sysinfo['layout']=='boro' ||
-                      window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' || 
-                        window.hWin.HAPI4.sysinfo['layout']=='WebSearch' ||
-                            window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
-               
-                var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
-                
-                //
-                // version to compare with server provided - to avoid caching issue
-                //
-                if(window.hWin.HAPI4.is_logged() && window.hWin.HAPI4.sysinfo['version']){
-                    if(version_in_cache){
-                            var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, window.hWin.HAPI4.sysinfo['version']);   
-                            if(res<0){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
-                                // show lock popup that forces to clear cache
-                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
-                                {}/* no buttons */,null,
-                                {options:{hideTitle:true, closeOnEscape:false,
-                                    open:function( event, ui ) {
-                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                                        $dlg.find('#version_cache').text(version_in_cache);
-                                        $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
-                                    }}});
+                   window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' || 
+                   window.hWin.HAPI4.sysinfo['layout']=='WebSearch' ||
+                   window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
 
-                            }
-                    }
-                    window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']); 
-                }
-                }
+                   var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
+
+                   //
+                   // version to compare with server provided - to avoid caching issue
+                   //
+                   if(window.hWin.HAPI4.is_logged() && window.hWin.HAPI4.sysinfo['version']){
+                       if(version_in_cache){
+                           var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, window.hWin.HAPI4.sysinfo['version']);   
+                           if(res<0){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
+                               // show lock popup that forces to clear cache
+                               window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
+                                   {}/* no buttons */,null,
+                                   {options:{hideTitle:true, closeOnEscape:false,
+                                       open:function( event, ui ) {
+                                           var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                           $dlg.find('#version_cache').text(version_in_cache);
+                                           $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
+                               }}});
+
+                           }
+                       }
+                       window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']); 
+                   }
+                   
+                   var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
+                   if(editRecID>0){
+                       //edit record
+                       window.hWin.HEURIST4.ui.openRecordEdit(editRecID, null);
+                   }else
+                   if(window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search) ||
+                        (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) && 
+                         window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search)))
+                   {
+                       
+                       var new_record_params = {
+                            rt: window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search)
+                                                    || window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search),
+                            ro: window.hWin.HEURIST4.util.getUrlParameter('rec_owner', window.location.search),
+                            rv: window.hWin.HEURIST4.util.getUrlParameter('rec_visibility', window.location.search),
+                            tag: window.hWin.HEURIST4.util.getUrlParameter('tag', window.location.search)
+                                ||window.hWin.HEURIST4.util.getUrlParameter('k', window.location.search),
+                            url:  window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search),
+                            desc:  window.hWin.HEURIST4.util.getUrlParameter('d', window.location.search)
+                       };
+                       
+                       //add new record
+                       window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
+                   }
+               }
                 
                 
                 //perform search in the case that parameter "q" is defined
@@ -276,7 +301,6 @@ _time_debug = new Date().getTime() / 1000;
                             window.hWin.HAPI4.SearchMgr.doSearch(document, request);
                     }, 3000);
                 }
-                
                 else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
                         || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
                             
@@ -310,7 +334,7 @@ var fin_time = new Date().getTime() / 1000;
                          title: 'Welcome',
                         buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  }
 
-            }
+            } //onInitCompleted_PerformSearch
 
         </script>
 

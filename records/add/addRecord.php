@@ -30,7 +30,7 @@
 * @subpackage  Records/Add
 */
 
-if (@$_REQUEST['h4']==1){
+if (@$_REQUEST['h4']==2){
     header( 'Location: ../../hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'] );
     return;
 }
@@ -64,15 +64,20 @@ if (@$_REQUEST['addref']) {	// add a record		//saw TODO: change this to addrec
 	else
 		$outdate = '';
 }
-// url with no rectype specified gets treated as an internet bookmark
-if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['rec_rectype'])
-	$_REQUEST['rec_rectype'] = (defined('RT_INTERNET_BOOKMARK')?RT_INTERNET_BOOKMARK:0);
+
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../files/saveURLasFile.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__).'/../disambig/testSimilarURLs.php');
 require_once(dirname(__FILE__).'/../woot/woot.php');
+
+
+// url with no rectype specified gets treated as an internet bookmark
+if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['rec_rectype']){
+    $_REQUEST['rec_rectype'] = (defined('RT_INTERNET_BOOKMARK')?RT_INTERNET_BOOKMARK:0);
+}
+
 
 if (!is_logged_in()) {
 	if (! (@$_REQUEST['bkmrk_bkmk_url'] || @$_REQUEST['bkmrk_bkmk_title'] || @$_REQUEST['bkmrk_bkmk_description']))
@@ -139,13 +144,20 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 	if (substr($burl, -1) == '/') $burl = substr($burl, 0, strlen($burl)-1);
 
 	/* look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it */
-	$res = mysql_query('select bkm_ID from usrBookmarks left join Records on rec_ID=bkm_recID where bkm_UGrpID="'.mysql_real_escape_string($usrID).'"
+	$res = mysql_query('select bkm_ID, rec_ID from usrBookmarks left join Records on rec_ID=bkm_recID where bkm_UGrpID="'.mysql_real_escape_string($usrID).'"
 							and (rec_URL="'.mysql_real_escape_string($burl).'" or rec_URL="'.mysql_real_escape_string($burl).'/")');
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
 		$bkm_ID = $bkmk['bkm_ID'];
-        $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate;
-		header('Location: ' . $url);
+        $rec_ID = $bkmk['rec_ID'];
+        
+        if (@$_REQUEST['h4']==1){
+            header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_ID );
+        }else {
+            $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate;
+            header('Location: ' . $url);    
+        }
+		
 		return;
 	}
 
@@ -463,8 +475,13 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 
 			insert_woot_content($rec_id, $description);
 		}
-        $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
-		header('Location: ' . $url );
+        
+        if (@$_REQUEST['h4']==1){
+            header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
+        }else{        
+            $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
+		    header('Location: ' . $url );
+        }
 		return;
 	}
 }
@@ -478,7 +495,8 @@ if ($rec_id) {
 		'bkm_recID' => $rec_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
-		'bkm_UGrpID' => $usrID
+		'bkm_UGrpID' => $usrID,
+        'bkm_Notes' => @$description
 	));
 	}
 
@@ -553,7 +571,11 @@ if ($rec_id) {
 
 
 	if ($bkm_ID) {
-		if ($isNewRecID) {
+        
+        if (@$_REQUEST['h4']==1){
+            header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
+        }
+        else if ($isNewRecID) {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bib' . $outdate . $wg;
 			header('Location: ' . $url);
 		} else {
@@ -565,6 +587,8 @@ if ($rec_id) {
 }
 
 function insert_woot_content($rec_id, $content) {
+    return; //2017-09-04 no woot anymore
+    
 	$result = loadWoot(array("title" => "record:$rec_id"));
 	if (! $result["success"]) {
 		return;

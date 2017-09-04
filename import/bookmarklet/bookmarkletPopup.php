@@ -367,7 +367,7 @@ bookmark: function(rectype) {
 	}
 	var favicon = Heurist.findFavicon();
 
-	var w = open(Heurist.uriBase +'records/add/addRecord.php?db='+Heurist.database+'&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
+	var w = open(Heurist.uriBase +'records/add/addRecord.php?db='+Heurist.database+'&h4=1&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
 				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
 				 (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '') +
 				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +
