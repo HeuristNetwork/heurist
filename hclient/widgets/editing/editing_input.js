@@ -133,14 +133,14 @@ $.widget( "heurist.editing_input", {
 
         }else{
 
-            var repeatable = (Number(this.f('rst_MaxValues')) != 1)? true : false; //saw TODO this really needs to check many exist
-
+            //saw TODO this really needs to check many exist
+            var repeatable = (Number(this.f('rst_MaxValues')) != 1)? true : false;
             
             if(!repeatable || this.options.suppress_repeat){  
                 //spacer
                 $( "<span>")
                 .addClass('editint-inout-repeat-button')
-                .css({'min-width':'16px', display:'table-cell'})
+                .css({'min-width':'22px', display:'table-cell'})
                 .appendTo( this.element );
                 
             }else{ //multiplier button
@@ -1705,6 +1705,10 @@ $.widget( "heurist.editing_input", {
             this.options.values = values;
         }
 
+        var repeatable = (Number(this.f('rst_MaxValues')) != 1);
+        if(values.length>1 && !repeatable){
+            this.error_message.text('Repeated value for a single value field - please correct').show();
+        }
     },
 
     //
