@@ -195,16 +195,20 @@ function lookupTitle(button) {
 //
 function doBookmark(dbname){
 
-   top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+'records/tags/addTagsPopup.html?db='+dbname,
+   top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+'records/tags/addTagsPopup.html?bookmark-only=1&db='+dbname,
    				{   
-                    title: 'Add tags',
-                    height: '360px', width:'450px',
+                    title: 'Add tags and bookmark',
+                    height:400, width:550,
                     callback: function(tags) {
-                            if(tags){
-   							    document.getElementById('wgTags').value = tags;
-   							    document.getElementById('adding_tags_elt').value = 1;
-   							    document.forms[0].submit();
-                            }
+                        if(tags=='~~~~bookmark-only~~~~'){
+                            document.getElementById('wgTags').value = '';
+                            document.getElementById('adding_tags_elt').value = 1;
+                            document.forms[0].submit();
+                        }else if(tags){
+                            document.getElementById('wgTags').value = tags;
+                            document.getElementById('adding_tags_elt').value = 1;
+                            document.forms[0].submit();
+                        }
    						}
    				} );
 

@@ -212,6 +212,11 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 }
 
 
+//print 'mode '.@$_REQUEST['mode'];
+//print 'addtag '.@$_REQUEST['adding_tags'];
+//print 'links '.@$_REQUEST['links'];
+
+
 $disambiguate_rec_ids = array();
 if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags'])  &&  @$_REQUEST['links'])
 {
@@ -244,13 +249,19 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 		//method to add bookmarks and tags
 		$data = array();
 		$data['rec_ids'] = $record_tobebookmarked;
-		$data['tagString'] = $kwd;
-
-		$res = bookmark_and_tag_record_ids($data);
+        
+        if(!$kwd){
+            $res = bookmark_references($data);
+        }else{
+            $data['tagString'] = $kwd;
+		    $res = bookmark_and_tag_record_ids($data);
+        }
 		if(@$res['ok']){
 			$success = $res['ok'];
 		}else if (@$res['none']){
 			$success = $res['none'];
+        }else if (@$res['execute']){
+            $success = 'Bookmarks added: '.count($res['execute'][3]);
 		}else{
 			$error = $res['problem'];
 		}
@@ -336,7 +347,7 @@ if (@$urls) {
 <script src="importHyperlinks.js"></script>
 <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
 <script>
-//top.HEURIST.loadScript("<?=HEURIST_BASE_URL?>common/php/loadUserInfo.php?db=<?=HEURIST_DBNAME?>");
+top.HEURIST.loadScript("<?=HEURIST_BASE_URL?>common/php/loadUserInfo.php?db=<?=HEURIST_DBNAME?>");
 </script>
 
 <?php //this frame is needed for title lookup ?>

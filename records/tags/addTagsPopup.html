@@ -71,6 +71,7 @@
     </head>
     <body width=450 height=360  class="popup">
         <script src="../../common/js/utilsLoad.js"></script>
+        <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
         <script src="../../common/php/displayPreferences.php"></script>
         <script src="autocompleteTags.js"></script>
 
@@ -93,7 +94,7 @@
                 <tr>
                     <td style="width: 8ex; text-align: right; white-space:nowrap;" nowrap><b>Add tags</b></td>
                     <td style="width: auto;"><input id=tags name=tagString type=text style="width: 100%;"></td>
-                    <td style="width: 4em;"><input type=submit value=Save></td>
+                    <td style="width: 4em;"><input id="btnSave" type=submit value=Save></td>
                 </tr>
             </table>
         </form>
@@ -123,12 +124,17 @@
                     </td>
                 </tr>
             </table>
-            <div  style="position:absolute;bottom:20px;font-size: 85%;">
+            <div id="promt_for_tag" style="position:absolute;bottom:20px;font-size: 85%;">
                 <input type="checkbox" id="cbPrefToggleOff" checked="checked" onclick="onTooglePopup(event)"/>Prompt for tags on data addition (you can turn this popup back on in user preferences)
             </div>
             <script>
                 if (location.search.match(/no-tags/))	// only show the no-tags row if requested
                     document.getElementById("no-tags").style.display = "";
+                    
+                if (location.search.match(/bookmark-only/)){    // only show the no-tags row if requested
+                    document.getElementById("promt_for_tag").style.display = "none";
+                    document.getElementById('btnSave').value = 'Bookmark';
+                }
             </script>
         </div>
 
@@ -174,7 +180,10 @@
             function onCloseWindow(){
 
                 var tags = document.getElementById('tags').value;
-
+                
+                if(location.search.match(/bookmark-only/) && !tags){
+                    window.close('~~~~bookmark-only~~~~');
+                }else
                 if (!location.search.match(/no-tags/)) {
                     if(!tags){
                         var sMsg = "The links you have selected will only be saved if you enter at least one tag.";
@@ -200,14 +209,14 @@
             var alphasort = function(a,b) { a = a.toLowerCase(); b = b.toLowerCase(); return (a < b)? -1 : (a > b)? 1 : 0; };
 
             var topTagsCell = document.getElementById("top-tags-cell");
-            var topTags = top.HEURIST.user.topTags.slice(0);
+            var topTags = top.HEURIST.user?top.HEURIST.user.topTags.slice(0):[];
             topTags.sort(alphasort);
             for (var i=0; i < topTags.length; ++i) {
                 if(topTags[i].indexOf('~')===0) continue;
                 addTagLink(topTags[i], topTagsCell);
             }
             var recentTagsCell = document.getElementById("recent-tags-cell");
-            var recentTags = top.HEURIST.user.recentTags.slice(0, 5);
+            var recentTags = top.HEURIST.user?top.HEURIST.user.recentTags.slice(0, 5):[];
             recentTags.sort(alphasort);
             for (var i=0; i < recentTags.length; ++i) {	// only use the last 5 tags here, we are starved for space
                 if(recentTags[i].indexOf('~')===0) continue;

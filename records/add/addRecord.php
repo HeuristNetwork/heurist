@@ -596,6 +596,7 @@ function insert_woot_content($rec_id, $content) {
 
 function check_rectype_exist($rt) {
 	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes where rty_ID = $rt");
+    if($res)
 	while ($row = mysql_fetch_assoc($res)) {
 		if ($row["rty_ID"] == $rt) {
 			return true;
