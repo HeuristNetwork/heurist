@@ -439,6 +439,9 @@
             }
 
             if($isinsert){
+                if($primary_field_type=='integer' && $fieldname==$primary_field){ //ignore primary field for update
+                   continue;
+                }
                 $query = $query.$fieldname.', ';
                 $query2 = $query2.'?, ';
             }else{
@@ -465,9 +468,13 @@
         }else{
             $query = $query." where ".$primary_field."=".($primary_field_type=='integer'?$rec_ID:"'".$rec_ID."'");
         }
-        
-//error_log($query);        
-//error_log(print_r($params, true));
+/*        
+if($table_name=='usrTags'){
+error_log($query);        
+error_log(print_r($params, true));
+}
+*/
+
 
         $stmt = $mysqli->prepare($query);
         if($stmt){

@@ -150,6 +150,7 @@ class DbEntityBase
             $ret = mysql__insertupdate($mysqli, 
                                     $this->config['tableName'], $this->fields,
                                     $values );
+//error_log('res on save '.$ret);                                            
             if($ret==null){ //it return null for non-numeric primary field
                    $results[] = $record[$this->primaryField];
             }else if(is_numeric($ret)){

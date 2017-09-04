@@ -981,9 +981,6 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
         $query = $query." where ".$table_prefix."ID=".$rec_ID;
     }
 
-//error_log($query);        
-//error_log(print_r($params, true));
-
     $stmt = $mysqli->prepare($query);
     if($stmt){
         call_user_func_array(array($stmt, 'bind_param'), refValues($params));
