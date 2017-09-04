@@ -670,11 +670,16 @@ $.widget( "heurist.manageEntity", {
                 btn_array.push({text:window.hWin.HR('Close'), 
                         click: function() { that.closeDialog(); }}); //use usual close dialog 
             }
-
+            
+            if(position==null) position = { my: "center", at: "center", of: window };
+            var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+            if(options['width']>maxw) options['width'] = maxw*0.95;
+            var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+            if(options['height']>maxh) options['height'] = maxh*0.95;
+            
             //this.options.window = window.hWin;
             
             var $dlg = this.element.dialog({
-            //window.hWin.HEURIST4.msg.showElementAsDialog({
                 autoOpen: false ,
                 //element: this.element[0],
                 height: options['height'],
@@ -778,8 +783,6 @@ $.widget( "heurist.manageEntity", {
                     position = { my: "left top", at:'left+'+prefs.left+' top+'+prefs.top}; //relative to window    
                 }
             }
-            
-            
             
             
             return position;
