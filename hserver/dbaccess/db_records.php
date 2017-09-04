@@ -179,14 +179,14 @@
     */
     function recordSave($system, $record){
 
-        
-        //check capture
-        if (@$record['Captcha'] || @$_SESSION["captcha_code"]){
+//error_log('captcha '.@$_SESSION["captcha_code"].'   '.@$record['Captcha']);
+        //check capture for newsletter subscription
+        if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
             
             $is_InValid = (@$_SESSION["captcha_code"] != @$record['Captcha']);
             
             if (@$_SESSION["captcha_code"]){
-                        unset($_SESSION["captcha_code"]);
+                unset($_SESSION["captcha_code"]);
             }
             if(@$record['Captcha']){
                 unset($record['Captcha']);
@@ -197,7 +197,7 @@
                     'Are you a bot? Please enter the correct answer to the challenge question');
             }else{
                 if($system->get_user_id()<1){ //if captcha is valies allow 
-                    $system->setCurrentUser(array('ugr_ID'=>5,'ugr_FullName'=>'Guest'));
+                    $system->setCurrentUser(array('ugr_ID'=>5, 'ugr_FullName'=>'Guest'));
                 }
             }
         }

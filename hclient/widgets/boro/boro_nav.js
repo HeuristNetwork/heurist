@@ -1796,13 +1796,15 @@ $.widget( "heurist.boro_nav", {
                 details['t:'+that.DT_NAME] = [ newsletter_type_name ];
                 details['t:23'] = [ newsletter_type_email ];
             
+            var entered_captcha = edit_form.find("#captcha").val()?edit_form.find("#captcha").val():'xxx';
+            
 
             var request = {a: 'save', 
                     db: window.hWin.HAPI4.database+'_Signups',
                     ID:-1, //new record
                     RecTypeID: that.RT_PERSON,
                     RecTitle: newsletter_type_name+' ('+newsletter_type_email+')',
-                    Captcha: edit_form.find("#captcha").val(),
+                    Captcha: entered_captcha,
                     details: details };     
                     
             window.hWin.HAPI4.RecordMgr.save(request, 
