@@ -24,6 +24,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     _currentEditRecTypeID:null,
     _isInsert: false,
+    _updated_tags_selection: null,
 
     usrPreferences:{},
     defaultPrefs:{
@@ -225,7 +226,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     btn.hide();
                                     
                                     var dlged = that._getEditDialog();
-                                    window.hWin.HEURIST4.msg.bringCoverallToFront(dlged.parents('.ui-dialog'));
+                                    if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged.parents('.ui-dialog'));
                                     
                                     window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
                                         function(response){
@@ -798,7 +799,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var request = {};
                 request['a']          = 'search'; //action
                 request['entity']     = 'usrTags';
-                request['details']    = 'name';
+                request['details']    = 'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 request['rtl_RecID']  = this._currentEditID;
                 
@@ -809,8 +810,25 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            var recordset = new hRecordSet(response.data);
-                            that._renderSummaryTags(recordset, panel);
+                            //var recordset =  new hRecordSet(response.data);
+                            //that._renderSummaryTags(recordset, panel);
+                            panel.empty();
+                            var recs = (response.data && response.data.records)?response.data.records:[];
+                            
+                            window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                                    container: panel,
+                                    select_mode:'select_multi', 
+                                    layout_mode: '<div class="recordList"/>',
+                                    list_mode: 'compact', //special option for tags
+                                    selection_ids: recs, //already selected tags
+                                    select_return_mode:'recordset', //ids by default
+                                    onselect:function(event, data){
+                                        if(data && data.selection){
+                                            that._updated_tags_selection = data.selection;
+                                            that.onEditFormChange();
+                                        }
+                                    }
+                            });
                         }
                     });
                 
@@ -987,7 +1005,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
              .appendTo(pnl);        
     },
     //
-    //
+    // NOT USED anymore
     //
     _renderSummaryTags: function(recordset, panel){
         
@@ -1000,6 +1018,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .attr('data-id', window.hWin.HAPI4.currentUser['ugr_ID'])
                 .hide().appendTo(panel);
             
+            //render group divs
             var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
             if(groups)
             for (idx in groups)
@@ -1512,6 +1531,29 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             if(fields==null) return; //validation failed
+
+            var that = this;                                    
+
+            //assign new set of tags to record
+            if($.isArray(that._updated_tags_selection)){
+                var request2 = {};
+                request2['a']          = 'action'; //batch action
+                request2['entity']     = 'usrTags';
+                request2['tagIDs']  = that._updated_tags_selection;
+                request2['recIDs']  = that._currentEditID;
+                that._updated_tags_selection = null;
+                
+                window.hWin.HAPI4.EntityMgr.doRequest(request2, 
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            
+                            that._saveEditAndClose( fields, afterAction );
+                        }
+                    });
+                return;
+            }
+
+
        
             var request = {ID: this._currentEditID, 
                            RecTypeID: this._currentEditRecTypeID, 
@@ -1521,13 +1563,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                            ScratchPad: fields['rec_ScratchPad'],
                            'details': fields};
         
-            var that = this;                                    
-
             that.onEditFormChange(true); //forcefully hide all "save" buttons
             
             var dlged = that._getEditDialog();
-            window.hWin.HEURIST4.msg.bringCoverallToFront(dlged.parents('.ui-dialog'));
-
+            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged.parents('.ui-dialog'));
+            
             window.hWin.HAPI4.RecordMgr.save(request, 
                     function(response){
                         
@@ -1583,7 +1623,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var mode = 'hidden';
         if(force_hide!==true){
-            var isChanged = this._editing.isModified();
+            var isChanged = this._editing.isModified() || this._updated_tags_selection!=null;
             mode = isChanged?'visible':'hidden';
             
             if(isChanged && changed_element){

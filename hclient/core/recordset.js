@@ -881,6 +881,7 @@ function hRecordSet(initdata) {
             }
             
             var recID, fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
+            var isexact = {};
             //remove empty fields from request
             for (fieldName in request) {
                 if (request.hasOwnProperty(fieldName) ){
@@ -891,6 +892,10 @@ function hRecordSet(initdata) {
                         dataTypes[fieldName] = __getDataType(fieldName);
                         if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
                             request[fieldName] = request[fieldName].toLowerCase();
+                            if(request[fieldName][0]=='='){
+                                request[fieldName] = request[fieldName].substring(1);
+                                isexact[fieldName] = true;
+                            }
                         }
                     }else{
                         sortFieldsOrder.push(Number(request[fieldName]));
@@ -901,6 +906,7 @@ function hRecordSet(initdata) {
 
             if($.isEmptyObject(request)) return this; //return all
 
+            
             //search
             for(recID in records){
                 var record = records[recID];
@@ -909,6 +915,10 @@ function hRecordSet(initdata) {
                     if(fieldName.indexOf('sort:')<0 && request.hasOwnProperty(fieldName)){
                         if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
                             
+                            if(isexact[fieldName] && this.fld(record,fieldName).toLowerCase() != request[fieldName]){
+                                isOK = false;
+                                break;                            
+                            }else
                             if(this.fld(record,fieldName).toLowerCase().indexOf(request[fieldName])<0){
                                 isOK = false;
                                 break;                            

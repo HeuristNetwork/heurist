@@ -29,31 +29,35 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         //this.options.layout_mode = 'basic';
         this.options.use_cache = true;
-        this.options.list_mode = 'accordions';
+        if(this.options.list_mode!='compact') this.options.list_mode = 'accordions';
         this.options.edit_mode = 'inline'; //online only
 
         this._super();
 
-        //initially hide usage/details        
-        this.editForm.parent().hide();
-        this.recordList.parent().css({'width':'100%', top:0});
-        this.editFormToolbar.css({'padding-right':'8em'});
-        
-        if(this.options.select_mode=='manager'){
-        
-            //expand and show tag details and usage
-            this.btn_show_usage = $('<div>').css({'position':'absolute', top:3, right:3}).appendTo(this.element);
-            this.btn_show_usage.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Usage"), icons: {
-                            secondary: "ui-icon-carat-1-w"}});
-                    
-            this._on( this.btn_show_usage, {"click": this.showHideUsage});
+        if(this.options.list_mode!='compact'){
+            //initially hide usage/details        
+            this.editForm.parent().hide();
+            this.recordList.parent().css({'width':'100%', top:0});
+            this.editFormToolbar.css({'padding-right':'8em'});
         
         
-            this.searchForm.find('.heurist-helper1').hide();
-        }else{
-            this.searchForm.css('height','10em');    
-            this.recordList.css('top','10em');    
+            if(this.options.select_mode=='manager'){
+            
+                //expand and show tag details and usage
+                this.btn_show_usage = $('<div>').css({'position':'absolute', top:3, right:3}).appendTo(this.element);
+                this.btn_show_usage.css({'min-width':'9m','z-index':2})
+                        .button({label: window.hWin.HR("Usage"), icons: {
+                                secondary: "ui-icon-carat-1-w"}});
+                        
+                this._on( this.btn_show_usage, {"click": this.showHideUsage});
+            
+            
+                this.searchForm.find('.heurist-helper1').hide();
+            }else{
+                this.searchForm.css('height','10em');    
+                this.recordList.css('top','10em');    
+            }
+            
         }
         
     },
@@ -66,27 +70,29 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             return false;
         }
 
-        // init search header
-        this.searchForm.searchUsrTags(this.options);
-        
-
-        /*
-        if(this.options.select_mode=='manager'){
-            this.recordList.parent().css({'border-right':'lightgray 1px solid'});
+        if(this.options.list_mode!='compact'){
+            // init search header
+            this.searchForm.searchUsrTags(this.options);
+            
+            this._on( this.searchForm, {
+                    "searchusrtagsonresult": this.updateRecordList
+                    });
+            this._on( this.searchForm, {
+                    "searchusrtagsonfilter": this.filterRecordList
+                    });
+            this._on( this.searchForm, {
+                    "searchusrtagsongroupfilter": this.showHideGroups
+                    });
+        }else{
+            
+            var that = this;
+            window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
+                function(response){
+                        that.updateRecordList(null, {recordset:response});
+                });
         }
-        */
         
-        this._on( this.searchForm, {
-                "searchusrtagsonresult": this.updateRecordList
-                });
-        this._on( this.searchForm, {
-                "searchusrtagsonfilter": this.filterRecordList
-                });
-        this._on( this.searchForm, {
-                "searchusrtagsongroupfilter": this.showHideGroups
-                });
-
-       return true;
+        return true;
     },
     
     //
@@ -94,8 +100,12 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     //
     updateRecordList: function( event, data ){
         this._super(event, data);
-        //use this._cachedRecordset
-        this._updateAccordions( this._cachedRecordset );
+        
+        if(this.options.list_mode=='compact'){
+            this._initCompactUI();
+        }else{
+            this._updateAccordions( this._cachedRecordset );    
+        }
     },
     
     showHideGroups: function(event, groupid){
@@ -298,44 +308,60 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         var that = this;
                 
-                    var item = $(event.target).parents('.recordDiv');
-                    var inpt = item.find('input');
-                    var text = inpt.val();
-                    if(!window.hWin.HEURIST4.util.isempty(text)){
-                        
-                        if(window.hWin.HEURIST4.msg.checkLength(inpt, 'Tag', null, 3, 0)){
-                            
-                            var groupid = $(event.target).parents('.summary-content').attr('data-id');
-                            var fields = {'tag_Text':text,'tag_UGrpID':groupid};
+        var item = $(event.target).parents('.tagDiv');
+        var inpt = item.find('input');
+        var text = inpt.val();
+                    
+        if(!window.hWin.HEURIST4.util.isempty(text)){
+            
+            if(window.hWin.HEURIST4.msg.checkLength(inpt, 'Tag', null, 3, 0)){
+                
+                var groupid;
+                if(this.options.list_mode!='compact'){
+                    groupid = $(event.target).parents('.summary-content').attr('data-id');
+                }else{
+                    groupid = item.find('select').val();
+                }
+                var request = {'tag_Text':'='+text,'tag_UGrpID':groupid};
+                var fields = {'tag_Text':text,'tag_UGrpID':groupid};
 
-                            //check duplication within group
-                            var subset = this._cachedRecordset.getSubSetByRequest(fields, 
-                                                        this.options.entity.fields);
+                //check duplication within group
+                var subset = this._cachedRecordset.getSubSetByRequest(request, 
+                                            this.options.entity.fields);
 
-                            if(subset.length()>0){
-                                
-                                if(this.options.select_mode=='select_multi'){
-                                    //move duplication to picked
-                                    this.recordList.find('div.recordDiv[recid='+subset.getOrder()[0]+']')
-                                        .appendTo(this.recordList.find('div[data-id="'+groupid+'"] > .picked'));
-                                    inpt.val('').focus();
-                                }else{
-                                /*
-                                inpt.addClass( "ui-state-error" );*/
-                                    window.hWin.HEURIST4.msg.showMsgFlash('<span class="ui-state-error" style="padding:10px">Duplication</span>', 2000);
-                                }
-                               //todo select tag instead of warning
-                               
-                            }else{                                                        
-                                that._currentEditID = -1;
-                                fields['tag_ID'] = -1;
-                                that._saveEditAndClose( fields );
-                                inpt.val('').focus();
-                                return;
+                if(subset.length()>0){
+                    
+                    var recID = Number(subset.getOrder()[0]);
+                    if(this.options.selection_ids.indexOf(recID)<0){
+                    
+                        if(this.options.select_mode=='select_multi'){
+                            //move duplication to picked
+                            if(this.options.list_mode!='compact'){
+                                this.recordList.find('div.recordDiv[recid='+recID+']')
+                                    .appendTo(this.recordList.find('div[data-id="'+groupid+'"] > .picked'));
+                            }else{
+                                this._addTagToPicked(recID);
                             }
+                            inpt.val('').focus();
+                        }else{
+                        /*
+                        inpt.addClass( "ui-state-error" );*/
+                            window.hWin.HEURIST4.msg.showMsgFlash('<span class="ui-state-error" style="padding:10px">Duplication</span>', 2000);
                         }
+                        
                     }
-                    inpt.focus(); 
+                   //todo select tag instead of warning
+                   
+                }else{                                                        
+                    that._currentEditID = -1;
+                    fields['tag_ID'] = -1;
+                    that._saveEditAndClose( fields );
+                    inpt.val('').focus();
+                    return;
+                }
+            }
+        }
+        inpt.focus(); 
     },
     
     onDeleteTag: function(event){
@@ -382,36 +408,43 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
             
             if(isNewRecord){
+                //added in manageEntity this._cachedRecordset.addRecord(recID, fields);
+                
                 this._currentEditID = null;
                 this.addEditRecord(null);//clear edit form
                 
-                var content = this.recordList.find('div[data-id="'+fields['tag_UGrpID']+'"]');
+                if(this.options.list_mode=='compact'){
+                    this._addTagToPicked(recID);
+                }else{
                 
-                if(this.options.select_mode=='select_multi'){
-                    this.options.selection_ids.push(recID);
-                    content = content.find('.picked');
-                }
+                    var content = this.recordList.find('div[data-id="'+fields['tag_UGrpID']+'"]');
+                    
+                    if(this.options.select_mode=='select_multi'){
+                        this.options.selection_ids.push(recID);
+                        content = content.find('.picked');
+                    }
+                    
+                    var ele = $('<div class="recordDiv tagDiv" recid="'+recID
+                    +'"><label>'+ fields['tag_Text']
+                    +'</label><div class="rec_action_link" data-key="delete"/>'
+                    +'</div>')
+                            .appendTo(content);
                 
-                var ele = $('<div class="recordDiv tagDiv" recid="'+recID
-                +'"><label>'+ fields['tag_Text']
-                +'</label><div class="rec_action_link" data-key="delete"/>'
-                +'</div>')
-                        .appendTo(content);
-            
-                if(this.options.select_mode=='manager'){
-                    var btns = ele.find('div.rec_action_link').button(
-                                    {icons: {primary: 'ui-icon-circle-close'}, 
-                                     text: false, 
-                                     title: window.hWin.HR('Click to delete tag')});
-                    this._on(btns, {'click':this.onDeleteTag});
+                    if(this.options.select_mode=='manager'){
+                        var btns = ele.find('div.rec_action_link').button(
+                                        {icons: {primary: 'ui-icon-circle-close'}, 
+                                         text: false, 
+                                         title: window.hWin.HR('Click to delete tag')});
+                        this._on(btns, {'click':this.onDeleteTag});
+                    }
+                    this._on(ele, {'click':this.onTagItemClick});
                 }
-                this._on(ele, {'click':this.onTagItemClick});
-
                 
             }else{
                 this.recordList.find('div[recid='+recID+'] > label').text(fields['tag_Text']
                 (fields['tag_Usage']>0?(' ('+fields['tag_Usage']+')'):''));
                 //reload
+                this._cachedRecordset.setRecord(recID, fields);
                 var recordset = this.getRecordSet([recID]);
                 this._initEditForm_step4(recordset);
             }
@@ -425,6 +458,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         //this.addEditRecord(null);
         if(this._editing)this._editing.initEditForm(null, null); 
         this.recordList.find('div.recordDiv[recid='+recID+']').remove();
+        this._cachedRecordset.removeRecord(recID);
     },
     
     selectedRecords: function(value){
@@ -434,5 +468,188 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }
         
         return this._super();
+    },
+    
+//----------------------------------------------------------------------------------    
+    
+    //
+    // compact mode
+    //
+    _initCompactUI: function(){
+        
+        var that = this;
+        
+        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
+        if(!groups){
+                //load detailed info about Workgroups
+                window.hWin.HAPI4.SystemMgr.mygroups(
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
+                            that._initCompactUI();
+                        }
+                });
+                return;
+        }
+        
+        
+        var idx, panel = this.recordList;
+       
+        panel.empty().css({'font-size': '0.9em'});
+        
+        $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>')
+            .css({'padding':'3px 4px'})
+            .attr('data-id', window.hWin.HAPI4.currentUser['ugr_ID'])
+            .hide().appendTo(panel);
+        
+        //render group divs
+        for (idx in groups)
+        {
+            if(idx){
+                var groupID = idx;
+                var name = groups[idx][1];
+                if(!window.hWin.HEURIST4.util.isnull(name))
+                {
+                    $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>')
+                        .css({'padding':'3px 4px'})
+                        .attr('data-id', groupID).hide().appendTo(panel);
+                }
+            }
+        }
+        
+        //add content - selected tags
+        var recordset = this._cachedRecordset;
+        var records = recordset.getRecords();
+        var recID, label, groupid, record, grp, isnone = true;
+        
+        for (idx=0;idx<this.options.selection_ids.length;idx++){
+            this._addTagToPicked(this.options.selection_ids[idx]);
+        }  
+        
+        //add group selector and search/add input     
+        var mdiv = $('<div class="tagDiv" style="text-decoration:none;padding:3px 4px"><label>Add to: </label><select></select>&nbsp;&nbsp;'
+                + '<input type="text" style="width:15ex" size="60"/>'
+                + '<div class="rec_action_link" data-key="add" style="visibility:visible !important"/>'
+                + '</div>').appendTo(panel);
+                
+        that.list_div = $('<div class="list_div">')
+            .css({'z-index':99999, height:'auto', 'max-height':'200px', 'border':'lightgray 1px solid',
+                  cursor:'pointer',' background':'white'})
+            .appendTo($('body')).hide();
+         
+        var input_tag = mdiv.find('input');                             
+
+        var sel_group = mdiv.find('select');
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(sel_group[0], null, 
+                //by default it takes  window.hWin.HAPI4.currentUser.usr_GroupsList,
+            [{key:window.hWin.HAPI4.currentUser['ugr_ID'], title:'Personal tags'}]);
+       sel_group.change(function(){
+              input_tag.val('');
+              that.list_div.hide();
+       }); 
+        
+        //add button
+        var btn_add = mdiv.find('div.rec_action_link').button(
+                        {icons: {primary: 'ui-icon-circle-plus'}, 
+                         text: false, 
+                         label: window.hWin.HR('Click to add tag')});
+
+        this._on(input_tag, {'keypress': function(event){
+            
+                var code = (event.keyCode ? event.keyCode : event.which);
+                if (code == 13) {
+                    this.onAddTag( event );
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                }
+            
+        },
+        'keyup': function(event){
+
+            if(input_tag.val().length>1){
+                
+                var request = {tag_Text:input_tag.val(), tag_UGrpID:sel_group.val() };    
+                var recordset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
+                
+                var records = recordset.getRecords();
+                var order = recordset.getOrder();
+                var recID, label, record;
+                
+                if(order.length>0){
+                    that.list_div.empty();  
+                    for (idx=0;idx<order.length;idx++){
+
+                        recID = order[idx];
+                        if(recID && that.options.selection_ids.indexOf(Number(recID))<0 && records[recID]){
+                            label = recordset.fld(records[recID],'tag_Text');
+                            $('<div recid="'+recID+'">'+label+'</div>').appendTo(that.list_div)
+                            .click( function(event){
+                                $(event.target).hide();
+                                var recID = $(event.target).attr('recid');
+                                that._addTagToPicked(recID);
+                            } );
+                        }
+                    }
+                    that.list_div.show().position({my:'left top', at:'left bottom', of:input_tag}).css({'max-width':input_tag.width()+22});
+                    
+                }else{
+                    that.list_div.hide();  
+                }
+            }else{
+                that.list_div.hide();    
+            }
+            
+        }}
+        );               
+        this._on(btn_add, {'click': this.onAddTag});
+        
+        this._on($(document), {'click': function(event){
+           if($(event.target).parents('.list_div').length==0) { that.list_div.hide(); };
+        }});
+        
+    },
+    
+    
+    _addTagToPicked: function(recID){
+        
+        recID = Number(recID);
+        var recordset = this._cachedRecordset;
+        var record = recordset.getById(recID);
+        var that = this;
+        if(record){
+            var label = recordset.fld(record,'tag_Text');
+            var groupid = recordset.fld(record,'tag_UGrpID');
+                 
+            var grp = this.recordList.find('div[data-id='+groupid+']').show();
+            var ele = $('<div class="tagDiv2" style="display:inline-block;padding-right:4px">'
+                         + '<a href="' + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=tag:'+label
+                         + '" target="_blank">'+label+'</a>'
+            +'<span class="ui-icon ui-icon-circlesmall-close"  recid="'+recID
+            +'" style="display:inline-block;visibility:hidden;width:12px;vertical-align:middle"/></div>')
+                         .appendTo(grp);
+            //css hover doesn't work for unknown reason - todo uss css                                     
+            this._on(ele, {'mouseover':function(event){ 
+                $(event.target).parents('.tagDiv2').find('span').css('visibility','visible');  
+            },'mouseout':function(event){ 
+                $(event.target).parents('.tagDiv2').find('span').css('visibility','hidden');  
+            }});
+            
+            ele.find('span').click(function(event){
+                 var recID = Number($(event.target).attr('recid'));
+                 var idx = that.options.selection_ids.indexOf(recID);
+                 that.options.selection_ids.splice(idx, 1);
+                 $(event.target).parents('.tagDiv2').remove();
+                 that._trigger( "onselect", null, {selection:that.options.selection_ids});
+            });
+            
+                      //display:none;   inline-block
+            if(that.options.selection_ids.indexOf(recID)<0){
+                that.options.selection_ids.push(recID);
+                that._trigger( "onselect", null, {selection:that.options.selection_ids});
+            }
+                         
+        }
     }
+    
+    
+    
 });

@@ -43,7 +43,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
-<!--      
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrTags.js"></script>
+        
+        <!--      
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefFileExtToMimetype.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefFileExtToMimetype.js"></script>
 
@@ -146,6 +150,39 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     }                
             }
 
+            function testTags(){
+                
+                        window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                                container: '#main_div',
+                                select_mode:'select_multi', 
+                                layout_mode: '<div class="recordList"/>',
+                                list_mode: 'compact', //special option for tags
+                                selection_ids:[4,5,6,11,12,15,18], //already selected tags
+                                select_return_mode:'recordset', //ids by default
+                                onselect:function(event, data){
+                                    if(data && data.selection){
+                                        /*assign new set of tags to record
+                                        var request = {};
+                                        request['a']          = 'action'; //batch action
+                                        request['entity']     = 'usrTags';
+                                        request['tagIDs']  = data.selection.getOrder();
+                                        request['recIDs']  = that._currentEditID;
+                                        request['request_id'] = window.hWin.HEURIST4.util.random();
+                                        
+                                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                            function(response){
+                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                }
+                                            });
+                                        //update panel
+                                        that._renderSummaryTags(data.selection, panel);
+                                        */
+                                    }
+                                }
+                        });
+                
+                
+            }
             //
             //
             //
@@ -410,6 +447,7 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <button onclick="testEntity(true)">show in popup dialog</button>
                     <button onclick="testEntity(false)">show on this page</button>
+                    <button onclick="testTags()">embedded select tags</button>
                 </div>
             </div>
         <div id="main_div" style="position:absolute;top:250px;min-height:300px;width:700;border:1px solid">

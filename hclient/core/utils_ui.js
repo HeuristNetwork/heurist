@@ -45,8 +45,13 @@ setValueAndWidth assign value to input and adjust its width
 
 ENTITY
 
+openRecordEdit  - open add/edit record form/dialog
+openRecordInPopup - open viewer or add/edit record form
+createRecordLinkInfo - creates ui for resource or relationship record
+
 createEntitySelector - get id-name selector for specified entity
 showEntityDialog - get id-name selector for specified entity
+
 
 Other UI functions    
 initDialogHintButtons - add show hint and context buttons into dialog header
@@ -1213,7 +1218,7 @@ window.hWin.HEURIST4.ui = {
     //
     // important manageRecords.js and selectRecords.js must be loaded
     // if callback is defined it returns added/edited record as recordset
-    //
+    //             
     openRecordEdit:function(rec_ID, query_request, popup_options){
         
         /*
@@ -1391,7 +1396,7 @@ window.hWin.HEURIST4.ui = {
                             + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
                            :'')  
                         + '<div class="detail" '  // truncate
-                        + 'style="display:inline-block;min-width:35ex;padding:2px;max-width:60ex;">'
+                        + 'style="display:inline-block;min-width:35ex;padding:2px;max-width:160ex;">'
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
                         + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']

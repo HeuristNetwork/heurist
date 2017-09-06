@@ -1088,6 +1088,8 @@ $.widget( "heurist.manageEntity", {
     //  it creates hEditing object and warns about save previous data
     //
     _initEditForm_step1: function(recID, afterInitCallback){
+        
+        if(!this.editForm || this.editForm.length==0) return;
 
         var that = this;
         
