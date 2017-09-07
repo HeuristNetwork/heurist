@@ -527,14 +527,15 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }  
         
         //add group selector and search/add input     
-        var mdiv = $('<div class="tagDiv" style="text-decoration:none;padding:3px 4px"><label>Add to: </label><select></select>&nbsp;&nbsp;'
-                + '<input type="text" style="width:15ex" size="60"/>'
+        var mdiv = $('<div class="tagDiv" style="text-decoration:none;padding:3px 4px"><label>Add </label>'
+                + ' <input type="text" style="width:15ex" size="60"/> in <select></select>&nbsp;'
                 + '<div class="rec_action_link" data-key="add" style="visibility:visible !important"/>'
                 + '</div>').appendTo(panel);
                 
         that.list_div = $('<div class="list_div">')
-            .css({'z-index':99999, height:'auto', 'max-height':'200px', 'border':'lightgray 1px solid',
-                  cursor:'pointer',' background':'white'})
+            .addClass('ui-heurist-header2')
+            .css({'z-index':99999, height:'auto', 'max-height':'200px', 'padding':'4px', 'font-size':'1.2em',
+                  cursor:'pointer'})
             .appendTo($('body')).hide();
          
         var input_tag = mdiv.find('input');                             
@@ -549,10 +550,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
        }); 
         
         //add button
-        var btn_add = mdiv.find('div.rec_action_link').button(
-                        {icons: {primary: 'ui-icon-circle-plus'}, 
-                         text: false, 
-                         label: window.hWin.HR('Click to add tag')});
+        var btn_add = mdiv.find('div.rec_action_link').height('14px')
+                        .css({'vertical-align': 'bottom'})
+                        .button({
+                        //icons: {primary: 'ui-icon-circle-plus'}, 
+                        //text: false, 
+                         title: window.hWin.HR('Click to add tag'),
+                         label: window.hWin.HR('OK')});
 
         this._on(input_tag, {'keypress': function(event){
             
@@ -586,11 +590,24 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                                 $(event.target).hide();
                                 var recID = $(event.target).attr('recid');
                                 that._addTagToPicked(recID);
+                                input_tag.val('');
+                                that.list_div.hide();
                             } );
                         }
                     }
                     that.list_div.show().position({my:'left top', at:'left bottom', of:input_tag}).css({'max-width':input_tag.width()+22});
                     
+                }else if(input_tag.val().length>2){
+                    that.list_div.empty();
+                    $('<div><span class="ui-icon ui-icon-check" style="display:inline-block;vertical-align:bottom"/>Confirm New Tag</div>')
+                        .appendTo(that.list_div)
+                            .click( function(event){
+                                    btn_add.click();
+                                    that.list_div.hide();
+                            });
+                    that.list_div.show()
+                        .position({my:'left top', at:'left bottom', of:input_tag}).css({'max-width':'130px'});
+                      
                 }else{
                     that.list_div.hide();  
                 }
@@ -623,7 +640,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             var ele = $('<div class="tagDiv2" style="display:inline-block;padding-right:4px">'
                          + '<a href="' + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=tag:'+label
                          + '" target="_blank">'+label+'</a>'
-            +'<span class="ui-icon ui-icon-circlesmall-close"  recid="'+recID
+            +'<span class="ui-icon ui-icon-circlesmall-close" recid="'+recID
             +'" style="display:inline-block;visibility:hidden;width:12px;vertical-align:middle"/></div>')
                          .appendTo(grp);
             //css hover doesn't work for unknown reason - todo uss css                                     
@@ -633,6 +650,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 $(event.target).parents('.tagDiv2').find('span').css('visibility','hidden');  
             }});
             
+            //delete
             ele.find('span').click(function(event){
                  var recID = Number($(event.target).attr('recid'));
                  var idx = that.options.selection_ids.indexOf(recID);

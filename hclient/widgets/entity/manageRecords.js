@@ -739,13 +739,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
                 
                 if(sRel_Ids.length>0){
-                    $('<div class="detailRowHeader" style="border:none">Related</div>').insertBefore(ele1);
+                    $('<div class="detailRowHeader" style="border:none">Related</div>').css('border','none').insertBefore(ele1);
                 }
                 if(sLink_Ids.length>0){
-                    $('<div class="detailRowHeader">Linked from</div>').insertBefore(ele2);
+                    var ee2 = $('<div class="detailRowHeader">Linked from</div>').insertBefore(ele2);
+                    if(sRel_Ids.length==0){
+                        ee2.css('border','none')
+                    }
                 }
                 if(sRel_Ids.length==0 && sLink_Ids.length==0){
-                    $('<div class="detailRowHeader">none</div>').appendTo(panel);
+                    $('<div class="detailRowHeader">none</div>').css('border','none').appendTo(panel);
                 }
                 
 
