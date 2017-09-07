@@ -780,7 +780,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     bringCoverallToFront: function(ele) {
         if (!  window.hWin.HEURIST4.msg.coverall ) {
             window.hWin.HEURIST4.msg.coverall = 
-                $('<div>').addClass('coverall-div').css('zIndex',99999999999);
+                $('<div>').addClass('coverall-div').css('zIndex',9999999999);
         }
         
         if(ele){

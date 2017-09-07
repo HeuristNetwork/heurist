@@ -387,6 +387,11 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
+            .keydown(function(e){
+                if (e.keyCode == 65 && e.ctrlKey) {
+                    e.target.select()
+                }    
+            })
             .keyup(function(){that._onChange();})
             .change(function(){that._onChange();})
             .appendTo( $inputdiv );
@@ -854,6 +859,13 @@ $.widget( "heurist.editing_input", {
             })
             .appendTo( $inputdiv );
             
+            if(!(this.options.dtID=='file' || this.detailType=="resource" || this.detailType=="date" || this.detailType=="geo")){
+                $input.keydown(function(e){
+                    if (e.keyCode == 65 && e.ctrlKey) {
+                                        e.target.select()
+                    }    
+                });
+            }
             
             if(this.options.dtID=='rec_URL'){
                 
@@ -1710,7 +1722,7 @@ $.widget( "heurist.editing_input", {
             this.error_message.text('Repeated value for a single value field - please correct').show();
         }
     },
-
+    
     //
     // get value for particular input element
     //  input_id - id or element itself

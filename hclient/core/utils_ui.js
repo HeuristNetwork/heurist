@@ -1251,7 +1251,7 @@ window.hWin.HEURIST4.ui = {
                         + '<div class="ent_header editHeader"></div>'
                         + '<div class="editFormDialog ent_content_full">'
                                 + '<div class="ui-layout-center"><div class="editForm"/></div>'
-                                + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
+                                + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                                 //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
                         + '</div>'
                         //+ '<div class="ent_footer editForm-toolbar"/>'
@@ -1467,7 +1467,7 @@ window.hWin.HEURIST4.ui = {
                 
                 var recID = ele.attr('data-relID');
                 window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
-                {selectOnSave:true, onselect:
+                {selectOnSave:true, edit_obstacle: true, onselect:
                     function(event, res){
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                             var recordset = res.selection;
@@ -1486,7 +1486,7 @@ window.hWin.HEURIST4.ui = {
             var inpt = $(event.target);
             var recID = inpt.attr('data-recID');
             window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
-            {selectOnSave:true, onselect: 
+            {selectOnSave:true, edit_obstacle: true, onselect: 
                     function(event, res){
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                             var recordset = res.selection;

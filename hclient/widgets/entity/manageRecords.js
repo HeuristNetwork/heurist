@@ -1502,6 +1502,21 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
             }
             
+            //show coverall to prevnt edit
+            //1. No enough premission
+            //2. Popup for resource field
+            var dlged = that._getEditDialog();
+            if(dlged && this.options.edit_obstacle){ 
+                var ele = $('<div><div class="ui-heurist-header2" style="margin: 40px auto;width: 200px;padding:4px;border-radius:4px">'
+                            +'<h2>View only mode</h2><a href="#">Edit</a></div></div>')
+                       .addClass('coverall-div-bare')
+                       .css({top:'30px', 'text-align':'center','zIndex':9999999999}) //, 'background':'red'
+                       .appendTo(dlged);
+                ele.find('a').click(function(){ele.remove()});
+                this.options.edit_obstacle = false;
+            } 
+            
+            
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
