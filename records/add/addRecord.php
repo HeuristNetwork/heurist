@@ -151,8 +151,11 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 		$bkm_ID = $bkmk['bkm_ID'];
         $rec_ID = $bkmk['rec_ID'];
         
-        if (@$_REQUEST['h4']==1){
-            header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_ID );
+        if (true){ //@$_REQUEST['h4']==1
+            //open edit record in standalone page
+            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_ID );
+            //open edit above main screen as popup dialog
+            //header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_ID );
         }else {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate;
             header('Location: ' . $url);    
@@ -330,7 +333,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		}
         if($is_AddToExtendedDescription){
             mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id
-                    .','.DT_EXTENDED_DESCRIPTION.',"'.mysql_real_escape_string($description).'")');
+                    .','.DT_SHORT_SUMMARY.',"'.mysql_real_escape_string($description).'")'); //was DT_EXTENDED_DESCRIPTION
         }
 		$inserts = array();
 		foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . mysql_real_escape_string($doi) . "')");
@@ -407,7 +410,7 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	}
     if($is_AddToExtendedDescription){
             mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id
-                    .','.DT_EXTENDED_DESCRIPTION.',"'.mysql_real_escape_string($description).'")');
+                    .','.DT_SHORT_SUMMARY.',"'.mysql_real_escape_string($description).'")'); //was DT_EXTENDED_DESCRIPTION
     }
     
 	$inserts = array();
@@ -476,8 +479,11 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
         
-        if (@$_REQUEST['h4']==1){
-            header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
+        if (true){ //@$_REQUEST['h4']==1
+            //open edit record in standalone page
+            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_id );
+            //open edit above main screen as popup dialog
+            //header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
         }else{        
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
 		    header('Location: ' . $url );
@@ -495,8 +501,8 @@ if ($rec_id) {
 		'bkm_recID' => $rec_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
-		'bkm_UGrpID' => $usrID,
-        'bkm_Notes' => @$description
+		'bkm_UGrpID' => $usrID
+        //'bkm_Notes' => @$description
 	));
 	}
 
@@ -572,8 +578,11 @@ if ($rec_id) {
 
 	if ($bkm_ID) {
         
-        if (@$_REQUEST['h4']==1){
-            header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
+        if (true){ //@$_REQUEST['h4']==1
+            //open edit record in standalone page
+            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_id );
+            //open edit above main screen as popup dialog
+            //header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
         }
         else if ($isNewRecID) {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bib' . $outdate . $wg;
@@ -644,8 +653,10 @@ function insert_thumbnail_content($recid, $url){
         
 //check that DT_EXTENDED_DESCRIPTION is defined for given record type
 function checkAddToDescription($rt) {
-    if(defined('DT_EXTENDED_DESCRIPTION') ){
-        $query = 'select rst_ID from defRecStructure where rst_RecTypeID = '.($rt? $rt : RT_INTERNET_BOOKMARK).' and rst_DetailTypeID='.DT_EXTENDED_DESCRIPTION;
+    //before 2017-09-07 it was DT_EXTENDED_DESCRIPTION
+    if(defined('DT_SHORT_SUMMARY') ){
+        $query = 'select rst_ID from defRecStructure where rst_RecTypeID = '
+                   .($rt? $rt : RT_INTERNET_BOOKMARK).' and rst_DetailTypeID='.DT_SHORT_SUMMARY;
         $res = mysql_query($query);
         if (mysql_num_rows($res)>0) {
             return true;

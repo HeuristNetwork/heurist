@@ -91,7 +91,7 @@
                             + '<div class="ent_header editHeader"></div>'
                             + '<div class="editFormDialog ent_content">'
                                     + '<div class="ui-layout-center"><div class="editForm"/></div>'
-                                    + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
+                                    + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                                     //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
                             + '</div>'
                             + '<div class="ent_footer editForm-toolbar"/>'
@@ -119,7 +119,7 @@
                                         if(recset.length()>0){
                                             $container.manageRecords('updateRecordList', null, {recordset:recset});
                                             $container.manageRecords('addEditRecord', (recID>0)?recID:recset.getOrder()[0]);
-                                        }else if(isPopup){
+                                        }else{ // if(isPopup){
                                             window.close();  //nothing found
                                         }
                                     }else{

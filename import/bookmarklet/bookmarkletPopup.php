@@ -144,7 +144,8 @@ render: function() {
 
 		a = td.appendChild(document.createElement("a"));
 		a.target = "_blank";
-		a.href= Heurist.uriBase +'records/edit/editRecord.html?db='+Heurist.database+'&bkmk_id=' + HEURIST_url_bkmk_id;
+        a.href= Heurist.uriBase +'hclient/framecontent/recordEdit.php?db='+Heurist.database+'&recID='+ HEURIST_url_bib_id;
+		//a.href= Heurist.uriBase +'records/edit/editRecord.html?db='+Heurist.database+'&bkmk_id=' + HEURIST_url_bkmk_id;
 		a.onclick = function() { Heurist.close() };
 		a.innerHTML = "edit record";
 
@@ -367,7 +368,7 @@ bookmark: function(rectype) {
 	}
 	var favicon = Heurist.findFavicon();
 
-	var w = open(Heurist.uriBase +'records/add/addRecord.php?db='+Heurist.database+'&h4=1&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
+	var w = open(Heurist.uriBase +'records/add/addRecord.php?db='+Heurist.database+'&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
 				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
 				 (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '') +
 				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +

@@ -50,7 +50,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             //for inline edit - todo remove and not use!    
                             + '<div class="editFormDialog ent_wrapper editor">'
                                     + '<div class="ui-layout-center"><div class="editForm"/></div>'
-                                    + '<div class="ui-layout-east"><div class="editFormSummary">empty</div></div>'
+                                    + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                                     //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
                             +'</div>'
                         +'</div>';
@@ -187,12 +187,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     _getEditDialog: function(){
             if(this.options.edit_mode=='popup' && this._edit_dialog){
-                return this._edit_dialog; 
-            }else if(this.options.edit_mode=='editonly' && this._as_dialog){
-                return this._as_dialog; 
-            }else{
-                return null;
+                return this._edit_dialog.parents('.ui-dialog'); 
+            }else if(this.options.edit_mode=='editonly'){
+
+                if(this._as_dialog){
+                    return this._as_dialog.parents('.ui-dialog'); 
+                }else {
+                    return $(document).find('div.ui-widget')[0];
+                }
             }
+            return null;
     },
     
     _getEditDialogButtons: function(){
@@ -226,7 +230,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     btn.hide();
                                     
                                     var dlged = that._getEditDialog();
-                                    if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged.parents('.ui-dialog'));
+                                    if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
                                     
                                     window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
                                         function(response){
@@ -356,9 +360,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }//popup
             else { //initialize action buttons
                 
-                // in_popup_dialog - it means that list is not visible 
-                // we works with edit part only
-                
                 if(this.options.edit_mode=='editonly'){
                     //this is popup dialog
                    this.editFormToolbar
@@ -374,10 +375,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(this.editFormToolbar && this.editFormToolbar.length>0){
                     
                     var btn_array = this._getEditDialogButtons();
-                    if(this.options.edit_mode=='editonly' && this.options.in_popup_dialog!==false){
-                        //this is standalone window
-                        btn_array.pop();btn_array.pop(); //remove two last buttons about close edit form
-                    }
                     
                     this._toolbar = this.editFormToolbar;
                     this.editFormToolbar.empty();
@@ -440,7 +437,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(!this.usrPreferences.summary_tabs) this.usrPreferences.summary_tabs = ['0','1'];
 
                 //load content for editFormSummary
-                if(this.editFormSummary.text()=='empty'){
+                if(this.editFormSummary.text()=='....'){
                     this.editFormSummary.empty();
                     var headers = ['Admin','Linked records','Scratchpad','Private','Tags','Discussion','Dates']; //'Text',
                     for(var idx in headers){
@@ -482,10 +479,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         if(this.options.edit_mode=='editonly'){
             
-            if(this.options.in_popup_dialog==true){
-                window.close(this._currentEditRecordset);
-            } else if(this.options.isdialog){
+            if(this.options.isdialog){
                 this._as_dialog.dialog('close');
+            }else{
+                window.close(this._currentEditRecordset);
             }
             
         }else if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
@@ -1566,7 +1563,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that.onEditFormChange(true); //forcefully hide all "save" buttons
             
             var dlged = that._getEditDialog();
-            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged.parents('.ui-dialog'));
+            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
             
             window.hWin.HAPI4.RecordMgr.save(request, 
                     function(response){
@@ -1751,9 +1748,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     params['left'] = parseInt(dlged.css('left'), 10);
                 }
                 
-            }else if(that.options.in_popup_dialog==true){
-                dwidth  = window.innerWidth+20;
-                dheight = window.innerHeight+46;
+            }else{
+                //dwidth  = window.innerWidth+20;
+                //dheight = window.innerHeight+46;
             }      
                   
         }else                
