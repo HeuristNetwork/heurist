@@ -2209,6 +2209,10 @@ function EditRecStructure() {
         },
 
         closeWin:function(){
+            if(_expandedRecord!=null){
+                alert("You have to save or cancel changes for editing field first");
+                return;                
+            }
             if(_checkForRequired()){
 
                 _checkForTitleMask(function(){ window.close(editStructure._structureWasUpdated); });
