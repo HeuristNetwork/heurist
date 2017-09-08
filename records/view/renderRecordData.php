@@ -560,6 +560,10 @@ function print_private_details($bib) {
                         $bd['val'] = output_chunker($bd['val']);
                     }
 
+                }else if ($bd['dty_Type'] == 'blocktext') {
+                    
+                        $bd['val'] = nl2br(str_replace(' ', '&nbsp;', output_chunker($bd['val'])));
+                    
                 }else if ($bd['dty_Type'] == 'resource') {
 
                     $rec_id = intval($bd['val']);
