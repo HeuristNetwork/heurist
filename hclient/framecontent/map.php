@@ -446,6 +446,9 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         //document.getElementById("linkTimeline").href = url;
 
+        document.getElementById("code-textbox3").value = url;
+        
+        
         document.getElementById("code-textbox").value = '<iframe src=\'' + url +
         '\' width="800" height="650" frameborder="0"></iframe>';
 
@@ -616,7 +619,9 @@ require_once(dirname(__FILE__)."/initPage.php");
         <label style="font-size:0.9em">Readable code:</label>
         <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
         <label style="font-size:0.9em">Web-safe code:</label>
-        <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="     border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+        <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+        <label style="font-size:0.9em">URL:</label>
+        <textarea id="code-textbox3" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
         
         <p style="padding-top:1em">Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status - private records will not appear on the map, which could therefore be empty. </p>
         <p style="padding-top:1em"><button id="btnExportKML">Create KML for Google Earth</button></p>

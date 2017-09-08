@@ -208,6 +208,10 @@ window.hWin.HEURIST4.util = {
                 query_to_save.push('w='+domain);
             }
             if(!window.hWin.HEURIST4.util.isempty(query)){
+                
+               if($.isArray(query) || $.isPlainObject(query)){
+                  query = JSON.stringify(query);
+               }  
                query_to_save.push('q='+ (encode?encodeURIComponent(query):query) );
             }
             if(!window.hWin.HEURIST4.util.isempty(rules)){
