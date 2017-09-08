@@ -1619,7 +1619,7 @@ var TDuration = function (strDuration) {
 
         toString: function () {
             var temp = "";
-            if (_year || _month || _day || _hour || minute || second) {
+            if (_year || _month || _day || _hour || _minute || _second) {
                 temp += "P";
                 if ( _year ) {
                     temp += _year + "Y";

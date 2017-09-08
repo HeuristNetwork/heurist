@@ -67,15 +67,22 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 					}
 					break;
 				case 'c'://carbon
-					$value = (@$tDate['BPD']? '' . $tDate['BPD'] . ' BPD':
-									@$tDate['BCE']? '' . $tDate['BCE'] . ' BCE': "");
+					$value = (@$tDate['BPD']? ('' . $tDate['BPD'] . ' BP'):
+									(@$tDate['BCE']? '' . $tDate['BCE'] . ' BCE': "") );
 					if ($value) {
-						$value = $value.(@$tDate['DEV']
-                            ? ' ' . convertDurationToDelta($tDate['DEV'],'±')
-                            : (@$tDate['DVP']
-                                ? ' ' . convertDurationToDelta($tDate['DVP'],'+').
-										(@$tDate['DVN']?"/ ".convertDurationToDelta($tDate['DVN'],'-'):"")
-                                : (@$tDate['DVN']?" ".convertDurationToDelta($tDate['DVN'],'-'):"") ));
+                        
+                        if(@$tDate['DEV']){
+                            $value = $value . ' ' . convertDurationToDelta($tDate['DEV'],'±');
+                            
+                        }else if (@$tDate['DVP']){
+						    $value = $value. 
+                                    ' ' . convertDurationToDelta($tDate['DVP'],'+').
+									(@$tDate['DVN']?("/ ".convertDurationToDelta($tDate['DVN'],'-')):"");
+                        }else if (@$tDate['DVN']){
+                                $value = $value.' '.convertDurationToDelta($tDate['DVN'],'-');
+                        }
+                        
+                        
 					}else{
 						$value = "unknown carbon temporal format";
 					}
@@ -245,7 +252,17 @@ function parseDateTime($value) {
 	if($isbce){
 		$value = substr($value,1);
 	}
+    if(strpos($value,'P')===0){
+        $value = substr($value,1);
+    }
 
+    
+    $res = array();
+    
+    /*preg_match('/P(\d+)Y/', $value, $matches);
+    if(count($matches)>0){
+        return array('year'=>$matches[1]);
+    }*/
 	//if (preg_match('/^P([^T]*)T?(.*)$/', $value, $matches)) { // valid ISO Duration split into date and time
 
 	if($value && strlen($value)>10 && strpos($value,'T')>0){
@@ -259,7 +276,6 @@ function parseDateTime($value) {
 
 		$date = @$matches[0];
 		$time = @$matches[1];
-		$res = array();
 
 		if ($date) {
 			if (preg_match('/[YMD]/',$date)){ //char separated version 6Y5M8D
@@ -294,15 +310,17 @@ function convertDurationToDelta($value,$prefix = "") {
 	$date = parseDateTime($value);
 	if ($date) { // valid ISO Duration split into date and time
 
-		return (@$date['year'] ? "$prefix".$date['year'] :
-				@$date['month'] ? "$prefix".$date['month'] :
-				@$date['day'] ? "$prefix".$date['day'] :
-				@$date['hour'] ? "$prefix".$date['hour'] :
-				@$date['minute'] ? "$prefix".$date['minute'] :
-				@$date['second'] ? "$prefix".$date['second'] :
-				"");
+		return (@$date['year'] ? ("$prefix".$date['year'].' years') :
+				(@$date['month'] ? ("$prefix".$date['month'].' months') :
+				(@$date['day'] ? ("$prefix".$date['day'].' days') :
+				(@$date['hour'] ? ("$prefix".$date['hour']) :
+				(@$date['minute'] ? ("$prefix".$date['minute']) :
+				(@$date['second'] ? ("$prefix".$date['second']) :
+				"") )))));
 
-	}
+	} else {
+        return '';
+    }
 }
 
 /**
