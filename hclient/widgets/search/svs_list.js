@@ -108,7 +108,8 @@ $.widget( "heurist.svs_list", {
             this.helper_top = $( '<div>'+window.hWin.HR('right-click in list for menu')+'</div>' )
             //.addClass('logged-in-only heurist-helper1')
             .appendTo( $( "<div>" )
-            .css({'padding':'0.2em 0 0 1.2em','color':'rgb(142, 169, 185)','font-size':'1em','font-style':'italic'}).appendTo(this.div_header) )
+            .css({'padding':'0.2em 0 0 1.2em','color':'rgb(142, 169, 185)','font-size':'1em','font-style':'italic'})
+            .appendTo(this.div_header) );
         }
         //.appendTo( this.accordeon ); 'height':'1.3em', 
         //if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
@@ -657,6 +658,7 @@ $.widget( "heurist.svs_list", {
                     var qname   = that.allowed_svsIDs[svs_ID][_NAME];
                     var isfaceted = that.allowed_svsIDs[svs_ID][_FACET];
                     that._doSearch2( qname, qsearch, isfaceted, event.target );
+                    that.accordeon.find('#search_query').val('');
                 }
             })
             .appendTo(this.accordeon);
@@ -665,6 +667,33 @@ $.widget( "heurist.svs_list", {
 
         if(this.allowed_svsIDs && svsIDs.length==1){
             $(this.accordeon).find('button[data-svs-id="'+svsIDs[0]+'"]').click();
+        }
+        
+        
+        $('<div style="padding:4px;text-align:center"><input id="search_query" style="display:inline-block" type="search" value="">'+
+        '<button id="search_button"/></div>')
+         .appendTo(this.accordeon);
+        var ele_search = this.accordeon.find('#search_query'); //$(window.hWin.document).find('#search_query');
+        if(ele_search.length>0){
+            
+            this._on( ele_search, {
+                keypress: function(e){
+                    var code = (e.keyCode ? e.keyCode : e.which);
+                    if (code == 13) {
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                       that._doSearch2('', ele_search.val(), false, ele_search);
+                    }
+                }
+            });
+                                                                         
+            var btn_search = this.accordeon.find('#search_button')
+                .button({icons:{primary:'ui-icon-search'},text:false}).css({width:'20px', height:'20px'});
+            this._on( btn_search, {
+                click:  function(){
+                       that._doSearch2('', ele_search.val(), false, ele_search);
+                }
+            });
         }
 
 

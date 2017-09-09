@@ -823,7 +823,7 @@ class HPredicate {
 
         $res = 'exists (select dtl_ID from recDetails '.$p
         . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
-        . ' left join Records link on rd.dtl_Value=link.rec_ID '
+        . ' left join Records link on '.$p.'dtl_Value=link.rec_ID '
         .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID '
         .'  and if(dty_Type != "resource", '.$p.'dtl_Value'.$val
         .' , link.rec_Title like "%'.$mysqli->real_escape_string($this->value).'%"))';
