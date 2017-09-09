@@ -458,7 +458,8 @@ $.widget( "heurist.search_faceted", {
        
        this.facets_list.empty();
        
-       var $fieldset = $("<fieldset>").css({'font-size':'0.9em','background-color':'white'}).addClass('fieldset_search').appendTo(this.facets_list);
+       var $fieldset = $("<fieldset>").css({'font-size':'0.9em','background-color':'white'})
+                    .addClass('fieldset_search').appendTo(this.facets_list);
 
        //hide submit button will be displayed in case all fields are input fields (not facets)
        if(true){ 

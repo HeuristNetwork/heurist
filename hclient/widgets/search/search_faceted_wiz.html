@@ -20,34 +20,6 @@
 -->
 <fieldset>
 <input type="hidden" name="svs_ID" id="svs_ID" />
-<div>
-    <div class="header"><label for="svs_Name">Faceted search name</label></div>
-    <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
-        maxlength="30" size="30" />
-    <div style="width: 290px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
-        Used in navigation tree (limit to ~25 characters).
-
-    </div>
-</div>
-
-<div>
-    <div class="header"><label for="svs_Title">Title in user interface</label></div>
-    <input type="text" name="svs_Title" id="svs_Title" class="text ui-widget-content ui-corner-all"
-        maxlength="30" size="30" />
-    <div style="width: 290px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
-        Used in user search interface (limit to ~25 characters).
-
-    </div>
-</div>
-
-
-<div>
-    <div class="header"  style="margin-bottom: 10px; "><label for="svs_UGrpID">Save in work group</label></div>
-    <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
-    <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
-        Use a shared workgroup if you want other people to be able to use your search.
-    </div>
-</div>
 
 <div class="simple-mode">
 <div class="header"><label for="opt_rectypes">Search for (entity type)</label></div>
@@ -57,6 +29,27 @@ This determines the record type which will be retrieved by the search.
 The facets can, however, be based on attributes of other record types linked from this type.
 </div>
 </div>
+
+<div>
+    <div class="header"><label for="svs_Name">Faceted search name</label></div>
+    <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
+        maxlength="30" size="30" />
+    <div style="width: 290px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+        Used in navigation tree (limit to ~25 characters).
+
+    </div>
+</div>
+<div>
+    <div class="header"  style="margin-bottom: 10px; "><label for="svs_UGrpID">Save in work group</label></div>
+    <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
+    <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+        Use a shared workgroup if you want other people to be able to use your search.
+    </div>
+</div>
+</fieldset>
+
+<div class="optional_fields"><h4>Advanced</h4>
+<fieldset>
 
 <div>
 <div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
@@ -70,7 +63,6 @@ The facets can, however, be based on attributes of other record types linked fro
     <div style="width: 420px; font-size: smaller; margin-top: 5px; margin-bottom: 5px;">
             A Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
     </div>
-
 </div>
 
 <div>
@@ -95,20 +87,35 @@ The facets can, however, be based on attributes of other record types linked fro
     </div>
 
 </div>    
+</fieldset>
+</div>
+
+
+<div class="optional_fields"><h4>Public interface</h4>
+<fieldset style="padding-top:10px">
 
 <div>
     <div class="header">
-        <label for="svs_SearchOnReset">Perform search on init</label>
+        <label for="svs_SearchOnReset"></label>
     </div>
     <input name="svs_SearchOnReset" id="svs_SearchOnReset" class="text ui-widget-content ui-corner-all" type="checkbox"
-            style="display:inline-block;margin:0"/>
-    <div style="width: 420px; font-size: smaller; display:inline-block">
+            style="display:inline-block;margin:0" title="Perform search on init"/>
+    <div style="width: 420px; padding-left:10px; font-size: smaller; display:inline-block">
         Display full set of records prior to facet selection
     </div>
 </div>
 
+<div>
+    <div class="header"><label for="svs_Title">Title in user interface</label></div>
+    <input type="text" name="svs_Title" id="svs_Title" class="text ui-widget-content ui-corner-all"
+        maxlength="30" size="30" />
+    <div style="width: 290px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+        Used in user search interface (limit to ~25 characters).
 
+    </div>
+</div>
 </fieldset>
+</div>
 
 <!-- TODO: If the only function of this class is name length warning, remove it and replace with better methodology -->
 <div class="messages"></div>
