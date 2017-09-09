@@ -580,22 +580,27 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 
                 if(order.length>0){
                     that.list_div.empty();  
+                    
                     for (idx=0;idx<order.length;idx++){
 
                         recID = order[idx];
                         if(recID && that.options.selection_ids.indexOf(Number(recID))<0 && records[recID]){
                             label = recordset.fld(records[recID],'tag_Text');
-                            $('<div recid="'+recID+'">'+label+'</div>').appendTo(that.list_div)
+                            $('<div recid="'+recID+'" class="truncate">'+label+'</div>').appendTo(that.list_div)
                             .click( function(event){
                                 $(event.target).hide();
                                 var recID = $(event.target).attr('recid');
                                 that._addTagToPicked(recID);
-                                input_tag.val('');
                                 that.list_div.hide();
+                                input_tag.val('').focus();
                             } );
+
                         }
                     }
-                    that.list_div.show().position({my:'left top', at:'left bottom', of:input_tag}).css({'max-width':input_tag.width()+22});
+                    
+                    that.list_div.show().position({my:'left top', at:'left bottom', of:input_tag})
+                    //.css({'max-width':(maxw+'px')});
+                    .css({'max-width':input_tag.width()+60});
                     
                 }else if(input_tag.val().length>2){
                     that.list_div.empty();
@@ -606,7 +611,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                                     that.list_div.hide();
                             });
                     that.list_div.show()
-                        .position({my:'left top', at:'left bottom', of:input_tag}).css({'max-width':'130px'});
+                        .position({my:'left top', at:'left bottom', of:input_tag}).css({'max-width':'120px'});
                       
                 }else{
                     that.list_div.hide();  
