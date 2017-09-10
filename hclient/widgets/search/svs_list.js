@@ -669,11 +669,15 @@ $.widget( "heurist.svs_list", {
             $(this.accordeon).find('button[data-svs-id="'+svsIDs[0]+'"]').click();
         }
         
+        $(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
         
-        $('<div style="padding:4px;text-align:center"><input id="search_query" style="display:inline-block" type="search" value="">'+
-        '<button id="search_button"/></div>')
-         .appendTo(this.accordeon);
-        var ele_search = this.accordeon.find('#search_query'); //$(window.hWin.document).find('#search_query');
+        
+        var search_div = $('<div style="position:absolute;bottom:0px;height:2.5em;padding:4px;text-align:center;width:100%">'
+        +'<label>Search all fields:</label>'
+        +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
+        +'&nbsp;<button id="search_button"/></div>')
+         .insertAfter(this.accordeon);
+        var ele_search = search_div.find('#search_query'); //$(window.hWin.document).find('#search_query');
         if(ele_search.length>0){
             
             this._on( ele_search, {
@@ -687,8 +691,9 @@ $.widget( "heurist.svs_list", {
                 }
             });
                                                                          
-            var btn_search = this.accordeon.find('#search_button')
-                .button({icons:{primary:'ui-icon-search'},text:false}).css({width:'20px', height:'20px'});
+            var btn_search = search_div.find('#search_button')
+                .button({icons:{primary:'ui-icon-search'},text:false})
+                .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
             this._on( btn_search, {
                 click:  function(){
                        that._doSearch2('', ele_search.val(), false, ele_search);
