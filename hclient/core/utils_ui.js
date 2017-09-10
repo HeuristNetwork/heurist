@@ -55,7 +55,6 @@ showEntityDialog - get id-name selector for specified entity
 
 Other UI functions    
 initDialogHintButtons - add show hint and context buttons into dialog header
-initHintButton - button to show/hide hints
 initHelper - Inits helper div (slider) and button   
 
 
@@ -1070,15 +1069,39 @@ window.hWin.HEURIST4.ui = {
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         
         if(!hideHelpButton){
-            var $help_button = $('<div>').button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
+            var $help_menu = $('<ul><li data-level="1"><a><span class="ui-icon"/>Beginner</a></li>'
+                +'<li data-level="2"><a><span class="ui-icon"/>Intermediate</a></li>'
+                +'<li data-level="3"><a><span class="ui-icon"/>Expert</a></li><ul>')
+                .width(150).menu().hide().appendTo($dialog);
+            
+        $help_menu.on( {
+            //mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
+            click: function(event){ 
+                    var exp_level = $(event.target).parents('li').attr('data-level');
+                    window.hWin.HAPI4.save_pref('userCompetencyLevel', exp_level);
+                    $help_menu.hide();
+            },
+            mouseleave : function(){ $help_menu.hide()}
+        });
+            
+            
+            var $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, label:'Show help hints', text:false})
                     .addClass('dialog-title-button')
                     .css({'right':'48px'})
                     .appendTo(titlebar)
                     .on('click', function(event){
-                            window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, true);   
+                           var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel',1);
+                           if(exp_level=='beginner') exp_level = 1;
+                           
+                           $help_menu.find('span').removeClass('ui-icon-check');
+                           $help_menu.find('li[data-level="'+exp_level+'"] > a > span').addClass('ui-icon-check');
+                           
+                           $help_menu.show()
+                            .position({my: "left top", at: "left bottom", of: $help_button });
+                            //window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, true);   
                     });
                     
-           window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, false);         
+           //window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, false);         
         }
 
         if(helpcontent_url){                    
