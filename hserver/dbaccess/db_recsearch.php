@@ -1179,11 +1179,11 @@ $loop_cnt++;
                                             $val = array($row[4], $row[5]); //obfuscated value for fileid and parameters
                                         }
                                     
-                                    }else if(@$row[1]) {
+                                    }else if(@$row[1]!=null) {
                                         $val = $row[1];
                                     }
                                     
-                                    if($val){
+                                    if($val!=null){
                                         $fieldtypes_in_res[$dtyID] = 1;
                                         if( !array_key_exists($dtyID, $records[$recID]['d']) ){
                                             $records[$recID]['d'][$dtyID] = array();
