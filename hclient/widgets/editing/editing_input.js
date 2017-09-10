@@ -988,7 +988,7 @@ $.widget( "heurist.editing_input", {
                 }
                 
                 
-                if($.isFunction($('body').calendarsPicker)){
+                if($.isFunction($('body').calendarsPicker)){ //third party picker - NOT IN USE
                         
                     var defDate = window.hWin.HAPI4.get_prefs("record-edit-date");
                     $input.calendarsPicker({
@@ -1008,7 +1008,7 @@ $.widget( "heurist.editing_input", {
                         showTrigger: '<span class="ui-icon ui-icon-calendar trigger" style="display:inline-block" alt="Popup"></span>'}
                     );     
                            
-                }else{
+                }else{                                       // we use jquery datepicker
                         var $datepicker = $input.datepicker({
                             /*showOn: "button",
                             buttonImage: "ui-icon-calendar",
@@ -1017,8 +1017,20 @@ $.widget( "heurist.editing_input", {
                             changeMonth: true,
                             changeYear: true,
                             dateFormat: 'yy-mm-dd',
+                            beforeShow: function(){
+                                
+                                var prev_dp_value = window.hWin.HAPI4.get_prefs('edit_record_last_entered_date'); 
+                                if($input.val()=='' && !window.hWin.HEURIST4.util.isempty(prev_dp_value)){
+                                    //$datepicker.datepicker( "setDate", prev_dp_value );    
+                                    $datepicker.datepicker( "option", "defaultDate", prev_dp_value); 
+                                }
+                            
+                            },
                             onClose: function(dateText, inst){
                                 __onDateChange();
+                                
+                                if($input.val()!='')
+                                    window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
                                 //$input.change();
                             }
                             /*,beforeShow : function(dateText, inst){
@@ -1037,6 +1049,7 @@ $.widget( "heurist.editing_input", {
                        
                         
                         this._on( $btn_datepicker, { click: function(){
+                            
                                 $datepicker.datepicker( 'show' ); 
                                 $("#ui-datepicker-div").css("z-index", "999999 !important"); 
                                 //$(".ui-datepicker").css("z-index", "999999 !important");   
