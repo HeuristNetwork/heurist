@@ -1255,7 +1255,7 @@ window.hWin.HEURIST4.ui = {
                 
                 if(popup_options && 
                     $.isPlainObject(popup_options.new_record_params) && popup_options.new_record_params['rt']>0){
-                    rec_ID = -1;
+                    //rec_ID = -1;
                     query_request = null;
                 }
                 

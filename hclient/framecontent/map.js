@@ -836,6 +836,7 @@ if(_mapdata.limit_warning){
         vis_timeline.setGroups(groups);
         vis_timeline.setItems(items);
         
+        
         //apply label settings
         _applyTimeLineLabelsSettings(vis_timeline_label_mode);
         

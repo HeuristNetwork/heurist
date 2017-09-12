@@ -121,7 +121,7 @@ $.widget( "heurist.media_viewer", {
             }else{
 
             }  */
-            if($.isFunction(yoxview)){
+            if(yoxview && $.isFunction(yoxview)){
                 $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
             }
             // /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});

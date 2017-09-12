@@ -782,6 +782,7 @@ $.widget( "heurist.editing_input", {
                                         onselect:popup_options.onselect, 
                                         parententity:popup_options.parententity,
                                         selectOnSave:true});
+                                        
                                               $dlg_pce.dialog('close'); 
                                           }},
                                     {text:window.hWin.HR('Select'),

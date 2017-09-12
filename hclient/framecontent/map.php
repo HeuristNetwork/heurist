@@ -490,23 +490,45 @@ require_once(dirname(__FILE__)."/initPage.php");
     
     function refreshMapDocument(){
         var recID = $("#map-doc-select").val();
+        
+        mapping.map_control.loadMapDocuments(recID); //refresh list
+        /*
         $("#map-doc-select").val(recID);
         if(recID>0){
             $("#map-doc-select").change();
         }
+        */
+        
     }
 
     function mapEdit(){
         var recID = $("#map-doc-select").val();
         if(recID>0){
-            window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
+            editRecord(parseInt(recID), window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']);
+            //window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
         }
+    }
+    function editRecord(recID, rt){
+            window.hWin.HEURIST4.ui.openRecordEdit(recID, null, 
+                {new_record_params:{rt:rt},
+                 selectOnSave:true,
+                 onselect:function(event, data){
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        if(rt==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']){
+                            var recordset = data.selection;
+                            var record = recordset.getFirstRecord();
+                            var recID = recordset.fld(record,'rec_ID');
+                            //reload mapdocument list and load added mapdoc
+                            mapping.map_control.loadMapDocuments(recID);
+                        }
+                    }
+                 }});
     }
     function addNewRecord(rt){
 
-
         if(parseInt(rt)>0){
-            window.open(window.hWin.HAPI4.baseURL + 'records/add/addRecord.php?addref=1&db='+window.hWin.HAPI4.database+'&rec_rectype='+rt);
+            editRecord(-1, rt);
+            //window.open(window.hWin.HAPI4.baseURL + 'records/add/addRecord.php?addref=1&db='+window.hWin.HAPI4.database+'&rec_rectype='+rt);
         }else{
             window.hWin.HEURIST4.msg.showMsgDlg(
                 "The required record type "+rt+" has not been defined.<br><br>"+

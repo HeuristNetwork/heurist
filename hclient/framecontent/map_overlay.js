@@ -466,18 +466,32 @@ console.log('load '+current_map_document_id);
 
                 window.hWin.HEURIST4.util.stopEvent(event); return false;})
             .appendTo(legenditem);
+            
             $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+overlay_idx+'"></div>')
             .click(function(event){ 
 
-                var overlay_id = $(this).attr("layerid");
-                var overlay = overlays[overlay_id] ?overlays[overlay_id] :overlays_not_in_doc[overlay_id];  //overlays[index]
-
+                var overlayid = $(this).attr("layerid");
+                var overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
+                
                 if(overlay['editProperties']){
                     overlay.editProperties();
                 }
 
                 window.hWin.HEURIST4.util.stopEvent(event); return false;})
             .appendTo(legenditem);
+            
+            
+            $('<div class="svs-contextmenu ui-icon ui-icon-circle-zoomin" layerid="'+overlay_idx+'"></div>')
+            .click(function(event){ 
+
+                var overlayid = $(this).attr("layerid");
+                var overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
+
+                overlay.zoomToOverlay();
+                
+                window.hWin.HEURIST4.util.stopEvent(event); return false;})
+            .appendTo(legenditem);
+            
 
         }
         //add linked layers
@@ -601,7 +615,8 @@ console.log('load '+current_map_document_id);
     function _getStubOverlay(){
         return {visible:true,
             setVisibility:function(checked){},
-            removeOverlay: function(){}};
+            removeOverlay: function(){},
+            zoomToOverlay: function(){}};
     }
 
     /**
@@ -681,6 +696,9 @@ console.log('load '+current_map_document_id);
                 },
                 removeOverlay: function(){
                     map.overlayMapTypes.setAt(overlay_index, null);
+                },
+                zoomToOverlay: function(){
+                    map.fitBounds(bounds);
                 }
             };
 
@@ -779,6 +797,11 @@ console.log('load '+current_map_document_id);
         kmlLayer.removeOverlay = function(){
             kmlLayer.setMap(null);
         };
+        kmlLayer.zoomToOverlay = function(){
+            //map.fitBounds(bounds);
+            console.log('to implement');
+        };
+
 
 
         overlays[index] = kmlLayer;
@@ -855,6 +878,15 @@ console.log('load '+current_map_document_id);
             },
             removeOverlay: function(){
                 this.setVisibility(false);
+            },
+            zoomToOverlay: function(){
+                if(data && data.geojson && data.geojson.bbox){
+                    var swBound = new google.maps.LatLng(data.geojson.bbox[1], data.geojson.bbox[0]);
+                    var neBound = new google.maps.LatLng(data.geojson.bbox[3], data.geojson.bbox[2]);
+                    var bounds = new google.maps.LatLngBounds(swBound, neBound);
+                    map.fitBounds( bounds );
+                }
+                    
             }
         };
         overlays[index] = overlay;
@@ -1165,6 +1197,9 @@ console.log('load '+current_map_document_id);
                     mapping.deleteDataset( this.id ); //mapdata.id);
                     this.removeDependentLayers();
                 },
+                zoomToOverlay: function(){
+                    mapping.zoomDataset( this.id );
+                },
                 removeDependentLayers: function(){
                     if(this.dependent_layers){
                         var idx;
@@ -1208,13 +1243,16 @@ console.log('load '+current_map_document_id);
             }
         }
     }
-
+        
+/* NOT USED             
     function _zoomToMapdata( _mapdataid ) {
         var overlay = _getOverlayByMapdataId( _mapdataid );
         if(overlay!=null){
             mapping.zoomDataset( _mapdataid );
         }
     }
+    
+
     //
     //
     //
@@ -1231,7 +1269,7 @@ console.log('load '+current_map_document_id);
         }
         return null;
     }
-
+*/
     //
     //
     //
@@ -1328,10 +1366,25 @@ console.log('load '+current_map_document_id);
                     //change color scheme if required
                     mapping.changeDatasetColor( 'main', new_color, false );
                     //rename dataset for timeline items
+                    /*
+                    var uniqids = {};
                     for (var i=0; i<mapdata.timeline.items.length; i++){
-                        mapdata.timeline.items[i].id = mapdata.id + '-' +  mapdata.timeline.items[i].recID;
+                        if(uniqids[mapdata.timeline.items[i].recID]==undefined){
+                            uniqids[mapdata.timeline.items[i].recID] = 0;
+                        }else{
+                            uniqids[mapdata.timeline.items[i].recID]++;
+                        }
+                        mapdata.timeline.items[i].id = mapdata.id 
+                                        + '-' +  mapdata.timeline.items[i].recID 
+                                        + '-' +uniqids[mapdata.timeline.items[i].recID];
                         mapdata.timeline.items[i].group = mapdata.id 
                     }
+                    */
+                    for (var i=0; i<mapdata.timeline.items.length; i++){
+                        mapdata.timeline.items[i].id = mapdata.timeline.items[i].id.replace('main-',(mapdata.id+'-'));
+                        mapdata.timeline.items[i].group = mapdata.id;
+                    }
+                    
                     //change color for dependent
                     var idx;
                     for (idx in mapdata.depends){
@@ -1607,6 +1660,13 @@ console.log('load '+current_map_document_id);
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
+        
+        loadMapDocuments:function(startup_mapdocument){
+            current_map_document_id = 0;
+            $("#map-doc-select").empty();
+            _loadMapDocuments(startup_mapdocument);
+        },
+        
         loadMapDocumentById: function(mapdocument_id){
             _loadMapDocumentById_init(mapdocument_id);
         },
