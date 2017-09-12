@@ -38,6 +38,10 @@
     Change `sys_SyncDefsWithDB` Varchar( 1000 ) NULL DEFAULT ''
     COMMENT 'One or more Zotero library name,userID,groupID,key combinations separated by pipe symbols, for synchronisation of Zotero libraries';
 
+ALTER TABLE `usrSavedSearches` 
+        CHANGE COLUMN `svs_Name` `svs_Name` VARCHAR(128) NOT NULL COMMENT 'The display name for this saved search' ;
+    
+-- ---------------------------------------------------------------------------------------------------------------------------------
 -- Addition of certainty and annotation fields for alignment with NeCTAR/LIEF FAIMS project
 -- This is also a potentially very useful function for broader use
     ALTER TABLE `recDetails`
@@ -47,13 +51,37 @@
     ALTER TABLE `recDetails` ADD `dtl_Annotation` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
     COMMENT'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value';
 
+-- ---------------------------------------------------------------------------------------------------------------------------------    
 -- Default behaviour is not to show these, for compatibility with DB version 1.1.0 and before
     ALTER TABLE `defRecStructure` ADD `rst_ShowDetailCertainty` TinyInt(1) NOT NULL  default 0
     COMMENT 'When editing the field, allow editng of the dtl_Certainty value (off by default)';
 
-    ALTER TABLE `defRecStructure` ADD `rst_ShowDetailAnnotation` TinyInt(1) unsigned TinyInt(1) NOT NULL default 0
+    ALTER TABLE `defRecStructure` ADD `rst_ShowDetailAnnotation` TinyInt(1) unsigned NOT NULL default 0
     COMMENT 'When editing the field, allow editng of the dtl_Annotation value (off by default)';
+    
+-- It would of course be better to have a proper plugin architecture for calculated fields, but this provides a good stopgap
+-- method for combining fields eg. to create a unique item identifier for hierarchichally organised entities such as excavated artefacts
+    ALTER TABLE defRecStructure
+    ADD rst_CalcFieldMask Varchar(250) NULL
+    COMMENT 'A mask string along the lines of the title mask allowing a composite field to be generated from other fields in the record' after `rst_CalcFunctionID`;
+    -- Note: should be able to use the title mask routines to manage content of the CalcFieldmask, and both can be extended together
+    -- eg. refomatting dates, truncating strings
+    
+    ALTER TABLE defRecStructure
+    ADD rst_NumericLargestValueUsed INTEGER NULL
+    COMMENT 'For numeric fields, Null = no auto increment, 0 or more indicates largest value used so far. Set to 0 to switch on incrementing';
 
+    ALTER TABLE `defRecStructure` ADD `rst_DisplayHeight` TinyInt(2) unsigned NOT NULL default 3
+    COMMENT 'The field height for this detail type in this record type, only relevant for memo fields' AFTER `rst_DisplayWidth`;
+    
+    ALTER TABLE `defRecStructure` ADD `rst_EntryMask` Varchar(250) NULL
+    COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc. for this record type - future implementation Aug 2017';
+    
+    ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;    
+
+    ALTER TABLE `defRecStructure` ADD COLUMN `rst_InitialRepeats` TINYINT(1) DEFAULT 1 COMMENT 'Number of repeat values to be displayed for this field when a new record is first displayed' AFTER `rst_MinValues`;     
+
+-- ---------------------------------------------------------------------------------------------------------------------------------    
 -- Provision for an image or PDF or external URL to define or illustrate the term
     ALTER TABLE  `defTerms`
     ADD  `trm_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
@@ -63,34 +91,15 @@
     ADD  `trm_IllustrationURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
     COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory';
 
+-- ---------------------------------------------------------------------------------------------------------------------------------    
     -- Provision for an external semantic URL to define the base field type
     ALTER TABLE  `defDetailTypes`
     ADD  `dty_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
     COMMENT 'The URL to a semantic definition or web page describing the base field type';
 
--- It would of course be better to have a proper plugin architecture for calculated fields, but this provides a good stopgap
--- method for combining fields eg. to create a unique item identifier for hierarchichally organised entities such as excavated artefacts
-    ALTER TABLE defRecStructure
-    ADD rst_CalcFieldMask Varchar(250) NULL
-    COMMENT 'A mask string along the lines of the title mask allowing a composite field to be generated from other fields in the record';
-    -- Note: should be able to use the title mask routines to manage content of the CalcFieldmask, and both can be extended together
-    -- eg. refomatting dates, truncating strings
-
-    ALTER TABLE defRecStructure
-    ADD rst_NumericLargestValueUsed INTEGER NULL
-    COMMENT 'For numeric fields, Null = no auto increment, 0 or more indicates largest value used so far. Set to 0 to switch on incrementing';
-
-    ALTER TABLE `defRecStructure` ADD `rst_DisplayHeight` TinyInt(2) unsigned NOT NULL default 3
-    COMMENT 'The field height for this detail type in this record type, only relevant for memo fields';
-    
-    ALTER TABLE `defRecStructure` ADD `rst_EntryMask` Varchar(250) NULL
-    COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc. for this record type - future implementation Aug 2017';
-
-    -- Note: need to set initial value if not 0 and protect numeric auto-increment fields against manual editing
-    
-    ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;    
-
+-- ---------------------------------------------------------------------------------------------------------------------------------    
     ALTER TABLE `usrBookmarks` ADD `bkm_Notes` text COMMENT 'Personal notes';
 
     ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` text COMMENT 'JSON array that describes treeview for filters'
+    
     
