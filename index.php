@@ -245,7 +245,8 @@ _time_debug = new Date().getTime() / 1000;
                    //
                    if(window.hWin.HAPI4.is_logged() && window.hWin.HAPI4.sysinfo['version']){
                        if(version_in_cache){
-                           var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, window.hWin.HAPI4.sysinfo['version']);   
+                           var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, 
+                                                                              window.hWin.HAPI4.sysinfo['version']);   
                            if(res<0){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
                                // show lock popup that forces to clear cache
                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
@@ -260,7 +261,28 @@ _time_debug = new Date().getTime() / 1000;
                            }
                        }
                        window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']); 
+                       
+                       var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
+                                                                          window.hWin.HAPI4.sysinfo.db_version);   
+                       if(res==-2){ //-2= db_version_req newer
+                           // show lock popup that forces to upgrade database
+                           window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionDbCheckMsg.html',
+                               {'Upgrade':function(){
+//console.log(window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);                                   
+top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);
+                               }},null,
+                               {options:{hideTitle:false, closeOnEscape:false,
+                                   open:function( event, ui ) {
+                                       var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                       $dlg.find('#version_db').text(window.hWin.HAPI4.sysinfo.db_version);
+                                       $dlg.find('#version_min_db').text(window.hWin.HAPI4.sysinfo.db_version_req);
+                                       $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
+                           }}});
+
+                       }
+                       
                    }
+                   
                    
                    var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
                    if(editRecID>0){

@@ -79,6 +79,7 @@
                                     print "<p>Upgraded to ".$src_maj.".".$src_min.".0</p>";
                                 }else{
                                     $upgrade_success = false;
+                                    break;
                                 }
 
                             }else{

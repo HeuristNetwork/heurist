@@ -182,12 +182,13 @@ if (!$error && !TESTMODE)
   { reset($pre_query);
     foreach ($pre_query as $pre_query_value)
     {	if (!@mysql_query($pre_query_value, $dbconnection))
-    	{ echo ("<p class=\"error\">Error with pre-query.</p>\n");
-      	echo ("<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n");
-      	echo ("<p>MySQL: ".mysql_error()."</p>\n");
-      	$error=true;
-      	break;
-     }
+    	{ 
+            echo ("<p class=\"error\">Error with pre-query.</p>\n");
+      	    echo ("<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n");
+      	    echo ("<p>MySQL: ".mysql_error()."</p>\n");
+      	    $error=true;
+      	    break;
+        }
     }
   }
 }
@@ -287,10 +288,11 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
   {
     $query = "DELETE FROM `$csv_insert_table`";
     if (!TESTMODE && !mysql_query(trim($query), $dbconnection))
-    { echo ("<p class=\"error\">Error when deleting entries from $csv_insert_table.</p>\n");
-      echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
-      echo ("<p>MySQL: ".mysql_error()."</p>\n");
-      $error=true;
+    { 
+        echo ("<p class=\"error\">Error when deleting entries from $csv_insert_table.</p>\n");
+        echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
+        echo ("<p>MySQL: ".mysql_error()."</p>\n");
+        $error=true;
     }
   }
 
@@ -451,11 +453,15 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 // echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
 
         if (!TESTMODE && !mysql_query($query, $dbconnection))
-        { echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n");
-          echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
-          echo ("<p>MySQL: ".mysql_error()."</p>\n");
-          $error=true;
-          break;
+        { 
+            echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n");
+            echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
+            $errorMsg = mysql_error();
+            echo ("<p>MySQL: ".$errorMsg."</p>\n");
+            if(strpos($errorMsg,'Duplicate column')===false){
+                $error = true;
+            }
+            break;
         }
         $totalqueries++;
         $queries++;

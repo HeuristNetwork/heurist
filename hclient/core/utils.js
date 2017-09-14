@@ -935,7 +935,7 @@ window.hWin.HEURIST4.util = {
      versionCompare: function(v1, v2, options) {
          // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
          // used to detect change in version so that user is prompted to clear cache and reload
-         // returns -1 if cached version is older, -2 if cached version is newer, +1 if they are the same
+         // returns -1 if v1 is older, -2 v1 is newer, +1 if they are the same
         var lexicographical = options && options.lexicographical,
             zeroExtend = options && options.zeroExtend,
             v1parts = v1.split('.'),

@@ -25,13 +25,27 @@
 // TODO: Rationalise th duplication of constants across /php/consts.php and /common/connect/initialise.php
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
 
-define('HEURIST_VERSION', $version);
+define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.1.0");
 define('HEURIST_HELP', "http://heurist.sydney.edu.au/help");
+define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/heurist/");
+
+if (@$httpProxy != '') {
+    define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
+    if (@$httpProxyAuth != '') {
+        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
+    }
+}
 
 if (!@$serverName) {
     $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
+    define('HEURIST_DOMAIN', $_SERVER["SERVER_NAME"]);
+}else{
+    $k = strpos($serverName,":");
+    define('HEURIST_DOMAIN', ($k>0)?substr($serverName,0,$k-1):$serverName );
 }
+
+
 
 $isSecure = false;
 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {

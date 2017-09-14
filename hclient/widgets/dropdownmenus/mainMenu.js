@@ -49,17 +49,30 @@ $.widget( "heurist.mainMenu", {
             this.div_logo.button();
         }
 
+        var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.version_new, window.hWin.HAPI4.sysinfo['version']);   
+        var sUpdate = '';
+        if(res==-2){ // -2=newer code on server
+            sUpdate = '&nbsp;<span class="ui-icon ui-icon-alert" style="width:16px;display:inline-block;vertical-align: middle;cursor:pointer">';
+        }
 
         $("<div>")
             .css({'font-size':'0.8em', 'text-align':'center', 'margin-left': '100px', 'padding-top':'16px', 'width':'100%'})
-            .text("v"+window.hWin.HAPI4.sysinfo.version).appendTo( this.div_logo );
-
+            .html('<span style="padding-left:20px">v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>').appendTo( this.div_logo );
+            
         // bind click events
         this._on( this.div_logo, {
-            click: function(){
-                
-                document.location.reload();
-
+            click: function(event){
+                if($(event.target).is('span.ui-icon-alert')){
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                    "Your server is running Heurist version "+window.hWin.HAPI4.sysinfo['version']+" The current stable version of Heurist (version "
+                    +window.hWin.HAPI4.sysinfo.version_new+") is available from <a target=_blank href='https://github.com/HeuristNetwork/heurist'>GitHub</a> or "
+                    +"<a target=_blank href='http://HeuristNetwork.org'>HeuristNetwork.org</a>. We recommend updating your copy of the software if the sub-version has changed "
+                    +"(or better still with any change of version).<br/><br/>"
+                    +"Heurist is copyright (C) 2007 - 2017 The University of Sydney and available as Open Source software under the GNU-GPL licence. "
+                    +"Beta versions of the software with new features may also be available at the GitHub repository or linked from the HeuristNetwork home page.");
+                }else{
+                    document.location.reload();    
+                }
                 /*var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                 if(!window.hWin.HEURIST4.util.isempty(init_search)){
                     var request = {q: init_search, w: 'a', detail: 'detail', source:'init' };

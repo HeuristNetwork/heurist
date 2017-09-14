@@ -26,8 +26,7 @@ require_once (dirname(__FILE__).'/consts.php');
 
 require_once (dirname(__FILE__).'/dbaccess/utils_db.php');
 require_once (dirname(__FILE__).'/dbaccess/db_users.php');
-require_once (dirname(__FILE__).'/dbaccess/utils_file.php');
-
+require_once (dirname(__FILE__).'/utilities/utils_file.php');
 
 /**
 *  Class that contains mysqli (dbconnection), current user and system settings
@@ -130,8 +129,9 @@ class System {
 
                 $this->login_verify(); //load user info from session
 
-                //consts
-                $this->defineConstants();    //@todo - we do not need to init all constans for every system init - call it as separate method
+                // consts
+                // @todo constants inited once in initPage for index (main) page only
+                $this->defineConstants();  
             }
             $this->is_inited = true;
             return true;
@@ -145,7 +145,7 @@ class System {
     /**
     * Defines all constants
     */
-    function defineConstants() {
+    public function defineConstants() {
         // Record type constants
         global $rtDefines;
         foreach ($rtDefines as $str => $id) {
@@ -502,8 +502,8 @@ class System {
                 }
             }
 
-
-
+            //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
+            $lastCode_VersionOnServer = $this->get_last_code_and_db_version();
 
             $res = array(
                 "currentUser"=>$user,
@@ -511,8 +511,15 @@ class System {
                     "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
                     "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
                     "help"=>HEURIST_HELP,
-                    "version"=>HEURIST_VERSION,
-                    "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
+                    
+                    //code version
+                    "version"=>HEURIST_VERSION,    
+                    "version_new"=>$lastCode_VersionOnServer,
+                    //db version
+                    "db_version"=> '1.1.0', //$this->get_system('sys_dbVersion').'.'.$this->get_system('sys_dbSubVersion').'.'.$this->get_system('sys_dbSubSubVersion'),         
+                    "db_version_req"=>HEURIST_MIN_DBVERSION,
+                    
+                    "dbowner_name"=>@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'],
                     "dbowner_email"=>@$dbowner['ugr_eMail'],
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
@@ -1002,6 +1009,59 @@ class System {
             $val += 2.0 * (PHP_INT_MAX + 1);
         }
         return $val;
+    }
+    
+    //
+    //
+    //
+    private function get_last_code_and_db_version(){
+        
+        
+        $version_last_check = 'unknown';
+        $need_check_main_server = true;
+        
+        $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
+        if (file_exists($fname)){
+            //last check and version
+            list($date_last_check, $version_last_check) = explode("|", file_get_contents($fname));
+
+            //debug  $date_last_check = "2013-02-10";
+            if($date_last_check && strtotime($date_last_check)){
+
+                    $days =intval((time()-strtotime($date_last_check))/(3600*24)); //days since last check
+
+                    if(intval($days)<1){
+                        $need_check_main_server = false;
+                    }
+            }
+        }//file exitst
+        
+        if($need_check_main_server){
+            //send request to main server at HEURIST_INDEX_BASE_URL
+            // Heurist_Master_Index is the refernece standard for current database version
+            // Maybe this should be changed to Heurist_Sandpit?. Note: sandpit no longer needed, or used, from late 2015
+            $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
+
+            $rawdata = loadRemoteURLContentSpecial($url); //it returns HEURIST_VERSION."|".HEURIST_DBVERSION
+            
+            
+            if($rawdata){
+                $current_version = explode("|", $rawdata);
+
+                if (count($current_version)>0)
+                {
+                    $curver = explode(".", $current_version[0]);
+                    if( count($curver)>=2 && intval($curver[0])>0 && is_numeric($curver[1]) && intval($curver[1])>=0 ){
+                        $version_last_check = $current_version[0];
+                    }
+                }
+            }
+            
+            $version_in_session = date("Y-m-d").'|'.$version_last_check;
+            fileSave($version_in_session, $fname);
+        }
+        
+        return $version_last_check; 
     }
     
 }
