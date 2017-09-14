@@ -71,6 +71,18 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
                 }
             }
         }
+    }else{
+        
+            if(defined("HEURIST_HTTP_PROXY")){
+                $data = loadRemoteURLContent($reg_url, false); //false = USE PROXY
+                if($data){
+                    $registeredDBs = json_decode($data);
+                    if(!is_array($data)){
+                        $registeredDBs = array();
+                    }
+                }
+            }        
+        
     }
 
 }else{ // this is a connection on the same server as the master index
