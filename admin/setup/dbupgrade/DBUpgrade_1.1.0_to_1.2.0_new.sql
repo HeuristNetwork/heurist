@@ -84,17 +84,17 @@ BEGIN
         "VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value'");
     
     CALL sp_AlterTable(db_name,"defRecStructure","rst_ShowDetailCertainty",
-        "TinyInt(1) NOT NULL  default 0 COMMENT 'When editing the field, allow editng of the dtl_Certainty value (off by default)'");
+        "TinyInt(1) NOT NULL  default 0 COMMENT 'When editing the field, allow editng of the dtl_Certainty value (off by default)' after `rst_TermIDTreeNonSelectableIDs`");
     CALL sp_AlterTable(db_name,"defRecStructure","rst_ShowDetailAnnotation",
-        "TinyInt(1) UNSIGNED NOT NULL default 0 COMMENT 'When editing the field, allow editng of the dtl_Annotation value (off by default)'");
+        "TinyInt(1) UNSIGNED NOT NULL default 0 COMMENT 'When editing the field, allow editng of the dtl_Annotation value (off by default)'  after `rst_ShowDetailCertainty`");
     CALL sp_AlterTable(db_name,"defRecStructure","rst_CalcFieldMask",
         "Varchar(250) NULL COMMENT 'A mask string along the lines of the title mask allowing a composite field to be generated from other fields in the record' after `rst_CalcFunctionID`");
     CALL sp_AlterTable(db_name,"defRecStructure","rst_NumericLargestValueUsed",
-        "INTEGER NULL COMMENT 'For numeric fields, Null = no auto increment, 0 or more indicates largest value used so far. Set to 0 to switch on incrementing'");
+        "INTEGER NULL COMMENT 'For numeric fields, Null = no auto increment, 0 or more indicates largest value used so far. Set to 0 to switch on incrementing' after `rst_ShowDetailAnnotation`");
     CALL sp_AlterTable(db_name,"defRecStructure","rst_DisplayHeight",
         "TinyInt(2) unsigned NOT NULL default 3 COMMENT 'The field height for this detail type in this record type, only relevant for memo fields' AFTER `rst_DisplayWidth`");
     CALL sp_AlterTable(db_name,"defRecStructure","rst_EntryMask",
-        "Varchar(250) NULL COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc. for this record type - future implementation Aug 2017'");
+        "Varchar(250) NULL COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc. for this record type - future implementation Aug 2017' after `rst_NumericLargestValueUsed`");
     CALL sp_AlterTable(db_name,"defRecStructure","rst_CreateChildIfRecPtr",
         "TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`");
     CALL sp_AlterTable(db_name,"defRecStructure","rst_InitialRepeats",

@@ -30,7 +30,8 @@
 -- ***** THIS FILE MUST BE UPDATED IF THE DATABASE STRUCTURE IS CHANGED, see version # below
 --       Extract the relevant tables from blankDBStructure.sql
 
--- ***** Database version: 1.1.0  @ 13/9/2011, upodate 22 July 2014 ******
+-- ***** Database version: 1.1.0  @ 13/9/2011, update 22 July 2014 ******
+-- ***** Database version: 1.2.0  @ 14/9/2017, 
 
 -- -------------------------------------------------------------------------------------------------------
 
@@ -127,6 +128,7 @@ CREATE TABLE defDetailTypes (
   dty_NonOwnerVisibility enum('hidden','viewable','public','pending') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in ALL record types (overrides rst_VisibleOutsideGroup)',
   dty_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   dty_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
+  dty_SemanticReferenceURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a semantic definition or web page describing the base field type',  
   PRIMARY KEY  (dty_ID),
   UNIQUE KEY dty_Name (dty_Name),
   KEY dty_Type (dty_Type),
@@ -202,10 +204,12 @@ CREATE TABLE defRecStructure (
   rst_DisplayHelpText varchar(255) default NULL COMMENT 'The user help text to be displayed for this detail type for this record type',
   rst_DisplayExtendedDescription varchar(5000) default NULL COMMENT 'The rollover text to be displayed for this detail type for this record type',
   rst_DisplayOrder smallint(3) unsigned zerofill NOT NULL default '999' COMMENT 'A sort order for display of this detail type in the record edit form',
-  rst_DisplayWidth tinyint(3) unsigned NOT NULL default '50' COMMENT 'The field width displayed for this detail type in this record type',
+  rst_DisplayWidth tinyint(3) unsigned NOT NULL default '100' COMMENT 'The field width displayed for this detail type in this record type',
+  rst_DisplayHeight tinyint(2) unsigned NOT NULL default '3' COMMENT 'The field height for this detail type in this record type, only relevant for memo fields',
   rst_DefaultValue varchar(63) default NULL COMMENT 'The default value for this detail type for this record type',
   rst_RecordMatchOrder tinyint(1) unsigned NOT NULL default '0' COMMENT 'Indicates order of significance in detecting duplicate records, 1 = highest',
   rst_CalcFunctionID tinyint(3) unsigned default NULL COMMENT 'FK to table of function specifications for calculating string values',
+  rst_CalcFieldMask Varchar(250) NULL COMMENT 'A mask string along the lines of the title mask allowing a composite field to be generated from other fields in the record',
   rst_RequirementType enum('required','recommended','optional','forbidden') NOT NULL default 'optional',
   rst_NonOwnerVisibility enum('hidden','viewable','public','pending') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in a specified record type',
   rst_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
@@ -214,12 +218,17 @@ CREATE TABLE defRecStructure (
   rst_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this record structure element originated',
   rst_MaxValues tinyint(3) unsigned default NULL COMMENT 'Maximum number of values per record for this detail, NULL = unlimited, 0 = not allowed',
   rst_MinValues tinyint(3) unsigned NOT NULL default '0' COMMENT 'If required, minimum number of values per record for this detail',
+  rst_InitialRepeats TINYINT(1) DEFAULT 1 COMMENT 'Number of repeat values to be displayed for this field when a new record is first displayed',
   rst_DisplayDetailTypeGroupID tinyint(3) unsigned default NULL COMMENT 'If set, places detail in specified group instead of according to dty_DetailTypeGroup',
   rst_FilteredJsonTermIDTree varchar(500) default NULL COMMENT 'JSON encoded tree of allowed terms, subset of those defined in defDetailType',
   rst_PtrFilteredIDs varchar(250) default NULL COMMENT 'Allowed Rectypes (CSV) within list defined by defDetailType (for pointer details)',
   rst_CreateChildIfRecPtr tinyint(1) unsigned NOT NULL default '0' COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record',
   rst_OrderForThumbnailGeneration tinyint(3) unsigned default NULL COMMENT 'Priority order of fields to use in generating thumbnail, null = do not use',
   rst_TermIDTreeNonSelectableIDs varchar(255) default NULL COMMENT 'Term IDs to use as non-selectable headers for this field',
+  rst_ShowDetailCertainty TinyInt(1) NOT NULL  default 0 COMMENT 'When editing the field, allow editng of the dtl_Certainty value (off by default)', 
+  rst_ShowDetailAnnotation TinyInt(1) unsigned NOT NULL default 0 COMMENT 'When editing the field, allow editng of the dtl_Annotation value (off by default)',
+  rst_NumericLargestValueUsed INTEGER NULL COMMENT 'For numeric fields, Null = no auto increment, 0 or more indicates largest value used so far. Set to 0 to switch on incrementing',
+  rst_EntryMask Varchar(250) NULL COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc. for this record type - future implementation Aug 2017',
   rst_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   rst_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   PRIMARY KEY  (rst_ID),
@@ -330,6 +339,8 @@ CREATE TABLE defTerms (
   trm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   trm_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   trm_Code varchar(100) default NULL COMMENT 'Optional code eg. alphanumeric code which may be required for import or export',
+  trm_SemanticReferenceURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a semantic definition or web page describing the term',
+  trm_IllustrationURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
@@ -375,7 +386,7 @@ CREATE TABLE defURLPrefixes (
 
 CREATE TABLE usrSavedSearches (
   svs_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Saved search ID, used in publishing, primary key',
-  svs_Name varchar(30) NOT NULL COMMENT 'The display name for this saved search',
+  svs_Name varchar(128) NOT NULL COMMENT 'The display name for this saved search',
   svs_Added date NOT NULL default '0000-00-00' COMMENT 'Date and time saves search added',
   svs_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time saves search last modified',
   svs_Query text NOT NULL COMMENT 'The text of the saved search - added to search URL',
