@@ -1423,12 +1423,13 @@ $.widget( "heurist.editing_input", {
                 title: 'Clear entered value',
                 'data-input-id': $input.attr('id')
             })
-            .addClass("smallbutton btn_input_clear")
-            .css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'',
+            .addClass("smallbutton")//btn_input_clear
+            .css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'middle'})
+/* @todo - need to prevent wrap of clear button for long fields
 'margin-left': (this.detailType=='relmarker' || this.detailType=='geo' || 
                 this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum'  || this.detailType=='date')
                         ?'0px':'-17px'
-            })
+            })*/
             .appendTo( $inputdiv )
             .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
             //.position( { my: "right top", at: "right top", of: $($input) } );
