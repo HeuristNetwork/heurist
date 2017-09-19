@@ -248,14 +248,9 @@ require_once(dirname(__FILE__)."/initPage.php");
         $( window ).resize(function() {
             var w = $(this).width();
             if (w < 400) {
-                $("#mapSelector").hide();
+                $("#mapSelectorBtn").button({text:false}).width(20);
             }else{
-                $("#mapSelector").show();
-                if (w < 490) {
-                    $("#map-doc-select-lbl").hide();
-                }else{
-                    $("#map-doc-select-lbl").show();
-                }
+                $("#mapSelectorBtn").button({text:true}).width(100);
             }
             
             mapping.onWinResize();
@@ -489,20 +484,12 @@ require_once(dirname(__FILE__)."/initPage.php");
     }
     
     function refreshMapDocument(){
-        var recID = $("#map-doc-select").val();
-        
-        mapping.map_control.loadMapDocuments(recID); //refresh list
-        /*
-        $("#map-doc-select").val(recID);
-        if(recID>0){
-            $("#map-doc-select").change();
-        }
-        */
-        
+        var recID = $("#mapSelectorBtn").attr('mapdoc-selected');
+        mapping.map_control.loadMapDocumentById(recID, true);
     }
 
     function mapEdit(){
-        var recID = $("#map-doc-select").val();
+        var recID = $("#mapSelectorBtn").attr('mapdoc-selected');
         if(recID>0){
             editRecord(parseInt(recID), window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']);
             //window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
@@ -543,26 +530,6 @@ require_once(dirname(__FILE__)."/initPage.php");
         }
     }
 
-    //
-    // update mapdocument selector after map document add/edit
-    //
-    function updateCallerAfterSave( record ){
-        if(record && record.rectypeID=='<?=checkRt('RT_MAP_DOCUMENT')?>'){
-            
-            var notfound = true;
-            $('#map-doc-select > option').each(function(idx, item){
-                 if($(item).attr('value')==record.bibID){
-                     item.innerHTML = record.title;
-                     notfound = false;
-                     return false;
-                 }
-            });
-            if(notfound){
-                $('<option value="'+record.bibID+'">'+record.title+'</option>').appendTo($('#map-doc-select'));  
-            }
-        }
-    }
-
 </script>
 
 </head>
@@ -585,19 +552,18 @@ require_once(dirname(__FILE__)."/initPage.php");
             </span>
 
             <!-- Map document selector -->
-            <span id="mapSelector" class="map-inited" style="display:none">
+            
+            <div id="mapSelector" class="map-inited" style="float:left;">
                 <label id="map-doc-select-lbl"><i>Map document:</i></label>
-                <select id="map-doc-select" class="text ui-widget-content ui-corner-all" style="max-width:200px">
-                    <option value="-1" selected="selected">none available</option>
-                </select>
-            </span>
-            <span id="mapToolbar" class="map-inited" style="display:none">
+                <button id="mapSelectorBtn"></button> 
+            </div>
+            <div id="mapToolbar" class="map-inited" style="float:left;display:none">
                 <button id="btnMapRefresh" xxxdisabled="disabled" title="Refresh/reload current Map Document">Refresh current map</button>
                 <button id="btnMapEdit" xxxdisabled="disabled" title="Edit current Map Document record (Select the desired map in the dropdown)">Edit current map</button>
                 <button id="btnMapNew" title="Create new Map Document - a record that describes map features and defines what layers will be visible (will be included)">New map document</button>
                 <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>
                 <button id="btnMapDataSource" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>
-            </span>
+            </div>
 
             <div style="position: absolute; right: 0px; top:0px;display:none" class="ui-buttonset map-inited">
                 <button id="btnPrint">Print</button>
@@ -653,7 +619,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     </div>
 
     <div id="layer-edit-dialog"  style="display:none" class="ui-heurist-bg-light">
-        <fieldset> <legend>Map layer name</legend>
+        <fieldset>
             <div>
                 <!-- What would you like to call<br>the new map layer -->
                 <div class="header"><label for="layer_name">Name for map layer:</label></div>
@@ -664,7 +630,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <input id="layer_color"/>
             </div>
         </fieldset>
-        <div class="messages">1</div>
+        <div class="messages"></div>
     </div>
 </body>
 </html>
