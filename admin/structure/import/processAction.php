@@ -96,10 +96,10 @@ function import() {
 	$importLog = array();
 	if( !$tempDBName || $tempDBName === "" || !$targetDBName || $targetDBName === "" ||
 		!$sourceDBID || !is_numeric($sourceDBID)|| !$importRtyID || !is_numeric($importRtyID)) {
+        $error = true;
 		makeLogEntry("importParameters", -1, "One or more required import parameters not supplied or incorrect form ( ".
 					"importingDBName={name of target DB} sourceDBID={reg number of source DB or 0} ".
 					"importRtyID={numeric ID of record type} tempDBName={temp db name where source DB type data are held}");
-		$error = true;
 	}
    
     
@@ -150,7 +150,7 @@ function import() {
 		}
 	}
 	// successful import
-    	if(!$error) {
+    if(!$error) {
 
 		if ($startedTransaction) mysql_query("commit");
 
@@ -185,18 +185,27 @@ function import() {
 	} else {
 		if (isset($startedTransaction) && $startedTransaction) mysql_query("rollback");
 		if (mysql_error()) {
-			$statusMsg = "MySQL error: " . mysql_error() . "<br />";
+			$statusMsg = "MySQL error: " . mysql_error() . "<br/>";
 		} else  {
-			$statusMsg = "Error:<br />";
+			$statusMsg = "Error:<br/>";
 		}
 		if(sizeof($importLog) > 0) {
 			foreach($importLog as $logLine) {
-				$statusMsg .= $logLine[0].(intval($logLine[1])<0?"":" #".$logLine[1]." ").$logLine[2] . "<br />";
+				$statusMsg .= $logLine[0].(intval($logLine[1])<0?"":" #".$logLine[1]." ").$logLine[2] . "<br/>";
 			}
 			$statusMsg .= "Changes rolled back, nothing was imported";
 		}
 		// TODO: Delete all information that has already been imported (retrieve from $importLog)
 		echo $statusMsg;
+        
+        //send error report to buginfo
+        if(checkSmtp()){
+            $email_title = 'Error on import record type';
+            $email_text = 'Rectype: '.$importRty["rty_ID"].' ('.$importRty["rty_OriginatingDBID"].'-'.$importRty["rty_IDInOriginatingDB"].') "'.$importRty["rty_Name"]."\"\n"
+                .'From database #'.$sourceDBID.' "'.$sourceDBName.'" to "'.$targetDBName.'" at '.HEURIST_SERVER_URL."\n"
+                .'Log: '.str_replace('<br/>',"\n",$statusMsg);
+            sendEmail(HEURIST_MAIL_TO_BUG, $email_title, $email_text, null);
+        }
 	}
 }
 
@@ -316,9 +325,10 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 		if(mysql_num_rows($res) == 0) {
 			makeLogEntry("<b>Warning</b> unrecognized Record-type", $importRtyID,
 			" referenced by $contextString in field type #$forDtyID. value ignored");
-			if ($strictImport){
-				$error = true;
-			}else{
+            
+            if ($strictImport){
+                $error = true;
+            }else{
 				continue;
 			}
 			//IJ req DON't BOMB OUT return null; // missing rectype in importing DB
@@ -384,8 +394,8 @@ function importRectype($importRty, $alreadyImported) {
 
 		$res = mysql_query($query);
 		if(mysql_num_rows($res) == 0) {
+            $error = true;
 			makeLogEntry("<b>Error</b> Creating Record-type Group", -1, " Cannot find group #".$importRty['rty_RecTypeGroupID']);
-			$error = true;
 		}else{
 			$rtyGroup_src = mysql_fetch_assoc($res);
 			//find group by name in target

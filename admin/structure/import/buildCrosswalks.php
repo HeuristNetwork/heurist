@@ -52,6 +52,7 @@
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../common/php/utilsMail.php');
 require_once(dirname(__FILE__).'/../../../hserver/dbaccess/utils_db_load_script.php');
 
 
@@ -75,6 +76,7 @@ require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
 global $errorCreatingTables;
+global $errorCreatingReason;
 $errorCreatingTables = FALSE;
 
 global $dbname;
@@ -113,6 +115,7 @@ if($isNewDB){
 
     if(!file_exists($definitions_filename)){
         $errorCreatingTables = true;
+        $errorCreatingReason = 'Template file '.$templateFileName.' not found';
         $isCreateNew = true;
         echo ($definitions_filename." not found</br>");
         return false;
@@ -334,6 +337,8 @@ $savedSearches = getNextDataSet($splittedData);
 $query = "SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'";
 mysql_query($query);
 
+$errorCreatingReason = '';
+
 processRecTypeGroups($recTypeGroups);
 processDetailTypeGroups($detailTypeGroups);
 processOntologies($ontologies);
@@ -360,7 +365,7 @@ mysql_query($query);
 
 
 function processRecTypes($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
 
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defRecTypesFields.inc";
@@ -369,8 +374,9 @@ function processRecTypes($dataSet) {
         $query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "RECTYPES Error inserting data: " . mysql_error() . "<p>FIELDS:$flds<br /><p>VALUES:$dataSet<p>";
+            $errorCreatingReason = $errorCreatingReason."RECTYPES Error inserting data: " . mysql_error() . "<br/>FIELDS:$flds<br/><br/>VALUES:$dataSet";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
 
 //$r = mysql_query("SELECT DATABASE()") or die(mysql_error());
@@ -381,14 +387,15 @@ function processRecTypes($dataSet) {
 
 
 function processDetailTypes($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defDetailTypesFields.inc";
         $query = "INSERT INTO `defDetailTypes` ($flds) VALUES" . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "DETAILTYPES Error inserting data: " . mysql_error() . "<br />";
+            $errorCreatingReason = $errorCreatingReason."DETAILTYPES Error inserting data: " . mysql_error() . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: defDetailTypes
 } // processDetailTypes
@@ -396,14 +403,15 @@ function processDetailTypes($dataSet) {
 
 
 function processRecStructure($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defRecStructureFields.inc";
         $query = "INSERT INTO `defRecStructure` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "RECSTRUCTURE Error inserting data: " . mysql_error() . "<br />";
+            $errorCreatingReason = $errorCreatingReason."RECSTRUCTURE Error inserting data: " . mysql_error() . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: defRecStructure
 } // processRecStructure
@@ -411,7 +419,7 @@ function processRecStructure($dataSet) {
 
 
 function processTerms($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables,$errorCreatingReason;
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defTermsFields.inc";
         $query = "SET FOREIGN_KEY_CHECKS = 0;";
@@ -419,8 +427,9 @@ function processTerms($dataSet) {
         $query = "INSERT INTO `defTerms` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "TERMS Error inserting data: " . mysql_error() . "<br />";
+            $errorCreatingReason = $errorCreatingReason."TERMS Error inserting data: " . mysql_error() . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
         $query = "SET FOREIGN_KEY_CHECKS = 1;";
         mysql_query($query);
@@ -428,14 +437,15 @@ function processTerms($dataSet) {
 } // processTerms
 
 function processOntologies($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables,$errorCreatingReason;
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defOntologiesFields.inc";
         $query = "INSERT INTO `defOntologies` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "ONTOLOGIES Error inserting data: " . mysql_error() . "<br />";
+            $errorCreatingReason = $errorCreatingReason."ONTOLOGIES Error inserting data: " . mysql_error() . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: defOntologies
 } // processOntologies
@@ -443,14 +453,15 @@ function processOntologies($dataSet) {
 
 
 function processRelationshipConstraints($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defRelationshipConstraintsFields.inc";
         $query = "INSERT INTO `defRelationshipConstraints` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "RELATIONSHIPCONSTRAINTS Error inserting data: " . mysql_error() . "<br />";
+            $errorCreatingReason = $errorCreatingReason."RELATIONSHIPCONSTRAINTS Error inserting data: " . mysql_error() . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: defRelationshipConstraints
 } // processRelationshipConstraints
@@ -458,14 +469,15 @@ function processRelationshipConstraints($dataSet) {
 
 
 function processFileExtToMimetype($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defFileExtToMimetypeFields.inc";
         $query = "INSERT INTO `defFileExtToMimetype` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "FILEEXTTOMIMETYPE Error inserting data: " . mysql_error() . "<br />";
+            $errorCreatingReason = $errorCreatingReason."FILEEXTTOMIMETYPE Error inserting data: " . mysql_error() . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: defFileExtToMimetype
 } //processFileExtToMimetype
@@ -473,15 +485,16 @@ function processFileExtToMimetype($dataSet) {
 
 
 function processRecTypeGroups($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
 
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defRecTypeGroupsFields.inc";
         $query = "INSERT INTO `defRecTypeGroups` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "RECTYPEGROUPS Error inserting data: " . mysql_error() . "<br />";
+            $errorCreatingReason = $errorCreatingReason."RECTYPEGROUPS Error inserting data: " . mysql_error() . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: defRecTypeGroups
 } // processRectypeGroups
@@ -489,41 +502,44 @@ function processRecTypeGroups($dataSet) {
 
 
 function processDetailTypeGroups($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defDetailTypeGroupsFields.inc";
         $query = "INSERT INTO `defDetailTypeGroups` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "DETAILTYPEGROUPS Error inserting data: " . mysql_error() . "<br /><br />" . $dataSet . "<br />";
+            $errorCreatingReason = $errorCreatingReason."DETAILTYPEGROUPS Error inserting data: " . mysql_error() . "<br/><br/>" . $dataSet . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: defDetailTypeGroups
 } // processDetailTypeGroups
 
 function processSavedSearches($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
 
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/usrSavedSearchesFields.inc";
         $query = "INSERT INTO `usrSavedSearches` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "SAVEDSEARCHES Error inserting data: " . mysql_error() . "<br /><br />" . $dataSet . "<br />";
+            $errorCreatingReason = $errorCreatingReason."SAVEDSEARCHES Error inserting data: " . mysql_error() . "<br/><br/>" . $dataSet . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: usrSavedSearches
 } // processSavedSearches
 
 function processTranslations($dataSet) {
-    global $errorCreatingTables;
+    global $errorCreatingTables, $errorCreatingReason;
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defTranslationsFields.inc";
         $query = "INSERT INTO `defTranslations` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            echo "TRANSLATIONS Error inserting data: " . mysql_error() . "<br />";
+            $errorCreatingReason = $errorCreatingReason."TRANSLATIONS Error inserting data: " . mysql_error() . "<br/>";
             $errorCreatingTables = TRUE;
+            echo $errorCreatingReason;
         }
     } // END Imported first set of data to temp table: defTranslations
 } // processTranslations
@@ -550,6 +566,16 @@ if($errorCreatingTables) { // An error occurred while trying to create one (or m
         echo "<br /><strong>An error occurred trying to insert the downloaded data into the temporary database.</strong><br />";
     }
     echo "This may be due to a database version mismatch, please advise the Heurist development team<br>";
+    
+    if(checkSmtp()){
+        $email_title = 'Error on insert of structure definitions into '
+                        .($isNewDB?' new database ':'temporary database for ').HEURIST_DBNAME;
+        $email_text = "Database: ".HEURIST_DBNAME
+                      ."\n\nAction: ".($isNewDB?'New database':'Filling temporary database for import definitions')
+                      ."\n\nError Message: ".str_replace('<br/>',"\n",$errorCreatingReason);
+        sendEmail(HEURIST_MAIL_TO_BUG, $email_title, $email_text, null);
+    }
+    
     unlockDatabase();
     return;
 } else if(!$isNewDB){ // do crosswalking for exisitn database, no action for new database

@@ -27,6 +27,7 @@ if($outputFormat=="json"){
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
+require_once(dirname(__FILE__).'/../../../common/php/utilsMail.php');
 require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
 // User must be system administrator or admin of the owners group for this database
@@ -34,7 +35,7 @@ if( !is_admin() ){
     error_exit("Sorry, you need to be a database owner to be able to modify the database structure");
 }
 
-$excludeDuplication = (@$_REQUEST["dup"]!="1"); //by defaul exclude duplication of existing record types (identified by concept IDs)
+$excludeDuplication = (@$_REQUEST["dup"]!="1"); //by default exclude duplication of existing record types (identified by concept IDs)
 
 //combination of db and record type id eg. 1126-13
 // TODO: Artem, is this meant to be the concept ID for the record type? or si the record type referenced by local ID?
@@ -50,6 +51,8 @@ if(!$code){
 }else{
     $is_checkonly = false;
 }
+
+global $database_id;
 
 if(!$code){
     error_exit("Record type code not defined in call to importRectype.php - should be two numbers separated by a dash(program glitch)");
@@ -705,7 +708,7 @@ exit();
 // Report an error on exit
 //
 function error_exit($msg){
-    global $outputFormat, $mysqli;
+    global $outputFormat, $mysqli, $database_id;
 
     if($outputFormat=="json"){
         header("Content-type: text/javascript");
@@ -735,6 +738,14 @@ function error_exit($msg){
         }
     }
 
+    if(checkSmtp()){
+    
+        $email_title = 'Annotated template. Error on import record type definitions into '.HEURIST_DBNAME;
+        $email_text = 'Database '.HEURIST_DBNAME."\n\n".
+                      (isset($database_id)?'Source databse #: '.$database_id."\n\n":'').
+                      'Error Message: '.$msg;
+        sendEmail(HEURIST_MAIL_TO_BUG, $email_title, $email_text, null);
+    }
     exit;
 }
 
