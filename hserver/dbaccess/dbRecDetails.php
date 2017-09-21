@@ -22,6 +22,7 @@
 
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/db_tags.php');
+require_once (dirname(__FILE__).'/db_records.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 
 class DbRecDetails
@@ -197,11 +198,13 @@ class DbRecDetails
             }
             
             $row = $res->fetch_row();
+            
+            $rectype_ID = $row[0];
 
-            if (!array_key_exists($row[0],$rtyLimits)) { //limit not defined
+            if (!array_key_exists($rectype_ID,$rtyLimits)) { //limit not defined
                 array_push($undefinedFieldsRecIDs, $recID);
                 continue;
-            }else if (intval($rtyLimits[$row[0]])>0 && $row[1]>0 && ($rtyLimits[$row[0]] - $row[1]) < 1){
+            }else if (intval($rtyLimits[$rectype_ID])>0 && $row[1]>0 && ($rtyLimits[$rectype_ID] - $row[1]) < 1){
                 array_push($limittedRecIDs, $recID);  //over limit - skip
                 continue;
             }
@@ -220,6 +223,11 @@ class DbRecDetails
             $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
             if (!is_numeric($ret)) {
                 $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
+            }else{
+                //update record title
+                if(!recordUpdateTitle($this->system, $recID, $rectype_ID, null)){
+                    $sqlErrors[$recID] = 'Cannot update record title';
+                }
             }
         }
         
@@ -359,6 +367,12 @@ class DbRecDetails
             
         }//for recors
         
+        //update record title
+        foreach ($processedRecIDs as $recID){
+                if(!recordUpdateTitle($this->system, $recID, null, null)){
+                    $sqlErrors[$recID] = 'Cannot update record title';
+                }
+        }
         
         //assign special system tags
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
@@ -464,6 +478,10 @@ class DbRecDetails
                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
                if (!is_numeric($ret)) {
                     $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
+               }else{
+                    if(!recordUpdateTitle($this->system, $recID, $rectype_ID, null)){
+                        $sqlErrors[$recID] = 'Cannot update record title';
+                    }
                }
                
             } else {

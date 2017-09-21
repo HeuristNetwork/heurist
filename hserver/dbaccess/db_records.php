@@ -794,6 +794,14 @@
         
         $mysqli = $system->get_mysqli();
 
+        if(!(isset($rectype) && $rectype>0)){
+            $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
+            if(!($rectype>0)){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot get record for title mask update. Rec#'.$recID);
+                return false;
+            }
+        }
+        
         $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
         if(!$mask){
             $system->addError(HEURIST_DB_ERROR, 'Cannot get title mask for record type', $mysqli->error);
