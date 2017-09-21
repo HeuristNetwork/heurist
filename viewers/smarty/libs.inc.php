@@ -20,11 +20,11 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+    require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
-    define('SMARTY_DIR', dirname(__FILE__).'/../../external/Smarty-3.0.7/libs/');
+    define('SMARTY_DIR', HEURIST_DIR.'external/Smarty-3.0.7/libs/'); //was dirname(__FILE__)
 
     require_once(SMARTY_DIR.'Smarty.class.php');
-    require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
     $smarty = new Smarty();
 
