@@ -121,7 +121,7 @@ $talkToSysAdmin="Please advise your system administrator or email info - a t - H
 //       in particular this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
 
 define('HEURIST_VERSION', $version);
-define('HEURIST_MIN_DBVERSION', "1.1.0");
+define('HEURIST_MIN_DBVERSION', "1.2.0");
 
 if (!$serverName) {
     $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");

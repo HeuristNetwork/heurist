@@ -33,8 +33,6 @@
 -- Safety rating: SAFE
 -- Description: Add Child record functions, Add Certainty rating and Annotation text to every key-value (detail) pair
 
-use hdb_artem_19;
-
 DROP PROCEDURE IF EXISTS sp_UpdateAllDatabases;
 DROP PROCEDURE IF EXISTS sp_AlterTable;
 DROP PROCEDURE IF EXISTS sp_ExecSQL;
