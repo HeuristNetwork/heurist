@@ -23,6 +23,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+define('SKIP_VERSIONCHECK2', 1);
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -47,6 +48,17 @@ if("hdb_".$_REQUEST["db"]!=DATABASE){
 if(mysql_error()) {
     die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
 }
+
+$query = "select * from sysIdentification";
+$res = mysql_query($query);
+if($res){
+    $row = mysql_fetch_assoc($res);
+    $db_version = $row['sys_dbVersion'].'.'.$row['sys_dbSubVersion'].'.'.$row['sys_dbSubSubVersion'];
+}else{
+    $db_version = HEURIST_DBVERSION; 
+}
+
+
 
 //$r = mysql_query("SELECT DATABASE()") or die(mysql_error());
 //error_log("DATABASE IS ".mysql_result($r,0));    
@@ -80,7 +92,7 @@ print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i")."<
 print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
 print "-- Database = " . HEURIST_DBNAME . "<br>\n";
 print "-- Program Version: ".HEURIST_VERSION."<br>\n";
-print "-- Database Version: ".HEURIST_DBVERSION; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
+print "-- Database Version: ".$db_version; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
 if($isHTML) print "<br><br>\n";
 // Now output each of the definition tables as data for an insert statement. The headings are merely for documentation
 // Each block of data is between a >>StartData>> and >>EndData>> markers

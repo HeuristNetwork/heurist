@@ -104,6 +104,7 @@ function loadRemoteURLContentSpecial($url){
 
         $path = substr($path,0,strpos($path,'?'));
 
+        $parsed = parse_url($url);
         parse_str($parsed['query'], $_REQUEST);
 
         $out = getScriptOutput($path);
