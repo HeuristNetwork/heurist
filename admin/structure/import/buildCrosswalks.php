@@ -427,7 +427,7 @@ function processTerms($dataSet) {
         $query = "INSERT INTO `defTerms` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            $errorCreatingReason = $errorCreatingReason."TERMS Error inserting data: " . mysql_error() . "<br/>";
+            $errorCreatingReason = $errorCreatingReason."TERMS Error inserting data: " . mysql_error() . "<br/>";//.$query."</br>";
             $errorCreatingTables = TRUE;
             echo $errorCreatingReason;
         }
