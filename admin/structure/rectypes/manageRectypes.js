@@ -531,7 +531,7 @@ function RectypeManager() {
                     if(elLink.hash === "#search") {
                         window.open(top.HEURIST.baseURL+'?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
                     }else if(elLink.hash === "#addrec") {
-                        window.open(top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&db='+db+'&rec_rectype='+rectypeID,'_blank');
+                        window.open(top.HEURIST.baseURL+'records/add/addRecord.php?addref=1$ver=h3&db='+db+'&rec_rectype='+rectypeID,'_blank');
                     }else if(elLink.hash === "#edit_rectype") {
                         _editRecStructure(rectypeID);
                         //2016-06-14 Ian req _onAddEditRecordType(rectypeID, 0);

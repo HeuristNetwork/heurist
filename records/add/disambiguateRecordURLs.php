@@ -74,6 +74,7 @@
           <input type="hidden" name="bkmrk_bkmk_title" value="<?= htmlspecialchars($_REQUEST['bkmk_title']) ?>">
           <input type="hidden" name="bkmrk_bkmk_url" value="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>">
           <input type="hidden" name="bkmrk_bkmk_description" value="<?= htmlspecialchars($_REQUEST['bkmk_description']) ?>">
+          <input type="hidden" name="ver" value="h3">
           <input type="hidden" name="f" value="<?= @$_REQUEST['f']?htmlspecialchars($_REQUEST['f']):'' ?>">
           <input type="hidden" name="tag" value="<?= @$_REQUEST['tag']?htmlspecialchars($_REQUEST['tag']):'' ?>">
           <input type="hidden" name="rec_rectype" value="<?= htmlspecialchars(@$_REQUEST['rec_rectype']) ?>">
