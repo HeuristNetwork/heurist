@@ -68,6 +68,10 @@ $.widget( "heurist.editing_input", {
         }
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         
+        if((!(this.options.rectypeID>0)) && this.options.recordset){
+            this.options.rectypeID = this.options.recordset.fld(this.options.recordset.getFirstRecord(), 'rec_RecTypeID');
+        }
+        
 
         this.configMode = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(this.configMode)){
@@ -207,13 +211,42 @@ $.widget( "heurist.editing_input", {
             }else{
                 values_to_set = [def_value];
             }
+            
+            if(values_to_set=='increment_new_values_by_1'){
+                
+                    //find incremented value on server side
+                    var url = window.hWin.HAPI4.baseURL + "records/edit/getIncrementedValue.php";
+                    var request = {db:window.hWin.HAPI4.database,
+                                   dtyID: this.options.dtID,
+                                   rtyID: this.options.rectypeID};
+                    var that = this;
+                    
+                    window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
+                      if(!window.hWin.HEURIST4.util.isnull(response)){
+                          if(!window.hWin.HEURIST4.util.isnull(response.result)){
+                          
+                            //recreate input elements and assign given values
+                            that.setValue(response.result);
+                            that.options.values = that.getValues();
+                            that._refresh();
+                              
+                          }else if(!window.hWin.HEURIST4.util.isnull(response.error)){
+                              window.hWin.HEURIST4.msg.showMsgErr( response.error );
+                          }
+                      }
+                  });
+                  this.setValue(0);
+                  this.options.values = [0];
+                  return;
+            }
+            
         }else{
             values_to_set = window.hWin.HEURIST4.util.uniqueArray(this.options.values); //.slice();//.unique();
         }
+        
         //recreate input elements and assign given values
         this.setValue(values_to_set);
         this.options.values = this.getValues();
-
         this._refresh();
     }, //end _create
 

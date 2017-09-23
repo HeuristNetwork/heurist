@@ -1195,7 +1195,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record
         
-            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"complete", l:1}, 
+            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1}, 
                         function(response){ response.is_insert=false; that._initEditForm_step4(response); });
 
         }else if(recID<0){ //add new record
@@ -1318,7 +1318,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             //response==null means reload/refresh edit form
             
-            if(response){
+            if(response){ // && response.length()>0
                 that._currentEditRecordset = new hRecordSet(response.data);
                 that._isInsert = response.is_insert; 
             }

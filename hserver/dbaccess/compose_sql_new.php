@@ -116,7 +116,7 @@ $top_query;
 */
 // $params need for
 // q - json query array
-// w - domain all or bookmarked
+// w - domain all or bookmarked or e(everything)
 // limit and offset
 // @todo s - sort
 // @todo publiconly
