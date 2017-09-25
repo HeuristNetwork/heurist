@@ -206,7 +206,7 @@ function db_clean($db_name, $verbose=true){
 * @param mixed $db_target
 * @param mixed $verbose
 */
-function db_clone($db_source, $db_target, $verbose=true){
+function db_clone($db_source, $db_target, $verbose=true, $nodata=false){
 
     $res = true;
 
@@ -221,6 +221,10 @@ function db_clone($db_source, $db_target, $verbose=true){
         }
 
         if($res){
+            
+            $data_tables = array('Records','recDetails','recLinks','recRelationshipsCache',
+            'recSimilarButNotDupes','recThreadedComments','recUploadedFiles','usrBookmarks','usrRecentRecords','usrRecTagLinks',
+            'usrReminders','usrRemindersBlockList','woot_ChunkPermissions','woot_Chunks','woot_RecPermissions','woots');
 
             $tables = $mysqli->query("SHOW TABLES");
             if($tables){
@@ -231,6 +235,12 @@ function db_clone($db_source, $db_target, $verbose=true){
                 echo ("<b>Adding records to tables: </b>");
                 while ($table = $tables->fetch_row()) { //loop for all tables
                     $table = $table[0];
+                    
+                    if($nodata && in_array($table, $data_tables)){
+                        continue;
+                    }
+                    
+                    
                     $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
                     $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
 

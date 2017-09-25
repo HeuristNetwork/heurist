@@ -842,7 +842,6 @@ CREATE TABLE usrSavedSearches (
   svs_Query text NOT NULL COMMENT 'The text of the saved search - added to search URL',
   svs_UGrpID smallint(5) unsigned NOT NULL COMMENT 'The creator/owner or workgroup for the saved search',
   svs_ExclusiveXSL varchar(250) default '' COMMENT 'Name of XSL to which to lock this publish format, blank = any XSL OK',
-  ugr_NavigationTree  text COMMENT 'JSON array that describes treeview for filters',
   PRIMARY KEY  (svs_ID),
   KEY svs_UGrpID (svs_UGrpID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing';
