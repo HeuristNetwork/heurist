@@ -719,7 +719,7 @@ function RectypeManager() {
                 }
             };
             var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
-            btnAddRecordType2.onclick = btnAddRecordType.onclick;
+            if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick;
 
             var body = $(top.document).find('body');
             var dim = {h:body.innerHeight(), w:body.innerWidth()},
@@ -741,7 +741,7 @@ function RectypeManager() {
 
             };
             btnAddRecordType2 = Dom.get('btnImportFromDb'+grpID+'_2');
-            btnAddRecordType2.onclick = btnAddRecordType.onclick
+            if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick
 
             //-------
 /*Remarked temporarely 2016-05-11
