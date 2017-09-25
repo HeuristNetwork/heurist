@@ -536,12 +536,16 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
 
     if(strpos($search_fieldname, 'parent entity')===0 
         || strpos($search_fieldname, 'record parent')===0 
-        || $search_fieldname==DT_PARENT_ENTITY 
+        || (defined('DT_PARENT_ENTITY') && $search_fieldname==DT_PARENT_ENTITY) 
         || $search_fieldname=='2-247'){ 
             
-        $rdt = self::__get_detail_types();
-        if(@$rdt[DT_PARENT_ENTITY]){
-            return $rdt[DT_PARENT_ENTITY][$result_fieldname];
+        if (defined('DT_PARENT_ENTITY')){    
+            $rdt = self::__get_detail_types();
+            if(@$rdt[DT_PARENT_ENTITY]){
+                return $rdt[DT_PARENT_ENTITY][$result_fieldname];
+            }
+        }else{
+            return '';
         }
     }else
     //search in record type structure

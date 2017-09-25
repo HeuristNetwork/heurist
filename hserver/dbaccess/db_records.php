@@ -331,7 +331,7 @@
                 }*/
                 
                 //add reverce field "Parent Entity" (#247) in child resource record
-                if(@$values['dtl_ParentChild']==true){
+                if(@$values['dtl_ParentChild']==true && defined('DT_PARENT_ENTITY')){
                     
                         //find child record
                         list($dtl_ID, $parentID) = mysql__select_array($mysqli,
