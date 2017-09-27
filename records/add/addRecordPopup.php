@@ -212,7 +212,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                         sError2 = ' and '+sError2;
                     }
                     alert('Please select '+sError1+sError2);
-                    cbShowAccessRights.checked = true;
+                    cbShowAccessRights = true;
                     showHideAccessSettings(cbShowAccessRights);
                     //document.getElementById('rec_OwnerUGrpID').focus();
                     //document.getElementById('rec_NonOwnerVisibility').focus();
@@ -248,7 +248,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                         $("#add-link-tags").val().replace(/,/g,'|'), 1];
 
                     top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults);
-                    top.HEURIST.util.setDisplayPreference('record-add-showaccess', cbShowAccessRights.checked?"true":"false" );
+                    top.HEURIST.util.setDisplayPreference('record-add-showaccess', cbShowAccessRights?"true":"false" );
                 }else{
                     top.HEURIST.util.setDisplayPreference('record-add-defaults', "");
                 }
@@ -338,10 +338,6 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
             </div>
 
             <div class="input-row">
-
-                
-                
-
                 <div class="resource workgroup" style="margin:10px 0">
                     <div class="input-row workgroup">
                         <div class="input-header-cell">Record owner (group or individual)
