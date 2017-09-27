@@ -658,7 +658,7 @@
 
 					$rows = execSQL($mysqli, $query, $parameters, true);
 
-					if ($rows==0 || is_string($rows) ) {
+					if ( ($isInsert && $rows==0) || is_string($rows) ) {
 						$oper = (($isInsert)?"inserting":"updating");
 						array_push($ret[$rtyID], "Error on ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure: ".$rows);
 					} else {
@@ -822,7 +822,7 @@
 				$query = "update defRecTypeGroups set ".$query." where rtg_ID = $rtgID";
 
 				$rows = execSQL($mysqli, $query, $parameters, true);
-				if ($rows==0 || is_string($rows) ) {
+				if (is_string($rows) ) {
                     $ret = handleError("SQL error updating $colName in updateRectypeGroup "
                         .$rows.' params:'.print_r($parameters,true), $query);
 				} else {
@@ -993,7 +993,7 @@
 				$query = "update defDetailTypeGroups set ".$query." where dtg_ID = $dtgID";
 
 				$rows = execSQL($mysqli, $query, $parameters, true);
-				if ($rows==0 || is_string($rows) ) {
+				if (is_string($rows) ) {
                     $ret = handleError("SQL error updating $colName in updateDettypeGroup".$rows, $query);
 				} else {
 					$ret['result'] = $dtgID;
@@ -1188,7 +1188,7 @@
 				$rows = execSQL($mysqli, $query, $parameters, true);
 				if($rows == "1062"){
 					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
-				}else if ($rows==0 || is_string($rows) ) {
+				}else if (is_string($rows) ) { //$rows==0 || 
                     $ret = handleError("SQL error updating field type $dtyID in updateDetailType: "
                         .htmlspecialchars($query)."  type=".$parameters[0]." values=".@$parameters[1], $query);
                     $ret = $ret['error'];
@@ -1769,8 +1769,10 @@
 
 		$parameters = array("s",$terms[3]); //notes will be parameter
 		$query = "";
+        
+        $isInsert = ($res==null || $res->num_rows<1);
 
-		if ($res==null || $res->num_rows<1){ //$mysqli->affected_rows<1){
+		if ($isInsert){ //$mysqli->affected_rows<1){
 			//insert
 			$query = "insert into defRelationshipConstraints(rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_Description, rcs_TermID, rcs_TermLimit) values (".
 						$srcID.",".$trgID.",?,".$terms[0].",".$terms[2].")";
@@ -1781,7 +1783,7 @@
 		}
 
 		$rows = execSQL($mysqli, $query, $parameters, true);
-		if ($rows==0 || is_string($rows) ) {
+		if ( ($isInsert && $rows==0) || is_string($rows) ) {
                 $ret = handleError("SQL error in updateRelConstraint", $query);
                 $ret = $ret['error'];
 		} else {
