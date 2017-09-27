@@ -376,7 +376,8 @@ $.widget( "heurist.mainMenu", {
 
         }else if(name=='Profile'){
             
-            link = $('<div><a href="#" style="padding:2px 24px 0 2px">Settings&nbsp;&nbsp;'
+            link = $('<div><a href="#" style="padding:2px 24px 0 2px">'
+            +'<span style="width:7em;display:inline-block;text-align: left;">Settings</span>'
             +'<span class="ui-icon-user" style="color:white;" style="vertical-align:middle;font-size:16px;width:16px;height:16px;"></span>'
             +'&nbsp;<span class="usrFullName">'
             +window.hWin.HAPI4.currentUser.ugr_FullName

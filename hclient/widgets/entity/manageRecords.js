@@ -285,7 +285,22 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var query = null, popup_options={};
             //NEW WAY open as another widget 
             if(recID<0){
-                popup_options = {new_record_params:{rt:this._currentEditRecTypeID}};
+                popup_options = {selectOnSave:this.options.selectOnSave, 
+                                 new_record_params:{rt:this._currentEditRecTypeID}};
+                if(this.options.select_mode!='manager' && this.options.selectOnSave){ 
+                    //this is select form that all addition of new record
+                    //it should be closed after addition of new record
+                    var that = this;
+                    popup_options['onselect'] = function(event, data){
+                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                //that.selectedRecords(data.selection);
+                                //that._selectAndClose();
+                                that._trigger( "onselect", null, {selection:data.selection});  
+                                that.closeDialog();
+                            }
+                    };
+                    
+                }
             }else{
                 var recset = this.recordList.resultList('getRecordSet');
                 if(recset && recset.length()<1000){

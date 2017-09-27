@@ -1291,6 +1291,7 @@ window.hWin.HEURIST4.ui = {
                         
                         var widget = this; //reference to manageRecords
                         
+                        //find record or add after complete of initialiation of popup
                         if(query_request){
                             
                             query_request['limit'] = 100;

@@ -335,7 +335,7 @@ $.widget( "heurist.editing_input", {
                 else if(fieldname=='dty_Type') val = 'freetext'
                     else if(fieldname=='rst_DisplayWidth'
                         && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
-                            val = 55;
+                            val = 55;  //default width for input fields
                         }
         }
         return val;
@@ -719,7 +719,7 @@ $.widget( "heurist.editing_input", {
                             
                             select_return_mode: 'recordset',
                             edit_mode: 'popup',
-                            selectOnSave: true,
+                            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
                             title: window.hWin.HR('Record pointer: Select or create a linked record'),
                             rectype_set: that.f('rst_PtrFilteredIDs'),
                             parententity: (isparententity)?that.options.recID:0,
