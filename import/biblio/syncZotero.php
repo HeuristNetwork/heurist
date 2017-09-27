@@ -376,8 +376,8 @@ if($step=="1"){  //first step - info about current status
                 #print " <br/>".$itemtype."  ".strval(findXMLelement($entry, null, "title"))."<br/>";
 
 
-                ob_flush();
-                flush();
+                @ob_flush();
+                @flush();
 
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
                     #print " <br/> Undefined Record type".$itemtype."  ".$itemtitle."<br/>";

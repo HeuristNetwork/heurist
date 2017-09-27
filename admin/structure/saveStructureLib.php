@@ -186,12 +186,14 @@
     //
     function handleError($msg, $query, $sqlerror=null){
         
+        global $mysqli;
+        
         if(@$sqlerror===null){
             $sqlerror = $mysqli->error;
         }
         
         $email_title = 'SQL error on db structure modification. '.HEURIST_DBNAME;
-        $email_text = 'Database '.HEURIST_DBANME."\n\n".
+        $email_text = 'Database '.HEURIST_DBNAME."\n\n".
                       'Message: '.$msg."\n\n".
                       'Query: '.$query."\n\n".
                       'SQL error '.$sqlerror;
@@ -765,9 +767,9 @@
 
 
 	/**
-	* updateRectypeGroup - Helper function that updates group in the deleteRectypeGroup table
+	* updateRectypeGroup - Helper function that updates group in the defRecTypeGroups table
 	* @author Artem Osmakov
-	* @param $columnNames an array valid column names in the deleteRectypeGroups table which match the order of data in the $rt param
+	* @param $columnNames an array valid column names in the defRecTypeGroups table which match the order of data in the $rt param
 	* @param $rtgID id of the group to update
 	* @param $rt - data
 	* @return $ret an array of return values for the various data elements created or errors if they occurred
@@ -821,7 +823,8 @@
 
 				$rows = execSQL($mysqli, $query, $parameters, true);
 				if ($rows==0 || is_string($rows) ) {
-                    $ret = handleError("SQL error updating $colName in updateRectypeGroup".$rows, $query);
+                    $ret = handleError("SQL error updating $colName in updateRectypeGroup "
+                        .$rows.' params:'.print_r($parameters,true), $query);
 				} else {
 					$ret['result'] = $rtgID;
 				}

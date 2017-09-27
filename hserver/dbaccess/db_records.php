@@ -586,19 +586,21 @@
     //
     function removeReverseChildToParentPointer($mysqli, $parent_id, $rectype){
 
-       //get list of valid record 
-       $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
-        .$parent_id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
-       
-       $recids = mysql__select_list2($mysqli, $query);
-               
-       $query = 'DELETE FROM recDetails WHERE dtl_Value='.$parent_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
-       
-       if(is_array($recids) && count($recids)>0){
-            $query = $query.' AND dtl_RecID NOT IN ('.implode(',',$recids).')';
+       if(defined('DT_PARENT_ENTITY')){
+           //get list of valid record 
+           $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
+            .$parent_id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
+           
+           $recids = mysql__select_list2($mysqli, $query);
+                   
+           $query = 'DELETE FROM recDetails WHERE dtl_Value='.$parent_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
+           
+           if(is_array($recids) && count($recids)>0){
+                $query = $query.' AND dtl_RecID NOT IN ('.implode(',',$recids).')';
+           }
+            
+           $mysqli->query($query);
        }
-        
-       $mysqli->query($query);
     }
 
     // verify ACCESS RIGHTS -------------
