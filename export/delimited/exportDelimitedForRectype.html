@@ -86,19 +86,18 @@
 
         <!-- <h2>Delimited text file data export (CSV/TSV)</h2 -->
         <p>
-            This function exports data for specified fields of a selected record type in comma or tab delimited format (CSV/TSV).
-            An additional query string using normal Heurist query structure can be used to select a subset of the record type.
-            Due to the limitations of the delimited text format, only one record type can be exported at a time.
-
+           Due to the limitations of the delimited text format, it really only makes sense to export a single record type per file. However, if multiple record types exist in the subset, equivalent fields will be exported from each record type, where they exist.
+        </p>
         <div style="width:750px"> </div> <!-- Determines width of output text area -->
-
+     <div>
         <div class="input-row">
             <label class="input-header-cell">
-                Select record type</label>
+                Show fields for</label>
             <div class="input-cell" id="select-rec-type"></div>
+            <label id="lbl_rt_info">You have nnn record types</label>
         </div>
 
-        <div class="input-row">
+        <div class="input-row" style="display:none">
             <label class="input-header-cell">
                 Additional filter (Heurist query string - optional)</label>
             <div class="input-cell"><input type="text"  style="width:280px;" id="queryInput" onkeydown="clearOutput()"/></div>
@@ -106,7 +105,7 @@
 
         <div class="input-row">
             <label class="input-header-cell">
-                Select fields to export (use ctrl or shift to multi-select)</label>
+                Select fields to export<br/>(use ctrl or shift to multi-select)</label>
             <div class="input-cell" id="select-detail-type"><select size="15"></select></div>
         </div>
 
@@ -138,7 +137,11 @@
             <div class="input-row" style="text-align: center;">
                 <input type="button" onclick="getRecords()" value="Generate data"/>
             </div>
+            
 
+            <div class="input-row" style="text-align: center;display:none" id="after_gen_div">
+                <span><b>Use Ctrl-A to select all and then cut-and-paste into a text editor  OR</b></span>
+            </div>
         </div>
 
         <!-- List of fields above output box, but also used in building data so cannot be removed -->

@@ -50,6 +50,16 @@ This function gets the record types from HAPI and loads them into a Select eleme
 for multi-select, so the user can select the output data (record type + fields).
 */
 function getRecTypes() {
+
+    var allowed_rt = [];
+    if(top.HAPI4 && top.HAPI4.currentRecordset!=null){
+        allowed_rt = top.HAPI4.currentRecordset.getRectypes();
+        document.getElementById("lbl_rt_info").innerHTML = 'You have '
+            +top.HAPI4.currentRecordset.getRectypes().length+'record types in your subset';
+    }else{
+        document.getElementById("lbl_rt_info").innerHTML = '';
+    }
+    
     var e = document.getElementById("select-rec-type");
 
     removeChildren(e);
@@ -61,21 +71,25 @@ function getRecTypes() {
         g_records = [];
         getDetailTypes()
     };
-    var opt = document.createElement("option");
-    opt.innerHTML = "record type...";
-    opt.disabled = true;
-    opt.selected = true;
-    g_recTypeSelect.appendChild(opt);
+    if(allowed_rt.length>1) {
+        var opt = document.createElement("option");
+        opt.innerHTML = "record type...";
+        opt.disabled = true;
+        opt.selected = true;
+        g_recTypeSelect.appendChild(opt);
+    }
+    
     var recTypes = HRecordTypeManager.getRecordTypes();
     var l = recTypes.length;
     for (var i = 0; i < l; ++i) {
+        if(allowed_rt.indexOf(recTypes[i].getID())<0) continue;
         opt = document.createElement("option");
         opt.value = recTypes[i].getID();
         opt.innerHTML = recTypes[i].getName();
         g_recTypeSelect.appendChild(opt);
     }
     
-    g_recTypeSelect.selectedIndex  = 1;
+    g_recTypeSelect.selectedIndex  = (allowed_rt.length>1)?1:0;
     g_recTypeSelect.onchange();
 }
 
@@ -223,6 +237,8 @@ function getRecords() {
         alert("Please select fields to export");
         return;
     }
+    
+    document.getElementById('after_gen_div').style.display = 'none'; 
 
     if (!g_recType || (g_recType != g_recTypeLoaded) || (document.getElementById("queryInput").value!=g_usedQuery))
     {
@@ -241,6 +257,13 @@ function getRecords() {
         loadAllRecords(myQuery, null, loader);
     }else{
         showRecordData(g_records);
+    }
+}
+
+function dowloadRecords(){
+    if(top.HEURIST4 && top.HEURIST4.util){
+        top.HEURIST4.util.downloadData(top.HAPI4.database+".csv", 
+                document.getElementById('csv-textarea').value, 'text/csv');  
     }
 }
 
@@ -263,6 +286,7 @@ function clearOutput(){
         removeChildren(e);
         var elres = document.getElementById('results');
         elres.innerHTML = "";
+        document.getElementById('after_gen_div').style.display = 'none'; 
     }
 }
 
@@ -427,6 +451,7 @@ function csv_escape(str) {
 //-------------------------
 function getRecordsByH4(){
     
+   
     var request = top.HEURIST4.current_query_request;
     if(!request.w) request.w = 'all';
     if(!request.a) request.a = '1';
@@ -447,7 +472,7 @@ function getRecordsByH4(){
     top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
         if(recordset){
             //alert("got: "+recordset.length());
-            _getPointerIDs(recordset)
+            _getPointerIDs(recordset);
         }
 
     });    
@@ -668,5 +693,5 @@ function _showRecordDataH4(recordset, reference_recordset) {
         }
     }//for
     recDisplay.value = lines; 
-    
+    document.getElementById('after_gen_div').style.display = 'block'; 
 }
