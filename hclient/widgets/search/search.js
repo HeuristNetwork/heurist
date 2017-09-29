@@ -405,7 +405,6 @@ $.widget( "heurist.search", {
             .appendTo( this.div_search );
 
 
-
             this.btn_add_record = $( "<button>", {
                 text: window.hWin.HR("Add Record"),
                 title: "Click to select a record type and access permissions, and create a new record (entity) in the database"
@@ -441,7 +440,7 @@ $.widget( "heurist.search", {
             this.select_rectype_addrec = $('<select>')   
                 .attr('size',20)
                 .addClass('menu-or-popup') 
-                .css('position','absolute')
+                .css({'position':'absolute','min-width':'250'})
                 .appendTo( $('body') ) 
                 .hide();
                 
@@ -451,7 +450,7 @@ $.widget( "heurist.search", {
                 $('.menu-or-popup').hide(); //hide other
                 var $menu_recordtypes = $( this.select_rectype_addrec )
                     .show()
-                    .position({my: "right top", at: "right bottom", of: this.btn_select_rt });
+                    .position({my: "left top", at: "left bottom", of: this.btn_add_record });
                 $( document ).one( "click", function() { $menu_recordtypes.hide(); });
                 return false;
                     
@@ -459,7 +458,7 @@ $.widget( "heurist.search", {
             
             this._on( this.select_rectype_addrec, {
                 change: function(){
-console.log( this.select_rectype_addrec.find('option:selected').text()+'  '+this.select_rectype_addrec.val() );                    
+
                    this.btn_add_record.button({label: 'Add '+this.select_rectype_addrec.find('option:selected').text()});
                    
                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:this.select_rectype_addrec.val()}});
@@ -584,7 +583,14 @@ console.log( this.select_rectype_addrec.find('option:selected').text()+'  '+this
         }
         if(this.select_rectype_addrec){
             this.select_rectype_addrec.empty();
+            
             window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype_addrec.get(0));
+            
+            var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+            if(prefs[0]>0) {
+                this.select_rectype_addrec.val(prefs[0]);   
+                this.btn_add_record.button({label: 'Add '+this.select_rectype_addrec.find('option:selected').text()});
+            }
         }
         
         this._showhide_input_prompt();

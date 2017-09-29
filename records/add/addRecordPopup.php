@@ -56,6 +56,14 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
             var defaults = <?php echo json_format($addRecDefaults);?>;
             var usrID = <?php echo get_user_id();?>;
             
+            if(hasH4()){
+                var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                if(prefs[0]>0) {
+                    defaults[0] = prefs[0];
+                }
+            }
+
+            
             $(document).ready(function() {
                 $("#show-adv-link").click(function() {
                     $(this).hide();
@@ -85,7 +93,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 
                 window.hWin = detectHeurist(window);
                 if(hasH4()){
-                    console.log('>>> init handler');
+                    
                         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE,
                         function(e, data) { 
                             console.log('update selector');
@@ -247,6 +255,9 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                     defaults = [ rt, wg_id, vis , kwdList.options[kwdList.selectedIndex].value,
                         $("#add-link-tags").val().replace(/,/g,'|'), 1];
 
+                    if(hasH4()){
+                        window.hWin.HAPI4.save_pref('record-add-defaults', defaults);    
+                    }
                     top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults);
                     top.HEURIST.util.setDisplayPreference('record-add-showaccess', cbShowAccessRights?"true":"false" );
                 }else{
