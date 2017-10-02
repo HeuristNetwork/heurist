@@ -142,6 +142,7 @@ else
                 }
                 $rv['rectypes'] = getAllRectypeStructures();
                 $rv['detailTypes'] = getAllDetailTypeStructures();
+                $rv['terms'] = getTerms();
                 break;
 
             case 'deleteRTS':

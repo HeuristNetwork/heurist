@@ -633,7 +633,10 @@ function EditTerms() {
             if(!Hul.isnull(context) && !context.error){
 
                 top.HEURIST.terms = context.terms;
-
+                if(top.hWin && top.hWin.HEURIST4){
+                    top.hWin.HEURIST4.terms = context.terms;
+                }
+                
                 /*_isSomethingChanged = true;
                 document.getElementById ('div_btnAddChild').style.display = "inline-block";
                 document.getElementById ('btnDelete').value = "Delete";
@@ -1136,6 +1139,9 @@ function EditTerms() {
                     if(!error) {
                         
                         top.HEURIST.terms = context.terms;
+                        if(top.hWin && top.hWin.HEURIST4){
+                            top.hWin.HEURIST4.terms = context.terms;
+                        }
 
                         _isSomethingChanged = true;
                         document.getElementById ('div_btnAddChild').style.display = "inline-block";
@@ -1249,6 +1255,9 @@ function EditTerms() {
                     if(!Hul.isnull(context) && !context['error']){
 
                         top.HEURIST.terms = context.terms;
+                        if(top.hWin && top.hWin.HEURIST4){
+                            top.hWin.HEURIST4.terms = context.terms;
+                        }
                         //remove from tree
                         var term_id = _currentNode?_currentNode.data.id:0;
                         var term_id2 = nodeToDelete.data.id;
@@ -1588,6 +1597,7 @@ function EditTerms() {
 
 
             top.HEURIST.terms = context.terms;
+            
             var res = context.result,
             ind,
             parentNode = (context.parent===0)?_currTreeView.getRoot():_currentNode, //??????
@@ -1917,6 +1927,9 @@ function EditTerms() {
             if(!Hul.isnull(context) && !context.error){
 
                 top.HEURIST.terms = context.terms;
+                if(top.hWin && top.hWin.HEURIST4){
+                    top.hWin.HEURIST4.terms = context.terms;
+                }
                 
                 while(node.hasChildren())
                 {
