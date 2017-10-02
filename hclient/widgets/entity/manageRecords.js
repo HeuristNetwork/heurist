@@ -626,7 +626,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
                     
 
-                panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access right'),
+                panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access rights'),
                         icons:{primary:'ui-icon-pencil'}})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'left','margin': '0.8em 7px 0 0', 'font-size': '0.8em', height: '14px', width: '14px'})
