@@ -94,13 +94,13 @@
 
         // OWNER -----------
         $ownerid = intval($ownerid);
-        if(!$ownerid && isset($userDefaultOwnerGroupID)){
+        if(!($ownerid>=0) && isset($userDefaultOwnerGroupID)){
             $ownerid = $userDefaultOwnerGroupID;
         }
-        if(!$ownerid){
+        if(!($ownerid>=0)){
             $ownerid = @$sysvals['sys_NewRecOwnerGrpID'];
         }
-        if(!$ownerid){
+        if(!($ownerid>=0)){
             $ownerid = $system->get_user_id();
         }
 
@@ -694,7 +694,7 @@
         }
         
         //if not defined set current values
-        if(!$ownerid){
+        if(!($ownerid>=0)){
             $ownerid = $record["rec_OwnerUGrpID"];
         }
         if(!$access){
