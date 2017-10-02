@@ -677,7 +677,7 @@ input[type="radio"] {vertical-align: text-top;}
 
 .detailType {width:90px;display: table-cell;color: #999999;vertical-align: top;padding: 0 10px 0 0;text-align: right;text-transform: none;}
 .detail {display: table-cell;padding-right: 15px;text-transform: none;color: #333;}
-.detail a, .detail{text-wrap:normal; word-wrap:break-word; white-space:normal; word-break:break-word}
+.detail a, .detail{text-wrap:normal; word-wrap:break-word; white-space:normal; word-break:normal}
 .detailRow {display: table;padding: 5px 0 5px 0;font-size: 11px;overflow: visible;}
 .detailRowHeader {padding: 5px 0 5px 0;width:100%;border-top: 1px solid #7D9AAA;font-size: 11px;overflow: visible;text-align: left;color:#7D9AAA; text-transform: uppercase;}
 .detailRowHeader span.link{text-transform: none; font-size: 9px;}

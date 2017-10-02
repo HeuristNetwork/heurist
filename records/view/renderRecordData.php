@@ -562,7 +562,7 @@ function print_private_details($bib) {
 
                 }else if ($bd['dty_Type'] == 'blocktext') {
                     
-                        $bd['val'] = nl2br(str_replace(' ', '&nbsp;', output_chunker($bd['val'])));
+                        $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', output_chunker($bd['val'])));
                     
                 }else if ($bd['dty_Type'] == 'resource') {
 
