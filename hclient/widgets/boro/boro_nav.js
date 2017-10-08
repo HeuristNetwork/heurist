@@ -133,7 +133,7 @@ $.widget( "heurist.boro_nav", {
 
         if($('#'+this.options.menu_div).length==1){
             var that = this;
-            //seach for web content records
+            //seach for web content records - content for webpage is stored in special record type
             var details = [this.DT_NAME, this.DT_ORDER, this.DT_EXTENDED_DESCRIPTION];
 
             var request = request = {q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']
@@ -882,11 +882,11 @@ $.widget( "heurist.boro_nav", {
                     
                 }
             }
-            timeline.push({year:that.__getYear(sDate,9999), 
+            timeline.push({year:that.__getYear(sDate,9998),   //sort year
                         date: that.__getYear(sDate), 
                         date2: sDate,
                         story: sDeathType.toLowerCase(),
-                        description: (sDeathType?(sDeathType+', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):''))
+                        description: that.__getYear(sDate,9998)+'  '+(sDeathType?(sDeathType+', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):''))
                                                 :'Death' ) });
             
             leftside['p_lifetime'] = html;
@@ -996,7 +996,9 @@ $.widget( "heurist.boro_nav", {
             //Enlisted, Embarked, Served, Wounded, Demobilized, Returned, Married, Lived
             var allowed = [3302,4578,3693,4355,3303,3304,4254,3694];
             var deforder = [1914,1914,1914,1918,1919,1919,1919,1920];
+            var enlistedDateOrder = 1914;
             var events = that.recset.values(person, 79);
+            
             idx = 0;
             if($.isArray(events)){
                 for (idx in events){
@@ -1029,13 +1031,17 @@ $.widget( "heurist.boro_nav", {
                         }
                         
                         if(placeID==0 || place.ids.indexOf(placeID)>=0){
+                            
+                            if(termID==3302){
+                                enlistedDateOrder = that.__getYear(eventDate.date, ord);
+                            }
 
                             timeline.push({year:that.__getYear(eventDate.date, ord), 
                                 date: that.__getYear(eventDate.date), 
                                 date2: eventDate.date,
                                 eventTypeID: termID,
                                 story: sEventType.toLowerCase(),
-                                description: sEventType+(place.link?', '+place.link:'')+eventDate.desc });
+                                description: that.__getYear(eventDate.date, ord)+'  '+sEventType+(place.link?', '+place.link:'')+eventDate.desc });
                         }
                     }
                 }
@@ -1129,6 +1135,7 @@ $.widget( "heurist.boro_nav", {
                     if(!sEventType) {
                         termID = 3693;
                         sEventType = 'Served';//default   
+                        ord = enlistedDateOrder;
                     }
                     
                     //rank
@@ -1441,7 +1448,7 @@ $.widget( "heurist.boro_nav", {
             if(that.recset.fld(person, 'rec_ThumbnailURL')){
                 html =  html
                 +'<div class="bor-stop-image" style="background-color: '+that.recset.fld(person, 'rec_ThumbnailBg')+';">'
-                + '<img src="'+that.recset.fld(person, 'rec_ThumbnailURL')+'" height="65" alt="Photograph of '+fullName
+                + '<img src="'+that.recset.fld(person, 'rec_ThumbnailURL')+'" height="65" style="max-width:70" alt="Photograph of '+fullName
                 + '"></div>';
             }else{
                 html =  html + '<div class="bor-stop-image bor-stop-image-placeholder"></div>';

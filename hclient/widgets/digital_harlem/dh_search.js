@@ -37,6 +37,7 @@ $.widget( "heurist.dh_search", {
     _currentRequest:null,
     _currentRecordset:null,
     add_filter:null,
+    add_filter_original:null,
 
    _isDigitalHarlem:true,
    
@@ -375,27 +376,72 @@ $.widget( "heurist.dh_search", {
         
        $('#main_pane > .clearfix').hide(); //hide all
        $('.bor-page-search').show();
-        
+       
+       var search_value_original = null;
+       
        if(search_value!=''){
            
            if(typeof search_value === 'string'){
+               
+                search_value_original = search_value;
            
                 var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], //1
                     DT_GIVEN_NAMES = window.hWin.HAPI4.sysinfo['dbconst']['DT_GIVEN_NAMES'],
                     DT_EXTENDED_DESCRIPTION = 134;//window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']; //4      
                 
-                search_value = {any:[{"f:1":search_value},{"f:18":search_value},{"f:134":search_value}]};
+                var criteria = [];
+                var criteria_or = {any:[]};
+                
+                const regex = /"(?:\\.|[^\\"])*"|\S+/g;
+                var matches = search_value.match(regex);
+                var hasOR = false;
+                if(matches!=null){
+//DEBUG console.log(matches);
+                    //const regex = /"[^"]+"|(&&|\ OR \b)/gi;
+                    for(var i=0;i<matches.length;i++){
+                        if(matches[i].toUpperCase() === 'OR'){
+                            if(criteria.length>0){
+                                hasOR = true;
+                                criteria_or.any.push(criteria.length==1?criteria[0]:criteria);
+                                criteria = [];
+                            }
+                        }else{
+                            //strip quotes
+                            var val = matches[i].replace(/(^")|("$)/g, '');
+                            if(val){
+                                var pred = {any:[{"title":val},{"f:134":val}]};
+                                criteria.push(pred); //AND    //{"f:1":matches[i]},{"f:18":matches[i]}
+                            }
+                        }
+                    }
+                    if(hasOR && criteria.length>0){
+                        criteria_or.any.push(criteria.length==1?criteria[0]:criteria);
+                    }
+                    
+                    search_value = (hasOR)?criteria_or:criteria;
+//DEBUG console.log(search_value);  
+                }
+                
+                // OLD WAY
+                //search_value = {any:[{"title":search_value},
+                //    {"f:1":search_value},{"f:18":search_value},{"f:134":search_value}]};
                
            }
             
             this.add_filter = search_value;
+            this.add_filter_original = search_value_original;
        } else {
             this.add_filter = null;
        }
+       
        if(this.search_faceted.html()==''){ //not inited yet
             
        }else{
             //add filter to existing faceted search
+            if(search_value_original!=null){
+               this.search_faceted.search_faceted('option', 'add_filter_original', search_value_original); 
+               this.add_filter_original = search_value_original;
+            }
             this.search_faceted.search_faceted('option', 'add_filter', this.add_filter);
             this.search_faceted.search_faceted('doReset');
        }
@@ -448,6 +494,7 @@ $.widget( "heurist.dh_search", {
             
             if(that.add_filter!=null){
                 facet_params['add_filter'] = that.add_filter;
+                facet_params['add_filter_original'] = that.add_filter_original;
             }            
 
             var noptions= { query_name: this.usr_SavedSearch[svsID][_NAME], 

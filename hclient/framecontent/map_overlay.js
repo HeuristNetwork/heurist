@@ -113,13 +113,18 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                                 _loadMapDocumentById();
                                 menu_mapdocuments.hide();
                         }});
+
+                    var lt = window.hWin.HAPI4.sysinfo['layout'];   
+                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+                        menu_mapdocuments.hide();
+                    }
                     
                     if(startup_mapdocument>=0){
                         if(startup_mapdocument>0){
                             _loadMapDocumentById_init(startup_mapdocument);
                         }
                     }else{
-                        menu_mapdocuments.show().position({my: "right top", at: "right bottom", of: $('#mapSelectorBtn') });
+                        menu_mapdocuments.show().position({my: "right top", at: "right bottom", of: $('#mapSelectorBtn') });    
                     }
 
                 }else{
@@ -135,6 +140,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     function _loadMapDocumentById() {
 
 console.log('load '+current_map_document_id);    
+        menu_mapdocuments.hide();
 
         // Clean old data
         $('#map_extents').css('visibility','hidden');
