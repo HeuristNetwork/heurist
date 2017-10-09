@@ -1604,7 +1604,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
-                            var recID = ''+response.data[0];
+                            //var recID = ''+response.data[0];
                             var rec_Title = response.rec_Title;
                             
                             //that._afterSaveEventHandler( recID, fields);

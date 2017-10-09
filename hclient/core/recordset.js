@@ -650,6 +650,10 @@ function hRecordSet(initdata) {
             
         }else {
 
+            if($.isArray(newvalue)){
+                newvalue = (newvalue.length>0)?newvalue[0]:null;
+            }
+            
             var idx = $.inArray(fldname, fields);
             if(idx>-1){
                 record[idx] = newvalue;
