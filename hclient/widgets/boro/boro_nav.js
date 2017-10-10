@@ -1405,8 +1405,8 @@ $.widget( "heurist.boro_nav", {
                     var obf = that.recset.fld(record, 38);
                     var stitle = (that.recset.fld(record, 'rec_RecTypeID')==144)?'Document scan':('Photograph of '+fullName);
                     
-                    html = html + 
-                        '<a class="bor-gallery-link" data-toggle="lightbox" data-gallery="profile-images" data-title="'
+                    html = html +           
+                        '<a class="bor-gallery-link" data-fancybox="profile-images" data-lightbox="profile-images" data-caption="'
                             + filename + '" data-footer="" title="'+ filename +'" href="'
                             + window.hWin.HAPI4.baseURL+ '?db=' + window.hWin.HAPI4.database 
                             + '&file=' + obf[0] +'">'
@@ -1429,6 +1429,9 @@ $.widget( "heurist.boro_nav", {
                 
                 $('#p_gallery').parent().show();            
                 $('#p_gallery').empty().append($(html));            
+                
+                //top.lightbox.init();
+                $.fancybox({selector : 'a[data-fancybox="profile-images"]', loop:true});
             }
             
             //Timeline -------------------------------
