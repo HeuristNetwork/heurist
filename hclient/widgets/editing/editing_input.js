@@ -781,6 +781,12 @@ $.widget( "heurist.editing_input", {
                             //show preliminary dialog that offer to create new record instead 
                             var popele = that.element.find('.child_info_dlg');
                             if(popele.length==0){
+                                var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+                                if(!(DT_PARENT_ENTITY>0)){
+                                    window.hWin.HEURIST4.msg.showMsgErr('You are creating a parent-child (whole-part,containership) connection. Alas, your database does not have definition for field "Parent Entity". Please import this field from Core Definition database.');
+                                    return;
+                                }
+                                
                                 var sdiv = '<div class="child_info_dlg"><p style="padding:15px 0">You are creating a parent-child (whole-part,containership) connection. We normally recommend creating a new record whcih becomes the child of the current record</p><p>If child records have already been uploaded to the database, you may select one</p><p style="padding:15px 0"><label>Record type: </label><select id="sel_rectypes"></select></p></div>';
                                 popele = $(sdiv).appendTo(that.element);
                             }

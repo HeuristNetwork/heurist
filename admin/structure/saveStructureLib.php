@@ -1271,14 +1271,15 @@
 					}
 
                     if($colName=="trm_ParentTermID"){
+                        if(!($val>0)) $val = null;  //set null value, otherwise we get mysql error
                         $ch_parent_id = $val;
                     }else if($colName=="trm_Code"){
                         $ch_code = $val;
                     }else if($colName=="trm_Label"){
                         $ch_label = $val;
                     }else if($colName=="trm_InverseTermId"){
-                        if($val=="") $val=null;
-                        $inverse_termid = $val;   //new value
+                        if(!($val>0)) $val = null;
+                        $inverse_termid = $val;   //set null value, otherwise we get mysql error
                     }else if($colName=="trm_Status"){
                         if($val=="") $val="open";
                     }
