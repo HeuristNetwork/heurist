@@ -212,7 +212,8 @@ console.log('load '+current_map_document_id);
 
             map_bookmarks = [];
             window.hWin.HEURIST4.ui.addoption(selBookmakrs, -1, 'bookmarks...');
-            
+
+
             // Longitude,Latitude centrepoint, Initial minor span
             // add initial bookmarks based on long lat  minorSpan
             var cp_long = _validateCoord(doc.long,false);
@@ -221,6 +222,9 @@ console.log('load '+current_map_document_id);
                 
                 var body = $(this.document).find('body');
                 var prop = body.innerWidth()/body.innerHeight();
+
+                if(isNaN(prop)) prop = 1;
+                
                 if(body.innerWidth()<body.innerHeight()){
                     span_x = doc.minorSpan;
                     span_y = doc.minorSpan/prop;
