@@ -36,7 +36,9 @@ $.widget( "heurist.boro_nav", {
     
     data_content:{},
     static_pages:{},
-    currentChar:null, 
+    currentChar:null,
+    
+    history:[], 
     
     recset: null, //current recordset
     
@@ -106,10 +108,10 @@ $.widget( "heurist.boro_nav", {
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     _setOptions: function( ) {
 
-        if(arguments[0] && arguments[0]['page_name']){
-            var page_name = arguments[0]['page_name'];
-            var page_id = this._getStaticPageIdByName(page_name);
-            if(page_id>0){
+        if((arguments[0] && arguments[0]['page_name']) || arguments['page_name'] ){
+            var page_name = arguments['page_name']?arguments['page_name']:arguments[0]['page_name'];
+            var page_id = (page_name) ?page_name: this._getStaticPageIdByName(page_name);
+            if(page_id>0 || page_name=='home' || page_name=='people' || page_name=='search'){
                 $('#'+this.options.menu_div).find('a.nav-link[data-id='+page_id+']').click();
             }
         }else{
@@ -119,12 +121,12 @@ $.widget( "heurist.boro_nav", {
             this._superApply( arguments );
             
             if(wasChanged){
+                this.history.push({entityType:this.options.entityType, entityID:this.options.entityID});
                 this.resolveEntity();
             }
-        
         }
     },
-
+    
     /*
     * private function
     * show/hide buttons depends on current login status
@@ -237,6 +239,8 @@ $.widget( "heurist.boro_nav", {
 
             var hdoc = $(window.hWin.document);
             
+            that.history.push({page_name:recID});
+            
             if(recID=='people'){ //people by first char
             
                 that.fillPeopleByFirstChar();
@@ -244,6 +248,7 @@ $.widget( "heurist.boro_nav", {
             }else if(recID==homepage_id && hdoc.find('.bor-page-'+homepage_id).is(':visible')){ //home page
                 location.reload();
             }else{
+                
                 //hide all 
                 hdoc.find('#main_pane > .clearfix').hide(); //hide all
                 //show selected 
@@ -263,7 +268,7 @@ $.widget( "heurist.boro_nav", {
 
         });
 
-        //init links to search personby first char
+        //init links to search person by first char
         $('div.bor-pagination > ul.pagination > li > a').click(function(event){
          
             var firstChar = $(event.target).text();
@@ -298,6 +303,21 @@ $.widget( "heurist.boro_nav", {
             tooltipClass:"tooltip-inner",
             hide: { effect: "explode", duration: 500 }
         });
+        
+                    //find all links with placeid or profileid
+                    setTimeout(function(){
+                        $('#main_pane').find('a[href*="placeid="]').click( window.hWin.boroResolver );
+                        $('#main_pane').find('a[href*="profileid="]').click( window.hWin.boroResolver );
+                        $('#main_pane').find('a[href*="/profile/"]').click( window.hWin.boroResolver );
+                        $('#main_pane').find('a[href*="/place/"]').click( window.hWin.boroResolver );
+                        $('#main_pane').find('a[href*="/contribute"]').click( window.hWin.boroResolver );
+                        $('#main_pane').find('a[href*="/about"]').click( window.hWin.boroResolver );
+                        $('#main_pane').find('a[href*="/faq"]').click( window.hWin.boroResolver );
+                        $('#main_pane').find('a[href*="/search"]').click( window.hWin.boroResolver );
+                        $('#main_pane').find('a[href*="/people"]').click( window.hWin.boroResolver );
+                    },2000);
+                    
+        
         
     },
     
@@ -529,7 +549,7 @@ $.widget( "heurist.boro_nav", {
                     
                     //IMAGE AND NAME
                     var fullName = that.__composePersonName(person);
-                    var profileLink = window.hWin.HAPI4.baseURL+'profile/'+personID+'/'+that.__composePersonNameTag(person);
+                    var profileLink = window.hWin.boroLink('profile', personID, that.__composePersonNameTag(person));
                     var thumb = that.recset.fld(person, 'rec_ThumbnailURL');
                
                     var html_thumb = '';
@@ -786,7 +806,7 @@ $.widget( "heurist.boro_nav", {
 
                     //IMAGE AND NAME
                     var fullName = that.__composePersonName(person);
-                    var profileLink = window.hWin.HAPI4.baseURL+'profile/'+personID+'/'+that.__composePersonNameTag(person);
+                    var profileLink = window.hWin.boroLink('profile', personID, that.__composePersonNameTag(person));
                     var thumb = that.recset.fld(person, 'rec_ThumbnailURL');
 
                     html = html + 
@@ -1403,11 +1423,14 @@ $.widget( "heurist.boro_nav", {
                     var record = that.recset.getById(fval[idx]);
                     var filename = that.recset.fld(record, 62);
                     var obf = that.recset.fld(record, 38);
-                    var stitle = (that.recset.fld(record, 'rec_RecTypeID')==144)?'Document scan':('Photograph of '+fullName);
+                    var isScan = (that.recset.fld(record, 'rec_RecTypeID')==144);
+//console.log(record);
+                    var stitle = isScan?'Document scan':('Photograph of '+fullName);
+                    var slightbox = (that.recset.fld(record, 64)=='pdf')?'':'data-fancybox="profile-images" data-lightbox="profile-images"';
                     
                     html = html +           
-                        '<a class="bor-gallery-link" data-fancybox="profile-images" data-lightbox="profile-images" data-caption="'
-                            + filename + '" data-footer="" title="'+ filename +'" href="'
+                        '<a class="bor-gallery-link" '+slightbox+' data-caption="'
+                            + (filename==null?'':filename) + '" data-footer="" title="'+ (filename==null?'':filename) +'" href="'
                             + window.hWin.HAPI4.baseURL+ '?db=' + window.hWin.HAPI4.database 
                             + '&file=' + obf[0] +'">'
                             + '<img class="bor-thumbnail" src="' 
@@ -1431,7 +1454,9 @@ $.widget( "heurist.boro_nav", {
                 $('#p_gallery').empty().append($(html));            
                 
                 //top.lightbox.init();
-                $.fancybox({selector : 'a[data-fancybox="profile-images"]', loop:true});
+                if($.fancybox && $.isFunction($.fancybox)){
+                    $.fancybox({selector : 'a[data-fancybox="profile-images"]', loop:true});
+                }
             }
             
             //Timeline -------------------------------
@@ -1709,9 +1734,8 @@ $.widget( "heurist.boro_nav", {
                                 var fullName = res.join(', ');
                                 place_names.push(fullName);
                            
-                                aRes.push('<a href="'+window.hWin.HAPI4.baseURL+'place/'
-                                    + placeID
-                                    + '/a" onclick="{window.hWin.boroResolver(event);}">'
+                                aRes.push('<a href="'+window.hWin.boroLink('place', placeID)
+                                    + '" onclick="{window.hWin.boroResolver(event);}">'
                                     + fullName + '</a>');
                         }
                     }
@@ -1852,13 +1876,38 @@ $.widget( "heurist.boro_nav", {
         }
         
         
+    },
+    
+    stepBack: function(){
+        if(this.history.length>1){
+                this.history.pop(); //current page
+                var step = this.history.pop(); //previous
+                this._setOptions(step);
+        }
     }    
     
      
      
 });
 
-
+//
+//
+//
+function boroLink(type, id, tag){
+    
+   if(!tag) tag='a';  
+  
+   var link = window.hWin.HAPI4.baseURL;
+   if(true){
+       link = link + '?db='+window.hWin.HAPI4.database+'&a=2&ll=boro&'+type+'id='+id;
+   }else{
+       //place/'+ placeID+'/a       
+       link = link + type+'/'+ id+'/'+tag;       
+   } 
+   
+   return link;
+    
+}
 
 //
 // global function
@@ -1874,43 +1923,111 @@ function boroResolver(event){
         url = ele.attr('href');
     } 
     
-    var params = url.split('/');
-    if(params.length>2){
-        var recID = params[params.length-2];
-        var type = params[params.length-3];
-        
-        window.hWin.HEURIST4.util.stopEvent(event);
-        
-       if(recID>0 || (type=='military-service' && recID) ){
-
-            var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_nav');
-            if(app1 && app1.widget){
-                $(app1.widget).boro_nav({entityType:type, entityID:recID});    
-            }              
-             
-           /*
-           if(type=='place'){
-                //@todo?? move all functionality of boro_place to boro_nav??? 
-                var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_place');
-                if(app1 && app1.widget){
-                    var hdoc = $(window.hWin.document);
-                    hdoc.find('#main_pane > .clearfix').hide();
-                    hdoc.find('.bor-page-place').show();
-                    hdoc.scrollTop(0);
-                    $(app1.widget).boro_place('option', 'placeID', recID);    
-                }
-           }else{
-           }*/
-       }
-    }else if(params.length>1){
-        var page_name = params[params.length-1];
-        if(page_name){
-            window.hWin.HEURIST4.util.stopEvent(event);
-            var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_nav');
-            if(app1 && app1.widget){
-                $(app1.widget).boro_nav({page_name:page_name});    
-            }              
+    if(url.indexOf('db='+window.hWin.HAPI4.database)>0){ //standard heurist url
+    
+        var placeID = window.hWin.HEURIST4.util.getUrlParameter('placeid', url);
+        var profileID = window.hWin.HEURIST4.util.getUrlParameter('profileid', url);
+        var type = null, recID = 0;
+        if(placeID>0){
+            type = 'place';
+            recID = placeID;
+        }else if(profileID>0){
+            type = 'profile';
+            recID = profileID;
         }
-    }   
+        if(recID>0){
+                window.hWin.HEURIST4.util.stopEvent(event);
+                
+                var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_nav');
+                if(app1 && app1.widget){
+                    $(app1.widget).boro_nav({entityType:type, entityID:recID});    
+                }              
+        }
+        
+    }else{
+    
+        var params = url.split('/');
+        if(params.length>2){
+            var recID = params[params.length-2];
+            var type = params[params.length-3];
+            
+            window.hWin.HEURIST4.util.stopEvent(event);
+            
+           if(recID>0 || (type=='military-service' && recID) ){
+
+                var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_nav');
+                if(app1 && app1.widget){
+                    $(app1.widget).boro_nav({entityType:type, entityID:recID});    
+                }              
+                 
+               /*
+               if(type=='place'){
+                    //@todo?? move all functionality of boro_place to boro_nav??? 
+                    var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_place');
+                    if(app1 && app1.widget){
+                        var hdoc = $(window.hWin.document);
+                        hdoc.find('#main_pane > .clearfix').hide();
+                        hdoc.find('.bor-page-place').show();
+                        hdoc.scrollTop(0);
+                        $(app1.widget).boro_place('option', 'placeID', recID);    
+                    }
+               }else{
+               }*/
+           }
+        }else if(params.length>1){
+            var page_name = params[params.length-1];
+            if(page_name){
+                window.hWin.HEURIST4.util.stopEvent(event);
+                var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_nav');
+                if(app1 && app1.widget){
+                    $(app1.widget).boro_nav({page_name:page_name});    
+                }              
+            }
+        }   
+    }
 }
+
+window.onload = function () {
+    
+    /*
+    if (window.history && window.history.pushState) {
+        window.history.pushState('', null, './');
+        $(window).on('popstate', function() {
+            // alert('Back button was pressed.');
+            document.location.href = '#';
+
+        });
+    } */
+        
+    if (window.history && typeof history.pushState === "function") {
+        history.pushState("jibberish", null, null);
+        window.onpopstate = function () {
+            history.pushState('newjibberish', null, null);
+            // Handle the back (or forward) buttons here
+            // Will NOT handle refresh, use onbeforeunload for this.
+            var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_nav');
+            if(app1 && app1.widget){
+                $(app1.widget).boro_nav('stepBack');    
+            }              
+          
+        };
+    }
+    else {
+        var ignoreHashChange = true;
+        window.onhashchange = function () {
+            if (!ignoreHashChange) {
+                ignoreHashChange = true;
+                window.location.hash = Math.random();
+                // Detect and redirect change here
+                // Works in older FF and IE9
+                // * it does mess with your hash symbol (anchor?) pound sign
+                // delimiter on the end of the URL
+console.log('Back button 2');
+            }
+            else {
+                ignoreHashChange = false;
+            }
+        };
+    }
+};
 

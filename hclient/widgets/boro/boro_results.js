@@ -125,7 +125,8 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         }
         fullName = fullName + ' ' + fld(DT_NAME);
         
-        var profileLink = 'href="'+window.hWin.HAPI4.baseURL+'profile/'+fld('rec_ID')+'/a" onclick="{window.hWin.boroResolver(event);}"';
+        var profileLink = 'href="'+window.hWin.boroLink('profile', fld('rec_ID'))
+                                  +'" onclick="{window.hWin.boroResolver(event);}"';
    
         //get thumbnail if available for this record, or generic thumbnail for record type
         var html_thumb = '';
