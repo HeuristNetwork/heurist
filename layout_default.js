@@ -200,7 +200,7 @@ var cfg_layouts = [
                 {appid:'h4_search', hasheader:false, 
                 css:{position:'absolute', top:0, left:0, right:0,
                 border:'none', 'background':'white', 'min-width':'75em'}, 
-            options:{has_paginator:false, btn_visible_newrecord:false} }, 
+            options:{has_paginator:false, btn_visible_newrecord:true} }, 
         ]},
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, 
                      dockable:false, dragable:false, css:{'background-color':'white'}, 

@@ -1676,6 +1676,7 @@ function EditRecStructure() {
                         if(top.hWin && top.hWin.HEURIST4){
                             top.hWin.HEURIST4.rectypes = context.rectypes;
                             top.hWin.HEURIST4.detailtypes = context.detailTypes;
+                            top.hWin.HEURIST4.terms = context.terms;
                         }
                     
                     editStructure._structureWasUpdated = true;

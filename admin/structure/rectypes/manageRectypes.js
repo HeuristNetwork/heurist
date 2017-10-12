@@ -531,7 +531,16 @@ function RectypeManager() {
                     if(elLink.hash === "#search") {
                         window.open(top.HEURIST.baseURL+'?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
                     }else if(elLink.hash === "#addrec") {
-                        window.open(top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&db='+db+'&rec_rectype='+rectypeID,'_blank');
+                        
+                        if(top.HEURIST4){ //window.hWin && window.hWin.HEURIST4){
+                            
+                            var new_record_params = {};
+                            new_record_params['rt'] = rectypeID;
+                            top.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
+                        }else{
+                            var url = top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&ver=h3&db='+db+'&rec_rectype='+rectypeID
+                            window.open(url,'_blank');
+                        }
                     }else if(elLink.hash === "#edit_rectype") {
                         _editRecStructure(rectypeID);
                         //2016-06-14 Ian req _onAddEditRecordType(rectypeID, 0);
@@ -719,7 +728,7 @@ function RectypeManager() {
                 }
             };
             var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
-            btnAddRecordType2.onclick = btnAddRecordType.onclick;
+            if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick;
 
             var body = $(top.document).find('body');
             var dim = {h:body.innerHeight(), w:body.innerWidth()},
@@ -741,7 +750,7 @@ function RectypeManager() {
 
             };
             btnAddRecordType2 = Dom.get('btnImportFromDb'+grpID+'_2');
-            btnAddRecordType2.onclick = btnAddRecordType.onclick
+            if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick
 
             //-------
 /*Remarked temporarely 2016-05-11

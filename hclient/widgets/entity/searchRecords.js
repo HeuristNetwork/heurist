@@ -93,9 +93,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
 
         if(this.element.find('#cb_selected').is(':checked')){
-            qstr = qstr + ' ids:' + window.hWin.HAPI4.get_prefs('recent_Records');
             
-            qobj.push({"ids":window.hWin.HAPI4.get_prefs('recent_Records')});
+            var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
+            if (window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids)){
+                qstr = qstr + ' ids:' + window.hWin.HAPI4.get_prefs('recent_Records');
+                qobj.push({"ids":window.hWin.HAPI4.get_prefs('recent_Records')});
+            }
         }
         
         if(this.options.parententity>0){

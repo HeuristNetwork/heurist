@@ -308,50 +308,10 @@ $.widget( "heurist.search", {
             } });
         }
 
-        // Add record button
-        if(this.options.btn_visible_newrecord){
 
-            /* on right hand side
-            this.div_add_record = $('<div>')
-            .addClass('logged-in-only')
-            .css({'float': 'right', 'padding': '23px 23px 0 0'})
-            .appendTo( this.element );
-            */
-            
-            this.div_add_record = $('<div>')
-            .addClass('div-table-cell logged-in-only')
-            .appendTo( this.div_search );
-
-
-            /* in case we need place it along with other elements
-            .addClass('div-table-cell  logged-in-only')
-            .css('padding-left','4em')
-            .appendTo( this.div_search );*/
-
-            this.btn_add_record = $( "<button>", {
-                text: window.hWin.HR("Add Record"),
-                title: "Click to select a record type and access permissions, and create a new record (entity) in the database"
-            })
-            .css({'width':'140px','minwidth':'110px','margin-left':'4em'})
-            //.addClass('logged-in-only')
-            .addClass('ui-heurist-btn-header1')
-            .appendTo( this.div_add_record )
-            .button({icons: {
-                primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
-            }})
-            .click( function(){ window.hWin.HAPI4.SystemMgr.is_logged(that._addNewRecord); });
-
-            
-        } // add record button
-        
-        
         // Manage structure button
         if(window.hWin.HAPI4.sysinfo['layout']=='original'){
             
-        this.div_add_record = $('<div>')
-            .addClass('div-table-cell logged-in-only')
-            .appendTo( this.div_search );
-
         this.btn_mamage_structure = $( "<button>", {
                 text: window.hWin.HR("Manage Structure"),
                 title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
@@ -428,6 +388,92 @@ $.widget( "heurist.search", {
         this._on( link, {  click: function(){
             window.open('context_help/advanced_search.html','_blank');
         } });
+        
+        
+        // Add record button
+        if(this.options.btn_visible_newrecord){
+
+            /* on right hand side
+            this.div_add_record = $('<div>')
+            .addClass('logged-in-only')
+            .css({'float': 'right', 'padding': '23px 23px 0 0'})
+            .appendTo( this.element );
+            */
+            
+            this.div_add_record = $('<div>')
+            .addClass('div-table-cell logged-in-only')
+            .appendTo( this.div_search );
+
+
+            this.btn_add_record = $( "<button>", {
+                text: window.hWin.HR("Add Record"),
+                title: "Click to select a record type and access permissions, and create a new record (entity) in the database"
+            })
+            .css({'min-width':'110px','margin-left':'4em','font-size':'1.3em'})
+            //.addClass('logged-in-only')
+            //.addClass('ui-heurist-btn-header1')
+            .appendTo( this.div_add_record )
+            .button({icons: {
+                primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
+            }})
+            .click( function(){ 
+                window.hWin.HAPI4.SystemMgr.is_logged(function(){
+                    if(that.select_rectype_addrec.val()>0){
+                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                            {new_record_params:{rt:that.select_rectype_addrec.val()}});
+                    }else{
+                        that.btn_select_rt.click();
+                    }
+                }); 
+            });
+
+            this.btn_select_rt = $( "<button>", {
+                text: window.hWin.HR("Select record type")
+            })
+            .css({'font-size':'1.3em'})
+            .appendTo( this.div_add_record )
+            //.addClass('ui-heurist-btn-header1 heurist-bookmark-search')
+            .button({icons: {
+                primary: 'ui-icon-carat-1-s' //"ui-icon-triangle-1-s"
+                }, text:false});
+
+            this.select_rectype_addrec = $('<select>')   
+                .attr('size',20)
+                .addClass('menu-or-popup') 
+                .css({'position':'absolute','min-width':'250'})
+                .appendTo( $('body') ) 
+                .hide();
+                
+            this._on( this.btn_select_rt, {
+                click:  function(){
+                    
+                $('.menu-or-popup').hide(); //hide other
+                var $menu_recordtypes = $( this.select_rectype_addrec )
+                    .show()
+                    .position({my: "left top", at: "left bottom", of: this.btn_add_record });
+                $( document ).one( "click", function() { $menu_recordtypes.hide(); });
+                return false;
+                    
+            }});
+            
+            this._on( this.select_rectype_addrec, {
+                change: function(){
+
+                   this.btn_add_record.button({label: 'Add '+this.select_rectype_addrec.find('option:selected').text()});
+                   
+                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:this.select_rectype_addrec.val()}});
+                   
+                   return false;
+                }
+            });
+                
+                
+            this.div_add_record.buttonset();
+            
+        } // add record button
+        
+        
+        
 
 
         // bind click events
@@ -534,6 +580,17 @@ $.widget( "heurist.search", {
         if(this.select_rectype){
             this.select_rectype.empty();
             window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set);
+        }
+        if(this.select_rectype_addrec){
+            this.select_rectype_addrec.empty();
+            
+            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype_addrec.get(0));
+            
+            var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+            if(prefs[0]>0) {
+                this.select_rectype_addrec.val(prefs[0]);   
+                this.btn_add_record.button({label: 'Add '+this.select_rectype_addrec.find('option:selected').text()});
+            }
         }
         
         this._showhide_input_prompt();

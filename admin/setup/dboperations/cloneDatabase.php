@@ -154,6 +154,9 @@ if(mysql_error()) {
                         <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
                         <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
                             (all databases created by this installation of the software will have the same prefix).</p>
+                        <p>
+                            <label>No data (copy structure definitions only):&nbsp<input type='checkbox' name='nodata' value="1"/></label>
+                        </p>
                         <h3>Enter a name for the cloned database:</h3>
                         <div style="margin-left: 40px;">
                             <input type='text' name='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
@@ -183,6 +186,7 @@ function arraytolower($item)
 
 if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
     $targetdbname = $_REQUEST['targetdbname'];
+    $nodata = (@$_REQUEST['nodata']==1);
 
     // Avoid illegal chars in db name
     $hasInvalid = isInValid($targetdbname);
@@ -200,7 +204,7 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
         return false;
     }
 
-    $res = cloneDatabase($targetdbname);
+    $res = cloneDatabase($targetdbname, $nodata);
     
     if(!$res){
         echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
@@ -221,7 +225,7 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 // 4. add contrainsts, procedure and triggers
 // 5. remove registration info and assign originID for definitions
 //
-function cloneDatabase($targetdbname) {
+function cloneDatabase($targetdbname, $nodata=false) {
     set_time_limit(0);
 
     $newname = HEURIST_DB_PREFIX.$targetdbname;
@@ -250,7 +254,7 @@ function cloneDatabase($targetdbname) {
 
     echo_flush ("<p>Copy data</p>");
     // db_clone function in /common/php/db_utils.php does all the work
-    if( db_clone(DATABASE, $newname) ){
+    if( db_clone(DATABASE, $newname, true, $nodata) ){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         db_drop($newname);

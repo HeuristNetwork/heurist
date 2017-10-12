@@ -97,7 +97,7 @@ $.widget( "heurist.manageEntity", {
         // select_multi - several items can be highlighted, chekboxes are visible in list, onselect works only if button prerssed
         select_mode: 'manager', //'select_single','select_multi','manager'
 
-        selectbutton_label: 'Select',  //@todo remove?? 
+        selectbutton_label: 'Select',  //label for select button @todo remove?? 
         
         select_return_mode: 'ids', //ids or recordset
         

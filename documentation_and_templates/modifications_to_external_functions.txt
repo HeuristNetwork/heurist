@@ -55,6 +55,16 @@ external/php/phpZotero.php (114-121) support proxy settings
            - hide image util load is completed
 
 2017-08-09  ext/layout/jquery.layout-latest.js remark forceful set background to #FFF  line 180
+
+2017-09-21 in order avoid abstract class not found error
+            replace include_once to require_once in external/geoPHP/geoPHP.inc
+            remove ext/geoPHP
+            
+            Added explicite “require” for most common abstract classes into Smarty.class.php
+            require_once(SMARTY_SYSPLUGINS_DIR.'smarty_internal_data.php');
+            require_once(SMARTY_SYSPLUGINS_DIR.'smarty_internal_compilebase.php');
+
+
 -----------------------------------------------------------------------------------------------------------------------------------
 
 /**

@@ -516,7 +516,7 @@ class System {
                     "version"=>HEURIST_VERSION,    
                     "version_new"=>$lastCode_VersionOnServer,
                     //db version
-                    "db_version"=> '1.1.0', //$this->get_system('sys_dbVersion').'.'.$this->get_system('sys_dbSubVersion').'.'.$this->get_system('sys_dbSubSubVersion'),         
+                    "db_version"=> $this->get_system('sys_dbVersion').'.'.$this->get_system('sys_dbSubVersion').'.'.$this->get_system('sys_dbSubSubVersion'),         
                     "db_version_req"=>HEURIST_MIN_DBVERSION,
                     
                     "dbowner_name"=>@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'],
@@ -939,6 +939,7 @@ class System {
             if(!$res || $res<500 ) {$res = 500;}
             else if($res>5000 ) {$res = 5000;}
         }
+
 
         return $res;
     }

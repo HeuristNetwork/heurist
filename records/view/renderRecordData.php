@@ -562,7 +562,7 @@ function print_private_details($bib) {
 
                 }else if ($bd['dty_Type'] == 'blocktext') {
                     
-                        $bd['val'] = nl2br(str_replace(' ', '&nbsp;', output_chunker($bd['val'])));
+                        $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', output_chunker($bd['val'])));
                     
                 }else if ($bd['dty_Type'] == 'resource') {
 
@@ -708,7 +708,7 @@ if($is_map_popup){
     
             //print info about parent record
             foreach ($bds as $bd) {
-                if($bd['dty_ID']==DT_PARENT_ENTITY){
+                if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY){
                     print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
                         .'<div class=detailType>Parent record</div><div class="detail">'
                         .' '.$bd['val'].'</div></div>';
@@ -765,7 +765,7 @@ if($is_map_popup){
             
             $prevLbl = null;
             foreach ($bds as $bd) {
-                if($bd['dty_ID']==DT_PARENT_ENTITY) continue;
+                if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
                 print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;'
                     .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
                     .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))

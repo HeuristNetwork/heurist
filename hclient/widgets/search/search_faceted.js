@@ -81,6 +81,7 @@ ui_title - title in user interface
 title_hierarchy - show hierarchy in facet header
 sup_filter - suplementary filter that is set in design time
 add_filter - additional filter that can be set in run time 
+add_filter_original - original search string for add_filter if it is json
 search_on_reset - search for empty form (on reset and on init)
 
 viewport - collapse facet to limit count of items
@@ -210,7 +211,8 @@ $.widget( "heurist.search_faceted", {
         this._super( key, value );
         if(key=='add_filter'){
             this.options.params.add_filter = value;
-            //this.doSearch();
+        }else if(key=='add_filter_original'){
+            this.options.params.add_filter_original = value;
         }
     },
     
@@ -420,6 +422,7 @@ $.widget( "heurist.search_faceted", {
 
     ,doResetAll: function(){
         this.options.params.add_filter = null;
+        this.options.params.add_filter_original = null;
         this.doReset();
     }
     //

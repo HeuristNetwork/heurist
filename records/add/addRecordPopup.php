@@ -56,6 +56,14 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
             var defaults = <?php echo json_format($addRecDefaults);?>;
             var usrID = <?php echo get_user_id();?>;
             
+            if(hasH4()){
+                var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                if(prefs[0]>0) {
+                    defaults[0] = prefs[0];
+                }
+            }
+
+            
             $(document).ready(function() {
                 $("#show-adv-link").click(function() {
                     $(this).hide();
@@ -85,7 +93,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                 
                 window.hWin = detectHeurist(window);
                 if(hasH4()){
-                    console.log('>>> init handler');
+                    
                         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE,
                         function(e, data) { 
                             console.log('update selector');
@@ -212,7 +220,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                         sError2 = ' and '+sError2;
                     }
                     alert('Please select '+sError1+sError2);
-                    cbShowAccessRights.checked = true;
+                    cbShowAccessRights = true;
                     showHideAccessSettings(cbShowAccessRights);
                     //document.getElementById('rec_OwnerUGrpID').focus();
                     //document.getElementById('rec_NonOwnerVisibility').focus();
@@ -247,8 +255,11 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                     defaults = [ rt, wg_id, vis , kwdList.options[kwdList.selectedIndex].value,
                         $("#add-link-tags").val().replace(/,/g,'|'), 1];
 
+                    if(hasH4()){
+                        window.hWin.HAPI4.save_pref('record-add-defaults', defaults);    
+                    }
                     top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults);
-                    top.HEURIST.util.setDisplayPreference('record-add-showaccess', cbShowAccessRights.checked?"true":"false" );
+                    top.HEURIST.util.setDisplayPreference('record-add-showaccess', cbShowAccessRights?"true":"false" );
                 }else{
                     top.HEURIST.util.setDisplayPreference('record-add-defaults', "");
                 }
@@ -264,7 +275,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                                         
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
                 }else{
-                    window.open('<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='
+                    window.open('<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&ver=h3&db=<?=HEURIST_DBNAME?>&rec_rectype='
                             +rt + extra_parms);
                 }
 
@@ -338,10 +349,6 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
             </div>
 
             <div class="input-row">
-
-                
-                
-
                 <div class="resource workgroup" style="margin:10px 0">
                     <div class="input-row workgroup">
                         <div class="input-header-cell">Record owner (group or individual)

@@ -222,6 +222,9 @@ $.widget( "heurist.resultList", {
 
     }, //end _create
 
+    //
+    //
+    //
     _initControls: function() {
 
         var that = this;
@@ -254,7 +257,7 @@ $.widget( "heurist.resultList", {
         this.div_header =  $( "<div>" ).css('height','3em').appendTo( this.element );
 
         $('<h3>'+window.hWin.HR('Filtered Result')+'</h3>')
-        .css('padding','1em 0 0 0.7em')
+        .css('padding','0.7em 0 0 0.7em')
         .appendTo(this.div_header);
 
         if(this.options.select_mode=='select_multi'){
@@ -288,6 +291,7 @@ $.widget( "heurist.resultList", {
         .addClass('div-result-list-toolbar ent_header ui-heurist-bg-light')
         //.css({'border-bottom':'1px solid #cccccc'})
         .appendTo( this.element );
+        
         this.div_content = $( "<div>" )
         .addClass('div-result-list-content ent_content_full ui-heurist-bg-light')
         .css({'border-top':'1px solid #cccccc'})  //,'padding-top':'1em'
@@ -300,9 +304,7 @@ $.widget( "heurist.resultList", {
             'z-index':'99999999', 'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
         .appendTo( this.element ).hide();
 
-        this.action_buttons_div = $( "<span>" )
-        .css({'display':'inline-block', 'padding-left':'1em'})
-        .appendTo( this.div_toolbar );
+        this.action_buttons_div = $( "<span>" ).hide().appendTo( this.div_toolbar );
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_buttons)){
 
@@ -326,6 +328,8 @@ $.widget( "heurist.resultList", {
                     that._trigger( "onaction", null, key );
                 });
             }
+            
+            this.action_buttons_div.css({'display':'inline-block', 'padding':'0 0 4px 1em'});
         }
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)){
 
@@ -370,6 +374,7 @@ $.widget( "heurist.resultList", {
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
         .css({'float':'right','padding-right':right_padding+'px'})
+        //.css({'display':'inline-block','text-align':'right','padding-right':right_padding+'px'})
         .html('<input id="cb1_'+rnd+'" type="radio" name="list_lo" value="list"/>'
             +'<label for="cb1_'+rnd+'">'+window.hWin.HR('list')+'</label>'
             +'<input  id="cb2_'+rnd+'" type="radio" name="list_lo" value="icons"/>'
@@ -403,34 +408,16 @@ $.widget( "heurist.resultList", {
         //----------------------
         //,'min-width':'10em'
 
-        this.span_pagination = $( "<div>")
-        .css({'float':'right','padding':'6px 0.5em 0 0'})
-        .appendTo( this.div_toolbar );
 
-        this.span_info = $( "<div>")
-        .css({'float':'right','padding':'0.6em 0.5em 0 0','font-style':'italic'})
-        .appendTo( this.div_toolbar );
-
-        this._showHideOnWidth();
-
-        //-----------------------
-
-        if(this.options.show_menu){
-            if($.isFunction($('body').resultListMenu)){
-                this.div_actions = $('<div>')
-                //.css({'position':'absolute','top':3,'left':2})
-                .resultListMenu()
-                .appendTo(this.div_toolbar);
-            }
-        }    
         if(this.options.show_savefilter){
             //special feature to save current filter
-            var btndiv = $('<div>').css({position:'absolute',bottom:0,left:0,top:'2.8em'}).appendTo(this.div_toolbar);
+            //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
+            var btndiv = $('<div>').css({display:'inline-block','vertical-align':'top','padding-bottom':'4px'}).appendTo(this.div_toolbar);
             this.btn_search_save = $( "<button>", {
                 text: window.hWin.HR('Save Filter'),
                 title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
             })
-            .css({'min-width': '80px','font-size':'0.8em', 'xfont-weight': 'bold', 'margin-left': '0.9em' ,background: 'none', color: 'rgb(142, 169, 185)'})
+            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none', color: 'rgb(142, 169, 185)'})
             .addClass('ui-state-focus')
             .appendTo( btndiv )
             .button({icons: {
@@ -448,7 +435,29 @@ $.widget( "heurist.resultList", {
                 });
             } });    
         }             
+        if(this.options.show_menu){
+            if($.isFunction($('body').resultListMenu)){
+                this.div_actions = $('<div>')
+                .css({display:'inline-block','padding-bottom':'4px'})
+                //.css({'position':'absolute','top':3,'left':2})
+                .resultListMenu()
+                .appendTo(this.div_toolbar);
+            }
+        }    
 
+        this.span_pagination = $( "<div>")
+        .css({'display':'inline-block','vertical-align':'top','padding': '3px 0.5em 0 0'})
+        //.css({'float':'right','padding':'6px 0.5em 0 0'})
+        .appendTo( this.div_toolbar );
+
+        this.span_info = $( "<div>")
+        .css({'display':'inline-block','vertical-align':'top','padding': '3px 0.5em 0 0','font-style':'italic'})
+        //.css({'float':'right','padding':'0.6em 0.5em 0 0','font-style':'italic'})
+        .appendTo( this.div_toolbar );
+
+        this._showHideOnWidth();
+
+        //-----------------------
 
     },
 
@@ -554,6 +563,11 @@ $.widget( "heurist.resultList", {
     _showHideOnWidth: function(){      
 
         if(this.options.show_counter){
+            
+            if(this.max_page>1) this.span_pagination.css({'display':'inline-block'});
+            this.span_info.css({'display':'inline-block'});
+            return; //NOT HIDE ANYMORE - we use wrap now
+            
             var w = this.element.width();
             /* pagination has more priority than reccount
             if ( w < 380 || (w < 440 && this.max_page>1) ) {

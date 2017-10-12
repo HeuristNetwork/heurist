@@ -65,6 +65,7 @@ of the codebase and rename it to index.html
 $version = "4.5.1"; // sets current program version number, determined by Heurist development lead
 
 // 4.5.1 21 Sep 17 Nips and tucks to database structure, DB version 1.2.0
+// 4.2.23 3 Aug17 Bug fixes and draft of new record edit function (WIP)
 // 4.2.22  Many fixes/improvements for facet searches, file verification, thumbnailing, maps and timelines
 // 4.2.21 19Jun17. Clean up methods for uploaded files, multi-record attachment, increase thumbnail image size, 
 //                 improve vocabulary tree, handling of repeating and missing value matching in CSV import,

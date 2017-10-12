@@ -418,6 +418,7 @@ function updateRectypeOnServer() {
 
 function updateRectypeOnServer_continue()
 {
+        
     if(!titleMaskIsOk){
         $('#btnSave').removeAttr('disabled');
         alert("Title mask is invalid");
@@ -432,6 +433,7 @@ function updateRectypeOnServer_continue()
     var str = getUpdatedFields();
 
     if(str=="mandatory"){
+        $('#btnSave').removeAttr('disabled');
         //do not close the window
 
     }else if(str != null) {

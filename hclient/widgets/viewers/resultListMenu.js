@@ -155,7 +155,7 @@ $.widget( "heurist.resultListMenu", {
         var _hide = function(ele) {
             myTimeoutId = setTimeout(function() {
                 $( ele ).hide();
-                }, 800);
+                }, 1);
             //$( ele ).delay(800).hide();
         },
         _show = function(ele, parent) {

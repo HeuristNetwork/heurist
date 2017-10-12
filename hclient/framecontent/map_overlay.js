@@ -113,13 +113,18 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                                 _loadMapDocumentById();
                                 menu_mapdocuments.hide();
                         }});
+
+                    var lt = window.hWin.HAPI4.sysinfo['layout'];   
+                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+                        menu_mapdocuments.hide();
+                    }
                     
                     if(startup_mapdocument>=0){
                         if(startup_mapdocument>0){
                             _loadMapDocumentById_init(startup_mapdocument);
                         }
                     }else{
-                        menu_mapdocuments.show().position({my: "right top", at: "right bottom", of: $('#mapSelectorBtn') });
+                        menu_mapdocuments.show().position({my: "right top", at: "right bottom", of: $('#mapSelectorBtn') });    
                     }
 
                 }else{
@@ -135,6 +140,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     function _loadMapDocumentById() {
 
 console.log('load '+current_map_document_id);    
+        menu_mapdocuments.hide();
 
         // Clean old data
         $('#map_extents').css('visibility','hidden');
@@ -206,7 +212,8 @@ console.log('load '+current_map_document_id);
 
             map_bookmarks = [];
             window.hWin.HEURIST4.ui.addoption(selBookmakrs, -1, 'bookmarks...');
-            
+
+
             // Longitude,Latitude centrepoint, Initial minor span
             // add initial bookmarks based on long lat  minorSpan
             var cp_long = _validateCoord(doc.long,false);
@@ -215,6 +222,9 @@ console.log('load '+current_map_document_id);
                 
                 var body = $(this.document).find('body');
                 var prop = body.innerWidth()/body.innerHeight();
+
+                if(isNaN(prop)) prop = 1;
+                
                 if(body.innerWidth()<body.innerHeight()){
                     span_x = doc.minorSpan;
                     span_y = doc.minorSpan/prop;

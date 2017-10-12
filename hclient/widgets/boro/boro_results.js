@@ -82,9 +82,20 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         this._super( pageno, recordset, is_retained_selection );
 
         this.div_content.css('overflow','hidden');
+        $('.bor-page-search').height( 600 );
+        
+        
         var newHeight = $(this.div_content)[0].scrollHeight + 100;
-        if (newHeight<500) newHeight = 500;
-               
+/*
+        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');
+        var fsh = $(app.widget).find('.fieldset_search').parent()[0].scrollHeight + 200;
+        if(newHeight<fsh) newHeight = fsh;
+*/        
+        if (newHeight<1200){
+            newHeight = 1200;  
+        } 
+        
+             
         $('.bor-page-search').height( newHeight );
   },    
     
@@ -114,14 +125,15 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
         }
         fullName = fullName + ' ' + fld(DT_NAME);
         
-        var profileLink = 'href="'+window.hWin.HAPI4.baseURL+'profile/'+fld('rec_ID')+'/a" onclick="{window.hWin.boroResolver(event);}"';
+        var profileLink = 'href="'+window.hWin.boroLink('profile', fld('rec_ID'))
+                                  +'" onclick="{window.hWin.boroResolver(event);}"';
    
         //get thumbnail if available for this record, or generic thumbnail for record type
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
             html_thumb = 
                 '<a '+profileLink+' class="bor-stop-image" style="background-color: '+fld('rec_ThumbnailBg')+';">'
-                +'<img src="'+fld('rec_ThumbnailURL')+'" height="65" alt="Photograph of '+fullName
+                +'<img src="'+fld('rec_ThumbnailURL')+'" height="65" style="max-width:70" alt="Photograph of '+fullName
                 +'"></a>';
         }else{
             html_thumb = '<a '+profileLink+' class="bor-stop-image bor-stop-image-placeholder"></a>';
@@ -174,8 +186,15 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
             //get faceted search values
             var values = iFacetedSearch.search_faceted('getFacetsValues');    
             var f_params = iFacetedSearch.search_faceted('option','params');
-            var add_filter = f_params?f_params.add_filter:null;
-            var primary_rt = f_params.rectypes[0];
+            var add_filter = null;
+            var add_filter_original = null;
+            var primary_rt = null;
+         
+            if(f_params){
+                add_filter = f_params.add_filter;
+                add_filter_original = f_params.add_filter_original;
+                primary_rt = f_params.rectypes[0];
+            }
 
             var idx=0, len = values.length;
 
@@ -328,8 +347,10 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 
                 if(!window.hWin.HEURIST4.util.isempty(add_filter)){
                     
-                    if(add_filter['any']){
-                        sinfo.push('matching the phrase "'+add_filter['any'][0]['f:1']+'".');
+                    if(add_filter_original!=null){
+                        sinfo.push('matching the phrase "'+add_filter_original+'"');
+                    }else if(add_filter['any'] && add_filter['any'][0]['title']){
+                        sinfo.push('matching the phrase "'+add_filter['any'][0]['title']+'".');
                     }else{
                        //sinfo.push('matching the phrase "'+add_filter['any'][0]['f:1']+'".');
                     }

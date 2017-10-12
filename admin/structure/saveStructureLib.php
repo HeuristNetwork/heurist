@@ -186,12 +186,14 @@
     //
     function handleError($msg, $query, $sqlerror=null){
         
+        global $mysqli;
+        
         if(@$sqlerror===null){
             $sqlerror = $mysqli->error;
         }
         
         $email_title = 'SQL error on db structure modification. '.HEURIST_DBNAME;
-        $email_text = 'Database '.HEURIST_DBANME."\n\n".
+        $email_text = 'Database '.HEURIST_DBNAME."\n\n".
                       'Message: '.$msg."\n\n".
                       'Query: '.$query."\n\n".
                       'SQL error '.$sqlerror;
@@ -656,7 +658,7 @@
 
 					$rows = execSQL($mysqli, $query, $parameters, true);
 
-					if ($rows==0 || is_string($rows) ) {
+					if ( ($isInsert && $rows==0) || is_string($rows) ) {
 						$oper = (($isInsert)?"inserting":"updating");
 						array_push($ret[$rtyID], "Error on ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure: ".$rows);
 					} else {
@@ -765,9 +767,9 @@
 
 
 	/**
-	* updateRectypeGroup - Helper function that updates group in the deleteRectypeGroup table
+	* updateRectypeGroup - Helper function that updates group in the defRecTypeGroups table
 	* @author Artem Osmakov
-	* @param $columnNames an array valid column names in the deleteRectypeGroups table which match the order of data in the $rt param
+	* @param $columnNames an array valid column names in the defRecTypeGroups table which match the order of data in the $rt param
 	* @param $rtgID id of the group to update
 	* @param $rt - data
 	* @return $ret an array of return values for the various data elements created or errors if they occurred
@@ -820,8 +822,9 @@
 				$query = "update defRecTypeGroups set ".$query." where rtg_ID = $rtgID";
 
 				$rows = execSQL($mysqli, $query, $parameters, true);
-				if ($rows==0 || is_string($rows) ) {
-                    $ret = handleError("SQL error updating $colName in updateRectypeGroup".$rows, $query);
+				if (is_string($rows) ) {
+                    $ret = handleError("SQL error updating $colName in updateRectypeGroup "
+                        .$rows.' params:'.print_r($parameters,true), $query);
 				} else {
 					$ret['result'] = $rtgID;
 				}
@@ -990,7 +993,7 @@
 				$query = "update defDetailTypeGroups set ".$query." where dtg_ID = $dtgID";
 
 				$rows = execSQL($mysqli, $query, $parameters, true);
-				if ($rows==0 || is_string($rows) ) {
+				if (is_string($rows) ) {
                     $ret = handleError("SQL error updating $colName in updateDettypeGroup".$rows, $query);
 				} else {
 					$ret['result'] = $dtgID;
@@ -1185,7 +1188,7 @@
 				$rows = execSQL($mysqli, $query, $parameters, true);
 				if($rows == "1062"){
 					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
-				}else if ($rows==0 || is_string($rows) ) {
+				}else if (is_string($rows) ) { //$rows==0 || 
                     $ret = handleError("SQL error updating field type $dtyID in updateDetailType: "
                         .htmlspecialchars($query)."  type=".$parameters[0]." values=".@$parameters[1], $query);
                     $ret = $ret['error'];
@@ -1268,14 +1271,15 @@
 					}
 
                     if($colName=="trm_ParentTermID"){
+                        if(!($val>0)) $val = null;  //set null value, otherwise we get mysql error
                         $ch_parent_id = $val;
                     }else if($colName=="trm_Code"){
                         $ch_code = $val;
                     }else if($colName=="trm_Label"){
                         $ch_label = $val;
                     }else if($colName=="trm_InverseTermId"){
-                        if($val=="") $val=null;
-                        $inverse_termid = $val;   //new value
+                        if(!($val>0)) $val = null;
+                        $inverse_termid = $val;   //set null value, otherwise we get mysql error
                     }else if($colName=="trm_Status"){
                         if($val=="") $val="open";
                     }
@@ -1766,8 +1770,10 @@
 
 		$parameters = array("s",$terms[3]); //notes will be parameter
 		$query = "";
+        
+        $isInsert = ($res==null || $res->num_rows<1);
 
-		if ($res==null || $res->num_rows<1){ //$mysqli->affected_rows<1){
+		if ($isInsert){ //$mysqli->affected_rows<1){
 			//insert
 			$query = "insert into defRelationshipConstraints(rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_Description, rcs_TermID, rcs_TermLimit) values (".
 						$srcID.",".$trgID.",?,".$terms[0].",".$terms[2].")";
@@ -1778,7 +1784,7 @@
 		}
 
 		$rows = execSQL($mysqli, $query, $parameters, true);
-		if ($rows==0 || is_string($rows) ) {
+		if ( ($isInsert && $rows==0) || is_string($rows) ) {
                 $ret = handleError("SQL error in updateRelConstraint", $query);
                 $ret = $ret['error'];
 		} else {

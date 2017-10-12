@@ -151,14 +151,11 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 		$bkm_ID = $bkmk['bkm_ID'];
         $rec_ID = $bkmk['rec_ID'];
         
-        if (true){ //@$_REQUEST['h4']==1
-            //open edit record in standalone page
-            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_ID );
-            //open edit above main screen as popup dialog
-            //header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_ID );
-        }else {
+        if(@$_REQUEST['ver']=='h3') {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate;
             header('Location: ' . $url);    
+        }else{
+            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_ID );
         }
 		
 		return;
@@ -300,6 +297,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 			// the rectype passed in is not available on this instance  send them to the  add resource popup
 			header('Location: ' . HEURIST_BASE_URL . 'records/add/addRecord.php'
 								. '?db='.HEURIST_DBNAME
+                                . '&ver=' . @$_REQUEST['ver']
 								. '&t=' . urlencode($_REQUEST['t'])
 								. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this Heurist database'
 								. ' (it may not have been enabled). Please choose the record type from the pulldown '));
@@ -381,6 +379,7 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 		// the rectype passed in is not available on this instance  send them to the  add resource popup
 		header('Location: ' . HEURIST_BASE_URL . 'records/add/addRecord.php'
 							. '?db='.HEURIST_DBNAME
+                            . '&ver=' . @$_REQUEST['ver']
 							. '&t=' . urlencode($_REQUEST['t'])
 							. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this Heurist Database'
 							. ' (it may not have been enabled). Please choose the record type from the pulldown '));
@@ -479,14 +478,12 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
         
-        if (true){ //@$_REQUEST['h4']==1
-            //open edit record in standalone page
-            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_id );
-            //open edit above main screen as popup dialog
-            //header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
-        }else{        
+        if(@$_REQUEST['ver']=='h3') {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
-		    header('Location: ' . $url );
+            header('Location: ' . $url );
+        }else{        
+            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_id );
+            //header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
         }
 		return;
 	}
@@ -578,7 +575,7 @@ if ($rec_id) {
 
 	if ($bkm_ID) {
         
-        if (true){ //@$_REQUEST['h4']==1
+        if (@$_REQUEST['ver']!='h3') {
             //open edit record in standalone page
             header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_id );
             //open edit above main screen as popup dialog

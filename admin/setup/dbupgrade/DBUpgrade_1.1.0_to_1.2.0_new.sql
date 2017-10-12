@@ -33,7 +33,6 @@
 -- Safety rating: SAFE
 -- Description: Add Child record functions, Add Certainty rating and Annotation text to every key-value (detail) pair
 
-
 DROP PROCEDURE IF EXISTS sp_UpdateAllDatabases;
 DROP PROCEDURE IF EXISTS sp_AlterTable;
 DROP PROCEDURE IF EXISTS sp_ExecSQL;
@@ -51,18 +50,15 @@ END$$
 
 CREATE PROCEDURE sp_AlterTable(IN db_name varchar(100), IN tab varchar(100), IN col varchar(100), IN exp varchar(1000))
 BEGIN
-    
-    SET @s = (SELECT IF(
-        (SELECT COUNT(column_name)
+     IF (SELECT COUNT(column_name)
               FROM INFORMATION_SCHEMA.COLUMNS
               WHERE table_name = tab
               AND table_schema = db_name
               AND column_name = col
-        ) > 0,
-        "SELECT 1",
-        concat("ALTER TABLE `",db_name,"`.`",tab,"` ADD COLUMN `",col,"` ",exp,";")
-    ));
-    CALL sp_ExecSQL(@s);
+        ) = 0 THEN 
+        SET @s = concat("ALTER TABLE `",db_name,"`.`",tab,"` ADD COLUMN `",col,"` ",exp,";");
+        CALL sp_ExecSQL(@s);
+    END IF;
 END $$        
     
 CREATE PROCEDURE sp_UpdateAllDatabases()
@@ -77,6 +73,16 @@ BEGIN
     SET bDone = 0;
     REPEAT
         FETCH curs INTO db_name;
+
+     SET @s = concat("SELECT sys_dbSubVersion FROM `",db_name,"`.`sysIdentification` WHERE (sys_ID=1 OR sys_ID=0) and (sys_dbVersion=1) into @sub_version;");
+     PREPARE stmt FROM @s;
+     EXECUTE stmt;
+     DEALLOCATE PREPARE stmt;    
+
+    SELECT db_name,@sub_version;
+    
+     IF (SELECT @sub_version) = 1 THEN
+
 
     CALL sp_AlterTable(db_name,"recDetails","dtl_Certainty",
         "DECIMAL( 3, 2 ) NOT NULL DEFAULT '1.0' COMMENT 'A certainty value for this observation in the range 0 to 1, where 1 indicates complete certainty'");
@@ -113,7 +119,9 @@ BEGIN
 
     CALL sp_ExecSQL(CONCAT("ALTER TABLE ",db_name,".`sysIdentification` CHANGE COLUMN `sys_SyncDefsWithDB` `sys_SyncDefsWithDB` Varchar( 1000 ) NULL DEFAULT '' COMMENT 'One or more Zotero library name,userID,groupID,key combinations separated by pipe symbols, for synchronisation of Zotero libraries'"));
     CALL sp_ExecSQL(CONCAT("ALTER TABLE ",db_name,".`usrSavedSearches` CHANGE COLUMN `svs_Name` `svs_Name` VARCHAR(128) NOT NULL COMMENT 'The display name for this saved search'"));
-    CALL sp_ExecSQL(CONCAT("UPDATE ",db_name,".`sysIdentification` SET sys_dbVersion=1, sys_dbSubVersion=2, sys_dbSubSubVersion=0 WHERE sys_ID!=null"));
+    CALL sp_ExecSQL(CONCAT("UPDATE ",db_name,".`sysIdentification` SET sys_dbVersion=1, sys_dbSubVersion=2, sys_dbSubSubVersion=0 WHERE sys_ID=1 OR sys_ID=0"));
+    
+    END IF;
     
     UNTIL bDone END REPEAT;
 
@@ -126,7 +134,3 @@ CALL sp_UpdateAllDatabases();
 DROP PROCEDURE IF EXISTS sp_UpdateAllDatabases;
 DROP PROCEDURE IF EXISTS sp_AlterTable;
 DROP PROCEDURE IF EXISTS sp_ExecSQL;
-
-
-
-    

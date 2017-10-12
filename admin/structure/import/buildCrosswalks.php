@@ -269,10 +269,21 @@ if ($isExistingDB)
 
     // we ignore following test if creating a new database, because the current database version is irrelevant,
     // the definition files determine the version created.
-    // TODO: 13/9/11: HEURIST_DBVERSION seems to reflect default db or ? the first opened db rather than current open db
     if (!($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2])) {
-        echo "<p><strong>The source database $source_db_name ($sourceDBVersion[0]) is a different major/minor version from the current ".DATABASE." database (Vsn ".HEURIST_DBVERSION.
-        ")</strong><p>One or other database will need updating to the same major/minor version #";
+        
+        $sMsg = 'You are running a version of Heurist which expects database version '.HEURIST_DBVERSION
+            .', but the data read from the selected database '.$source_db_name.' is in database version '.implode('.',$sourceDBVersion);
+        if($sourceDBVersion[1] < $thisDBVersion[1] || 
+            ($sourceDBVersion[1]==$thisDBVersion[1] && $sourceDBVersion[2]<$thisDBVersion[2]))
+        {
+            $sMsg = $sMsg.'. Please contact support at HeuristNetwork dot org or ask the database owner to update their database '
+            .'(this will normally happen automatically if they use the same version of Heurist as you are using to access their database).';
+        }else{
+            $sMsg = $sMsg.'. Please contact the system administrator to update the copy of Heurist on this server.';
+        }
+        
+        echo '<p>'.$sMsg.'</p>';
+        
         //unlock
         unlockDatabase();
         exit();
@@ -427,7 +438,7 @@ function processTerms($dataSet) {
         $query = "INSERT INTO `defTerms` ($flds) VALUES " . $dataSet;
         mysql_query($query);
         if(mysql_error()) {
-            $errorCreatingReason = $errorCreatingReason."TERMS Error inserting data: " . mysql_error() . "<br/>";
+            $errorCreatingReason = $errorCreatingReason."TERMS Error inserting data: " . mysql_error() . "<br/>";//.$query."</br>";
             $errorCreatingTables = TRUE;
             echo $errorCreatingReason;
         }

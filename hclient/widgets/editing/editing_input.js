@@ -68,6 +68,10 @@ $.widget( "heurist.editing_input", {
         }
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         
+        if((!(this.options.rectypeID>0)) && this.options.recordset){
+            this.options.rectypeID = this.options.recordset.fld(this.options.recordset.getFirstRecord(), 'rec_RecTypeID');
+        }
+        
 
         this.configMode = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(this.configMode)){
@@ -207,13 +211,42 @@ $.widget( "heurist.editing_input", {
             }else{
                 values_to_set = [def_value];
             }
+            
+            if(values_to_set=='increment_new_values_by_1'){
+                
+                    //find incremented value on server side
+                    var url = window.hWin.HAPI4.baseURL + "records/edit/getIncrementedValue.php";
+                    var request = {db:window.hWin.HAPI4.database,
+                                   dtyID: this.options.dtID,
+                                   rtyID: this.options.rectypeID};
+                    var that = this;
+                    
+                    window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
+                      if(!window.hWin.HEURIST4.util.isnull(response)){
+                          if(!window.hWin.HEURIST4.util.isnull(response.result)){
+                          
+                            //recreate input elements and assign given values
+                            that.setValue(response.result);
+                            that.options.values = that.getValues();
+                            that._refresh();
+                              
+                          }else if(!window.hWin.HEURIST4.util.isnull(response.error)){
+                              window.hWin.HEURIST4.msg.showMsgErr( response.error );
+                          }
+                      }
+                  });
+                  this.setValue(0);
+                  this.options.values = [0];
+                  return;
+            }
+            
         }else{
             values_to_set = window.hWin.HEURIST4.util.uniqueArray(this.options.values); //.slice();//.unique();
         }
+        
         //recreate input elements and assign given values
         this.setValue(values_to_set);
         this.options.values = this.getValues();
-
         this._refresh();
     }, //end _create
 
@@ -302,7 +335,7 @@ $.widget( "heurist.editing_input", {
                 else if(fieldname=='dty_Type') val = 'freetext'
                     else if(fieldname=='rst_DisplayWidth'
                         && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
-                            val = 55;
+                            val = 55;  //default width for input fields
                         }
         }
         return val;
@@ -686,7 +719,7 @@ $.widget( "heurist.editing_input", {
                             
                             select_return_mode: 'recordset',
                             edit_mode: 'popup',
-                            selectOnSave: true,
+                            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
                             title: window.hWin.HR('Record pointer: Select or create a linked record'),
                             rectype_set: that.f('rst_PtrFilteredIDs'),
                             parententity: (isparententity)?that.options.recID:0,
@@ -700,6 +733,18 @@ $.widget( "heurist.editing_input", {
                                         var rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                         that.newvalues[$input.attr('id')] = targetID;
                                         //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                        
+                                        //save last 25 selected records
+                                        var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
+                                        if(window.hWin.HEURIST4.util.isempty(previously_selected_ids)){
+                                            previously_selected_ids = [];    
+                                        }else{
+                                            previously_selected_ids = previously_selected_ids.split(',');
+                                        }
+                                        var now_selected = data.selection.getIds(25);
+                                        now_selected = now_selected.concat(previously_selected_ids);
+                                        window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
+                                        
                                         
                                         $input.empty();
                                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
@@ -748,6 +793,12 @@ $.widget( "heurist.editing_input", {
                             //show preliminary dialog that offer to create new record instead 
                             var popele = that.element.find('.child_info_dlg');
                             if(popele.length==0){
+                                var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+                                if(!(DT_PARENT_ENTITY>0)){
+                                    window.hWin.HEURIST4.msg.showMsgErr('You are creating a parent-child (whole-part,containership) connection. Alas, your database does not have definition for field "Parent Entity". Please import this field from Core Definition database.');
+                                    return;
+                                }
+                                
                                 var sdiv = '<div class="child_info_dlg"><p style="padding:15px 0">You are creating a parent-child (whole-part,containership) connection. We normally recommend creating a new record whcih becomes the child of the current record</p><p>If child records have already been uploaded to the database, you may select one</p><p style="padding:15px 0"><label>Record type: </label><select id="sel_rectypes"></select></p></div>';
                                 popele = $(sdiv).appendTo(that.element);
                             }

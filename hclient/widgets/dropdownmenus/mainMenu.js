@@ -161,13 +161,7 @@ $.widget( "heurist.mainMenu", {
         .css({'float':'left', 'padding-right':'2em'})
         .appendTo( this.divMainMenu );
 
-        this.divProfileItems = $( "<ul>")
-        .css('float','right')
-        .addClass('horizontalmenu')
-        .appendTo( this.divMainMenu );
-
-
-
+        this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         this._initMenu('Profile', this.divProfileItems);
         
         if(window.hWin.HAPI4.sysinfo['layout']=='original'){
@@ -301,7 +295,7 @@ $.widget( "heurist.mainMenu", {
             this.menu_Profile.find('.admin-only').hide();    
         }
         
-        this['btn_Profile'].find('a').text(window.hWin.HAPI4.currentUser.ugr_FullName);
+        this['btn_Profile'].find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
         
         //need to update position of carat icon according width of user name
         var ele = $('#carat1');
@@ -356,7 +350,7 @@ $.widget( "heurist.mainMenu", {
             var menu = $( ele )
             //.css('width', this.btn_user.width())
             .show()
-            .position({my: "left top", at: "left bottom", of: parent });
+            .position({my: "center top", at: "center bottom", of: parent });
             //$( document ).one( "click", function() { menu.hide(); });
             return false;
         };
@@ -366,7 +360,8 @@ $.widget( "heurist.mainMenu", {
         if(name=='Database_lo'){
             link = $('<a>',{
                 text: 'Open database',
-                href: window.hWin.HAPI4.baseURL + 'common/connect/getListOfDatabases.php?popup=1&v=4&db=' + window.hWin.HAPI4.database,
+                href: window.hWin.HAPI4.baseURL + 'common/connect/getListOfDatabases.php?popup=1&v=4&db=' 
+                        + window.hWin.HAPI4.database,
                 target: '_blank'
             });
 
@@ -378,12 +373,15 @@ $.widget( "heurist.mainMenu", {
                 }
                 //that._onPopupLink
             });
+
         }else if(name=='Profile'){
             
-            link = $('<div><span class="ui-icon ui-icon-user" style="color:white;">'
-            +'</span><a href="#" style="padding:2px 24px 0 2px">'
+            link = $('<div><a href="#" style="padding:2px 24px 0 2px">'
+            +'<span style="width:7em;display:inline-block;text-align: left;">Settings</span>'
+            +'<span class="ui-icon-user" style="color:white;" style="vertical-align:middle;font-size:16px;width:16px;height:16px;"></span>'
+            +'&nbsp;<span class="usrFullName">'
             +window.hWin.HAPI4.currentUser.ugr_FullName
-            +'</a><span class="ui-icon ui-icon-carat-1-s"  style="color:white;" id="carat1"></span></div>');
+            +'</span></a><span class="ui-icon ui-icon-carat-1-s"  style="vertical-align:middle;color:white;" id="carat1"></span></div>');
                              
         }else{
             link = $('<a>',{
@@ -397,10 +395,12 @@ $.widget( "heurist.mainMenu", {
         
         // Load content for all menus except Database when user is logged out
         if(name!='Database_lo'){
+            
+            var name2 = (name=='Help_lo'?'Help':name);
 
             this['menu_'+name] = $('<ul>')
             .load(
-                window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+(name=='Help_lo'?'Help':name)+'.html',
+                window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+name2+'.html',
               function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
              
                 that['menu_'+name].find('.list-menu-only').hide();

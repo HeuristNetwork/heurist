@@ -285,7 +285,32 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var query = null, popup_options={};
             //NEW WAY open as another widget 
             if(recID<0){
-                popup_options = {new_record_params:{rt:this._currentEditRecTypeID}};
+                popup_options = {selectOnSave:this.options.selectOnSave, 
+                                 new_record_params:{rt:this._currentEditRecTypeID}};
+                if(this.options.select_mode!='manager' && this.options.selectOnSave){ 
+                    //this is select form that all addition of new record
+                    //it should be closed after addition of new record
+                    var that = this;
+                    popup_options['onselect'] = function(event, data){
+                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                //that.selectedRecords(data.selection);
+                                //that._selectAndClose();
+
+                                //save last 25 selected records
+                                var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
+                                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids)){
+                                    previously_selected_ids = [];
+                                }
+                                var now_selected = data.selection.getIds(25);
+                                now_selected = now_selected.concat(previously_selected_ids);
+                                window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
+                                
+                                that._trigger( "onselect", null, {selection:data.selection});  
+                                that.closeDialog();
+                            }
+                    };
+                    
+                }
             }else{
                 var recset = this.recordList.resultList('getRecordSet');
                 if(recset && recset.length()<1000){
@@ -611,7 +636,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
                     
 
-                panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access right'),
+                panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access rights'),
                         icons:{primary:'ui-icon-pencil'}})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'left','margin': '0.8em 7px 0 0', 'font-size': '0.8em', height: '14px', width: '14px'})
@@ -1195,7 +1220,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record
         
-            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "all", f:"complete", l:1}, 
+            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1}, 
                         function(response){ response.is_insert=false; that._initEditForm_step4(response); });
 
         }else if(recID<0){ //add new record
@@ -1318,7 +1343,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             //response==null means reload/refresh edit form
             
-            if(response){
+            if(response){ // && response.length()>0
                 that._currentEditRecordset = new hRecordSet(response.data);
                 that._isInsert = response.is_insert; 
             }
@@ -1589,7 +1614,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
-                            var recID = ''+response.data[0];
+                            //var recID = ''+response.data[0];
                             var rec_Title = response.rec_Title;
                             
                             //that._afterSaveEventHandler( recID, fields);

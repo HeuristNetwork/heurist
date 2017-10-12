@@ -397,12 +397,22 @@ function hLayout(args) {
     function _initLayoutFree(layout, $container){
 
         //$container.hide();
+
+        if(!Hul.isempty(layout.cssfile)){
+            $("head").append($('<link rel="stylesheet" type="text/css" href="'+layout.cssfile+'?t='+(new Date().getTime())+'">'));
+            layout.cssfile = null;
+        }
         
         //find main container and load template
         if(layout['template']){
+               $container.hide();
                $container.load(layout['template'], function(){ 
-                    layout['template']=null; 
+                    layout['template'] = null; 
+                    
                     _initLayoutFree(layout, $container); 
+                    setTimeout(function(){
+                        $container.show();
+                    },2000);
                });    
                return;
         }

@@ -289,7 +289,13 @@ function hRecordSet(initdata) {
                             for(m=0; m<geodata.length; m++){
                                 var shape = window.hWin.HEURIST4.util.parseCoordinates(geodata[m].geotype, geodata[m].wkt, 0);
                                 if(shape){ //main shape
-                                    shapes.push(shape);
+                                    if($.isArray(shapes)){
+                                        shapes.push(shape);
+                                    }else{
+                                        console.log(record);
+                                        console.log(shapes);
+                                    }
+                                        
                                 }
                             }
                         }
@@ -649,7 +655,12 @@ function hRecordSet(initdata) {
             
             
         }else {
+            //header fields always single values except rec_Shape
 
+            if($.isArray(newvalue) && fldname!='rec_Shape'){
+                newvalue = (newvalue.length>0)?newvalue[0]:null;
+            }
+            
             var idx = $.inArray(fldname, fields);
             if(idx>-1){
                 record[idx] = newvalue;

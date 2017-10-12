@@ -482,7 +482,7 @@ if (! top.HEURIST.edit) {
             var rt = top.HEURIST.edit.record.rectypeID;
             
             top.HEURIST.edit.save_record(function(){ //callback is called in case of success
-               window.document.location = top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&db='
+               window.document.location = top.HEURIST.baseURL+'records/add/addRecord.php?addref=1&ver=h3&db='
                     + top.HEURIST.database.name+'&rec_rectype='+rt; 
             })
         },

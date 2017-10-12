@@ -84,6 +84,7 @@
         var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
         
         var params = "db="+top.HEURIST.database.name+"&public=1&named=1&exclude="+top.HEURIST.database.id; //HEURIST_DBNAME, HEURIST_DBID
+
         top.HEURIST.util.getJsonData(baseurl,
             // fillRegisteredDatabasesTable
             function(responce){
@@ -97,7 +98,7 @@
 
                         var regDB = responce[idx];
 
-                        if( !regDB['version'] || regDB['version']<top.HEURIST.database.version)
+                        if(!regDB['version'])  // || regDB['version']<top.HEURIST.database.version)
                         {
                             continue;
                         }

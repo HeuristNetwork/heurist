@@ -61,7 +61,9 @@
 					// We only make it here if someone's screwing around ...
 					// It does give a flash of popup window, but it's a bit hard to work around that.
 					alert("Sorry - record not found");
-					setTimeout(function() { window.close(); }, 0);
+					setTimeout(function() { 
+                        window.close();
+                    }, 0);
 					return;
 				}
 				document.title = "Edit " + window.HEURIST.edit.record.rectype + " record: <i>"+ window.HEURIST.edit.record.title + "</i>";

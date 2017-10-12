@@ -734,6 +734,10 @@
 
             $keepMainSet = (@$params['rulesonly']!=1);
             
+            if(is_array($resSearch) && $resSearch['status']!=HEURIST_OK){
+                return $resSearch;
+            }
+            
             if($keepMainSet){
                 //find main query results
                 $fin_result = $resSearch;
