@@ -295,6 +295,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                 //that.selectedRecords(data.selection);
                                 //that._selectAndClose();
+
+                                //save last 25 selected records
+                                var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
+                                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids)){
+                                    previously_selected_ids = [];
+                                }
+                                var now_selected = data.selection.getIds(25);
+                                now_selected = now_selected.concat(previously_selected_ids);
+                                window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
+                                
                                 that._trigger( "onselect", null, {selection:data.selection});  
                                 that.closeDialog();
                             }

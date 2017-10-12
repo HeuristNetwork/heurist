@@ -734,6 +734,18 @@ $.widget( "heurist.editing_input", {
                                         that.newvalues[$input.attr('id')] = targetID;
                                         //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                         
+                                        //save last 25 selected records
+                                        var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
+                                        if(window.hWin.HEURIST4.util.isempty(previously_selected_ids)){
+                                            previously_selected_ids = [];    
+                                        }else{
+                                            previously_selected_ids = previously_selected_ids.split(',');
+                                        }
+                                        var now_selected = data.selection.getIds(25);
+                                        now_selected = now_selected.concat(previously_selected_ids);
+                                        window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
+                                        
+                                        
                                         $input.empty();
                                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
                                             {rec_ID: targetID, 
