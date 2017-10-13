@@ -148,7 +148,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
       //
       
       //
-      // fill list of coordintes
+      // fill list of coordinates
       //
     function _fillCoordinates(shape){
         if(shape!=null){
@@ -342,14 +342,14 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     // init map 
     //
     function _init(_mapdiv_id, _initial_wkt) {
+
+        map_viewpoints = window.hWin.HAPI4.get_prefs('map_viewpoints');
         
         _initUIcontrols();
         
         mapdiv_id = _mapdiv_id;
         initial_wkt = _initial_wkt;
 
-        map_viewpoints = window.hWin.HAPI4.get_prefs('map_viewpoints');
-        
         var map = new google.maps.Map(document.getElementById(mapdiv_id), {
           zoom: 2,
           center: new google.maps.LatLng(31.2890625, 5), //22.344, 114.048),
@@ -928,8 +928,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                //get LatLngBounds from urlvalue lat_lo,lng_lo,lat_hi,lng_hi
                bounds = bounds.split(',');
                gmap.fitBounds({south:Number(bounds[0]), west:Number(bounds[1]),
-                                north:Number(bounds[2]), east:Number(bounds[3]) });
-                               
+                                north:Number(bounds[2]), east:Number(bounds[3]) }, -1);
+                                
+               window.hWin.HAPI4.save_pref('map_viewpoints_sel', $(this).find('option:selected').text());                
                //gmap.fitBounds(new LatLngBounds(new LatLng(Number(bounds[1]), Number(bounds[2]))
                //    , new LatLng(Number(bounds[3]), Number(bounds[0])) );
            }
@@ -970,8 +971,19 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                             map_viewpoints=[];   
                             $sel_viepoints.empty();
                       }
-                      map_viewpoints.push({key:gmap.getBounds().toUrlValue(), title:location_name});
-                      window.hWin.HAPI4.save_pref('map_viewpoints', map_viewpoints);
+                      var not_found = true;
+                      $.each(map_viewpoints, function(idx, item){
+                         if(item.title == location_name){
+                             map_viewpoints[idx].key = gmap.getBounds().toUrlValue();
+                             not_found = false;
+                             return false;
+                         }
+                      });
+                      if(not_found){
+                        map_viewpoints.push({key:gmap.getBounds().toUrlValue(), title:location_name});
+                        window.hWin.HAPI4.save_pref('map_viewpoints', map_viewpoints);
+                      }
+                      window.hWin.HAPI4.save_pref('map_viewpoints_sel', location_name);
                       // and add to selector
                       window.hWin.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
                                 gmap.getBounds().toUrlValue(), location_name);
@@ -980,11 +992,6 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
               });
           });
           
-        if(!$.isEmptyObject(map_viewpoints)){
-            $sel_viepoints.find('option:last-child').attr('selected', 'selected');
-            $sel_viepoints.change();
-        }     
-        
         // apply coordinates
         $('#apply-coords-button').button().click(_applyCoordsForSelectedShape);
         
@@ -1048,7 +1055,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         // Creates a drawing manager attached to the map that allows the user to draw
         // markers, lines, and shapes.
         drawingManager = new google.maps.drawing.DrawingManager({
-          drawingMode: google.maps.drawing.OverlayType.POLYGON,
+          drawingMode: google.maps.drawing.OverlayType.MARKER, //google.maps.drawing.OverlayType.POLYGON,
           markerOptions: {
             draggable: true
           },
@@ -1095,8 +1102,32 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         
         
         if(!window.hWin.HEURIST4.util.isempty(initial_wkt)){
-            setTimeout(function(){_loadWKT(initial_wkt);}, 2000);
+            setTimeout(function(){
+                _loadWKT(initial_wkt);
+            }, 2000);
         }
+        
+        if(!$.isEmptyObject(map_viewpoints)){
+
+            var map_viewpoints_sel = window.hWin.HAPI4.get_prefs('map_viewpoints_sel');
+
+            var $sel_viepoints = $('#sel_viewpoints');
+            var not_found = true;
+            if(map_viewpoints_sel){
+                $.each(map_viewpoints, function(idx, item){
+                    if(item.title == map_viewpoints_sel){
+                        $sel_viepoints.val(item.key);
+                        not_found = false;
+                        return false;
+                    }
+                });
+            }
+            if(not_found){
+                $sel_viepoints.find('option:last-child').attr('selected', 'selected');
+            }
+            $sel_viepoints.change();
+        }     
+        
     }
       
     //

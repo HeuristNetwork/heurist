@@ -122,7 +122,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div id="mapToolbarDiv" style="height: 30px;padding:0.2em">
                     
                 <div class="div-table-cell">
-                    <label>Geocode:</label>
+                    <label>Find:</label>
                     <input id="input_search" class="text ui-widget-content ui-corner-all" 
                             style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
                     <div id="btn_search_start"></div>
@@ -146,6 +146,13 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div id="rightpanel">
 
                 <div id="color-palette"></div>
+
+                <div style="padding-top:15px">
+                    <button id="save-button" style="font-weight:bold">Save</button>
+                </div> 
+                <div style="padding-top:20px">
+                    <button id="cancel-button">Cancel</button>
+                </div>
                 <div>
                     <button id="delete-button">Delete Selected</button>
                 </div> 
@@ -153,23 +160,18 @@ require_once(dirname(__FILE__)."/initPage.php");
                     <button id="delete-all-button">Clear Map</button>
                 </div> 
                 <div>
-                    <textarea id="coords1" cols="2" rows="2">
-                        Click on the map. The code for the selected shape you create will be presented here.
-                    </textarea>
-                    <button id="apply-coords-button">Apply Coordinates</button>
-                </div> 
-                <div>
                     <button id="load-geometry-button">Add Geometry</button>
                 </div> 
                 <div>
                     <button id="get-geometry-button">Get Geometry</button>
                 </div> 
-                <div>
-                    <button id="save-button" style="font-weight:bold">Save</button>
+                
+                <div style="padding-top:15px">
+                    <textarea id="coords1" cols="2" rows="2">
+                        Click on the map. The code for the selected shape you create will be presented here.
+                    </textarea>
+                    <button id="apply-coords-button" style="margin-top:10px">Apply Coordinates</button>
                 </div> 
-                <div>
-                    <button id="cancel-button" style="font-weight:bold">Cancel</button>
-                </div>
             </div>            
         </div>
         
