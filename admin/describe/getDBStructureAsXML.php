@@ -359,10 +359,19 @@ function print_row($row,$fmt,$flds) {
                 $rty_TitleMask = html_escape($row['rty_TitleMask']);
                 $rty_CanonicalTitleMask = html_escape($row['rty_CanonicalTitleMask']);
                 $rty_Plural = html_escape($row['rty_Plural']);
-                $rty_NameInOriginatingDB = html_escape($row['rty_NameInOriginatingDB']);
                 $rty_RecTypeGroupID = html_escape($row['rty_RecTypeGroupID']);
                 $rty_ReferenceURL = html_escape($row['rty_ReferenceURL']);
                 $rty_AlternativeRecEditor = html_escape($row['rty_AlternativeRecEditor']);
+                
+                $rty_NameInOriginatingDB = $row['rty_NameInOriginatingDB']?html_escape($row['rty_NameInOriginatingDB']):$rty_Name;
+                $rty_IDInOriginatingDB = $row['rty_IDInOriginatingDB'];
+                $rty_OriginatingDBID = $row['rty_OriginatingDBID']>0?$row['rty_OriginatingDBID']:HEURIST_DBID;
+                if(HEURIST_DBID>0 && !($rty_IDInOriginatingDB>0)){
+                    $rty_IDInOriginatingDB = $row['rty_ID']; 
+                    $rty_OriginatingDBID = HEURIST_DBID; 
+                }
+                
+                
                 print "<rty>";
                 print "<rty_ID>$row[rty_ID]</rty_ID>".
                 "<rty_Name>$rty_Name</rty_Name>".
@@ -371,9 +380,9 @@ function print_row($row,$fmt,$flds) {
                 "<rty_TitleMask>$rty_TitleMask</rty_TitleMask>".
                 "<rty_CanonicalTitleMask>$rty_CanonicalTitleMask</rty_CanonicalTitleMask>".
                 "<rty_Plural>$rty_Plural</rty_Plural><rty_Status>$row[rty_Status]</rty_Status>".
-                "<rty_OriginatingDBID>$row[rty_OriginatingDBID]</rty_OriginatingDBID>".
+                "<rty_OriginatingDBID>$rty_OriginatingDBID</rty_OriginatingDBID>".
                 "<rty_NameInOriginatingDB>$rty_NameInOriginatingDB</rty_NameInOriginatingDB>".
-                "<rty_IDInOriginatingDB>$row[rty_IDInOriginatingDB]</rty_IDInOriginatingDB>".
+                "<rty_IDInOriginatingDB>$rty_IDInOriginatingDB</rty_IDInOriginatingDB>".
                 "<rty_NonOwnerVisibility>$row[rty_NonOwnerVisibility]</rty_NonOwnerVisibility>".
                 "<rty_ShowInLists>$row[rty_ShowInLists]</rty_ShowInLists>".
                 "<rty_RecTypeGroupID>$rty_RecTypeGroupID</rty_RecTypeGroupID>".
@@ -400,6 +409,15 @@ function print_row($row,$fmt,$flds) {
             $dty_JsonTermIDTree = html_escape($row['dty_JsonTermIDTree']);
             $dty_TermIDTreeNonSelectableIDs = html_escape($row['dty_TermIDTreeNonSelectableIDs']);
             $dty_PtrTargetRectypeIDs = html_escape($row['dty_PtrTargetRectypeIDs']);
+            
+            $dty_NameInOriginatingDB = $row['dty_NameInOriginatingDB']?html_escape($row['dty_NameInOriginatingDB']):$dty_Name;
+            $dty_IDInOriginatingDB = $row['dty_IDInOriginatingDB'];
+            $dty_OriginatingDBID = $row['dty_OriginatingDBID']>0?$row['dty_OriginatingDBID']:HEURIST_DBID;
+            if(HEURIST_DBID>0 && !($dty_IDInOriginatingDB>0)){
+                $dty_IDInOriginatingDB = $row['dty_ID']; 
+                $dty_OriginatingDBID = HEURIST_DBID; 
+            }
+            
             print "<dty>";
             print "<dty_ID>$row[dty_ID]</dty_ID>".
             "<dty_Name>$dty_Name</dty_Name>".
@@ -409,9 +427,9 @@ function print_row($row,$fmt,$flds) {
             "<dty_ExtendedDescription>$dty_ExtendedDescription</dty_ExtendedDescription>".
             "<dty_EntryMask>$dty_EntryMask</dty_EntryMask>".
             "<dty_Status>$row[dty_Status]</dty_Status>".
-            "<dty_OriginatingDBID>$row[dty_OriginatingDBID]</dty_OriginatingDBID>".
+            "<dty_OriginatingDBID>$dty_OriginatingDBID</dty_OriginatingDBID>".
             "<dty_NameInOriginatingDB>$dty_NameInOriginatingDB</dty_NameInOriginatingDB>".
-            "<dty_IDInOriginatingDB>$row[dty_IDInOriginatingDB]</dty_IDInOriginatingDB>".
+            "<dty_IDInOriginatingDB>$dty_IDInOriginatingDB</dty_IDInOriginatingDB>".
             "<dty_DetailTypeGroupID>$row[dty_DetailTypeGroupID]</dty_DetailTypeGroupID>".
             "<dty_OrderInGroup>$row[dty_OrderInGroup]</dty_OrderInGroup>".
             "<dty_JsonTermIDTree>$dty_JsonTermIDTree</dty_JsonTermIDTree>".
@@ -466,16 +484,24 @@ function print_row($row,$fmt,$flds) {
             $trm_Label = html_escape($row['trm_Label']);
             $trm_Description = html_escape($row['trm_Description']);
             $trm_Code = html_escape($row['trm_Code']);
-            $trm_NameInOriginatingDB = html_escape($row['trm_NameInOriginatingDB']);
+            
+            $trm_NameInOriginatingDB = $row['trm_NameInOriginatingDB']?html_escape($row['trm_NameInOriginatingDB']):$trm_Label;
+            $trm_IDInOriginatingDB = $row['trm_IDInOriginatingDB'];
+            $trm_OriginatingDBID = $row['trm_OriginatingDBID']>0?$row['trm_OriginatingDBID']:HEURIST_DBID;
+            if(HEURIST_DBID>0 && !($trm_IDInOriginatingDB>0)){
+                $trm_IDInOriginatingDB = $row['trm_ID']; 
+                $trm_OriginatingDBID = HEURIST_DBID; 
+            }
+            
             print "<trm>";
             print "<trm_ID>$row[trm_ID]</trm_ID>".
             "<trm_Label>$trm_Label</trm_Label>".
             "<trm_InverseTermId>$row[trm_InverseTermId]</trm_InverseTermId>".
             "<trm_Description>$trm_Description</trm_Description>".
             "<trm_Status>$row[trm_Status]</trm_Status>".
-            "<trm_OriginatingDBID>$row[trm_OriginatingDBID]</trm_OriginatingDBID>".
+            "<trm_OriginatingDBID>$trm_OriginatingDBID</trm_OriginatingDBID>".
             "<trm_NameInOriginatingDB>$trm_NameInOriginatingDB</trm_NameInOriginatingDB>".
-            "<trm_IDInOriginatingDB>$row[trm_IDInOriginatingDB]</trm_IDInOriginatingDB>".
+            "<trm_IDInOriginatingDB>$trm_IDInOriginatingDB</trm_IDInOriginatingDB>".
             "<trm_AddedByImport>$row[trm_AddedByImport]</trm_AddedByImport>".
             "<trm_IsLocalExtension>$row[trm_IsLocalExtension]</trm_IsLocalExtension>".
             "<trm_Domain>$row[trm_Domain]</trm_Domain>".

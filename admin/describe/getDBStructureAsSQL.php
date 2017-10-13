@@ -482,9 +482,18 @@ function print_row($row,$fmt) {
                 $rty_RecTypeGroupID = mysql_real_escape_string($row['rty_RecTypeGroupID']);
                 $rty_ReferenceURL = mysql_real_escape_string($row['rty_ReferenceURL']);
                 $rty_AlternativeRecEditor = mysql_real_escape_string($row['rty_AlternativeRecEditor']);
+                
+                $rty_NameInOriginatingDB = $row['rty_NameInOriginatingDB']?mysql_real_escape_string($row['rty_NameInOriginatingDB']):$rty_Name;
+                $rty_IDInOriginatingDB = $row['rty_IDInOriginatingDB'];
+                $rty_OriginatingDBID = $row['rty_OriginatingDBID']>0?$row['rty_OriginatingDBID']:HEURIST_DBID;
+                if(HEURIST_DBID>0 && !($rty_IDInOriginatingDB>0)){
+                    $rty_IDInOriginatingDB = $row['rty_ID']; 
+                    $rty_OriginatingDBID = HEURIST_DBID; 
+                }
+                
                 print "('$row[rty_ID]','$rty_Name','$row[rty_OrderInGroup]','$rty_Description','$rty_TitleMask',
                 '$rty_CanonicalTitleMask','$rty_Plural','$row[rty_Status]',
-                '$row[rty_OriginatingDBID]','$rty_NameInOriginatingDB','$row[rty_IDInOriginatingDB]',
+                '$rty_OriginatingDBID','$rty_NameInOriginatingDB','$rty_IDInOriginatingDB',
                 '$row[rty_NonOwnerVisibility]','$row[rty_ShowInLists]','$rty_RecTypeGroupID','$row[rty_RecTypeModelIDs]',
                 '$row[rty_FlagAsFieldset]','$rty_ReferenceURL','$rty_AlternativeRecEditor','$row[rty_Type]',
                 '$row[rty_ShowURLOnEditForm]','$row[rty_ShowDescriptionOnEditForm]','$row[rty_LocallyModified]'),";
@@ -499,17 +508,24 @@ function print_row($row,$fmt) {
             $dty_Documentation = mysql_real_escape_string($row['dty_Documentation']);
             $dty_HelpText = mysql_real_escape_string($row['dty_HelpText']);
             $dty_ExtendedDescription = mysql_real_escape_string($row['dty_ExtendedDescription']);
-            $dty_NameInOriginatingDB = mysql_real_escape_string($row['dty_NameInOriginatingDB']);
             $dty_EntryMask = mysql_real_escape_string($row['dty_EntryMask']);
             $dty_JsonTermIDTree = mysql_real_escape_string($row['dty_JsonTermIDTree']);
             $dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);
             $dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
             $dty_SemanticReferenceURL = mysql_real_escape_string($row['dty_SemanticReferenceURL']);
             
+            $dty_NameInOriginatingDB = $row['dty_NameInOriginatingDB']?mysql_real_escape_string($row['dty_NameInOriginatingDB']):$dty_Name;
+            $dty_IDInOriginatingDB = $row['dty_IDInOriginatingDB'];
+            $dty_OriginatingDBID = $row['dty_OriginatingDBID']>0?$row['dty_OriginatingDBID']:HEURIST_DBID;
+            if(HEURIST_DBID>0 && !($dty_IDInOriginatingDB>0)){
+                $dty_IDInOriginatingDB = $row['dty_ID']; 
+                $dty_OriginatingDBID = HEURIST_DBID; 
+            }
+            
             $dty_SemanticReferenceURL =  mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
             print "('$row[dty_ID]','$dty_Name','$dty_Documentation','$row[dty_Type]','$dty_HelpText',
-            '$dty_ExtendedDescription','$dty_EntryMask','$row[dty_Status]','$row[dty_OriginatingDBID]',
-            '$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
+            '$dty_ExtendedDescription','$dty_EntryMask','$row[dty_Status]','$dty_OriginatingDBID',
+            '$dty_NameInOriginatingDB','$dty_IDInOriginatingDB','$row[dty_DetailTypeGroupID]',
             '$row[dty_OrderInGroup]','$dty_JsonTermIDTree','$dty_TermIDTreeNonSelectableIDs',
             '$dty_PtrTargetRectypeIDs',$dty_FieldSetRecTypeID,'$row[dty_ShowInLists]','$row[dty_NonOwnerVisibility]',
             '$row[dty_LocallyModified]','$dty_SemanticReferenceURL'),";
@@ -563,13 +579,20 @@ function print_row($row,$fmt) {
         case 'defTerms': // Data from the rec_details_lookup table
             $trm_Label = mysql_real_escape_string($row['trm_Label']);
             $trm_Description = mysql_real_escape_string($row['trm_Description']);
-            $trm_NameInOriginatingDB = mysql_real_escape_string($row['trm_NameInOriginatingDB']);
             $trm_SemanticReferenceURL = mysql_real_escape_string($row['trm_SemanticReferenceURL']);
             $trm_IllustrationURL = mysql_real_escape_string($row['trm_IllustrationURL']);
             
+            $trm_NameInOriginatingDB = $row['trm_NameInOriginatingDB']?mysql_real_escape_string($row['trm_NameInOriginatingDB']):$trm_Label;
+            $trm_IDInOriginatingDB = $row['trm_IDInOriginatingDB'];
+            $trm_OriginatingDBID = $row['trm_OriginatingDBID']>0?$row['trm_OriginatingDBID']:HEURIST_DBID;
+            if(HEURIST_DBID>0 && !($trm_IDInOriginatingDB>0)){
+                $trm_IDInOriginatingDB = $row['trm_ID']; 
+                $trm_OriginatingDBID = HEURIST_DBID; 
+            }
+            
             print "('$row[trm_ID]','$trm_Label','$row[trm_InverseTermId]',
             '$trm_Description','$row[trm_Status]',
-            '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
+            '$trm_OriginatingDBID','$trm_NameInOriginatingDB','$trm_IDInOriginatingDB',
             '$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
             '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]','$row[trm_Modified]','$row[trm_LocallyModified]',
             '$row[trm_Code]','$trm_SemanticReferenceURL','$trm_IllustrationURL'),";
