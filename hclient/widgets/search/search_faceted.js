@@ -108,7 +108,7 @@ $.widget( "heurist.search_faceted", {
 
     cached_counts:[], //stored results of get_facets by stringified query index
     _input_fields:{},
-    _request_id: 0,
+    _request_id: 0, //keep unique id to avoid redraw facets for old requests
     _first_query:[], //query for all empty values
     _isInited: true,
     _current_query: null,
@@ -825,7 +825,6 @@ $.widget( "heurist.search_faceted", {
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
                             this.options.params.sup_filter, this.options.params.add_filter);
             
-            //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
             this._current_query.push({sortby:'t'});
@@ -870,6 +869,8 @@ $.widget( "heurist.search_faceted", {
         // this._resultset
         if(isNaN(field_index) || field_index<0){
                 field_index = -1;  
+                
+                this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             
                 var div_facets = this.facets_list.find(".facets");
                 if(div_facets.length>0)
@@ -1028,6 +1029,7 @@ $.widget( "heurist.search_faceted", {
                                      vocabulary_id: vocabulary_id, //special case for firstlevel group - got it from field definitions
                                      needcount: needcount,         
                                      qname:this.options.query_name,
+                                     request_id:this._request_id,
                                      //DBGSESSID:'425944380594800002;d=1,p=0,c=07', 
                                      source:this.element.attr('id') }; //, facets: facets
 
@@ -1045,8 +1047,12 @@ $.widget( "heurist.search_faceted", {
                         return;
                     }
                 }
-                
+
                 window.HAPI4.RecordMgr.get_facets(request, function(response){ 
+                    if(response.request_id != that._request_id){
+                        //ignore results of passed sequence
+                        return;
+                    }
                     that._redrawFacets(response, true) 
                 });            
                                 
@@ -1383,8 +1389,6 @@ $.widget( "heurist.search_faceted", {
                     if ((field['type']=="float" || field['type']=="integer" 
                         || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
-                    
-//console.log(facet_index);
                     
                         $facet_values.parent().css({'display':'block','padding-left':'1em','padding-right':'2em'});
                         //'width':'90%', $facet_values.css({'width':'100%','padding':'1em'});
