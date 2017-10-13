@@ -107,7 +107,7 @@
                             
                             if(q){
                             
-                                window.hWin.HAPI4.RecordMgr.search({q: q, w: "all", 
+                                window.hWin.HAPI4.RecordMgr.search({q: q, w: "e",  //all records including temp
                                                 limit: 100,
                                                 needall: 1, //it means return all recors - no limits
                                                 detail: 'ids'}, 
