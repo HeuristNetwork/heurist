@@ -503,7 +503,8 @@ function print_row($row,$fmt) {
             $dty_EntryMask = mysql_real_escape_string($row['dty_EntryMask']);
             $dty_JsonTermIDTree = mysql_real_escape_string($row['dty_JsonTermIDTree']);
             $dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);
-            $dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_SemanticReferenceURL']);
+            $dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
+            $dty_SemanticReferenceURL = mysql_real_escape_string($row['dty_SemanticReferenceURL']);
             
             $dty_SemanticReferenceURL =  mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
             print "('$row[dty_ID]','$dty_Name','$dty_Documentation','$row[dty_Type]','$dty_HelpText',
@@ -511,7 +512,7 @@ function print_row($row,$fmt) {
             '$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
             '$row[dty_OrderInGroup]','$dty_JsonTermIDTree','$dty_TermIDTreeNonSelectableIDs',
             '$dty_PtrTargetRectypeIDs',$dty_FieldSetRecTypeID,'$row[dty_ShowInLists]','$row[dty_NonOwnerVisibility]',
-            '$row[dty_LocallyModified]','$dty_PtrTargetRectypeIDs'),";
+            '$row[dty_LocallyModified]','$dty_SemanticReferenceURL'),";
             break;
 
         case 'defRecStructure': // Data from the defRecStructure table
