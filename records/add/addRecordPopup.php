@@ -333,10 +333,10 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                     // class="actionButtons"
                     ?>
                     <span style="float:right; margin:3 0 0 30" >
-                        <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event, false);">Add Record</button>
+                        <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event, false);">Add Record in new window</button>
                     </span>
                     <span style="float:right; margin:3 0 0 30" >
-                        <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event, true);">Add Record in New Editor</button>
+                        <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event, true);">Add Record</button>
                     </span>
                 </div>
             </div>

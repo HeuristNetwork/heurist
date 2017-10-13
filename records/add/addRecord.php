@@ -151,7 +151,7 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 		$bkm_ID = $bkmk['bkm_ID'];
         $rec_ID = $bkmk['rec_ID'];
         
-        if(@$_REQUEST['ver']=='h3') {
+        if(false && @$_REQUEST['ver']=='h3') { //since 2017-09-29
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate;
             header('Location: ' . $url);    
         }else{
@@ -478,7 +478,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
         
-        if(@$_REQUEST['ver']=='h3') {
+        if(false && @$_REQUEST['ver']=='h3') { //since 2017-09-29
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
             header('Location: ' . $url );
         }else{        
@@ -575,7 +575,7 @@ if ($rec_id) {
 
 	if ($bkm_ID) {
         
-        if (@$_REQUEST['ver']!='h3') {
+        if (true || @$_REQUEST['ver']!='h3') {//since 2017-09-29
             //open edit record in standalone page
             header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_id );
             //open edit above main screen as popup dialog
