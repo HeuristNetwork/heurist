@@ -1263,13 +1263,6 @@
                         $querycols = $querycols.",";
                     }
 
-					if($isInsert){
-						$query = $query."?";
-                        $querycols = $querycols.$colName;
-					}else{
-						$query = $query."$colName = ?";
-					}
-
                     if($colName=="trm_ParentTermID"){
                         if(!($val>0)) $val = null;  //set null value, otherwise we get mysql error
                         $ch_parent_id = $val;
@@ -1284,6 +1277,14 @@
                         if($val=="") $val="open";
                     }
 
+                    if($isInsert){
+                        $query = $query."?";
+                        $querycols = $querycols.$colName;
+                    }else{
+                        $query = $query."$colName = ?";
+                    }
+
+                    
                     $parameters = addParam($parameters, $trmColumnNames[$colName], $val);
 				}
 			}//for columns

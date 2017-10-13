@@ -282,7 +282,11 @@ class HQuery {
             }
             $where2 = '(not r0.rec_FlagTemporary) and '.$where2;
 
-            $this->where_clause = $this->where_clause. ' and ' . $where2;
+            if(trim($this->where_clause)!=''){
+                $this->where_clause = $this->where_clause. ' and ' . $where2;
+            }else{
+                $this->where_clause = $where2;
+            }
             
             //apply sort clause for top level only
             $this->createSortClause();
