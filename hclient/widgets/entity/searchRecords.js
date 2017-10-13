@@ -42,7 +42,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             if(that.selectRectype.val()>0){
                 that._trigger( "onaddrecord", null, that.selectRectype.val() );
             }else{
-                alert('Select rectype first (@todo - popup to select record type to be added)');
+                alert('Select record type first');
             }
         });        
             

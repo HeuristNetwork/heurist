@@ -258,7 +258,7 @@ if(isset($_POST['data'])) {
             //this.record = records.getFirstRecord(); // Reference to first record; 
             var rectype = this.record[rectype_index]; // Record type of first record
             this.definitions = window.hWin.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
-            console.log("Rectype: " + rectype + ", definitions", this.definitions);
+//console.log("Rectype: " + rectype + ", definitions", this.definitions);
 
             // TEXT ONLY DROPDOWNS
             var text_options = determineOptions(text_types);
