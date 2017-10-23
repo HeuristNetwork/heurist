@@ -204,7 +204,8 @@ function EditRecStructure() {
                         aval[fi.rst_NonOwnerVisibility],
                         aval[fi.rst_DisplayHelpText],
                         '',
-                        conceptCode]);
+                        conceptCode,
+                        aval[fi.rst_CreateChildIfRecPtr]]);
                     //statusLock]);   last column stores edited values and show either delete or lock image
                 }
             }
@@ -221,7 +222,7 @@ function EditRecStructure() {
                         "dty_Name",
                         "rst_DisplayName", "dty_Type", "rst_RequirementType",
                         "rst_DisplayWidth", "rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_Status",
-                        "rst_NonOwnerVisibility", "rst_DisplayHelpText", "rst_values", "conceptCode"]
+                        "rst_NonOwnerVisibility", "rst_DisplayHelpText", "rst_values", "conceptCode", "rst_CreateChildIfRecPtr"]
                 }
             });
 
@@ -306,6 +307,9 @@ function EditRecStructure() {
                         var type = oRecord.getData("dty_Type");
                         if(type!=='separator'){
                             elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
+                            if(type=='resource' && oRecord.getData("rst_CreateChildIfRecPtr")==1){
+                                    elLiner.innerHTML = elLiner.innerHTML + ' (child)';     
+                            }
                         }
                     }
                 },
@@ -545,6 +549,8 @@ function EditRecStructure() {
                         
                         '<a href="#" class="help_rst_CreateChildIfRecPtr" onclick="onCreateChildIfRecPtrInfo(event)" style="vertical-align:bottom">'+
                             '<img src="../../../common/images/info.png" width="14" height="14" border="0" title="Info"></a>'+
+                        '<span class="help prompt">New records created via this field become child records. Click "i" for further information.</span>'+    
+                            
                         '</div></div>'+
                         
                         
@@ -2633,8 +2639,10 @@ function onRepeatValueChange(evt){
 function onCreateChildIfRecPtrInfo(evt){
   evt.preventDefault();
     
-  top.HEURIST.util.popupElement(hasH4()
-        ?top:window.hWin, document.getElementById('info_rst_CreateChildIfRecPtr'));
+  top.HEURIST.util.popupElement(
+                hasH4()?top:window.hWin, 
+                document.getElementById('info_rst_CreateChildIfRecPtr'),
+                {title:'Creation of records as children',height:300});
     
   return false;
 }
