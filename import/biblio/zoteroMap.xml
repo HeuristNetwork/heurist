@@ -105,9 +105,9 @@
             <field label="Issue" value="issue" h3id="3-1035.3-113.3-1033"/>
             <field label="Pages" value="pages" h3id="3-1026"/>
             <field label="Date" value="date" h3id="3-1035.3-113.2-9"/>
-            <field label="Series" value="series" h3id="3-1018.3-104.2-1"/>
-            <field label="Series Title" value="seriesTitle" h3id="3-1018.3-104.2-2"/>
-            <field label="Series Text" value="seriesText" h3id="3-1018.3-104.2-3"/>
+            <field label="Series" value="series" h3id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-1"/>
+            <field label="Series Title" value="seriesTitle" h3id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-2"/>
+            <field label="Series Text" value="seriesText" h3id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-3"/>
             <field label="Journal Abbr" value="journalAbbreviation" h3id="3-1035.3-113.3-1034.3-111.2-2"/>
             <field label="Language" value="language" />
             <field label="DOI" value="DOI" h3id="3-1003"/>

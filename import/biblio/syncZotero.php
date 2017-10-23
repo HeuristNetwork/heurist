@@ -143,13 +143,6 @@ if($user_ID!=null)$user_ID = trim($user_ID);
 if($group_ID!=null)$group_ID = trim($group_ID);
 if($api_Key!=null)$api_Key = trim($api_Key);
 
-if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
-    print "<div style='color:red'><br />Current Zotero access settings: ' ".$key.
-    " ' <p>Please go to $linkToAdvancedProperties to enter access details for your Zotero library</div></body>
-    </html>";
-    exit;
-}
-
 
 if(!file_exists($mapping_file) || !is_readable($mapping_file)){
     die("Sorry, could not find/read configuration file .../import/biblio/zoteroMap.xml required for Zotero synchronisation - please ask your system administrator to copy it from Heurist source code");
@@ -159,6 +152,12 @@ if($fh_data==null || is_string($fh_data)){
     die("Sorry, configuration file import/biblio/zoteroMap.xml for Zotero synchronisation is corrupted - please ask your system administrator to update it from Heurist source code");
 }
 
+global $rectypes, $is_verbose;
+$is_verbose = true;
+if($is_verbose){
+    $rectypes = getAllRectypeStructures();
+    print '<table style="display:none" id="mapping_report">';
+}
 
 // 2) verify heurist codes in mapping and create mapping array
 foreach ($fh_data->children() as $f_gen){
@@ -173,6 +172,9 @@ foreach ($fh_data->children() as $f_gen){
                     $zType = strval($arr['zType']);
                     // find record type with such code (or concept code)
                     $rt_id = getRecTypeLocalID($arr['h3id']);
+                    
+                    printMappingReport_rt($arr, $rt_id);                    
+                    
                     if($rt_id == null){
                         array_push($mapping_rt_errors, $arr['h3id']."  ".$zType);
                     }else{
@@ -190,14 +192,14 @@ foreach ($fh_data->children() as $f_gen){
                                             $arr = $f_ctype->attributes();
                                             if(@$arr['h3id'])
                                             {
-                                                addMapping($arr, $zType); //, "creator");
+                                                addMapping($arr, $zType, $rt_id); //, "creator");
                                             }
                                         }
                                     }
 
                                 }else if(@$arr['h3id'])
                                 {
-                                    addMapping($arr, $zType);
+                                    addMapping($arr, $zType, $rt_id);
                                 }
                             }
                         }
@@ -215,6 +217,20 @@ foreach ($fh_data->children() as $f_gen){
         }
     }
 }///foreach
+
+if($is_verbose){
+    print '</table><br><br>';
+    print 'Mapping check passed. <button onclick="{document.getElementById(\'mapping_report\').style.display=\'block\';}">Show report</button><br><br>';
+}
+
+
+if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
+    print "<div style='color:red'><br />Current Zotero access settings: ' ".$key.
+    " ' <p>Please go to $linkToAdvancedProperties to enter access details for your Zotero library</div></body>
+    </html>";
+    exit;
+}
+
 
 $zotero = null;
 $zotero = new phpZotero($api_Key);
@@ -657,7 +673,7 @@ if($step=="1"){  //first step - info about current status
 * @param mixed $arr - attributes
 * @param mixed $zType - zotero type
 */
-function addMapping($arr, $zType)
+function addMapping($arr, $zType, $rt_id)
 {
 
     global $mapping_dt, $mapping_dt_errors;
@@ -665,14 +681,15 @@ function addMapping($arr, $zType)
     $dt_code = strval($arr['h3id']);
     $resource_rt_id = null;
     $resource_dt_id = null;
-
+    
     //pointer mapping
     if(strpos($dt_code,".")>0){
 
-        $res = getResourceMapping($dt_code);
+        $res = getResourceMapping($dt_code, $rt_id, $arr);
         if(is_array($res)){
             $mapping_dt[strval($arr['value'])] = $res;
         }else{
+            //not found
             array_push($mapping_dt_errors, $arr['value'].$res." in ".$zType);
         }
 
@@ -681,18 +698,84 @@ function addMapping($arr, $zType)
         $dt_id = getDetailTypeLocalID($dt_code);
 
         if($dt_id == null){
+            //not found
             array_push($mapping_dt_errors, $arr['value']." detail type not found ".$dt_code." in ".$zType);
         }else{
             $mapping_dt[strval($arr['value'])] = $dt_id;
         }
+        
+        printMappingReport_dt($arr, $rt_id, $dt_id);
+        
 
+    }
+}
+
+//
+//
+//
+function printMappingReport_rt($arr, $rt_id){
+    global $rectypes, $is_verbose;
+    
+    if($is_verbose){
+        
+            if(is_object($arr)){
+                $zType = strval($arr['zType']);
+                $code = $arr['h3id'];
+            }else{
+                $zType = '->';
+                $code = $arr;
+            }
+        
+        
+        
+        //' '.print_r($arr,true).
+        print '<tr><td colspan=2><b>'.$zType.'</b></td><td><b>'.$code.'</b></td>';
+        if($rt_id==null){
+            print '<td>NOT FOUND'.'</td><td></td>';
+        }else{
+            print '<td>'.$rectypes['names'][$rt_id].'</td><td>'.$rt_id.'</td>';                                   
+        }
+        print '</tr>';
+    }                    
+}
+
+//
+//
+//
+function printMappingReport_dt($arr, $rt_id, $dt_id){
+    global $rectypes, $is_verbose;
+    
+    if($is_verbose){
+        
+            if(is_object($arr)){
+                $label = $arr['value'];
+                $code = $arr['h3id'];
+            }else{
+                $label = '';
+                $code = $arr;
+            }
+    
+            print '<tr>&nbsp;&nbsp;&nbsp;<td></td><td>'.$label.'</td><td>'.$code.'</td>';
+            if($dt_id==null){
+                print '<td>NOT FOUND'.'</td><td></td>';
+            }else{
+                if(@$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id]){
+                    print '<td>'.$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id][0].'</td><td>'.$dt_id.'</td>';                                       
+                }else{
+//print print_r($rectypes['typedefs'][$rt_id]['dtFields'][$dt_id],true);                    
+//$is_verbose=false;
+                    print '<td>NOT FOUND IN RECORD TYPE STRUCTURE</td><td>'.$dt_id.'</td>';                                   
+                }
+                
+            }
+            print '</tr>';
     }
 }
 
 /*
 * parse resource mapping (recursive)
 */
-function getResourceMapping($dt_code){
+function getResourceMapping($dt_code, $rt_id, $arr=null){
 
     $arrdt = explode(".",$dt_code);
     if(count($arrdt)>2){
@@ -704,25 +787,41 @@ function getResourceMapping($dt_code){
     }
 
     $dt_id = getDetailTypeLocalID($dt_code);
+    
+    if($arr!=null){
+        printMappingReport_dt($arr, $rt_id, $dt_id);    
+    }else{
+        printMappingReport_dt($dt_code, $rt_id, $dt_id);            
+    }
+    
+    
+    
     if($dt_id == null){
         return " detail type not found ".$dt_code;
     }
 
 
     $res_rt_id = getRecTypeLocalID($resource_rt_id);
+    
+    printMappingReport_rt($resource_rt_id, $res_rt_id);
+    
     if($res_rt_id == null){
         return " resource record type not recognized: ".$resource_rt_id;
     }
 
     $res_dt_id = getDetailTypeLocalID($resource_dt_id);
+    
+        
+    
     if($res_dt_id == null){
+        printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id);
         return " detail type for resource not recognized ".$resource_dt_id;
     }
 
 
     if(count($arrdt)>1){
         // next level
-        $subres = getResourceMapping( implode(".",$arrdt) );
+        $subres = getResourceMapping( implode(".",$arrdt), $res_rt_id );
         if(is_array($subres)){
             $res = array($dt_id, $res_rt_id, $subres);
         }else{
@@ -730,6 +829,8 @@ function getResourceMapping($dt_code){
         }
     }else{
         //pointer detail type and detail type in resource record
+        printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id);
+        
         $res = array($dt_id, $res_rt_id, $res_dt_id);
     }
 
