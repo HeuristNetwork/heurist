@@ -707,7 +707,7 @@ $.widget( "heurist.editing_input", {
             
             //define explicit add relationship button
             $( "<button>", {title: "Select record to be linked"})
-                        .button({icons:{primary: "ui-icon-triangle-1-e"},label:'&nbsp;&nbsp;&nbsp;Select Record'})
+                        .button({icons:{primary: "ui-icon-triangle-1-e"},label:'&nbsp;&nbsp;&nbsp;select record'})
                         .addClass('sel_link2')
                         .appendTo( $inputdiv );
             
@@ -790,6 +790,7 @@ $.widget( "heurist.editing_input", {
                             }
                             
                             
+                            var btn_select_title = window.hWin.HR('Select');
                             //show preliminary dialog that offer to create new record instead 
                             var popele = that.element.find('.child_info_dlg');
                             if(popele.length==0){
@@ -799,25 +800,55 @@ $.widget( "heurist.editing_input", {
                                     return;
                                 }
                                 
-                                var sdiv = '<div class="child_info_dlg"><p style="padding:15px 0">You are creating a parent-child (whole-part,containership) connection. We normally recommend creating a new record whcih becomes the child of the current record</p><p>If child records have already been uploaded to the database, you may select one</p><p style="padding:15px 0"><label>Record type: </label><select id="sel_rectypes"></select></p></div>';
+                                var sdiv = '<div class="child_info_dlg">'
+                                    +'<div style="padding:0.5em 1em"><p style="padding:15px 0">'
+                                        +'The field normally creates a parent-child (whole part of containership) connection'
+                                        +' where the new record is wholly owned by the parent</p>'
+                                        +'<p style="padding:15px 0"><label>Record type: </label><select id="sel_rectypes"></select></p>'
+                                    + '</div>'
+                                    
+                                    + '<div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="position:absolute;bottom:0">'
+                                        + '<div class="ui-dialog-buttonset">'
+                                            + '<label>Recommended >> </label><button class="btn_child_add"></div>'
+                                        + '<div class="ui-dialog-buttonset">'
+                                            + '<button class="btn_child_cancel"><button class="btn_child_select"></div>'
+                                    + '</div>'
+                                    
+                                    +'</div>';
                                 popele = $(sdiv).appendTo(that.element);
+                                
+                                btn_select_title = 'Select existing / create (non-child)';
                             }
                             
                             var new_rec_param = null;
                             var selector_rectype = popele.find('select');
+                            var btn_child_add = popele.find('.btn_child_add');
+
                             
                             if(popup_options.rectype_set.indexOf(',')>0){ //multiconstraint need to show selector
                                 selector_rectype.empty().parent().show();
+                                selector_rectype.change(function(){
+                                     btn_child_add.button({label:'Create new <i>'+
+                                        window.hWin.HEURIST4.rectypes.names[selector_rectype.val()] + '</i> (child record)'});
+                                });
                                 window.hWin.HEURIST4.ui.createRectypeSelect(selector_rectype.get(0), 
                                                 popup_options.rectype_set,null);
-                                btn_add_title = window.hWin.HR('Create new record');
+                                btn_add_title = 'Create new <i>'+
+                                        window.hWin.HEURIST4.rectypes.names[selector_rectype.val()] + '</i> (child record)';
                             }else{
                                 new_rec_param = {rt:popup_options.rectype_set};
                                 selector_rectype.empty().parent().hide();
-                                btn_add_title = window.hWin.HR('Create new')
-                                    +' '+window.hWin.HEURIST4.rectypes.names[popup_options.rectype_set];
+                                
+                                btn_add_title = window.hWin.HR('Create new');
+                                if(popup_options.rectype_set && window.hWin.HEURIST4.rectypes.names[popup_options.rectype_set]){
+                                    btn_add_title = btn_add_title +
+                                         ' <i>'+window.hWin.HEURIST4.rectypes.names[popup_options.rectype_set]+'</i> (child record)';
+                                }else{
+                                    btn_add_title = btn_add_title + ' child record';
+                                }
                             }
                             
+                            /*
                             var $dlg_pce = null;
                             
                             var btns = [
@@ -829,29 +860,56 @@ $.widget( "heurist.editing_input", {
                                               }
                                               
                                               window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                                    {new_record_params:new_rec_param, 
-                                        onselect:popup_options.onselect, 
-                                        parententity:popup_options.parententity,
-                                        selectOnSave:true});
-                                        
-                                              $dlg_pce.dialog('close'); 
-                                          }},
-                                    {text:window.hWin.HR('Select'),
+                                                    {new_record_params:new_rec_param, 
+                                                        onselect:popup_options.onselect, 
+                                                        parententity:popup_options.parententity,
+                                                        selectOnSave:true});
+                                                        
+                                                              $dlg_pce.dialog('close'); 
+                                                          }},
+                                    {text:btn_select_title,
                                           click: function() { __show_select_dialog(false); $dlg_pce.dialog('close'); }},
                                     {text:window.hWin.HR('Cancel'),
                                           click: function() { $dlg_pce.dialog('close'); }}
                             ];
+                            */
                             
-                            
-                            $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+                            var $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
                                 window:  window.hWin, //opener is top most heurist window
                                 title: window.hWin.HR('Create or select child record'),
-                                width: 400,
-                                height: 250,
+                                width: 500,
+                                height: popup_options.rectype_set.indexOf(',')>0?250:200,
                                 element:  popele[0],
                                 resizable: false,
-                                buttons: btns
-                            })
+                                buttons: null //btns
+                            });
+                            
+                            btn_child_add.button({label:btn_add_title})
+                                .click( function() { 
+                                    
+                                              if(new_rec_param==null){
+                                                  new_rec_param = {rt:selector_rectype.val()};
+                                              }
+                                              
+                                              window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                                    {new_record_params:new_rec_param, 
+                                                        onselect:popup_options.onselect, 
+                                                        parententity:popup_options.parententity,
+                                                        selectOnSave:true});
+                                                        
+                                              $dlg_pce.dialog('close');                                     
+                                    
+                                });
+                            var btn_child_select = popele.find('.btn_child_select');
+                            btn_child_select.button({label:'Select existing / create (non-child)'})
+                                .click( function() {  __show_select_dialog(false); $dlg_pce.dialog('close'); });
+                            var btn_child_cancel = popele.find('.btn_child_cancel');
+                            btn_child_cancel.button({label:'Cancel'})
+                                .click( function() { $dlg_pce.dialog('close'); });
+                            
+                            
+                            //.find()
+                            popele.parents('.ui-dialog-content').css({'padding':0});
                             
                             return;
                         }

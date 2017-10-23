@@ -1421,6 +1421,7 @@ window.hWin.HEURIST4.ui = {
                            :'')  
                         + '<div class="detail" '  // truncate
                         + 'style="display:inline-block;min-width:35ex;padding:2px;max-width:160ex;">'
+                        + (isEdit?'<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block;vertical-align: middle"/>&nbsp;&nbsp;&nbsp;':'')
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
                         + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']
