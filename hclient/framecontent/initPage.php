@@ -276,7 +276,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions in get_defs, possible database corruption, please consult Heurist developers');
+                        window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions (get_defs function). This is probably due to a network timeout. However, if the problem persists please report to Heurist developers as it could indicate corruption of the database.');
                         success = false;
                     }
 
