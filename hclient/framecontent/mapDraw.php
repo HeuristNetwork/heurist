@@ -147,7 +147,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
                 <div id="color-palette"></div>
 
-                <div style="padding-top:15px">
+                <div style="padding-top:35px">
                     <button id="save-button" style="font-weight:bold">Save</button>
                 </div> 
                 <div style="padding-top:20px">
