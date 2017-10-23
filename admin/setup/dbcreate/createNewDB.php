@@ -389,7 +389,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             // Backwards compatibility for dbs originally registered with h3
                             if(regurl=='http://heurist.sydney.edu.au/h3/'){
                                 regurl = 'http://heurist.sydney.edu.au/heurist/';
-                            }
+                            } 
 
                             ele.value = regurl + 'admin/describe/getDBStructureAsSQL.php?plain=1&db='+reginfo[2];
                         }

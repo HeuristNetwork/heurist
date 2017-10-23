@@ -56,7 +56,6 @@ function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8
             }
         }
 
-
         if($is_utf8){
             $email_header = $email_header."\r\nContent-Type: text/plain; charset=utf-8\r\n";
             $email_title = '=?utf-8?B?'.base64_encode($email_title).'?=';
