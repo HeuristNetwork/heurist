@@ -1532,15 +1532,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             //show coverall to prevnt edit
             //1. No enough premission
+            var no_access = that._getField('rec_OwnerUGrpID')>0 &&  //0 is everyone
+                            window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'))<0;
+            
             //2. Popup for resource field
             var dlged = that._getEditDialog();
-            if(dlged && this.options.edit_obstacle){ 
+            if(dlged && (no_access || this.options.edit_obstacle)){ 
                 var ele = $('<div><div class="ui-heurist-header2" style="margin: 40px auto;width: 200px;padding:4px;border-radius:4px">'
-                            +'<h2>View only mode</h2><a href="#">Edit</a></div></div>')
+                            +'<h2>View only mode</h2><a href="#">Edit</a><span>No enough rights</span></div></div>')
                        .addClass('coverall-div-bare')
                        .css({top:'30px', 'text-align':'center','zIndex':9999999999}) //, 'background':'red'
                        .appendTo(dlged);
-                ele.find('a').click(function(){ele.remove()});
+                if(no_access){
+                    ele.find('a').hide();
+                }else{       
+                    ele.find('a').click(function(){ele.remove()});
+                    ele.find('span').hide();
+                }
                 this.options.edit_obstacle = false;
             } 
             
