@@ -194,9 +194,19 @@
         $res = $mysqli->query($query);
         while ($row = $res->fetch_row()) {
             if($imode!=1){
-                array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['allTypes'], $row[0]);
+                $rtg_ID = $row[1];
+                if(!@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]){
+                    if($rtg_ID>0){
+                        //error_log('Database '.HEURIST_DBNAME.' Definitions error: wrong group id '.$rtg_ID.' for record type '.$row[0]);
+                    }
+                    
+                    $idxs = array_keys($rtStructs['groups']['groupIDToIndex']);
+                    $rtg_ID = $idxs[0];
+                }
+                
+                array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['allTypes'], $row[0]);
                 if ($row[14]) { //rty_ShowInList
-                    array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['showTypes'], $row[0]);
+                    array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['showTypes'], $row[0]);
                 }
             }
             if($imode>0){
