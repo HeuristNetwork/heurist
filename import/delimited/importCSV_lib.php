@@ -924,7 +924,7 @@ function getMultiValues($values, $csv_enclosure, $csv_mvsep){
                 if(strpos($value,$csv_enclosure)===0 && strrpos($value,$csv_enclosure)===strlen($value)-1){
                     $value = substr($value,1,strlen($value)-2);
                 }
-                array_push($nv, $value);
+                array_push($nv, trim($value));
             }
         }
     }

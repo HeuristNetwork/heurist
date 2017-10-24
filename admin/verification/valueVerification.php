@@ -125,11 +125,11 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $isStripAccents=f
         $allowed_terms = $dtyID_term_label[$dtyID];
     }
 
-    if($isStripAccents){
+    if($isStripAccents && is_array($allowed_terms)){
         array_walk($allowed_terms, 'trim_lower_accent2');
     }
     
-    $label = mb_strtolower($label);
+    $label = trim(mb_strtolower($label));
 
     if(is_array($allowed_terms)){
         $term_ID = array_search($label, $allowed_terms, true);
