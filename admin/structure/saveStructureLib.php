@@ -298,6 +298,7 @@
 
             $parameters = array("");
             $titleMask = null;
+            $rty_Name = null;
             $query = "";
             $querycols = "";
 
@@ -308,6 +309,8 @@
                     //keep value of text title mask to create canonical one
                     if($convertTitleMask && $colName == "rty_TitleMask"){
                         $titleMask = $val;
+                    }else if ($colName == "rty_Name"){
+                        $rty_Name = $val;
                     }
 
                         if($query!="") {
@@ -320,6 +323,16 @@
 
                 }
             }
+            
+            $query = "SELECT rty_ID FROM defRecTypes where rty_Name='".mysql_real_escape_string($rty_Name)."'";
+            $res = mysql_query($query);
+            if($res){
+                $rty_ID = mysql_fetch_array($res);
+                if($rty_ID && @$rty_ID[0]>0){
+                    $ret =  "Record type with specified name already exists in the database, please use the existing record type\nThis type may be hidden - turn it on through Database > Manage structure";
+                }
+            }else{
+            
 
             $query = "insert into defRecTypes ($querycols) values ($query)";
 
@@ -355,6 +368,8 @@
 
             }
 
+            
+            }
         }
         if ($ret ==  null) {
             $ret = "no data supplied for inserting record type";
