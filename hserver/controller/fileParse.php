@@ -828,7 +828,7 @@ function getImportSession($imp_ID){
     
     if($imp_ID && is_numeric($imp_ID)){
 
-        $res = mysql__select_array($system->get_mysqli(),
+        $res = mysql__select_row($system->get_mysqli(),
             "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".$imp_ID);
 
         $session = json_decode($res[0], true);
@@ -1538,7 +1538,7 @@ function getRecordsFromImportTable1($import_table, $imp_ids){
     }
     
     $query = "SELECT * FROM $import_table WHERE imp_id IN ($imp_ids)";
-    $res = mysql__select_array($mysqli, $query);
+    $res = mysql__select_row($mysqli, $query);
     return $res;
 }
 
@@ -1713,7 +1713,7 @@ function validateImport($params){
                 ." from ".$import_table
                 ." left join Records on rec_ID=".$id_field
                 ." where ".$id_field.">0 and rec_ID is null";
-                $row = mysql__select_array($mysqli, $query);
+                $row = mysql__select_row($mysqli, $query);
                 if($row && $row[0]>0){
                     $cnt_recs_insert_nonexist_id = $row[0];
                 }

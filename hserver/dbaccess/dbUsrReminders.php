@@ -255,7 +255,7 @@ class DbUsrReminders extends DbEntityBase
             }
             else if (@$record['rem_ToUserID']) {
                 
-                $row = mysql__select_array($mysqli,
+                $row = mysql__select_row($mysqli,
                     'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']);
                 if ($row) {
                     array_push($recipients, array(
@@ -292,7 +292,7 @@ class DbUsrReminders extends DbEntityBase
             $email_headers = 'From: Heurist reminder service <no-reply@'.HEURIST_SERVER_NAME.'>';
 
             //sender params - reminder owner
-            $owner = mysql__select_array($mysqli,
+            $owner = mysql__select_row($mysqli,
                 'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='
                         .$record['rem_OwnerUGrpID']);
             if ($owner) {
@@ -305,7 +305,7 @@ class DbUsrReminders extends DbEntityBase
                 $email_headers .= "\r\nReply-To: ".$email_owner;
 
                 //find associated record
-                $bib = mysql__select_array($mysqli,
+                $bib = mysql__select_row($mysqli,
                     'select rec_Title, rec_OwnerUGrpID, rec_NonOwnerVisibility, grp.ugr_Name from Records '.
                                     'left join sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type!="user" '.
                                     'where rec_ID = '.$record['rem_RecID']);

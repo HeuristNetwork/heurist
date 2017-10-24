@@ -171,7 +171,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 $attrID = $row1[0];
 
                 //try to find correspondant dettype in Heurist
-                $row = mysql__select_array($mysqli, "select dty_ID, dty_Name, dty_JsonTermIDTree from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$attrID."'");
+                $row = mysql__select_row($mysqli, "select dty_ID, dty_Name, dty_JsonTermIDTree from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$attrID."'");
                 if($row){
 
                     print  "DT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
@@ -226,7 +226,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     }
 
 
-                    $row = mysql__select_array($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."'");
+                    $row = mysql__select_row($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."'");
                     if($row){
 
                         print  "&nbsp;&nbsp;&nbsp;&nbsp;Term ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br/>";
@@ -263,7 +263,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 $attrID = $row1[0];
 
                 //try to find correspondant rectype in Heurist
-                $row = mysql__select_array($mysqli, "select rty_ID, rty_Name from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
+                $row = mysql__select_row($mysqli, "select rty_ID, rty_Name from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
                 if($row){
 
                     print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
@@ -300,7 +300,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 {
 
 
-                    $row = mysql__select_array($mysqli,
+                    $row = mysql__select_row($mysqli,
                         "select rst_DetailTypeID, rst_DisplayName from defDetailTypes d, defRecStructure r ".
                         "where d.dty_ID=r.rst_DetailTypeID and r.rst_RecTypeID=$rtyId and d.dty_NameInOriginatingDB='FAIMS.".$row_recstr[0]."'");
 
@@ -310,7 +310,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     }else{
 
-                        $row3 = mysql__select_array($mysqli, "select dty_ID, dty_Name from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$row_recstr[0]."'");
+                        $row3 = mysql__select_row($mysqli, "select dty_ID, dty_Name from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$row_recstr[0]."'");
                         if($row3){
                             //add new detail type into HEURIST
                             $query = "INSERT INTO defRecStructure (rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText) VALUES (?,?,?, '')";

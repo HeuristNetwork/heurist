@@ -281,7 +281,7 @@
         $ret = false;
 
         if($system->is_admin() && $recID>0){
-            $res = mysql__select_array($system->get_mysqli(),
+            $res = mysql__select_row($system->get_mysqli(),
                 "select ugr_Type, ugr_Enabled, ugr_LoginCount from sysUGrps  where ugr_ID=".$recID);
             $ret = ($row[0]=="user" && $row[1]=="n" && $row[2]==0);
         }

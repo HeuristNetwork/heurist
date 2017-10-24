@@ -8,7 +8,7 @@
     *  mysql__select_assoc - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of column values
     *  mysql__select_value   - return the first column of first row
-    *  mysql__select_array   - returns first row
+    *  mysql__select_row   - returns first row
     *  mysql__insertupdate
     *  mysql__delete
     *  mysql__begin_transaction
@@ -207,7 +207,7 @@
     * @param mixed $query
     */
     function mysql__select_value($mysqli, $query) {
-        $row = mysql__select_array($mysqli, $query);
+        $row = mysql__select_row($mysqli, $query);
 
         if($row && @$row[0]){
             $result = $row[0];
@@ -223,7 +223,7 @@
     * @param mixed $mysqli
     * @param mixed $query
     */
-    function mysql__select_array($mysqli, $query) {
+    function mysql__select_row($mysqli, $query) {
         $result = null;
         if($mysqli){
             $res = $mysqli->query($query);

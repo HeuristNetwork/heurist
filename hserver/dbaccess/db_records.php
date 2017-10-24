@@ -334,7 +334,7 @@
                 if(@$values['dtl_ParentChild']==true && defined('DT_PARENT_ENTITY')){
                     
                         //find child record
-                        list($dtl_ID, $parentID) = mysql__select_array($mysqli,
+                        list($dtl_ID, $parentID) = mysql__select_row($mysqli,
                             'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
                             .$dtl_Value.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY);
                         
@@ -357,7 +357,7 @@
                         }
                         
                         //update record title for child record
-                        list($child_rectype, $child_title) = mysql__select_array($mysqli,
+                        list($child_rectype, $child_title) = mysql__select_row($mysqli,
                             'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
                             .$dtl_Value);
                         recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title);
