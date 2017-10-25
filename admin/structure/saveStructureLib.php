@@ -329,9 +329,9 @@
             if($res){
                 $rty_ID = mysql_fetch_array($res);
                 if($rty_ID && @$rty_ID[0]>0){
-                    $ret =  "Record type with specified name already exists in the database, please use the existing record type\nThis type may be hidden - turn it on through Database > Manage structure";
+                    return  "Record type with specified name already exists in the database, please use the existing record type\nThis type may be hidden - turn it on through Database > Manage structure";
                 }
-            }else{
+            }
             
 
             $query = "insert into defRecTypes ($querycols) values ($query)";
@@ -366,7 +366,7 @@
                     getRectypeThumbURL($rtyID);
                 }
 
-            }
+            
 
             
             }
