@@ -86,7 +86,10 @@
 
         <!-- <h2>Delimited text file data export (CSV/TSV)</h2 -->
         <p>
-           Due to the limitations of the delimited text format, it really only makes sense to export a single record type per file. However, if multiple record types exist in the subset, equivalent fields will be exported from each record type, where they exist.
+           Due to the limitations of the delimited text format, it really only makes sense to export a single record type per file.
+        </p>
+        <p>
+           However, if multiple record types exist in the subset, equivalent fields will be exported from each record type, where they exist.
         </p>
         <div style="width:750px"> </div> <!-- Determines width of output text area -->
      <div>
@@ -94,7 +97,7 @@
             <label class="input-header-cell">
                 Show fields for</label>
             <div class="input-cell" id="select-rec-type"></div>
-            <label id="lbl_rt_info">You have nnn record types</label>
+            <label id="lbl_rt_info" style="text-align:left;padding-left:10px;">You have nnn record types</label>
         </div>
 
         <div class="input-row" style="display:none">

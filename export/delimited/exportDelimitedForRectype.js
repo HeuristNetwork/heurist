@@ -55,7 +55,7 @@ function getRecTypes() {
     if(top.HAPI4 && top.HAPI4.currentRecordset!=null){
         allowed_rt = top.HAPI4.currentRecordset.getRectypes();
         document.getElementById("lbl_rt_info").innerHTML = 'You have '
-            +top.HAPI4.currentRecordset.getRectypes().length+'record types in your subset';
+            +top.HAPI4.currentRecordset.getRectypes().length+'&nbsp;record types in your subset';
     }else{
         document.getElementById("lbl_rt_info").innerHTML = '';
     }
