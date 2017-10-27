@@ -110,9 +110,15 @@ $.widget( "heurist.boro_nav", {
 
         if((arguments[0] && arguments[0]['page_name']) || arguments['page_name'] ){
             var page_name = arguments['page_name']?arguments['page_name']:arguments[0]['page_name'];
-            var page_id = (page_name) ?page_name: this._getStaticPageIdByName(page_name);
-            if(page_id>0 || page_name=='home' || page_name=='people' || page_name=='search'){
+            var page_id;
+            if(page_name>0 || page_name=='home' || page_name=='people' || page_name=='search'){
+                page_id = page_name;
+            }else{
+                page_id = this._getStaticPageIdByName(page_name);
+            }
+            if(page_id){
                 $('#'+this.options.menu_div).find('a.nav-link[data-id='+page_id+']').click();
+                //this.history.push({page_name:recID});
             }
         }else{
         
