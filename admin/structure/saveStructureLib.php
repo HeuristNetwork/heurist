@@ -1175,6 +1175,7 @@
 		//$row = $res->fetch_object();
 		//$query = "dty_LocallyModified=".(($row->dty_OriginatingDBID>0)?"1":"0").",";
 		$query = "";
+        $dty_Name = null;
 
 		if (count($commonNames)) {
 
@@ -1192,20 +1193,38 @@
 					$query = $query."$colName = ?";
 
                     $parameters = addParam($parameters, $dtyColumnNames[$colName], $val);
+                    
+                    if($colName=='dty_Name'){
+                        $dty_Name = $val;
+                    }
 				}
 			}//for
 			//
 			if($query!=""){
+                
+                
+                if($dty_Name){
+                    $query = "SELECT dty_ID FROM defDetailTypes where dty_ID<>$dtyID AND dty_Name='".mysql_real_escape_string($dty_Name)."'";
+                    $res = mysql_query($query);
+                    if($res){
+                        $dty_ID = mysql_fetch_array($res);
+                        if($dty_ID && @$dty_ID[0]>0){
+                            return  "Field type with specified name already exists in the database, please use the existing field type";
+                        }
+                    }
+                }
+            
 
 				$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)";
 				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
 				$rows = execSQL($mysqli, $query, $parameters, true);
+
 				if($rows == "1062"){
 					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
-				}else if (is_string($rows) ) { //$rows==0 || 
+				}else if ($rows!='' && is_string($rows)){  //(is_string($rows) || $rows==0)
                     $ret = handleError("SQL error updating field type $dtyID in updateDetailType: "
-                        .htmlspecialchars($query)."  type=".$parameters[0]." values=".@$parameters[1], $query);
+                        .htmlspecialchars($query)."  parameters=".implode(',',$parameters), $query, $rows);
                     $ret = $ret['error'];
 				} else {
 					$ret = $dtyID;
