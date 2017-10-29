@@ -611,11 +611,16 @@ function getTerms($useCachedData = false) {
         'fieldNamesToIndex' => getColumnNameToIndex(array_slice(getTermColNames(), 1)));
     $terms['fieldNamesToIndex']['trm_Image'] = count($terms['commonFieldNames']);
     array_push($terms['commonFieldNames'],'trm_Image');
-        
-    while ($row = mysql_fetch_row($res)) {
-        $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
-        $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$row[0].'.png';
-        array_push($terms['termsByDomainLookup'][$row[9]][$row[0]], file_exists($filename));
+    if(!$res){
+        if (mysql_error()) {
+            return array("error" => mysql_error());
+        }
+    }else{    
+        while ($row = mysql_fetch_row($res)) {
+            $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
+            $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$row[0].'.png';
+            array_push($terms['termsByDomainLookup'][$row[9]][$row[0]], file_exists($filename));
+        }
     }
     $terms['treesByDomain'] = array('relation' => getTermTree("relation", "prefix"), 'enum' => getTermTree("enum", "prefix"));
     setCachedData($cacheKey, $terms);
