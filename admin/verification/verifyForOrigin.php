@@ -26,13 +26,17 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
     
-    $_REQUEST['db'] = 'Heurist_Bibliographic';
-
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-    require_once(dirname(__FILE__).'/../../common/php/utilsMail.php');
-    require_once('valueVerification.php');
+    if(!@$_REQUEST['db']){
+        $_REQUEST['db'] = 'Heurist_Bibliographic';    
+    }
+    
+    if(!@$_REQUEST['verbose']){
+        require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+        require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+        require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+        require_once('valueVerification.php');
+    }
+    
 
     if (! is_logged_in()) {
         header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -43,22 +47,27 @@
         print "Sorry, you need to be a database owner to be able to modify the database structure";
         return;
     }
+
+    $filter = @$_REQUEST['filter_exact'];
+    if(!$filter){
+        $filter = @$_REQUEST['filter'];
+        if(!$filter) $filter = 'hdb_johns';
     
-    $is_action = (@$_REQUEST['action']==1);
-    $filter = @$_REQUEST['filter'];
-    if(!$filter) $filter = 'hdb_johns';
 
-    //1. find all database
-    $query = 'show databases';
+        //1. find all database
+        $query = 'show databases';
 
-    $res = mysql_query($query);      
-    if (!$res) {  print $query.'  '.mysql_error();  return; }
-    $databases = array();
-    while (($row = mysql_fetch_row($res))) {
-        if( strpos($row[0], 'hdb_')===0 && ($filter=="all" || strpos($row[0], $filter)===0)){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
-                $databases[] = $row[0];
+        $res = mysql_query($query);      
+        if (!$res) {  print $query.'  '.mysql_error();  return; }
+        $databases = array();
+        while (($row = mysql_fetch_row($res))) {
+            if( strpos($row[0], 'hdb_')===0 && ($filter=="all" || strpos($row[0], $filter)===0)){
+                //if($row[0]>'hdb_Masterclass_Cookbook')
+                    $databases[] = $row[0];
+            }
         }
+    }else{
+        $databases = array($filter);
     }
     
     //origin database and record types to check
@@ -109,9 +118,9 @@
             if(!@$rty_CodesToCheck[$code]){ //not already was in previous database
                 array_push($rty_IDs_ToCheck, $rty_ID); 
                 array_push($rty_CodesToCheck, $code); 
-                $rty_Names[$code] = $rty_Names_temp[$code]; 
             }
-        }
+       }
+        $rty_Names = array_merge($rty_Names, $rty_Names_temp);
 
         
         $query = 'select rst_RecTypeID, dty_Type, rst_DisplayName, dty_OriginatingDBID, dty_IDInOriginatingDB, '
@@ -183,12 +192,16 @@
         
         mysql_connection_select($db_name);
        
-        print "<h4>db = $db_name</h4>";
+        $smsg = ""; 
         
         resetGlobalTermsArrays();        
         $all_terms = getTerms(false);
         $constraints2 = array(); //per detail
         $terms_codes2 = array(); //per detail
+        
+        $fileds_differ_terms = array(); //differenece in field list
+        $fileds_missed_terms = array(); //missed in this db
+        $fileds_missed_rectypes = array(); 
         
         //find all rty-codes
         $rty_Codes2 = mysql__select_assoc('defRecTypes', 'rty_ID', 
@@ -201,6 +214,7 @@
         //loop by rectypes        
         foreach ($rty_CodesToCheck as $index=>$rty_Code){
    
+            $msg_error = '';
        
             if(array_search($rty_Code, $rty_Codes2)==false) continue;//there is no such record type
             
@@ -211,11 +225,11 @@
             $query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB '
             .' FROM defRecTypes WHERE rty_Name="'.mysql_real_escape_string($rty_Name).'"';
             $res = mysql_query($query);
-            if (!$res) {  print $query.'  '.mysql_error();  return; }
+            if (!$res) {  print $db_name.'  '.$query.'  '.mysql_error();  return; }
             $row = mysql_fetch_row($res);
             if($row){
                 if($row[0]!=$db_id || $row[1]!=$orig_id){
-                   print "<p style='padding-left:20px'>name = $rty_Name : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
+                   $msg_error = $msg_error."<p style='padding-left:20px'>name = $rty_Name : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
                 }
             }
             
@@ -227,7 +241,7 @@
             .$db_id.' AND rty_IDInOriginatingDB='.$orig_id;
         
             $res = mysql_query($query);
-            if (!$res) {  print $query.'  '.mysql_error();  return; }
+            if (!$res) {  print $db_name.'  '.$query.'  '.mysql_error();  return; }
             
             $fields2 = array();      //per record type
             
@@ -263,12 +277,12 @@
                                 $term = $all_terms['termsByDomainLookup'][$domain][$trm_id];
                                 $codes[] = $term[$ti_dbid].'-'.$term[$ti_oid];  
                              }else{
-                                print '<p>Term does not exist '.$trm_id.' in field '.$row['dty_ID'].'  '.$row['dty_Name'].' ('.$row['dty_JsonTermIDTree'].')</p>';
+                                $msg_error = $msg_error.'<p>Term does not exist '.$trm_id.' in field '.$row['dty_ID'].'  '.$row['dty_Name'].' ('.$row['dty_JsonTermIDTree'].')</p>';
                              }
                              
                          }
-                     }else{
-                         print '<p>Can\'t parse '.$row['dty_JsonTermIDTree'].' for '.$row['dty_ID'].'  '.$row['dty_Name'].'</p>';
+                     }else if($terms!='all'){
+                         $msg_error = $msg_error.'<p>Can\'t parse term list "'.$row['dty_JsonTermIDTree'].'" for field '.$row['dty_ID'].'  '.$row['dty_Name'].'</p>';
                      }
                      //get concept codes
                      $terms_codes2[$dty_Code] = $codes;
@@ -279,74 +293,121 @@
             
             if(count($fields2)===0) continue; //there is no such record type
             
-            print "<p style='padding-left:20px'>id = ".$rty_Code.'  '.$rty_Names[$rty_Code]. 
-                (($rty_Names[$rty_Code]!=$rty_Name)?' (in this database: '.$rty_Name.')':'').'</p>';
-            
             //1. check fields 
             $missing = array();
-            foreach($fields[$rty_Code] as $f_code=>$f_name){
+            foreach($fields[$rty_Code] as $f_code=>$f_name){  //field code=>field name
                 if(array_search($f_code, $fields2)===false){ //not found
-                    array_push($missing, $f_code.'  '.$f_name);
+                    array_push($missing, '<i>'.$f_code.'  '.$f_name.'</i>');
                 }
             }
             if(count($missing)>0){
-                print "<p style='padding-left:40px'>missing fields ".implode(',',$missing)."</p>"; 
+                $msg_error = $msg_error."<p style='padding-left:40px'>missing fields: ".implode(', ',$missing)."</p>"; 
             }
             //2. check constraints
             foreach($constraints as $dty_Code=>$codes){
-                if(@$fields[$rty_Code][$dty_Code]){ //exists in original recctype and in this db
+                if(@$fields[$rty_Code][$dty_Code] && array_search($dty_Code, $fields2)!==false){ //exists in original recctype and in this db
                     $missing = array();
                     $missing2 = array();
                     foreach($codes as $rty_code){
                         if(!is_array(@$constraints2[$dty_Code]) || array_search($rty_code, $constraints2[$dty_Code])===false){ //not found or unconstrained
-                            array_push($missing, $rty_code.'  '.$rty_Names[$rty_code] );
+                            array_push($missing, $rty_code.'  '.@$rty_Names[$rty_code] );
                         }
-                        if(array_search($rty_code, $rty_Codes2)===false){
-                            array_push($missing2, $rty_code.'  '.$rty_Names[$rty_code] );
+                        if(!@$fileds_missed_rectypes[$rty_code] && array_search($rty_code, $rty_Codes2)===false){
+                            $fileds_missed_rectypes[$rty_code] = $rty_code.'  '.@$rty_Names[$rty_code];
+                            //array_push($missing2, $rty_code.'  '.@$rty_Names[$rty_code] );
                         }
                     }        
                     if(count($missing)>0){
-                       //print print_r($fields[$rty_Code],true).'<br>';  
-                        
-                       print "<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
+                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
                                     .': missing constraint record types '.implode(',',$missing).'</p>';
                     }
-                    //check rectype presence in this db
+                    /*
                     if(count($missing2)>0){
-                       print "<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
+                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
                                     .': missing record types '.implode(',',$missing2).'</p>';
                     }
+                    */
                             
                 }
             }//foreach constaints
             
             //3. check terms 
             foreach($terms_codes as $dty_Code=>$codes){
-                if(@$fields[$rty_Code][$dty_Code]){ //exists in original recctype and in this db
+                if(@$fields[$rty_Code][$dty_Code] && array_search($dty_Code, $fields2)!==false){ //exists in original recctype and in this db
                     $missing = array();
                     $missing2 = array();
-                    foreach($codes as $trm_code){
-                        if(!is_array(@$terms_codes2[$dty_Code]) || array_search($trm_code, $terms_codes2[$dty_Code])===false){ //not found
-                            array_push($missing, $trm_code );
+                    if(!@$fileds_differ_terms[$dty_Code]){
+                        foreach($codes as $trm_code){
+                            if(!is_array(@$terms_codes2[$dty_Code]) || array_search($trm_code, $terms_codes2[$dty_Code])===false){ //not found
+                                array_push($missing, $trm_code );
+                            }
+                            if(array_search($trm_code, $fileds_missed_terms)===false 
+                                        && array_search($trm_code, $trm_Codes2)===false){ //all codes of terms in this db
+                                array_push($fileds_missed_terms, $trm_code );
+                            }
+                            
+                        }        
+                        if(count($missing)>0){
+                               $fileds_differ_terms[$dty_Code] = 
+                                        "<p style='padding-left:10px'>field ".$dty_Code.' <b>'.$fields[$rty_Code][$dty_Code]
+                                        .'</b>:</p><p style="padding-left:40px"> missing terms in defined list: '
+                                        .implode(', ',$missing).'</p>';
                         }
-                        if(array_search($trm_code, $trm_Codes2)===false){ //all codes of terms in this db
-                            array_push($missing2, $trm_code );
-                        }
-                    }        
-                    if(count($missing)>0){
-                       print "<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
-                                    .': missing terms in field list '.implode(',',$missing).'</p>';
                     }
-                    //check rectype presence in this db
+                    if(@$fileds_differ_terms[$dty_Code]){
+                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' <i>'.$fields[$rty_Code][$dty_Code]
+                                    .'</i>: missing terms (see below)</p>';
+                    }
+                    
+                    /*heck term presence in this db
                     if(count($missing2)>0){
-                       print "<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
+                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
                                     .': missing terms '.implode(',',$missing2).'</p>';
                     }
-                            
+                    */      
                 }
             }//foreach terms
             
+            if($msg_error){
+                $smsg = $smsg
+                    ."<p style='padding-left:20px'>id = ".$rty_Code.'  <b>'.$rty_Names[$rty_Code] 
+                    .(($rty_Names[$rty_Code]!=$rty_Name)?'</b> <i>(in this database: '.$rty_Name.')</i>':'</b>').'</p>'
+                    .$msg_error;
+            }
                  
         }//for record types
+
+        
+        $has_issues = ($smsg!='' || count($fileds_differ_terms)>0 || count($fileds_missed_terms)>0 || count($fileds_missed_rectypes)>0);
+        
+        //
+        //
+        if(@$_REQUEST['verbose']==1){
+           if($has_issues){
+               print '<p>The differences indicated are not necessarily of concern, as we make incremental improvements to the core structures, but if there appear to be errors and you are concerned, please contact the Heurist development team with the name of your database and we will check it out</p>';
+           }else{
+               print '<p>No differences found</p>';
+           }
+        }
+        if(count($databases)>1){
+            print "<h4>db = $db_name</h4>";  
+        }
+        if($has_issues){
+            if($smsg) print $smsg;
+            if(count($fileds_differ_terms)>0){
+                print implode('',$fileds_differ_terms);
+            }
+            if(count($fileds_missed_terms)>0){
+                print "<p style='padding-left:10px'>Missed terms (they are in defined list of enumeration fields but not found in terms table): "
+                    .implode(', ',$fileds_missed_terms).'</p>';
+            }
+            if(count($fileds_missed_rectypes)>0){
+                print "<p style='padding-left:10px'>Missed record types (however they are presented in constraint of resource fields):</p>"
+                    ."<p style='padding-left:40px'>"
+                    .implode('<br>',$fileds_missed_rectypes).'</p>';
+            }
+        }
+        
+
     }//while  databases
 ?>

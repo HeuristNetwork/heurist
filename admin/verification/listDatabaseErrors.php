@@ -153,6 +153,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 <a href="#single_value" style="white-space: nowrap;padding-right:10px">Single value fields</a>
                 <a href="#required_fields" style="white-space: nowrap;padding-right:10px">Required fields</a>
                 <a href="#nonstandard_fields" style="white-space: nowrap;padding-right:10px">Non-standard fields</a>
+                <a href="#origin_differences" style="white-space: nowrap;padding-right:10px">Differences with Core Definitions</a>
             </div>
         </div>
         
@@ -918,7 +919,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
 
 
             <!--  Records with non-standard fields (not listed in recstructure)  -->
-            <a name="nonstandard_fields"/>
+            <a name="nonstandard_fields"></a>
             <?php
 
             $res = mysql_query("select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
@@ -992,6 +993,18 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 ?>
             </div>
 
+            <hr/>
+            
+            <a name="origin_differences"></a>
+            <div>
+                <h3>The database structure is cross-checked against the core and bibliographic definitions curated by the Heurist team</h3>
+                <?php
+                    $_REQUEST['verbose'] = 1;
+                    $_REQUEST['filter_exact']  = DATABASE;
+                    include(dirname(__FILE__).'/verifyForOrigin.php');
+                ?>
+            </div>
+            
             <hr/>
 
         </div>
