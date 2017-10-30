@@ -324,8 +324,8 @@
                 }
             }
             
-            $query = "SELECT rty_ID FROM defRecTypes where rty_Name='".mysql_real_escape_string($rty_Name)."'";
-            $res = mysql_query($query);
+            $query_check = "SELECT rty_ID FROM defRecTypes where rty_Name='".mysql_real_escape_string($rty_Name)."'";
+            $res = mysql_query($query_check);
             if($res){
                 $rty_ID = mysql_fetch_array($res);
                 if($rty_ID && @$rty_ID[0]>0){
@@ -1204,8 +1204,8 @@
                 
                 
                 if($dty_Name){
-                    $query = "SELECT dty_ID FROM defDetailTypes where dty_ID<>$dtyID AND dty_Name='".mysql_real_escape_string($dty_Name)."'";
-                    $res = mysql_query($query);
+                    $query_check = "SELECT dty_ID FROM defDetailTypes where dty_ID<>$dtyID AND dty_Name='".mysql_real_escape_string($dty_Name)."'";
+                    $res = mysql_query($query_check);
                     if($res){
                         $dty_ID = mysql_fetch_array($res);
                         if($dty_ID && @$dty_ID[0]>0){

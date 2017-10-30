@@ -484,7 +484,12 @@ function execSQL($mysqli, $sql, $params, $retCnt=true) {
             }
         }
     } else { //prepared query
-        $stmt = $mysqli->prepare($sql) or die("Failed to prepare the SQL statement: ".$sql);
+        $stmt = $mysqli->prepare($sql);
+        if(!$stmt){
+            error_log('Failed to prepare the SQL statement: '.$sql);            
+            error_log(print_r($params, true));
+            die('Failed to prepare the SQL statement: '.$sql);
+        }
         call_user_func_array(array($stmt, 'bind_param'), refValues($params));
         $stmt->execute();
         if ($retCnt) {
