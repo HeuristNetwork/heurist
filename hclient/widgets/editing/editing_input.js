@@ -1514,7 +1514,7 @@ $.widget( "heurist.editing_input", {
         }
 
         if (parseFloat( this.f('rst_DisplayWidth') ) > 0 
-            &&  this.detailType!='boolean' && this.detailType!='date') {    //if the size is greater than zero
+            &&  this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {    //if the size is greater than zero
                 $input.css('width', Math.round(2 + Math.min(120, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
         }
 
