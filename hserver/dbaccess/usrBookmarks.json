@@ -56,9 +56,9 @@
                 {
                     "dtID": "bkm_PwdReminder",
                     "dtFields":{
-                        "dty_Type":"freetext",
+                        "dty_Type":"blocktext",
                         "dty_Size":250,
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":"90%",
                         "rst_DisplayName": "Password reminder:",
                         "rst_DisplayHelpText": "Note: content is not encrypted. DO NOT enter important passwords verbatim. We suggest using a prompt whih is meaningful only to you, rather than an actual password." 
                     }
@@ -71,7 +71,7 @@
                         "rst_DisplayHelpText": "Select a personal star rating for this record",
                         "rst_DefaultValue": 0,
                         "rst_FieldConfig":[
-                            {"key":0,"title":"no rated"},
+                            {"key":0,"title":"not rated"},
                             {"key":1,"title":"*"},
                             {"key":2,"title":"**"},
                             {"key":3,"title":"***"},
@@ -85,7 +85,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":65535,
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":"90%",
                         "rst_DisplayName": "Personal notes:"
                     }
                 }

@@ -335,7 +335,7 @@ $.widget( "heurist.editing_input", {
                 else if(fieldname=='dty_Type') val = 'freetext'
                     else if(fieldname=='rst_DisplayWidth'
                         && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
-                            val = 55;  //default width for input fields
+                            val = '55';  //default width for input fields
                         }
         }
         return val;
@@ -1512,10 +1512,16 @@ $.widget( "heurist.editing_input", {
             }*/
 
         }
-
-        if (parseFloat( this.f('rst_DisplayWidth') ) > 0 
+        
+        var dwidth = this.f('rst_DisplayWidth');
+        
+        if( typeof dwidth==='string' && dwidth.indexOf('%')== dwidth.length-1){
+            
+            $input.css('width', dwidth);
+            
+        }else if (parseFloat( dwidth ) > 0 
             &&  this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {    //if the size is greater than zero
-                $input.css('width', Math.round(2 + Math.min(120, Number(this.f('rst_DisplayWidth')))) + "ex"); //was *4/3
+                $input.css('width', Math.round(2 + Math.min(120, Number(dwidth))) + "ex"); //was *4/3
         }
 
 
