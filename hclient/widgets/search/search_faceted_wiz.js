@@ -547,6 +547,11 @@ $.widget( "heurist.search_faceted_wiz", {
 
             if($(opt_rectypes).is(':empty')){
                 window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
+                
+                $dlg.find("#opt_rectypes").change(function(){
+                    if(svs_name.val()=='') svs_name.val(opt_rectypes.options[opt_rectypes.selectedIndex].text+'s');
+                    svs_name.focus();
+                });
             }
 
 
@@ -1162,11 +1167,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 }else if(facets[k].type=='float' || facets[k].type=='integer'){
                     sContent = sContent 
                         +'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
-                        +k+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
+                        +idd+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
                 }else if(facets[k].type=='date' || facets[k].type=='year'){
                     sContent = sContent 
                         +'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
-                        +k+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
+                        +idd+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
                     
                     sGroupBy = '<span id="facet_DateGroup'+idd+'"><label>Group by '
                         +'<select id="facet_Group'+idd+'"><option>year</option><option>decade</option><option>century</option></select>'
@@ -1221,6 +1226,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 //assign values
                 listdiv.find('#facet_Title'+idd).val(facets[k].title);
                 listdiv.find('#facet_Help'+idd).val(facets[k].help);
+                
                 listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
                 listdiv.find('input:checkbox[name="facet_Order'+idd+'"]').attr('checked', (facets[k].orderby=='count'));
                 
