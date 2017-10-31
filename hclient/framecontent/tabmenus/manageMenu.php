@@ -87,7 +87,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
                             onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
                             title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
-                            Build</a>
+                            Modify</a>
                     </li>
 
                     <li>

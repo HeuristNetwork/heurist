@@ -58,10 +58,10 @@ function hexportMenu() {
                 
                 if(href!='#'){
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
-                if(lnk.hasClass('h3link')){
-                    //h3link class on menus implies location of older (vsn 3) code
-                    href = window.hWin.HAPI4.baseURL + href;
-                }
+                    if(lnk.hasClass('h3link')){
+                        //h3link class on menus implies location of older (vsn 3) code
+                        href = window.hWin.HAPI4.baseURL + href;
+                    }
                 }
                 
                 lnk.attr('href', href).click(

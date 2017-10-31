@@ -147,19 +147,32 @@ function hmanageMenu() {
                 //window.hWin.HEURIST4.msg.showDialog(url, options);
                 $('.accordion_pnl').find('a').parent().removeClass('item-selected'); //was #menu_container
                 link.parent().addClass('item-selected');
-                $('#frame_container').attr('src', url); 
+                
+                __load_frame_content(url);
+
             });
         }else{
             //window.hWin.HEURIST4.msg.showDialog(url, options);
             $('.accordion_pnl').find('a').parent().removeClass('item-selected');
             link.parent().addClass('item-selected');
-            $('#frame_container').attr('src', url); 
+            
+            __load_frame_content(url);
         }        
         
         
         return false;
     }
     
+    function __load_frame_content(url){
+        var frm = $('#frame_container');
+        frm.hide();
+        frm.parent().css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+        frm.on('load', function(){
+            frm.show();
+            frm.css('background','none');
+        });
+        frm.attr('src', url)
+    }
     
     //public members
     var that = {
