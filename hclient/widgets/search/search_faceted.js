@@ -532,7 +532,7 @@ $.widget( "heurist.search_faceted", {
                                 rectypeID: field['rtid'],
                                 dtID: field['id'],
                                 rectypes: window.hWin.HEURIST4.rectypes,
-                                values: '',
+                                values: [''],
                                 readonly: false,
                                 title:  (that.options.params.title_hierarchy?harchy:'')
                                         + "<span style='font-weight:bold'>" + field['title'] + "</span>",
@@ -562,9 +562,7 @@ $.widget( "heurist.search_faceted", {
                     inpt.find('.header').attr('title', field['help'])
                         .css('display','block')
                         .html('<h4 style="display:inline-block;">'+field['title']+'</h4>');
-                    
-                    inpt.find('.input-div').css('display','inline-block');
-                    
+                                                                        
                     //@todo make as event listeneres
                     //assign event listener
                     //var $inputs = inpt.editing_input('getInputs');
@@ -597,6 +595,9 @@ $.widget( "heurist.search_faceted", {
                                 }
                                 that.doSearch();
                         }});//"doSearch"});                   
+                    
+                    inpt.find('.input-cell > .input-div').css({'display':'inline-block'}); // !important
+                    inpt.find('.input-cell').css('display','block');
                     
                     inpt.find('input').removeClass('text').css({'width':'150px'});
                     inpt.find('select').removeClass('text').css({'width':'150px'});
@@ -1777,7 +1778,7 @@ $.widget( "heurist.search_faceted", {
                             rectypeID: field['rtid'],
                             dtID: field['id'],
                             rectypes: window.hWin.HEURIST4.rectypes,
-                            values: '',
+                            values: [''],
                             readonly: false,
                             title:  "<span style='font-weight:bold'>" + field['title'] + "</span>",
                             showclear_button: false,
@@ -1786,15 +1787,16 @@ $.widget( "heurist.search_faceted", {
                             detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
                     };
                     
-               if(isNaN(Number(field['id']))){
+               if(isNaN(Number(field['id']))){ //field id not defined
                    ed_options['dtFields'] = {
                        dty_Type: field['type'],
                        rst_RequirementType: 'optional',
                        rst_MaxValues: 1,
-                       rst_DisplayWidth:0
+                       rst_DisplayWidth: 0
                    };
                }
-
+   
+                //rst_DefaultValue
                  
                 var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
                         ed_options
