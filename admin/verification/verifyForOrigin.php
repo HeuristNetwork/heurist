@@ -47,6 +47,36 @@
         print "Sorry, you need to be a database owner to be able to modify the database structure";
         return;
     }
+    
+    
+    if(@$_REQUEST['verbose']!=1){
+        // <li>optrectypes=1    test for presence of missing record types not referenced by a pointer field</li>
+?>  
+<html>
+<head>
+<style>
+    p {padding:0;margin:0px;}
+    * {font-size: medium;}
+</style>
+</head>  
+<body>
+<ul>
+    <li>filter_exact - exact name of database to be tested</li>
+    <li>filter=all     databases to be tested, hdb_xyz acts as wildcard for all DBs starting with xyz</li>
+    <li>biblio=0       omit test bibliographic record types against Heurist_Bibliographic (#6)</li>
+    <li>spatial=0      omit test spatial and temporal record types against Heurist_Core_Definitions (#2)</li>
+    <li>optfields=1    test for presence of optional fields</li>
+    <li>recfields=1    test for presence of recommended fields</li>
+    <li>termlists=1    test for missing terms in lists for fields (undefined codes are always shown)</li>
+    <li>showalldbs=1   show databases without errors</li>
+</ul>
+<?php        
+    }
+    
+    $test_optfields = (@$_REQUEST['optfields']==1);
+    $test_recfields = (@$_REQUEST['recfields']==1);
+    
+    
 
     $filter = @$_REQUEST['filter_exact'];
     if(!$filter){
@@ -71,13 +101,19 @@
     }
     
     //origin database and record types to check
-    $origin_dbs = array('hdb_Heurist_Bibliographic'=>array('rty_RecTypeGroupID'=>array(7,9),'rty_ID'=>array()),
-                        'hdb_Heurist_Core_Definitions'=>array('rty_RecTypeGroupID'=>array(8),'rty_ID'=>array()));
+    $origin_dbs = array();
+    if(@$_REQUEST['biblio']==null || @$_REQUEST['biblio']!=0){
+        $origin_dbs['hdb_Heurist_Bibliographic'] = array('rty_RecTypeGroupID'=>array(7,9),'rty_ID'=>array());
+    }
+    if(@$_REQUEST['spatial']==null || @$_REQUEST['spatial']!=0){
+        $origin_dbs['hdb_Heurist_Core_Definitions'] = array('rty_RecTypeGroupID'=>array(8),'rty_ID'=>array());
+    }
     
     $rty_CodesToCheck = array(); //rty ids in origin db to be checked
     $rty_Names = array();   //code -> name
     
     $fields = array();      //per record type
+    $fields_req = array();  //requirement per record type
     $constraints = array(); //per detail
     $terms_codes = array(); //per detail
     
@@ -124,7 +160,7 @@
 
         
         $query = 'select rst_RecTypeID, dty_Type, rst_DisplayName, dty_OriginatingDBID, dty_IDInOriginatingDB, '
-        .'dty_ID, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree '
+        .'dty_ID, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree, rst_RequirementType '
         .'from defRecStructure, defDetailTypes  where dty_ID=rst_DetailTypeID AND rst_RecTypeID in ('
                 .implode(',',$rty_IDs_ToCheck).')';
     
@@ -144,6 +180,7 @@
               }*/
             
              $fields[$rty_Code][$dty_Code] = $row['rst_DisplayName'];
+             $fields_req[$rty_Code][$dty_Code] = $row['rst_RequirementType'];
              
              if($row['dty_Type']=='resource' && $row['dty_PtrTargetRectypeIDs'] && !@$constraints[$dty_Code]){
                  //convert constraints to concept codes
@@ -296,8 +333,21 @@
             //1. check fields 
             $missing = array();
             foreach($fields[$rty_Code] as $f_code=>$f_name){  //field code=>field name
+            
+                if ((!$test_optfields && $fields_req[$rty_Code][$f_code] == 'optional')||
+                   (!$test_recfields && $fields_req[$rty_Code][$f_code] == 'recommended')) {
+                    continue;                       
+                }
+            
                 if(array_search($f_code, $fields2)===false){ //not found
-                    array_push($missing, '<i>'.$f_code.'  '.$f_name.'</i>');
+                
+                    if($fields_req[$rty_Code][$f_code] == 'required'){
+                        $red_color = ' style="color:red">';
+                    }else{
+                        $red_color = '>';
+                    }
+                
+                    array_push($missing, '<i'.$red_color.$f_code.'  '.$f_name.'</i>');
                 }
             }
             if(count($missing)>0){
@@ -378,26 +428,32 @@
         }//for record types
 
         
-        $has_issues = ($smsg!='' || count($fileds_differ_terms)>0 || count($fileds_missed_terms)>0 || count($fileds_missed_rectypes)>0);
+        $has_issues = ($smsg!='' || count($fileds_differ_terms)>0 || count($fileds_missed_rectypes)>0 || 
+            (@$_REQUEST['termlists']==1 && count($fileds_missed_terms)>0));
+        
         
         //
         //
-        if(@$_REQUEST['verbose']==1){
+        if(@$_REQUEST['verbose']==1 && count($databases)==1){
            if($has_issues){
                print '<p>The differences indicated are not necessarily of concern, as we make incremental improvements to the core structures, but if there appear to be errors and you are concerned, please contact the Heurist development team with the name of your database and we will check it out</p>';
            }else{
                print '<p>No differences found</p>';
            }
         }
-        if(count($databases)>1){
+        
+        if(count($databases)>1 && ($has_issues || @$_REQUEST['showalldbs']==1)){
             print "<h4>db = $db_name</h4>";  
         }
+        
         if($has_issues){
-            if($smsg) print $smsg;
+            
+            if($smsg) print $smsg; //main error message
+            
             if(count($fileds_differ_terms)>0){
                 print implode('',$fileds_differ_terms);
             }
-            if(count($fileds_missed_terms)>0){
+            if(@$_REQUEST['termlists']==1 && count($fileds_missed_terms)>0){
                 print "<p style='padding-left:10px'>Missed terms (they are in defined list of enumeration fields but not found in terms table): "
                     .implode(', ',$fileds_missed_terms).'</p>';
             }
@@ -406,8 +462,16 @@
                     ."<p style='padding-left:40px'>"
                     .implode('<br>',$fileds_missed_rectypes).'</p>';
             }
+            if(count($databases)>1){
+                print '<hr/>';
+            }
         }
         
 
     }//while  databases
+    if(@$_REQUEST['verbose']!=1){
+?>
+</body></html>
+<?php
+    }
 ?>
