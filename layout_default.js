@@ -125,15 +125,15 @@ var cfg_layouts = [
 
                 apps:[
                     {appid:'h4_static', 
-                      name: '<span class="ui-icon ui-icon-gear" style="display:inline-block;margin-right:4px"></span>Manage',  dragable:false,
+                      name: 'Manage<span class="ui-icon ui-icon-gears" style="display:inline-block;font-size:18px;margin-left:14px;width:18px;height:18px;"></span>',  dragable:false,
                         options:{url: 'hclient/framecontent/tabmenus/manageMenu.php?db=[dbname]', isframe:true}}
                         //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0, 'min-width':'75em'}}             
                     ,{appid:'h4_static', 
-                    name: '<span class="ui-icon ui-icon-circle-plus" style="display:inline-block;margin-right:4px"></span>Add Data',  dragable:false,
+                    name: 'Add Data<span class="ui-icon ui-icon-add-to-db" style="display:inline-block;margin-left:14px"></span>',  dragable:false,
                         options:{url: 'hclient/framecontent/tabmenus/addDataMenu.php?db=[dbname]', isframe:true}}
                         //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0,'min-width':'75em'}}
                     ,{appid:'include_layout', 
-                        name: '<span class="ui-icon ui-icon-search" style="display:inline-block;margin-right:4px"></span>Filter-Analyse-Publish',
+                        name: 'Filter-Analyse-Publish<span class="ui-icon ui-icon-filter-black" style="display:inline-block;margin-left:7px;width:18px;height:18px;"></span>',
                         layout_id:'FAP',dragable:false,
                         options:{ref: 'SearchAnalyze'}
                         ,css:{position:'absolute', top:'5.5em',left:0,bottom:'0.1em',right:0,'font-size':'0.9em'}}

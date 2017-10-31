@@ -1350,6 +1350,22 @@ background: #8ea9b9
     margin-left: -0.3em;
 }
 
+.ui-icon-filter-black { 
+    background-image: url(hclient/assets/filter_icon_black18.png) !important; 
+    width: 18;
+    height: 18;
+    margin-top: -0.8em !important;
+    margin-left: -0.3em;
+}
+
+.ui-icon-add-to-db{ 
+    background-image: url(hclient/assets/add_to_db24.png) !important; 
+    width: 24;
+    height: 24;
+    margin-top: -0.8em !important;
+    margin-left: -0.3em;
+}
+
 .ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon.png) !important; }
 
 .ui-icon-aa { 
