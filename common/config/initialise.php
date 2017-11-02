@@ -507,10 +507,30 @@ $rtDefines = array(
     'RT_PIPELINE' => array(2, 17),
     'RT_TOOL' => array(2, 19),
 
-    // SW & SH bibliographic record types (deprecated)
-    'RT_JOURNAL_ARTICLE' => array(3, 1012),
-    'RT_BOOK' => array(3, 1002),
-    'RT_JOURNAL_VOLUME' => array(3, 1013),
+    // Cleaned up bibliographic record types
+    'RT_BOOK' => array(3, 102),
+    'RT_CONFERENCE' => array(3, 103),
+    'RT_PUB_SERIES' => array(3, 104),
+    'RT_BOOK_CHAPTER' => array(3, 108),
+    'RT_JOURNAL' => array(3, 111),
+    'RT_JOURNAL_ARTICLE' => array(3, 112),
+    'RT_JOURNAL_VOLUME' => array(3, 113),
+    'RT_MAP' => array(3, 115),
+    'RT_OTHER_DOC' => array(3, 117),
+    'RT_REPORT' => array(3, 119),
+    'RT_THESIS' => array(3, 120),
+    'RT_ARTWORK' => array(3, 122),
+    'RT_MAGAZINE_ARTICLE' => array(3, 123),
+    'RT_MAGAZINE' => array(3, 124),
+    'RT_MAGAZINE_VOLUME' => array(3, 125),
+    'RT_NEWSPAPER' => array(3, 126),
+    'RT_NEWSPAPER_ARTICLE' => array(3, 127),
+    'RT_NEWSPAPER_VOLUME' => array(3, 128),
+    'RT_PHOTOGRAPH' => array(3, 129),
+    'RT_ARCHIVAL_RECORD' => array(3, 1000),
+    'RT_ARCHIVAL_SERIES' => array(3, 1001),
+    
+    
     'RT_AUTHOR_EDITOR' => array(3, 23), //Deprecated
     'RT_FACTOID' => array(3, 22), // Deprecated
 
