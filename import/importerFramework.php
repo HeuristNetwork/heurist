@@ -2144,8 +2144,8 @@ function process_disambiguations() {
 
 function flush_fo_shizzle() {
     // flush output for SURE
-    ob_flush();
-    flush();
+    @ob_flush();
+    @flush();
 }
 
 
