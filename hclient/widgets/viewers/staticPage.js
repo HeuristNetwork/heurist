@@ -103,8 +103,9 @@ $.widget( "heurist.staticPage", {
             
             if(this.options.isframe){
                 if(!this.dosframe){
+                    var that = this;
                     this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.div_content );
-                    this.dosframe.on('load',function(){
+                    this.dosframe.on('load', function(){
                         that.loadanimation(false);
                     })
                 }

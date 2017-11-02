@@ -965,7 +965,7 @@
                         if($isValid && in_array($dtyID, $det_childpointers)){
                             $dval['dtl_ParentChild'] = true;
                         }
-
+                       
                         break;
 
 
@@ -1034,7 +1034,7 @@
 
                 if($isValid){
 
-                    if(@$det_required[$dtyID]){
+                    if(@$det_required[$dtyID]!=null){
                         unset($det_required[$dtyID]);
                     }
 
