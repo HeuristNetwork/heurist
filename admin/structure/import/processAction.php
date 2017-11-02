@@ -130,6 +130,43 @@ function import() {
 				$importRty["rty_IDInOriginatingDB"] = $importRtyID;
 				$importRty["rty_NameInOriginatingDB"] = $origRtyName;
 			}
+            
+            $warning = false;
+            
+            
+            if($sourceDBID!=2 &&   //core_definitions
+                (($importRty["rty_OriginatingDBID"]==3 
+                && in_array($importRty["rty_IDInOriginatingDB"],array(1014,1017,1018,1019,1020,1021))) ||  
+                ($importRty["rty_OriginatingDBID"]==2 && $importRty["rty_IDInOriginatingDB"]==11))
+             ){
+                    $warning = true;
+                    makeLogEntry("Record type", $importRtyID,               
+"The structure of spatial and temporal record types is critical to effective operation of mapping and timelines. To ensure consistency and the latest versions, please download this record type from the Heurist_Core_Definitions (#2) template database at the top of the list in Manage > Structure > Browse templates.");               
+                 
+             }else if($sourceDBID!=6 //bibliography
+                && $importRty["rty_OriginatingDBID"]==3
+                && (in_array($importRty["rty_IDInOriginatingDB"],array(102,103,104,108,111,112,113,115,117,1000,1001)) ||
+                    ($importRty["rty_IDInOriginatingDB"]>118 && $importRty["rty_IDInOriginatingDB"]<130))               
+             ){
+                    $warning = true;
+                    makeLogEntry("Record type", $importRtyID,               
+"The structure of bibliographic record types is critical to effective operation of Zotero synchronisation and bibliographic output formats. To ensure consistency and the latest versions, please download this record type from the Heurist_Bibliographic (#6) template database at the top of the list in Manage > Structure > Browse templates."); 
+                 
+             }
+             
+             if($warning){
+                $statusMsg = "Warning:<br/>";
+                foreach($importLog as $logLine) {
+                    $statusMsg .= $logLine[0].(intval($logLine[1])<0?"":" #".$logLine[1]." ").$logLine[2] . "<br/>";
+                }
+                echo $statusMsg;
+                return;
+             }
+        }            
+            
+        if(!$error && $importRty) {
+            
+            
 			//lookup rty in target DB
 			$resRtyExist = mysql_query("select rty_ID from ".$targetDBName.".defRecTypes ".
 							"where rty_OriginatingDBID = ".$importRty["rty_OriginatingDBID"].

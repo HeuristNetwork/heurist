@@ -894,6 +894,16 @@
                             // Handle the response, and give feedback
                             if(response.substring(0,6) == "prompt") {
                                 changeDuplicateEntryName(rtyID, rectypeName);
+                            } else if(response.substring(0,7) == "Warning"){
+                                response = response.substring(8);
+                                
+                                if(window.hWin.HEURIST4 && window.hWin.HEURIST4.msg){
+                                    //window.hWin
+                                    window.hWin.HEURIST4.msg.showMsgDlg(response, null, 'Importing record type');
+                                }else{
+                                    alert(response);
+                                }                                
+                                
                             } else if(response.substring(0,5) == "Error") {
 
                                 response = response.substring(6);
@@ -925,7 +935,7 @@
                                     //window.hWin
                                     window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 'Importing record type: '+logHeader2);
                                 }else{
-                                    alert(sMasg);
+                                    alert(sMsg);
                                 }
                                 
 
