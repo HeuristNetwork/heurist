@@ -155,7 +155,11 @@
                         
                         if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                             chdir(HEURIST_FILESTORE_DIR);
-                            $dir = realpath($dir);
+                            $resdir = realpath($dir);   //realpath returns false if folder does not exist
+                            if($resdir===false){
+                                $dir = HEURIST_FILESTORE_DIR.'/'.$dir;
+                                $dir = str_replace('//','/',$dir);     
+                            }
 
                             //realpath gives real path on remote file server
                             if(strpos($dir, '/srv/HEURIST_FILESTORE/')===0){
@@ -167,21 +171,37 @@
                             $dir = str_replace('\\','/',$dir);     
                             if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                                 // Folder must be in heurist filestore directory
+                                
+                                print 'Folder "'.$dir.'" is not in heurist filestore directory<br>';
+                                
                                 continue;
                             }
                         }
                         
                         if(file_exists($dir) && is_dir($dir) && !in_array($dir, $system_folders)){
-                             array_push($dirs2, $dir);
+                            array_push($dirs2, $dir);
+                        }else{
+                            if(in_array($dir, $system_folders)){
+                                print 'Folder "'.$dir.'" is system one and can not be used for file upload<br>';    
+                            }else{
+                                print 'Folder "'.$dir.'" does not exist<br>';
+                                if (!mkdir($dir, 0777, true)) {
+                                    print 'Unable to create or wtite into folder '.$dir;    
+                                }else{
+                                    print 'Created successfully<br>';    
+                                    array_push($dirs2, $dir);
+                                }
+                                
+                            }
+                            
                         }
                     }
                 }
                 $dirs = $dirs2;
 
-
                 // add the scratch directory, which will be the default for upload of material for import
-                array_push($dirs, HEURIST_FILESTORE_DIR.'scratch/');
-                array_push($dirs, HEURIST_FILES_DIR);
+                //array_push($dirs, HEURIST_FILESTORE_DIR.'scratch/');
+                //array_push($dirs, HEURIST_FILES_DIR);
 //error_log('3.'.print_r($dirs,true));                            
 
                 // The defined list of file extensions for FieldHelper indexing.
