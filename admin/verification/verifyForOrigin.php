@@ -44,7 +44,8 @@
     }
 
     if (!is_admin()) {
-        print "Sorry, you need to be a database owner to be able to modify the database structure";
+        if(!@$_REQUEST['verbose'])
+            print "Sorry, you need to be a database owner to be able to modify the database structure";
         return;
     }
     
