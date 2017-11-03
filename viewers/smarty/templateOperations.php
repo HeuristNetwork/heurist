@@ -107,6 +107,10 @@
 
     /**
     * Returns the list of available tempaltes as json array
+    * 
+    *  1. checks for gpl in template folder
+    *  2. convert them to tpl
+    *  3. return all tpl names
     */
     function getList(){
 
@@ -127,7 +131,38 @@
                 $ind = strpos($filename,"_");
                 $isnot_temp = (!(is_numeric($ind) && $ind==0));
 
-                if(file_exists($dir.$filename) && $ext=="tpl" && $isnot_temp)
+                if(file_exists($dir.$filename) && $ext=="gpl"){
+
+                    // gpl->tpl
+                    $template_body = file_get_contents($dir.$filename);
+                    $res = convertTemplate($template_body, 1); //to local codes
+                    
+                    if(is_array($res) && @$res['details_not_found']){
+                        //error
+                        error_log('Cant convert gpl template '.$dir.$filename
+                            .'. Local details not found '.print_r($res['details_not_found'],true)); 
+                        
+                    }else if(is_array($res) && @$res['template']) {
+                        $name = substr($filename, 0, -4);
+                        $filename_tpl = $name.'.tpl';
+                        $template_body = $res['template'];
+                        
+                        //save tpl
+                        $res = saveTemplate($template_body, $dir.$filename_tpl);
+
+                        if(@$res['ok']){
+                            //remove gpl 
+                            unlink($dir.$filename);
+                            array_push($results, array( 'filename'=>$filename_tpl, 'name'=>$name));
+                        }else{
+                            error_log('Cant save template '.$dir.$filename_tpl.' '.print_r($res,true)); 
+                        }
+                    }else{
+                        error_log('Unknow issue on gpl convertation '.$dir.$filename.'. '.print_r($res,true)); 
+                    }
+                       
+                    
+                }else if(file_exists($dir.$filename) && $ext=="tpl" && $isnot_temp)
                 {
                     //$path_parts['filename'] )); - does not work for nonlatin names
                     $name = substr($filename, 0, -4);
@@ -185,6 +220,9 @@
         return $template_file_fullpath;
     }
 
+    //
+    //
+    //
     function  saveTemplate($template_body, $template_file){
         global $dir;
 
@@ -363,7 +401,7 @@
             print $res; //"<hr><br><br><xmp>".$template."</xmp>";
         }
     }
-
+    
     /**
     * Returns the content of global concept IDs stream as text with local IDs
     *

@@ -159,6 +159,8 @@
                             if($resdir===false){
                                 $dir = HEURIST_FILESTORE_DIR.'/'.$dir;
                                 $dir = str_replace('//','/',$dir);     
+                            }else{
+                                $dir = $resdir;    
                             }
 
                             //realpath gives real path on remote file server
