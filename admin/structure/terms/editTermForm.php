@@ -141,7 +141,7 @@
                  if($need_close){
                       echo 'window.close(context_return_res);';
                  }else{
-                      echo 'document.getElementById("trmName").focus();';
+                      //echo 'document.getElementById("trmName").focus();';
                  }
                  ?>
             },500);
@@ -159,7 +159,7 @@
         
     </head>
 
-    <body class="popup">
+    <body class="popup" onload="{document.getElementById('trmName').focus();}">
         <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
         <div>
             <form name="main" action="editTermForm.php" method="post"
