@@ -796,32 +796,34 @@ $.widget( "heurist.resultList", {
                 this.div_content.load( this.options.emptyMessageURL );
             }else{
 
-                var empty_message = window.hWin.HR('<br><br><h2 style="color:teal">No records match the filter criteria</h2>')+
-                '<div class="prompt">'+window.hWin.HR((window.hWin.HAPI4.currentUser.ugr_ID>0)
-                    ?'<br><i>Note: some records may only be visible to members of particular workgroups</i>'+
-                    '<br>' // TODO: This text is inelegantly duplicated in hclient/core/localization.js
-                    +'<p><br><br><hr><br><br>'
-                    +'<h3>Creating and saving filters</h3>'
-                    +'<br>'
-                    +'Filters are used to find information in the database (search) and to create subsets '
-                    +'to which different actions can be applied - editing, listing, tagging, mapping, export etc. '
-                    +'If you are not using filters, '
-                    +'and in particular <a href="../../context_help/advanced_search.html" target="_blank"> '
-                    +'<b>Saved filters</b></a>, you are not getting the best out of Heurist.'
-                    +'<br><br>'
-                    +'<p>Use the filter field at the top of the page to define a filter / search. The filter setup icon '
-                    +'<img src="../assets/filter_icon_black_18.png"> helps build simple filters. '
-                    +'More complex filters can be built by following instructions linked from '
-                    +'<a href="../../context_help/advanced_search.html" target="_blank"><b>help</b></a> next to the Filter button. '
-                    +'<br><br>'    
-                    +'After running a filter, click the <b>Save Filter</b> button (which only appears after a filter has been run) '
-                    +'to save it in the tree in the navigation panel on the left.'
-                    +'<br><br>'
-                    +'<p>Simple to very complex filters, including Facet queries and Rules-based expansion of query results, '
-                    +'can be built by right-clicking in the tree in the navigation panel on the left '
-                    +'and selecting New, New Faceted or New Ruleset.'
-                    +'<br><br>'
-                    :'<i>To see workgoup-owned and non-public records you may need to log in</i>')+'</div>';
+                var empty_message = '<br><br><h2 style="color:teal">'
+                +window.hWin.HR('No records match the filter criteria')+
+                '</h2><div class="prompt">'+((window.hWin.HAPI4.currentUser.ugr_ID>0)
+                    ?'<br><i>Note: some records may only be visible to members of particular workgroups</i>'
+                        +'<br>' 
+                        +'<p><br><br><hr><br><br>'
+                        +'<h3>Creating and saving filters</h3>'
+                        +'<br>'
+                        +'Filters are used to find information in the database (search) and to create subsets '
+                        +'to which different actions can be applied - editing, listing, tagging, mapping, export etc. '
+                        +'If you are not using filters, '
+                        +'and in particular <a href="context_help/advanced_search.html" target="_blank"> '
+                        +'<b>Saved filters</b></a>, you are not getting the best out of Heurist.'
+                        +'<br><br>'
+                        +'<p>Use the filter field at the top of the page to define a filter / search. The filter setup icon '
+                        +'<img src="hclient/assets/filter_icon_black18.png"> helps build simple filters. '
+                        +'More complex filters can be built by following instructions linked from '
+                        +'<a href="context_help/advanced_search.html" target="_blank"><b>help</b></a> next to the Filter button. '
+                        +'<br><br>'    
+                        +'After running a filter, click the <b>Save Filter</b> button (which only appears after a filter has been run) '
+                        +'to save it in the tree in the navigation panel on the left.'
+                        +'<br><br>'
+                        +'<p>Simple to very complex filters, including Facet queries and Rules-based expansion of query results, '
+                        +'can be built by right-clicking in the tree in the navigation panel on the left '
+                        +'and selecting New, New Faceted or New Ruleset.'
+                        +'<br><br>'
+                    :'<i>To see workgoup-owned and non-public records you may need to log in</i>')
+                    +'</div>';
 
                 if(this.options['empty_remark']!=''){
                     empty_message = empty_message + this.options['empty_remark'];
