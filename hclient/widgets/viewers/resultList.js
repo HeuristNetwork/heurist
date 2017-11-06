@@ -796,10 +796,10 @@ $.widget( "heurist.resultList", {
                 this.div_content.load( this.options.emptyMessageURL );
             }else{
 
-                var empty_message = window.hWin.HR('No records match the search')+
+                var empty_message = window.hWin.HR('<br><br><h2>No records match the filter criteria</h2>')+
                 '<div class="prompt">'+window.hWin.HR((window.hWin.HAPI4.currentUser.ugr_ID>0)
-                    ?'Note: some records may only be visible to members of particular workgroups'
-                    :'To see workgoup-owned and non-public records you may need to log in')+'</div>';
+                    ?'<br><i>Note: some records may only be visible to members of particular workgroups</i>'
+                    :'<i>To see workgoup-owned and non-public records you may need to log in</i>')+'</div>';
 
                 if(this.options['empty_remark']!=''){
                     empty_message = empty_message + this.options['empty_remark'];
