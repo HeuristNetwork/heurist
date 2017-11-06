@@ -91,7 +91,7 @@ $.widget( "heurist.resultList", {
         if(this.options.pagesize<50 || this.options.pagesize>5000){
             this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
         }
-        
+
         this.element.addClass('ui-heurist-bg-light');
 
         this._initControls();
@@ -291,7 +291,7 @@ $.widget( "heurist.resultList", {
         .addClass('div-result-list-toolbar ent_header ui-heurist-bg-light')
         //.css({'border-bottom':'1px solid #cccccc'})
         .appendTo( this.element );
-        
+
         this.div_content = $( "<div>" )
         .addClass('div-result-list-content ent_content_full ui-heurist-bg-light')
         .css({'border-top':'1px solid #cccccc'})  //,'padding-top':'1em'
@@ -328,7 +328,7 @@ $.widget( "heurist.resultList", {
                     that._trigger( "onaction", null, key );
                 });
             }
-            
+
             this.action_buttons_div.css({'display':'inline-block', 'padding':'0 0 4px 1em'});
         }
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)){
@@ -521,8 +521,8 @@ $.widget( "heurist.resultList", {
 
         top = top + (this.options.show_toolbar?2.5:0);
         top = top + (this.options.show_savefilter?2.5:0);
-        
-        
+
+
         if(this.div_content_header && this.div_content_header.is(':visible')){
             top = top + 2;    
         }
@@ -563,11 +563,11 @@ $.widget( "heurist.resultList", {
     _showHideOnWidth: function(){      
 
         if(this.options.show_counter){
-            
+
             if(this.max_page>1) this.span_pagination.css({'display':'inline-block'});
             this.span_info.css({'display':'inline-block'});
             return; //NOT HIDE ANYMORE - we use wrap now
-            
+
             var w = this.element.width();
             /* pagination has more priority than reccount
             if ( w < 380 || (w < 440 && this.max_page>1) ) {
@@ -796,9 +796,31 @@ $.widget( "heurist.resultList", {
                 this.div_content.load( this.options.emptyMessageURL );
             }else{
 
-                var empty_message = window.hWin.HR('<br><br><h2>No records match the filter criteria</h2>')+
+                var empty_message = window.hWin.HR('<br><br><h2 style="color:teal">No records match the filter criteria</h2>')+
                 '<div class="prompt">'+window.hWin.HR((window.hWin.HAPI4.currentUser.ugr_ID>0)
-                    ?'<br><i>Note: some records may only be visible to members of particular workgroups</i>'
+                    ?'<br><i>Note: some records may only be visible to members of particular workgroups</i>'+
+                    '<br>' // TODO: This text is inelegantly duplicated in hclient/core/localization.js
+                    +'<p><br><br><hr><br><br>'
+                    +'<h3>Creating and saving filters</h3>'
+                    +'<br>'
+                    +'Filters are used to find information in the database (search) and to create subsets '
+                    +'to which different actions can be applied - editing, listing, tagging, mapping, export etc. '
+                    +'If you are not using filters, '
+                    +'and in particular <a href="../../context_help/advanced_search.html" target="_blank"> '
+                    +'<b>Saved filters</b></a>, you are not getting the best out of Heurist.'
+                    +'<br><br>'
+                    +'<p>Use the filter field at the top of the page to define a filter / search. The filter setup icon '
+                    +'<img src="../assets/filter_icon_black_18.png"> helps build simple filters. '
+                    +'More complex filters can be built by following instructions linked from '
+                    +'<a href="../../context_help/advanced_search.html" target="_blank"><b>help</b></a> next to the Filter button. '
+                    +'<br><br>'    
+                    +'After running a filter, click the <b>Save Filter</b> button (which only appears after a filter has been run) '
+                    +'to save it in the tree in the navigation panel on the left.'
+                    +'<br><br>'
+                    +'<p>Simple to very complex filters, including Facet queries and Rules-based expansion of query results, '
+                    +'can be built by right-clicking in the tree in the navigation panel on the left '
+                    +'and selecting New, New Faceted or New Ruleset.'
+                    +'<br><br>'
                     :'<i>To see workgoup-owned and non-public records you may need to log in</i>')+'</div>';
 
                 if(this.options['empty_remark']!=''){
@@ -848,41 +870,41 @@ $.widget( "heurist.resultList", {
 
         var recID = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
         if(recID>0){
-        
+
             if(this._startupInfo){
                 this.div_coverall.show();
             }else if(recID>0){
-                
-                 var details = [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
-                                window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
-                                window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']];
-                                
-                 var request = request = {q: 'ids:'+recID, w: 'all', detail:details };
-                 
-                 var that = this;
 
-                 window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( new_recordset )
-                 {
-                    if(new_recordset!=null){
-                        var record = new_recordset.getFirstRecord();
-                        
-                        var title = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
-                        var summary = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY']);
-                        var extended = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']);
-                        
-                        //compose
-                        that._startupInfo = '<div style="padding:1em"><h2>'+title+'</h2><div style="padding-top:10px">'
-                                            +(summary?summary:'')+'</div><div>'
-                                            +(extended?extended:'')+'</div></div>';
-                                            
-                        that.div_coverall.empty();
-                        $(that._startupInfo).appendTo(that.div_coverall);
-                        that.div_coverall.show();
-                    }
-                 });
-                
+                var details = [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']];
+
+                var request = request = {q: 'ids:'+recID, w: 'all', detail:details };
+
+                var that = this;
+
+                window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( new_recordset )
+                    {
+                        if(new_recordset!=null){
+                            var record = new_recordset.getFirstRecord();
+
+                            var title = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
+                            var summary = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY']);
+                            var extended = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']);
+
+                            //compose
+                            that._startupInfo = '<div style="padding:1em"><h2>'+title+'</h2><div style="padding-top:10px">'
+                            +(summary?summary:'')+'</div><div>'
+                            +(extended?extended:'')+'</div></div>';
+
+                            that.div_coverall.empty();
+                            $(that._startupInfo).appendTo(that.div_coverall);
+                            that.div_coverall.show();
+                        }
+                });
+
             }
-            
+
 
         }        
     },
@@ -1702,7 +1724,7 @@ $.widget( "heurist.resultList", {
 
                     event.preventDefault();
                     //window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID, "_new");
-                    
+
                     var query = null;
                     if(this._currentRecordset && this._currentRecordset.length()<1000){
                         query = 'ids:'+this._currentRecordset.getIds().join(',');
@@ -1712,8 +1734,8 @@ $.widget( "heurist.resultList", {
 
                     window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, null);
                     //@todo callback to change rectitle
-                    
-                    
+
+
                 }
             }
         });

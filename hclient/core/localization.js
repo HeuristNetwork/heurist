@@ -45,7 +45,7 @@ regional['en'] = {
 
 
     // Initial startup filter message
-    'No filter defined':'<br><br><h3>You do not have a startup filter</h3>'
+    'No filter defined':'<br><br><h3 style="color:teal">You do not have a startup filter</h3>'
     +'<br>'
     +'<i>This panel normally displays a filtered subset of the database which you can edit, analyse, '
     +'visualise and publish in the righthand panel or through popup forms, depending on context.'
@@ -61,22 +61,25 @@ regional['en'] = {
     +'<br><br>'
     +'<p>Use the filter field at the top of the page to define a filter / search. The filter setup icon '
     +'<img src="../assets/filter_icon_black_18.png"> helps build simple filters. '
-    +'More complex filters can be built by following instructions linked from help next to the Filter button. '
-    +'After running a filter, click the Save Filter button to save it in the tree '
-    +'in the navigation panel on the left.'
+    +'More complex filters can be built by following instructions linked from '
+    +'<a href="../../context_help/advanced_search.html" target="_blank"><b>help</b></a> next to the Filter button. '
+    +'<br><br>'    
+    +'After running a filter, click the <b>Save Filter</b> button (which only appears after a filter has been run) '
+    +'to save it in the tree in the navigation panel on the left.'
     +'<br><br>'
-    +'<p>Very complex filters, including Facet queries and Rules-based expansion of query results, '
-    +'can be built by right-clicking in the tree in the navigation panel on the left.'
+    +'<p>Simple to very complex filters, including Facet queries and Rules-based expansion of query results, '
+    +'can be built by right-clicking in the tree in the navigation panel on the left '
+    +'and selecting New, New Faceted or New Ruleset.'
     +'<br><br>'
     +'<h3>Defining a startup filter</h3>'
     +'<br>'
     +'<p>A startup filter can populate this panel automatically with the set of records to which you often '
-    +'need immediate access. For example, tags:Favourites (for records tagged as favourites), '
-    +'sortby:-m (for recently modified records) or a more complex query retrieving, for instance, '
+    +'need immediate access. For example, <i>tags:Favourites</i> (for records tagged as favourites), '
+    +'<i>sortby:-m</i> (for recently modified records) or a more complex query retrieving, for instance, '
     +'recent meeting notes in date order or records relating to current projects.'
     +'<br><br>'
-    +'<p>To set a startup filter: go to Profile > Preferences or add a parameter &q=xxxx '
-    +'to the end of the URL (where xxxx is a valid Heurist search string, which you can '
+    +'<p>To set a startup filter: go to <i>Profile > Preferences</i> (menu at top right) or add a parameter '
+    +'<i>&q=xxxx</i> to the end of the URL (where xxxx is a valid Heurist search string, which you can '
     +'determine by creating a filter and then copying from the filter field above).'
     +'<br><br>',
 
@@ -124,6 +127,9 @@ regional['en'] = {
     'thumbs3':'preview'
 
 };
+
+// TODO: messages above, particularly the default startup message, have been substnatially modified/improved 6/11/17, 
+//       so translated versions require update.
 
 regional['ru'] = {
     language: 'Русский',
