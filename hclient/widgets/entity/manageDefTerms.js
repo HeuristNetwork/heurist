@@ -23,6 +23,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _entityName:'defTerms',
     
     _treeview:null,
+    _thumbs:null,
     _currentDomain:null,
     _currentParentID:null,
     
@@ -34,6 +35,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.options.select_mode!='manager'){
             this.options.width = 390;                    
             this.options.edit_mode = 'none'
+        }
+        if(this.options.select_mode=='images'){
+            this.options.width = 700;                   
+            this.options.height = Math.min(1200, $(this.document).find('body').innerHeight()-10);                 
         }
     
         this._super();
@@ -57,31 +62,62 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             return false;
         }
 
-        // init search header
-        this.searchForm.searchDefTerms(this.options);
-        
-        var iheight = 2;
-        //if(this.searchForm.width()<200){  - width does not work here  
-        if(this.options.select_mode=='manager'){            
-            iheight = iheight + 2;
-        }
-        if(window.hWin.HEURIST4.util.isempty(this.options.filter_groups)){
-            iheight = iheight + 2;    
-        }
-        this.searchForm.css({'height':iheight+'em'});
-        this.recordList.css({'top':iheight+0.4+'em'});
-
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
         }
-
+        //add two elements - treeview and thumb viewer
+        this.treeview_Container = $('<div>')
+            .css({position:'absolute', top:0,bottom:0, left:0, width:300, 'overflow-y':'auto'})
+            .appendTo(this.recordList);
         
-        this._on( this.searchForm, {
-                "searchdeftermsonresult": this.updateRecordList
-                });
-        this._on( this.searchForm, {
-                "searchdeftermsonfilter": this.filterRecordList
-                });
+        this.thumb_Container = $('<div>')
+            .css({position:'absolute', top:0,bottom:0, left:300, right:0, 'overflow-y':'auto'})
+            .appendTo(this.recordList);
+        
+        if(this.options.select_mode=='images'){
+            
+            this.options.select_mode = 'select_single';
+            
+            this.searchForm.css({'height':0});
+            this.recordList.css({'top':0});
+            
+            this.thumb_Container.css('left',0);
+            this.treeview_Container.hide();
+            
+            this._initTreeView(null);
+            //search for given list of ids
+            
+            if(this.options.recordset){
+                this._filterTreeView(this.options.recordset);
+            }else if(this.options.initialTermsIds){
+                this.searchTermsWithImages(this.options.initialTermsIds);    
+            }
+            
+        
+        }else{
+            var iheight = 2;
+            //if(this.searchForm.width()<200){  - width does not work here  
+            if(this.options.select_mode=='manager'){            
+                iheight = iheight + 2;
+            }
+            if(window.hWin.HEURIST4.util.isempty(this.options.filter_groups)){
+                iheight = iheight + 2;    
+            }
+
+            
+            this.searchForm.css({'height':iheight+'em'});
+            this.recordList.css({'top':iheight+0.4+'em'});
+            // init search header
+            this.searchForm.searchDefTerms(this.options);
+            
+            this._on( this.searchForm, {
+                    "searchdeftermsonresult": this.updateRecordList          //called once
+                    });
+            this._on( this.searchForm, {
+                    "searchdeftermsonfilter": this.filterRecordList
+                    });
+                
+        }
                 
        //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
        //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
@@ -107,7 +143,41 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
     
     //
+    // non standard way - search and show only specific terms
     //
+    searchTermsWithImages: function(term_IDs){
+        
+        var request = {};
+        request['a']          = 'search'; //action
+        request['entity']     = 'DefTerms';//this.options.entity.entityName;
+        request['details']    = 'list'; //'id';
+        request['request_id'] = window.hWin.HEURIST4.util.random();
+        request['trm_ID'] = term_IDs;
+        request['withimages'] = 1;
+        
+        //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
+
+        var that = this;                                                
+        
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    var recset = new hRecordSet(response.data);
+                    if(recset.length()>0){                                                                      
+                        that._filterTreeView(recset);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgFlash('No terms images defined');
+                        that.closeDialog();
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+
+    },
+    
+    //
+    // listener of onresult event generated by searchEtity
     //
     updateRecordList: function( event, data ){
         
@@ -159,24 +229,51 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         
         var recID   = fld('trm_ID');
-        var recTitle = fld2('trm_ID','4em')+fld2('trm_Label');
+        var recTitle = fld('trm_Code')+' '+fld('trm_Label');
+        var recTitleHint = fld('trm_Description');
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
-        if(this.options.select_mode=='select_multi'){
-            html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle">';
-        }else{
-            html = html + '<div>';
+        
+        //var curtimestamp = (new Date()).getMilliseconds();
+        var thumb_url = top.HEURIST.iconBaseURL + recID + '&ent=term&editmode=0';//"&t=" + curtimestamp
+
+        var html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ thumb_url + '&quot;);opacity:1"></div>';
+
+
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        + html_thumb
+        + '<div class="recordSelector"><input type="checkbox" /></div>'
+        /*+ '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'
+        + '</div>'*/
+        + '<div class="recordTitle" title="'+recTitleHint+'">'
+        +     recTitle
+        + '</div>';
+        
+        // add edit/remove action buttons
+        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+/*            
+            html = html 
+                + '<div title="Click to edit term" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                + '</div>&nbsp;&nbsp;';
+           html = html      
+                + '<div title="Click to delete term" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                + '</div>';
+*/           
+           html = html + '<div class="rec_actions">' 
+            + this._defineActionButton({key:'add-child',
+                label:'Add a child term (a term hierarchichally below the current vocabulary or term)', title:'', icon:'ui-icon-plus'},
+                 null, 'icon_text')
+            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null, 'icon_text')
+            + this._defineActionButton({key:'remove',label:'Delete this term (if unused in database)', title:'', icon:'ui-icon-close'}, null, 'icon_text')
+            + this._defineActionButton({key:'add-import',label:'IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term', title:'', icon:'ui-icon-arrowthick-1-w'}, null, 'icon_text')
+            + this._defineActionButton({key:'export',label:'EXPORT this vocabulary to a text file', title:'', icon:'ui-icon-arrowthick-1-e'}, null, 'icon_text')
+            + '</div>';
         }
         
-        html = html + fld2('trm_Label') + '</div>';
-        
-        if(this.options.edit_mode=='popup'){
-            html = html
-            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
-            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
-        }
         return html+'</div>';
-        
         
     },
     
@@ -436,6 +533,23 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             focusOnSelect:true,
             source: treeData,
             quicksearch: true,
+            
+            expand: function(event, data){
+                //show thumbs for expanded node - otherwise for root
+                //data.node.children
+                if(data.node.children && data.node.children.length>0){
+                    var rec_ids = [];
+                    for (var idx in data.node.children){
+                        if(idx>=0){
+                            var node = data.node.children[idx];
+                            rec_ids.push(node.key);
+                        }
+                    }
+                    var subset = that._cachedRecordset.getSubSetByIds(rec_ids);
+                    that._thumbs.resultList('applyViewMode', 'thumbs3'); 
+                    that._thumbs.resultList('updateResultSet', subset);  
+                }
+            },
 
             activate: function(event, data) {
                 
@@ -493,7 +607,46 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             };     */
             fancytree_options['filter'] = { highlight:false, mode: "hide" };  
 
-            this._treeview = this.recordList.fancytree(fancytree_options);
+            this._treeview = this.treeview_Container.fancytree(fancytree_options); //was recordList
+
+            this._thumbs = this.thumb_Container.resultList(
+                      {
+                       eventbased: false, 
+                       isapplication: false, //do not listent global events @todo merge with eventbased
+                       multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
+
+                       select_mode: this.options.select_mode,
+                       pagesize:999,
+                       show_toolbar: false,
+                       /*
+                       selectbutton_label: this.options.selectbutton_label,
+                       
+                       //view_mode: this.options.view_mode?this.options.view_mode:null,
+                       empty_remark: 
+                            (this.options.select_mode!='manager')
+                            ?'<div style="padding:1em 0 1em 0">'+this.options.entity.empty_remark+'</div>'
+                            :'',
+                       searchfull: function(arr_ids, pageno, callback){
+                           that._recordListGetFullData(arr_ids, pageno, callback);
+                       },//this._recordListGetFullData,    //search function 
+                       */
+                       renderer: function(recordset, record){ 
+                                return that._recordListItemRenderer(recordset, record);  //custom render for particular entity type
+                            },
+                       rendererHeader: this.options.list_header ?function(){
+                                return that._recordListHeaderRenderer();  //custom header for list mode (table header)
+                                }:null
+                               
+                       });     
+                   
+            this._on( this._thumbs, {
+                    "resultlistonselect": function(event, selected_recs){
+                                this.selectedRecords(selected_recs);
+                            },
+                    "resultlistonaction": this._onActionListener        
+                    });
+                    
+            
         
     },
                  
@@ -505,6 +658,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             wtree.filterNodes(function(node){
                 return !window.hWin.HEURIST4.util.isnull(recordset.getById(node.key));
             }, true);
+        }
+        if(this._thumbs){
+            this._thumbs.resultList('applyViewMode', 'thumbs3');
+            this._thumbs.resultList('updateResultSet', recordset);               
         }
 
     }

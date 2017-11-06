@@ -450,18 +450,18 @@ $.widget( "heurist.manageEntity", {
         if(!action.icon) action.icon = '';
         action.title = (!action.title)?'':window.hWin.HR(action.title);
 
-        if(mode=='icon_text'){ //for resultList item
+        if(mode=='icon_text'){ //for resultList item - buttons will be inited after render complete
 
-            var res = '<div title="'+action.title
+            var res = '<div title="'+(action.title?action.title:action.label)
             +'" class="logged-in-only" role="button" aria-disabled="false" data-key="'+action.key+'">';
 
                     if(action.icon){
-                        res = res + '(<span class="ui-icon '+action.icon+'"></span>';    
+                        res = res + '<span class="ui-icon '+action.icon+'"></span>';    
                     }else{
                         res = res + window.hWin.HR(action.label);
                     }
             res = res + '</div>';
-        
+            
             return res;
         }else {
             if(!container) return;
@@ -1175,7 +1175,7 @@ $.widget( "heurist.manageEntity", {
                 this.editFormToolbar.empty();
                 var btns = this._getEditDialogButtons();
                 for(var idx in btns){
-                    this._defineActionButton2(btn_array[idx], this.editFormToolbar);
+                    this._defineActionButton2(btns[idx], this.editFormToolbar);
                 }
                 
             }

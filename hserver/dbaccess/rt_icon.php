@@ -59,7 +59,14 @@
     
     if(@$_REQUEST['ent']=='term'){    //FOR H3 UI
         $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$rectype_id;
-        if (@$_REQUEST['deletemode']=='1'){
+        if (@$_REQUEST['checkmode']=='1'){
+            header('Content-type: text/javascript');
+            if(file_exists($filename)){
+                print '{"res":"ok"}';
+            }else{
+                print '{"res":"notfound"}';
+            }
+        }else if (@$_REQUEST['deletemode']=='1'){
             header('Content-type: text/javascript');
             //header('Content-type: text/html');
             if (@$_REQUEST['deletemode']=='1'){

@@ -43,16 +43,17 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
+        <!--      
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrTags.js"></script>
         
-        <!--      
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefFileExtToMimetype.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefFileExtToMimetype.js"></script>
 
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
@@ -303,6 +304,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
 */                
                 }
                 
+                
+                if(entity=='DefTerms'){
+                    options.select_mode = 'images';
+                    //options.initialTermsIds = [414,415,5424,528,5426,5449];
+                    options.initialTermsIds = [5321,5317];
+                }
+                
+                
                 window.hWin.HEURIST4.ui.showEntityDialog(entity, options);
                 
             }
@@ -398,9 +407,9 @@ print $targetPath.'<br>';
                             <option value="DefRecTypeGroups">Record Type Groups</option>
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups</option>
-                            <option value="DefTerms">Terms</option>
+                            <option value="DefTerms" selected>Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
-                            <option value="RecThreadedComments" selected>Record Comments</option>
+                            <option value="RecThreadedComments">Record Comments</option>
                             <option value="Smarty">Smarty Reports</option>
                             <option value="SmartySchedule">Smarty Reports Schedule</option>
                         </select></label>

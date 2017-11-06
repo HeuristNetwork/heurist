@@ -395,7 +395,7 @@ $.widget( "heurist.resultList", {
                     var view_mode = this.element.find('#'+rbid).val();
                     //var view_mode = this.element.find("input[name='list_lo']:checked").val();
                     //console.log(this.element.parent().parent().attr('id')+'  '+rbid+' '+view_mode);
-                    this._applyViewMode(view_mode);
+                    this.applyViewMode(view_mode);
                     window.hWin.HAPI4.save_pref('rec_list_viewmode', view_mode);
                 }
         }});
@@ -480,7 +480,7 @@ $.widget( "heurist.resultList", {
 
         if(!this._init_completed) return;
 
-        this._applyViewMode(this.options.view_mode);
+        this.applyViewMode(this.options.view_mode);
 
         if(window.hWin.HAPI4.currentUser.ugr_ID>0){
             $(this.div_toolbar).find('.logged-in-only').css('visibility','visible');
@@ -653,7 +653,7 @@ $.widget( "heurist.resultList", {
     //
     // switcher listener - list;icons;thumbs
     //
-    _applyViewMode: function(newmode){
+    applyViewMode: function(newmode){
 
         var allowed = ['list','icons','thumbs','thumbs3'];
 

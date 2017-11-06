@@ -415,14 +415,16 @@ H2 {
 
 div.recordDiv:hover  .rec_edit_link, 
     div.recordDiv:hover  .rec_edit_link_ext, 
-    div.recordDiv:hover  .rec_view_link 
+    div.recordDiv:hover  .rec_view_link, 
+    div.recordDiv:hover  .rec_actions 
 {
     display: inline-block;
 }
 h3:hover > #rec_add_link, 
     div.recordDiv:hover > .rec_edit_link, 
     div.recordDiv:hover > .rec_edit_link_ext, 
-    div.recordDiv:hover > .rec_view_link 
+    div.recordDiv:hover > .rec_view_link,
+    div.recordDiv:hover > .rec_actions
 {
     display: block;
 }
@@ -438,9 +440,16 @@ h3 > #rec_add_link,
     height: 16px;
     width: 16px;
 }
+div.recordDiv  .rec_actions {
+    display: none;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+}
+
 div.recordDiv > .rec_edit_link, 
 div.recordDiv > .rec_edit_link_ext,
-div.recordDiv > .rec_view_link {
+div.recordDiv > .rec_view_link{
     position: absolute;
     top: 2px;
 }

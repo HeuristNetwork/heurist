@@ -465,6 +465,57 @@ $.widget( "heurist.editing_input", {
 
                 var isVocabulary = !isNaN(Number(allTerms)); 
 
+
+
+                var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
+                .addClass('smallicon ui-icon ui-icon-image')
+                .appendTo( $inputdiv );
+
+                this._on( $btn_termsel, { click: function(){
+                    
+                    var all_term_ids = $.map($input.find('option'), function(e) { return e.value; });
+                    
+                    var request = {};
+                    request['a']          = 'search'; //action
+                    request['entity']     = 'DefTerms';//this.options.entity.entityName;
+                    request['details']    = 'list'; //'id';
+                    request['request_id'] = window.hWin.HEURIST4.util.random();
+                    request['trm_ID'] = all_term_ids;
+                    request['withimages'] = 1;
+                    
+                    //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
+
+                    var that = this;                                                
+                    
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                        function(response){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                var recset = new hRecordSet(response.data);
+                                if(recset.length()>0){                                  
+                                
+                                    window.hWin.HEURIST4.ui.showEntityDialog('DefTerms', 
+                                        {select_mode:'images', recordset:recset, isdialog:true,
+                                        onselect:function(event, data){
+                                            if(data && data.selection && data.selection.length>0){
+                                                $input.val(data.selection[0]);
+                                            }
+                                        }
+                                        });
+                                                                    
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgFlash('No terms images defined');
+                                }
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                        });
+                    
+                    
+                    
+
+                }});
+
+
                 var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
                 .addClass('smallicon ui-icon ui-icon-gear')
                 .appendTo( $inputdiv );

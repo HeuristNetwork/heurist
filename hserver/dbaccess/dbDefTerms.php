@@ -64,6 +64,25 @@ class DbDefTerms extends DbEntityBase
     *  @todo overwrite
     */
     public function search(){
+
+
+        if(@$this->data['withimages']==1){
+             $ids = $this->data['trm_ID'];
+             $lib_dir = HEURIST_FILESTORE_DIR . 'term-images/';
+             $files = array();
+             foreach ($ids as $id){
+                $filename = $lib_dir.$id.'.png';
+                if(file_exists($filename)){
+                    array_push($files, $id);
+                }
+             }
+             if(count($files)==0){
+                $this->data['trm_ID'] = 999999999; 
+             }else{
+                $this->data['trm_ID'] = $files;    
+             }
+             
+        }
         
 //error_log(print_r($this->data,true));        
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
@@ -86,7 +105,8 @@ class DbDefTerms extends DbEntityBase
         }else{
             if(!$res) return false;        
         }        
-
+        
+        
         //compose WHERE 
         $where = array();    
         
