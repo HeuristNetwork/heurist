@@ -477,7 +477,7 @@ $.widget( "heurist.editing_input", {
                     
                     var request = {};
                     request['a']          = 'search'; //action
-                    request['entity']     = 'DefTerms';//this.options.entity.entityName;
+                    request['entity']     = 'defTerms';//this.options.entity.entityName;
                     request['details']    = 'list'; //'id';
                     request['request_id'] = window.hWin.HEURIST4.util.random();
                     request['trm_ID'] = all_term_ids;

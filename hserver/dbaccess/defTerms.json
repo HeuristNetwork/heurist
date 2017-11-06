@@ -9,7 +9,7 @@
         "searchFormContent": "searchDefTerms.html",
         
         "entityTitle": "Term",
-        "entityTitlePlural": "Vocabularies",
+        "entityTitlePlural": "Terms",
         "empty_remark": "Please use the search field above to locate relevant term (partial string match on title)",
 
         "sel_actions": [{"key":"edit", "title":"Edit Term"},
