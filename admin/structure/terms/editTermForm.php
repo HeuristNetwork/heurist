@@ -58,15 +58,15 @@
 
             $mysqli = mysqli_connection_overwrite(DATABASE); //artem's
             
-            $res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $parent_id."-1",
-                array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['treetype'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), $mysqli);
+            $res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), null, //$parent_id."-1",
+                array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['treetype'], ($parent_id>0?$parent_id:null) ,"open",$_REQUEST['code']), $mysqli);
 
             $mysqli->close();
 
             if(is_numeric($res)){
 
                 $local_message = "<script>top.HEURIST.terms = \n" . json_format(getTerms(),true) . ";\n</script>".
-                "<span style='color:green; padding-left:50px;'>Added ".(($parent_id==0)?"vocabulary":"term").": <b>".$term_name."</b></span>";
+                "<span style='color:green; padding-left:50px;'>Added ".(($parent_id>0)?'term':'vocabulary').": <b>".$term_name."</b></span>";
                 if($return_res==""){
                     $return_res = ($parent_id==0)?$res:"ok";
                 }

@@ -1325,7 +1325,7 @@
 
             //check label and code duplication for the same level
             if($ch_code || $ch_label){
-                if($ch_parent_id){
+                if($ch_parent_id>0){
                     $ch_parent_id = "trm_ParentTermID=".$ch_parent_id;
                 }else{
                     $ch_parent_id = "(trm_ParentTermID is null or trm_ParentTermID=0)";
@@ -1376,7 +1376,8 @@
 				if (is_string($rows) ) {      //ERROR
 					$oper = (($isInsert)?"inserting":"updating term ".$trmID);
 
-                    $ret = handleError("SQL error $oper in updateTerms: ".$rows.' params='.implode(',',$parameters), $query, $ext_db->error);
+                    $ret = handleError("SQL error $oper in updateTerms: ".$rows
+                                .' params='.implode(',',$parameters), $query, $ext_db->error);
                     $ret = $ret['error'];
 				} else {
 					if($isInsert){

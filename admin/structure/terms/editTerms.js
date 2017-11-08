@@ -309,7 +309,7 @@ function EditTerms() {
 
                 //    alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
                 $('#edId').val(node.data.id);
-                $('#edParentId').val(node.data.parent_id);
+                $('#edParentId').val(node.data.parent_id>0?node.data.parent_id:0);
                 var edName = $('#edName');
                 edName.val(node.data.label);
                 /*if(node.data.label==="new term"){
@@ -1472,7 +1472,7 @@ function EditTerms() {
             newNode.setActive(true); //expand
             _currentNode.setExpanded(true);
             _parentNode = newNode.getParent();
-            document.getElementById ('edParentId').value = _parentNode.data.id;
+            document.getElementById ('edParentId').value = _parentNode.data.id>0?_parentNode.data.id:0;
         }
     }
 
@@ -2445,7 +2445,7 @@ function EditTerms() {
                             if(node.data.id === "root") {
                                 document.getElementById ('edParentId').value = "";
                             }else{
-                                document.getElementById ('edParentId').value = node.data.id;
+                                document.getElementById ('edParentId').value = node.data.id>0?node.data.id:0;
 
                             }
 
@@ -2466,7 +2466,7 @@ function EditTerms() {
                             if(node.data.id === "root") {
                                 document.getElementById ('edParentId').value = "";
                             }else{
-                                document.getElementById ('edParentId').value = node.data.id;
+                                document.getElementById ('edParentId').value = node.data.id>0?node.data.id:0;
 
                             }
                             // alert($('#edParentId').val());
@@ -2530,7 +2530,7 @@ function EditTerms() {
                             
                             function __proceed(){
                                 //everything is OK
-                                document.getElementById('edParentId').value = parentNodeId;
+                                document.getElementById('edParentId').value = parentNodeId>0?parentNodeId:0;
                                 _doSave(false, true);
                                 // _updateTermsOnServer(_currentNode,false);
                                 __moveNode();
