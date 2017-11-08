@@ -103,6 +103,18 @@ if($sError){
         function hideRegistrationForm() {
             document.getElementById("registerDBForm").style.display = "none";
         }
+        
+        
+        function onKeyUpDbDescription( event ){
+            var len = event.target.value.length;
+            var btn = document.getElementById('btnSubmit');
+            var lbl = document.getElementById('cntChars');
+            btn.disabled = (len<40); 
+            btn.style.color = (len<40)?'lightgray':'black';
+
+            lbl.innerHTML = len+' characters';            
+            lbl.style.color = (len<40)?'red':'#6A7C99';
+        }
     </script>
 
     <!-- Database registration form -->
@@ -124,11 +136,11 @@ if($sError){
                         <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                         <div style="display:inline-block">
                             <textarea  type="memo" maxlength="1000" cols="80" rows="3" name="dbDescription"
-                                onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit').disabled = (len<40); document.getElementById('cntChars').innerHTML = len;}"></textarea>
+                                onkeyup="onKeyUpDbDescription( event )"></textarea>
                         </div>
                         <div  style="display:inline-block">
                             <label id="cntChars" style="text-align:left"></label><br/>
-                            <input id="btnSubmit" type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="hideRegistrationForm()" disabled="disabled" >
+                            <input id="btnSubmit" type="submit" name="submit" value="Register" style="font-weight: bold;color:lightgray" onClick="hideRegistrationForm()" disabled="disabled" >
                         </div>
                         <div>Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)</div>
                         <div  style="margin-top: 15px; margin-bottom: 20px;">
