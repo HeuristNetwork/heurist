@@ -47,7 +47,7 @@
                 {
                     "dtID": "ulf_HeuristURL",
                     "dtFields":{
-                        "dty_Type":"freetext",
+                        "dty_Type":"url",
                         "rst_DisplayName": "Download URL:",
                         "rst_DisplayHelpText": "Heusit URL to download file", 
                         "rst_Display":"hidden",
@@ -57,7 +57,7 @@
                 {
                     "dtID": "ulf_ExternalFileReference",
                     "dtFields":{
-                        "dty_Type":"freetext",
+                        "dty_Type":"url",
                         "rst_DisplayName": "External URL:",
                         "rst_DisplayHelpText": "URI of an external file, which may or may not be cached locally", 
                         "rst_Display":"visible",
@@ -88,7 +88,7 @@
                     "dtID": "ulf_FileSizeKB",
                     "dtFields":{
                         "dty_Type":"integer",
-                        "rst_DisplayName": "Size:",
+                        "rst_DisplayName": "Size(in KB):",
                         "rst_DisplayHelpText": "File size in Kbytes calculated at upload", 
                         "rst_Display":"readonly"
                     }

@@ -119,22 +119,31 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
         var i_filename = this.getEntityFieldIdx('ulf_OrigFileName');
         var i_filesize = this.getEntityFieldIdx('ulf_FileSizeKB');
+
+        var i_mime_loc = this.getEntityFieldIdx('fxm_MimeType'); // for local
+        var i_mime_ext = this.getEntityFieldIdx('ulf_MimeExt');   // for external
+
         
         if(isLocal){ //local
             this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL
                                                     + '?db=' + window.hWin.HAPI4.database 
                                                     + '&file='+this._getField('ulf_ObfuscatedFileID');
             this.options.entity.fields[i_url].dtFields['rst_Display'] = 'readonly';
-            this.options.entity.fields[i_url_ext].dtFields['rst_Display'] = 'hidden'; 
+            this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'hidden'; 
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'readonly';
             this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'readonly';
             
+            this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'readonly';
+            this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden';
             
         }else{ //remote
             this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
-            this.options.entity.fields[i_url_ext].dtFields['rst_Display'] = 'visible';
+            this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'visible';
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
+
+            this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden';
+            this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'visible';
         }
         
         this._super(recordset);

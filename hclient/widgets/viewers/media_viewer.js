@@ -107,8 +107,10 @@ $.widget( "heurist.media_viewer", {
                                 +'</audio>').appendTo( this.mediacontent );
                         
                     }else{
-                        var $alink = $("<a>",{href: fileURL, target:"yoxview" })
-                            .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
+                        
+                        var $alink = $("<a>",{href: fileURL, target:"yoxview", 'data-fancybox':'fb-images' })
+                            .appendTo($("<div>").css({height:'auto','display':'inline-block','data-caption':title})
+                            .appendTo(this.mediacontent));
                         $("<img>", {height:200, src: thumbURL, title:title}).appendTo($alink);
                     }
                 }
@@ -121,7 +123,9 @@ $.widget( "heurist.media_viewer", {
             }else{
 
             }  */
-            if(yoxview && $.isFunction(yoxview)){
+            if($.fancybox && $.isFunction($.fancybox)){
+                    $.fancybox({selector : 'a[data-fancybox="fb-images"]', loop:true});
+            }else if(!window.hWin.HEURIST4.util.isnull(yoxview) && $.isFunction(yoxview)){
                 $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
             }
             // /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
