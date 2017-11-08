@@ -94,7 +94,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(hasSearchForm){
             this.searchForm.height('9.5em').css('border','none');    
         }
-        
+
         var that = this;
         
         jQuery(document).keydown(function(event) {

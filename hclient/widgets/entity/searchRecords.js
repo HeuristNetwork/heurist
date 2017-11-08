@@ -69,6 +69,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         if(this.selectRectype.val()>0){
             this.selectRectype.change();
         }
+        
+        
+        //if(this.searchForm && this.searchForm.length>0)
+        //this.searchForm.find('#input_search').focus();
+        this.input_search.focus();
+
     },  
 
     //

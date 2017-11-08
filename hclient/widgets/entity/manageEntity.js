@@ -1105,9 +1105,10 @@ $.widget( "heurist.manageEntity", {
             
             if(this._currentEditID!=null && this._editing.isModified()){
                 window.hWin.HEURIST4.msg.showMsgDlg(
-                    'Data were modified in edit form. Ignore modifications and start edit the new data',
+                    'Save changes and move to [next | previous] record?',
+                    //'Data were modified in edit form. Ignore modifications and start edit the new data',
                         function(){ that._initEditForm_step2(recID); },
-                    'Confirm');
+                        {title:'Confirm',yes:'Cancel',no:'Save changes'});
             }else{
                 this._initEditForm_step2(recID);            
             }

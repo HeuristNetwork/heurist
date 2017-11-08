@@ -121,7 +121,7 @@ $.widget( "heurist.editing_input", {
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
-            .css('vertical-align', (this.detailType=="blocktext" || this.detailType=='file')?'top':'')
+            .css('vertical-align', (this.detailType=="blocktext")?'top':'')  //|| this.detailType=='file'
             .html('<label>' + lblTitle + '</label>')
             .appendTo( this.element );
         }
@@ -334,7 +334,8 @@ $.widget( "heurist.editing_input", {
             else if(fieldname=='rst_MaxValues') val = 1
                 else if(fieldname=='dty_Type') val = 'freetext'
                     else if(fieldname=='rst_DisplayWidth'
-                        && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
+                        && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='url' || 
+                            this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
                             val = '55';  //default width for input fields
                         }
         }
@@ -373,6 +374,7 @@ $.widget( "heurist.editing_input", {
                     }
                     //remove from array
                     that.inputs.splice(idx,1);
+                    that._onChange();                    
                     return;
                 }
 
@@ -588,7 +590,7 @@ $.widget( "heurist.editing_input", {
                 $input.prop('checked','checked');
             }
 
-        }else if(this.detailType=="rectype"){
+        }else if(this.detailType=='rectype'){
 
             $input = $( "<select>" )
             .uniqueId()
@@ -621,7 +623,7 @@ $.widget( "heurist.editing_input", {
             }
 
         }
-        else if(this.detailType=="relmarker"){ 
+        else if(this.detailType=='relmarker'){ 
             
                 this.options.showclear_button = false;
                 $inputdiv.css({'display':'inline-block','vertical-align':'middle'});
@@ -746,7 +748,7 @@ $.widget( "heurist.editing_input", {
                 
 
         }
-        else if(this.detailType=="resource" && this.configMode.entity=='records'){
+        else if(this.detailType=='resource' && this.configMode.entity=='records'){
 
             if(value=='' && this.element.find('.sel_link2').is(':visible')){
                 window.hWin.HEURIST4.msg.showMsgFlash('Please select record before adding another pointer');                              return;
@@ -805,6 +807,13 @@ $.widget( "heurist.editing_input", {
                                         //ele.appendTo($inputdiv);
                                         that._onChange();
                                         
+                                        var triangle_icon = ele.find('.ui-icon-triangle-1-e');
+                                        if(triangle_icon.length>0){
+                                           triangle_icon.css('cursor','hand');
+                                           that._on(triangle_icon, { click: __show_select_dialog } );
+                                        }
+                                        
+                /* 2017-11-08 no more button - use icon at the beginning of input 
                                         if($inputdiv.find('.sel_link').length==0){
                                             var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
                                                 .addClass('smallicon sel_link ui-icon ui-icon-pencil')
@@ -814,7 +823,7 @@ $.widget( "heurist.editing_input", {
                                         }else{
                                             $inputdiv.find('.sel_link').css({display:'inline-block'});
                                         }
-                                        
+                */                        
                                         if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
                                             $inputdiv.find('.sel_link2').hide(); //was that.element
                                         }
@@ -853,7 +862,7 @@ $.widget( "heurist.editing_input", {
                                 
                                 var sdiv = '<div class="child_info_dlg">'
                                     +'<div style="padding:0.5em 1em"><p style="padding:15px 0">'
-                                        +'The field normally creates a parent-child (whole part of containership) connection'
+                                        +'This field normally creates a parent-child (whole part of containership) connection'
                                         +' where the new record is wholly owned by the parent</p>'
                                         +'<p style="padding:15px 0"><label>Record type: </label><select id="sel_rectypes"></select></p>'
                                     + '</div>'
@@ -977,14 +986,16 @@ $.widget( "heurist.editing_input", {
                     window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);
             }
 
-            that._findAndAssignTitle($input, value);
+            that._findAndAssignTitle($input, value, __show_select_dialog);
             
             if(value>0){
+                /* 2017-11-08 no more button - use icon at the beginning of input 
                         var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
                             .addClass('smallicon sel_link ui-icon ui-icon-pencil')
                                     .insertAfter( $input );
                             //.button({icons:{primary: 'ui-icon-pencil'},text:false}); //wasui-icon-link
                         this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+               */         
             }
             
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
@@ -1020,7 +1031,7 @@ $.widget( "heurist.editing_input", {
             })
             .appendTo( $inputdiv );
             
-            if(!(this.options.dtID=='file' || this.detailType=="resource" || this.detailType=="date" || this.detailType=="geo")){
+            if(!(this.options.dtID=='file' || this.detailType=='resource' || this.detailType=='date' || this.detailType=='geo')){
                 $input.keydown(function(e){
                     if (e.keyCode == 65 && e.ctrlKey) {
                                         e.target.select()
@@ -1028,7 +1039,7 @@ $.widget( "heurist.editing_input", {
                 });
             }
             
-            if(this.options.dtID=='rec_URL'){
+            if(this.options.dtID=='rec_URL' || this.detailType=='url'){
                 
                     var $btn_extlink = null, $btn_editlink = null;
                 
@@ -1256,7 +1267,7 @@ $.widget( "heurist.editing_input", {
                 $input.change();   
 
             }else 
-            if(this.detailType=="resource" || this.isFileForRecord)
+            if(this.detailType=='resource' || this.isFileForRecord)
             {
                         var $input_img;
                         var select_return_mode = 'ids';
@@ -1265,9 +1276,14 @@ $.widget( "heurist.editing_input", {
                             icon_for_button = 'ui-icon-folder-open';
                             select_return_mode = 'recordset';
                             
+                            $input.css({'padding-left':'30px'});
+                            $('<span class="ui-icon ui-icon-folder-open"></span>')
+                                .css({position: 'absolute', margin: '5px 0px 0px 6px'}).insertBefore( $input ); 
+                            
                             //container for image
                             $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
-                            + '<img class="image_input"></div>').css({'position':'absolute','display':'none','z-index':9999})
+                            + '<img class="image_input"></div>')
+                            .css({'position':'absolute','display':'none','z-index':9999})
                             .appendTo( $inputdiv ); 
                             
                             $input.change(function(){
@@ -1296,11 +1312,16 @@ $.widget( "heurist.editing_input", {
                                 }});
                                 
                         }else{
-                            icon_for_button = 'ui-icon-link';
+                            icon_for_button = 'ui-icon-pencil'; //was -link
                             if(this.configMode.select_return_mode &&
                                this.configMode.select_return_mode!='ids'){
                                  select_return_mode = 'recordset'
                             }
+                            
+                            $('<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block;vertical-align: middle"></span>')
+                            .insertBefore( $input );
+                            
+                            $input.css({'margin-left': '-16px', 'padding-left': '16px'});
                         }
 
                         $input.css({'min-wdith':'20ex'});
@@ -1308,9 +1329,11 @@ $.widget( "heurist.editing_input", {
                         var ptrset = that.f('rst_PtrFilteredIDs');
 
                         var __show_select_dialog = null;
+                        /* 2017-11-08 no more buttons
                         var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
                         .addClass('smallicon ui-icon '+icon_for_button)
                         .appendTo( $inputdiv );
+                        */
                         //.button({icons:{primary: icon_for_button},text:false});
 
 
@@ -1416,7 +1439,7 @@ $.widget( "heurist.editing_input", {
                         }
                         
                         if(__show_select_dialog!=null){
-                            this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+                            //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
                         }
                         
@@ -1433,17 +1456,23 @@ $.widget( "heurist.editing_input", {
                         //url for thumb
                         var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumbnail');
                         
+                        $input.css({'padding-left':'30px'});
+                        $('<span class="ui-icon ui-icon-folder-open"></span>')
+                                .css({position: 'absolute', margin: '5px 0px 0px 6px'}).insertBefore( $input ); 
+                        
                         //container for image
                         var $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
                             + '<img src="'+urlThumb+'" class="image_input"></div>').appendTo( $inputdiv );                
                             
+                            
+                /* 2017-11-08 no more buttons
                         //browse button    
                         var $btn_fileselect_dialog = $( "<span>", {title: "Click to select file for upload"})
                         .addClass('smallicon fileupload ui-icon ui-icon-folder-open')
                         .css('vertical-align','top')
                         .appendTo( $inputdiv );
                         //.button({icons:{primary: "ui-icon-folder-open"},text:false});
-                        
+                */                        
                         //set input as file and hide
                         $input.prop('type','file').hide();
                         
@@ -1502,20 +1531,21 @@ $.widget( "heurist.editing_input", {
                         });
                 
                         //init click handlers
-                        this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
+                        //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
                         $input_img.on({click: function(){ //find('a')
                                 $input.click();}
                         }); 
             }
             else //------------------------------------------------------------------------------------
-            if(this.detailType=="geo"){
+            if(this.detailType=='geo'){
                 
                 $input.css({'width':'20ex','padding-left':'30px'});
-                //browse button    
+                   
                 $('<span>').addClass('ui-icon ui-icon-globe')
                     .css({position:'absolute',margin:'5px 0 0 6px'})
                     .insertBefore($input);
                 
+                /* 2017-11-08 no more buttons
                 var $btn_digitizer_dialog = $( "<span>", {title: "Click to draw map location"})
                         .addClass('smallicon ui-icon ui-icon-pencil')
                         .appendTo( $inputdiv );
@@ -1524,7 +1554,7 @@ $.widget( "heurist.editing_input", {
                         .text( window.hWin.HR('Edit'))
                         .css('cursor','pointer')
                         .appendTo( $inputdiv );
-            
+                */
                 var geovalue = window.hWin.HEURIST4.util.wktValueToDescription(value);
             
                 that.newvalues[$input.attr('id')] = value;
@@ -1554,8 +1584,8 @@ $.widget( "heurist.editing_input", {
                     } );
                 };
 
-                this._on( $link_digitizer_dialog, { click: __show_mapdigit_dialog } );
-                this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
+                //this._on( $link_digitizer_dialog, { click: __show_mapdigit_dialog } );
+                //this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
                 this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
             }
             /*else if(this.detailType=="freetext" && this.options['input_width']){
@@ -1590,7 +1620,7 @@ $.widget( "heurist.editing_input", {
                 'data-input-id': $input.attr('id')
             })
             .addClass("smallbutton")//btn_input_clear
-            .css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'middle'})
+            .css({'vertical-align': (this.detailType=='blocktext')?'top':'middle'}) // || this.detailType=='file'
 /* @todo - need to prevent wrap of clear button for long fields
 'margin-left': (this.detailType=='relmarker' || this.detailType=='geo' || 
                 this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum'  || this.detailType=='date')
@@ -1692,7 +1722,7 @@ $.widget( "heurist.editing_input", {
     //
     //
     //
-    _findAndAssignTitle: function(ele, value){
+    _findAndAssignTitle: function(ele, value, selector_function){
         
         if(!value){
             window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
@@ -1751,6 +1781,14 @@ $.widget( "heurist.editing_input", {
                                              rec_Title: rec_Title, 
                                              rec_RecTypeID: rec_RecType}, true);
 
+                                    if($.isFunction(selector_function)){
+                                        var triangle_icon = ele.find('.ui-icon-triangle-1-e');
+                                        if(triangle_icon.length>0){
+                                           triangle_icon.css({'cursor':'hand'});
+                                           that._on(triangle_icon, { click: selector_function } );
+                                        }
+                                    }
+                                             
                                     //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
                                 }
                             }
@@ -2025,13 +2063,13 @@ $.widget( "heurist.editing_input", {
                 //add error message
                 errorMessage = 'Field is requried. Please specify value';
 
-            }else if((data_type=='freetext' || data_type=='blocktext') && ress[0].length<4){
+            }else if((data_type=='freetext' || data_type=='url' || data_type=='blocktext') && ress[0].length<4){
                 //errorMessage = 'Field is requried. Please specify value';
             }
         }
         //verify max alowed size
         if(max_length>0 &&
-            (data_type=='freetext' || data_type=='blocktext')){
+            (data_type=='freetext' || data_type=='url' || data_type=='blocktext')){
 
             var idx;
             for (idx in this.inputs) {
@@ -2121,6 +2159,15 @@ $.widget( "heurist.editing_input", {
             disp_value = "@todo geo "+value;
 
 
+        } else if(this.detailType=="url"){
+
+            
+            if(!(value.indexOf('http://')==0 || value.indexOf('https://')==0)){
+                value = 'http://'+value;
+            }
+            disp_value = '<a href="'+value+'" target="_blank">'+value+'</a>';
+            
+            
         }else{
             disp_value = value;
         }
@@ -2130,7 +2177,18 @@ $.widget( "heurist.editing_input", {
         }
 
         $inputdiv.html(disp_value);
+
+        /*
+        if(this.detailType=="url"){
+
+            $btn_extlink = $( '<span>', {title: 'Open URL in new window'})
+                .addClass('smallicon ui-icon ui-icon-extlink')
+                .appendTo( $inputdiv.find('div') );
         
+            this._on( $btn_extlink, { click: function(){ window.open(value, '_blank') }} );
+        
+        }
+        */   
     }
 
 
