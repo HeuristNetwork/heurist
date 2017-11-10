@@ -139,11 +139,14 @@ class DbDefFileExtToMimetype extends DbEntityBase
             
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
-                .' FROM defFileExtToMimetype ORDER BY fxm_Extension';
+                .' FROM defFileExtToMimetype';
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
+         
+         $query = $query.' ORDER BY fxm_Extension ';
+         
          $query = $query.$this->searchMgr->getOffset()
                         .$this->searchMgr->getLimit();
         

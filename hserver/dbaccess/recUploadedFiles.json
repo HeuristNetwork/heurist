@@ -49,6 +49,7 @@
                     "dtFields":{
                         "dty_Type":"url",
                         "rst_DisplayName": "Download URL:",
+                        "rst_DisplayWidth":70,
                         "rst_DisplayHelpText": "Heusit URL to download file", 
                         "rst_Display":"hidden",
                         "dty_Role":"virtual"
@@ -88,7 +89,7 @@
                     "dtID": "ulf_FileSizeKB",
                     "dtFields":{
                         "dty_Type":"integer",
-                        "rst_DisplayName": "Size(in KB):",
+                        "rst_DisplayName": "Size (in KB):",
                         "rst_DisplayHelpText": "File size in Kbytes calculated at upload", 
                         "rst_Display":"readonly"
                     }

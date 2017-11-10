@@ -35,13 +35,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.use_cache = false;
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 540;
+        this.options.edit_height = 640;
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
             this.options.width = (isNaN(this.options.width) || this.options.width<815)?900:this.options.width;                    
             //this.options.edit_mode = 'none'
         }
+        this.options.height = (isNaN(this.options.height) || this.options.height<815)?900:this.options.height;                    
     
         this._super();
     },
@@ -65,7 +66,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         // init search header
         this.searchForm.searchRecUploadedFiles(this.options);
-        var iheight = 6;
+        var iheight = 8;
         
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 8;

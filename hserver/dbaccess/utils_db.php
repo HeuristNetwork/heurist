@@ -710,7 +710,20 @@ error_log(print_r($params, true));
         
         return $ids;
     }
+
+    function prepareStrIds($ids){
     
+        if(!is_array($ids)){
+            $ids = explode(',', $ids);
+        }
+        
+        $ids = array_map(function ($v) {
+             return '"'.$v.'"';
+        }, $ids);
+        
+        return $ids;
+        
+    }
     //
     //
     //

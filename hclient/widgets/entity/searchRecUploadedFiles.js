@@ -91,7 +91,9 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         }
         
                       
-        this.startSearch();            
+        this.startSearch();   
+        
+        this.input_search.focus();         
     },  
 
     clearInputs: function(){

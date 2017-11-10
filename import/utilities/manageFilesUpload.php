@@ -240,8 +240,12 @@
             <div><label for="upload_folder" style="color:black;">Select target folder:</label>
                 <select name="folder" id="upload_folder">
                     <?php
+                        $is_dir_found = false;
                         foreach($dirs as $upload_dir) {
-                            print '<option value="'.$upload_dir.'">'.$upload_dir.'</option>';
+                            if(file_exists($upload_dir)){
+                                print '<option value="'.$upload_dir.'">'.$upload_dir.'</option>';
+                                $is_dir_found = true;
+                            }
                         }
                     ?>
                 </select>
@@ -249,7 +253,7 @@
             </div>
 
             <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-            <div class="fileupload-buttonbar">
+            <div class="fileupload-buttonbar" style="display:<?php print $is_dir_found?'block':'none';?>">
                 <div class="fileupload-buttons">
                     <!-- The fileinput-button span is used to style the file input field as button -->
                     <span class="fileinput-button">
@@ -280,10 +284,14 @@
 
 
             <!-- The table listing the files available for upload/download -->
-            <table role="presentation">
+            <table role="presentation" style="display:<?php print $is_dir_found?'block':'none';?>">
             <tbody class="files"></tbody>
             </table>
 
+            
+            <div id="msgWarnDir" style="color:red;display:<?php print $is_dir_found?'none':'block';?>">
+                You must set folders before uploading files
+            </div>
         </form>
 
 
@@ -432,6 +440,20 @@
                     $(this).fileupload('option', 'done')
                     .call(this, $.Event('done'), {result: result});
                 });
+                
+                
+                /*
+                $('#upload_folder').change(function(){
+                    if($('#upload_folder').val()==''){
+                        $('.fileupload-buttonbar').hide();
+                        $('#presentation').hide();
+                    }else{
+                        $('.fileupload-buttonbar').show();
+                        $('#presentation').show();
+                    }    
+                });
+                */
+                
             });
         </script>
 
