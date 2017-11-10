@@ -375,18 +375,17 @@ $.widget( "heurist.resultList", {
         //.css({'position':'absolute','right':right_padding+'px'})
         .css({'float':'right','padding-right':right_padding+'px'})
         //.css({'display':'inline-block','text-align':'right','padding-right':right_padding+'px'})
-        .html('<input id="cb1_'+rnd+'" type="radio" name="list_lo" value="list"/>'
+        .html('<input id="cb1_'+rnd+'" type="radio" name="list_lo" value="list" class="btnset_radio"/>'
             +'<label for="cb1_'+rnd+'">'+window.hWin.HR('list')+'</label>'
-            +'<input  id="cb2_'+rnd+'" type="radio" name="list_lo" value="icons"/>'
+            +'<input  id="cb2_'+rnd+'" type="radio" name="list_lo" value="icons" class="btnset_radio"/>'
             +'<label for="cb2_'+rnd+'">'+window.hWin.HR('icons')+'</label>'
-            +'<input  id="cb3_'+rnd+'" type="radio" name="list_lo" value="thumbs"/>'
+            +'<input  id="cb3_'+rnd+'" type="radio" name="list_lo" value="thumbs" class="btnset_radio"/>'
             +'<label for="cb3_'+rnd+'">'+window.hWin.HR('thumbs')+'</label>'
-            +'<input  id="cb4_'+rnd+'" type="radio" name="list_lo" value="thumbs3"/>'
+            +'<input  id="cb4_'+rnd+'" type="radio" name="list_lo" value="thumbs3" class="btnset_radio"/>'
             +'<label for="cb4_'+rnd+'">'+window.hWin.HR('thumbs3')+'</label>'
         )
         .buttonset()
         .appendTo( this.div_toolbar );
-
 
         this._on( this.view_mode_selector, {
             click: function(event) { //it works twice - first for button, then for buttonset

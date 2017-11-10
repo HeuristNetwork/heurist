@@ -208,7 +208,8 @@ fieldset > div, .input-row{
 fieldset input:focus,
 fieldset select:focus,
 fieldset textarea:focus,
-fieldset button:focus {
+fieldset button:focus,
+btnset_radio:focus {
     outline: none;
     outline-style:none;
     box-shadow:none;

@@ -1404,13 +1404,19 @@ window.hWin.HEURIST4.ui = {
     //
     // info {rec_ID,rec_Title,rec_RecTypeID,relation_recID,trm_ID}
     //
-    createRecordLinkInfo:function(container, info, isEdit){
+    // selector_function opens select dialog. it it is true it opens record edit popup dialog
+    createRecordLinkInfo:function(container, info, selector_function){
         
         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         var sRelBtn = '';
         
+        var isEdit = (selector_function!==false);
+        
+        
         if(info['trm_ID']>0){
             sRelBtn = '<div style="float:right"><div class="btn-rel"/><div class="btn-del"/></div>';
+        }else{
+            sRelBtn = '<div style="float:right"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
@@ -1421,18 +1427,32 @@ window.hWin.HEURIST4.ui = {
                            :'')  
                         + '<div class="detail" '  // truncate
                         + 'style="display:inline-block;min-width:35ex;padding:2px;max-width:160ex;">'
-                        + (isEdit?'<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block;vertical-align: middle"/>&nbsp;&nbsp;&nbsp;':'')
+                        + (isEdit?'<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block;vertical-align: middle;margin-left:6px"/>&nbsp;&nbsp;&nbsp;':'')
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
-                        + '\');"/><a target=_new href="#" data-recID="'+info['rec_ID']
-                        //+'" title="' + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])
-                        +'">'
-                        + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a></div>'
-                        + sRelBtn + '</div>')
+                        + '\');"/>'
+                        //2017-11-08 no more link here
+                        //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
+                        //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
+                        + '<span data-recID="'+info['rec_ID'] +'">'
+                        + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</span>'
+                        + sRelBtn
+                        + '</div>'
+                        + '</div>')
         .appendTo($(container));
         
         
         if(isEdit){
+            
+            if($.isFunction(selector_function)){
+                var triangle_icon = ele.find('.ui-icon-triangle-1-e');
+                if(triangle_icon.length>0){
+                   ele.find('.detail').css({'cursor':'hand'});
+                   triangle_icon.click(selector_function);
+                }
+                ele.find('span[data-recID='+info['rec_ID']+']').click(selector_function);
+            }
+            
             //remove button
             ele.find('.btn-del').button({text:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
                             icons:{primary:'ui-icon-circlesmall-close'}})
@@ -1480,7 +1500,6 @@ window.hWin.HEURIST4.ui = {
             });
         }
         
-        
 
         if(info['relation_recID']>0){
             
@@ -1505,7 +1524,8 @@ window.hWin.HEURIST4.ui = {
             });
         
         }
-            
+        
+        /* 2017-08-11 no more link for edit linked record :(    
         ele.find('a').click(function(event){
             event.preventDefault();
             var inpt = $(event.target);
@@ -1522,6 +1542,34 @@ window.hWin.HEURIST4.ui = {
                     }}
                 );
         });        
+        */
+        var btn_edit = ele.find('div.btn-edit');
+        if(btn_edit.length>0){
+            
+            btn_edit.button({text:false, label:top.HR('Edit linked record'),
+                            icons:{primary:'ui-icon-pencil'}})
+                        .attr('data-recID', info['rec_ID'])
+                        .css({'font-size': '0.8em', height: '18px', 'max-width': '18px'})
+                        .click(function(event){
+           
+           
+            var recID = $(event.target).parent('.ui-button').attr('data-recID');
+console.log(recID);            
+            window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
+            {selectOnSave:true, edit_obstacle: true, onselect: 
+                    function(event, res){
+                        if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
+                            var recordset = res.selection;
+                            var record = recordset.getFirstRecord();
+                            var rec_Title = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title'));
+                            
+                            ele.find('span[data-recID='+recID+']').text(rec_Title);
+                        }
+                    }}
+                );
+                            
+                        });
+        }
         
         $(container).find('.add-rel-button').hide();
         

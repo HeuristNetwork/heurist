@@ -41,11 +41,11 @@ class DbEntitySearch
     //
     //
     //
-    private function _validateIds($fieldname){
+    private function _validateIds($fieldname, $data_type=null){
     
         $values = @$this->data[$fieldname];
         
-        if($values!=null){
+        if($values!=null && $data_type!='freetext'){
             //array of integer or integer
             if(!is_array($values)){
                 $values = explode(',', $values);
@@ -53,7 +53,7 @@ class DbEntitySearch
             }
             //if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) 
             foreach($values as $val){  //intval()
-                if(!(is_numeric($val) && $val!=null)){
+                if( !(is_numeric($val) && $val!=null)){
                     $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname: $val");
                     return false;
                 }
@@ -151,7 +151,7 @@ class DbEntitySearch
                 if($value=='NULL' || $value=='-NULL'){
                     $res = true;
                 }else if($is_ids=='ids'){
-                    $res = $this->_validateIds($fieldname); //, 'user/group IDs');
+                    $res = $this->_validateIds($fieldname, $data_type); //, 'user/group IDs');
                     
                 }else if($data_type == 'enum' && !$is_ids){
                     $res = $this->_validateEnum($fieldname);
@@ -220,7 +220,12 @@ class DbEntitySearch
                 $negate = false;
             }
         
-            $value = prepareIds($value);
+            if($data_type=='freetext'){
+                $value = prepareStrIds($value);    
+            }else{
+                $value = prepareIds($value);    
+            }
+            
             if(count($value)==0) return null;
             
             if(count($value)>1){
