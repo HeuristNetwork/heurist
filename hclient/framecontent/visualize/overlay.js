@@ -262,8 +262,17 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     
     
         // Draw a semi transparant rectangle       
-        var rect = overlay.append("rect")
-                          .attr("class", "semi-transparant info-mode")              
+        var rect_full = overlay.append("rect")
+                          .attr("class", "semi-transparant info-mode-full rect-info-full")              
+                          .attr("x", 0)
+                          .attr("y", 0)
+                          .attr("rx", 6)
+                          .attr("ry", 6)
+                          .style('stroke','#ff0000')
+                          .style("stroke-width", 0.5)
+                          .style("filter", "url(#drop-shadow)");
+        var rect_info = overlay.append("rect")
+                          .attr("class", "semi-transparant info-mode rect-info")              
                           .attr("x", 0)
                           .attr("y", 0)
                           .attr("rx", 6)
@@ -316,7 +325,11 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                               return d.text;
                           })
                           .attr("class", function(d, i) {
-                             return (i>0?'info-mode ':'nodelabel ')+'namelabel';
+                              if(i>0 && d.style=='italic'){
+                                    return 'info-mode-full namelabel';
+                              }else{
+                                    return (i>0?'info-mode ':'nodelabel ')+'namelabel';     
+                              }
                           })
                           .attr("x", function(d, i) {
                               // Indent check
@@ -506,7 +519,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                          
                       var hinttext = hintoverlay.append("text")
                       .text('drag me to another node …')
-                      .attr('x',3)
+                      .attr('x',3)                
                       .attr('y',10)
                       .attr("fill", fontColor)
                       .style("font-style", 'italic', "important")
@@ -568,22 +581,20 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             // Close button
             var close = overlay.append("g")
                                .attr("class", "close info-mode")
-                               .attr("transform", "translate("+(maxWidth-iconSize)+",3)")
+                               .attr("transform", "translate("+(maxWidth-10)+",3)")  //position of icon maxWidth-iconSize
                                .on("mouseup", function(d) {
                                    $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();                                              });
                                
             // Close rectangle                                                                     
             close.append("rect")
-                   .attr("class", "close-button")
-                   .attr("width", iconSize)
-                   .attr("height", iconSize)
-
+                   .attr("class", "close-button");
+            
             // Close text        
             close.append("text")
                  .attr("class", "close-text")
-                 .text("X")
-                 .attr("x", iconSize/4)
-                 .attr("y", iconSize*0.75);
+                 .text("x")
+                 .attr("x", iconSize/4-3)
+                 .attr("y", 7);
                  
         }
                   
@@ -593,14 +604,30 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
       
       
       // Set optimal width & height
-      rect.attr("width", maxWidth+4)
+      rect_full.attr("width", maxWidth+4)
             .attr("height", maxHeight);      
       
-      
+      rect_info.attr("width", maxWidth+4)
+            .attr("height", 26);      
       
       if(type=='record'){
-        if(currentMode=='icons'){
+
+        if(currentMode=='infoboxes'){
+
+            rect_full.style('display', 'none');
+            overlay.selectAll(".info-mode-full").style('display', 'none');
+            //overlay.selectAll(".rect-info").style('display', 'initial');
+            
+        }else if(currentMode=='infoboxes_full'){
+            
+            rect_info.style('display', 'none');
+  
+        }else if(currentMode=='icons'){
+            
             overlay.selectAll('.info-mode').style('display', 'none');
+            overlay.selectAll('.info-mode-full').style('display', 'none');
+            overlay.selectAll(".rect-info-full").style('display', 'none');
+            overlay.selectAll(".rect-info").style('display', 'none');
         }
       }
              

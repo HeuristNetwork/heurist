@@ -41,8 +41,9 @@ var setting_fisheye       = "setting_fisheye";
 var setting_translatex    = "setting_translatex";
 var setting_translatey    = "setting_translatey";
 var setting_scale         = "setting_scale"; 
+var setting_advanced      = "setting_advanced"; 
 
-
+//localStorage.clear();
 /**
 * Returns the current displayed URL
 * 
@@ -96,6 +97,7 @@ function checkStoredSettings() {
     getSetting(   setting_translatex,    settings.translatex  );
     getSetting(   setting_translatey,    settings.translatey  );
     getSetting(   setting_scale,         settings.scale       );
+    getSetting(   setting_advanced,      settings.advanced    );
 }
 
 /**
@@ -116,11 +118,15 @@ function handleSettingsInUI() {
         .click( function(){changeViewMode('icons');} );
     $('#btnViewModeInfo').button({icons: { primary: 'ui-icon-circle-b-info' }, text:false})
         .click( function(){changeViewMode('infoboxes');} );
+    $('#btnViewModeFull').button({icons: { primary: 'ui-icon-circle-info' }, text:false})
+        .click( function(){changeViewMode('infoboxes_full');} );
+        
     $( "#setViewMode" ).buttonset();    
 
+     var grv = getSetting(setting_gravity);
     //
-    if(setting_gravity=='agressive') setting_gravity='touch';
-    $("input[name='gravityMode'][value='" +getSetting(setting_gravity)+ "']").attr("checked", true);
+    if(grv=='agressive') grv='touch';
+    $("input[name='gravityMode'][value='" +grv+ "']").attr("checked", true);
     
     $('#gravityMode0').button() //{icons: { primary: 'ui-icon-gravity0' }, text:false})
         .click( function(){ setGravity('off') });
@@ -387,12 +393,28 @@ function changeViewMode(mode){
             currentMode = 'infoboxes';
             //d3.selectAll(".icon-mode").style('display', 'none');
             d3.selectAll(".info-mode").style('display', 'initial');
+            d3.selectAll(".info-mode-full").style('display', 'none');
+            
+            d3.selectAll(".rect-info-full").style('display', 'none');
+            d3.selectAll(".rect-info").style('display', 'initial');
+            
+        }else if(mode=='infoboxes_full'){
+            
+            currentMode = 'infoboxes_full';
+            d3.selectAll(".info-mode").style('display', 'initial');
+            d3.selectAll(".info-mode-full").style('display', 'initial');
+            
+            d3.selectAll(".rect-info-full").style('display', 'initial');
+            d3.selectAll(".rect-info").style('display', 'none');
+            
         }else{
+            
             currentMode = 'icons';
             //d3.selectAll(".icon-mode").style('display', 'initial');
             d3.selectAll(".info-mode").style('display', 'none');
+            d3.selectAll(".info-mode-full").style('display', 'none');
         }
-        var isLabelVisible = (currentMode == 'infoboxes') || (getSetting(setting_labels)=='on');
+        var isLabelVisible = (currentMode != 'icons') || (getSetting(setting_labels)=='on');
         d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
     }
 }

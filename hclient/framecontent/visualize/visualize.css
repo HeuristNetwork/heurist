@@ -200,9 +200,11 @@ text.shadow {
 .close-button {
     fill: #fff;
     stroke: #000;
-    stroke-width: 1.5; 
+    stroke-width: 0.5; 
     pointer-events: all; 
     cursor: pointer;
+    width:8;
+    height:8;
 }
 
 .close-text {

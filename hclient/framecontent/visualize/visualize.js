@@ -120,6 +120,7 @@ var svg;        // The SVG where the visualisation will be executed on
             
             
             // UI default settings
+            advanced: false,
             linetype: "straight",
             linelength: 100,
             linewidth: 3,
@@ -137,7 +138,7 @@ var svg;        // The SVG where the visualisation will be executed on
             formula: "linear",
             fisheye: false,
             
-            gravity: "touch",
+            gravity: "off",
             attraction: -3000,
             
             translatex: 0,
