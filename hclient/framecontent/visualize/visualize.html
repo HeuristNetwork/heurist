@@ -80,11 +80,14 @@
             </div>
         </div>
         
-        <div id="setAdvancedMode" style="border-left: solid 1px gray;padding-left:15px"><label>advanced functions</label></div>
+        <div id="setAdvancedMode" style="border-left: solid 1px gray;padding-left:15px;min-height:22px;vertical-align:middle">
+                <span class="ui-icon ui-icon-triangle-1-w advanced" title="Hide advanced functions" style="height: 22px;">&nbsp;</span>
+                <a href="#">advanced functions&nbsp;<span class="ui-icon ui-icon-triangle-1-e"
+                 style="display: inline-block;vertical-align: middle;height: 22px;"></span></a></div>
 
         <!-- -->
-        <div id="setDivNodes" class="toolbar-section" 
-            style="display:none;border-left: solid 1px gray; padding-left:15px; min-width:190px">
+        <div id="setDivNodes" class="toolbar-section advanced" 
+            style="display:none;padding-left:15px; min-width:190px">
             <label>Nodes</label>
             <div id="entityColor" class="colorblock" style="margin-left:10px"  title="Color of nodes"></div>
             <div id="setNodesMode" style="display:inline-block">
@@ -104,7 +107,7 @@
         </div>
 
         <!-- -->
-        <div id="setDivLinks" class="toolbar-section" 
+        <div id="setDivLinks" class="toolbar-section advanced" 
             style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
             <label>Links</label>
 
@@ -143,9 +146,8 @@
         </div>
         
         
-        <div id="setDivExport" class="toolbar-section" 
+        <div id="setDivExport" class="toolbar-section advanced" 
             style="display:none;border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px;">
-            <label>&nbsp;</label><br>
             <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
             <button type="button" id="embed-export">Embed</button>
         </div>

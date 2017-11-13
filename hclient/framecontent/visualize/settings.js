@@ -108,6 +108,40 @@ function handleSettingsInUI() {
     //add elements on toolbar
     var tBar = $('#toolbar');
     
+    
+    var is_advanced = getSetting(setting_advanced);
+    
+    $('#setAdvancedMode').css({cursor:'hand'}).click(
+        function(){
+              var is_advanced = getSetting(setting_advanced);
+              is_advanced = (is_advanced==='false');
+                if(is_advanced){
+                    $('.advanced').show();
+                    $('#setAdvancedMode').find('a').hide();
+                    if(settings.isDatabaseStructure){
+                        $('#setDivExport').hide();
+                    }
+                }else{
+                    $('.advanced').hide();
+                    $('#setAdvancedMode').find('a').show();
+                }
+              putSetting(setting_advanced, is_advanced); 
+        }
+    );
+    
+    if(is_advanced!=='false'){
+        $('.advanced').show();
+        $('#setAdvancedMode').find('a').hide();
+        if(settings.isDatabaseStructure){
+            $('#setDivExport').hide();
+        }
+    }else{
+        $('.advanced').hide();
+        $('#setAdvancedMode').find('a').show();
+    }
+    
+    //-------------------------------
+    
     $('#btnSingleSelect').button({icons: { primary: 'ui-icon-cursor' }, text:false})
         .click( function(){ selectionMode = 'single'; $("#d3svg").css("cursor", "default");});
     $('#btnMultipleSelect').button({icons: { primary: 'ui-icon-select' }, text:false})

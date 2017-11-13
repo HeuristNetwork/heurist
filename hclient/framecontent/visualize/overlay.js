@@ -71,7 +71,7 @@ function getRecordOverlayData(record) {
                 
                 if(!settings.isDatabaseStructure){
                     // Relation
-                    var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", height: 11, indent: true};
+                    var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", height: 11, indent: true, subheader:1};
                     if(settings.showCounts) {
                         relation.text += ", n=" + link.targetcount;                      
                     }
@@ -108,7 +108,7 @@ function getRecordOverlayData(record) {
         // Convert map to array
         for(key in map) {                                   
             array.push({text: truncateText(key, maxLength), size: "8px", 
-                    style:"italic", height: fontSize, indent:true, enter: true}); // Heading
+                    style:"italic", height: fontSize, indent:true, enter: true, subheader:1}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
@@ -123,7 +123,7 @@ function getRelationOverlayData(line) {
     var array = [];
     var maxLength = getSetting(setting_textlength);
     var relation = {type: line.relation.type, cnt: line.targetcount, text: 
-            truncateText(line.relation.name, maxLength), size: "9px", height: 11};
+            truncateText(line.relation.name, maxLength), size: "9px", height: 11, subheader:1};
     if(true || settings.showCounts) {
             relation.text = relation.text + ", n=" + line.targetcount;
     }
@@ -325,7 +325,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                               return d.text;
                           })
                           .attr("class", function(d, i) {
-                              if(i>0 && d.style=='italic'){
+                              if(i>0 && d.subheader==1){ // d.style=='italic'
                                     return 'info-mode-full namelabel';
                               }else{
                                     return (i>0?'info-mode ':'nodelabel ')+'namelabel';     
