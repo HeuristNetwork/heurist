@@ -150,7 +150,7 @@ var cfg_layouts = [
                 options:{buttons_mode: true},
                 css:{border:'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, 
-                apps:[{appid:'h3_resultList', hasheader:false, 
+                apps:[{appid:'h3_resultList', hasheader:false,
                         dockable:false, dragable:false, 
                             css:{'background-color':'white'}, 
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
@@ -170,7 +170,7 @@ var cfg_layouts = [
         center:{minsize:300, dropable:false, 
                 apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false, 
                             css:{'background-color':'white'}, 
-                            options:{show_menu:true, show_savefilter:true, show_inner_header: true} }]},  //search result
+                            options:{ empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header: true} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
@@ -206,7 +206,7 @@ var cfg_layouts = [
         ]},
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, 
                      dockable:false, dragable:false, css:{'background-color':'white'}, 
-                     options:{show_menu:true, show_savefilter:true, show_inner_header:true} }]},  //search result
+                     options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
@@ -295,7 +295,7 @@ var cfg_layouts = [
                 apps:[
                     {appid:'ha51', options:{layout:['map','timeline'], startup:61557, eventbased:false} } //mapping
                     ,{appid:'h3_resultList', hasheader:true, name: 'List', 
-                        options:{title:'List', show_viewmode:false, eventbased:false} }
+                        options:{empty_remark:null, title:'List', show_viewmode:false, eventbased:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                 ]
             }]
@@ -333,7 +333,7 @@ var cfg_layouts = [
                 apps:[
                     {appid:'ha51', options:{layout:['map','timeline'], startup:61557, eventbased:false} } //mapping
                     ,{appid:'h3_resultList', hasheader:true, name: 'List', 
-                        options:{title:'List', show_viewmode:false, eventbased:false} }
+                        options:{empty_remark:null, title:'List', show_viewmode:false, eventbased:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                 ]
             }]

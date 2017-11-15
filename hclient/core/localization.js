@@ -43,46 +43,6 @@ regional['en'] = {
     'mailto_fail': 'You have not set an email handler for mailto: links. '
     +'<br/>Please set this in your  browser (it is normally in the content settings under Privacy).',
 
-
-    // Initial startup filter message
-    'No filter defined':'<br><br><h3 style="color:teal">You do not have a startup filter</h3>'
-    +'<br>'
-    +'<i>This panel normally displays a filtered subset of the database which you can edit, analyse, '
-    +'visualise and publish in the righthand panel or through popup forms, depending on context.'
-    +'You may wish to create a startup filter - see below - so it is populated when you first load Heurist.</i>'
-    +'<p><br><br><hr><br><br>'
-    +'<h3>Creating and saving filters</h3>'
-    +'<br>'
-    +'Filters are used to find information in the database (search) and to create subsets '
-    +'to which different actions can be applied - editing, listing, tagging, mapping, export etc. '
-    +'If you are not using filters, '
-    +'and in particular <a href="context_help/advanced_search.html" target="_blank"> '
-    +'<b>Saved filters</b></a>, you are not getting the best out of Heurist.'
-    +'<br><br>'
-    +'<p>Use the filter field at the top of the page to define a filter / search. The filter setup icon '
-    +'<img src="hclient/assets/filter_icon_black18.png"> helps build simple filters. '
-    +'More complex filters can be built by following instructions linked from '
-    +'<a href="context_help/advanced_search.html" target="_blank"><b>help</b></a> next to the Filter button. '
-    +'<br><br>'    
-    +'After running a filter, click the <b>Save Filter</b> button (which only appears after a filter has been run) '
-    +'to save it in the tree in the navigation panel on the left.'
-    +'<br><br>'
-    +'<p>Simple to very complex filters, including Facet queries and Rules-based expansion of query results, '
-    +'can be built by right-clicking in the tree in the navigation panel on the left '
-    +'and selecting New, New Faceted or New Ruleset.'
-    +'<br><br>'
-    +'<h3>Defining a startup filter</h3>'
-    +'<br>'
-    +'<p>A startup filter can populate this panel automatically with the set of records to which you often '
-    +'need immediate access. For example, <i>tags:Favourites</i> (for records tagged as favourites), '
-    +'<i>sortby:-m</i> (for recently modified records) or a more complex query retrieving, for instance, '
-    +'recent meeting notes in date order or records relating to current projects.'
-    +'<br><br>'
-    +'<p>To set a startup filter: go to <i>Profile > Preferences</i> (menu at top right) or add a parameter '
-    +'<i>&q=xxxx</i> to the end of the URL (where xxxx is a valid Heurist search string, which you can '
-    +'determine by creating a filter and then copying from the filter field above).'
-    +'<br><br>',
-
     //titles
     'add_detail':'Add field value',
     'replace_detail':'Replace field value',

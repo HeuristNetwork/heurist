@@ -46,7 +46,7 @@ $.widget( "heurist.resultList", {
         eventbased:true,
         //searchsource: null,
 
-        empty_remark:'',
+        empty_remark:'No entries match the filter criteria',
         pagesize: -1,
 
         renderer: null,    // custom renderer function to draw item
@@ -184,9 +184,7 @@ $.widget( "heurist.resultList", {
                             if(that.options.emptyMessageURL){
                                 that.div_content.load( that.options.emptyMessageURL );
                             }else{
-                                var empty_message = window.hWin.HR('No filter defined');
-                                var $emptyres = that._renderMessage( empty_message );
-
+                                that._renderEmptyMessage(0);
                             }
 
                         if(that.btn_search_save) that.btn_search_save.hide();
@@ -794,56 +792,7 @@ $.widget( "heurist.resultList", {
             if(this.options.emptyMessageURL){
                 this.div_content.load( this.options.emptyMessageURL );
             }else{
-
-                var empty_message = '<br><br><h2 style="color:teal">'
-                +window.hWin.HR('No records match the filter criteria')+
-                '</h2><div class="prompt">'+((window.hWin.HAPI4.currentUser.ugr_ID>0)
-                    ?'<br><i>Note: some records may only be visible to members of particular workgroups</i>'
-                        +'<br>' 
-                        +'<p><br><br><hr><br><br>'
-                        +'<h3>Creating and saving filters</h3>'
-                        +'<br>'
-                        +'Filters are used to find information in the database (search) and to create subsets '
-                        +'to which different actions can be applied - editing, listing, tagging, mapping, export etc. '
-                        +'If you are not using filters, '
-                        +'and in particular <a href="context_help/advanced_search.html" target="_blank"> '
-                        +'<b>Saved filters</b></a>, you are not getting the best out of Heurist.'
-                        +'<br><br>'
-                        +'<p>Use the filter field at the top of the page to define a filter / search. The filter setup icon '
-                        +'<img src="hclient/assets/filter_icon_black18.png"> helps build simple filters. '
-                        +'More complex filters can be built by following instructions linked from '
-                        +'<a href="context_help/advanced_search.html" target="_blank"><b>help</b></a> next to the Filter button. '
-                        +'<br><br>'    
-                        +'After running a filter, click the <b>Save Filter</b> button (which only appears after a filter has been run) '
-                        +'to save it in the tree in the navigation panel on the left.'
-                        +'<br><br>'
-                        +'<p>Simple to very complex filters, including Facet queries and Rules-based expansion of query results, '
-                        +'can be built by right-clicking in the tree in the navigation panel on the left '
-                        +'and selecting New, New Faceted or New Ruleset.'
-                        +'<br><br>'
-                    :'<i>To see workgoup-owned and non-public records you may need to log in</i>')
-                    +'</div>';
-
-                if(this.options['empty_remark']!=''){
-                    empty_message = empty_message + this.options['empty_remark'];
-                }
-
-                var $emptyres = this._renderMessage( empty_message );
-
-                if(window.hWin.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
-                    var domain = this._query_request.w
-                    if((domain=='b' || domain=='bookmark')){
-                        var $al = $('<a href="#">')
-                        .text(window.hWin.HR('Click here to search the whole database'))
-                        .appendTo($emptyres);
-                        this._on(  $al, {
-                            click: this._doSearch4
-                        });
-
-                    }
-                }
-
-
+                this._renderEmptyMessage( 1 );
             }
 
         }
@@ -864,6 +813,63 @@ $.widget( "heurist.resultList", {
         return $emptyres;
     },
 
+    //
+    // mode 
+    // 0 - no startup filter
+    // 1 - no result
+    //
+    _renderEmptyMessage: function(mode){
+
+        if( !window.hWin.HEURIST4.util.isempty (this.options['empty_remark']) ){
+            $('<div>').css('padding','10px').html(this.options['empty_remark']).appendTo(this.div_content);
+            return;
+        }
+        
+        var $emptyres = $('<div>')
+        .css('padding','1em')
+        .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListEmptyMsg.html',
+            function(){
+                $emptyres.find('.acc').accordion({collapsible:true,heightStyle:'content'});
+                $emptyres.find('p').css({'padding-top':'10px'});
+                
+                $emptyres.find('.acc > h3').css({
+                    background: 'none',
+                    border: 'none',
+                    'font-size': 'larger',
+                    'font-weight': 'bold'
+                });
+                $emptyres.find('.acc > div').css({
+                    background: 'none', border: 'none'});    
+                    
+                if(mode==0){   //no filter
+                    $emptyres.find('.no-filter').show();
+                    $emptyres.find('.not-found').hide();
+                    $emptyres.find('.acc1').accordion({active:false});
+                }else{       //no result
+                    $emptyres.find('.no-filter').hide();
+                    $emptyres.find('.not-found').show();
+                    $emptyres.find('.acc2').accordion({active:false});
+
+                     //logged in and current search was by bookmarks
+                    if(window.hWin.HAPI4.currentUser.ugr_ID>0 && this._query_request){
+                        var domain = this._query_request.w
+                        if((domain=='b' || domain=='bookmark')){
+                            var $al = $('<a href="#">')
+                            .text(window.hWin.HR('Click here to search the whole database'))
+                            .appendTo($emptyres);
+                            this._on(  $al, {
+                                click: this._doSearch4
+                            });
+                        }
+                    }
+                
+                }
+                
+            }
+        ).appendTo(this.div_content);
+                
+    },
+    
     //
     //  
     //
