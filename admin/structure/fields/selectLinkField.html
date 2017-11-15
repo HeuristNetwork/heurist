@@ -42,6 +42,7 @@
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
         
         <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <style>
         	.ft_col{
@@ -116,30 +117,38 @@
                 <br>
             
                 <!-- redundancy note: this functionality is repeated in selectFieldType.html/js -->
-            			
-			    <input type="radio" name="ft_type" id="t_resourse" value="resource" class="ft_selfield">
-			 	<label  class="ft_selfield" for="t_resourse">Record pointer</label>                                                  
-			    <div class="ft_notes ft_selfield">
-			    	A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
-                    <a id="hint_more_info1" class="ft_notes">more...</a>
-			    </div>
+            	
+                <hr style="width:80%"/>
                 
-                <div class="ft_preview" style="font-size: smaller;">
-                    Available base fields: <select id="sel_resource_fields" class="ft_selfield"></select>
+                <div>
+                    <div style="display:inline-block">
+
+                        <input type="radio" name="ft_type" id="t_resourse" value="resource" class="ft_selfield">
+                        <label  class="ft_selfield" for="t_resourse">Record pointer</label>                                                  
+                        <br>
+                        <input type="radio" name="ft_type" id="t_relmarker" value="relmarker" class="ft_selfield">
+                        <label class="ft_selfield" for="t_relmarker">Relationship marker</label>                                                             
+                    </div>
+                    <div style="display:inline-block;vertical-align: top;padding: 15px 20px;">
+                        <a href="#" id="hint_more_info1">
+                            <span class="ui-icon ui-icon-circle-b-info" style="display:inline-block;vertical-align:middle;padding-right:8px"></span>
+                            Which one should I choose?</a>
+                    </div>
+                </div>        
+
+                <hr style="width:80%"/>
+                
+                <div style="display:block">
+                    <input type="radio" name="t_sel_field" id="t_add_new_field" checked>
+                    <label  class="ft_selfield" id="lt_add_new_field" for="t_add_new_field">Add new field</label>                                                  
+                </div>
+                <div>
+                    <input type="radio"  name="t_sel_field" id="t_use_existing_field">
+                    <label  class="ft_selfield" id="lt_use_existing_field" for="t_use_existing_field">Add existing field</label>                                                  
+                    <select id="sel_resource_fields" class="ft_selfield"></select>
+                    <select id="sel_relmarker_fields" class="ft_selfield" style='background:red'></select>
                 </div>
                 
-
-			    <input type="radio" name="ft_type" id="t_relmarker" value="relmarker" class="ft_selfield">
-			 	<label class="ft_selfield" for="t_relmarker">Relationship marker</label>                                             			    <div class="ft_notes ft_selfield">
-			    	A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
-                    <a id="hint_more_info2" class="ft_notes">more...</a>
-			    </div>
-
-                <div class="ft_preview" style="font-size: smaller;">
-                    Available base fields: <select id="sel_relmarker_fields" class="ft_selfield"></select>
-                </div>
-                
-			
 		        <div style="text-align:center;width:100%;padding-top:2em;">
 		            <button type="button" id="btnSelect" disabled="disabled"
 		            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"

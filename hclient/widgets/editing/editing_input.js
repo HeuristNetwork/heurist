@@ -643,7 +643,7 @@ $.widget( "heurist.editing_input", {
                                 +'&source_ID=' + that.options.recID
                                 +'&dty_ID=' + that.options.dtID;
                             
-                            window.hWin.HEURIST4.msg.showDialog(url, {height:380, width:600,
+                            window.hWin.HEURIST4.msg.showDialog(url, {height:380, width:750,
                                 title: window.hWin.HR('Add relationship'),
                                 class:'ui-heurist-bg-light',
                                 callback: function(context){

@@ -44,7 +44,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 <body style="overflow:hidden">
 
         <div id="mainForm" class="popup_content_div" class="ui-widget-content">
-            <label id="helpmsg">Choose the field(s) on wich to create the link(s)</label>
+            <label id="helpmsg">Choose the field(s) on which to create the link(s)</label>
             <br><br>
             
             <label style="vertical-align: top; padding-top:4px;display:inline-block;width:95px;">Source record:</label>
@@ -52,12 +52,12 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <img src='../assets/16x16.gif' id="source_rectype_img" 
                     style="vertical-align:top;margin-left:0px;" />
             
-                <h2 class="header truncate" id="source_title" 
-                    style="max-width:400px;display:inline-block;color:black;vertical-align:top;margin-left:10px">
-                </h2>
-                
                 <h2 id="source_rectype" class="truncate" 
-                    style="max-width:400px;margin-top:5px;margin-left:30px;"></h2>
+                    style="max-width:400px;margin-left:30px;display:inline-block;"></h2>
+                    
+                <h2 class="header truncate" id="source_title" 
+                    style="display:inline-block;max-width:400px;color:black;vertical-align:top;margin-left:10px">
+                </h2>
                     
             </div>    
             <div id="div_source2" style="display:none;">
@@ -65,7 +65,8 @@ require_once(dirname(__FILE__)."/initPage.php");
             </div>
             
             <!-- field selector -->
-            <div id="source_field" style="margin-top:30px;margin-bottom:40px;max-height: 40%;overflow: auto;">
+            <div id="source_field" 
+                style="margin-top:5px;margin-bottom:40px;max-height: 40%;overflow: auto;border: 1px solid gray;">
             </div>
 
             <label style="vertical-align: top; padding-top:4px;display:inline-block;width:95px;">Target record:</label>
@@ -74,13 +75,14 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div id="div_target1" style="display:inline-block;">
                 <img src='../assets/16x16.gif' id="target_rectype_img" 
                     style="vertical-align:top;margin-left:0px;" />
+                    
+                <h2 id="target_rectype" class="truncate" 
+                    style="max-width:400px;margin-left:30px;display:inline-block;"></h2>
             
                 <h2 class="header truncate" id="target_title" 
                     style="display:inline-block;max-width:400px;color:black;vertical-align:top;margin-left:10px">
                 </h2>
 
-                <h2 id="target_rectype" class="truncate" 
-                    style="max-width:400px;margin-top:5px;margin-left:30px;"></h2>
             </div>    
                 
                 <!-- 
@@ -93,7 +95,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 -->
                                     
             <!-- field selector -->
-            <div id="target_field" style="margin-top:10px;max-height:25%;overflow: auto;">
+            <div id="target_field" style="margin-top:5px;max-height:25%;overflow: auto;border: 1px solid lightgray;">
             </div>
                     
         </div>

@@ -76,13 +76,15 @@ $(document).ready(function() {
     function onScriptsReady(){
 
         top.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
-                            'Field data type: Record pointer', 
-                            top.HAPI4.baseURL+'context_help/field_data_types.html #resource',
+                            'Link types', 
+                            top.HAPI4.baseURL+'context_help/link_types.html #content_body',
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
+/*                            
         top.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
                             'Field data type: Relationship marker', 
                             top.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
+*/                            
 	    
         $('#btnSelect').click( editDetailType );
     
@@ -97,10 +99,17 @@ $(document).ready(function() {
         $('#source_rectype').text(top.HEURIST.rectypes.names[rty_ID]);
         $('#source_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+rty_ID+'")');
         $('#source_rectype_desc').text( top.HEURIST.rectypes.typedefs[rty_ID].commonFields[fidx] );
+        $('#lt_add_new_field').text('Add new field to '+top.HEURIST.rectypes.names[rty_ID]);
+        $('#lt_use_existing_field').text('Add existing field to '+top.HEURIST.rectypes.names[rty_ID]);
+        
+        $('#t_resourse').change(updateUI);
+        $('#t_relmarker').change(updateUI);
+        $('#t_add_new_field').change(updateUI);
+        $('#t_use_existing_field').change(updateUI);
         
         
         var rt_selector = $('#sel_target_rectype_id');
-        top.HEURIST4.ui.createRectypeSelect(rt_selector[0],null,'Select target record type');
+        top.HEURIST4.ui.createRectypeSelect(rt_selector[0], null, 'Select target record type');
         rt_selector.change(
 
                 function(){
@@ -121,7 +130,8 @@ $(document).ready(function() {
                         _getLinkFields();
                         $('#sel_resource_fields').val('');
                         $('#sel_relmarker_fields').val('');
-                        $('#t_resourse').attr('checked', true);
+                        $('#t_resourse').prop('checked', true);
+                        updateUI();
 
                         top.HEURIST4.util.setDisabled($('#btnSelect'), false);
                         $('#btnSelect').css('color','black');
@@ -132,6 +142,7 @@ $(document).ready(function() {
                     $('#target_rectype_desc').text( top.HEURIST.rectypes.typedefs[target_ID].commonFields[fidx] );
                 }
         );
+        //target rectype is already defined via parameter
         if(target_ID){
             rt_selector.val(target_ID); 
             
@@ -168,8 +179,8 @@ $(document).ready(function() {
         var idx_Name = detailTypes['fieldNamesToIndex']['dty_Name'];
         var idx_NameInRecType = top.HEURIST4.rectypes.typedefs['dtFieldNamesToIndex']['rst_DisplayName'];
 
-        var aPointers = [{key:0, title:'Create new field'}], 
-            aRelMarkers = [{key:0, title:'Create new field'}], 
+        var aPointers = [], 
+            aRelMarkers = [], 
             cnt_ptrs = 0, cnt_relmarkers = 0;
 
         for(dty_ID in detailTypes){
@@ -205,7 +216,8 @@ $(document).ready(function() {
                         }else{
                             aRelMarkers.push(option_item);
                             if(!already_inuse) cnt_relmarkers++;
-                        }        
+                        }
+                        
                     }
                 }
             }
@@ -224,8 +236,13 @@ $(document).ready(function() {
             aRelMarkers[0].title  += ('. Other field types already in use in "'+top.HEURIST4.rectypes.names[rty_ID]+'")');
         }
         */
+        
+        if(aPointers.length==0) aPointers = [{key:0, title:'<none available>'}];
+        if(aRelMarkers.length==0) aRelMarkers = [{key:0, title:'<none available>'}];
         top.HEURIST4.ui.createSelector($('#sel_resource_fields')[0], aPointers);
         top.HEURIST4.ui.createSelector($('#sel_relmarker_fields')[0], aRelMarkers);
+
+        updateUI();        
     }
 
     //
@@ -235,10 +252,13 @@ $(document).ready(function() {
 
         var dt_type = $('input[name="ft_type"]:checked').val();
         var dty_ID = 0;
-        if(dt_type=='resource'){
-            dty_ID = $('#sel_resource_fields').val();
-        }else{
-            dty_ID = $('#sel_relmarker_fields').val();
+        
+        if(!$('#t_add_new_field').is(':checked')){
+            if(dt_type=='resource'){
+                dty_ID = $('#sel_resource_fields').val();
+            }else{
+                dty_ID = $('#sel_relmarker_fields').val();
+            }
         }
 
         if(dty_ID>0){ //add already existing field type
@@ -345,4 +365,47 @@ $(document).ready(function() {
 
     }
 
+    //
+    //
+    //
+    function updateUI(){
+     
+            var is_resource_selected = $('#t_resourse').is(':checked');
+            var is_fields_available = false;
+        
+            if(is_resource_selected){
+                    $('#sel_resource_fields').show();
+                    $('#sel_relmarker_fields').hide();
+                    
+                    is_fields_available = 
+                        ($('#sel_resource_fields > option').length>1 ||
+                        $('#sel_resource_fields').val()>0)
+                    
+            }else{
+                    $('#sel_resource_fields').hide();
+                    $('#sel_relmarker_fields').show();
+                    
+                    is_fields_available = 
+                        ($('#sel_relmarker_fields > option').length>1 ||
+                        $('#sel_relmarker_fields').val()>0)
+                    
+            }
+            
+            var f_new = $('#t_add_new_field');
+            var f_exs = $('#t_use_existing_field');
+            if(is_fields_available){
+                  f_exs.removeProp('disabled');
+                  f_exs.removeClass('ui-state-disabled ui-button-disabled');
+            }else{
+                  f_new.prop('checked', true);
+                  f_exs.prop('disabled', 'disabled');
+                  f_exs.addClass('ui-state-disabled');
+            }
+            
+            var is_add_new = f_new.is(':checked');
+            var clr = (is_add_new)?'lightgray':'none';   
+            $('#sel_resource_fields').css('background', clr);
+            $('#sel_relmarker_fields').css('background', clr);
+    }
+    
 });  
