@@ -238,7 +238,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         }
     
     if(parent_node){
-        parent_node.on("mouseover", function(d) {
+        parent_node
+        .on("mouseover", function(d) {
             if(drag_link_source_id!=null){
                 //cancel timer
                 if(drag_link_timer>0){
@@ -254,7 +255,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             drag_link_timer = setTimeout(function(){
                 drag_link_target_id = null;
                 if(drag_link_line) drag_link_line.attr("stroke","#ff0000");
-            },500);
+            },300);
             }            
         });
     }
@@ -438,11 +439,14 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                     var x = bbox.left + bbox.width/2 - svgPos.left;
                     var y = bbox.top + bbox.height/2 - svgPos.top;  
                     
+                    var dx = (x < (event.clientX - svgPos.left))?-2:2;
+                    var dy = (y < (event.clientY - svgPos.top))?-2:2;
+                    
                     drag_link_line = svg.append("svg:line")
                        .attr("stroke","#ff0000")
                        .attr("stroke-width",4)
                        .attr("x1", x).attr("y1", y)
-                       .attr("x2", event.clientX - svgPos.left).attr("y2", event.clientY - svgPos.top);
+                       .attr("x2", event.clientX - svgPos.left+dx).attr("y2", event.clientY - svgPos.top+dy);
                     
                  })
                  .on("drag", 
@@ -451,11 +455,14 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         //drag_link_line
                         //.attr("x2", Number(drag_link_line.attr("x2"))+d3.event.dx)
                         //.attr("y2", Number(drag_link_line.attr("y2"))+d3.event.dy); //scale is not used
-                    
                         var svgPos = $("svg").position();
+
+                    var dx = (drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
+                    var dy = (drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
+
                         drag_link_line
-                            .attr("x2", event.clientX - svgPos.left)
-                            .attr("y2", event.clientY - svgPos.top);
+                            .attr("x2", event.clientX - svgPos.left+dx)
+                            .attr("y2", event.clientY - svgPos.top+dy);
                         
                     }
                     
@@ -751,7 +758,7 @@ function _addNewLinkField(source_ID, target_ID){
                     + '&source_ID='+source_ID;
                     
                dlg_title = 'Add new link or create a relationship between records'; 
-               dim.w = 550;
+               dim.w = 750;
                dim.h = 380;
             }
                    

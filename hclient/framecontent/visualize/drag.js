@@ -108,14 +108,14 @@ function addNodes() {
         .on("mouseover", function(d) {
             if(drag_link_source_id!=null){
                 drag_link_target_id = d.id;
-                drag_link_line.attr("stroke","#00ff00");
+                drag_link_line.attr("stroke","#00ff00");  //green
             }            
         })
         .on("mouseout", function(d) {
             if(drag_link_source_id!=null){
             setTimeout(function(){
                 drag_link_target_id = null;
-                if(drag_link_line) drag_link_line.attr("stroke","#ff0000");
+                if(drag_link_line) drag_link_line.attr("stroke","#ff0000");  //red
             },200);
             }            
         });
