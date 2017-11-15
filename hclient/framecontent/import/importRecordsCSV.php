@@ -144,19 +144,20 @@ If you have missing data for Required fields, you may find it convenient to set 
         
         </div>      
     
-        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
-            <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
-            <a href="#" id="btnClearAllSessions"
-                title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
-                            style="margin-left: 10px;">Clear all files</a>        
-
-        <h2 style="padding:10 0 10 120">OR</h2>
-        
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Upload new file (CSV/TSV)</h2>
             <input type="file" id="uploadFile" style="display:none">
             <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
                 Upload File</div>
             <span>The first line must have field names with correct number of fields</span>  
+
+        <h2 style="padding:10 0 10 120">OR</h2>
+        
+        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
+            <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
+            <a href="#" id="btnClearAllSessions"
+                title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
+                            style="margin-left: 10px;">Clear all files</a>        
+            
         <h2 style="padding:10 0 10 120">OR</h2>
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Paste delimited data in area below</h2>
         <div id="btnUploadData"

@@ -1291,6 +1291,7 @@ if(is_array($imp_session)){
         <input type="hidden" id="upload_file_name" name="upload_file_name">
 
         <table width="100%">
+
             <tr>
                 <td align="right" width="250px">Select previously uploaded file:</td>
                 <td><select name="import_id" id="import_id" onchange="doSelectSession()"><?=get_list_import_sessions()?></select>
@@ -1299,13 +1300,16 @@ if(is_array($imp_session)){
                                             style="margin-right: 10px;" onclick="doClearSession('all')">
                 </td>
             </tr>
-
+        
             <tr>
                 <td colspan=2><hr/></td>
             </tr>
+
             <tr>
                 <td align="right"><label>OR Upload new CSV/TSV file</label></td>
             </tr>
+        
+            
             <tr>
                 <td>&nbsp;</td>
             </tr>

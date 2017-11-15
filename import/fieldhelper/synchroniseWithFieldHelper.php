@@ -115,17 +115,26 @@ if (! is_logged_in()) {
             die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
         }
 
-        print "<h2>ADVANCED USERS</h2>";
-        print "This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants)";
-        print " listed in Admin > Database > Advanced Properties and writes the metadata as records in the current database, ".
-        "with pointers back to the files described by the manifests.";
-        print "<p>If no manifests exist, they are created (and can be read by FieldHelper). ".
-        "New files are added to the existing manifests.<br>&nbsp;<br>";
-        print "The current database may already contain data; new records are appended, existing records are unaffected.<br>&nbsp;<br>";
-        print "Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by Apache or www-data (as appropriate).";
-        print "<p>Files will need to be uploaded to the server via direct access to the server or through Import > Multi-file upload.";
-        print "</p>";
+        ?>
+        <h2>ADVANCED USERS</h2>
 
+        <p style="font-weight:bold;font-size:larger;padding:10 0">This function is designed for the indexing of bulk uploaded files (often images)</p>
+        
+        This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants)
+        listed in Admin > Database > Advanced Properties and writes the metadata as records in the current database, 
+        with pointers back to the files described by the manifests.
+        
+         <p>
+            If no manifests exist, they are created (and can be read by FieldHelper). 
+            New files are added to the existing manifests.<br>&nbsp;<br>
+            The current database may already contain data; new records are appended, existing records are unaffected.<br>&nbsp;<br>
+            Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by Apache or www-data (as appropriate).
+         </p>   
+         <p>
+            Files will need to be uploaded to the server via direct access to the server or through Import > Multi-file upload.
+         </p>
+         <?php
+        
         $notfound = array();
         foreach ($fieldhelper_to_heurist_map as $key=>$id){
             if(is_numeric($id) && $id==0){
