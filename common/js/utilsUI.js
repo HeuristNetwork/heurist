@@ -1852,7 +1852,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                         termName = getFullTermLabel(localLookup[termID], datatype, false);
                     }
                     termCode = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Code']];
-                    hasImage = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Image']];
+                    hasImage = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_HasImage']];
                     
 
                     if(top.HEURIST.util.isempty(termCode)){

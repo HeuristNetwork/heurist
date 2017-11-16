@@ -468,10 +468,24 @@ $.widget( "heurist.editing_input", {
                 var isVocabulary = !isNaN(Number(allTerms)); 
 
 
-
                 var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
                 .addClass('smallicon ui-icon ui-icon-image')
+                .css({'margin-right': '24px'})
                 .appendTo( $inputdiv );
+
+                function __showHideSelByImage(){
+                    var hasImage = ($input.find('option[term-img=1]').length>0);
+                    if(hasImage) {
+                        $input.css({'margin-right': '-44px', 'padding-right': '30px'});
+                        $btn_termsel.show();   
+                    }else{
+                        $input.css({'margin-right': 0, 'padding-right': 0});
+                        $btn_termsel.hide();   
+                    }
+                }
+                
+                __showHideSelByImage();
+                
 
                 this._on( $btn_termsel, { click: function(){
                     
@@ -489,6 +503,7 @@ $.widget( "heurist.editing_input", {
 
                     var that = this;                                                
                     
+                    //select term by image
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
@@ -511,9 +526,6 @@ $.widget( "heurist.editing_input", {
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                         });
-                    
-                    
-                    
 
                 }});
 
@@ -540,6 +552,8 @@ $.widget( "heurist.editing_input", {
                             if(context=="ok") {
                                 window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
                                 that._recreateSelector($input, true);
+                                
+                                __showHideSelByImage();
                             }
                         }
                     } );
@@ -563,6 +577,8 @@ $.widget( "heurist.editing_input", {
                                 that.options['dtFields']['rst_TermIDTreeNonSelectableIDs'] = editedDisabledTerms
                                                                 
                                 that._recreateSelector($input, true);
+                                
+                                __showHideSelByImage();
                             }
                         }
                     });
@@ -1264,16 +1280,16 @@ $.widget( "heurist.editing_input", {
             }else 
             if(this.detailType=='resource' || this.isFileForRecord)
             {
-                        var $input_img;
+                        var $input_img, $gicon;
                         var select_return_mode = 'ids';
                         if(this.isFileForRecord){
                             
                             icon_for_button = 'ui-icon-folder-open';
                             select_return_mode = 'recordset';
                             
-                            $input.css({'padding-left':'30px'});
-                            $('<span class="ui-icon ui-icon-folder-open"></span>')
-                                .css({position: 'absolute', margin: '5px 0px 0px 8px'}).insertBefore( $input ); 
+                            $input.css({'padding-left':'30px', cursor:'hand'});
+                            $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
+                                .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
                             
                             //container for image
                             $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
@@ -1313,8 +1329,8 @@ $.widget( "heurist.editing_input", {
                                  select_return_mode = 'recordset'
                             }
                             
-                            $('<span class="ui-icon ui-icon-triangle-1-e" '
-                            +'style="display:inline-block;vertical-align:middle;margin-left:8px;"></span>')
+                            $gicon = $('<span class="ui-icon ui-icon-triangle-1-e" '
+                            +'style="display:inline-block;vertical-align:middle;margin-left:8px;cursor:hand"></span>')
                             .insertBefore( $input );
                             
                             $input.css({'margin-left': '-24px', 'padding-left': '30px', 'cursor':'hand'});
@@ -1437,6 +1453,7 @@ $.widget( "heurist.editing_input", {
                         if(__show_select_dialog!=null){
                             //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
+                            this._on( $gicon, { click: __show_select_dialog } );
                         }
                         
                         if(this.isFileForRecord && value){
@@ -1535,10 +1552,10 @@ $.widget( "heurist.editing_input", {
             else //------------------------------------------------------------------------------------
             if(this.detailType=='geo'){
                 
-                $input.css({'width':'30ex','padding-left':'30px'});
+                $input.css({'width':'30ex','padding-left':'30px',cursor:'hand'});
                    
-                $('<span>').addClass('ui-icon ui-icon-globe')
-                    .css({position:'absolute',margin:'5px 0 0 8px'})
+                var $gicon = $('<span>').addClass('ui-icon ui-icon-globe')
+                    .css({position:'absolute',margin:'5px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
                 
                 /* 2017-11-08 no more buttons
@@ -1583,6 +1600,7 @@ $.widget( "heurist.editing_input", {
                 //this._on( $link_digitizer_dialog, { click: __show_mapdigit_dialog } );
                 //this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
                 this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
+                this._on( $gicon, { click: __show_mapdigit_dialog } );
             }
             /*else if(this.detailType=="freetext" && this.options['input_width']){
             $input.css('width', this.options['input_width']);
@@ -1811,7 +1829,7 @@ $.widget( "heurist.editing_input", {
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)){//this is not vocabulary ID, this is something more complex
 
-            if($.isPlainObject(this.configMode)){ //this lookup for entity
+            if($.isPlainObject(this.configMode))    { //this lookup for entity
 
                 //create and fill SELECT
                 //this.configMode.entity

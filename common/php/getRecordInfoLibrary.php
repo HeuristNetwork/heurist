@@ -609,17 +609,21 @@ function getTerms($useCachedData = false) {
     $terms = array('termsByDomainLookup' => array('relation' => array(), 'enum' => array()), 
         'commonFieldNames' => array_slice(getTermColNames(), 1), 
         'fieldNamesToIndex' => getColumnNameToIndex(array_slice(getTermColNames(), 1)));
-    $terms['fieldNamesToIndex']['trm_Image'] = count($terms['commonFieldNames']);
-    array_push($terms['commonFieldNames'],'trm_Image');
+
+    $terms['fieldNamesToIndex']['trm_HasImage'] = count($terms['commonFieldNames']);
+    array_push($terms['commonFieldNames'],'trm_HasImage');        
+
     if(!$res){
         if (mysql_error()) {
             return array("error" => mysql_error());
         }
     }else{    
+        $lib_dir = HEURIST_FILESTORE_DIR . 'term-images/';
         while ($row = mysql_fetch_row($res)) {
             $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
-            $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$row[0].'.png';
-            array_push($terms['termsByDomainLookup'][$row[9]][$row[0]], file_exists($filename));
+
+            $hasImage = file_exists($lib_dir.$row[0].'.png');
+            array_push($terms['termsByDomainLookup'][$row[9]][$row[0]], $hasImage);
         }
     }
     $terms['treesByDomain'] = array('relation' => getTermTree("relation", "prefix"), 'enum' => getTermTree("enum", "prefix"));

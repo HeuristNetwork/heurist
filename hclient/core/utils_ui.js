@@ -434,7 +434,7 @@ window.hWin.HEURIST4.ui = {
             var termID;
             var localLookup = termLookupInner;
             var termName,
-            termCode,
+            termCode, hasImage,
             arrterm = [],
             reslist2 = [];
 
@@ -445,6 +445,7 @@ window.hWin.HEURIST4.ui = {
                 if(localLookup[termID]){
                     termName = localLookup[termID][terms.fieldNamesToIndex['trm_Label']];
                     termCode = localLookup[termID][terms.fieldNamesToIndex['trm_Code']];
+                    hasImage = localLookup[termID][terms.fieldNamesToIndex['trm_HasImage']];
                     if(supressTermCode || window.hWin.HEURIST4.util.isempty(termCode)){
                         termCode = '';
                     }else{
@@ -454,7 +455,7 @@ window.hWin.HEURIST4.ui = {
 
                 if(window.hWin.HEURIST4.util.isempty(termName)) continue;
 
-                arrterm.push([termID, termName, termCode]);
+                arrterm.push([termID, termName, termCode, hasImage]);
             }
 
             //sort by name
@@ -470,6 +471,7 @@ window.hWin.HEURIST4.ui = {
                 termID = arrterm[i][0];
                 termName = arrterm[i][1];
                 termCode = arrterm[i][2];
+                hasImage = arrterm[i][3];
                 var termParents = '';
                 var origName = arrterm[i][1];
                 
@@ -515,10 +517,12 @@ window.hWin.HEURIST4.ui = {
                         opt.className = "depth" + (depth<7)?depth:7;
                         opt.depth = depth;
                         opt.disabled = isDisabled;
+                        $(opt).attr('term-img', hasImage?1:0);
+                        
                         if(termParents!=''){
                             $(opt).attr('parents', termParents);
                             $(opt).attr('term-orig', origName);  
-                            $(opt).attr('term-view', termName+termCode);  
+                            $(opt).attr('term-view', termName+termCode);
                         } 
 
                         if (termID == defaultTermID ||
