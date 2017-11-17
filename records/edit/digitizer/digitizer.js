@@ -1,5 +1,7 @@
 /**
-* filename: explanation
+* digitzer.js: This appears to be the OLD gigitiser version of map digitising popup
+*  TODO: Remove when old edit functions, including blog edit, are removed.
+*  Replaced by mapDraw.js
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -1510,7 +1512,7 @@ function searchAddress(address) {
              $(el).position({ my: "right top", at: "right bottom", of:$('#btnGeocode') });
              document.body.appendChild(el);              
           }else{
-            alert("Geocode was not successful for the following reason: " + status);      
+            alert("Sorry, Google Maps reports " + status + ". Could not find the specified place name. <br/>Please check spelling");      
           }
       }
   });
