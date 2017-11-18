@@ -456,10 +456,15 @@ require_once(dirname(__FILE__)."/initPage.php");
         document.getElementById("code-textbox2").value = '<iframe src=\'' + url +
         '\' width="800" height="650" frameborder="0"></iframe>';
         
-        
-        
-        var $dlg = $("#embed-dialog");
+        window.hWin.HEURIST4.msg.showElementAsDialog({
+            element: document.getElementById('map-embed-dialog'),
+            height: 420,
+            width: 700,
+            title: window.hWin.HR('Publish Map')
+        });
 
+        /*        
+        var $dlg = $("#embed-dialog");
         $dlg.dialog({
             autoOpen: true,
             height: 320,
@@ -468,6 +473,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             resizable: false,
             title: window.hWin.HR('Publish Map')
         });
+        */
     }
 
     function exportKML(){
@@ -601,7 +607,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div id="timeline_toolbar" style="position:absolute;top:1;left:1;height:20px;"></div>
         </div>
     </div>
-    <div id="embed-dialog" style="display:none">
+    <div id="map-embed-dialog" style="display:none">
         <p>Embed this Google Map (plus timeline) in your own web page:</p>
         <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. Use the web-safe version if the readable version does not work</p>
         <label style="font-size:0.9em">Readable code:</label>

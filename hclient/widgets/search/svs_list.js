@@ -1035,7 +1035,9 @@ $.widget( "heurist.svs_list", {
                         case "embed":   //EMBED
                             //show popup with link
                             if(!node.folder && node.key>0){
-
+                                
+                                that._showEmbedDialog(node.key);
+                                /*
                                 window.hWin.HEURIST4.msg.showMsgDlg(
                                     'One or more saved facet (or ordinary) searches can be embedded into an iframe in a website using the following code:<br><br>'
                                     +'<xmp style="font-size:1.2em">'
@@ -1047,6 +1049,7 @@ $.widget( "heurist.svs_list", {
                                     +'The URL can also be opened on its own in a separate tab. Note that ordinary searches can also be embedded simply through '
                                     +'specifying the URL obtained when the search is run in the Heurist interface.',
                                     null, 'Embedding searchs');
+                                 */   
                             }
                             break;
                         case "rename":   //EDIT
@@ -1257,7 +1260,8 @@ $.widget( "heurist.svs_list", {
                         function(event){
                             var ele = $(item).find('.svs-contextmenu2');
                             //ele.css('color','red');
-                            ele.show();//css('display','inline-block');
+                            ele.css('display','inline-block');
+                            //ele.show();
                     }).mouseleave(
                         function(event){
                             var ele = $(item).find('.svs-contextmenu2');
@@ -1734,6 +1738,31 @@ $.widget( "heurist.svs_list", {
         window.hWin.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );
 
     }
+    
+    ,_showEmbedDialog: function(svs_ID){
+        
+        if(!this.embed_dialog){
+            var that = this;
+            this.embed_dialog = $('<div>').appendTo( this.element );
+            this.embed_dialog.load(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_embed_dialog.html', function(){that._showEmbedDialog(svs_ID)});
+            return;
+        }
+        
+        var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&searchIDs='+svs_ID;
+        
+        this.embed_dialog.find("#code-textbox3").val(query);
+        
+        this.embed_dialog.find("#code-textbox").val('<iframe src=\'' + query +
+        '\' width="100%" height="700"" frameborder="0"></iframe>');
+        
+        window.hWin.HEURIST4.msg.showElementAsDialog({
+            element: this.embed_dialog[0],
+            height: 420,
+            width: 700,
+            title: window.hWin.HR('Embedding searchs')
+        });
+    }
+    
 
 });
 
