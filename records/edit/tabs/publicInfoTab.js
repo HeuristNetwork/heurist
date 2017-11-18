@@ -450,7 +450,7 @@ function()
                 var extraDataHeader = container.appendChild(document.createElement("div"));
                 extraDataHeader.className = "title-row extradata hidden";
                 var hrCell = extraDataHeader.appendChild(document.createElement("div"));
-                hrCell.innerHTML = "<b>Non-standard record type fields for this record</b>";
+                hrCell.innerHTML = "<b>Non-standard fields for this record type</b>";
                 hrCell.className = "additional-header-cell";
 
                 return extraDataHeader;

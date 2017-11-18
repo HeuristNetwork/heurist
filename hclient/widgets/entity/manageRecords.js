@@ -1470,7 +1470,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                         if(addhead==0){                    
                             var rfr = that._getFakeRectypeField(1);
-                            rfr[fi_name] = 'Non-standard record type fields for this record';
+                            rfr[fi_name] = 'Non-standard fields for this record type';
                             rfr[fi_type] = 'separator';
                             s_fields.push(rfr);
                             addhead++;

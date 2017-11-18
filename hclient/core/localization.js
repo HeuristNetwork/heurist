@@ -75,7 +75,7 @@ regional['en'] = {
     'record_action_ownership':'&nbsp;',
     //reports
     'record_action_passed': 'Records passed to process',
-    'record_action_noaccess': 'No editable records found (non-editble records may exist)',
+    'record_action_noaccess': 'Non-editable records found (may be due to permissions)',
     'record_action_processed': 'Records processed',
     'record_action_undefined_add_detail': 'Records with undefined fields',
     'record_action_undefined_replace_detail': 'Skipped due to no matching',
