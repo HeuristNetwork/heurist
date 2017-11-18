@@ -84,14 +84,16 @@ if($dt_SourceRecordID==0){
         $mapping_rt_errors2 = array();
         $rep_errors_only = true;
 
-        $linkToAdvancedProperties = "<a target=\"_blank\" href=\"../../admin/adminMenuStandalone.php?db="
-        . HEURIST_DBNAME
-        ."&mode=properties2\">Database administration page > Database > Advanced Properties</a>";
+        // TODO: we need a link here which opens the Properties form in the main interface, rather than the old form
+        // $linkToAdvancedProperties = "<a target=\"_blank\" href=\"../../admin/adminMenuStandalone.php?db="
+        // . HEURIST_DBNAME
+        // ."&mode=properties2\"Manage > Database > Prxoperties</a>";
 
 
         if(!defined('HEURIST_ZOTEROSYNC') && HEURIST_ZOTEROSYNC==''){
             die(
-                " <p>Library key for Zotero synchronisation is not defined. Please go to $linkToAdvancedProperties to enter access details for your Zotero library");
+                " <p>Library key for Zotero synchronisation is not defined. Please go to " +
+                "Manage > Database > Properties to enter access details for your Zotero library.");
         }
 
         //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";
@@ -225,9 +227,8 @@ if($is_verbose){
 
 
 if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
-    print "<div style='color:red'><br />Current Zotero access settings: ' ".$key.
-    " ' <p>Please go to $linkToAdvancedProperties to enter access details for your Zotero library</div></body>
-    </html>";
+    print "<div style='color:red'><br />Current Zotero access settings incomplete: ' ".$key.
+    " ' <p>Please configure Zotero connection in Manage > Database > Properties.</div></body></html>";
     exit;
 }
 
@@ -273,10 +274,10 @@ if($step=="1"){  //first step - info about current status
     }else if($code>399){
         $msg = "<div style='color:red'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
         if($code==400 || $code==401 || $code==403){
-            $msg = $msg."Verify API key in $linkToAdvancedProperties. It can be incorrect or truncated";
+            $msg = $msg."Please verify Zotero API key in Manage > Database > Properties - it may be incorrect or truncated.";
 
         }else if($code==404 ){
-            $msg = $msg."Verify User and Group ID in ".$linkToAdvancedProperties;
+            $msg = $msg."Please verify Zotero User and Group ID in Manage > Database > Properties - values may be incorrect.";
         }else if($code==407 ){
             $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
         }
