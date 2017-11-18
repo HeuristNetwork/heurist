@@ -241,7 +241,8 @@ function SelectDetailType() {
 								];
 
 								var myConfigs = {
-									sortedBy:{key:"name", dir:"asc"}
+									sortedBy:{key:"name", dir:"asc"},
+                                    MSG_EMPTY: '<br><br>No records found.'
 									//selectionMode: "singlecell",
 									/*, paginator : new YAHOO.widget.Paginator({
 										rowsPerPage: 10, // REQUIRED
@@ -255,7 +256,7 @@ function SelectDetailType() {
 										//, rowsPerPageOptions: [100]
 									})*/
 								};
-
+                                
 								_myDataTable = new YAHOO.widget.DataTable('tabContainer', myColumnDefs, _myDataSource, myConfigs);
 
 								//

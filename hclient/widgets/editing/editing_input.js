@@ -771,7 +771,7 @@ $.widget( "heurist.editing_input", {
             }
             
             //replace input with div
-            $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'20ex'})
+            $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
                             .uniqueId().appendTo( $inputdiv );
             
             //define explicit add relationship button
@@ -1288,6 +1288,7 @@ $.widget( "heurist.editing_input", {
                             select_return_mode = 'recordset';
                             
                             $input.css({'padding-left':'30px', cursor:'hand'});
+                            //folder icon in the begining of field
                             $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
                                 .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
                             
@@ -1397,7 +1398,7 @@ $.widget( "heurist.editing_input", {
                                             rec_Title = recordset.fld(record,'ulf_OrigFileName');
                                         }
                                         that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
-                                        window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                        window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title, 10);
 
                                         //url for thumb
                                         $inputdiv.find('.image_input > img').attr('src',
@@ -1416,7 +1417,7 @@ $.widget( "heurist.editing_input", {
                                         window.hWin.HAPI4.EntityMgr.getTitlesByIds(that.configMode.entity, data.selection,
                                             function( display_value ){
                                                 var rec_Title = display_value.join(',');
-                                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
+                                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title, 10);
                                         });
                                         that.newvalues[$input.attr('id')] = data.selection.join(',');
                                         $input.change();
@@ -1610,12 +1611,13 @@ $.widget( "heurist.editing_input", {
         
         var dwidth = this.f('rst_DisplayWidth');
         
-        if( typeof dwidth==='string' && dwidth.indexOf('%')== dwidth.length-1){
+        if( typeof dwidth==='string' && dwidth.indexOf('%')== dwidth.length-1){ //set in percents
             
             $input.css('width', dwidth);
             
         }else if (parseFloat( dwidth ) > 0 
-            &&  this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {    //if the size is greater than zero
+            &&  this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {  
+              //if the size is greater than zero
                 $input.css('width', Math.round(2 + Math.min(120, Number(dwidth))) + "ex"); //was *4/3
         }
 
@@ -1751,7 +1753,7 @@ $.widget( "heurist.editing_input", {
             if(window.hWin.HEURIST4.util.isempty(rec_Title)){
                 rec_Title = value.ulf_OrigFileName;
             }
-            window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+            window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
             
             //url for thumb
             ele.parent().find('.image_input > img').attr('src',
@@ -1760,7 +1762,7 @@ $.widget( "heurist.editing_input", {
                     
         }else if(this.detailType=='file'){
             
-            window.hWin.HEURIST4.ui.setValueAndWidth(ele, value);
+            window.hWin.HEURIST4.ui.setValueAndWidth(ele, value, 10);
             
         }else if(this.configMode.entity==='records'){
                 //assign initial display value
@@ -1807,7 +1809,7 @@ $.widget( "heurist.editing_input", {
             window.hWin.HAPI4.EntityMgr.getTitlesByIds(this.configMode.entity, value.split(','),
                    function( display_value ){
                         var rec_Title  = display_value.join(',');           
-                        window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+                        window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
                    });
         }
         

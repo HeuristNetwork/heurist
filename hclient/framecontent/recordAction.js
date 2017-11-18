@@ -603,7 +603,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             '" target="_blank">view recent changes</a></span>';
                         }
 
-                        sResult = sResult + '<div><span>'+lbl+'</span><span>'
+                        sResult = sResult + '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'
                         +response[key]+'</span>'
                         +tag_link+'</div>'
 
@@ -611,7 +611,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }
 
                 $('#div_result').html(sResult);
-                $('#div_result').show();
+                $('#div_result').css({padding:'10px'}).show();
                 $('#btn-ok').button('option','label',window.hWin.HR('New Action'));
 
             }else{

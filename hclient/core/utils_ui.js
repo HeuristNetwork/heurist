@@ -70,13 +70,16 @@ if (!window.hWin.HEURIST4.ui)
 
 window.hWin.HEURIST4.ui = {
 
-    setValueAndWidth: function(ele, value){
+    setValueAndWidth: function(ele, value, padding){
         
         if(window.hWin.HEURIST4.util.isempty(value)) value='';
         ele = $(ele);
         if(ele.is('input')){
+            
+            if(!(padding>0)) padding = 4;
+            
             ele.val( value )
-                .css('width', (Math.min(80,Math.max(20,value.length))+4+'ex'));
+                .css('width', (Math.min(80,Math.max(20,value.length))+padding+'ex'));
         }else{
             ele.html( value );
         }

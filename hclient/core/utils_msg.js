@@ -727,7 +727,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             var element = options['element'];
             var originalParentNode = element.parentNode;
-            element.parentNode.removeChild(element);
+            originalParentNode.removeChild(element);
 
             $(element).show().appendTo($dlg);
 
