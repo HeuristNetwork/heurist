@@ -92,12 +92,20 @@ if(isForAdminOnly("to modify database structure")){
             }
             div.svs-contextmenu3{
                 cursor:pointer;
-                float:right;
-                min-width: 80px;
-                /*color: white !important;*/
+                position:absolute;
+                right:5px;
+                /*min-width: 80px;*/
+                /*
+                color: white !important;
                 visibility: hidden;
+                float:right;
                 padding-left:10px;
-                padding-top: 3px;
+                */
+                padding:3px;
+                display:none;
+                background:white;
+                color:#95A7B7;
+                border-radius:2px;
             }
             span.fancytree-node{
                 min-width: 300px;

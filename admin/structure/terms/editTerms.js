@@ -2254,7 +2254,7 @@ function EditTerms() {
                           if(node) node = $(node[0]);
                        }
                        var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
-                       ele.css('visibility','hidden');
+                       ele.hide();//css('visibility','hidden');
                }               
                
                $(item).hover(
@@ -2266,7 +2266,7 @@ function EditTerms() {
                           node = $(event.target).parents('.fancytree-node');
                        }
                        var ele = $(node).find('.svs-contextmenu3');
-                       ele.css('visibility','visible');
+                       ele.css('display','inline-block');//.css('visibility','visible');
                    }
                );               
                $(item).mouseleave(

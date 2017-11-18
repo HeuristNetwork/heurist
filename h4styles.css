@@ -1063,7 +1063,9 @@ ul > li > .svs-contextmenu {
 ul > li > .fancytree-node > .svs-contextmenu2 {
     display: none;
     cursor: pointer;
-    float:right;
+    /*float:right;*/
+    position:absolute;
+    right:10;
 }
 div > .svs-contextmenu {
     display: none;
@@ -1376,7 +1378,7 @@ background: #8ea9b9
     margin-left: -0.3em;
 }
 
-.ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon.png) !important; }
+.ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon_black.png) !important; }
 
 .ui-icon-aa { 
     background-image: url(hclient/assets/Aa.png) !important; 
