@@ -146,7 +146,7 @@ $.widget( "heurist.search", {
         .addClass('div-table-cell')
         .appendTo( this.div_search );
 
-        this.input_search_prompt = $( "<span>" ).text(window.hWin.HR("enter search/filter or use filter builder"))
+        this.input_search_prompt = $( "<span>" ).text(window.hWin.HR("enter search/filter or use filter builder at right"))
         .css({'color':'gray','font-size':'0.8em', 'margin': '0.2em 0 0 0.5em',
               'position': 'absolute'})
         .appendTo( this.div_search_input );
