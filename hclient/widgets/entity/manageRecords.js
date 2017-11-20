@@ -1595,9 +1595,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     
     //  -----------------------------------------------------
-    //
+    //  OVERRIDE
     //  send update request and close popup if edit is in dialog
-    // OVERRIDE
+    //  afteraction - none, close, newrecord or callback function
     //
     _saveEditAndClose: function( fields, afterAction ){
 

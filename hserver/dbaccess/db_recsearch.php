@@ -301,9 +301,9 @@
             */
 
             //
-//DEBUG
+//DEBUG     facet search
 //if(@$params['debug']) echo $query."<br>";
-// error_log($query);
+//error_log($query);
 
             $res = $mysqli->query($query);
             if (!$res){

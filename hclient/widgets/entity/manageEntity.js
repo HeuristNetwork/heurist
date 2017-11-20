@@ -937,8 +937,9 @@ $.widget( "heurist.manageEntity", {
     //  -----------------------------------------------------
     //
     //  send update request and close popup if edit is in dialog
+    // adteraction is used in overriden version of this method
     //
-    _saveEditAndClose: function( fields, afteraction ){
+    _saveEditAndClose: function( fields, afterAction ){
 
             if(!fields){
                 fields = this._getValidatedValues(); 
@@ -1107,8 +1108,12 @@ $.widget( "heurist.manageEntity", {
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'Save changes and move to [next | previous] record?',
                     //'Data were modified in edit form. Ignore modifications and start edit the new data',
-                        function(){ that._initEditForm_step2(recID); },
-                        {title:'Confirm',yes:'Cancel',no:'Save changes'});
+                        function(){ 
+                            //save changes and go to next step
+                            that._saveEditAndClose( null, function(){ that._initEditForm_step2(recID); } );
+                            //that._initEditForm_step2(recID); 
+                        },
+                        {title:'Confirm',yes:'Save changes', no:'Cancel'});
             }else{
                 this._initEditForm_step2(recID);            
             }
