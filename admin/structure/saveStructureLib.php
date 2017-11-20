@@ -535,22 +535,28 @@
 		$arr_target[$ri['rst_DisplayName']] = $dt[$di['dty_Name']];
 		$arr_target[$ri['rst_DisplayHelpText']] = $dt[$di['dty_HelpText']];
 		$arr_target[$ri['rst_DisplayExtendedDescription']] = $dt[$di['dty_ExtendedDescription']];
+
+        $arr_target[$ri['rst_DisplayOrder']] = "null";
+        $arr_target[$ri['rst_DisplayWidth']] = $defvals[2];
 		$arr_target[$ri['rst_DefaultValue']] = "";
+        $arr_target[$ri['rst_RecordMatchOrder']] = "0";
+
 		$arr_target[$ri['rst_RequirementType']] = $defvals[0];
+        $arr_target[$ri['rst_NonOwnerVisibility']] = "viewable";
+        $arr_target[$ri['rst_Status']] = "open";
+        
+        $arr_target[$ri['rst_OriginatingDBID']] = 2;
 		$arr_target[$ri['rst_MaxValues']] = "1";
 		$arr_target[$ri['rst_MinValues']] = $defvals[1]; //0 -repeatable, 1-single
-		$arr_target[$ri['rst_DisplayWidth']] = $defvals[2];
-		$arr_target[$ri['rst_RecordMatchOrder']] = "0";
-		$arr_target[$ri['rst_DisplayOrder']] = "null";
+        
 		$arr_target[$ri['rst_DisplayDetailTypeGroupID']] = "1";
 		$arr_target[$ri['rst_FilteredJsonTermIDTree']] = null;
 		$arr_target[$ri['rst_PtrFilteredIDs']] = null;
         $arr_target[$ri['rst_CreateChildIfRecPtr']] = '0';
+        
+        $arr_target[$ri['rst_OrderForThumbnailGeneration']] = null;
 		$arr_target[$ri['rst_TermIDTreeNonSelectableIDs']] = null;
 		$arr_target[$ri['rst_CalcFunctionID']] = null;
-		$arr_target[$ri['rst_Status']] = "open";
-		$arr_target[$ri['rst_OrderForThumbnailGeneration']] = null;
-		$arr_target[$ri['rst_NonOwnerVisibility']] = "viewable";
 		//$arr_target[$ri['dty_TermIDTreeNonSelectableIDs']] = "null";
 		//$arr_target[$ri['dty_FieldSetRectypeID']] = "null";
 
@@ -642,7 +648,8 @@
 					$val = array_shift($fieldVals);
 
 
-					if (array_key_exists($colName, $rstColumnNames) && $colName!="rst_LocallyModified") {
+					if (array_key_exists($colName, $rstColumnNames) 
+                                && $colName!="rst_LocallyModified") {
 						//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
 						if($isInsert){
@@ -669,7 +676,6 @@
 					}else{
 						$query = "update defRecStructure set ".$query." where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID";
 					}
-
 
 					$rows = execSQL($mysqli, $query, $parameters, true);
 
