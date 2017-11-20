@@ -1135,12 +1135,14 @@
             return $system->addError(HEURIST_INVALID_REQUEST, "Record ID is not defined");
         }
 
-        if (!$system->is_admin()) {
+        $new_owner = 0;
+        //if (!$system->is_admin()) {
             $owner = mysql__select_value($mysqli, "SELECT rec_OwnerUGrpID FROM Records WHERE rec_ID = ".$id);
-            if (!($owner == $system->get_user_id() || $system->is_admin('group', $owner))){
-                return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
+            if (!$system->is_member($owner)){
+                $new_owner = $system->get_user_id();
+                //return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
             }
-        }
+        //}
 
         $bkmk_count = 0;
         $rels_count = 0;
@@ -1153,6 +1155,19 @@
 
             $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
             //@todo addRecordIndexEntry(DATABASE, $recTypeID, $id);
+            
+            $query = '';
+            if($new_owner>0){
+                $query = ', rec_OwnerUGrpID='.$new_owner;
+            }
+                
+            $query = 'UPDATE Records set rec_Modified=NOW()'.$query.' where rec_ID='.$new_id;
+            $res = $mysqli->query($query);
+            if(!$res){
+                $error = 'database error - ' .$mysqli->error;
+                break;
+            }
+            
             
             if(!is_int($new_id)){ $error = $new_id; break; }
 

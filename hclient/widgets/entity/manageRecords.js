@@ -243,6 +243,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                                     window.hWin.HR('Record has been duplicated'));
                                                 var new_recID = ''+response.data.added;
                                                 that._initEditForm_step3(new_recID);
+                                                
+                                                var dlged = that._getEditDialog();
+                                                dlged.find('.coverall-div-bare').remove();
+                                                
                                             }else{
                                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                                             }
@@ -1568,13 +1572,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var no_access = that._getField('rec_OwnerUGrpID')>0 &&  //0 is everyone
                             window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'))<0;
             
+            
             //2. Popup for resource field
             var dlged = that._getEditDialog();
             if(dlged && (no_access || this.options.edit_obstacle)){ 
                 var ele = $('<div><div class="ui-heurist-header2" style="margin: 40px auto;width: 200px;padding:4px;border-radius:4px">'
                             +'<h2>View only mode</h2><a href="#">Edit</a><span>No enough rights</span></div></div>')
                        .addClass('coverall-div-bare')
-                       .css({top:'30px', 'text-align':'center','zIndex':9999999999}) //, 'background':'red'
+                       .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto', bottom: '40px'}) //, 'background':'red'
                        .appendTo(dlged);
                 if(no_access){
                     ele.find('a').hide();
