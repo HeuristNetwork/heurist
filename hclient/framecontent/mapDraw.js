@@ -1057,6 +1057,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         // markers, lines, and shapes.
         drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.MARKER, //google.maps.drawing.OverlayType.POLYGON,
+            drawingControlOptions: {
+                position: google.maps.ControlPosition.TOP_RIGHT //TOP_CENTER
+                //drawingModes: ['marker', 'circle', 'polygon', 'polyline', 'rectangle']
+            },            
             markerOptions: {
                 draggable: true
             },

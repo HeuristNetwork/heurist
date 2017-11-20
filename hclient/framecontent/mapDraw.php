@@ -54,7 +54,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         <style type="text/css">
             #map_digitizer {
                 position: absolute;
-                top: 30px;
+                top: 50px;
                 left: 0px;
                 right: 200px;
                 bottom: 0px;
@@ -90,7 +90,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             #rightpanel{
                 text-align:center;
                 position: absolute;
-                top: 30px;
+                top: 50px;
                 width: 200px;
                 right: 0px;
                 bottom: 0px;
@@ -106,7 +106,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 padding: 5px;
                 font-weight: normal;
                 width:190px;
-                height:290px;
+                min-height:190px;
                 border:1px solid #000000;
                 font-size:0.9em;
                 text-align:left;
@@ -119,7 +119,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     <body style="overflow:hidden">
         <div style="height:100%; width:100%;">
 
-            <div id="mapToolbarDiv" style="height: 30px;padding:0.2em">
+            <div id="mapToolbarDiv" style="height:50px;padding:1em 0.2em">
                     
                 <div class="div-table-cell">
                     <label>Find:</label>
@@ -136,7 +136,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <div class="div-table-cell" id="coords2" style="padding-left: 1em;">
                 </div>
             
-                <div style="position: absolute; right: 0.2em; top:0.2em;" class="ui-buttonset map-inited">
+                <div style="position: absolute; right: 0.2em; top:1em;" class="ui-buttonset map-inited">
                     <button id="btn_help">Help</button>
                 </div>
             </div>
@@ -150,23 +150,23 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <div style="padding-top:35px">
                     <button id="save-button" style="font-weight:bold">Save</button>
                 </div> 
-                <div style="padding-top:20px">
+                <div style="padding-top:10px">
                     <button id="cancel-button">Cancel</button>
                 </div>
-                <div>
+                <div style="padding-top:40px">
                     <button id="delete-button">Delete Selected</button>
                 </div> 
                 <div>
                     <button id="delete-all-button">Clear Map</button>
                 </div> 
-                <div>
+                <div style="padding-top:20px">
                     <button id="load-geometry-button">Add Geometry</button>
                 </div> 
                 <div>
                     <button id="get-geometry-button">Get Geometry</button>
                 </div> 
                 
-                <div style="padding-top:15px">
+                <div style="padding-top:15px;bottom:0;position: absolute">
                     <textarea id="coords1" cols="2" rows="2">
                         Click on the map. The code for the selected shape you create will be presented here.
                     </textarea>
