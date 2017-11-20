@@ -115,7 +115,12 @@
             $access = 'viewable';
         }
 
-        if(isWrongOwnership($system, $ownerid) || isWrongAccessRights($system, $access)){
+        if(isWrongOwnership($system, $ownerid)){
+            return $system->addError(HEURIST_REQUEST_DENIED, 
+                'Cannot edit the record. You are neither an owner nor a member of group that owns this record');
+        }
+            
+        if(isWrongAccessRights($system, $access)){
             return $system->getError();
         }
 
@@ -621,16 +626,13 @@
     * @param mixed $system
     * @param mixed $ownerid
     */
-    function isWrongOwnership($system, $ownerid)
+    function isWrongOwnership($system, $owneri)
     {
         if( $system->is_member($ownerid) )
         {
             return false;
         }else{
-
-            $system->addError(HEURIST_REQUEST_DENIED, 'Cannot set ownership of record to the group without membership in this group');
             return true;
-
             /* not used: since only group member can set ownership - it means that it exists
             $mysqli = $system->get_mysqli();
             $user = user_getById($mysqli, $ownerid);
@@ -655,9 +657,14 @@
     function recordCanChangeOwnerwhipAndAccess($system, $recID, &$ownerid, &$access, &$rectypes)
     {
 
+       if($ownerid && isWrongOwnership($system, $ownerid)) {
+            $system->addError(HEURIST_REQUEST_DENIED, 
+                'Cannot set ownership of record to the group without membership in this group');
+            return false;    
+       }
+        
         //if defined and wrong it fails
-        if(($ownerid && isWrongOwnership($system, $ownerid)) ||
-            ($access && isWrongAccessRights($system, $access)))
+        if($access && isWrongAccessRights($system, $access))
         {
             return false;
         }
@@ -1176,7 +1183,7 @@
 
             $res = mysql__duplicate_table_record($mysqli, 'usrBookmarks', 'bkm_RecID', $id, $new_id);
             if(!is_int($res)){ $error = $res; break; }
-            $bkmk_count = mysql_affected_rows();
+            $bkmk_count = $mysqli->affected_rows;
 
             /*@todo add to woot
             mysql_query('delete from woot_ChunkPermissions where wprm_ChunkID in '.
