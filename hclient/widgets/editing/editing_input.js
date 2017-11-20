@@ -184,6 +184,7 @@ $.widget( "heurist.editing_input", {
         .addClass('heurist-prompt ui-state-error')
         .css({'height': 'auto',
             'padding': '0.2em',
+            'border': 0,
             'margin-bottom': '0.2em'})
         .appendTo( this.input_cell );
 
@@ -2128,8 +2129,8 @@ $.widget( "heurist.editing_input", {
         var disp_value ='';
         
 
-        var $inputdiv = $( "<div>" ).addClass('input-div truncate')
-                .css({'font-weight':'bold', 'max-width':'400px'})
+        var $inputdiv = $( "<div>" ).addClass('input-div')
+                .css({'font-weight':'bold'})
                 .insertBefore(this.input_prompt);
 
         var dwidth = this.f('rst_DisplayWidth');
@@ -2151,6 +2152,8 @@ $.widget( "heurist.editing_input", {
             }
         } else if(this.detailType=='file'){
 
+            $inputdiv.addClass('truncate').css({'max-width':'400px'});
+            
             this._findAndAssignTitle($inputdiv, value);
 
         } else if(this.detailType=="resource"){
@@ -2182,9 +2185,11 @@ $.widget( "heurist.editing_input", {
             }
             disp_value = '<a href="'+value+'" target="_blank" title="'+value+'">'+value+'</a>';
             
-            
+            $inputdiv.addClass('truncate').css({'max-width':'400px'});
         }else{
             disp_value = value;
+            
+            $inputdiv.addClass('truncate').css({'max-width':'400px'});
         }
 
         if(this.detailType=="blocktext"){
