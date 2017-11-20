@@ -155,14 +155,14 @@ if(isForAdminOnly("to modify database structure")){
         <div class="ent_wrapper"> <!-- style="top:0px"-->
             <div class="ent_header" id="divBanner" style="height:3em;border:none;">
                 <h2></h2>
-                <label style="padding-left:5px;font-weight:bold">Vocabularies</label>
+                <label style="padding:14px 0px;font-size:14px;font-weight:bold">Vocabularies</label>
             </div>
-            <div class="ent_content_full" style="overflow:hidden;top:4em">
+            <div class="ent_content_full" style="overflow:hidden;top:5em">
             
-            <div id="termTree"  style="width:350;max-width:350;top:0;bottom:0;padding-right:5px;overflow:hidden;position:absolute">
+            <div id="termTree" style="width:350;max-width:350;top:0;bottom:0;padding-right:5px;overflow:hidden;position:absolute;border:1px gray solid;">
             </div>
 
-            <div id="formContainer"style="top:0;bottom:0;left:350;right:0;padding-left:10px;position:absolute;vertical-align:top;overflow-y:auto">
+            <div id="formContainer"style="top:0;bottom:0;left:350;right:0;padding-left:10px;position:absolute;vertical-align:top;overflow-y:auto;border:1px gray solid;">
             
                <div style="margin-left:2px; margin-top:15px;">
                     <span class="ui-icon ui-icon-arrowthick-1-w" style="font-size:18px;color:gray"></span>
