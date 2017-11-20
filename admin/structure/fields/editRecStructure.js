@@ -531,7 +531,7 @@ function EditRecStructure() {
                         '<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
                         '<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
                         '<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
-                        '<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition" and then "Change Vocabulary"</span>'+
+                        '<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition"</span>'+
                         '</div></div>'+
 
                         // Pointer target types - pointers and relmarkers
@@ -539,7 +539,7 @@ function EditRecStructure() {
                         '<div id="pointerPreview" class="input-cell" title="Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained">'+
                         '<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
                         // TODO: the following message is not showing, whereas the one above does
-                        '<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition" and then "Select Record Types"</span>'+
+                        '<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition"</span>'+ // and then "Select Record Types"
                         '</div></div>'+
 
                         '<div class="input-row"><div class="input-header-cell">Create new records as children:</div>'+
@@ -556,7 +556,7 @@ function EditRecStructure() {
                         
                         // Base field definitions  (button)
                         '<div>'+
-                        '<div style="margin-left:190px; padding-top:5px; padding-bottom:15px;">'+
+                        '<div style="width:90%;text-align:right;padding:5px 20px 15px 0">'+ //margin-left:190px; 
                         
                         (allowEditBaseFieldType?
                         '<input style="margin-right:100px;" id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
@@ -903,7 +903,7 @@ function EditRecStructure() {
     *				rstID from the last expanded row - from _expandedRecord. In this case it performs the saving only
     * @param needSave  whether to save data on server, it is false for collapse on delete only
     */
-    function _doExpliciteCollapse(rst_ID, needSave){
+    function _doExpliciteCollapse(rst_ID, needSave, needClose){
 
         if(Hul.isnull(rst_ID)){ //when user open select and new field type popup we have to save all changes
             rst_ID = _expandedRecord;
@@ -914,6 +914,8 @@ function EditRecStructure() {
                 return;
             }
         }
+        
+        needClose = (needClose===true);
 
         var oRecord = _getRecordById(rst_ID).record;
         var record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
@@ -931,11 +933,11 @@ function EditRecStructure() {
             _expandedRecord = null;
 
             if(needSave){
-                _saveUpdates(false); //global function
+                _saveUpdates(needClose); //global function
             }
         }
     }
-
+    
     /**
     * Find the row in database by recstructure type ID and returns the object with references.
     * This object has 2 properties: reference to record (row in datatable) and its index in datatable
@@ -1698,6 +1700,8 @@ function EditRecStructure() {
             _isServerOperationInProgress = true;
             Hul.getJsonData(baseurl, callback, params);
 
+        }else if(needClose){
+            window.close();
         }
     }
 
@@ -2217,7 +2221,10 @@ function EditRecStructure() {
 
         closeWin:function(){
             if(_expandedRecord!=null){
-                alert("You have to save or cancel changes for editing field first");
+                
+                _doExpliciteCollapse(null, true, true);
+                
+                //alert("You have to save or cancel changes for editing field first");
                 return;                
             }
             if(_checkForRequired()){
