@@ -287,7 +287,7 @@
     * @param $icon_filename - filename from icon library - for new record type ONLY
     * @return $ret an array of return values for the various data elements created or errors if they occurred
     **/
-    function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true, $icon_filename=null) {
+    function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true, $icon_filename=null, $newfields=null) {
         global $mysqli, $rtyColumnNames;
 
         $ret = null;
@@ -348,7 +348,7 @@
                 $ret = -$rtyID;
                 if($isAddDefaultSetOfFields){
                     //add default set of detail types
-                    addDefaultFieldForNewRecordType($rtyID);
+                    addDefaultFieldForNewRecordType($rtyID, $newfields);
                 }
 
                 //create canonical title mask
@@ -564,11 +564,11 @@
 
 		return $arr_target;
 	}
-
+                                 
 	//
 	//
 	//
-	function addDefaultFieldForNewRecordType($rtyID)
+	function addDefaultFieldForNewRecordType($rtyID, $newfields)
 	{
 
 			$dt = getAllDetailTypeStructures();
@@ -581,15 +581,34 @@
 			$ri = $rv['typedefs']['dtFieldNamesToIndex'];
 
 			$data = array();
-			$data['dtFields'] = array(
-			DT_NAME => getInitRty($ri, $di, $dt, DT_NAME, array('required',1,40)),
-			//DT_CREATOR => getInitRty($ri, $di, $dt, DT_CREATOR, array('optional',0,40)),
-			DT_SHORT_SUMMARY => getInitRty($ri, $di, $dt, DT_SHORT_SUMMARY, array('recommended',1,60))
-			//DT_THUMBNAIL => getInitRty($ri, $di, $dt, DT_THUMBNAIL, array('recommended',1,60)),
-			//DT_GEO_OBJECT => getInitRty($ri, $di, $dt, DT_GEO_OBJECT, array('recommended',1,40))
-			// DT_START_DATE => getInitRty($ri, $di, $dt, DT_START_DATE, array('recommended',1,40)),
-			// DT_END_DATE => getInitRty($ri, $di, $dt, DT_END_DATE, array('recommended',1,40))
-			);
+            
+            if($newfields){
+                        $newfields = json_decode(urldecode($newfields), true);
+            }
+            
+            if(is_array($newfields) && count($newfields)>0){
+                
+                $fields = $newfields['fields'];
+                $reqs   = $newfields['reqs'];
+                
+                $data['dtFields'] = array();
+                
+                foreach($fields as $dty_ID){
+                    
+                    $data['dtFields'][$dty_ID] = getInitRty($ri, $di, $dt, $dty_ID, 
+                            array((in_array($dty_ID, $reqs)?'required':'recommended'),1,60));  //req,minval,width
+                }
+            }else{
+			    $data['dtFields'] = array(
+			    DT_NAME => getInitRty($ri, $di, $dt, DT_NAME, array('required',1,40)),
+			    //DT_CREATOR => getInitRty($ri, $di, $dt, DT_CREATOR, array('optional',0,40)),
+			    DT_SHORT_SUMMARY => getInitRty($ri, $di, $dt, DT_SHORT_SUMMARY, array('recommended',1,60))
+			    //DT_THUMBNAIL => getInitRty($ri, $di, $dt, DT_THUMBNAIL, array('recommended',1,60)),
+			    //DT_GEO_OBJECT => getInitRty($ri, $di, $dt, DT_GEO_OBJECT, array('recommended',1,40))
+			    // DT_START_DATE => getInitRty($ri, $di, $dt, DT_START_DATE, array('recommended',1,40)),
+			    // DT_END_DATE => getInitRty($ri, $di, $dt, DT_END_DATE, array('recommended',1,40))
+			    );
+            }
 
 			updateRecStructure($dtFieldNames, $rtyID, $data);
 	}

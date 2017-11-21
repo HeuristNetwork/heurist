@@ -15,8 +15,8 @@
     */
 
     /**
-    * uploadRectypeIcon.php
-    * uploads icons and thumbnails for record types
+    * selectTermsByImage.php
+    * select term by image
     *
     * @author      Tom Murtagh
     * @author      Kim Jackson

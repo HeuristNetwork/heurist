@@ -110,7 +110,7 @@ else
                     if ($rtyID == -1) {    // new rectypes
                         $definit = @$_REQUEST['definit'];  //create set of default fields for new rectype
 
-                        $ret = createRectypes($commonNames, $rt, ($definit=="1"), true, @$_REQUEST['icon']);
+                        $ret = createRectypes($commonNames, $rt, ($definit=="1"), true, @$_REQUEST['icon'], @$_REQUEST['newfields']);
                         array_push($rv['result'], $ret);
 
                     }else{

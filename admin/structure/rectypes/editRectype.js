@@ -37,7 +37,8 @@ var rectype,
     titleMaskIsOk = true,
     _keepTitleMask,
     _keepStatus,
-    _rectype_icon = '';
+    _rectype_icon = '',
+    _selected_fields = null;
 
 var _openEditStrucutreAfterClose = false,
     _isIconWasUpdated = false;
@@ -52,7 +53,9 @@ function init() {
 
     var typesDropdown;
     var groupDropdown;
-    var newRectypeCode = 0; // 0: rectype with rectypeID exists - 1: no rectypeID given, create new - 2: rectype with given ID not found, error
+    var newRectypeCode = 0; // 0: rectype with rectypeID exists 
+                            // 1: no rectypeID given, create new 
+                            // 2: rectype with given ID not found, error
     if(rectypeID) { // Existing rectype, so load with values
         try {
             rectype = top.HEURIST.rectypes.typedefs[rectypeID].commonFields; // If succeeds, rectype with ID from URL exists, fill form with values
@@ -68,6 +71,8 @@ function init() {
         document.getElementById("rty_TitleMask_row").style.display = "none";
         if(newRectypeCode == 1){
             _upload_icon(3);
+            
+            _select_fields();
         }
         
     }else{
@@ -83,11 +88,34 @@ function init() {
     }
 
     setTimeout(function(){document.getElementById("rty_Name").focus();},1000);
+    
+}
 
+/**
+* select minimum set of fields for new record type
+*/
+function _select_fields(){
+
+    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeSelFields.php?db=" + db;
+
+    Hul.popupURL(top, sURL, {
+            "close-on-blur": false,
+            "no-resize": false,
+            height: 500, //(mode==0?200:250),
+            width: 700,
+            title:' Select fields for new record type',
+            callback:function(context){
+                _selected_fields = context;
+            } 
+    });
+    
 }
 
 /**
  * invokes popup to change icon or thumbnail
+ *  0 icon
+ *  1 thumb
+ *  3 select from lib
  */
 function _upload_icon(mode) {
 
@@ -443,6 +471,10 @@ function updateRectypeOnServer_continue()
         var params = "method=saveRT&db="+db+"&definit="+
         (document.getElementById("definit").checked?1:0)+
         "&data=" + encodeURIComponent(str);
+        
+        if(_selected_fields!=null){
+            params = params + '&newfields='+encodeURIComponent(JSON.stringify(_selected_fields));
+        }
 
         if(!(rectypeID>0)){   //assign for new                                          
             params = params + '&icon='+ encodeURIComponent(_rectype_icon);

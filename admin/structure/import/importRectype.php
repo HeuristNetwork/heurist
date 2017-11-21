@@ -386,7 +386,7 @@ foreach ($imp_recordtypes as $rtyID){
         }
     }
 
-    $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false);
+    $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
 
     if(is_numeric($res)){
 
