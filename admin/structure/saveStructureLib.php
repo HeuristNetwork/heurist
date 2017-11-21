@@ -536,7 +536,7 @@
 		$arr_target[$ri['rst_DisplayHelpText']] = $dt[$di['dty_HelpText']];
 		$arr_target[$ri['rst_DisplayExtendedDescription']] = $dt[$di['dty_ExtendedDescription']];
 
-        $arr_target[$ri['rst_DisplayOrder']] = "null";
+        $arr_target[$ri['rst_DisplayOrder']] = $defvals[3];//"null";
         $arr_target[$ri['rst_DisplayWidth']] = $defvals[2];
 		$arr_target[$ri['rst_DefaultValue']] = "";
         $arr_target[$ri['rst_RecordMatchOrder']] = "0";
@@ -588,26 +588,50 @@
             
             if(is_array($newfields) && count($newfields)>0){
                 
+                //find two separators
+                $seps = array();
+                foreach($dt as $dty_ID=>$fld){ 
+                    if($dty_ID>0 && @$fld['commonFields'][$di['dty_Type']]=='separator'){
+                       $seps[] = $dty_ID;  
+                       if(count($seps)==2) break;
+                    }
+                }
+                
                 $fields = $newfields['fields'];
                 $reqs   = $newfields['reqs'];
                 
                 $data['dtFields'] = array();
                 
+                $need_sep = true;
+                $order = 10;
+                if(count($seps)==2){
+                    $data['dtFields'][$seps[0]] = getInitRty($ri, $di, $dt, $seps[0], array('optional',1,60,$order));
+                    $data['dtFields'][$seps[0]][$ri['rst_DisplayName']] = 'Identification';
+                    $order = $order+10;
+                }
+                
                 foreach($fields as $dty_ID){
-                    
                     $data['dtFields'][$dty_ID] = getInitRty($ri, $di, $dt, $dty_ID, 
-                            array((in_array($dty_ID, $reqs)?'required':'recommended'),1,60));  //req,minval,width
+                            array((in_array($dty_ID, $reqs)?'required':'recommended'),1,60,$order));  //req,minval,width
+                    $order = $order+10;        
+                    if(count($seps)==2 && $need_sep){
+                        $data['dtFields'][$seps[1]] = getInitRty($ri, $di, $dt, $seps[1], array('optional',1,60,$order));
+                        $data['dtFields'][$seps[1]][$ri['rst_DisplayName']] = 'Description';
+                        $order = $order+10;
+                        $need_sep = false;
+                    }
                 }
             }else{
-			    $data['dtFields'] = array(
-			    DT_NAME => getInitRty($ri, $di, $dt, DT_NAME, array('required',1,40)),
+                $data['dtFields'] = array();
+			    $data['dtFields'][DT_NAME]= getInitRty($ri, $di, $dt, DT_NAME, array('required',1,40,$order));
+                $order = $order+10;        
+                $data['dtFields'][DT_SHORT_SUMMARY]= getInitRty($ri, $di, $dt, DT_SHORT_SUMMARY, array('recommended',1,60,$order));
+                $order = $order+10;        
 			    //DT_CREATOR => getInitRty($ri, $di, $dt, DT_CREATOR, array('optional',0,40)),
-			    DT_SHORT_SUMMARY => getInitRty($ri, $di, $dt, DT_SHORT_SUMMARY, array('recommended',1,60))
 			    //DT_THUMBNAIL => getInitRty($ri, $di, $dt, DT_THUMBNAIL, array('recommended',1,60)),
 			    //DT_GEO_OBJECT => getInitRty($ri, $di, $dt, DT_GEO_OBJECT, array('recommended',1,40))
 			    // DT_START_DATE => getInitRty($ri, $di, $dt, DT_START_DATE, array('recommended',1,40)),
 			    // DT_END_DATE => getInitRty($ri, $di, $dt, DT_END_DATE, array('recommended',1,40))
-			    );
             }
 
 			updateRecStructure($dtFieldNames, $rtyID, $data);

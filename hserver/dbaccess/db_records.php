@@ -626,7 +626,7 @@
     * @param mixed $system
     * @param mixed $ownerid
     */
-    function isWrongOwnership($system, $owneri)
+    function isWrongOwnership($system, $ownerid)
     {
         if( $system->is_member($ownerid) )
         {
