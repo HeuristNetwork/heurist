@@ -508,6 +508,21 @@ function EditRectypeTitle() {
      */
     function _doSave_Step1_Verification()
     {
+
+        function __loopNodes(node){
+            if(node.children.length===0 && node.highlightState===1){
+                return true;
+            }
+            return false;
+        }
+        
+        var res = _varsTree.getNodesBy(__loopNodes);
+        if(res && res.length>0){
+            alert('You have not yet inserted the selected fields in the title mask. Please click Insert Fields, or unselect the fields in the tree');
+            return;
+        }
+        
+        
         var mask = document.getElementById('rty_TitleMask').value;
         //var rec_type = top.HEURIST.parameters.rectypeID;
 
