@@ -120,7 +120,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //remove it to debug 
-        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 

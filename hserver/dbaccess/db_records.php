@@ -117,7 +117,7 @@
 
         if(isWrongOwnership($system, $ownerid)){
             return $system->addError(HEURIST_REQUEST_DENIED, 
-                'Cannot edit the record. You are neither an owner nor a member of group that owns this record');
+            'Sorry, you are not allowed to edit this record. You are neither the owner nor a member of the group that owns this record');
         }
             
         if(isWrongAccessRights($system, $access)){
@@ -317,6 +317,7 @@
 
                 $dtyID = $values['dtl_DetailTypeID'];
                 $dtl_Value = @$values['dtl_Value'];
+                if($dtl_Value) $dtl_Value = trim($dtl_Value);
                 $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
                 $dtl_Geo = @$values['dtl_Geo'];
 
