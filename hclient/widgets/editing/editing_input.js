@@ -1963,7 +1963,7 @@ $.widget( "heurist.editing_input", {
         var $input = $(input_id);
 
         if(!(this.detailType=="resource" || this.detailType=='file' || this.detailType=='date' || this.detailType=='geo')){
-            res = trim($input.val());
+            res = $input.val().trim();
         }else {
             res = this.newvalues[$input.attr('id')];
         }
