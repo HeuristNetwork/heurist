@@ -62,8 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.5.1"; // sets current program version number, determined by Heurist development lead
+$version = "4.5.2"; // sets current program version number, determined by Heurist development lead
 
+// 4.5.2 22 Nov 17 Fixed bugs arising from DB format changes, improve digitiser layout, fix errors in biblio structures,
+//                 improve structure visualise, fix up child record functions and new editor glitches, 
+//                 many bug fixes, lots of cosmetic improvements
 // 4.5.1 21 Sep 17 Nips and tucks to database structure, DB version 1.2.0
 // 4.2.23 3 Aug17 Bug fixes and draft of new record edit function (WIP)
 // 4.2.22  Many fixes/improvements for facet searches, file verification, thumbnailing, maps and timelines
