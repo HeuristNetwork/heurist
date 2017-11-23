@@ -118,13 +118,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             qstr = qstr + ' sortby:-m after:"1 week ago"';
             
             qobj.push({"sortby":"-m after:\"1 week ago\""});
+        }else{
+            qstr = 'sortby:t';
+            qobj.push({"sortby":"t"}); //sort by record title
         }
         if(this.element.find('#cb_bookmarked').is(':checked')){
             domain = 'b';
-            if(qstr==''){
-                qstr = 'sortby:t';
-                qobj.push({"sortby":"t"});
-            }
         }            
         
         if(qstr==''){
