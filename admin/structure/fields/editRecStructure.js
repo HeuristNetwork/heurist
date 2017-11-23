@@ -230,6 +230,9 @@ function EditRecStructure() {
                 var type = oRecord.getData("dty_Type");
                 if(type!=='separator'){
                     elLiner.innerHTML = oData;
+                    return true;
+                }else{
+                    return false;
                 }
             }
 
@@ -312,7 +315,8 @@ function EditRecStructure() {
                         if(type=='separator'){
                             $(elLiner).css({'font-size':'1.2em','font-weight':'bold','cursor':'normal'});
                         }else{
-                            $(elLiner).css({'font-weight':'bold'});   
+                            $(elLiner).css({'font-weight':'bold'})
+                                .addClass('yui-dt-liner-editable');   
                         }
 
                     }
@@ -342,8 +346,13 @@ function EditRecStructure() {
                     
                     editor: new YAHOO.widget.TextboxCellEditor({
                             validator: YAHOO.widget.DataTable.validateNumber,
-                            disableBtns:true } ),
-                            //asyncSubmitter(fnCallback,oNewValue) fnCallback(bSuccess, oNewValue) 
+                            disableBtns:true,
+                            asyncSubmitter:function(fnCallback, oNewValue){
+                                var rec = this.getRecord();
+                                _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayWidth', 
+                                            oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                            } 
+                    } ),
                     
                     formatter: function(elLiner, oRecord, oColumn, oData){
                         var wid = oRecord.getData('rst_DisplayWidth');
@@ -355,6 +364,7 @@ function EditRecStructure() {
                         }
                         else{
                             res = wid;
+                            $(elLiner).addClass('yui-dt-liner-editable');   
                         }
 
 
@@ -364,14 +374,23 @@ function EditRecStructure() {
                 //{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
                 {
                     key:"rst_RequirementType", label: "Requirement", sortable:false,
-                    minWidth:100, maxAutoWidth:100, width:100, className:'center',
+                    minWidth:80, maxAutoWidth:80, width:80, className:'left',
                     
                     editor: new YAHOO.widget.DropdownCellEditor({ 
                             dropdownOptions: ['required', 'recommended', 'optional', 'forbidden' ], 
-                            disableBtns:true } ),
-                            //asyncSubmitter(fnCallback,oNewValue) fnCallback(bSuccess, oNewValue) 
+                            disableBtns:true,
+                            asyncSubmitter:function(fnCallback, oNewValue){
+                                var rec = this.getRecord();
+                                _updateSingleField(rec.getData("rst_ID"), 'rst_RequirementType', 
+                                            oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                            } 
+                    } ),
                             
-                    formatter: _hidevalueforseparator
+                    formatter: function(elLiner, oRecord, oColumn, oData){
+                        if(_hidevalueforseparator(elLiner, oRecord, oColumn, oData)){
+                            $(elLiner).addClass('yui-dt-liner-editable2');
+                        }
+                    }
                     /*function(elLiner, oRecord, oColumn, oData){
                         var type = oRecord.getData("dty_Type");
                         if(type!=='separator'){
@@ -385,13 +404,19 @@ function EditRecStructure() {
                 },
                 {
                     key:"rst_MaxValues", label: "Repeatability", sortable:false,
-                    minWidth:60, maxAutoWidth:60, width:60, className:'center',
+                    minWidth:80, maxAutoWidth:80, width:80, className:'left',
                     editor: new YAHOO.widget.DropdownCellEditor({ 
                             dropdownOptions: 
                             //['single', 'repeatable', 'limited'],
                     [{value:0, label:'repeatable'}, {value:1, label:'single'}, 
-                        {value:2, label:'limit 2'},{value:3, label:'limit 3'},{value:4, label:'limit 4'},{value:4, label:'limit 5'} ], 
-                            disableBtns:true } ),
+                        {value:2, label:'limit 2'},{value:3, label:'limit 3'},{value:4, label:'limit 4'},{value:5, label:'limit 5'} ], 
+                            disableBtns:true,
+                            asyncSubmitter:function(fnCallback, oNewValue){
+                                var rec = this.getRecord();
+                                _updateSingleField(rec.getData("rst_ID"), 'rst_MaxValues', 
+                                            oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                            } 
+                    } ),
                     
                     formatter: function(elLiner, oRecord, oColumn, oData){
                         var type = oRecord.getData("dty_Type");
@@ -405,6 +430,7 @@ function EditRecStructure() {
                                 res = 'limit '+maxval;
                             }
                             elLiner.innerHTML = res;
+                            $(elLiner).addClass('yui-dt-liner-editable2');   
                         }
                     }
 
