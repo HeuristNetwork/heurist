@@ -1712,7 +1712,6 @@ function EditRecStructure() {
             
             var str = YAHOO.lang.JSON.stringify(orec);            
      
-//console.log(str);            
             var updateResult = function(context){
                 if(!Hul.isnull(context)){
                     top.HEURIST.rectypes = context.rectypes;

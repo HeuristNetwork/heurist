@@ -43,6 +43,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     var overlays = []; //all objects on map
     var geocoder = null;
     var map_viewpoints = []; //saved in user preferences (session) map viewpoints (bounds)
+    var map_overlays = [];   //array of kml, tiled and images layers (from db)
+    var _current_overlay = null;
 
     function clearSelection() {
         if (selectedShape) {
@@ -916,6 +918,16 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         $('#delete-button').button().click(_deleteSelectedShape);
         $('#delete-all-button').button().click(_deleteAllShapes);
 
+        
+        //get overlay layers (image,tiled,kml) ------------------------------------
+        var $sel_overlays = $('#sel_overlays');
+
+        $sel_overlays.change(function(){
+            var rec_ID = $sel_overlays.val();
+            _addOverlay(rec_ID);
+            window.hWin.HAPI4.save_pref('map_overlay_sel', rec_ID);                
+        });
+        
         //get save bounds (viewpoints) ------------------------------------
         var $sel_viepoints = $('#sel_viewpoints');
 
@@ -1132,6 +1144,55 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             }
             $sel_viepoints.change();
         }     
+        
+        //load overlays from server        
+        var rts = [window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'],
+                   //window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE'],
+                   window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']];
+        
+        var request = { q: {"t":rts.join(',')},
+            w: 'a',
+            detail: 'header',
+            source: 'sel_overlays'};
+
+        //perform search
+        window.hWin.HAPI4.RecordMgr.search(request, function(response){
+
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    var resdata = new hRecordSet(response.data);
+
+                    map_overlays = [];
+
+                    if(resdata.length()>0){
+                       map_overlays.push({key:0, title:'select...'}); 
+                    }
+                    
+                    var idx, records = resdata.getRecords();
+                    for(idx in records){
+                        if(idx)
+                        {
+                            var record = records[idx];
+                            var recID  = resdata.fld(record, 'rec_ID'),
+                            recName = resdata.fld(record, 'rec_Title');
+
+                            map_overlays.push({key:recID, title:recName});
+                        }
+                    }//for
+                    
+                    var $sel_overlays = $('#sel_overlays');
+                    window.hWin.HEURIST4.ui.createSelector( $sel_overlays.get(0),
+                        $.isEmptyObject(map_overlays)?window.hWin.HR('none defined'): map_overlays);
+
+                   var map_overlay_sel = window.hWin.HAPI4.get_prefs('map_overlay_sel');     
+                   if(map_overlay_sel>0) {
+                       $sel_overlays.val(map_overlay_sel);   
+                       $sel_overlays.change();
+                   }
+                        
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });        
 
     }
 
@@ -1216,8 +1277,63 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         drawingManager.setDrawingMode(mode);
         $("#coords1").val(sCoords);
         _applyCoordsForSelectedShape();
-    }      
+    }     
+    
+    //
+    //
+    //
+    function _addOverlay(rec_ID){
+        
+        _removeOverlay();  //remove previous
+        
+        if(!(rec_ID>0)) return;
+        
+        var that = this;
+        
+        /*
+        var request = {'a': 'search',
+            'entity': 'Records',
+            'details': 'full',
+            'rec_ID': rec_ID,
+            'request_id': window.hWin.HEURIST4.util.random()
+        }
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+        */
+        var request = { q: {"ids":rec_ID},
+            w: 'a',
+            detail: 'detail',
+            source: 'sel_overlays'};
 
+        //perform search
+        window.hWin.HAPI4.RecordMgr.search(request, function(response){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    var recordset = new hRecordSet(response.data);
+                    var record = recordset.getFirstRecord();
+                    _current_overlay = new hMapLayer({gmap:gmap, recordset:recordset});
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });
+        
+    }
+
+    //
+    //
+    //     
+    function _removeOverlay(){
+        if(_current_overlay){
+            try {
+                if(_current_overlay['removeLayer']){  // hasOwnProperty
+                    _current_overlay.removeLayer();
+                }
+                _current_overlay = null;
+            } catch(err) {
+                console.log(err);
+            }
+        }
+        
+    }
+    
     //public members
     var that = {
 

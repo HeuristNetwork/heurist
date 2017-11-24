@@ -139,7 +139,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _loadMapDocumentById() {
 
-console.log('load '+current_map_document_id);    
+//console.log('load '+current_map_document_id);    
         menu_mapdocuments.hide();
 
         // Clean old data

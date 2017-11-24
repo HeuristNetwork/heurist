@@ -1582,7 +1582,7 @@ $.widget( "heurist.editing_input", {
                     'hclient/framecontent/mapDraw.php?db='+window.hWin.HAPI4.database+
                     '&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
                     
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:'800', width:'1000',
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:'880', width:'1000',
                         title: window.hWin.HR('Heurist map digitizer'),
                         window:  window.hWin, //opener is top most heurist window
                         class:'ui-heurist-bg-light',

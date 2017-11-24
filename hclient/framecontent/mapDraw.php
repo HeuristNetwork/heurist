@@ -26,6 +26,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing,geometry"></script>
 
         <script type="text/javascript" src="mapDraw.js"></script>
+        <script type="text/javascript" src="mapLayer.js"></script>
 
         <!-- Initializing -->
 
@@ -124,7 +125,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <div class="div-table-cell">
                     <label>Find:</label>
                     <input id="input_search" class="text ui-widget-content ui-corner-all" 
-                            style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
+                            style="max-width: 150px; min-width: 10em; width: 150px; margin-right:0.2em"/>
                     <div id="btn_search_start"></div>
                 </div>
                 <div class="div-table-cell" style="padding-left: 2em;">
@@ -134,6 +135,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                     <div id="btn_viewpoint_save"></div>
                 </div>
                 <div class="div-table-cell" id="coords2" style="padding-left: 1em;">
+                </div>
+                
+                <div class="div-table-cell" style="padding-left: 2em;">
+                    <label for="sel_overlays">Background</label>
+                    <select id="sel_overlays" class="text ui-widget-content ui-corner-all" style="max-width:120px"></select>
                 </div>
             
                 <div style="position: absolute; right: 0.2em; top:1em;" class="ui-buttonset map-inited">

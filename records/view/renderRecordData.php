@@ -361,7 +361,7 @@ function print_header_line($bib) {
     ?>
         <h3>
             <div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url(".HEURIST_ICON_URL.$bib['rty_ID'].".png)'"?> >
-                <?= htmlspecialchars($bib['rty_Name'])." [".$bib['rty_ID']."] AAAA" ?>
+                <?= htmlspecialchars($bib['rty_Name'])." [".$bib['rty_ID']."] " ?>
             </div>
         </h3>
         <br>
