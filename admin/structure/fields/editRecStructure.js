@@ -296,7 +296,7 @@ function EditRecStructure() {
                             asyncSubmitter:function(fnCallback, oNewValue){
                                 var rec = this.getRecord();
                                 _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayName', 
-                                            oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                                            rec.getData("rst_DisplayName"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
                             } 
                                 }),
                             
@@ -350,7 +350,7 @@ function EditRecStructure() {
                             asyncSubmitter:function(fnCallback, oNewValue){
                                 var rec = this.getRecord();
                                 _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayWidth', 
-                                            oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                                            rec.getData("rst_DisplayWidth"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
                             } 
                     } ),
                     
@@ -382,7 +382,7 @@ function EditRecStructure() {
                             asyncSubmitter:function(fnCallback, oNewValue){
                                 var rec = this.getRecord();
                                 _updateSingleField(rec.getData("rst_ID"), 'rst_RequirementType', 
-                                            oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                                            rec.getData("rst_RequirementType"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
                             } 
                     } ),
                             
@@ -414,7 +414,7 @@ function EditRecStructure() {
                             asyncSubmitter:function(fnCallback, oNewValue){
                                 var rec = this.getRecord();
                                 _updateSingleField(rec.getData("rst_ID"), 'rst_MaxValues', 
-                                            oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                                            rec.getData("rst_MaxValues"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
                             } 
                     } ),
                     
@@ -1697,8 +1697,11 @@ function EditRecStructure() {
     * asyncSubmitter for inline editor
     * 
     */
-    function _updateSingleField(dty_ID, fieldName, oNewValue, fnCallback){
-           
+    function _updateSingleField(dty_ID, fieldName, oOldValue, oNewValue, fnCallback){
+         
+         fnCallback(true, oNewValue);
+          
+         if(oOldValue!=oNewValue){
             //create and fill the data structure
             var orec = {rectype:{
                 colNames:{common:[], dtFields:[fieldName]},
@@ -1722,9 +1725,9 @@ function EditRecStructure() {
                     
                     editStructure._structureWasUpdated = true;
                     
-                    fnCallback(true, oNewValue);
+                    //fnCallback(true, oNewValue);
                 }else{
-                    fnCallback(false, oNewValue);    
+                    //fnCallback(false, oNewValue);    
                 }
                 _isServerOperationInProgress = false;
             };
@@ -1733,6 +1736,9 @@ function EditRecStructure() {
             var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
             _isServerOperationInProgress = true;
             Hul.getJsonData(baseurl, callback, params);           
+         }else{
+            //fnCallback(true, oNewValue); 
+         }
     }
 
     
