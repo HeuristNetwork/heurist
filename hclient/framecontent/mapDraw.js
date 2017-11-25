@@ -1043,20 +1043,48 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 title:window.hWin.HR('Copy the result')
             });
         });
+        
+        /*
+        window.onbeforeunload = function(){
+            concole.log('ave extent');
+            _saveExtentOnExit();  
+        }
+        */ 
 
         $('#save-button').button().click(function(){
             if(selectedShape==null){
                 window.hWin.HEURIST4.msg.showMsgDlg('You have to select a shape');
             }else{
                 var res = _getWKT(selectedShape);
+                _saveExtentOnExit();
                 window.close(res);    
             }
         });
         $('#cancel-button').button().click(function(){
+            _saveExtentOnExit();
             window.close();
         });
-    }     
+    }          
+    
 
+    //
+    //
+    //
+    function _loadSavedExtentOnInit(){
+        var bounds = window.hWin.HAPI4.get_prefs('map_viewpoint_last');
+        if(bounds!=''){
+                bounds = bounds.split(',');
+                gmap.fitBounds({south:Number(bounds[0]), west:Number(bounds[1]),
+                    north:Number(bounds[2]), east:Number(bounds[3]) }, -1);
+        }
+    }
+    
+    //
+    //
+    //
+    function _saveExtentOnExit(){
+        window.hWin.HAPI4.save_pref('map_viewpoint_last', gmap.getBounds().toUrlValue());
+    }
 
     function _onMapInited(){
 
@@ -1143,7 +1171,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 $sel_viepoints.find('option:last-child').attr('selected', 'selected');
             }
             $sel_viepoints.change();
-        }     
+        }    
+        
+        _loadSavedExtentOnInit(); 
         
         //load overlays from server        
         var rts = [window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'],

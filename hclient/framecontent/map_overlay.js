@@ -906,11 +906,22 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     }
                     
                 }else if(this.features!=null) {
+                    
+                    //map.data.setStyle({visible: false});
+                    //Call the revertStyles() method to remove all style overrides.
+                    
                     for (var i = 0; i < this.features.length; i++) {
                         map.data.remove(this.features[i]);
                     }
                     this.features = null;
                 }
+                
+/* Set mouseover event for each feature.
+map.data.addListener('mouseover', function(event) {
+  document.getElementById('info-box').textContent =
+      event.feature.getProperty('letter');
+});*/                
+                
             },
             removeOverlay: function(){
                 this.setVisibility(false);
