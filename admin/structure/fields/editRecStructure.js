@@ -377,7 +377,7 @@ function EditRecStructure() {
                     minWidth:80, maxAutoWidth:80, width:80, className:'left',
                     
                     editor: new YAHOO.widget.DropdownCellEditor({ 
-                            dropdownOptions: ['required', 'recommended', 'optional', 'forbidden' ], 
+                            dropdownOptions: ['required', 'recommended', 'optional', {value:'forbidden',label:'hidden'} ],  
                             disableBtns:true,
                             asyncSubmitter:function(fnCallback, oNewValue){
                                 var rec = this.getRecord();
@@ -389,6 +389,7 @@ function EditRecStructure() {
                     formatter: function(elLiner, oRecord, oColumn, oData){
                         if(_hidevalueforseparator(elLiner, oRecord, oColumn, oData)){
                             $(elLiner).addClass('yui-dt-liner-editable2');
+                            if(oRecord.getData("rst_RequirementType")=='forbidden') $(elLiner).text('hidden');
                         }
                     }
                     /*function(elLiner, oRecord, oColumn, oData){
@@ -554,7 +555,7 @@ function EditRecStructure() {
                         '<option value="required">required</option>'+
                         '<option value="recommended">recommended</option>'+
                         '<option value="optional">optional</option>'+
-                        '<option value="forbidden">forbidden</option></select>'+
+                        '<option value="forbidden">hidden</option></select>'+ //was forbidden
 
                         
                         // Default value
@@ -877,6 +878,7 @@ function EditRecStructure() {
             record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
         }
 
+        //init inline edit
         var typ = oRecord.getData("dty_Type");
         if(!Hul.isnull(record_id) && 
                 (column.key === 'rst_RequirementType' || column.key === 'rst_MaxValues' || column.key === 'rst_DisplayName'
@@ -1308,14 +1310,14 @@ function EditRecStructure() {
 
                 }else if(rst_type === "separator"  &&
                     !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth" 
-                            || fieldnames[k] === "rst_DisplayHelpText")){
+                            || fieldnames[k] === "rst_DisplayHelpText" )){ //|| fieldnames[k] === "rst_RequirementType"
                         //hide all but name  and help
                         edt.parentNode.parentNode.style.display = "none";
-                    }else if(rst_type === "fieldsetmarker" && 
+                }else if(rst_type === "fieldsetmarker" && 
                         !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth" || fieldnames[k] === "rst_Status")){
                             //hide all, required - once
                             edt.parentNode.parentNode.style.display = "none";
-                        }
+                }
 
                 //hide width for some field types
                 if(fieldnames[k] === "rst_DisplayWidth" && _isNoWidth(rst_type) ){
@@ -1334,6 +1336,7 @@ function EditRecStructure() {
             //hide repeatability
             $('#divRepeatability'+rst_ID).hide();
             $('#divMoreDefs'+rst_ID).hide();
+            
         }else{
 
             //determine what is repeatability type
@@ -2596,7 +2599,7 @@ function onReqtypeChange(evt){
         var curr_value = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType];     */
         var curr_value = $(el).attr('data-original');
         var new_value = el.value;
-        if(new_value=='forbidden'){
+        if(new_value=='forbidden' || new_value=='hidden'){
             el.value = curr_value; //restore
             return;
         }
@@ -2662,7 +2665,7 @@ function onReqtypeChange(evt){
         el_min.value = 0;
 
         //Dom.setStyle(span_min, "visibility", "hidden");
-    } else if(el.value === "forbidden"){
+    } else if(el.value === "forbidden" || el.value === "hidden"){
         el_min.value = 0;
         el_max.value = 0;
 
@@ -2670,7 +2673,7 @@ function onReqtypeChange(evt){
         Dom.setStyle(span_max, "visibility", "hidden");
     }
 
-    if(el.value !== "forbidden"){
+    if (!(el.value == "forbidden" || el.value == "hidden" )){
         //rep_el.disabled = false;
         onRepeatChange(evt);
     }
@@ -2744,7 +2747,7 @@ function onRepeatChange(evt){
     function ___onRepeatChange_continue(){    
 
     var el =  Dom.get(name+'_rst_RequirementType');
-    if(el.value !== "forbidden"){
+    if(!(el.value === "forbidden" || el.value === "hidden")){
 
         el =  Dom.get(name+'_Repeatability');
         var span_min = Dom.get(name+'_spanMinValue');

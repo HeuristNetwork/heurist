@@ -1436,6 +1436,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 fi_name = fi['rst_DisplayName'],
                 fi_order = fi['rst_DisplayOrder'],
                 fi_defval = fi['rst_DefaultValue'],
+                fi_help =  fi['rst_DisplayHelpText'],
                 fi_maxval = fi['rst_MaxValues']; //need for proper repeat
             
             var s_fields = []; //sorted fields
@@ -1502,6 +1503,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }
                     var dtGroup = {
                         groupHeader: rfr[fi_name],
+                        groupHelpText: rfr[fi_help],
                         groupType: 'group', //accordion, tabs, group
                         groupStyle: {},
                         children:[]
@@ -1750,6 +1752,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
 
+        $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
+        
         if(this.element.find('.chb_show_help').length==0){
         
             $('<div style="display:block;text-align:right;padding:0 10px 5px 0;">'

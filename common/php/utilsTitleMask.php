@@ -308,10 +308,10 @@ function _titlemask__get_rec_detail_types($rt) {
         $query ='select rst_RecTypeID, '
         .' lower(rst_DisplayName) as rst_DisplayName, rst_DisplayName as originalName, '   //lower(dty_Name) as dty_Name,
         .' dty_Type, if(rst_PtrFilteredIDs,rst_PtrFilteredIDs, dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs,'
-        .' dty_OriginatingDBID, dty_IDInOriginatingDB, dty_ID '
+        .' dty_OriginatingDBID, dty_IDInOriginatingDB, dty_ID, rst_RequirementType '
         .' from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID '
-        .' where rst_RequirementType in ("required", "recommended", "optional") '
-        .' and rst_RecTypeID='.$rt
+        .' where ' //since 2017-11-25 'rst_RequirementType in ("required", "recommended", "optional") and '
+        .' rst_RecTypeID='.$rt
         .' order by rst_DisplayOrder';
 
         $res = mysql_query($query);
@@ -332,6 +332,7 @@ function _titlemask__get_rec_detail_types($rt) {
 
                 $row['dty_ConceptCode'] = $dt_cc;
 
+                //keep 3 indexes by id, name and concept code
                 $rdr[$rt][$row['dty_ID']] = $row;
                 $rdr[$rt][$row['rst_DisplayName']] = $row;
                 $rdr[$rt][$dt_cc] = $row;
@@ -370,7 +371,12 @@ function _titlemask__get_record_value($rec_id, $reset=false) {
                 $ret = $row;
                 $ret['rec_Details'] = array();
 
-                $query = 'SELECT dtl_DetailTypeID, dtl_Value FROM recDetails where dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
+                $query = 'SELECT dtl_DetailTypeID, dtl_Value '
+                .'FROM recDetails, defRecStructure '
+                .'where rst_RecTypeID='.$ret['rec_RecTypeID']
+                   .' AND rst_DetailTypeID=dtl_DetailTypeID AND rst_RequirementType!="forbidden" '
+                   .' AND dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
+                
                 $res = mysql_query($query);
                 while ($row = mysql_fetch_array($res)) {
                     array_push($ret['rec_Details'], $row);

@@ -187,6 +187,7 @@ function hEditing(_options) {
                     }
                     
                     var headerText = fields[idx]['groupHeader'];
+                    var headerHelpText = fields[idx]['groupHelpText'];
                     
                     fieldContainer = $('<fieldset>').uniqueId();
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
@@ -213,6 +214,10 @@ function hEditing(_options) {
                          //.css({'font-size':'1em'})
                     }else{
                          $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
+                         var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px').addClass('heurist-helper1').appendTo(groupContainer);
+                         if(window.hWin.HAPI4.get_prefs('help_on')!=1){
+                            div_prompt.hide();
+                         }
                          fieldContainer.appendTo(groupContainer);
                     }
                         
@@ -228,6 +233,10 @@ function hEditing(_options) {
                     
                     if(fields[idx]['dty_Type']=="separator"){
                         $('<h4>').text(fields[idx]['rst_DisplayName']).addClass('separator').appendTo(fieldContainer);
+                        var div_prompt = $('<div>').text(fields[idx]['rst_DisplayHelpText']).addClass('heurist-helper1').appendTo(fieldContainer);
+                        if(window.hWin.HAPI4.get_prefs('help_on')!=1){
+                            div_prompt.hide();
+                        }
                     }else  
                     //if(fields[idx]['dtFields']['rst_Display']!="hidden") 
                     {
@@ -295,6 +304,11 @@ function hEditing(_options) {
                     break;    
                 }
             }
+        }
+
+        if($container.find('.forbidden').length>0){
+            $('<div>').css({float: 'right',padding: '4px'})
+                .html('There are hidden fields in this form. Modify structure to enable them.').appendTo($container);
         }
         
     }
