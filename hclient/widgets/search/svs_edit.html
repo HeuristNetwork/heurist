@@ -25,7 +25,7 @@
         <div class="header" style="vertical-align:top; margin-top:5px;"><label for="svs_Name">Filter name</label></div>
         <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
             maxlength="30" size="30" style="width:250px" />
-        <div style="font-size: smaller; margin-top: 2px;">
+        <div style="font-size: smaller; margin-top: 2px; margin-bottom: 10px;">
             Used in navigation tree (maximum 30 characters).
         </div>
     </div>
@@ -34,16 +34,18 @@
         <div class="header" style="vertical-align:top; margin-top:5px;"><label for="svs_Query">Filter string</label></div>
         <textarea name="svs_Query" id="svs_Query" rows="3" class="text ui-widget-content ui-corner-all"
             style="margin-top:0.4em;width:400px"></textarea>
-        <div style="width: 380px; font-size: smaller; margin-top: 5px;margin-bottom: 5px;">
-            A standard Heurist filter string which extracts a subset of the database.
+        <div style="width: 380px; font-size: smaller; margin-top: 5px; margin-bottom: 15px;">
+            A standard Heurist filter string which extracts a subset of the database. 
+            Close this popup, use the filter builder (icon in the filter field) to build a filter, 
+            then reopen this popup - this field will be populated automatically.
         </div>
     </div>
 
     <div>
-        <div class="header" ><label for="svs_Name">Exclude filter results</label></div>
+        <div class="header" ><label for="svs_Name">Show expansion only</label></div>
         <input type="checkbox" name="svs_RulesOnly" id="svs_RulesOnly" class="text ui-widget-content ui-corner-all" style="margin:0 0 0 0"/>
         <label style="font-size: smaller; margin-top: 2px;" for="svs_RulesOnly">
-            If checked, only the result of the expansion are shown
+            Exclude results from the initial filter, only show results from expansion rules
         </label>
     </div>
     <div></div>
