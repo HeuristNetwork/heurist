@@ -400,15 +400,17 @@ $.widget( "heurist.svs_list", {
                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                     try {
                         //1. remove nodes that refers to missed search
-                        function __cleandata(data){
+                        //it returns null if leaf is not found
+                        function __cleandata(data, level){
 
-                            if(data['all']&&data['bookmark']){ //this is top level
+                            if(level==0){ //this is top level  data['all'] && data['bookmark']
                                 for(groupID in data){
-                                    data[groupID] = __cleandata(data[groupID]);
+                                    data[groupID] = __cleandata(data[groupID], level+1);
                                     if(data[groupID].was_cleaned==true){
                                         data[groupID].was_cleaned = null;
                                         var treeData = {};
                                         treeData[groupID] = data[groupID];
+console.log('saved searches tree was updated');                                        
                                         that._saveTreeData( groupID, treeData );
                                     }
                                 }
@@ -419,9 +421,11 @@ $.widget( "heurist.svs_list", {
                                 var newchildren = [];
                                 for (var idx in data.children){
                                     if(idx>=0){
-                                        var node = __cleandata(data.children[idx]);
+                                        var node = __cleandata(data.children[idx], level+1);
                                         if(node!=null){
-                                            newchildren.push(node)
+                                            newchildren.push(node);
+                                            data.was_cleaned = data.was_cleaned || node.was_cleaned; 
+                                            node.was_cleaned = null;
                                         }else{
                                             data.was_cleaned = true;
                                         }
@@ -438,7 +442,7 @@ $.widget( "heurist.svs_list", {
 
                         window.hWin.HAPI4.currentUser.ugr_SvsTreeData = $.parseJSON(response.data);
 
-                        window.hWin.HAPI4.currentUser.ugr_SvsTreeData = __cleandata(window.hWin.HAPI4.currentUser.ugr_SvsTreeData);
+                        window.hWin.HAPI4.currentUser.ugr_SvsTreeData = __cleandata(window.hWin.HAPI4.currentUser.ugr_SvsTreeData, 0);
 
                     }
                     catch (err) {
@@ -993,8 +997,9 @@ $.widget( "heurist.svs_list", {
             fancytree_options['edit'] = {
                 save:function(event, data){
                     if(''!=data.input.val()){
+                        var new_name = data.input.val();
                         that._avoidConflictForGroup(groupID, function(){
-                            data.node.setTitle( data.input.val() );
+                            data.node.setTitle( new_name );
                             that._saveTreeData( groupID );
                         });
                     }
@@ -1058,6 +1063,7 @@ $.widget( "heurist.svs_list", {
 
                                 that.editSavedSearch(null, groupID, node.key, null, node);
                             }else{
+                                //rename folder
                                 node.editStart();
                             }
 
