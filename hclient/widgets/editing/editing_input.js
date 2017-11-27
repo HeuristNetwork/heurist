@@ -157,6 +157,10 @@ $.widget( "heurist.editing_input", {
                 .button({icons:{primary: "ui-icon-circlesmall-plus"}, text:false, label:'Add another ' + lblTitle +' value'})
                 .css({display:'table-cell'});
                 
+                if(this.detailType=="blocktext"){
+                    this.btn_add.css({'vertical-align':'top','margin-top':'3px'});    
+                }
+                
                 this.btn_add.find('span.ui-icon').css({'font-size':'2em'});
                 
                 // bind click events
@@ -427,6 +431,7 @@ $.widget( "heurist.editing_input", {
             $input = $( "<textarea>",{rows:dheight})
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
+            .css({'overflow-x':'hidden'})
             .val(value)
             .keydown(function(e){
                 if (e.keyCode == 65 && e.ctrlKey) {
