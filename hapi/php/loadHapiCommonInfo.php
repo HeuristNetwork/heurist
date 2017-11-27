@@ -237,6 +237,7 @@ foreach ($rec_types as $rec_type) {
             $rstC2I['rst_DisplayHelpText']?$rdr[$rstC2I['rst_DisplayHelpText']]:null,							// 5-HelpText
             $rstC2I['rst_RecordMatchOrder']?intval($rdr[$rstC2I['rst_RecordMatchOrder']]):0,					// 6-Match Order
             $rstC2I['rst_DisplayWidth']?intval($rdr[$rstC2I['rst_DisplayWidth']]):0,							// 7-DisplayWidth
+            $rstC2I['rst_DisplayHeight']?intval($rdr[$rstC2I['rst_DisplayHeight']]):0,                            // 7-DisplayHeight
             $rstC2I['rst_DisplayOrder']?intval($rdr[$rstC2I['rst_DisplayOrder']]):0,							// 8-Display Order
             $rstC2I['rst_DisplayExtendedDescription']?$rdr[$rstC2I['rst_DisplayExtendedDescription']]:null,		// 9-Extended Description
             $rstC2I['rst_DefaultValue']?$rdr[$rstC2I['rst_DefaultValue']]:null,									//10-Default Value

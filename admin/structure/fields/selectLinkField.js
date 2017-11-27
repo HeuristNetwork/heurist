@@ -315,6 +315,7 @@ $(document).ready(function() {
         arr_target[rst.rst_MaxValues] = "1";
         arr_target[rst.rst_MinValues] = "0";
         arr_target[rst.rst_DisplayWidth] = "0";
+        arr_target[rst.rst_DisplayHeight] = "0";
         arr_target[rst.rst_RecordMatchOrder] = "0";
         arr_target[rst.rst_DisplayOrder] = insert_index;
         arr_target[rst.rst_DisplayDetailTypeGroupID] = "1";

@@ -74,6 +74,7 @@
         "rst_DisplayExtendedDescription"=>"s",
         "rst_DisplayOrder"=>"i",
         "rst_DisplayWidth"=>"i",
+        "rst_DisplayHeight"=>"i",
         "rst_DefaultValue"=>"s",
         "rst_RecordMatchOrder"=>"i",
         "rst_CalcFunctionID"=>"i",

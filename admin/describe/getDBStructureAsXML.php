@@ -459,6 +459,7 @@ function print_row($row,$fmt,$flds) {
             "<rst_DisplayExtendedDescription>$rst_DisplayExtendedDescription</rst_DisplayExtendedDescription>".
             "<rst_DisplayOrder>$row[rst_DisplayOrder]</rst_DisplayOrder>".
             "<rst_DisplayWidth>$row[rst_DisplayWidth]</rst_DisplayWidth>".
+            "<rst_DisplayHeight>$row[rst_DisplayHeight]</rst_DisplayHeight>".
             "<rst_DefaultValue>$rst_DefaultValue</rst_DefaultValue>".
             "<rst_RecordMatchOrder>$row[rst_RecordMatchOrder]</rst_RecordMatchOrder>".
             "<rst_CalcFunctionID>$row[rst_CalcFunctionID]</rst_CalcFunctionID>".

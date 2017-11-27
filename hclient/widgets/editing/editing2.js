@@ -188,6 +188,7 @@ function hEditing(_options) {
                     
                     var headerText = fields[idx]['groupHeader'];
                     var headerHelpText = fields[idx]['groupHelpText'];
+                    var is_header_visible = fields[idx]['groupTitleVisible'];
                     
                     fieldContainer = $('<fieldset>').uniqueId();
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
@@ -213,12 +214,14 @@ function hEditing(_options) {
                          }
                          //.css({'font-size':'1em'})
                     }else{
-                         $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
-                         var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px').addClass('heurist-helper1').appendTo(groupContainer);
-                         if(window.hWin.HAPI4.get_prefs('help_on')!=1){
-                            div_prompt.hide();
-                         }
-                         fieldContainer.appendTo(groupContainer);
+                        if(is_header_visible){
+                             $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
+                             var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px').addClass('heurist-helper1').appendTo(groupContainer);
+                             if(window.hWin.HAPI4.get_prefs('help_on')!=1){
+                                div_prompt.hide();
+                             }
+                        }
+                        fieldContainer.appendTo(groupContainer);
                     }
                         
                     __createGroup(fields[idx].children, groupContainer, fieldContainer);
@@ -308,7 +311,7 @@ function hEditing(_options) {
 
         if($container.find('.forbidden').length>0){
             $('<div>').css({float: 'right',padding: '4px'})
-                .html('There are hidden fields in this form. Modify structure to enable them.').appendTo($container);
+                .html('There are hidden fields in this form. <a href="#">Modify structure</a> to enable them.').appendTo($container);
         }
         
     }

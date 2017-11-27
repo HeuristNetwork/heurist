@@ -334,9 +334,12 @@ $.widget( "heurist.editing_input", {
             if(fieldname=='rst_RequirementType') val = 'optional'
             else if(fieldname=='rst_MaxValues') val = 1
                 else if(fieldname=='dty_Type') val = 'freetext'
-                    else if(fieldname=='rst_DisplayWidth'
-                        && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='url' || 
-                            this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
+                    else if(fieldname=='rst_DisplayHeight'
+                        && this.f('dty_Type')=='blocktext') {
+                          val = 3; //height in rows
+                        }else if(fieldname=='rst_DisplayWidth'
+                            && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='url' || 
+                                this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
                             val = '55';  //default width for input fields
                         }
         }
@@ -419,7 +422,9 @@ $.widget( "heurist.editing_input", {
 
         if(this.detailType=='blocktext'){
 
-            $input = $( "<textarea>",{rows:3})
+            var dheight = this.f('rst_DisplayHeight');
+            
+            $input = $( "<textarea>",{rows:dheight})
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)

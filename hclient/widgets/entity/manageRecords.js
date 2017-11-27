@@ -1437,6 +1437,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 fi_order = fi['rst_DisplayOrder'],
                 fi_defval = fi['rst_DefaultValue'],
                 fi_help =  fi['rst_DisplayHelpText'],
+                fi_reqtype =  fi['rst_RequirementType'],
                 fi_maxval = fi['rst_MaxValues']; //need for proper repeat
             
             var s_fields = []; //sorted fields
@@ -1504,6 +1505,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     var dtGroup = {
                         groupHeader: rfr[fi_name],
                         groupHelpText: rfr[fi_help],
+                        groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
                         groupType: 'group', //accordion, tabs, group
                         groupStyle: {},
                         children:[]
