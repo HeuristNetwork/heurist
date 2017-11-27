@@ -205,7 +205,8 @@ function EditRecStructure() {
                         aval[fi.rst_DisplayHelpText],
                         '',
                         conceptCode,
-                        aval[fi.rst_CreateChildIfRecPtr]]);
+                        aval[fi.rst_CreateChildIfRecPtr],
+                        aval[fi.rst_DisplayHeight]]);
                     //statusLock]);   last column stores edited values and show either delete or lock image
                 }
             }
@@ -222,7 +223,8 @@ function EditRecStructure() {
                         "dty_Name",
                         "rst_DisplayName", "dty_Type", "rst_RequirementType",
                         "rst_DisplayWidth", "rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_Status",
-                        "rst_NonOwnerVisibility", "rst_DisplayHelpText", "rst_values", "conceptCode", "rst_CreateChildIfRecPtr"]
+                        "rst_NonOwnerVisibility", "rst_DisplayHelpText", "rst_values", "conceptCode", 
+                        "rst_CreateChildIfRecPtr", "rst_DisplayHeight"]
                 }
             });
 
@@ -313,11 +315,11 @@ function EditRecStructure() {
                         
                         var type = oRecord.getData("dty_Type");
                         if(type=='separator'){
-                            $(elLiner).css({'font-size':'1.2em','font-weight':'bold','cursor':'normal'});
-                        }else{
-                            $(elLiner).css({'font-weight':'bold'})
-                                .addClass('yui-dt-liner-editable');   
+                            $(elLiner).css({'font-size':'1.2em'});//,'font-weight':'bold','cursor':'normal'});
                         }
+                        $(elLiner).css({'font-weight':'bold'})
+                                .addClass('yui-dt-liner-editable');   
+                        
 
                     }
                 },
@@ -490,14 +492,13 @@ function EditRecStructure() {
                 var val0 = oRecord.getData('dty_Type');
                 if(val0 === 'separator'){
                     Dom.addClass(elTr, 'separator');
+                }
+                var val1 = oRecord.getData('rst_NonOwnerVisibility');
+                var val2 = oRecord.getData('rst_RequirementType');
+                if (val1==='hidden' || val2==='forbidden') {
+                    Dom.addClass(elTr, 'gray');
                 }else{
-                    var val1 = oRecord.getData('rst_NonOwnerVisibility');
-                    var val2 = oRecord.getData('rst_RequirementType');
-                    if (val1==='hidden' || val2==='forbidden') {
-                        Dom.addClass(elTr, 'gray');
-                    }else{
-                        Dom.removeClass(elTr, 'gray');
-                    }
+                    Dom.removeClass(elTr, 'gray');
                 }
                 return true;
             };
@@ -531,13 +532,20 @@ function EditRecStructure() {
                         '<div style="padding-left:30; padding-bottom:5; padding-right:5; background-color:#EEE">'+
 
                         // Name / prompt
-                        '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div><div class="input-cell">'+
-                        '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
-                        'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
-
-                        // Field width
-                        '<span><label style="min-width:65px;width:65px">Field width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" '+
-                        'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="Hul.validate(event)"/></span></div>'+
+                        '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div>'+
+                            '<div class="input-cell">'+
+                                '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
+                                    'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
+                                // Field width
+                                '<span><label style="min-width:65px;width:65px">Field width:</label>'+
+                                '<input id="ed'+rst_ID+'_rst_DisplayWidth" '+
+                                    'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="Hul.validate(event)"/>'+
+                                '</span>'+
+                                '<span id="span'+rst_ID+'_rst_DisplayHeight"><label style="min-width:35px;width:35px">&nbsp;Height:</label>'+
+                                '<input id="ed'+rst_ID+'_rst_DisplayHeight" '+
+                                    'title="Display height in rows of this field in the data entry form" style="width:40" size="4" onkeypress="Hul.validate(event)"/>'+
+                                '</span>'+
+                            '</div></div>'+
 
 
                         // Help text
@@ -548,6 +556,12 @@ function EditRecStructure() {
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                         '</div></div>'+
 
+                        '<div class="input-row">'+
+                        '<div class="input-header-cell">Hidden:</div>'+
+                        '<div class="input-cell">'+
+                        '<input id="ed'+rst_ID+'_rst_RequirementType_separator" type="checkbox" value="forbidden" />'+
+                        '</div></div>'+
+                        
                         // Required/recommended optional
                         '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Requirement:</div>'+
                         '<div class="input-cell" title="Determines whether the field must be filled in, should generally be filled in, or is optional">'+
@@ -884,8 +898,31 @@ function EditRecStructure() {
                 (column.key === 'rst_RequirementType' || column.key === 'rst_MaxValues' || column.key === 'rst_DisplayName'
                 || (column.key === 'rst_DisplayWidth' && !_isNoWidth(typ))
                 )){
-            if(typ!=='separator'){
+            if(typ!=='separator' || column.key === 'rst_DisplayName'){
                 _myDataTable.onEventShowCellEditor(oArgs);
+                
+                if(column.key === 'rst_RequirementType' || column.key === 'rst_MaxValues'){ //force open dropdown
+                
+                    var editor = _myDataTable.getCellEditor();
+                    
+                    function __down(ele){
+                        var pos = $(ele).offset(); // remember position
+                        var len = $(ele).find("option").length;
+                            if(len > 20) {
+                                len = 20;
+                            }
+
+                        $(ele).css("position", "absolute");
+                        $(ele).css("zIndex", 9999);
+                        $(ele).offset(pos+18);   // reset position
+                        $(ele).attr("size", len); // open dropdown
+                        $(ele).unbind("focus", down);
+                        $(ele).focus();
+                                
+                    }
+                    __down(editor.dropdown);
+                }
+                
                 return;
             }
         }
@@ -1122,6 +1159,30 @@ function EditRecStructure() {
                 }
             }//end for
 
+
+            //special case for separator
+            var k = fieldnames.indexOf('rst_RequirementType');
+            var dti = fieldnames.indexOf('dty_Type');
+            if(values[dti]=='separator') {
+                var ed_name = '#ed'+__rst_ID+'_rst_RequirementType_separator';   
+                if($(ed_name).length>0){
+                    var is_hidden = $(ed_name).is(':checked');
+                    if ((is_hidden && values[k] !== 'forbidden') || (!is_hidden && values[k] == 'forbidden')){
+                       isChanged = true;
+                       values[k] = is_hidden?'forbidden':'optional';
+                       $('#ed'+__rst_ID+'_rst_RequirementType').val(values[k]);
+                            if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(k)<0){
+                                _updatedFields.push(k);
+                            }
+                            if(_updatedDetails.indexOf(__rst_ID)<0){
+                                _updatedDetails.push(__rst_ID);
+                            }
+                            dataupdate['rst_RequirementType'] = values[k];
+                    }
+                }
+            }
+            
+
             //update visible row in datatable
             if(isChanged){
                 dataupdate.rst_values = values;
@@ -1213,6 +1274,16 @@ function EditRecStructure() {
         $('#ed'+rst_ID+'_rst_RequirementType').attr('data-original', values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType]);
         $(selstatus).attr('data-original', status);
 
+        if(rst_type === "separator"){
+
+            $('#ed'+rst_ID+'_rst_RequirementType_separator').attr('checked',
+            values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType]=='forbidden');
+        }else{
+            $('#ed'+rst_ID+'_rst_RequirementType_separator').parents('.input-row').hide();  
+            //.parentNode.parentNode.style.display = "block";  
+        }
+        
+        
         var k;
         for(k=0; k<fieldnames.length; k++){
             var ed_name = 'ed'+rst_ID+'_'+fieldnames[k];
@@ -1309,21 +1380,35 @@ function EditRecStructure() {
                     //show disable target pnr rectype
 
                 }else if(rst_type === "separator"  &&
-                    !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth" 
+                    !(fieldnames[k] === "rst_DisplayName" //|| fieldnames[k] === "rst_DisplayWidth" 
                             || fieldnames[k] === "rst_DisplayHelpText" )){ //|| fieldnames[k] === "rst_RequirementType"
                         //hide all but name  and help
                         edt.parentNode.parentNode.style.display = "none";
                 }else if(rst_type === "fieldsetmarker" && 
-                        !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth" || fieldnames[k] === "rst_Status")){
+                        !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_Status")){ //fieldnames[k] === "rst_DisplayWidth" || 
                             //hide all, required - once
                             edt.parentNode.parentNode.style.display = "none";
                 }
-
+                
+                //hide width for alle except blocktext
+                if(fieldnames[k] === "rst_DisplayHeight"){
+                    if(rst_type=='blocktext'){
+                        ///edt.parentNode.style.display = "none";
+                        $(edt).parent().show();
+                    }else{
+                        //edt.parentNode.style.display = "block";
+                        $(edt).parent().hide();
+                    }
+                }else 
                 //hide width for some field types
-                if(fieldnames[k] === "rst_DisplayWidth" && _isNoWidth(rst_type) ){
-                    edt.parentNode.style.display = "none";
-                }else if(fieldnames[k] === "rst_DisplayName"){
-                    edt.parentNode.parentNode.style.display = "block";
+                if(fieldnames[k] === "rst_DisplayWidth"){
+                    if(_isNoWidth(rst_type) ){
+                        //edt.parentNode.style.display = "none";
+                        $(edt).parent().hide();
+                    }else{
+                        //edt.parentNode.style.display = "block";
+                        $(edt).parent().show();
+                    }
                 }
 
 
@@ -1546,7 +1631,7 @@ function EditRecStructure() {
                 var arrs = detTypes[dty_ID].commonFields;
                 // add new detail type
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
-                var def_width = 80;  // default width, used by single line text fields
+                var def_width = 80, def_height = 0;  // default width, used by single line text fields
                 var dt_type = arrs[fi.dty_Type];
 
                 if (_isNoWidth(dt_type))  // types which have no intrinsic width ie. adapt to content
@@ -1554,6 +1639,7 @@ function EditRecStructure() {
                     def_width = 0;
                 }else if (dt_type === "blocktext"){  // multi line text generally need to be wider
                     def_width = 100;
+                    def_height = 3;
                 }else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
                     dt_type === "calculated") { // numeric and date don't need much width by default
                         def_width = 10;
@@ -1570,6 +1656,7 @@ function EditRecStructure() {
                 arr_target[rst.rst_MaxValues] = "1";
                 arr_target[rst.rst_MinValues] = "0";
                 arr_target[rst.rst_DisplayWidth] = def_width;
+                arr_target[rst.rst_DisplayHeight] = def_height; //rows
                 arr_target[rst.rst_RecordMatchOrder] = "0";
                 arr_target[rst.rst_DisplayOrder] = order;
                 arr_target[rst.rst_DisplayDetailTypeGroupID] = "1";
@@ -1596,6 +1683,7 @@ function EditRecStructure() {
                     dty_Type: arrs[fi.dty_Type],
                     rst_RequirementType: "optional",
                     rst_DisplayWidth: def_width,
+                    rst_DisplayHeight: def_height,
                     rst_MinValues: 1,
                     rst_MaxValues: 1,
                     rst_DefaultValue: "",
@@ -1703,8 +1791,11 @@ function EditRecStructure() {
     function _updateSingleField(dty_ID, fieldName, oOldValue, oNewValue, fnCallback){
          
          fnCallback(true, oNewValue);
+         
           
          if(oOldValue!=oNewValue){
+             
+            _myDataTable.render();
             //create and fill the data structure
             var orec = {rectype:{
                 colNames:{common:[], dtFields:[fieldName]},
@@ -2524,6 +2615,8 @@ function onStatusChange(evt){
     
     el = Dom.get(name+"_rst_Status");
 
+    if(el==null) return;    
+    
     var curr_value = $(el).attr('data-original');
     var new_value = el.value;
         
