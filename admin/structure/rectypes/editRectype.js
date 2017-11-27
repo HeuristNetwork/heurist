@@ -72,7 +72,7 @@ function init() {
         if(newRectypeCode == 1){
             _upload_icon(3);
             
-            _select_fields();
+            //_select_fields();
         }
         
     }else{
@@ -94,16 +94,23 @@ function init() {
 /**
 * select minimum set of fields for new record type
 */
-function _select_fields(){
+function _select_fields(continue_save){
 
     var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeSelFields.php?db=" + db;
 
+    var that = this;
+    
     Hul.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
             height: 500, //(mode==0?200:250),
             width: 700,
             title:' Select fields for new record type',
+            afterclose:function(){
+                if($.isFunction(continue_save)){
+                    continue_save.call(that);
+                }
+            },
             callback:function(context){
                 _selected_fields = context;
             } 
@@ -464,7 +471,14 @@ function updateRectypeOnServer_continue()
         //do not close the window
 
     }else if(str != null) {
+        
+        if( !(rectypeID > 0) && _selected_fields==null) {
+            _select_fields( updateRectypeOnServer_continue );
+            return;
+        }
 
+console.log(_selected_fields);        
+        
         // TODO: Change base URL
         var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
         var callback = updateResult;

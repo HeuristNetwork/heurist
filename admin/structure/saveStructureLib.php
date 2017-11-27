@@ -539,6 +539,7 @@
 
         $arr_target[$ri['rst_DisplayOrder']] = $defvals[3];//"null";
         $arr_target[$ri['rst_DisplayWidth']] = $defvals[2];
+        $arr_target[$ri['rst_DisplayHeight']] = 0;
 		$arr_target[$ri['rst_DefaultValue']] = "";
         $arr_target[$ri['rst_RecordMatchOrder']] = "0";
 
