@@ -498,6 +498,21 @@ class DbRecDetails
         
         return $this->result_data;        
     }
+    
+    
+    /**
+    * assign child detail type (2-272) that refers to parent record
+    * or change given detail type to 2-272
+    */
+    public function setRecordAsChild(){
+        // parameters
+        // 1. required. detail type (pointer) from parent record - to detect what record types will be affected
+        // 2. optional. detail type in child record that already has backward reference to parent record - 
+        //             if hot defined ALL records of given record type will be affected
+        //             this detail will be replaced to 
+        
+        
+    }
 
 
     /**

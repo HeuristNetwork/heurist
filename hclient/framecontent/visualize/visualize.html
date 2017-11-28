@@ -35,15 +35,13 @@
             <button id="showRectypeSelector" style="min-width:15ex">Showing</button>
    </div>
 
-   <div id="toolbar" style="display:none">
+   <div id="toolbar" style="display:none;font-size:10px">
 
 
         <div id="setSelectMode" class="toolbar-section" style="min-width:40px">
             
-            <input type="radio" id="btnSingleSelect" name="selectMode" checked="checked">
-            <label for="btnSingleSelect">Select and drag nodes</label>
-            <input type="radio" id="btnMultipleSelect" name="selectMode">
-            <label for="btnMultipleSelect">Select multiple nodes</label>
+            <button id="btnSingleSelect" name="selectMode" value="single">"Select and drag nodes"</button>
+            <button id="btnMultipleSelect" name="selectMode" value="multi">Select multiple nodes</button>
             
             <span style="display:inline-block;width:15px"></span>
             
@@ -52,27 +50,18 @@
         </div>
 
         <div id="setViewMode" class="toolbar-section" style="min-width:40px;padding-left:15px;">
-
-            <input type="radio" id="btnViewModeIcon" name="videMode">
-            <label for="btnViewModeIcon">Icons</label>
-
-            <input type="radio" id="btnViewModeInfo" name="videMode" checked="checked">
-            <label for="btnViewModeInfo">Info</label>
-            
-            <input type="radio" id="btnViewModeFull" name="videMode">
-            <label for="btnViewModeFull">Info + Links</label>
+            <button id="btnViewModeIcon" name="videMode" value="icons">Icons</button>
+            <button id="btnViewModeInfo" name="videMode" value="infoboxes">Info</button>
+            <button id="btnViewModeFull" name="videMode" value="infoboxes_full">Info + Links</button>
         </div>
 
         <div id="setDivGravity" class="toolbar-section" 
             style="border-left: solid 1px gray; min-width:90px">
             
-            <div id="setGravityMode" style="padding-left:15px">
-                <label>gravity</label>
-                <input type="radio" id="gravityMode0" name="gravityMode" value="off">
-                <label for="gravityMode0">off</label>
-
-                <input type="radio" id="gravityMode1" name="gravityMode" value="touch">
-                <label for="gravityMode1">on</label>
+            <div id="setGravityMode" style="padding-left:10px">
+                <label class="ui-controlgroup-label" style="border:none;background:none">gravity</label> 
+                <button id="gravityMode0" name="gravityMode" value="off">off</button>
+                <button id="gravityMode1" name="gravityMode" value="touch">on</button>
 <!-- 2017-02-02
                 <input type="radio" id="gravityMode2" name="gravityMode" value="aggressive">
                 <label for="gravityMode2">strong</label>
@@ -91,17 +80,12 @@
             <label>Nodes</label>
             <div id="entityColor" class="colorblock" style="margin-left:10px"  title="Color of nodes"></div>
             <div id="setNodesMode" style="display:inline-block">
-                <input type="radio" id="nodesMode0" name="nodesMode" value="linear" 
-                    title="radius of nodes changes linearly">
-                <label for="nodesMode0">lin</label>
-
-                <input type="radio" id="nodesMode1" name="nodesMode" value="logarithmic"
-                    title="radius of nodes changes logarithmically">
-                <label for="nodesMode1">log</label>
-
-                <input type="radio" id="nodesMode2" name="nodesMode" value="unweighted" checked="checked" 
-                    title="radius of nodes has fixed size">
-                <label for="nodesMode2">fixed</label>
+                <button id="nodesMode0" name="nodesMode" value="linear" 
+                    title="radius of nodes changes linearly">lin</button>
+                <button id="nodesMode1" name="nodesMode" value="logarithmic"
+                    title="radius of nodes changes logarithmically">log</button>
+                <button id="nodesMode2" name="nodesMode" value="unweighted" checked="checked" 
+                    title="radius of nodes has fixed size">fixed</button>
             </div>
             <input id="nodesRadius" class="number-input small" type="number" min="12" max="45" step="1" />
         </div>
@@ -115,17 +99,14 @@
             <div id="linksMarkerColor" class="colorblock" title="Color of markers/arrows on links"></div>
 
             <div id="setLinksMode" style="display:inline-block">
-                <input type="radio" id="linksMode0" name="linksMode" value="straight" 
-                    title="link shape is straight">
-                <label for="linksMode0">straight</label>
+                <button id="linksMode0" name="linksMode" value="straight" 
+                    title="link shape is straight">straight</button>
 
-                <input type="radio" id="linksMode1" name="linksMode" value="curved" checked="checked" 
-                    title="link shape is curved">
-                <label for="linksMode1">curved</label>
+                <button id="linksMode1" name="linksMode" value="curved" checked="checked" 
+                    title="link shape is curved">curved</button>
                 
-                <input type="radio" id="linksMode2" name="linksMode" value="stepped"
-                    title="link shape is stepped">
-                <label for="linksMode2">stepped</label>
+                <button id="linksMode2" name="linksMode" value="stepped"
+                    title="link shape is stepped">stepped</button>
             </div>
 
             <input id="linksLength" title="Links Length" class="number-input medium" type="number" min="1" step="25" />

@@ -59,7 +59,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         <link rel=stylesheet href="../../common/css/admin.css" media="all">
 
         <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="selectRectype.js"></script>
         <style>
             .err_message {

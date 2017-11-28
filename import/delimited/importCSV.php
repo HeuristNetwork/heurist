@@ -103,9 +103,10 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
-        <link rel="stylesheet" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css" />
+        
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <script type="text/javascript" src="../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <script type="text/javascript" src="../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>

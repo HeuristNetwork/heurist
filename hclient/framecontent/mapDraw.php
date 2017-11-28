@@ -142,7 +142,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                     <select id="sel_overlays" class="text ui-widget-content ui-corner-all" style="max-width:120px"></select>
                 </div>
             
-                <div style="position: absolute; right: 0.2em; top:1em;" class="ui-buttonset map-inited">
+                <div style="position: absolute; right: 0.2em; top:1em;" class="map-inited">
                     <button id="btn_help">Help</button>
                 </div>
             </div>

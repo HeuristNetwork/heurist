@@ -60,7 +60,8 @@
 
         <!-- jQuery UI styles
         <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/base/jquery-ui.css" id="theme"> -->
-        <link rel="stylesheet" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery-ui.css" id="theme">
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" id="theme"/>
+        
         <!-- Demo styles -->
         <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo.css">
         <!--[if lte IE 8]>
@@ -360,8 +361,7 @@
         </script>
 
 
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+        <script src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <!-- The Templates plugin is included to render the upload/download listings -->
         <script src="http://blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
         <!-- The Load Image plugin is included for the preview images and image resizing functionality -->

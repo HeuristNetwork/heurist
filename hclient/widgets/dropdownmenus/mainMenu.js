@@ -170,6 +170,7 @@ $.widget( "heurist.mainMenu", {
             this._initMenu('Export');
         }
         this._initMenu('Help');
+        
         this.divMainMenuItems.menu();
         this.divProfileItems.menu();
 
@@ -387,6 +388,10 @@ $.widget( "heurist.mainMenu", {
             link = $('<a>',{
                 text: window.hWin.HR((name=='Help_lo'?'Help':name)), href:'#'
             });
+            
+            if(name=='Help'){
+                link.css({'padding-top': '7px'});    
+            }            
         }
         
         this['btn_'+name] = $('<li>').append(link)

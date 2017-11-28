@@ -42,11 +42,12 @@ if(! $system->init(@$_REQUEST['db'], true) ){
         <title><?=HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" href="../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="../../style.css">
 
-        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
+        
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <script type="text/javascript" src="../../core/recordset.js"></script>
         <script type="text/javascript" src="../../core/hapi.js"></script>

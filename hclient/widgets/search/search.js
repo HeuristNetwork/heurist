@@ -87,22 +87,18 @@ $.widget( "heurist.search", {
 
             if(!this.options.isloginforced){
                 // Login button if not already logged in
-                this.btn_login = $( "<button>", {
-                    text: window.hWin.HR("Login")
-                }) // login button
+                this.btn_login = $( "<button>" ) // login button
                 .css('width',(window.hWin.HAPI4.sysinfo.registration_allowed==1)?'80px':'160px')
                 .addClass('logged-out-only')
                 .addClass('ui-heurist-btn-header1')
                 .appendTo(div_left)
-                .button({icons: {
-                    primary: 'ui-icon-key'
-                }})
+                .button({label: window.hWin.HR("Login"), icon:'ui-icon-key'})
                 .click( function(){ that._doLogin(); });
 
                 // Register button if the database permits user registration
                 if(window.hWin.HAPI4.sysinfo.registration_allowed==1){
                     this.btn_register = $( "<button>", {
-                        text: window.hWin.HR("Register")
+                        label: window.hWin.HR("Register")
                     })
                     .css('width','80px')
                     .addClass('logged-out-only')
@@ -204,14 +200,10 @@ $.widget( "heurist.search", {
         .addClass('div-table-cell logged-out-only')
         .appendTo( this.div_search );
 
-        this.btn_search_as_guest = $( "<button>", {
-            text: window.hWin.HR("filter")
-        })
+        this.btn_search_as_guest = $( "<button>")
         .appendTo( this.div_search_as_guest )
         .addClass('ui-heurist-btn-header1')
-        .button({icons: {
-            secondary: "ui-icon-search"
-        }});
+        .button({label: window.hWin.HR("filter"), iconPosition: 'end', icon:"ui-icon-search"});
 
         this.div_search_as_user = $('<div>')
         .addClass('div-table-cell logged-in-only')
@@ -219,26 +211,22 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         this.btn_search_as_user = $( "<button>", {
-            text: window.hWin.HR("filter"), title: "Apply the filter/search in the search field and display results in the central panel below"
+            label: window.hWin.HR("filter"), title: "Apply the filter/search in the search field and display results in the central panel below"
         })
-        .css({'vertical-align':'top', 'font-size':'1.3em', 'width':'8em'})  //'width':'10em', 
+        .css({'font-size':'1.3em', 'width':'8em'})  //'width':'10em', 
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1')
-        .button({text:true, icons: {
-            primary: 'ui-icon-filter'  //was "ui-icon-search"
-        }});
+        .button({showLabel:true, icon:'ui-icon-filter'});
         
         this.btn_search_domain = $( "<button>", {
-            text: window.hWin.HR("filter option")
+            label: window.hWin.HR("filter option")
         })
         .css({'vertical-align':'top', 'font-size':'1.3em'})
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1 heurist-bookmark-search')
-        .button({icons: {
-            primary: 'ui-icon-carat-1-s' //"ui-icon-triangle-1-s"
-            }, text:false});
+        .button({icon:'ui-icon-carat-1-s', showLabel:false});
 
-        this.div_search_as_user.buttonset();
+        //btn_search_domain is hidden this.div_search_as_user.controlgroup();
 
         var dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');//,c,r,s';
         var smenu = "";
@@ -250,8 +238,7 @@ $.widget( "heurist.search", {
         });
 
         this.menu_search_domain = $('<ul>'+smenu+'</ul>')   //<a href="#">
-        .zIndex(9999)
-        .css('position','absolute')
+        .css({position:'absolute', zIndex:9999})
         .appendTo( this.document.find('body') )
         .menu({
             select: function( event, ui ) {
@@ -288,15 +275,13 @@ $.widget( "heurist.search", {
             }
             
             this.btn_search_save = $( "<button>", {
-                text: window.hWin.HR("Save"),
+                label: window.hWin.HR("Save"),
                 title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
             })
             .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
             .addClass('ui-heurist-btn-header1')
             .appendTo(div_save_filter)
-            .button({icons: {
-                primary: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"
-            }});
+            .button({icon: 'ui-icon-circle-arrow-s'});
 
             this._on( this.btn_search_save, {  click: function(){
                 window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
@@ -313,7 +298,7 @@ $.widget( "heurist.search", {
         if(window.hWin.HAPI4.sysinfo['layout']=='original'){
             
         this.btn_mamage_structure = $( "<button>", {
-                text: window.hWin.HR("Manage Structure"),
+                label: window.hWin.HR("Manage Structure"),
                 title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
             })
             .css({'width':'140px','min-width': '120px','margin-left':'3em'})
@@ -340,9 +325,7 @@ $.widget( "heurist.search", {
 
         // Quick search builder dropdown form
         var link = $('<button>')
-        .button({icons: {
-            primary: 'ui-icon-arrowthick-1-s'
-            }, text:false,
+        .button({icon: 'ui-icon-arrowthick-1-s', showLabel:false,
             label:'Dropdown form for building a simple filter expression',
             title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
         .addClass('ui-heurist-btn-header1')
@@ -351,7 +334,7 @@ $.widget( "heurist.search", {
 
         var linkGear = $('<a>',{href:'#', 
         title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px','height':'18px','opacity':'0.5'})
+        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px','height':'18px','opacity':'0.5','margin-top': '0.2em'})
         .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
         .appendTo(this.div_buttons);
         this._on( linkGear, {  click: this.showSearchAssistant });
@@ -406,16 +389,13 @@ $.widget( "heurist.search", {
 
 
             this.btn_add_record = $( "<button>", {
-                text: window.hWin.HR("Add Record"),
                 title: "Click to select a record type and access permissions, and create a new record (entity) in the database"
             })
             .css({'min-width':'110px','margin-left':'4em','font-size':'1.3em'})
             //.addClass('logged-in-only')
             //.addClass('ui-heurist-btn-header1')
             .appendTo( this.div_add_record )
-            .button({icons: {
-                primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
-            }})
+            .button({label: window.hWin.HR("Add Record"), icon:'ui-icon-plusthick'}) //"ui-icon-circle-plus"
             .click( function(){ 
                 window.hWin.HAPI4.SystemMgr.is_logged(function(){
                     if(that.select_rectype_addrec.val()>0){
@@ -427,15 +407,11 @@ $.widget( "heurist.search", {
                 }); 
             });
 
-            this.btn_select_rt = $( "<button>", {
-                text: window.hWin.HR("Select record type")
-            })
+            this.btn_select_rt = $( "<button>")
             .css({'font-size':'1.3em'})
             .appendTo( this.div_add_record )
             //.addClass('ui-heurist-btn-header1 heurist-bookmark-search')
-            .button({icons: {
-                primary: 'ui-icon-carat-1-s' //"ui-icon-triangle-1-s"
-                }, text:false});
+            .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
 
             this.select_rectype_addrec = $('<select>')   
                 .attr('size',20)
@@ -468,7 +444,7 @@ $.widget( "heurist.search", {
             });
                 
                 
-            this.div_add_record.buttonset();
+            this.div_add_record.controlgroup();
             
         } // add record button
         
@@ -608,7 +584,7 @@ $.widget( "heurist.search", {
 
         var url = window.hWin.HAPI4.baseURL+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
 
-        window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
+        window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, text:'Advanced Search Builder', callback:
             function(res){
                 if(!Hul.isempty(res)) {
                     that.input_search.val(res);
@@ -808,8 +784,7 @@ $.widget( "heurist.search", {
 
         var $dlg = this.search_assistant = $( "<div>" )
         .addClass('text ui-corner-all ui-widget-content ui-heurist-bg-light')  // menu-or-popup
-        .zIndex(9999)
-        .css('position','absolute')
+        .css({position:'absolute', zIndex:9999})
         .appendTo( this.document.find('body') )
         .hide();
 
@@ -820,15 +795,12 @@ $.widget( "heurist.search", {
 
 
             var search_quick_close = $( "<button>", {
-                text: window.hWin.HR("close")
+                label: window.hWin.HR("close")
             })
             .appendTo( $dlg )
             .addClass('ui-heurist-btn-header1')
-            .zIndex(9999)
-            .css({'position':'absolute', 'right':4, top:4, width:16, height:16, 'font-size':'0.8em'})
-            .button({icons: {
-                primary: "ui-icon-triangle-1-n"
-                }, text:false});
+            .css({position:'absolute', zIndex:9999, 'right':4, top:4, width:16, height:16, 'font-size':'0.8em'})
+            .button({icon: "ui-icon-triangle-1-n", showLabel:false});
             that._on( search_quick_close, {
                 click: function(event){
                     $dlg.hide( "blind", {}, 500 );
@@ -850,15 +822,14 @@ $.widget( "heurist.search", {
             } });
 
 
-            var search_quick_go = $( "<button>", {
-                text: window.hWin.HR("Go")
-            })
+            var search_quick_go = $( "<button>")
             .appendTo( dv )
             .addClass('ui-heurist-btn-header1')
-            //.zIndex(9999)
-            //.css({'position':'absolute', 'right':4, top:4, width:18, height:18})
+            //.css({position:'absolute', zIndex:9999, 'right':4, top:4, width:18, height:18})
             .css('float', 'right')
-            .button();
+            .button({
+                label: window.hWin.HR("Go"), showLabel:true
+            });
             that._on( search_quick_go, {
                 click: function(event){
                     $dlg.hide( "blind", {}, 500 );

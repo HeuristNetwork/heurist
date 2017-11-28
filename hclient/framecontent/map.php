@@ -248,9 +248,9 @@ require_once(dirname(__FILE__)."/initPage.php");
         $( window ).resize(function() {
             var w = $(this).width();
             if (w < 400) {
-                $("#mapSelectorBtn").button({text:false}).width(20);
+                $("#mapSelectorBtn").button({showLabel:false}).width(20);
             }else{
-                $("#mapSelectorBtn").button({text:true}).width(100);
+                $("#mapSelectorBtn").button({showLabel:true}).width(100);
             }
             
             mapping.onWinResize();
@@ -265,17 +265,13 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         $("#btnExportKML").button().click(exportKML);
 
-        $("#btnPrint").button({text:false, icons: {
-            primary: "ui-icon-print"
-        }})
+        $("#btnPrint").button({showLabel:false, icon: "ui-icon-print"})
         .click(mapping.printMap);
 
-        $("#btnEmbed").button({text:false, icons: {
-            primary: "ui-icon-globe-b"
-        }})
+        $("#btnEmbed").button({showLabel:false, icon: "ui-icon-globe-b"})
         .click(showEmbedDialog);
 
-        $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, function(){
+        $('#btn_help').button({icon: "ui-icon-help", showLabel:false}).on('click', 3, function(){
             var $helper = $("#helper");
             if($helper.dialog( "isOpen" )){
                 $helper.dialog( "close" );
@@ -350,18 +346,14 @@ require_once(dirname(__FILE__)."/initPage.php");
             $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
             $items = $items.'<li rtid="'.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
             ?>
-            $("#btnMapRefresh").button({ text:false,
-                icons: {primary: "ui-icon-arrowrefresh-1-e" }})
+            $("#btnMapRefresh").button({ showLabel:false, icon:"ui-icon-arrowrefresh-1-e" })
             .click( refreshMapDocument );
-            $("#btnMapNew").button({ text:false,
-                icons: {primary: "ui-map-document" }})
+            $("#btnMapNew").button({ showLabel:false, icon: "ui-map-document" })
             .click( function(){ addNewRecord('<?=checkRt('RT_MAP_DOCUMENT')?>');} )
             .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
-            $("#btnMapEdit").button({text:false,
-                icons: {primary: "ui-icon-pencil"}})
+            $("#btnMapEdit").button({showLabel:false, icon: "ui-icon-pencil"})
             .click( mapEdit );
-            $("#btnMapLayer").button({text:false,
-                icons: {primary: "ui-map-layer"}})
+            $("#btnMapLayer").button({showLabel:false, icon: "ui-map-layer"})
             .click(function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
             .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
 
@@ -376,22 +368,23 @@ require_once(dirname(__FILE__)."/initPage.php");
             }})
             .hide();
 
-            btn_datasets = $("#btnMapDataSource").button({text:false,
-                icons: {
-                    primary: "ui-icon-bars",  //icon-reorder
-                    secondary: "ui-icon-triangle-1-s"}});
-
-            btn_datasets.click( function(e) {
+            
+            function __drodown_mapDataSources(e) {
                 $('.menu-or-popup').hide(); //hide other
                 var $menu_layers = $( menu_datasets )
                 .show()
                 .position({my: "right top", at: "right bottom", of: btn_datasets });
                 $( document ).one( "click", function() { $menu_layers.hide(); });
                 return false;
-            });
+            }
+            
+            btn_datasets = $("#btnMapDataSourceArrow").button({showLabel:false, icon: 'ui-icon-triangle-1-s'})
+                .css({'padding':'0.4em', 'max-width':'12px'})
+                .click(__drodown_mapDataSources);
+            $("#btnMapDataSource").button({showLabel:false,icon: "ui-icon-bars"}).click(__drodown_mapDataSources);
 
 
-            $("#mapToolbar").buttonset();
+            $("#mapToolbar").controlgroup();
             <?php } else { ?>
             $("#mapSelector").hide();
             $("#mapToolbar").hide();
@@ -569,9 +562,10 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <button id="btnMapNew" title="Create new Map Document - a record that describes map features and defines what layers will be visible (will be included)">New map document</button>
                 <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>
                 <button id="btnMapDataSource" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>
+                <button id="btnMapDataSourceArrow" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>
             </div>
 
-            <div style="position: absolute; right: 0px; top:0px;display:none" class="ui-buttonset map-inited">
+            <div style="position: absolute; right: 0px; top:0px;display:none" class="map-inited">
                 <button id="btnPrint">Print</button>
                 <button id="btnEmbed">Embed</button>
                 <button id="btn_help">Help</button>

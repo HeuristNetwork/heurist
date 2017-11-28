@@ -1356,9 +1356,9 @@ background: #8ea9b9
 
 .ui-icon-filter { 
     background-image: url(hclient/assets/filter_icon24.png) !important; 
-    width: 24;
-    height: 24;
-    margin-top: -0.8em !important;
+    width: 22;
+    height: 22;
+    /*margin-top: -0.8em !important;*/
     margin-left: -0.3em;
 }
 

@@ -49,7 +49,7 @@
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/edit.css">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/admin.css">
 
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         
         <script>
             function closewin(){

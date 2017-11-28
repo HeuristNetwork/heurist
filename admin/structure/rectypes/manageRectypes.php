@@ -68,7 +68,7 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
         <!-- END PAGINATOR -->
 
-        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">

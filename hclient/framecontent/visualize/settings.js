@@ -142,33 +142,27 @@ function handleSettingsInUI() {
     
     //-------------------------------
     
-    $('#btnSingleSelect').button({icons: { primary: 'ui-icon-cursor' }, text:false})
-        .click( function(){ selectionMode = 'single'; $("#d3svg").css("cursor", "default");});
-    $('#btnMultipleSelect').button({icons: { primary: 'ui-icon-select' }, text:false})
-        .click( function(){ selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair");});
-    $('#selectMode').buttonset();
+    $('#btnSingleSelect').button({icon:'ui-icon-cursor' , showLabel:false})
+        .click( function(){ selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
+    $('#btnMultipleSelect').button({icon: 'ui-icon-select', showLabel:false})
+        .click( function(){ selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
+    $('#selectMode').controlgroup();
         
-    $('#btnViewModeIcon').button({icons: { primary: 'ui-icon-circle' }, text:false})
+    $('#btnViewModeIcon').button({icon: 'ui-icon-circle' , showLabel:false})
         .click( function(){changeViewMode('icons');} );
-    $('#btnViewModeInfo').button({icons: { primary: 'ui-icon-circle-b-info' }, text:false})
+    $('#btnViewModeInfo').button({icon: 'ui-icon-circle-b-info' , showLabel:false})
         .click( function(){changeViewMode('infoboxes');} );
-    $('#btnViewModeFull').button({icons: { primary: 'ui-icon-circle-info' }, text:false})
+    $('#btnViewModeFull').button({icon: 'ui-icon-circle-info' , showLabel:false})
         .click( function(){changeViewMode('infoboxes_full');} );
-        
-    $( "#setViewMode" ).buttonset();    
+    $( "#setViewMode" ).controlgroup();    
 
-     var grv = getSetting(setting_gravity);
-    //
-    if(grv=='agressive') grv='touch';
-    $("input[name='gravityMode'][value='" +grv+ "']").attr("checked", true);
-    
-    $('#gravityMode0').button() //{icons: { primary: 'ui-icon-gravity0' }, text:false})
-        .click( function(){ setGravity('off') });
-    $('#gravityMode1').button() //{icons: { primary: 'ui-icon-gravity1' }, text:false})
-        .click( function(){ setGravity('touch') });
-    $('#gravityMode2').button() //{icons: { primary: 'ui-icon-gravity2' }, text:false})
-        .click( function(){ setGravity('aggressive') });
-    $( "#setGravityMode" ).buttonset();    
+    $('#gravityMode0').button(/*{icon: 'ui-icon-gravity0' , showLabel:false}*/)
+        .click( function(){setGravity('off');} );
+    $('#gravityMode1').button(/*{icon: 'ui-icon-gravity1' , showLabel:false}*/)
+        .click( function(){setGravity('touch');} );
+    $('#gravityMode2').button(/*{icon: 'ui-icon-gravity2' , showLabel:false}*/)
+        .click( function(){setGravity('aggressive');} );
+    $("#setGravityMode").controlgroup();    
     
     //------------ NODES ----------
     
@@ -182,15 +176,17 @@ function handleSettingsInUI() {
                         return getEntityRadius(d.count);
                     })
     });
-    $("input[name='nodesMode'][value='" +getSetting(setting_formula)+ "']").attr("checked", true);
     
-    $('#nodesMode0').button().css('width','20px')
+    //$("input[name='nodesMode'][value='" +getSetting(setting_formula)+ "']").attr("checked", true);
+    
+    $('#nodesMode0').button().css('width','35px')
         .click( function(){ setFormulaMode('linear'); });
-    $('#nodesMode1').button().css('width','20px')
+    $('#nodesMode1').button().css('width','40px')
         .click( function(){ setFormulaMode('logarithmic'); }); 
-    $('#nodesMode2').button().css('width','20px')
+    $('#nodesMode2').button().css('width','50px')
         .click( function(){ setFormulaMode('unweighted'); });
-    $( "#setNodesMode" ).buttonset();    
+    $( "#setNodesMode" ).controlgroup();    
+
     
     $("#entityColor")
         .addClass('ui-icon ui-icon-bullet')
@@ -211,16 +207,18 @@ function handleSettingsInUI() {
     
     //------------ LINKS ----------
 
-    $("input[name='linksMode'][value='" +getSetting(setting_linetype)+ "']").attr("checked", true);
-    $('#linksMode0').button({icons: { primary: 'ui-icon-link-streight' }, text:false})
-        .click( setLinkMode );
-    $('#linksMode1').button({icons: { primary: 'ui-icon-link-curved' }, text:false})
-        .click( setLinkMode );
-    $('#linksMode2').button({icons: { primary: 'ui-icon-link-stepped' }, text:false})
-        .click( setLinkMode );
-        
-    $( "#setLinksMode" ).buttonset();    
+    //$("input[name='linksMode'][value='" +getSetting(setting_linetype)+ "']").attr("checked", true);
     
+    $('#linksMode0').button({icon: 'ui-icon-link-streight', showLabel:false})
+        .click( function(){ setLinkMode('straight');} );
+    $('#linksMode1').button({icon: 'ui-icon-link-curved', showLabel:false})
+        .click( function(){ setLinkMode('curved');} );
+    $('#linksMode2').button({icon: 'ui-icon-link-stepped', showLabel:false})
+        .click( function(){ setLinkMode('stepped');} );
+        
+    $( "#setLinksMode" ).controlgroup();    
+    
+    _syncUI();
 
     var linksLength = getSetting(setting_linelength, 200);    
     $('#linksLength').val(linksLength).change(function(){
@@ -420,7 +418,25 @@ function initRecTypeSelector(){
     $('#rectypeSelector').css('display','table-cell');     
 }
 
+function _syncUI(){
+    $('#toolbar').find('button').removeClass('ui-heurist-btn-header1');
+    
+    $('#toolbar').find('button[value="'+selectionMode+'"]').addClass('ui-heurist-btn-header1');
+    $('#toolbar').find('button[value="'+currentMode+'"]').addClass('ui-heurist-btn-header1');
+
+    var grv = getSetting(setting_gravity);
+    if(grv=='agressive') grv = 'touch';
+    $('#toolbar').find('button[value="'+grv+'"]').addClass('ui-heurist-btn-header1');
+    
+    var formula = getSetting(setting_formula)
+    $('#toolbar').find('button[value="'+formula+'"]').addClass('ui-heurist-btn-header1');
+    
+    var linetype = getSetting(setting_linetype);
+    $('#toolbar').find('button[value="'+linetype+'"]').addClass('ui-heurist-btn-header1');
+}
+
 function changeViewMode(mode){
+    
     
     if(mode!=currentMode){
         if(mode=='infoboxes'){ // && currentMode=='icons'
@@ -450,6 +466,9 @@ function changeViewMode(mode){
         }
         var isLabelVisible = (currentMode != 'icons') || (getSetting(setting_labels)=='on');
         d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
+        
+        
+        _syncUI();
     }
 }
 
@@ -476,6 +495,8 @@ function setGravity(gravity) {
     if(gravity !== "off") {
         force.resume(); 
     }     
+    
+    _syncUI();
 }
 //
 //
@@ -487,6 +508,7 @@ function setFormulaMode(formula) {
                         return getEntityRadius(d.count);
                     })
     refreshLinesWidth();
+    _syncUI();
 }
 
 //
@@ -517,10 +539,11 @@ function refreshLinesWidth(){
 //
 // straight or curverd links type
 //
-function setLinkMode() {
-    var formula = $(event.target).val();
+function setLinkMode(formula) {
+    //var formula = $(event.target).val();
     putSetting(setting_linetype, formula);
     visualizeData();
+    _syncUI();
 }
 
 //-----------------------

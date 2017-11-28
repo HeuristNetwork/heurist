@@ -63,7 +63,7 @@
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/samples/yui-dt-expandable.js"></script>
-        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <style type="text/css">
             .yui-skin-sam .yui-dt-liner {
                 white-space:nowrap;

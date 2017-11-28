@@ -1743,8 +1743,8 @@ map.data.addListener('mouseover', function(event) {
         
         menu_mapdocuments = $('<ul>').appendTo( $('body') ).hide();
 
-        var btn_mapdocs = $("#mapSelectorBtn").button({text:true, label:'Select...',
-                icons: {secondary: "ui-icon-triangle-1-s"}}).height(20)
+        var btn_mapdocs = $("#mapSelectorBtn").button({showLabel:true, label:'Select...',
+                icon:"ui-icon-triangle-1-s", iconPosition:'end'}).css('max-height',22)
                 .click( function(e) {
                 $('.menu-or-popup').hide(); //hide other
                 

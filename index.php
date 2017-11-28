@@ -60,23 +60,12 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
         number of widgets. Currently it is commented out of the code in layout_default.js -->
 
-        <!-- for gridster layout, development version - remove comments to use
-        <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
-        <script type="text/javascript" src="ext/gridster/utils.js"></script>
-        <script type="text/javascript" src="ext/gridster/jquery.collision.js"></script>
-        <script type="text/javascript" src="ext/gridster/jquery.coords.js"></script>
-        <script type="text/javascript" src="ext/gridster/jquery.draggable.js"></script>
-        <script type="text/javascript" src="ext/gridster/jquery.gridster.js"></script>
-        -->
-        <!-- for gridster layout, production (minimised) version - remove comments to use
-        <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.all.css" />
-        <script type="text/javascript" src="ext/gridster/jquery.gridster.all.js"></script>
-        -->
-
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
-        <!-- script type="text/javascript" src="ext/js/moment.min.js"></script -->
+        
+        <!-- script type="text/javascript" src="ext/js/moment.min.js"></script
         <script type="text/javascript" src="ext/js/date.format.js"></script>
-
+         -->
+         
         <!-- init layout and loads all apps.widgets -->
         <script type="text/javascript" src="hclient/core/layout.js"></script>
         <!-- array of possible layouts -->
@@ -136,8 +125,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <!--  media viewer - however it is not used at the moment 
         <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
-        <link rel="stylesheet" type="text/css" href="ext/lightbox/css/lightbox.css" />
-        <script type="text/javascript" src="ext/lightbox/js/lightbox.js"></script>
         -->
         
         <link rel="stylesheet" type="text/css" href="ext/fancybox/jquery.fancybox.css" />

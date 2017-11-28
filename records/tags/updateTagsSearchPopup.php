@@ -54,7 +54,7 @@ if(@$_REQUEST['recid']){
         <link rel=stylesheet href="../../common/css/autocomplete.css">
         <link rel=stylesheet href="../../common/css/global.css">
         <link rel=stylesheet href="../../common/css/edit.css">
-        <script src="../../external/jquery/jquery.js"></script>
+        <script src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <title>Tags</title>
         <style>
             .input-row div.input-header-cell, .input-row label {width:45px;max-width:45px}

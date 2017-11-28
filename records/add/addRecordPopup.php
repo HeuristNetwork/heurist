@@ -48,7 +48,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
         <link rel=stylesheet href="<?=HEURIST_BASE_URL?>common/css/admin.css">
         <title>Add new record</title>
 
-        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?=HEURIST_BASE_URL?>common/js/utilsUI.js"></script>
 
         <script>

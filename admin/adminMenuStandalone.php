@@ -68,8 +68,7 @@ if (array_key_exists('mode', $_REQUEST)) {
     </head>
 
     <body>
-        <script src="../external/jquery/jquery-1.5.1.min.js"></script>
-        <script src="../external/jquery/jquery-ui-1.8.13.custom.min.js"></script>
+        <script src="../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
         <script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
         <script src="../common/js/utilsLoad.js"></script><!-- core HEURIST functions -->

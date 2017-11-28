@@ -103,7 +103,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
         if($blankServer){
             ?>
             <link rel=icon href="../../../favicon.ico" type="image/x-icon">
-            <link rel="stylesheet" href="../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+            <link rel="stylesheet" href="../../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
             <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
 
             <!-- TODO: These all climb laboriously out to codebase then into /ext, /js etc...
@@ -112,8 +112,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 window.hWin = window;
             </script>
             
-            <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-            <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+            <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+            <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
             <script type="text/javascript" src="../../../hclient/core/localization.js"></script>
             <script type="text/javascript" src="../../../hclient/core/utils.js"></script>
             <script type="text/javascript" src="../../../hclient/core/utils_msg.js"></script>
@@ -247,7 +247,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
             <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
             <!-- already referenced above <link rel="stylesheet" type="text/css" href="../../../h4styles.css"> -->
-            <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+            <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
 
             <script type="text/javascript">
                 $(document).ready(function() {

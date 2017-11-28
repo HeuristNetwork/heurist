@@ -38,10 +38,10 @@ if(isForAdminOnly("to modify database structure")){
         <title>Manage terms for term list fields and relationship type</title>
 
         <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
         
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
         <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
 

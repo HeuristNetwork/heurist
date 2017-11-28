@@ -467,96 +467,6 @@ function hLayout(args) {
     }
 
     /**
-    * Init Gridster layout
-    *
-    * @param layout
-    * @param $container
-    */
-    function _initLayoutGridster(layout, $container){
-
-            if(!$.isFunction($('body').gridster)){
-                $.getScript(window.hWin.HAPI4.baseURL+'ext/gridster/jquery.gridster.js', initLayoutGridster );
-                return;
-            }
-
-        //pane - the base container for widgets/applications
-
-        //1. loop trough all layout panes  - create divs or use existing ones
-        var panes = Object.keys(layout);
-        var i, reserved = ['id', 'name', 'theme', 'type', 'options', 'cssfile'];
-
-        if(!layout.options){
-            layout.options = {};
-        }
-        if(!layout.options.widget_margins){
-            layout.options.widget_margins = [10, 10];
-        }
-        if(!layout.options.widget_base_dimensions){
-            layout.options.widget_base_dimensions = [50, 50];
-        }
-        if( Hul.isnull(layout.options.autogrow_cols) ){
-            layout.options.autogrow_cols = true;
-        }
-        if( Hul.isnull(layout.options.resize) ){
-            layout.options.helper = 'clone';
-            layout.options.resize = {enabled: true};
-        }
-
-    //dat-row="1" data-col="3" data-sizex="1" data-sizey="2" data-max-sizex="6" data-max-sizey="2"
-
-        //add UL to main
-        $container.addClass('gridster');
-        var $ul = $('<ul>').css({'background-color': '#EFEFEF', 'list-style-type': 'none', 'position':'absolute'}).appendTo($container);
-        var gridster = $ul.gridster(layout.options).data('gridster');
-        var icol=1, irow=1;
-
-        function __layoutAddPane(pos){
-            if(layout[pos]){
-
-                var lpane = layout[pos];
-
-                var col,row;
-                if(lpane.col>0){
-                    col = lpane.col;
-                }else{
-                    col = icol;
-                    icol++;
-                }
-                if(lpane.row>0){
-                    row = lpane.row;
-                }else{
-                    row = irow;
-                    irow++;
-                }
-
-                gridster.add_widget('<li><div class="ui-layout-'+pos+'"></div></li>',
-                                              lpane.size_x>0?lpane.size_x:1,
-                                              lpane.size_y>0?lpane.size_y:1,
-                                              col, row);
-                /* @todo
-                if(lpane.css){
-                        $pane.css(lpane.css);
-                }*/
-            }
-        }
-
-        var bg_color = $('.ui-widget-content:first').css('background-color');
-        $('body').css('background-color', bg_color);
-
-        for (i=0; i<panes.length; i++){
-            if(reserved.indexOf(panes[i])<0){
-                 __layoutAddPane(panes[i]);
-                 layoutInitPane( layout, $container, panes[i], bg_color );
-            }
-        }
-
-        $('li.gs-w').css({'background-color': '#DDD'});
-
-        initDragDropListener();
-    }
-
-
-    /**
     * Adds application/widgets to specified pane
     *
     * @param $container
@@ -1112,10 +1022,6 @@ function hLayout(args) {
         if(Hul.isempty(layout.type) || layout.type=='cardinal'){
 
             _initLayoutCardinal(layout, $container);
-
-        }else if(layout.type=='gridster'){
-
-            _initLayoutGridster(layout, $container);
 
         }else { //}if(layout.type=='free'){
 

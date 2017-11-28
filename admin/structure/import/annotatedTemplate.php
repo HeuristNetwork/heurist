@@ -37,7 +37,7 @@
         <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
 
-        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">

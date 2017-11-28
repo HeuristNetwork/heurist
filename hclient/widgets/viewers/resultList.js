@@ -340,8 +340,7 @@ $.widget( "heurist.resultList", {
             }
 
             this.menu_actions = $('<ul>'+smenu+'</ul>')   //<a href="#">
-            .zIndex(9999)
-            .css('position','absolute')
+            .css({position:'absolute', zIndex:9999})
             .appendTo( this.document.find('body') )
             .menu({
                 select: function( event, ui ) {
@@ -372,39 +371,30 @@ $.widget( "heurist.resultList", {
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
         .css({'float':'right','padding-right':right_padding+'px'})
-        //.css({'display':'inline-block','text-align':'right','padding-right':right_padding+'px'})
-        .html('<input id="cb1_'+rnd+'" type="radio" name="list_lo" value="list" class="btnset_radio"/>'
-            +'<label for="cb1_'+rnd+'">'+window.hWin.HR('list')+'</label>'
-            +'<input  id="cb2_'+rnd+'" type="radio" name="list_lo" value="icons" class="btnset_radio"/>'
-            +'<label for="cb2_'+rnd+'">'+window.hWin.HR('icons')+'</label>'
-            +'<input  id="cb3_'+rnd+'" type="radio" name="list_lo" value="thumbs" class="btnset_radio"/>'
-            +'<label for="cb3_'+rnd+'">'+window.hWin.HR('thumbs')+'</label>'
-            +'<input  id="cb4_'+rnd+'" type="radio" name="list_lo" value="thumbs3" class="btnset_radio"/>'
-            +'<label for="cb4_'+rnd+'">'+window.hWin.HR('thumbs3')+'</label>'
+        .html('<button d="cb1_'+rnd+'" value="list" class="btnset_radio"/>'
+            +'<button  id="cb2_'+rnd+'" value="icons" class="btnset_radio"/>'
+            +'<button  id="cb3_'+rnd+'" value="thumbs" class="btnset_radio"/>'
+            +'<button  id="cb4_'+rnd+'" value="thumbs3" class="btnset_radio"/>'
         )
-        .buttonset()
         .appendTo( this.div_toolbar );
+        
+        this.view_mode_selector.find('button[value="list"]').button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('list')});
+        this.view_mode_selector.find('button[value="icons"]').button({icon: "ui-icon-view-icons-b", showLabel:false, label:window.hWin.HR('icons')});
+        this.view_mode_selector.find('button[value="thumbs"]').button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('thumbs')});
+        this.view_mode_selector.find('button[value="thumbs3"]').button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('thumbs3')});
+        this.view_mode_selector.controlgroup();
 
-        this._on( this.view_mode_selector, {
-            click: function(event) { //it works twice - first for button, then for buttonset
-                var rbid = $(event.target).parent().attr('for');
-                if(!window.hWin.HEURIST4.util.isnull(rbid)){
-                    var view_mode = this.element.find('#'+rbid).val();
-                    //var view_mode = this.element.find("input[name='list_lo']:checked").val();
-                    //console.log(this.element.parent().parent().attr('id')+'  '+rbid+' '+view_mode);
+        
+        this._on( this.view_mode_selector.find('button'), {
+            click: function(event) {
+                    var btn = $(event.target).parent('button');
+                    var view_mode = btn.attr('value');
+
                     this.applyViewMode(view_mode);
                     window.hWin.HAPI4.save_pref('rec_list_viewmode', view_mode);
-                }
         }});
 
-        this.element.find('input[type=radio][value="list"]').button({icons: {primary: "ui-icon-list"}, text:false, title:window.hWin.HR('list')});
-        this.element.find('input[type=radio][value="icons"]').button({icons: {primary: "ui-icon-view-icons-b"}, text:false, title:window.hWin.HR('icons')});
-        this.element.find('input[type=radio][value="thumbs"]').button({icons: {primary: "ui-icon-view-icons"}, text:false, title:window.hWin.HR('thumbs')});
-        this.element.find('input[type=radio][value="thumbs3"]').button({icons: {primary: "ui-icon-stop"}, text:false, title:window.hWin.HR('thumbs3')});
-
-        //----------------------
-        //,'min-width':'10em'
-
+        
 
         if(this.options.show_savefilter){
             //special feature to save current filter
@@ -703,12 +693,13 @@ $.widget( "heurist.resultList", {
             }
 
         }
-        //this.btn_view.button( "option", "label", window.hWin.HR(newmode));
-        //this.element.find('#list_layout_'+newmode).attr('checked','checked');
-        this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
+        //this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
 
-        if(this.view_mode_selector){ //this.view_mode_selector.data('uiButtonset')){
-            this.view_mode_selector.buttonset('refresh'); 
+        if(this.view_mode_selector){
+            this.view_mode_selector.find('button').removeClass('ui-heurist-btn-header1');
+            var btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
+            btn.addClass('ui-heurist-btn-header1')                
+            //this.view_mode_selector.controlgroup('refresh');
         }
 
     },
@@ -1590,8 +1581,7 @@ $.widget( "heurist.resultList", {
 
 
             this.menu_pages = $('<ul>'+smenu+'</ul>')   //<a href="#">
-            .zIndex(9999)
-            .css({'font-size':'0.7em', 'position':'absolute'})
+            .css({position:'absolute', zIndex:9999, 'font-size':'0.7em'})
             .appendTo( this.document.find('body') )
             .menu({
                 select: function( event, ui ) {

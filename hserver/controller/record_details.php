@@ -48,6 +48,8 @@
 
             $res = $dbRecDetails->detailsDelete();
 
+        }else if(@$_REQUEST['a'] == 'add_child'){
+            
         }else if(@$_REQUEST['a'] == 'rectype_change'){
 
             $res = $dbRecDetails->changeRecordTypeInBatch();

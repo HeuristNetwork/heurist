@@ -144,8 +144,7 @@ $.widget( "heurist.dh_search", {
                     }});
 
                     that.menu_fi = $('<ul>'+smenu+'</ul>')   //<a href="#">
-                    .zIndex(9999)
-                    .css({'position':'absolute', 'width':that.btn_fi_menu.width() })
+                    .css({'position':'absolute', 'width':that.btn_fi_menu.width(), zIndex:99999 })
                     .appendTo( that.document.find('body') )
                     .menu({
                         select: function( event, ui ) {

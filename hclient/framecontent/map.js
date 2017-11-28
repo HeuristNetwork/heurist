@@ -607,7 +607,7 @@ if(_mapdata.limit_warning){
             }
         }
 
-        var toolbar = $("#timeline_toolbar").zIndex(3).css('font-size','0.8em');
+        var toolbar = $("#timeline_toolbar").css({'font-size':'0.8em', zIndex:3});
 
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
@@ -647,9 +647,8 @@ if(_mapdata.limit_warning){
                         +'<li id="tlm2"><a href="#"><span class="ui-icon ui-icon-check"/>Fixed length</a></li>'
                         +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li>'
                         +'<li id="tlm4"><a href="#"><span/>Hide labels/No stack</a></li></ul>')
-        .zIndex(9999)
         .addClass('menu-or-popup')
-        .css({'position':   'absolute', 'padding':'2px'})
+        .css({'position':   'absolute', 'padding':'2px', zIndex:99999})
         .appendTo( $('body') )
         .menu({
             select: function( event, ui ) {
@@ -671,10 +670,8 @@ if(_mapdata.limit_warning){
         }})
         .hide();
 
-        $("<button>").button({icons: {
-            primary: "ui-icon-tag",
-            secondary: "ui-icon-triangle-1-s"
-            },text:false, label:window.hWin.HR("Label settings")})
+        //secondary: "ui-icon-triangle-1-s"
+        $("<button>").button({icon:"ui-icon-tag",showLabel:false, label:window.hWin.HR("Label settings")})
             .click(function(){
                 $('.menu-or-popup').hide(); //hide other
 
@@ -685,7 +682,7 @@ if(_mapdata.limit_warning){
                 return false;
 
             })
-            .css({width:'5em'})
+            //.css({width:'5em'})
             .appendTo(toolbar);
 
         var spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);
