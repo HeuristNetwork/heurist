@@ -71,6 +71,12 @@ body {
 .ui-button .ui-button-text {
     line-height: 1em;
 }
+.ui-selectmenu-button span.ui-selectmenu-text{
+    padding: 0.1em 2.1em 0.2em 0.2em;
+}
+.ui-front{
+    z-index: 999999999;
+}
 /*  LAYOUT */
 .ui-layout-pane {
     padding: 0 !important;
@@ -216,7 +222,7 @@ btnset_radio:focus {
     border-color:transparent;    
 }
 
-fieldset > div > input.text, fieldset > div > select.text{
+fieldset > div > input.text, fieldset > div > select.text, fieldset > div > .ui-selectmenu-button{
     margin-top: 0.3em;
     margin-bottom: 0.5em;
 }

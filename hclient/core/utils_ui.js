@@ -98,13 +98,15 @@ window.hWin.HEURIST4.ui = {
         }
         
         //$(option).appendTo($(sel));
-        
+        sel.appendChild(option);
+        /*
         try {
             // for IE earlier than version 8
             sel.add(option, sel.options[null]);
         }catch (ex2){
             sel.add(option, null);
         }
+        */
         
         return option;
     },
@@ -120,6 +122,9 @@ window.hWin.HEURIST4.ui = {
             selObj = document.createElement("select");
         }else{
             $(selObj).empty();
+            if($(selObj).hSelect("instance")!=undefined){
+               $(selObj).hSelect("destroy"); 
+            }
         }
         
         window.hWin.HEURIST4.ui.fillSelector(selObj, topOptions);
@@ -405,8 +410,10 @@ window.hWin.HEURIST4.ui = {
             selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
         }
 
-        if(datatype === "relmarker" || datatype === "relationtype"){
+        if(datatype=="relation" || datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
+        }else{
+            datatype = "enum";
         }
 
         var terms = window.hWin.HEURIST4.terms;
@@ -480,14 +487,16 @@ window.hWin.HEURIST4.ui = {
                 
                 var depth = parents.length;
 
+                /* not used anymore - replaced with jquery selecmenu
                 if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
                     //for non mozilla add manual indent
                     var a = new Array( ((depth<7)?depth:7)*2 );
                     termName = a.join('. ') + termName;       
-                }
+                }*/
                 if(depth>0){
                     termParents = parents.join('.');
                 }
+                
 
                 var isDisabled = (headerTerms[termID]? true:false);
                 var hasChildren = ( typeof termSubTree[termID] == "object" && Object.keys(termSubTree[termID]).length>0 );
@@ -518,9 +527,11 @@ window.hWin.HEURIST4.ui = {
 
                         var opt = new Option(termName+termCode, termID);
                         opt.className = "depth" + (depth<7)?depth:7;
-                        opt.depth = depth;
+                        //opt.depth = depth;
+                        $(opt).attr('depth', depth);
                         opt.disabled = isDisabled;
                         $(opt).attr('term-img', hasImage?1:0);
+                        
                         
                         if(termParents!=''){
                             $(opt).attr('parents', termParents);
@@ -565,7 +576,7 @@ window.hWin.HEURIST4.ui = {
                     parent.children[k].parent = parent;
                 }
             } //for
-
+            
             return reslist2;
         }//end internal function
 
@@ -612,6 +623,10 @@ window.hWin.HEURIST4.ui = {
 
         if(selObj){
             if (!defaultTermID) selObj.selectedIndex = 0;
+            
+            //apply select menu
+            window.hWin.HEURIST4.ui.initHSelect(selObj);
+            
             return selObj;
         }else{
             return reslist_final;
@@ -655,7 +670,7 @@ window.hWin.HEURIST4.ui = {
     //
     createRectypeSelect: function(selObj, rectypeList, topOptions) {
 
-        window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
+        selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
         var rectypes = window.hWin.HEURIST4.rectypes,
         index;
@@ -672,7 +687,7 @@ window.hWin.HEURIST4.ui = {
             rectypeList = [];
         }
         
-        if(rectypeList.length>0 && rectypeList.length<4){
+        if(rectypeList.length>0 && rectypeList.length<4){  //show only specified list of rectypes
             for (var idx in rectypeList)
             {
                 if(idx){
@@ -684,13 +699,14 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
             }
-        }else{
+        }else{  //show rectypes separated by groups
+        
             for (index in rectypes.groups){
                 if (index == "groupIDToIndex" ||
                     rectypes.groups[index].showTypes.length < 1) {
                     continue;
                 }
-                //show group if at leas one rectype is visible
+                //show group if at least one rectype is visible
                 if(rectypeList.length>0){
                     var notfound = true;
                     for (var recTypeIDIndex in rectypes.groups[index].showTypes){
@@ -715,9 +731,14 @@ window.hWin.HEURIST4.ui = {
 
                     if(!window.hWin.HEURIST4.util.isnull(name)){
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
+                        $(opt).attr('depth', 1);
                     }
                 }
+                
             }
+            
+            window.hWin.HEURIST4.ui.initHSelect(selObj);
+
         }
 
         return selObj;
@@ -763,15 +784,16 @@ window.hWin.HEURIST4.ui = {
                         ((rectypes.names[rectypeTree.rt_ids]!=parent_Name)?(' as '+parent_Name):'');
             }
             
-            
+            /* rerplaced witj jquery selectmenu see hSelect 
             if(isNotFirefox && indent>0){
                 var a = new Array( ((indent<7)?indent:7)*2 );
                 rectypeName = a.join('. ') + rectypeName;
             }
+            */
             
             var opt = window.hWin.HEURIST4.ui.addoption(selObj, recTypeID, rectypeName); 
             opt.className = "depth" + (indent<7)?indent:7;
-            opt.depth = indent;        
+            $(opt).attr('depth', indent);        
             is_used = true;
         }
         
@@ -783,6 +805,10 @@ window.hWin.HEURIST4.ui = {
                     indent+(is_used?1:0) );
         }
 
+        if(indent==0){
+            window.hWin.HEURIST4.ui.initHSelect(selObj);        
+        }
+        
         return selObj;
     },
     
@@ -802,16 +828,19 @@ window.hWin.HEURIST4.ui = {
         var selectedValue = null;
         var showLatLongForGeo = false;
         var show_parent_rt = false;
+        var initial_indent = 0;
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name']==true;
             addLatLongForGeo  = options['show_latlong']==true;
             requriedHighlight = options['show_required']==true;
             selectedValue     = options['selected_value'];
             show_parent_rt    = options['show_parent_rt']==true;
+            initial_indent = options['initial_indent']>0?options['initial_indent']:0;
         }
         
         var dtyID, details;
         
+        //show fields for specified set of record types
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length>1){
             //get fields for specified array of record types
             // if number of record types is less than 10 form structure
@@ -849,6 +878,8 @@ window.hWin.HEURIST4.ui = {
                   dtys[dtyName].push(fieldName);
                 }
             }//for rectypes
+            
+            //fill select
             if (dtyNames.length >0) {
                 dtyNames.sort();
                 //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
@@ -860,11 +891,13 @@ window.hWin.HEURIST4.ui = {
 
                   //sort RectypeName.FieldName
                   dtys[dtyName].sort();
+                  
                   for (j in dtys[dtyName]){
                     fieldName = dtys[dtyName][j];
                     
-                    opt = window.hWin.HEURIST4.ui.addoption(selObj, '',  '.  .'+fieldName);
-                    opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
+                    opt = window.hWin.HEURIST4.ui.addoption(selObj, '',  fieldName);
+                    $(opt).attr('depth',1);
+                    //opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
                     opt.disabled = "disabled";
 
                   }
@@ -873,8 +906,8 @@ window.hWin.HEURIST4.ui = {
                 window.hWin.HEURIST4.ui.addoption(selObj, '', window.hWin.HR('no suitable fields'));
             }
             
-            
         }else 
+        //details for the only recordtype
         if((window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
             //structure not defined
             var rectype = Number((window.hWin.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
@@ -952,9 +985,12 @@ window.hWin.HEURIST4.ui = {
                 if(arrterm[i][2] && requriedHighlight){
                     opt.className = "required";
                 }
+                $(opt).attr('depth',initial_indent);
             }
 
-        }else{ //show all detail types
+        }
+        // for all fields
+        else{ //show all detail types
 
             if(!window.hWin.HEURIST4.detailtypes) return selObj;
 
@@ -992,7 +1028,8 @@ window.hWin.HEURIST4.ui = {
                     //add to select
                     var i=0, cnt= arrterm.length;
                     for(;i<cnt;i++) {
-                        window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
+                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
+                        $(opt).attr('depth',1);
                     }
                 }
 
@@ -1008,6 +1045,8 @@ window.hWin.HEURIST4.ui = {
             $(selObj).val(selectedValue);
         }
 
+        window.hWin.HEURIST4.ui.initHSelect(selObj); 
+        
         return selObj;
     },
 
@@ -1069,6 +1108,33 @@ window.hWin.HEURIST4.ui = {
         }
     },
     
+    initHSelect: function(selObj){            
+
+        //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
+        ////depth>1 || (optgroup==null && depth>0
+        
+        $(selObj).find('option').each(
+            function(idx, item){
+                var opt = $(item);
+                var depth = parseInt(opt.attr('depth'));
+                if(depth>0) { 
+                    //for non mozilla add manual indent
+                    var a = new Array( 2 + ((depth<7)?depth:7)*2 );
+                    opt.html(a.join('&nbsp;&nbsp;') + opt.text());       
+                }
+        });
+        
+           /*
+            var menu = $(selObj).hSelect({
+                change: function( event, data ) {
+                        $(selObj).val(data.item.value);
+                        $(selObj).trigger('change');
+                }});
+            
+            menu.hSelect( "menuWidget" ).css({'padding':0,'background':'#F4F2F4','zIndex':9999999});
+            menu.hSelect( "widget" ).css({'padding':0,'background':'#F4F2F4'});
+            */
+    },            
     
     // Init button that show/hide help tips
     initDialogHintButtons: function($dialog, usrPrefKey, helpcontent_url, hideHelpButton){
@@ -1726,3 +1792,34 @@ console.log(recID);
 
 }
 
+/*
+hSelect - decendant of jquery.selectmenu
+*/
+$.widget( "heurist.hSelect", $.ui.selectmenu, {
+  _renderItem: function( ul, item ) {
+    var li = $( "<li>" ),
+      wrapper = $( "<div>", { text: item.label } );
+
+    if ( item.disabled ) {
+      li.addClass( "ui-state-disabled" );
+    }
+    
+    if($(item.element).attr('depth')>0){
+        console.log($(item.element).attr('depth')+'   '+item.label);
+    }
+    
+    var depth = parseInt($(item.element).attr('depth'));
+    if(!(depth>0)) depth = 0;
+    wrapper.css('padding-left',(depth+0.2)+'em');
+    
+    /*icon
+    $( "<span>", {
+      style: item.element.attr( "data-style" ),
+      "class": "ui-icon " + item.element.attr( "data-class" )
+    })
+      .appendTo( wrapper );
+    */   
+
+    return li.append( wrapper ).appendTo( ul );
+  }
+});

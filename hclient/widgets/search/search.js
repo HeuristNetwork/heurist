@@ -435,7 +435,7 @@ $.widget( "heurist.search", {
             this._on( this.select_rectype_addrec, {
                 change: function(){
 
-                   this.btn_add_record.button({label: 'Add '+this.select_rectype_addrec.find('option:selected').text()});
+                   this.btn_add_record.button({label: 'Add '+this.select_rectype_addrec.find('option:selected').text().trim()});
                    
                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:this.select_rectype_addrec.val()}});
                    
@@ -892,7 +892,8 @@ $.widget( "heurist.search", {
                         select_sortby.get(0).appendChild(grp);
                         */
                     }
-                    window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, topOptions);
+                    window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, topOptions,
+                                {initial_indent:1});
 
                     $("#sa_fieldvalue").val("");
                     $("#sa_negate").prop("checked",'');
