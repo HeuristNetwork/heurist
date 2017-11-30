@@ -390,7 +390,7 @@ $.widget( "heurist.mainMenu", {
             });
             
             if(name=='Help'){
-                link.css({'padding-top': '7px'});    
+                link.css({'padding-top': '4px'});    
             }            
         }
         

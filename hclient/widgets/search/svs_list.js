@@ -719,6 +719,7 @@ console.log('saved searches tree was updated');
         var that = this;
 
         var context_opts = {
+            delegate: ".hasmenu",
             menu: arr_menu,
             select: function(event, ui) {
 
@@ -755,7 +756,7 @@ console.log('saved searches tree was updated');
             sIcon = 'group';
         }
 
-        var $header = $('<h3 grpid="'+domain+'"><span class="ui-icon ui-icon-'+sIcon+'" '
+        var $header = $('<h3 grpid="'+domain+'" class="hasmenu"><span class="ui-icon ui-icon-'+sIcon+'" '
             + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
             + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;">('
             + ((sIcon=='user')?'private':'workgroup')
@@ -842,7 +843,7 @@ console.log('saved searches tree was updated');
         var treeData = window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID] && window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID].children
         ?window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID].children :[];
 
-        var tree = $("<div>").css('padding-bottom','0em');
+        var tree = $("<div>").addClass('hasmenu').css('padding-bottom','0em');
 
         var fancytree_options =
         {
@@ -1288,17 +1289,19 @@ console.log('saved searches tree was updated');
 
             var context_opts = this._getAddContextMenu(groupID);
 
+            var append_link = $("<a>",{href:'#'})
+                .html('<span class="ui-icon ui-icon-plus hasmenu" style="display:inline-block; vertical-align: bottom"></span>'+
+                '<span class="hasmenu">add</span>')
+                .click(function(event){
+                    append_link.contextmenu('open', append_link.find('span.ui-icon') );
+                    //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
+             });
+             append_link.contextmenu(context_opts);
 
             //treedata is empty - add div - to show add links
             var tree_links = $("<div>", {id:"addlink"+groupID})
             .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
-            .append( $("<a>",{href:'#'})
-                .html('<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom"></span>add')
-                .click(function(event){
-                    $(this).contextmenu('open', $(this));
-                })
-                .contextmenu(context_opts)
-            );
+            .append( append_link );
 
 
             if(window.hWin.HEURIST4.util.isnull(container)){
