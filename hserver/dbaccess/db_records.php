@@ -218,8 +218,15 @@
 
         $mysqli = $system->get_mysqli();
 
+        //0 normal, 1 import, 2 - faims import
         $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
 
+        $is_strict_validation = true;
+        if(@$record['no_validation']){
+            $is_strict_validation = false;
+            unset($record['no_validation']);
+        }
+        
         $rectype = intval(@$record['RecTypeID']);
 
         if ($rectype && !dbs_GetRectypeByID($mysqli, $rectype))  {
@@ -228,7 +235,7 @@
 
         // recDetails data
         if ( @$record['details'] ) {
-            $detailValues = prepareDetails($system, $rectype, $record['details'], ($modeImport<2));
+            $detailValues = prepareDetails($system, $rectype, $record['details'], ($modeImport<2 && $is_strict_validation));
             if(!$detailValues){
                 return $system->getError();
             }
@@ -849,7 +856,7 @@
     * @param mixed $mysqli
     * @param mixed $rectype
     * @param mixed $details
-    * @param mixed $is_strict - check resources and terms ID
+    * @param mixed $is_strict - check mandatory fields, resources and terms ID
     */
     function prepareDetails($system, $rectype, $details, $is_strict)
     {
@@ -1063,7 +1070,7 @@
         //there is undefined required details
         if (count($det_required)>0) {
 
-            $system->addError(HEURIST_INVALID_REQUEST, "Required details not defined", $det_required);
+            $system->addError(HEURIST_INVALID_REQUEST, "Required details not defined: ".implode(',',array_values($det_required)));
 
         }else if (count($errorValues)>0) {
 

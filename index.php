@@ -60,7 +60,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
         number of widgets. Currently it is commented out of the code in layout_default.js -->
 
-        <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
+        <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.js"></script>
         
         <!-- script type="text/javascript" src="ext/js/moment.min.js"></script
         <script type="text/javascript" src="ext/js/date.format.js"></script>

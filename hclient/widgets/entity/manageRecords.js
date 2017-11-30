@@ -25,6 +25,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _currentEditRecTypeID:null,
     _isInsert: false,
     _updated_tags_selection: null,
+    _keepYPos: 0,
 
     usrPreferences:{},
     defaultPrefs:{
@@ -32,7 +33,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         help_on:true, 
         optfields:true, 
-        summary_closed:false, 
+        summary_closed:false,          
         summary_width:400, 
         summary_tabs:['0','1']},
     
@@ -91,9 +92,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //-----------------
         this.recordList.css('top','7em');
+        var sh2 = '7em';
         if(hasSearchForm){
-            this.searchForm.height('9.5em').css('border','none');    
+            var sh = (this.options.parententity>0)?'11.5em':'9.5em';
+            sh2 = (this.options.parententity>0)?'9em':'7em';
+            this.searchForm.height(sh).css('border','none');    
         }
+        this.recordList.css('top', sh2);
 
         var that = this;
         
@@ -143,7 +148,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
         
         if(this.searchForm && this.searchForm.length>0){
-        this._on( this.searchForm, {
+            
+            this._on( this.searchForm, {
                 "searchrecordsonresult": this.updateRecordList,
                 "searchrecordsonaddrecord": function( event, _rectype_id ){
                     this._currentEditRecTypeID = _rectype_id;
@@ -1265,8 +1271,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
             if(!that.options.new_record_params) that.options.new_record_params = {};
         
-            if(this._currentEditRecTypeID>0){
-                that.options.new_record_params['rt'] = this._currentEditRecTypeID;
+            if(that._currentEditRecTypeID>0){
+                that.options.new_record_params['rt'] = that._currentEditRecTypeID;
             }        
             
             that.options.new_record_params['temp'] = 1;
@@ -1285,7 +1291,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     click: function(){  
                                     
                             that._currentEditRecTypeID = that._rt_select_dialog.find('select').val();
-                            that.options.new_record_params['rt'] = this._currentEditRecTypeID;
+                            that.options.new_record_params['rt'] = that._currentEditRecTypeID;
                                                 
                             window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
                                     function(response){  response.is_insert=true; that._initEditForm_step4(response); });
@@ -1546,8 +1552,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             that._editing.initEditForm(fields, that._currentEditRecordset);
+            
             that._afterInitEditForm();
 
+            if(this._keepYPos>0){
+                this.editForm.scrollTop(this._keepYPos);
+                this._keepYPos = 0;
+            }
+            
             //show rec_URL 
             var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
             if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='1'){
@@ -1654,6 +1666,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                            ScratchPad: fields['rec_ScratchPad'],
                            'details': fields};
         
+            if(fields['no_validation']){
+                request['no_validation'] = 1;
+            }
+        
+            //keep current overflow position
+            this._keepYPos = this.editForm.scrollTop();
+        
             that.onEditFormChange(true); //forcefully hide all "save" buttons
             
             var dlged = that._getEditDialog();
@@ -1723,6 +1742,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(parententity==1){
                     //get values without validation
                     var fields = this._editing.getValues(false);
+                    fields['no_validation'] = 1;
                     this._saveEditAndClose( fields, 'none' );
                     return;                    
                 }

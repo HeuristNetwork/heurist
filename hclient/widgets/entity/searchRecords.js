@@ -44,14 +44,14 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }else{
                 alert('Select record type first');
             }
-        });        
-            
+        });  
+        
         //force search if rectype_set is defined
         this._on( this.selectRectype, {
             change: function(event){
 
                 if(this.selectRectype.val()>0){
-                    lbl = window.hWin.HR('Add')+' '+ this.selectRectype.find( "option:selected" ).text();
+                    lbl = window.hWin.HR('Add')+' '+ this.selectRectype.find( "option:selected" ).text().trim();
                 }else{
                     lbl = window.hWin.HR("Add Record");
                 }
@@ -69,7 +69,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         if(this.selectRectype.val()>0){
             this.selectRectype.change();
         }
-        
+
+        if(this.options.parententity>0){
+            this.element.find('#row_parententity_helper').css({'display':'block'});//table-row
+            this.element.find('#row_helper').css({'line-height':'3em'});//table-row
+            this.element.find('#row_addbtn').css({'line-height':'4em'});//table-row
+        }
         
         //if(this.searchForm && this.searchForm.length>0)
         //this.searchForm.find('#input_search').focus();
@@ -106,12 +111,14 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 qobj.push({"ids":window.hWin.HAPI4.get_prefs('recent_Records')});
             }
         }
-        
+
         if(this.options.parententity>0){
             //filter out records with parent entiy (247) field
             var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
             var pred = {}; pred["f:"+DT_PARENT_ENTITY]="NULL";
             qobj.push(pred);
+            
+            this.element.find('#parententity_helper').css({'display':'table-row'});
         }
         
         if(this.element.find('#cb_modified').is(':checked')){
