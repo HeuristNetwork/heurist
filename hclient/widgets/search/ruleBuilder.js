@@ -66,7 +66,7 @@ $.widget( "heurist.ruleBuilder", {
 
         this.select_source_rectype = $( "<select>" )
         .attr('title', 'The starting point entity type for this rule. The result set will be expanded by following pointers/relationships from/to this type' )
-        .addClass('text ui-corner-all')
+        .addClass('text ui-corner-all ui-widget-content')
         .appendTo( cont );
 
         window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, (this.options.level==1?'select....':false) );
@@ -74,23 +74,23 @@ $.widget( "heurist.ruleBuilder", {
         //create list/combobox of pointer/relmarker fields
         this.select_fields = $( "<select>" )
         .attr('title', 'The pointer and relationship fields in the starting point entities and in entities which point at the starting point entities' )
-        .addClass('text ui-corner-all')
+        .addClass('text ui-corner-all ui-widget-content')
         .appendTo( $('<div>').appendTo(this.element) );
 
         //create list/combobox of relation types
         this.select_reltype = $( "<select>" )
         .attr('title', 'The type of pointer or relationship which is followed to add entities to the current result set' )
-        .addClass('text ui-corner-all')
+        .addClass('text ui-corner-all ui-widget-content')
         .appendTo( $('<div>').appendTo(this.element) ).hide();
 
         //create list/combobox of target record types
         this.select_target_rectype = $( "<select>" )
         .attr('title', 'The entity type(s) which will be added to the current result set by this rule' )
-        .addClass('text ui-corner-all')
+        .addClass('text ui-corner-all ui-widget-content')
         .appendTo( $('<div>').appendTo(this.element) );
 
         //
-        this.additional_filter = $( "<input>" ).addClass('text ui-corner-all').css({'width':'220px'})
+        this.additional_filter = $( "<input>" ).addClass('text ui-corner-all ui-widget-content').css({'width':'220px'})
         .attr('title', 'Add an additional Heurist query string which will filter the set of records retrieved by this rule' )
         .appendTo( $('<div>').css({'width':'220px'}).appendTo(this.element) );
 

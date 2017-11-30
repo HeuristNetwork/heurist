@@ -351,7 +351,7 @@ $.widget( "heurist.search", {
             $("<label>for&nbsp;</label>").appendTo( this.div_search );
 
             this.select_rectype = $( "<select>" )
-            .addClass('text ui-widget-content ui-corner-all')
+            .addClass('text ui-corner-all ui-widget-content') 
             .css('width','auto')
             .css('max-width','200px')
             //.val(value)
@@ -415,7 +415,7 @@ $.widget( "heurist.search", {
 
             this.select_rectype_addrec = $('<select>')   
                 .attr('size',20)
-                .addClass('menu-or-popup') 
+                .addClass('menu-or-popup text ui-corner-all ui-widget-content') 
                 .css({'position':'absolute','min-width':'250'})
                 .appendTo( $('body') ) 
                 .hide();

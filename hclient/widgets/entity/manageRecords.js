@@ -546,7 +546,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
                 + top.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
                 + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
-+'<select class="rectypeSelect" style="display:none;z-index: 20;background:white;position: absolute;border: 1px solid gray;'
++'<select class="rectypeSelect ui-corner-all ui-widget-content" '
++'style="display:none;z-index: 20;position: absolute;border: 1px solid gray;'  //background:white;
 +'top: 5.7em;" size="20"></select><div class="btn-modify"/>'
 +'<div style="display:inline-block;float:right;">'
     +'<div class="btn-config2"/><div class="btn-config"/>'
@@ -1275,7 +1276,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //select record type first
                 if(!this._rt_select_dialog){
                     this._rt_select_dialog = $('<div>').css({'text-align': 'center'}).appendTo(this.element);
-                    var selRt = $('<select>').appendTo(this._rt_select_dialog);
+                    var selRt = $('<select>').addClass('text ui-corner-all ui-widget-content').appendTo(this._rt_select_dialog);
                     window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0));    
                 }
                 
