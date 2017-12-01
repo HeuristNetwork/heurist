@@ -6,8 +6,6 @@
         <input id="input_search" class="text ui-widget-content ui-corner-all" 
                 style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
         <div id="btn_search_start"></div>        
-    </div>
-    <div class="div-table-cell" style="padding-left:0.5em">
         <label>in</label>
         <select id="sel_rectypes" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
     </div>
@@ -36,16 +34,17 @@
     </div>
 </div>
 -->
-<div style="display: table-row;line-height: 2em;" id="row_helper">
+<div style="display: table-row;" id="row_helper">
     <div class="div-table-cell"></div>
     <div class="div-table-cell heurist-helper1">Select below or search on title here. [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search</div>
 </div>
-<div style="display: table-row;line-height: 2em;" id="row_addbtn">
+<div style="display: none;line-height: 2em" id="row_parententity_helper">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell heurist-helper1">Note: child records are not shown in this search, unless created through a different record pointer field</div>
+</div>
+<div style="display: table-row;height:3em;" id="row_addbtn">
     <div class="div-table-cell" style="padding-right:0.5em;text-align:right"><label id="lbl_add_record">or</label></div>
     <div class="div-table-cell">
         <div id="btn_add_record"></div>
     </div>
-</div>
-<div style="display:none;position:absolute;bottom:4.2em" id="row_parententity_helper">
-    <div class="heurist-helper1">Note: child records are not shown in this search, unless created through a different record pointer field</div>
 </div>

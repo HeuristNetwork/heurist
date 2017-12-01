@@ -71,9 +71,9 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
 
         if(this.options.parententity>0){
-            this.element.find('#row_parententity_helper').css({'display':'block'});//table-row
-            this.element.find('#row_helper').css({'line-height':'3em'});//table-row
-            this.element.find('#row_addbtn').css({'line-height':'4em'});//table-row
+            this.element.find('#row_parententity_helper').css({'display':'table-row'});//table-row
+            //this.element.find('#row_helper').css({'line-height':'3em'});//table-row
+            //this.element.find('#row_addbtn').css({'line-height':'4em'});//table-row
         }
         
         //if(this.searchForm && this.searchForm.length>0)

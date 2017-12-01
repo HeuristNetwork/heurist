@@ -27,7 +27,7 @@ function hEditing(_options) {
          recdata = null,     //hRecordSet with data to be edited
          editing_inputs = [],
          recstructure,
-         wasModified = false,
+         wasModified = 0, //0 not modified (on init), 1 was modified, 2 - finalized(not modified)
          onChangeCallBack=null;
 
     /**
@@ -88,7 +88,7 @@ function hEditing(_options) {
     
     function _initEditForm(_recstructure, _recdata){
         
-        wasModified = false;
+        wasModified = 0;
         
         $container.hide();
         $container.empty(); //clear previous edit elements
@@ -377,12 +377,12 @@ function hEditing(_options) {
         }
     }
 
-
-
     
     function _isModified(){
         
-        if(wasModified){
+        if(wasModified==2){ //modfied flag is reset (after save)
+            return false;
+        }else if(wasModified==1){
             return true;
         }else{
             var idx;
@@ -517,7 +517,7 @@ function hEditing(_options) {
         },
         
         setModified: function(val){
-            wasModified = val;
+            wasModified = (val===false)?2:1;
         },
         
         getContainer: function(){

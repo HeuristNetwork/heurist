@@ -658,7 +658,6 @@ $.widget( "heurist.editing_input", {
                 if(this.inputs.length==0){ //show current relations
                 
                     function __onRelRemove(){
-                        //console.log('>>>>'+that.element.find('.link-div').length);
                         if( that.element.find('.link-div').length==0){ //hide this button if there are links
                             that.element.find('.rel_link').show()
                         }
@@ -862,7 +861,7 @@ $.widget( "heurist.editing_input", {
                     if(event!==false){
                 
                         if(event) event.preventDefault();
-                        
+             
                         if(popup_options.parententity>0){
                             
                             if(that.newvalues[$input.attr('id')]>0){
@@ -906,7 +905,6 @@ $.widget( "heurist.editing_input", {
                             var selector_rectype = popele.find('select');
                             var btn_child_add = popele.find('.btn_child_add');
 
-                            
                             if(popup_options.rectype_set.indexOf(',')>0){ //multiconstraint need to show selector
                                 selector_rectype.empty().parent().show();
                                 selector_rectype.change(function(){
@@ -978,7 +976,6 @@ $.widget( "heurist.editing_input", {
                                                         onselect:popup_options.onselect, 
                                                         parententity:popup_options.parententity,
                                                         selectOnSave:true});
-                                                        
                                               $dlg_pce.dialog('close');                                     
                                     
                                 });

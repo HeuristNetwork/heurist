@@ -1106,7 +1106,7 @@ $.widget( "heurist.manageEntity", {
             
             if(this._currentEditID!=null && this._editing.isModified()){
                 window.hWin.HEURIST4.msg.showMsgDlg(
-                    'Save changes and move to [next | previous] record?',
+                    'Save changes and load another record?',
                     //'Data were modified in edit form. Ignore modifications and start edit the new data',
                         function(){ 
                             //save changes and go to next step

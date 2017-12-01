@@ -1118,7 +1118,9 @@ $.widget( "heurist.resultList", {
             }else if (action=='edit'){
 
                 var query = null;
-                if(this._currentRecordset && this._currentRecordset.length()<1000){
+                
+                if(false && this._currentRecordset && this._currentRecordset.length()<1000){
+                    //it breaks order in edit form - previos/next becomes wrong
                     query = 'ids:'+this._currentRecordset.getIds().join(',');
                 }else{
                     query = this._query_request;

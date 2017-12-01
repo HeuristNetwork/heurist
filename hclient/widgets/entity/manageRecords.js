@@ -91,14 +91,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
         
         //-----------------
-        this.recordList.css('top','7em');
-        var sh2 = '7em';
+        var sh = 7;
         if(hasSearchForm){
-            var sh = (this.options.parententity>0)?'11.5em':'9.5em';
-            sh2 = (this.options.parententity>0)?'9em':'7em';
-            this.searchForm.height(sh).css('border','none');    
+            sh = (this.options.parententity>0)?9:7;
+            this.searchForm.height((sh+2.5)+'em').css('border','none');    
         }
-        this.recordList.css('top', sh2);
+        this.recordList.css('top', sh+'em');
 
         var that = this;
         
@@ -182,9 +180,25 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var idx = order.indexOf(Number(this._currentEditID));
                 idx = idx + dest;
                 if(idx>=0 && idx<order.length){
-                    this._toolbar.find('#divNav').html( (idx+1)+' of '+order.length);
-                    if(dest!=0){
-                        this.addEditRecord(order[idx]);
+                    
+                    var newRecID = order[idx];
+                    var that = this;
+                    
+                    if(this._editing.isModified()){
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Save changes and move to '+((dest<0)?'previous':'next')+' record?',
+                            function(){ 
+                                //save changes and go to next step
+                                that._saveEditAndClose( null, function(){ that.addEditRecord(newRecID); } );
+                            },
+                            {title:'Confirm',yes:'Save changes', no:'Cancel'});
+                            
+                    }else{
+                        this._toolbar.find('#divNav').html( (idx+1)+' of '+order.length);
+                        if(dest!=0){
+                            this.addEditRecord(newRecID);
+                        }
                     }
                 }
         }
@@ -428,7 +442,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     $('<div id="divNav" style="min-width:40px;padding:0 1em;display:inline-block;text-align:center">')
                         .insertAfter(this._toolbar.find('#btnPrev'));
                 }
-                this._navigateToRec(0);
+                this._navigateToRec(0); //reload
             }else{
                 this._toolbar.find('#btnPrev').hide();
                 this._toolbar.find('#btnNext').hide();
@@ -648,7 +662,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                               that._currentEditRecordset.setFld(record, 'rec_RecTypeID', selRt.val());
                                               that._initEditForm_step4(null); //reload form
                                               
-                                              that._editing.setModified(true);
+                                              that._editing.setModified(true); //forcefully set to modified after rt change
                                               that.onEditFormChange();
                                               
                                               selHd.html(
@@ -1683,7 +1697,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-
+                            
+                            that._editing.setModified(false); //reset modified flag after save
+                            
                             //var recID = ''+response.data[0];
                             var rec_Title = response.rec_Title;
                             
@@ -1742,8 +1758,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(parententity==1){
                     //get values without validation
                     var fields = this._editing.getValues(false);
-                    fields['no_validation'] = 1;
-                    this._saveEditAndClose( fields, 'none' );
+                    var that = this;
+                    fields['no_validation'] = 1; //do not validate required fields
+                    this._saveEditAndClose( fields, function(){
+                        that._editing.setModified(true); //restore flag after autosave
+                        that.onEditFormChange();
+                    });
                     return;                    
                 }
             }
