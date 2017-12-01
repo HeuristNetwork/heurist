@@ -118,15 +118,15 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             selScope.appendChild(opt);
         }else{
             
-            if(is_initscope_empty || init_scope_type=='current'){
-                //add result count option default
-                opt = new Option("Current results set (count="+ window.hWin.HAPI4.currentRecordset.length()+")", "Current");
-                selScope.appendChild(opt);
-            }
             //selected count option
             if((is_initscope_empty || init_scope_type=='selected') &&
                (window.hWin.HAPI4.currentRecordsetSelection &&  window.hWin.HAPI4.currentRecordsetSelection.length > 0)) {
                 opt = new Option("Selected results set (count=" + window.hWin.HAPI4.currentRecordsetSelection.length+")", "Selected");
+                selScope.appendChild(opt);
+            }
+            if(is_initscope_empty || init_scope_type=='current'){
+                //add result count option default
+                opt = new Option("Current results set (count="+ window.hWin.HAPI4.currentRecordset.length()+")", "Current");
                 selScope.appendChild(opt);
             }
             if(is_initscope_empty){
@@ -136,7 +136,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 for (var rty in rectype_Ids){
                     if(rty>=0){
                         rty = rectype_Ids[rty];
-                        opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[rty], rty);
+                        opt = new Option('only: '+window.hWin.HEURIST4.rectypes.pluralNames[rty], rty);
                         selScope.appendChild(opt);
                     }
                 }
@@ -613,6 +613,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 $('#div_result').html(sResult);
                 $('#div_result').css({padding:'10px'}).show();
                 $('#btn-ok').button('option','label',window.hWin.HR('New Action'));
+                $('#btn-cancel').button('option','label',window.hWin.HR('Close'));
 
             }else{
                 $('#div_result').hide();
