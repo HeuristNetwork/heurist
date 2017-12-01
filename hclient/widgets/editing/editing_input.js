@@ -814,14 +814,14 @@ $.widget( "heurist.editing_input", {
                                         //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                         
                                         //save last 25 selected records
-                                        var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
+                                        /*var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
                                         if(window.hWin.HEURIST4.util.isempty(previously_selected_ids)){
                                             previously_selected_ids = [];    
                                         }else{
                                             previously_selected_ids = previously_selected_ids.split(',');
                                         }
+                                        now_selected = now_selected.concat(previously_selected_ids);*/
                                         var now_selected = data.selection.getIds(25);
-                                        now_selected = now_selected.concat(previously_selected_ids);
                                         window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
                                         
                                         
@@ -954,7 +954,7 @@ $.widget( "heurist.editing_input", {
                             ];
                             */
                             
-                            var $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+                            that.dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
                                 window:  window.hWin, //opener is top most heurist window
                                 title: window.hWin.HR('Create or select child record'),
                                 width: 500,
@@ -963,29 +963,37 @@ $.widget( "heurist.editing_input", {
                                 resizable: false,
                                 buttons: null //btns
                             });
+      
+                            function __openrecedit() { 
+                                    
+                                  if(new_rec_param==null){
+                                      new_rec_param = {rt:selector_rectype.val()};
+                                  }
+                                  
+                                  window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                        {new_record_params:new_rec_param, 
+                                            onselect:popup_options.onselect, 
+                                            parententity:popup_options.parententity,
+                                            selectOnSave:true});
+                                            
+                                  if(that.dlg_pce.dialog('instance')){
+                                    that.dlg_pce.dialog('close');                                     
+                                  }
+                            }                            
                             
-                            btn_child_add.button({label:btn_add_title})
-                                .click( function() { 
-                                    
-                                              if(new_rec_param==null){
-                                                  new_rec_param = {rt:selector_rectype.val()};
-                                              }
-                                              
-                                              window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                                                    {new_record_params:new_rec_param, 
-                                                        onselect:popup_options.onselect, 
-                                                        parententity:popup_options.parententity,
-                                                        selectOnSave:true});
-                                              $dlg_pce.dialog('close');                                     
-                                    
-                                });
+                            btn_child_add.button({label:btn_add_title});
+                            btn_child_add.off( "click");
+                            btn_child_add.on( "click", __openrecedit);
+                                
                             var btn_child_select = popele.find('.btn_child_select');
-                            btn_child_select.button({label:'Select existing / create (non-child)'})
-                                .click( function() {  __show_select_dialog(false); $dlg_pce.dialog('close'); });
-                            var btn_child_cancel = popele.find('.btn_child_cancel');
-                            btn_child_cancel.button({label:'Cancel'})
-                                .click( function() { $dlg_pce.dialog('close'); });
+                            btn_child_select.button({label:'Select existing / create (non-child)'});
+                            btn_child_select.off('click');
+                            btn_child_select.on( "click", function() {  __show_select_dialog(false); that.dlg_pce.dialog('close'); });
                             
+                            var btn_child_cancel = popele.find('.btn_child_cancel');
+                            btn_child_cancel.button({label:'Cancel'});
+                            btn_child_cancel.off('click');
+                            btn_child_cancel.on( "click", function() { that.dlg_pce.dialog('close'); });
                             
                             //.find()
                             popele.parents('.ui-dialog-content').css({'padding':0});
@@ -1644,7 +1652,7 @@ $.widget( "heurist.editing_input", {
                 'data-input-id': $input.attr('id')
             })
             .addClass("smallbutton")//btn_input_clear
-            .css({'vertical-align': (this.detailType=='blocktext')?'top':'middle'}) // || this.detailType=='file'
+            .css({position: 'absolute', 'margin-top': '3px'})
 /* @todo - need to prevent wrap of clear button for long fields
 'margin-left': (this.detailType=='relmarker' || this.detailType=='geo' || 
                 this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum'  || this.detailType=='date')

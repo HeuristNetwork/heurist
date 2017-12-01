@@ -755,7 +755,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         if($.isFunction(onCloseCalback)){
                              onCloseCalback.call(this, event, ui);
                         }
-                        //var element = popup.element.parentNode.removeChild(popup.element);
+                        
+                        element.parentNode.removeChild(element);
                         element.style.display = "none";
                         originalParentNode.appendChild(element);
 

@@ -984,13 +984,12 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                         var cur_value = window.hWin.HAPI4.get_prefs(name);
                         cur_value = (cur_value?cur_value.split(','):null);
+                        if(!$.isArray(cur_value)) cur_value = [];
 
-                        if($.isArray(cur_value)){
-                            var to_remove = Math.min(limit, value.length);
-                            cur_value = cur_value.slice(0, to_remove);
-                            value = cur_value.concat(value);
-                        }
-                        value = value.join(',');
+                        $.each(value, function(i, item){
+                            if($.inArray(item, cur_value) === -1) cur_value.unshift(item);
+                        });
+                        value = cur_value.join(',').slice(0, limit);
                 }
 
                 var request = {};

@@ -92,26 +92,31 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         var request = {}
 
         var qstr = '', domain = 'a', qobj = [];
+        
+        //by record type
         if(this.selectRectype.val()!=''){
             qstr = qstr + 't:'+this.selectRectype.val();
-            
             qobj.push({"t":this.selectRectype.val()});
         }   
+
+        //by title        
         if(this.input_search.val()!=''){
             qstr = qstr + ' title:'+this.input_search.val();
-            
             qobj.push({"title":this.input_search.val()});
         }
 
+        //by ids of recently selected
         if(this.element.find('#cb_selected').is(':checked')){
-            
             var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
-            if (window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids)){
-                qstr = qstr + ' ids:' + window.hWin.HAPI4.get_prefs('recent_Records');
-                qobj.push({"ids":window.hWin.HAPI4.get_prefs('recent_Records')});
+            if (previously_selected_ids && 
+                window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids.split(',')))
+            {
+                qstr = qstr + ' ids:' + previously_selected_ids;
+                qobj.push({"ids":previously_selected_ids});
             }
         }
 
+        //exclude already children
         if(this.options.parententity>0){
             //filter out records with parent entiy (247) field
             var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
@@ -123,12 +128,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         
         if(this.element.find('#cb_modified').is(':checked')){
             qstr = qstr + ' sortby:-m after:"1 week ago"';
-            
-            qobj.push({"sortby":"-m after:\"1 week ago\""});
+            qobj.push({"sortby":"-m"}); // after:\"1 week ago\"
         }else{
             qstr = 'sortby:t';
             qobj.push({"sortby":"t"}); //sort by record title
         }
+        
         if(this.element.find('#cb_bookmarked').is(':checked')){
             domain = 'b';
         }            
