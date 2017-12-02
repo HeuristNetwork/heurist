@@ -758,25 +758,27 @@ class HPredicate {
         
         $sHeaderField = null;
         
-        if($this->pred_type=='title'){
+        if($this->pred_type=='title' || $this->field_id=='title'){
 
             $sHeaderField = "rec_Title";
 
-        }else if($this->pred_type=='modified'){
+        }else if($this->pred_type=='modified' || $this->field_id=='modified'){
 
             $sHeaderField = "rec_Modified";
             
-        }else if($this->pred_type=='url'){
+        }else if($this->pred_type=='url' || $this->field_id=='url'){
             
             $sHeaderField = "rec_URL";
 
-        }else if($this->pred_type=='notes'){
+        }else if($this->pred_type=='notes' || $this->field_id=='notes'){
             
             $sHeaderField = "rec_ScratchPad";
         }
             
           
         if($sHeaderField){    
+            
+            if($this->pred_type=='f') $this->pred_type = $this->field_id;
             
             if($is_empty){
                 $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField=='')";    
