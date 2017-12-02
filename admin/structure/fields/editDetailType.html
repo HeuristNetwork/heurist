@@ -107,17 +107,12 @@
                     <div class="help prompt">A default generic help text which may be overridden with more specific help for each record type that uses this field type</div></div>
             </div>
 
-            <div class="input-row">
-                <div class="input-header-cell" style="vertical-align:top">Extended description:</div>
-                <div class="input-cell"><textarea cols="200" id="dty_ExtendedDescription" rows="3" style="width:420;"></textarea>
-                    <div class="help prompt">An extended description of the content of this field type and references to any standards used</div></div>
-            </div>
-
             <div class="input-row required">
                 <div class="input-header-cell">Data type:
                 </div>
                 <div class="input-cell">
-                    <input id="typeValue" style="width:200;" readonly="readonly" type="text"
+                    <input id="typeValue" readonly="readonly" type="text"
+                        style="width:200;background-image:url(../../../common/images/blue-down-triangle.png);background-repeat:no-repeat;background-position:right"
                         value="-- Click to select data type --"
                         onclick="window.detailTypeEditor.onDataTypeClick(event)"> 
                     <select class="dtyValue" id="dty_Type" disabled=disabled 
@@ -186,6 +181,13 @@
             </div>
 
             <div id="options" class="hidden" style="background-color:#ffffff;">
+            
+                <div class="input-row">
+                    <div class="input-header-cell" style="vertical-align:top">Extended description:</div>
+                    <div class="input-cell"><textarea cols="200" id="dty_ExtendedDescription" rows="3" style="width:420;"></textarea>
+                        <div class="help prompt">An extended description of the content of this field type and references to any standards used</div></div>
+                </div>
+            
                 <div class="input-row">
                     <div class="input-header-cell">Display group:</div>
                     <div class="input-cell"><select class="dtyValue" id="dty_DetailTypeGroupID"></select>
@@ -241,7 +243,7 @@
 
             <br />
             <div class="actionButtons">
-                <input type="button" value="Save" id="btnSave" onClick="window.detailTypeEditor.save();" />
+                <input type="button" value="Create Field" id="btnSave" onClick="window.detailTypeEditor.save();" style="margin-right:40px" />
                 <input type="button" value="Cancel" onClick="window.detailTypeEditor.cancel();" />
             </div>
         </div>

@@ -256,17 +256,21 @@ function EditRecStructure() {
                     sortable:false, width:20,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' style='cursor:pointer;' "
-                        //+" title='Click to add new field or section header' "+
-                        +" title='Click this button to insert a new field or section header at this point in the record structure / data entry form' "+
-                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event);}' >";
+                        +" title='Click this button to insert a new field at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >";
                         //editStructure.onAddFieldMenu(event);
                     }
                 },
                 {
-                    key:"rst_ID", label: "Code", sortable:false, className:"center", hidden:true,
+                    key:"rst_ID", label: "Hdr", sortable:false, width:20,
                     formatter: function(elLiner, oRecord, oColumn, oData){
-                        elLiner.innerHTML = oData;
-                        elLiner.title = oRecord.getData("conceptCode");
+                        
+                        elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' style='cursor:pointer;' "
+                        +" title='Click this button to insert a new section header at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >";
+                        
+                        //elLiner.innerHTML = oData;
+                        //elLiner.title = oRecord.getData("conceptCode");
                     }
                 },
                 {
@@ -2034,7 +2038,7 @@ function EditRecStructure() {
         });
     }
 
-    function _onAddFieldAtIndex(e){
+    function _onAddFieldAtIndex(e, isSectionHeader){
         e = top.HEURIST.util.stopEvent(e);
         var targ = e.target;
         var rst_ID = targ.getAttribute("rst_ID")
@@ -2044,7 +2048,13 @@ function EditRecStructure() {
         var index_toinsert = _getRecordById(rst_ID).row_index;
         _myDataTable.unselectAllRows();
 
-        onAddNewDetail(index_toinsert);
+        
+        if(isSectionHeader===true){
+            _onAddSeparator(index_toinsert);
+        }else{
+            onAddNewDetail(index_toinsert);
+        }
+        
     }
 
     //Ian decided to remove this feature -however it may be helpful in another place
@@ -2434,8 +2444,8 @@ function EditRecStructure() {
             _onAddSeparator(index_toinsert);
         },
 
-        onAddFieldAtIndex: function(e){
-            _onAddFieldAtIndex(e);
+        onAddFieldAtIndex: function(e, isSectionHeader){
+            _onAddFieldAtIndex(e, isSectionHeader);
         },
 
         onAddFieldMenu: function(e){
@@ -2511,7 +2521,7 @@ function onAddNewDetail(index_toinsert){
             "admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
             {	"close-on-blur": false,
                 "no-resize": false,
-                title: 'Add Field or Section Header',
+                title: 'Add Field', // or Section Header
                 height: dim.h*0.9,
                 width: 700, //back to fixed width    dim.w*0.5,
 

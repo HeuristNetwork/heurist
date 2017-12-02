@@ -107,8 +107,13 @@
         <script type="text/javascript" src="selectDetailType.js"></script>
 
         <div id="filtertoolbar">
-            <div class="input-row">
-                <div class="input-header-cell">
+            <div class="input-row" style="border:none;">
+            
+                <div style="display:table-cell;min-width:120px">  <!-- class="input-cell"  class="input-cell" -->
+                    <b>Use an existing field</b>
+                </div>
+                    
+                <div style="display:table-cell;color: #6A7C99;min-width:80px;text-align:right;padding-right:10px">
                     Filter by group
                 </div>
                 <div class="input-cell">
@@ -116,7 +121,7 @@
                         <option value="all">all groups</option>
                     </select>
 
-                    <div style="display:inline-block;" class="input-header-cell">
+                    <div style="display:inline-block;">
                         Show
                     </div>
                     <div style="display:inline-block;">
@@ -129,36 +134,37 @@
                 </div>
             </div>
 
-            <div class="input-row">
-                <div class="input-header-cell">
+            <div class="input-row" style="border:none;">
+                <div style="display:table-cell;min-width:120px">
+                    (select in list below)
+                </div>
+            
+                <div style="display:table-cell;color: #6A7C99;min-width:80px;text-align:right;padding-right:10px">
                     Filter by name
                 </div>
                 <div class="input-cell">
-                    <input type="text" id="inputFilterByName" name="inputFilterByName" style="width:20px;" value=""/>
-                    &nbsp;&nbsp;Type a few characters. You may filter and select repeatedly.
+                    <input type="text" id="inputFilterByName" name="inputFilterByName" style="min-width:138px;" value=""/>
+                    <br>Type a few characters. You may filter and select repeatedly.
                 </div>
             </div>
 
             <div>
-                <div style="padding-left:30px; padding-top: 20px; padding-bottom: 10px; font-size: medium;">
-                    <b>Not finding the field you require?</b>
-                </div>
-                <div style="padding:0 0 15px 105px">
+                <div>
+                    <b>or:</b>
+                    <!--
                     <input type="button" style="margin:0 5px;min-width:11ex;" value="Add section header"
                         onClick="{window.selectDetailType.addHeader();}"
                         title="Add a labelled divider/heading in the data entry form.
                         Use dividers to break up the form into groups of related fields." />
+                    -->
                     <input type="button" style="margin:0 5px;min-width:11ex;" value="Define New field"
                         onClick="{window.selectDetailType.onDefineNewType();}"
-                        title="Create a completely new base field type. It is preferable to use an existing field
-                        (select one or several fields below and click Insert Selected) before creating a new field type." />
-
-                    <div style="float:right; text-align:right;padding-bottom: 10px; padding-right: 30px;">
+                        title="Create a completely new base field type. It is preferable to use an existing field (select one or several fields below and click Insert Selected) before creating a new field type." />
+                </div>
+                <div style="float:right;text-align:right;padding-right: 30px;padding-bottom:5px">
                         <label id="lblSelect1"></label>
                         <a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear the current selection">&nbsp;clear&nbsp;</a>
                         <input type="button" tabindex="11" value="Insert selected" onClick="onApply()" />
-                    </div>
-
                 </div>
             </div>
         </div>

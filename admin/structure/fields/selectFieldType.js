@@ -95,6 +95,7 @@ $(document).ready(function() {
 	
 	function onScriptsReady(){
 	
+/*
   	top.HEURIST.edit.allInputs = [];
 	
 	var container = document.getElementById("inpt0");
@@ -133,11 +134,14 @@ $(document).ready(function() {
                                                                            
 	container = document.getElementById("inpt9");
 	//input = top.HEURIST.edit.createInput(1, getFirstFieldWithType('relmarker'), null, [], container);
+    $(container).find('[name="savebutton"]').css('color','lightgray').prop('disabled','disabled');
+    
+*/    
 /*	var record = {recID:-1,title:'',rectype:2,isTemporary:true}
     var relManager = new top.RelationManager(container, record,[], 0, null, false, true);
 	$(relManager.addOtherTd).hide(); 
 	$(relManager.addOtherTd).find('a').click();*/
-	$(container).find('[name="savebutton"]').css('color','lightgray').prop('disabled','disabled');
+	
     
 
         if(top.HEURIST4){
@@ -162,6 +166,7 @@ $(document).ready(function() {
             
         }
 	
+/*    
 	$('.input-cell > .prompt').hide(); //hide help text
 	$('.input-header-cell').css({'width':'0','min-width':'15ex','font-size':'0.8em'});
     $('.input2-header-cell').css({'min-width':'0','font-size':'0.8em'});
@@ -181,7 +186,8 @@ $(document).ready(function() {
     $('.temporal-div img').css({'vertical-align':'baseline'});
     
     $('.separator > .input-header-cell').css({'text-align':'right','min-width':'15ex'});
-
+*/
+    
     $('input[name="ft_type"]').change(function(){
         $('#btnSelect').removeProp('disabled');
         $('#btnSelect').css('color','black');
