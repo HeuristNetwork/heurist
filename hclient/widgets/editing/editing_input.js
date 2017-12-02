@@ -811,16 +811,11 @@ $.widget( "heurist.editing_input", {
                                         var rec_Title = recordset.fld(record,'rec_Title');
                                         var rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                         that.newvalues[$input.attr('id')] = targetID;
+                                        dtl_ParentChild
+                                        
                                         //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                         
                                         //save last 25 selected records
-                                        /*var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
-                                        if(window.hWin.HEURIST4.util.isempty(previously_selected_ids)){
-                                            previously_selected_ids = [];    
-                                        }else{
-                                            previously_selected_ids = previously_selected_ids.split(',');
-                                        }
-                                        now_selected = now_selected.concat(previously_selected_ids);*/
                                         var now_selected = data.selection.getIds(25);
                                         window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
                                         
@@ -988,7 +983,10 @@ $.widget( "heurist.editing_input", {
                             var btn_child_select = popele.find('.btn_child_select');
                             btn_child_select.button({label:'Select existing / create (non-child)'});
                             btn_child_select.off('click');
-                            btn_child_select.on( "click", function() {  __show_select_dialog(false); that.dlg_pce.dialog('close'); });
+                            btn_child_select.on( "click", function() { 
+                                 //popup_options.parententity = -1;
+                                 __show_select_dialog(false); 
+                                 that.dlg_pce.dialog('close'); });
                             
                             var btn_child_cancel = popele.find('.btn_child_cancel');
                             btn_child_cancel.button({label:'Cancel'});
@@ -1692,7 +1690,14 @@ $.widget( "heurist.editing_input", {
         
             var popele = that.element.find('.child_delete_dlg');
             if(popele.length==0){
-                var sdiv = '<div class="child_delete_dlg"><p style="padding:15px 0">You are deleting a pointer to a child record, that is a record which is owned by/an integral part of the current record, as identified by a pointer back from the child to the current record.</p><p>Actions:<br><label><input type="radio" value="1" name="delete_mode"/>Delete parent pointer in the child record</label><br><label><input type="radio" value="2" name="delete_mode" checked="checked"/>Delete the child record completely</label></p><p style="padding:15px 0">Warning: If you delete the parent pointer in the child record, this will generally render the record useless as it will lack identifying information.</p></div>';
+                var sdiv = '<div class="child_delete_dlg">'
+                +'<p style="padding:15px 0">You are deleting a pointer to a child record, that is a record which is owned by/an integral part of the current record, as identified by a pointer back from the child to the current record.</p>'
+                //Actions:<br>
+                +'<p><label><input type="radio" value="1" name="delete_mode" style="outline:none"/>'
+                            +'Delete parent pointer in the child record</label><br><br>'
+                        +'<label><input type="radio" value="2" name="delete_mode" checked="checked" style="outline:none"/>'
+                            +'Delete the child record completely</label></p>'
+                +'<p style="padding:15px 0">Warning: If you delete the parent pointer in the child record, this will generally render the record useless as it will lack identifying information.</p></div>';
                 
 //<label><input type="radio" value="0" name="delete_mode"/>Leave child record as-is</label><br>
 //<p style="padding:0 0 15px 0">If you leave the child record as-is, it will remain as a child of the current record and retain a pointer allowing the parent record information to be used in the child\'s record title, custom reports etc.</p>                
