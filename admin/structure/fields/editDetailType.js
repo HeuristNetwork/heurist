@@ -170,8 +170,10 @@ function DetailTypeEditor() {
 
             
             $("#topdiv_closebtn").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
+            $('#btnSave').attr('value','Create Field');
         }else{
-        
+            $('#btnSave').attr('value','Save Field');
+            
             //var el = Dom.get("dty_Type");
             //el.val(top.HEURIST.detailTypes.lookups[value]);
             _dty_Type = _detailType[fi.dty_Type];
