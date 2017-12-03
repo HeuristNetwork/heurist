@@ -795,11 +795,12 @@ $.widget( "heurist.editing_input", {
             var popup_options = {
                             isdialog: true,
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
-                            
                             select_return_mode: 'recordset',
                             edit_mode: 'popup',
                             selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                            title: window.hWin.HR('Record pointer: Select or create a linked record'),
+                            title: window.hWin.HR((isparententity)
+                                ?'CHILD record pointer: select or create a linked child record'
+                                :'Record pointer: Select or create a linked record'),
                             rectype_set: that.f('rst_PtrFilteredIDs'),
                             parententity: (isparententity)?that.options.recID:0,
                             
@@ -811,7 +812,6 @@ $.widget( "heurist.editing_input", {
                                         var rec_Title = recordset.fld(record,'rec_Title');
                                         var rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                         that.newvalues[$input.attr('id')] = targetID;
-                                        dtl_ParentChild
                                         
                                         //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
                                         
@@ -878,16 +878,16 @@ $.widget( "heurist.editing_input", {
                                 
                                 var sdiv = '<div class="child_info_dlg">'
                                     +'<div style="padding:0.5em 1em"><p style="padding:15px 0">'
-                                        +'This field normally creates a parent-child (whole part of containership) connection'
+                                        +'This field creates a parent-child (whole part of containership) connection'
                                         +' where the new record is wholly owned by the parent</p>'
                                         +'<p style="padding:15px 0"><label>Record type: </label><select id="sel_rectypes"></select></p>'
                                     + '</div>'
                                     
                                     + '<div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="position:absolute;bottom:0">'
                                         + '<div class="ui-dialog-buttonset">'
-                                            + '<label>Recommended >> </label><button class="btn_child_add"></div>'
+                                            + '<label>Recommended >> </label><button class="btn_child_add" style="margin-right:100px"></div>'
                                         + '<div class="ui-dialog-buttonset">'
-                                            + '<button class="btn_child_cancel"><button class="btn_child_select"></div>'
+                                            + '<button class="btn_child_select" style="margin-right:26px"><button class="btn_child_cancel"></div>'
                                     + '</div>'
                                     
                                     +'</div>';
@@ -981,7 +981,7 @@ $.widget( "heurist.editing_input", {
                             btn_child_add.on( "click", __openrecedit);
                                 
                             var btn_child_select = popele.find('.btn_child_select');
-                            btn_child_select.button({label:'Select existing / create (non-child)'});
+                            btn_child_select.button({label:'Select existing (set as child record)'});
                             btn_child_select.off('click');
                             btn_child_select.on( "click", function() { 
                                  //popup_options.parententity = -1;
@@ -1004,7 +1004,7 @@ $.widget( "heurist.editing_input", {
                         {width: null,  //null triggers default width within particular widget
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
         
-                    popup_options.width = usrPreferences.width;
+                    popup_options.width = Math.max(usrPreferences.width,710);
                     popup_options.height = usrPreferences.height;
                     
                     //init selection dialog
