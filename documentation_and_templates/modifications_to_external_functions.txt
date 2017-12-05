@@ -64,7 +64,10 @@ external/php/phpZotero.php (114-121) support proxy settings
             require_once(SMARTY_SYSPLUGINS_DIR.'smarty_internal_data.php');
             require_once(SMARTY_SYSPLUGINS_DIR.'smarty_internal_compilebase.php');
 
-
+2017-12-04  jquery.layout-latest.js
+         fix cssWidth, cssHeight and sizePane function in case pane is not defined
+            
+            
 -----------------------------------------------------------------------------------------------------------------------------------
 
 /**

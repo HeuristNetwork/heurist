@@ -210,8 +210,8 @@ function hLayout(args) {
               spacing_open:6,
               spacing_closed:16,  
               togglerAlign_open:'center',
-              togglerAlign_closed:'top',
-              togglerLength_closed:16,  //makes it square
+              togglerAlign_closed:20,
+              togglerLength_closed:32,  //to makes it square set to 16
               onopen_start : function(){ 
                   var  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
                   var mw = 250; //window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
@@ -227,8 +227,8 @@ function hLayout(args) {
               spacing_open:6,
               spacing_closed:16,  
               togglerAlign_open:'center',
-              togglerAlign_closed:'top',
-              togglerLength_closed:16,  //makes it square
+              togglerAlign_closed:20, //'top',
+              togglerLength_closed:32,  //to makes it square set to 16
               onopen_start: function(){ 
                   
                   var  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
@@ -316,8 +316,10 @@ function hLayout(args) {
         function __toogleIcons(pane, closed, opened){
             var tog = $container.find('.ui-layout-toggler-'+pane);
             tog.addClass('ui-heurist-btn-header1')
+            
             var togc = tog.find('.content-closed'); togc.empty();
             $('<div>').addClass('ui-icon ui-icon-triangle-1-'+closed).appendTo(togc);
+            
             togc = tog.find('.content-open'); togc.empty();
             $('<div>').addClass('ui-icon ui-icon-triangle-1-'+opened).appendTo(togc);
         }
