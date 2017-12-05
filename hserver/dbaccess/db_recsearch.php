@@ -124,6 +124,11 @@
             $facet_groupby =  @$params['facet_groupby'];  //by first char for freetext, by year for dates, by level for enum
             $vocabulary_id =  @$params['vocabulary_id'];  //special case for groupby first level
             $limit         = @$params['limit']; //limit for preview
+            
+            //special parameter to avoid nested queries - it allows performs correct count for distinct target record type
+            //besides it return correct field name to be used in count function
+            $params['nested'] = (@$params['needcount']!=2); 
+            
 
             //do not include bookmark join
             if(!(strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0)){
@@ -246,8 +251,9 @@
                             "facet_index"=>@$params['facet_index'], 'q'=>$params['q'] );
                 
             }
+            //SLIDER
             else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT) || $dt_type=="year"){
-                    // slider
+                    
                     //if ranges are not defined there are two steps 1) find min and max values 2) create select case
                     $select_field = "cast($select_field as DECIMAL)";
 
@@ -267,14 +273,33 @@
 
                 if($params['needcount']==1){
 
-                    $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
+                    $select_clause = "SELECT $select_field as rng, count(DISTINCT r0.rec_ID) as cnt ";
                     if($grouporder_clause==""){
                             $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field";
                     }
 
                 }else{ //count for related  if($params['needcount']==2)
-
-                    $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
+                
+                    /*temp solution for single level linkage only
+                    if(strpos($qclauses["where"],'recLinks rl0_')===false){
+                        if (strpos($qclauses["where"],'rl0x1.rl_SourceID IN')>0){
+                            $select_clause = "SELECT $select_field as rng, count(DISTINCT rl0x1.rl_SourceID) as cnt ";
+                        }else if (strpos($qclauses["where"],'rl0x1.rl_TargetID IN')>0){
+                            $select_clause = "SELECT $select_field as rng, count(DISTINCT rl0x1.rl_TargetID) as cnt ";   
+                        }
+                    }else{
+                        // it counts linked records, thus
+                        // it returns wrong value if there is more than one linked record per target record type
+                        $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
+                    }
+                    */
+                    
+                    $tab = 'r0';
+                    while(strpos($qclauses["from"], 'Records '.$tab.'_0')>0){
+                        $tab = $tab.'_0';
+                    }
+                    $select_clause = "SELECT $select_field as rng, count(DISTINCT ".$tab.".rec_ID) as cnt ";
+                    
                     if($grouporder_clause==""){
                             $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field";
                     }

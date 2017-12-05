@@ -790,6 +790,8 @@ $.widget( "heurist.search_faceted", {
     
     ,doSearch : function(){
 
+//console.log(this.options.params.q );
+
             var query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
             var isform_empty = this._fillQueryWithValues(query);
 
@@ -854,7 +856,7 @@ $.widget( "heurist.search_faceted", {
     //-------------------------------------------------------------------------------
     //
     // called on ON_REC_SEARCH_FINISH
-    // perform search for facet values and redraw facet fields
+    // perform search for facet values and counts and redraw facet fields
     // @todo query - current query - if resultset > 1000, use query
     // _recalculateFacets (call server) -> as callback _redrawFacets -> _recalculateFacets (next facet)
     //
@@ -945,6 +947,8 @@ $.widget( "heurist.search_faceted", {
                             return res;
                     
                 }
+     
+//DBG console.log(field);
                 
                 var query, needcount = 2;
                 if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
@@ -1047,6 +1051,8 @@ $.widget( "heurist.search_faceted", {
                     }
                 }
 
+//DBG console.log(request);                
+                
                 window.HAPI4.RecordMgr.get_facets(request, function(response){ 
                     if(response.request_id != that._request_id){
                         //ignore results of passed sequence

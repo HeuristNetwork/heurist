@@ -635,7 +635,7 @@ $.widget( "heurist.search", {
         }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
             window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
-            this.input_search.focus();
+            if(this.input_search.is(':visible')) this.input_search.focus();
             
             //show if there is resulst
             if(this.btn_search_save){

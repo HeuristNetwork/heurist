@@ -336,7 +336,7 @@ $.widget( "heurist.svs_list", {
 
                         var d = this.treeviews[groupID].toDict(true);
                         if(groupID=='all'){
-                            console.log(d);                            
+                            //console.log(d);                            
                         }
 
                         treeData[groupID] = d;
