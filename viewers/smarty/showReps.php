@@ -483,6 +483,7 @@ function save_report_output2($tpl_source){
     }
     }
 
+    //$publishmode=2 download
     if($publishmode!=1){
 
         if($errors!=null){
@@ -506,25 +507,17 @@ function save_report_output2($tpl_source){
         echo $tpl_res;
 
     }else if ($publishmode==1){
-
-        header("Content-type: text/html");
-            
+        
         if($errors!=null){
+            header("Content-type: text/html;charset=UTF-8");
             echo $errors;
         }else{
-
             ?>
-
-
             <html>
-
-
             <head>
                 <meta http-equiv="content-type" content="text/html; charset=utf-8">
                 <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
             </head>
-
-
             <body style="margin: 25px;">
             <h2>
                 The following file has been updated:  <?=$res_file?></h2><br />
