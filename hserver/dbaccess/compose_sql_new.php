@@ -52,6 +52,7 @@ tag, keyword, kwd:   tag
 id, ids:  id
 t, type:  record type id
 f, field:   field id
+cnt:field id  search for number of field instances
 
 latitude, lat:
 longitude, long, lng:
@@ -85,7 +86,8 @@ VALUE
 4)  Query     "linked_to:15": [{ t:4 }, {"f:1":"Alex" } ]
 "f:10": {"any":[ {t:4}, {} ] }
 
-
+5) Find all records without field  "f:5":"NULL"
+6) Find all records with any value in field  "f:5":""
 
 */
 
@@ -571,7 +573,7 @@ class HPredicate {
     var $lessthan = false;
     var $greaterthan = false;
 
-    var $allowed = array('title','t','modified','url','notes','type','ids','id',
+    var $allowed = array('title','t','modified','url','notes','type','ids','id','count','cnt',
             'f','field','linked_to','linkedfrom','related_to','relatedfrom','links','plain');
     /*
     notes, n:        record heder notes (scratchpad)
@@ -678,6 +680,12 @@ class HPredicate {
                 $res = "r".$this->qlevel.".rec_RecTypeID ".$res;
                 return array("where"=>$res);
 
+            case 'count':
+            case 'cnt':
+            
+                if(!$this->field_id) return null;
+                $this->pred_type = strtolower($this->pred_type);
+                
             case 'field':
             case 'f':
 
@@ -746,15 +754,17 @@ class HPredicate {
 
         $p = "rd".$this->qlevel.".";
         $p = "";
-
-        if(intval($this->field_id)>0){
+        
+        if($this->pred_type=='count' || $this->pred_type=='cnt'){
+            $this->field_type = 'link'; //integer without quotes
+        }else if(intval($this->field_id)>0){
             //find field type - @todo from cache
             $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
         }else{
             $this->field_type = 'freetext';
         }
         
-        $is_empty = $this->isEmptyValue(); //search for empty of not defined value
+        $is_empty = $this->isEmptyValue(); //search for empty or not defined value
         
         $val = $this->getFieldValue();
         if(!$val) return null;
@@ -794,6 +804,12 @@ class HPredicate {
             
             $res = "NOT exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p."dtl_DetailTypeID=".$this->field_id.")";
+
+        }else if($this->pred_type=='count' || $this->pred_type=='cnt'){ //search for records where field occurs N times (repeatable values)
+
+            $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
+            .$p."dtl_DetailTypeID=".$this->field_id.")".$val;
+        
             
         }else{
             
@@ -1238,6 +1254,7 @@ class HPredicate {
 
         //
         if (strpos($this->value,"<>")===false) {
+            
             if(strpos($this->value, '-')===0){
                 $this->negate = true;
                 $this->value = substr($this->value, 1);
@@ -1280,7 +1297,14 @@ class HPredicate {
             
         }else
         if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type == 'link') && is_numeric($this->value)) {
-            if($this->field_type == "link"){
+            
+            if (strpos($this->value,"<>")>0) {
+                $vals = explode("<>", $this->value);
+                $between = (($this->negate)?" not":"")." between ";
+                if(is_numeric($vals[0]) && is_numeric($vals[1])){
+                    $res = $between.$vals[0]." and ".$vals[1];
+                }
+            }else if($this->field_type == "link"){
                 $res = " $eq ".intval($this->value);  //no quotes
             }else{
                 $res = " $eq '".($this->field_type=='float'?floatval($this->value):intval($this->value))."'";
