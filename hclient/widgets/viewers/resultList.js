@@ -371,7 +371,7 @@ $.widget( "heurist.resultList", {
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
         .css({'float':'right','padding-right':right_padding+'px'})
-        .html('<button d="cb1_'+rnd+'" value="list" class="btnset_radio"/>'
+        .html('<button id="cb1_'+rnd+'" value="list" class="btnset_radio"/>'
             +'<button  id="cb2_'+rnd+'" value="icons" class="btnset_radio"/>'
             +'<button  id="cb3_'+rnd+'" value="thumbs" class="btnset_radio"/>'
             +'<button  id="cb4_'+rnd+'" value="thumbs3" class="btnset_radio"/>'

@@ -826,7 +826,13 @@ class HPredicate {
         $p = "rd".$this->qlevel.".";
         $p = "";
 
+        $keep_val = $this->value;
+        
+        $this->field_type = 'enum';
+        $val_enum = $this->getFieldValue();
+        
         $this->field_type = 'freetext';
+        $this->value = $keep_val;
         $val = $this->getFieldValue();
         if(!$val) return null;
 
@@ -834,8 +840,10 @@ class HPredicate {
         . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
         . ' left join Records link on '.$p.'dtl_Value=link.rec_ID '
         .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID '
-        .'  and if(dty_Type != "resource", '.$p.'dtl_Value'.$val
-        .' , link.rec_Title like "%'.$mysqli->real_escape_string($this->value).'%"))';
+        .'  and if(dty_Type != "resource", '
+                .' if(dty_Type="enum", '.$p.'dtl_Value'.$val_enum 
+                   .', '.$p.'dtl_Value'.$val
+                   .'), link.rec_Title '.$val.'))';   //'like "%'.$mysqli->real_escape_string($this->value).'%"))';
 
         return array("where"=>$res);
     }
