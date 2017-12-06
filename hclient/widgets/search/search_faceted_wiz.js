@@ -1155,23 +1155,27 @@ $.widget( "heurist.search_faceted_wiz", {
                 +'<input type="text" name="facet_Title'+idd+'" id="facet_Title'+idd+'" '
                 +' style="font-weight:bold;display:inline-block" class="text ui-widget-content ui-corner-all" />'
                 
-                + '<div class="ent_search_cb" style="float:right;font-style:italic;">'
+                + '<div class="ent_search_cb" style="float:right;font-style:italic;padding-right:6px">'
                 + '<span id="buttonset'+idd+'">';
                 
                 
                 var sGroupBy = '';
                 if(facets[k].type=='freetext'){
-                    sGroupBy = // style="float:right;font-size:smaller;"
+                    sGroupBy =
                         '<label><input type="checkbox" name="facet_Group'+idd+'" value="firstchar"/>'
                         +'Group by first character</label>';
+                   
                 }else if(facets[k].type=='float' || facets[k].type=='integer'){
                     sContent = sContent 
-                        +'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
-                        +idd+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
+                        //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
+                        //+idd+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
+                        +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1"/>';
+                    
                 }else if(facets[k].type=='date' || facets[k].type=='year'){
                     sContent = sContent 
-                        +'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
-                        +idd+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
+                        //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
+                        //+idd+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
+                        +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="slider"/>';
                     
                     sGroupBy = '<span id="facet_DateGroup'+idd+'"><label>Group by '
                         +'<select id="facet_Group'+idd+'"><option>year</option><option>decade</option><option>century</option></select>'
@@ -1179,8 +1183,9 @@ $.widget( "heurist.search_faceted_wiz", {
                     
                 }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                     sContent = sContent 
-                        +'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
-                        +idd+'" value="1" data-type="dropdown"/><label for="facetType'+idd+'_1">dropdown</label>';
+                        //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
+                        //+idd+'" value="1" data-type="dropdown"/><label for="facetType'+idd+'_1">dropdown</label>';
+                        +'<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>';
                     
                     sGroupBy = '<label>'
                                             +'<input type="checkbox" name="facet_Group'+idd+'" value="firstlevel"/>Group by first level</label>';
@@ -1188,9 +1193,12 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
                 
                 sContent = sContent
-                +'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_3" name="facet_Type'+idd+'" value="3"/><label for="facetType'+idd+'_3">list</label>'
-                +'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_2" name="facet_Type'+idd+'" value="2"/><label for="facetType'+idd+'_2">wrpapped</label>'
-                +'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_0" name="facet_Type'+idd+'" value="0"/><label for="facetType'+idd+'_0">search</label>'
+                        +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"/>'
+                        +'<button label="wrpapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>'
+                        +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"/>'
+                //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_3" name="facet_Type'+idd+'" value="3"/><label for="facetType'+idd+'_3">list</label>'
+                //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_2" name="facet_Type'+idd+'" value="2"/><label for="facetType'+idd+'_2">wrpapped</label>'
+                //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_0" name="facet_Type'+idd+'" value="0"/><label for="facetType'+idd+'_0">search</label>'
                 + '</span></div></div>' 
 
                 //second/optional line
@@ -1202,7 +1210,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 +' style="font-size:smaller;margin-top:0.4em;margin-bottom:1.0em;width:200px;"/>'
                 +'</div>'
                 
-                + '<div style="float:right;font-size:smaller;margin-right:20px">'
+                + '<div style="float:right;font-size:smaller;margin-right:20px;margin-top: 4px;">'
                 + sGroupBy 
                 +'<label><input type="checkbox" id="facet_Order'    // style="float:right;font-size:smaller;"
                 + idd+'" style="vertical-align: middle;margin-left:16px">'
@@ -1227,46 +1235,69 @@ $.widget( "heurist.search_faceted_wiz", {
                 listdiv.find('#facet_Title'+idd).val(facets[k].title);
                 listdiv.find('#facet_Help'+idd).val(facets[k].help);
                 
-                listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
                 listdiv.find('input:checkbox[name="facet_Order'+idd+'"]').attr('checked', (facets[k].orderby=='count'));
+
+                //listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
+                listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').removeClass('ui-heurist-btn-header1');
+                var btn =   listdiv.find('button.btnset_radio[data-idx="'+idd+'"][data-value="'+facets[k].isfacet+'"]');
+                btn.addClass('ui-heurist-btn-header1');                
+
+
+                    function __dateGrouping(idd){
+                        
+                            var idx = -1;
+                            for(var m=0; m<facets.length; m++){
+                                if(facets[m]['var']==idd){
+                                    idx = m;
+                                    break;
+                                }
+                            }
+                            if(idx>=0){
+                                if(facets[idx].type=='date' || facets[idx].type=='year'){
+                                    var is_allowed = (listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value')>1);
+                                                    //(listdiv.find('input:radio[name="facet_Type'+idd+'"]:checked').val()>1);
+                                    listdiv.find('#facet_DateGroup'+idd).css({'visibility':is_allowed?'visible':'hidden'});        
+                                    if(is_allowed){
+                                        if(Hul.isempty(facets[idx].groupby)){
+                                                                                facets[idx].groupby = 'year';
+                                        }
+                                        listdiv.find('#facet_Group'+idd).val(facets[idx].groupby);
+                                    }
+                                }
+                            }else{
+                                console.log('facet not found '+idd);
+                            }
+                    }
+
+                
+                this._on( listdiv.find('button.btnset_radio'), {
+                    click: function(event) {
+                        var btn = $(event.target);
+                        if(!btn.is('button')){ btn = btn.parent('button'); }
+                        var view_mode = btn.attr('data-value');
+                        
+                        var idd = btn.attr('data-idx');
+
+                        listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').removeClass('ui-heurist-btn-header1');
+                        var btn =   listdiv.find('button.btnset_radio[data-idx="'+idd+'"][data-value="'+view_mode+'"]');
+                        btn.addClass('ui-heurist-btn-header1');
+                        
+                        __dateGrouping(idd);
+                }});
+                
                 
                 
                 if(facets[k].type=='date' || facets[k].type=='year'){
+                    __dateGrouping(idd);
                     
-                    
-                    function __dateGrouping(idd){
-                        
-                            var is_allowed = (listdiv.find('input:radio[name="facet_Type'+idd+'"]:checked').val()>1);
-                            
-                            listdiv.find('#facet_DateGroup'+idd).css({'visibility':is_allowed?'visible':'hidden'});
-                            if(is_allowed){
-                                
-                                var idx = -1;
-                                for(var m=0; m<facets.length; m++){
-                                    if(facets[m]['var']==idd){
-                                        idx = m;
-                                        break;
-                                    }
-                                }
-                                if(idx>=0){
-                                    if(Hul.isempty(facets[idx].groupby)){
-                                        facets[idx].groupby = 'year';
-                                    }
-                                    listdiv.find('#facet_Group'+idd).val(facets[idx].groupby);
-                                }else{
-                                    console.log('facet not found '+idd);
-                                }
-                            }
-                    }
-                    
-                    __dateGrouping(k);
-                    
+                    /*
                     listdiv.find('input:radio[name="facet_Type'+idd+'"]').click(
                         function( event ){
                             var idd = $(event.target).attr('data-idx');
                             __dateGrouping(idd);
                         }                    
                     )
+                    */
                 }else{
                     listdiv.find('input:checkbox[name="facet_Group'+idd+'"][value="'+facets[k].groupby+'"]').attr('checked', true);
                 }
@@ -1275,7 +1306,8 @@ $.widget( "heurist.search_faceted_wiz", {
             listdiv.sortable();
             listdiv.disableSelection();
 
-            
+
+            /*            
             listdiv.find('input:radio[value="3"]')                                           
                             .button({icons: { secondary: 'ui-icon-list-column' }});
             listdiv.find('input:radio[value="2"]')
@@ -1289,9 +1321,16 @@ $.widget( "heurist.search_faceted_wiz", {
                             
             listdiv.find('input:radio').button({text:true});
             listdiv.find('.ui-button-text').css({"min-width":"60px","font-size":'0.9em'});
+            */
+            
+            listdiv.find('button[data-value="3"]').button({icon: "ui-icon-list-column",iconPosition:'end',showLabel:true,label:'list'});
+            listdiv.find('button[data-value="2"]').button({icon: "ui-icon-list-inline",iconPosition:'end',showLabel:true,label:'wrpapped'});
+            listdiv.find('button[data-value="0"]').button({icon: "ui-icon-search",iconPosition:'end',showLabel:true,label:'search'});
+            listdiv.find('button[data-type="slider"]').button({icon: "ui-icon-input-slider",iconPosition:'end',showLabel:true,label:'slider'});
+            listdiv.find('button[data-type="dropdown"]').button({icon: "ui-icon-input-dropdown",iconPosition:'end',showLabel:true,label:'dropdown'});
+            listdiv.find('.ui-button-text').css({"min-width":"60px","font-size":'0.9em'});
+            listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').controlgroup();
                                       
-            //listdiv.find('input:radio').button().css({width:30,height:30});
-            //listdiv.find('span[id^="buttonset"]').buttonset().css({height:'24px'});
             $(this.step3).find('#cbShowAdvanced').attr('checked',false).change(function(event){
                 if($(event.target).is(':checked')){
                      listdiv.find('.optional_settings').show();
@@ -1320,7 +1359,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 var title = listdiv.find('#facet_Title'+idd).val();
                 if(title!='') this.options.params.facets[k].title = title;
                 this.options.params.facets[k].help = listdiv.find('#facet_Help'+idd).val();
-                this.options.params.facets[k].isfacet = listdiv.find('input:radio[name="facet_Type'+idd+'"]:checked').val();
+                this.options.params.facets[k].isfacet = listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value');
+                                //was  listdiv.find('input:radio[name="facet_Type'+idd+'"]:checked').val();
                 this.options.params.facets[k].orderby = listdiv.find('input:checkbox[name="facet_Order'+idd+'"]').is(':checked')?'count':null;
                 
                 if(this.options.params.facets[k].type=='date' 
