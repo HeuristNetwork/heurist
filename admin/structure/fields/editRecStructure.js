@@ -251,6 +251,18 @@ function EditRecStructure() {
                     }
                 },
                 {
+                    key:"rst_ID", label: "Hdr", sortable:false, width:20,
+                    formatter: function(elLiner, oRecord, oColumn, oData){
+                        
+                        elLiner.innerHTML = "<img src='../../../common/images/insert_header .png' style='cursor:pointer;' "
+                        +" title='Click this button to insert a new section header at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >";
+                        
+                        //elLiner.innerHTML = oData;
+                        //elLiner.title = oRecord.getData("conceptCode");
+                    }
+                },
+                {
                     key:'addColumn',
                     label: "Add",
                     sortable:false, width:20,
@@ -259,18 +271,6 @@ function EditRecStructure() {
                         +" title='Click this button to insert a new field at this point in the record structure / data entry form' "+
                         " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >";
                         //editStructure.onAddFieldMenu(event);
-                    }
-                },
-                {
-                    key:"rst_ID", label: "Hdr", sortable:false, width:20,
-                    formatter: function(elLiner, oRecord, oColumn, oData){
-                        
-                        elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' style='cursor:pointer;' "
-                        +" title='Click this button to insert a new section header at this point in the record structure / data entry form' "+
-                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >";
-                        
-                        //elLiner.innerHTML = oData;
-                        //elLiner.title = oRecord.getData("conceptCode");
                     }
                 },
                 {
