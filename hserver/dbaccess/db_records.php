@@ -1059,7 +1059,8 @@
                     array_push($insertValues, $dval);
 
                 }else{
-                    array_push($errorValues, $dtl_Value." is not valid. Detail type ".$det_types[$dtyID]);
+                    $dt_names = dbs_GetDtLookups();
+                    array_push($errorValues, $dtl_Value." is not valid. Field type ".@$dt_names[$det_types[$dtyID]]);
                 }
 
             }//for values
@@ -1070,15 +1071,21 @@
         //there is undefined required details
         if (count($det_required)>0) {
 
-            $system->addError(HEURIST_INVALID_REQUEST, "Required details not defined: ".implode(',',array_values($det_required)));
+            $system->addError(HEURIST_ERROR, 'Required field'.(count($det_required)>1?'s':'').' not defined: '.implode(',',array_values($det_required)));
 
         }else if (count($errorValues)>0) {
 
-            $system->addError(HEURIST_INVALID_REQUEST, "Details have wrong values", $errorValues);
+            $ss = (count($errorValues)>1?'s':'');    
+array_push($errorValues,                                                        
+'<br><br>Please run Manage > Database > Verify to check for and fix data problems.<br>' 
+.'If the problem cannot be fixed, or re-occurs frequently, please email the Heurist development team (support at HeuristNetwork dor org)');
+            
+            $system->addError(HEURIST_ERROR, 'Encountered invalid value'.$ss
+                                                        .' for field'.$ss, $errorValues);
 
         }else if (count($insertValues)<1) {
 
-            $system->addError(HEURIST_INVALID_REQUEST, "Details not defined");
+            $system->addError(HEURIST_INVALID_REQUEST, "Fields not defined");
 
         }else{
             $res = $insertValues;

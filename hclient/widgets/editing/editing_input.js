@@ -1807,17 +1807,21 @@ $.widget( "heurist.editing_input", {
                         window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "e", f:"header"},  //search for temp also
                             function(response){
                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                    var recordset = new hRecordSet(response.data);
-                                    var record = recordset.getFirstRecord();
-                                    var rec_Title = recordset.fld(record,'rec_Title');
-                                    if(!rec_Title) {rec_Title = 'New record. Title is not defined yet.';}
-                                    var rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                     ele.empty();
-                                    window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
-                                            {rec_ID: value, 
-                                             rec_Title: rec_Title, 
-                                             rec_RecTypeID: rec_RecType}, selector_function);
 
+                                    var recordset = new hRecordSet(response.data);
+                                    if(recordset.length()>0){
+                                        var record = recordset.getFirstRecord();
+                                        var rec_Title = recordset.fld(record,'rec_Title');
+                                        if(!rec_Title) {rec_Title = 'New record. Title is not defined yet.';}
+                                        var rec_RecType = recordset.fld(record,'rec_RecTypeID');
+                                        window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
+                                                {rec_ID: value, 
+                                                 rec_Title: rec_Title, 
+                                                 rec_RecTypeID: rec_RecType}, selector_function);
+                                    }else{
+                                        that._removeInput( ele.attr('id') );
+                                    }
                                     //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
                                 }
                             }
