@@ -408,8 +408,17 @@ $.widget( "heurist.dh_search", {
                             //strip quotes
                             var val = matches[i].replace(/(^")|("$)/g, '');
                             if(val){
-                                var pred = {any:[{"title":val},{"f:134":val}]};
-                                criteria.push(pred); //AND    //{"f:1":matches[i]},{"f:18":matches[i]}
+                                
+                                //search for given and family name
+                                //var pred = {any:[{"f:1":val},{"f:18":val}]};
+                                
+                                //search  for rec title and OCR
+                                //var pred = {any:[{"title":val},{"f:134":val}]};
+
+                                //search  for rec any field and tite of linked records
+                                var pred = {"f":val};
+                                
+                                criteria.push(pred); 
                             }
                         }
                     }

@@ -314,7 +314,7 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                         sinfo.push(born);
                     }
                     if(qualification!=''){
-                        qualification = 'who studied '+qualification;
+                        qualification = 'who awarded '+qualification;
                         sinfo.push(qualification);
                     }
                     if(educated!=''){

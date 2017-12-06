@@ -593,7 +593,7 @@ $.widget( "heurist.boro_nav", {
                                 }
                             }
                             
-                            story = ' studied this at '+that.__joinAnd(res);
+                            story = ' awarded this at '+that.__joinAnd(res);
                         }                        
                         
                     }else if(entType=='institution'){
@@ -620,7 +620,7 @@ $.widget( "heurist.boro_nav", {
                                     }
                                 }//for
                                 
-                                story = ' studied '+that.__joinAnd(res)+' here';
+                                story = ' awarded '+that.__joinAnd(res)+' here';
                             }                        
                         }else{
                             story = ' attended school here';
@@ -1002,12 +1002,12 @@ $.widget( "heurist.boro_nav", {
                             timeline.push({year:that.__getYear(sDate,birthYear+2), 
                                     date: that.__getYear(sDate), 
                                     date2: null,
-                                    story: 'studied '+sDegree+' at '+sEduInst,
-                                    description: 'Studied '+sDegree+' at '+sEduInst+','+place.link});
+                                    story: 'awarded '+sDegree+' at '+sEduInst,
+                                    description: 'Awarded '+sDegree+' at '+sEduInst+','+place.link});
                         } 
                         
                         if(placeID==0){
-                            that.__setPlaceDesc(place, 'tertiary-study', 'Studied '+sDegree+' at '+sEduInst);                                                   }else{
+                            that.__setPlaceDesc(place, 'tertiary-study', 'Awarded '+sDegree+' at '+sEduInst);                                                   }else{
                             that.__setPlaceDesc(place);                                         
                         }
 
