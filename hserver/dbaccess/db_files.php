@@ -168,6 +168,8 @@ function getImageFromFile($filename){
         
             $path_parts = pathinfo($filename);
         
+            try{
+        
             switch($path_parts['extension']) {
                 case 'jpeg':
                 case 'jpg':
@@ -180,6 +182,13 @@ function getImageFromFile($filename){
                     $image = @imagecreatefrompng($filename);
                     break;
             }
+            
+            }catch(Exception $e) {
+                $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Image corruption '.HEURIST_DBNAME, 
+                    $filename.'. System message: ' .$e->getMessage() , null);
+            }
+
+            
     }
     return $image;
 }

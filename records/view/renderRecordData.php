@@ -967,7 +967,8 @@ function print_linked_details($bib) {
         if (! $result["success"] && count($cmts) == 0) return;
         
         $content = "";
-        $woot = $result["woot"];
+        $woot = @$result["woot"];
+        if(is_array($woot) && is_array($woot["chunks"]))
         foreach ($woot["chunks"] as $chunk) {
             $content .= $chunk["text"] . " ";
         }
