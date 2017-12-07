@@ -650,8 +650,10 @@ class HPredicate {
             
                 $query = parse_query($top_query->search_domain, urldecode($this->value), null, null, $top_query->currUserID);
 
+                $tab = 'r'.$this->qlevel;
+                             
                 $where_clause = $query->where_clause;
-                $where_clause = str_replace('TOPBIBLIO','r0',$where_clause);
+                $where_clause = str_replace('TOPBIBLIO',$tab,$where_clause);  //need to replace for particular level
                 $where_clause = str_replace('TOPBKMK','b',$where_clause);
                 
 //error_log($where_clause);

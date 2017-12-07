@@ -956,10 +956,12 @@ $.widget( "heurist.search_faceted", {
                     if(this._isInited){
                         //replace with current query   - @todo check for empty 
                         query = this._first_query;
-                        
+
                         //add additional/supplementary filter
                         query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
-                                        this.options.params.sup_filter, this.options.params.add_filter);
+                                        this.options.params.sup_filter,   //suplementary filter defined in wiz
+                                        this.options.params.add_filter);  //dynaminc addition filter
+
                         
                     }else{
                         //replace with list of ids
@@ -1021,7 +1023,8 @@ $.widget( "heurist.search_faceted", {
                 }else {
                     step_level = 1; //always full value for this type of facet
                 }
-                
+        
+//console.log(query);
                 var request = {q: query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  field['id'],
