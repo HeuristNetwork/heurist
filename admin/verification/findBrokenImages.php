@@ -1,6 +1,6 @@
 <?php
 /**
-* dbStatistics: shows a sortable list of databases on the server and their usage (record counts, access dates etc.)
+* findBrokenIamge.php
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

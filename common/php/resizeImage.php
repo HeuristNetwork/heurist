@@ -239,6 +239,11 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                     $img = make_file_image($desc); //from string
                     break;
             }
+            
+            //$rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Image corruption '.HEURIST_DBNAME, 
+            //        $filename.'. System message: ' .$e->getMessage() , null);
+            
+            
         }
         restore_error_handler();
 
