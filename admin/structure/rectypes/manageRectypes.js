@@ -77,6 +77,7 @@ function RectypeManager() {
     //
     function _init()
     {
+        
         var grpID,
         ind = 0,
         index;
@@ -93,14 +94,7 @@ function RectypeManager() {
             }
         }//for groups
 
-        top.HEURIST.parameters = top.HEURIST.parseParams(this.location.search);
-
-        if(top.HEURIST.parameters){ //to open edit recordtyep structure at once
-            _initRecID = top.HEURIST.parameters.rtID;
-        }
-
-        _rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
-
+        
         tabView.addTab(new YAHOO.widget.Tab({
                     id: "newGroup",
                     label: "<label title='Create new group, edit or delete an existing group' style='font-style:bold'> +/- </label>",
@@ -120,6 +114,16 @@ function RectypeManager() {
                         '</div></div>'+
                         '</div>')
             }));
+        
+        
+        top.HEURIST.parameters = top.HEURIST.parseParams(this.location.search);
+
+        if(top.HEURIST.parameters){ //to open edit recordtype structure at once
+            _initRecID = top.HEURIST.parameters.rtID;
+        }
+
+        _rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
+
         tabView.appendTo("modelTabs");
 
 
@@ -145,7 +149,8 @@ function RectypeManager() {
         YAHOO.util.History.initialize("yui-history-field", "yui-history-iframe");
         } catch (e) {
         }
-        */			initTabView();
+        */			
+        initTabView();
 
         dragDropEnable();
     }//end _init
@@ -175,7 +180,7 @@ function RectypeManager() {
             grpDescription = "Describe this group!";
         }
 
-        _groups.push({value:grpID, text:grpName});
+        _groups.splice( ind, 0, {value:grpID, text:grpName});
 
         tabView.addTab(new YAHOO.widget.Tab({
                     id: grpID,
@@ -1008,7 +1013,7 @@ function RectypeManager() {
         var state = dtable.getState();
         state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
-        var grpID = _getGroupByIndex(tabIndex);
+        var grpID = _getGroupByIndex(tabView.get('activeIndex'));
 
         _filterText = Dom.get('filter'+grpID).value;
         _filterVisible = Dom.get('filter'+grpID+'vis').checked?1:0;
@@ -1291,8 +1296,11 @@ function RectypeManager() {
         //define new or exisiting
         if(grpID<0) {
             grp = {name: name, description:description};
+            
+            orec.rectypegroups.colNames.push('rtg_Order');
             orec.rectypegroups.defs[-1] = [];
-            orec.rectypegroups.defs[-1].push({values:[name, description]});
+            orec.rectypegroups.defs[-1].push({values:[name, description, 0]});
+            
         }else{
             //for existing - rename
             grp = top.HEURIST.rectypes.groups[top.HEURIST.rectypes.groups.groupIDToIndex[grpID]];
@@ -1319,13 +1327,16 @@ function RectypeManager() {
                     _cloneHEU = null;
 
                     if(grpID<0){
-
-                        _refreshAllTables();
+                        
+                        //insert new group at the beginning of tabview
 
                         grpID = context['0'].result;
                         ind = _groups.length;
-                        _addNewTab(ind, grpID, name, description);
+                        _addNewTab(0, grpID, name, description);
+                        _updateOrderAfterDrag();
                         dragDropEnable();
+                        tabView.set("activeIndex", 0);
+                        _refreshAllTables();
                     }else{
                         //update label
                         for (ind in _groups){
@@ -1336,9 +1347,10 @@ function RectypeManager() {
                                 _groups[ind].text = name;
                                 break;
                         }}
+                        tabView.set("activeIndex", ind);
                         _refreshAllTables();
                     }
-                    tabView.set("activeIndex", ind);
+                    
                 }
             }
         }

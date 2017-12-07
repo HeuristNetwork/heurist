@@ -254,7 +254,7 @@ function EditRecStructure() {
                     key:"rst_ID", label: "Hdr", sortable:false, width:20,
                     formatter: function(elLiner, oRecord, oColumn, oData){
                         
-                        elLiner.innerHTML = "<img src='../../../common/images/insert_header .png' style='cursor:pointer;' "
+                        elLiner.innerHTML = "<img src='../../../common/images/insert_header.png' style='cursor:pointer;' "
                         +" title='Click this button to insert a new section header at this point in the record structure / data entry form' "+
                         " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >";
                         
