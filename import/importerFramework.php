@@ -220,48 +220,62 @@ function clear_session() {
 function mode_file_selection() {
     global $session_data;
 
+    if (@$_REQUEST['format']) {
+    $frm = $_REQUEST['format'];
+    
+    if ($frm == "GEO"){
+?>
+    <h2>IMPORT KML</h2>
+
+    <p style="font-weight:bold;font-size:larger;padding:10 0">This function is designed for the importing of KML into map enabled Heurist records</p>      
+    
+    <p>Note: you may use KML (or KML snippet) on map directly. Use KML Map source record type for such aim. Although to manipulate data stored along with coordinates use this function</p>
+    
+    <p><a href='<?=HEURIST_BASE_URL?>context_help/kml_import.html' onClick="top.HEURIST.util.popupURL(window, href); return false;">More info</a></p>
+    
+<?php  
+    }else{
+        
     ?>
+    
     <h2>File selection</h2>
 
     <div class="explanation">
         Use this webpage to import your records from another program into Heurist.<br>
         <?php
-        if (@$_REQUEST['format']) {
-            $frm = $_REQUEST['format'];
             if ($frm == "BIB") {
                 ?>
                 Currently, support is limited to EndNote REFER and Zotero formats.<br>
                 <a href="<?=HEURIST_BASE_URL?>import/interface/listRequiredElements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
                 <?php
-            }else if ($frm == "GEO") {
-                ?>
-                Currently, support is limited to <a href='<?=HEURIST_BASE_URL?>context_help/kml_import.html' onClick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
-                <?php
             }
-        }
         ?>
         For additional formats email <a  href="mailto:<?=HEURIST_MAIL_TO_INFO?>"><?=HEURIST_MAIL_TO_INFO?></a>.
     </div>
-    <br>
     <?php
+    }
+    }
+    print '<br>';
     if (@$session_data['error']) {
         print '   <div class="error">' . $session_data['error'] . "</div><br>\n";
     }
     ?>
     <div class="file_selection">
         Select a file:
-        <input type="file" size="50" name="import_file">
+        <input type="file" size="50" name="import_file" onchange="{document.forms[0].submit()}">
     </div>
     <br clear=all>
 
     <div class="separator_row" style="margin:10px 0"></div>
 
-
+    <?php
+/*    
     <div class="actionButtons">
         <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 5px;">
         <input type="submit" value="Continue" style="font-weight: bold;">
     </div>
-    <?php
+*/    
+    
 }
 
 
@@ -323,7 +337,7 @@ function mode_file_parsing() {
     <?php
     // determine file type
     $found_parser = FALSE;
-    $parsers = &getHeuristFiletypeParsers();
+    $parsers = getHeuristFiletypeParsers(); //was &
     foreach (array_keys($parsers) as $i) {
         if ($parsers[$i]->recogniseFile($session_data['infile'])) {
             $session_data['parser'] = &$parsers[$i];
@@ -416,14 +430,16 @@ function mode_file_parsing() {
     do_entry_parsing();
     ?>
     <br clear=all>
-    <hr>
+<!--     <hr>  -->
     <br clear=all>
+    <div style="max-width:250;text-align:right">
+    <input type="submit" value="Continue" style="font-weight: bold;">
     <?php	if (! @$session_data['zoteroImport']) { ?>
         <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="margin-right: 4ex;">
-        <?php	} else { ?>
+    <?php	} else { ?>
         <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
-        <?php	} ?>
-    <input type="submit" value="Continue" style="font-weight: bold;">
+    <?php	} ?>
+    </div>
     <?php
 }
 
@@ -507,8 +523,8 @@ function mode_zotero_request_parsing() {
     <br clear=all>
     <hr>
     <br clear=all>
-    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
     <input type="submit" value="Continue" style="font-weight: bold;">
+    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
     <?php
 }
 
@@ -534,9 +550,9 @@ function mode_print_rectype_selection() {
     <div style="width: 500px;">To help Heurist accurately identify the record types where these have not been specified, please select the types of record which may be in the file.  Be specific, as you will have further chances to include additional types if there are records which do not fit with the selected types.</div>
 
     <p>
-        <a target="_new" href="interface/downloadOriginalInputFile.php/<?= htmlspecialchars($session_data['in_filename']) ?>?import_id=<?= htmlspecialchars($import_id) ?>">View import file</a>
+        <a target="_new" href="interface/downloadOriginalInputFile.php/<?php echo htmlspecialchars($session_data['in_filename']); ?>?db=<?php echo HEURIST_DBNAME; ?>&import_id=<?php echo htmlspecialchars($import_id); ?>">View import file</a>
         &nbsp;&nbsp;&nbsp;
-        <a target="_new" href="interface/listRequiredElements.php">View tag definitions</a>
+        <a target="_new" href="interface/listRequiredElements.php?db=<?php echo HEURIST_DBNAME; ?>">View tag definitions</a>
     </p>
 
     <?php	if (@$session_data['error']) {	?>
@@ -549,7 +565,7 @@ function mode_print_rectype_selection() {
     <table cellpadding="5">
         <tr>
             <td>
-                <span style="vertical-align: top;">All unspecified records <b>have this type</b>&nbsp;</span>&nbsp;
+                <!-- span style="vertical-align: top;">All unspecified records <b>have this type</b>&nbsp;</span>&nbsp; -->
             </td>
 
             <?php	if ($session_data['parser']->supportsReferenceTypeGuessing()) { ?>
@@ -577,7 +593,13 @@ function mode_print_rectype_selection() {
                 <td></td>
                 <?php	} ?>
         </tr>
-        <?php	foreach ($session_data['parser']->getReferenceTypes() as $rectype) { ?>
+        <tr><td>Select record type: <select name="set-rectype">
+        <?php	
+            foreach ($session_data['parser']->getReferenceTypes() as $rectype) { 
+                print '<option val="'.htmlspecialchars($rectype).'>'.htmlspecialchars($rectype).'</option>';
+            }
+            if (false) //it never works
+            foreach ($session_data['parser']->getReferenceTypes() as $rectype) { ?>
             <tr>
                 <td style="text-align: right;"><label>&nbsp;<input type="radio" name="set-rectype" value="<?= htmlspecialchars($rectype) ?>" onClick="if (this.checked) heuristic_enabler(false);">&nbsp;</label></td>
                 <td>
@@ -591,17 +613,18 @@ function mode_print_rectype_selection() {
                 </td>
             </tr>
             <?php	} ?>
-    </table>
-
-    <br clear=all>
-    <hr>
-    <br clear=all>
-    <?php	if (! @$session_data['zoteroImport']) { ?>
+          </select></td><td></td></tr>  
+          <tr><td style="text-align:right">
+         <input type="submit" value="Continue" style="font-weight: bold;">
+    <?php    
+             if (! @$session_data['zoteroImport']) { ?>
         <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="margin-right: 4ex;">
-        <?php	} else { ?>
+    <?php    } else { ?>
         <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
-        <?php	} ?>
-    <input type="submit" value="Continue" style="font-weight: bold;">
+    <?php    } ?>
+         </td><td></td>
+         </tr> 
+    </table>
     <?php
 }
 
@@ -801,7 +824,7 @@ function mode_crosswalking() {
             unset($out_entry);
             $out_entry = $in_entry->crosswalk();
             if ($out_entry) {
-                print $out_entry->getTitle() . "<br>";
+                if(strlen(trim($out_entry->getTitle()))>0) print trim($out_entry->getTitle())."<br>";
                 if ($out_entry->isValid()) {
                     $out_entries[] = &$out_entry;
                     @++$out_entry_count_by_rectype[$out_entry->getReferenceType()];
@@ -975,14 +998,15 @@ function mode_crosswalking() {
         <br clear=all>
         <hr>
         <br clear=all>
-
-        <?php	if (! @$session_data['zoteroImport']) { ?>
+        <div style="max-width:500px;text-align:right">
+        <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
+        
+            <?php	if (! @$session_data['zoteroImport']) { ?>
             <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="margin-right: 4ex;">
             <?php	} else { ?>
             <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
             <?php	} ?>
-
-        <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
+        </div>
         <p>
             <b>Import is non-reversible!</b> Data will be written to the Heurist database.
         </p>
@@ -2156,7 +2180,7 @@ function update_progress_bar($fraction) {
     $percent = 100*$fraction;
     if (intval($percent) == intval($last_percent)) return;
 
-    print '<script type="text/javascript">importer.setProgress('.$percent.")</script>\n";
+    print '<script type="text/javascript">importer.setProgress('.$percent.")</script>";
     flush_fo_shizzle();
 
     $last_percent = $percent;
@@ -2164,7 +2188,7 @@ function update_progress_bar($fraction) {
 
 function set_progress_bar_title($title) {
     // print out javascript to update the progress bar title
-    print '<script type="text/javascript">importer.setProgressTitle(\''.addslashes($title)."')</script>\n";
+    print '<script type="text/javascript">importer.setProgressTitle(\''.addslashes($title)."')</script>";
     flush_fo_shizzle();
 }
 

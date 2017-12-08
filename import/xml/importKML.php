@@ -85,7 +85,8 @@ class HeuristKMLParser extends HeuristForeignParser {
 
 
 	function parseFile(&$file) {
-		$fp =& $file->getRawFile();
+        
+		$fp = $file->getRawFile();
 		rewind($fp);
 
 		// easiest to grab the file as a single string and use the (natively compiled) preg stuff
