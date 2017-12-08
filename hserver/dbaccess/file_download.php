@@ -39,7 +39,7 @@ if($db){
         if(file_exists($thumbfile)){
             downloadFile('image/png', $thumbfile);
         }else{
-            //@todo - change to the same script in h4
+            //@todo - change to the same script in h4  or use ImageMagic
             $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".$db."&ulf_ID=".$fileid;
             header("Location: ".$thumb_url);
             exit();

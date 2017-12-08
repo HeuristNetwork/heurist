@@ -75,7 +75,12 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     header("Location: ".HEURIST_THUMB_URL."ulf_".$_REQUEST['ulf_ID'].".png");
     return;
     }*/
-
+    
+    if ($standard_thumb  &&  file_exists($thumbnail_file)) {
+       echo readfile($thumbnail_file);
+       return;
+    }  
+    
     $res = mysql_query('select recUploadedFiles.*, defFileExtToMimetype.fxm_MimeType '
     .'from recUploadedFiles,defFileExtToMimetype where (fxm_Extension=ulf_MimeExt) and ulf_ObfuscatedFileID = "' 
     . mysql_real_escape_string($_REQUEST['ulf_ID']) . '"');
@@ -85,7 +90,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 
     if ($standard_thumb  &&  $file['ulf_Thumbnail']) {
 
-        //save as file
+        //save as file - recreate from thumb blob from database
         $img = @imagecreatefromstring($file['ulf_Thumbnail']);
         if($img){
             imagepng($img, $thumbnail_file);
