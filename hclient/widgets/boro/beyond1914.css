@@ -5402,8 +5402,8 @@ html {
 .bor-gallery {
   margin: 30px 0px; }
   .bor-gallery .bor-gallery-link {
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
     margin-right: 20px;
     margin-bottom: 20px;
     display: inline-block;

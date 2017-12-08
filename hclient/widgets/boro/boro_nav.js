@@ -1401,6 +1401,16 @@ $.widget( "heurist.boro_nav", {
                 }
             }
             $('#p_pdf_entry').empty().append($(html));
+
+            //Short description -------------------------------
+
+            fval = that.recset.values(person, 3);
+            if(!that.isempty(fval)){
+                $('#p_short_description_entry').parent().show();            
+                $('#p_short_description_entry').text(fval);            
+            }else{
+                $('#p_short_description_entry').parent().hide();            
+            }
             
 //console.log(record);            
             
@@ -1442,7 +1452,7 @@ $.widget( "heurist.boro_nav", {
                             + '<img class="bor-thumbnail" src="' 
                             + window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database 
                             + '&thumb=' + obf[0]
-                            + '" alt="'+stitle+'">'
+                            + '" alt="'+stitle+'" style="max-height:150px">'
                         +'</a>';                    
                 }
             }
