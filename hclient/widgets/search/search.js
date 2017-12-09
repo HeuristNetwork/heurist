@@ -146,7 +146,10 @@ $.widget( "heurist.search", {
         .css({'color':'gray','font-size':'0.8em', 'margin': '0.2em 0 0 0.5em',
               'position': 'absolute'})
         .appendTo( this.div_search_input );
-        this._on( this.input_search_prompt, {click: function(){this.input_search.focus()}} );
+        this._on( this.input_search_prompt, {click: function(){
+                //AAAA 
+                this.input_search.focus()
+        }} );
 
         
         this.input_search = $( "<textarea>" )
@@ -250,7 +253,7 @@ $.widget( "heurist.search", {
 
         this._on( this.btn_search_domain, {
             click: function() {
-                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
                 var menu = $( this.menu_search_domain )
                 .css('width', '100px')     //was this.div_search_as_user.width()
                 .show()
@@ -413,37 +416,32 @@ $.widget( "heurist.search", {
             //.addClass('ui-heurist-btn-header1 heurist-bookmark-search')
             .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
 
+            /*
             this.select_rectype_addrec = $('<select>')   
                 .attr('size',20)
-                .addClass('menu-or-popup text ui-corner-all ui-widget-content') 
+                .addClass('text ui-corner-all ui-widget-content select_rectype_addrec') 
                 .css({'position':'absolute','min-width':'250'})
                 .appendTo( $('body') ) 
                 .hide();
+                */
                 
             this._on( this.btn_select_rt, {
                 click:  function(){
-                    
+            
+                //this.select_rectype_addrec.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
+                this.select_rectype_addrec.hSelect('open');
+                this.select_rectype_addrec.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
+                /*    
                 $('.menu-or-popup').hide(); //hide other
                 var $menu_recordtypes = $( this.select_rectype_addrec )
                     .show()
                     .position({my: "left top", at: "left bottom", of: this.btn_add_record });
                 $( document ).one( "click", function() { $menu_recordtypes.hide(); });
+                */
                 return false;
                     
             }});
             
-            this._on( this.select_rectype_addrec, {
-                change: function(){
-
-                   this.btn_add_record.button({label: 'Add '+this.select_rectype_addrec.find('option:selected').text().trim()});
-                   
-                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:this.select_rectype_addrec.val()}});
-                   
-                   return false;
-                }
-            });
-                
-                
             this.div_add_record.controlgroup();
             
         } // add record button
@@ -553,19 +551,36 @@ $.widget( "heurist.search", {
 
         this.btn_search_domain.css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'inline-block':'none');
 
-        if(this.select_rectype){
+        if(this.select_rectype){ 
             this.select_rectype.empty();
-            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set);
+            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set, false);
         }
-        if(this.select_rectype_addrec){
-            this.select_rectype_addrec.empty();
-            
-            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype_addrec.get(0));
+        if(!this.select_rectype_addrec){
+
+            this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
+
+            var that = this;
+            this.select_rectype_addrec.hSelect({change: function(event, data){
+                    
+                   var selval = data.item.value;
+                   that.select_rectype_addrec.val(selval);
+                   var opt = that.select_rectype_addrec.find('option[value="'+selval+'"]');
+                   that.btn_add_record.button({label: 'Add '+opt.text().trim()});
+
+                   window.hWin.HAPI4.save_pref('record-add-defaults',selval);
+                   
+                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:selval}});
+                   return false;
+                }
+            });
+
             
             var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-            if(prefs[0]>0) {
-                this.select_rectype_addrec.val(prefs[0]);   
-                this.btn_add_record.button({label: 'Add '+this.select_rectype_addrec.find('option:selected').text()});
+            if($.isArray(prefs) && prefs.length>0) prefs = prefs[0];
+            if(prefs>0) {
+                this.select_rectype_addrec.val(prefs); 
+                var opt = this.select_rectype_addrec.find('option[value="'+prefs+'"]');
+                this.btn_add_record.button({label: 'Add '+opt.text()});
             }
         }
         
@@ -635,7 +650,7 @@ $.widget( "heurist.search", {
         }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
             window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
-            if(this.input_search.is(':visible')) this.input_search.focus();
+            //AAAA if(this.input_search.is(':visible')) this.input_search.focus();
             
             //show if there is resulst
             if(this.btn_search_save){
@@ -748,7 +763,7 @@ $.widget( "heurist.search", {
     * @returns {Boolean}
     */
     , showSearchAssistant: function() {
-        $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+        $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
         $('.menu-or-popup').hide(); //hide other
 
         if(this.search_assistant){ //inited already
@@ -849,7 +864,7 @@ $.widget( "heurist.search", {
             var sortasc =  $('#sa_sortasc');
             $dlg.find("#fld_enum").hide();
 
-            window.hWin.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), null, window.hWin.HR('Any record type'));
+            select_rectype = window.hWin.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), null, window.hWin.HR('Any record type'), false);
 
             var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
             allowed.splice(allowed.indexOf("separator"),1);
@@ -872,8 +887,9 @@ $.widget( "heurist.search", {
                                          {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
                     }
                     
-                    window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), 
-                                rectype, allowed, topOptions2, {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions});
+                    select_fieldtype = window.hWin.HEURIST4.ui.createRectypeDetailSelect($("#sa_fieldtype").get(0), 
+                                rectype, allowed, topOptions2, 
+                                {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, useHtmlSelect:false});
 
                     var topOptions = [{key:'t', title:window.hWin.HR("record title")},
                         {key:'id', title:window.hWin.HR("record id")},
@@ -892,22 +908,31 @@ $.widget( "heurist.search", {
                         select_sortby.get(0).appendChild(grp);
                         */
                     }
-                    window.hWin.HEURIST4.ui.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, topOptions,
-                                {initial_indent:1});
-
+                    select_sortby = window.hWin.HEURIST4.ui.createRectypeDetailSelect($("#sa_sortby").get(0), rectype, allowed, topOptions,
+                                {initial_indent:1, useHtmlSelect:false});
+                                
+                                
+                    that._on( select_fieldtype, {
+                        change: __onFieldTypeChange
+                    });
+                    that._on( select_sortby, {
+                        change: function(event){ this.calcShowSimpleSearch(); }
+                    });
+                                
                     $("#sa_fieldvalue").val("");
                     $("#sa_negate").prop("checked",'');
                     $("#sa_negate2").prop("checked",'');
+                    
                     $dlg.find("#fld_contain").show();
                     $dlg.find("#fld_enum").hide();
+                    $dlg.find("#fld_coord").hide();
                     this.calcShowSimpleSearch();
                 }
             });
             
             //change compare option according to selected field type
             // enum, geocoord, others
-            that._on( select_fieldtype, {
-                change: function(event){
+            function __onFieldTypeChange(event){
 
                     if(event.target.value=='longitude' || event.target.value=='latitude'){
 
@@ -933,10 +958,18 @@ $.widget( "heurist.search", {
                             var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                             disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
-                            window.hWin.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, 
-                                                allTerms, disabledTerms, null, 
-                                                [{ key:'any', title:window.hWin.HR('<any>')},
-                                                 { key:'blank', title:window.hWin.HR('<blank>')}]);
+                            var select_terms = $("#sa_termvalue");
+
+                            window.hWin.HEURIST4.ui.createTermSelectExt2(select_terms.get(0),
+                            {datatype:detailType, termIDTree:allTerms, headerTermIDsList:disabledTerms, defaultTermID:null, 
+                                topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:window.hWin.HR('<blank>')}], 
+                                needArray:false, useHtmlSelect:false});
+                                                 
+                            that._on( select_terms, { change: function(event){
+                                    this.calcShowSimpleSearch();
+                                }
+                            } );
+                                                                                                     
                         } else {
                             $dlg.find("#fld_contain").show();
                             $dlg.find("#fld_enum").hide();
@@ -945,18 +978,19 @@ $.widget( "heurist.search", {
                     }
 
                     this.calcShowSimpleSearch();
-                }
+            }//__onFieldTypeChange
+                
+            that._on( select_fieldtype, {
+                change: __onFieldTypeChange
             });
-            that._on( select_terms, {
-                change: function(event){
+            that._on( select_terms, { change: function(event){
                     this.calcShowSimpleSearch();
                 }
-            });
-            that._on( select_sortby, {
-                change: function(event){
+            } );
+            that._on( select_sortby, { change: function(event){
                     this.calcShowSimpleSearch();
                 }
-            });
+            } );
             that._on( $("#sa_fieldvalue"), {
                 keyup: function(event){
                     this.calcShowSimpleSearch();
@@ -968,6 +1002,16 @@ $.widget( "heurist.search", {
                 }
             });
             that._on( $("#sa_negate2"), {
+                change: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
+            that._on( $("#sa_coord1"), {
+                change: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
+            that._on( $("#sa_coord2"), {
                 change: function(event){
                     this.calcShowSimpleSearch();
                 }

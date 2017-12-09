@@ -69,7 +69,7 @@ $.widget( "heurist.ruleBuilder", {
         .addClass('text ui-corner-all ui-widget-content')
         .appendTo( cont );
 
-        window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, (this.options.level==1?'select....':false) );
+        window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, (this.options.level==1?'select....':false), true );
 
         //create list/combobox of pointer/relmarker fields
         this.select_fields = $( "<select>" )
@@ -245,7 +245,7 @@ $.widget( "heurist.ruleBuilder", {
     this._super( key, value );
     if ( key === "recordtypes" ) {
 
-    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false);
+    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false, true);
     this._onSelectRectype();
     this._refresh();
     }
@@ -529,7 +529,7 @@ $.widget( "heurist.ruleBuilder", {
                         window.hWin.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'Any relationship type', false);
                     }
                     //reduced list of constraints
-                    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
+                    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null, true); //arr_field.rectypes.length>1?'any':null);
                     if(arr_field.rectypes.length!=1){
                         window.hWin.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
                         this.select_target_rectype.val(0);
@@ -554,7 +554,7 @@ $.widget( "heurist.ruleBuilder", {
         }
         if(is_not_selected){
             //show all constraints
-            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null); //this._arr_rectypes.length>1?'any':null);
+            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null, true); //this._arr_rectypes.length>1?'any':null);
             if(this._arr_rectypes.length>1){
                 window.hWin.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
             }

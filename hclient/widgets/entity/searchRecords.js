@@ -31,7 +31,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this.selectRectype.empty();
         window.hWin.HEURIST4.ui.createRectypeSelect(this.selectRectype.get(0), 
             this.options.rectype_set, 
-            this.options.rectype_set?null:window.hWin.HR('Any Record Type'));
+            this.options.rectype_set?null:window.hWin.HR('Any Record Type'), true);
 
         this.btn_add_record = this.element.find('#btn_add_record')
         .css({'min-width':'11.9em','z-index':2})

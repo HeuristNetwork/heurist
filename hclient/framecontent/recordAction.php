@@ -167,9 +167,11 @@ if(!in_array($action_type, $allowed_actions)){
         </div>
 
     </div>
+
     <div id="div_result" class="content_div" style="display: none;">
         RESULT
     </div>
+    
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div">
         <div class="ui-dialog-buttonset">
             <div id="btn-ok" class="ui-state-disabled">OK</div>

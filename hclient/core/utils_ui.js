@@ -121,10 +121,11 @@ window.hWin.HEURIST4.ui = {
         if(selObj==null){
             selObj = document.createElement("select");
         }else{
-            $(selObj).empty();
+            $(selObj).off('change');
             if($(selObj).hSelect("instance")!=undefined){
                $(selObj).hSelect("destroy"); 
             }
+            $(selObj).empty();
         }
         
         window.hWin.HEURIST4.ui.fillSelector(selObj, topOptions);
@@ -390,7 +391,7 @@ window.hWin.HEURIST4.ui = {
     createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
         return window.hWin.HEURIST4.ui.createTermSelectExt2(selObj,
             {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
-             defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray});
+             defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray, useHtmlSelect:false});
     },
 
     createTermSelectExt2: function(selObj, options) {
@@ -401,7 +402,8 @@ window.hWin.HEURIST4.ui = {
             defaultTermID =  options.defaultTermID,
             topOptions =  options.topOptions,
             needArray  =  options.needArray,
-            supressTermCode = options.supressTermCode;
+            supressTermCode = options.supressTermCode,
+            useHtmlSelect  = (options.useHtmlSelect===true);
 
 
         if(needArray){
@@ -625,7 +627,7 @@ window.hWin.HEURIST4.ui = {
             if (!defaultTermID) selObj.selectedIndex = 0;
             
             //apply select menu
-            window.hWin.HEURIST4.ui.initHSelect(selObj);
+            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect);
             
             return selObj;
         }else{
@@ -668,14 +670,14 @@ window.hWin.HEURIST4.ui = {
     //
     // rectypeList - constraint options to this list, otherwise show entire list of rectypes separated by groups
     //
-    createRectypeSelect: function(selObj, rectypeList, topOptions) {
+    createRectypeSelect: function(selObj, rectypeList, topOptions, useHtmlSelect) {
 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
         var rectypes = window.hWin.HEURIST4.rectypes,
         index;
 
-        if(!rectypes) return selObj;
+        if(rectypes){ 
 
 
         if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
@@ -737,11 +739,14 @@ window.hWin.HEURIST4.ui = {
                 
             }
             
-            window.hWin.HEURIST4.ui.initHSelect(selObj);
-
         }
+        }
+        
+        useHtmlSelect = (useHtmlSelect===true);
+        
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect);
 
-        return selObj;
+        return $(selObj);
     },
 
     //
@@ -806,7 +811,7 @@ window.hWin.HEURIST4.ui = {
         }
 
         if(indent==0){
-            window.hWin.HEURIST4.ui.initHSelect(selObj);        
+            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, false);        
         }
         
         return selObj;
@@ -828,6 +833,7 @@ window.hWin.HEURIST4.ui = {
         var selectedValue = null;
         var showLatLongForGeo = false;
         var show_parent_rt = false;
+        var useHtmlSelect = true;
         var initial_indent = 0;
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name']==true;
@@ -835,7 +841,8 @@ window.hWin.HEURIST4.ui = {
             requriedHighlight = options['show_required']==true;
             selectedValue     = options['selected_value'];
             show_parent_rt    = options['show_parent_rt']==true;
-            initial_indent = options['initial_indent']>0?options['initial_indent']:0;
+            initial_indent    = options['initial_indent']>0?options['initial_indent']:0;
+            useHtmlSelect     = options['useHtmlSelect']!==false;
         }
         
         var dtyID, details;
@@ -1045,7 +1052,7 @@ window.hWin.HEURIST4.ui = {
             $(selObj).val(selectedValue);
         }
 
-        window.hWin.HEURIST4.ui.initHSelect(selObj); 
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect); 
         
         return selObj;
     },
@@ -1108,32 +1115,39 @@ window.hWin.HEURIST4.ui = {
         }
     },
     
-    initHSelect: function(selObj){            
+    initHSelect: function(selObj, useHtmlSelect){            
 
         //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
         ////depth>1 || (optgroup==null && depth>0
         
-        $(selObj).find('option').each(
-            function(idx, item){
-                var opt = $(item);
-                var depth = parseInt(opt.attr('depth'));
-                if(depth>0) { 
-                    //for non mozilla add manual indent
-                    var a = new Array( 2 + ((depth<7)?depth:7)*2 );
-                    opt.html(a.join('&nbsp;&nbsp;') + opt.text());       
-                }
-        });
-        
-           /*
-            var menu = $(selObj).hSelect({
-                change: function( event, data ) {
+        //for usual HTML select we have to add spaces for indent
+        if(useHtmlSelect){
+            
+            $(selObj).find('option').each(
+                function(idx, item){
+                    var opt = $(item);
+                    var depth = parseInt(opt.attr('depth'));
+                    if(depth>0) { 
+                        //for non mozilla add manual indent
+                        var a = new Array( 2 + ((depth<7)?depth:7)*2 );
+                        opt.html(a.join('&nbsp;&nbsp;') + opt.text());       
+                    }
+            });
+            
+        }else{
+            
+            var menu = $(selObj).hSelect(       
+              { change: function( event, data ) {
+    //console.log('onnn '+data.item.value);                
                         $(selObj).val(data.item.value);
                         $(selObj).trigger('change');
                 }});
             
             menu.hSelect( "menuWidget" ).css({'padding':0,'background':'#F4F2F4','zIndex':9999999});
-            menu.hSelect( "widget" ).css({'padding':0,'background':'#F4F2F4'});
-            */
+            menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu').addClass( "overflow" );
+            menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF'}); //'#F4F2F4'
+        }
+        return $(selObj);
     },            
     
     // Init button that show/hide help tips
@@ -1627,7 +1641,7 @@ window.hWin.HEURIST4.ui = {
            
            
             var recID = $(event.target).parent('.ui-button').attr('data-recID');
-console.log(recID);            
+          
             window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
             {selectOnSave:true, edit_obstacle: true, onselect: 
                     function(event, res){
@@ -1803,11 +1817,12 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     if ( item.disabled ) {
       li.addClass( "ui-state-disabled" );
     }
-    
+
+/*    
     if($(item.element).attr('depth')>0){
         console.log($(item.element).attr('depth')+'   '+item.label);
     }
-    
+*/    
     var depth = parseInt($(item.element).attr('depth'));
     if(!(depth>0)) depth = 0;
     wrapper.css('padding-left',(depth+0.2)+'em');

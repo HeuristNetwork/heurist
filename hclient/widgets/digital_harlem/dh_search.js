@@ -171,7 +171,7 @@ $.widget( "heurist.dh_search", {
 
                     that._on( that.btn_fi_menu, {
                         click: function() {
-                            $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                            $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
                             var menu = $( that.menu_fi )
                             //.css('min-width', '80px')
                             .show()

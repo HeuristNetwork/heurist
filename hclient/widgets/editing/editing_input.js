@@ -298,8 +298,17 @@ $.widget( "heurist.editing_input", {
         if(this.header){
             this.header.remove();
         }
+        var that = this;
         if(this.inputs){
-            $.each(this.inputs, function(index, value){ value.remove(); } );
+            $.each(this.inputs, function(index, input){ 
+
+                    if(that.detailType=='file'){
+                        $(input).fileupload('destroy');
+                    }else{
+                        if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
+                    }
+                    input.remove();
+            } );
             this.input_cell.remove();
         }
     },
@@ -377,6 +386,8 @@ $.widget( "heurist.editing_input", {
                         $input.remove();
                         that.input_cell.find('.input-div').remove();
                     }else{
+                        if($input.hSelect('instance')!==undefined) $input.hSelect('destroy');
+                        
                         //remove element
                         $input.parents('.input-div').remove();
                     }
@@ -449,25 +460,42 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .change(function(){
-                
-                $input.find('option[term-view]').each(function(idx,opt){
-                    $(opt).text($(opt).attr('term-view'));
-                });
-                
-                var opt = $input.find( "option:selected" );
-                var parentTerms = opt.attr('parents');
-                if(parentTerms){
-                     opt.text(parentTerms+'.'+opt.attr('term-orig'));
-                }
-                that._onChange();
-            })
             .appendTo( $inputdiv );
 
-            this._recreateSelector($input, value);
+            $input = this._recreateSelector($input, value);
+            
+            function __onTermChange( event, data ){
+                
+                if($input.hSelect("instance")!=undefined){
+                    
+                    var opt = $input.find('option[value="'+$input.val()+'"]');
+                    var parentTerms = opt.attr('parents');
+                    if(parentTerms){
+                        $input.hSelect("widget").find('.ui-selectmenu-text').text( parentTerms+'.'+opt.text() );    
+                    }    
+                       
+                }else{
+                    //restore plain text value               
+                    $input.find('option[term-view]').each(function(idx,opt){
+                        $(opt).text($(opt).attr('term-view'));
+                    });
+                    
+                    //assign for selected term value in format: parent.child 
+                    var opt = $input.find( "option:selected" );
+                    var parentTerms = opt.attr('parents');
+                    if(parentTerms){
+                         opt.text(parentTerms+'.'+opt.attr('term-orig'));
+                    }
+                }
+                that._onChange();
+            }
+            
+            $input.change( __onTermChange );
+
+            
             
             if($input.val()!=value){ //value is not allowed
-                
+            
             }
             
             var allTerms = this.f('rst_FieldConfig');    
@@ -562,7 +590,9 @@ $.widget( "heurist.editing_input", {
                         callback: function(context){
                             if(context=="ok") {
                                 window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
-                                that._recreateSelector($input, true);
+                                $input = that._recreateSelector($input, true);
+                                
+                                $input.change( __onTermChange );
                                 
                                 __showHideSelByImage();
                             }
@@ -587,7 +617,9 @@ $.widget( "heurist.editing_input", {
                                 that.options['dtFields']['rst_FilteredJsonTermIDTree'] = editedTermTree;
                                 that.options['dtFields']['rst_TermIDTreeNonSelectableIDs'] = editedDisabledTerms
                                                                 
-                                that._recreateSelector($input, true);
+                                $input = that._recreateSelector($input, true);
+                                
+                                $input.change( __onTermChange );
                                 
                                 __showHideSelByImage();
                             }
@@ -627,7 +659,7 @@ $.widget( "heurist.editing_input", {
             .change(function(){that._onChange();})
             .appendTo( $inputdiv );
 
-            window.hWin.HEURIST4.ui.createRectypeSelect($input.get(0),null, this.f('cst_EmptyValue'));
+            window.hWin.HEURIST4.ui.createRectypeSelect($input.get(0),null, this.f('cst_EmptyValue'), true);
             if(value){
                 $input.val(value);
             }
@@ -907,7 +939,7 @@ $.widget( "heurist.editing_input", {
                                         window.hWin.HEURIST4.rectypes.names[selector_rectype.val()] + '</i> (child record)'});
                                 });
                                 window.hWin.HEURIST4.ui.createRectypeSelect(selector_rectype.get(0), 
-                                                popup_options.rectype_set,null);
+                                                popup_options.rectype_set, null, true);
                                 btn_add_title = 'Create new <i>'+
                                         window.hWin.HEURIST4.rectypes.names[selector_rectype.val()] + '</i> (child record)';
                             }else{
@@ -1900,10 +1932,13 @@ $.widget( "heurist.editing_input", {
             var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
 
             //vocabulary
-            window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
+            $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
                 {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms,
-                    defaultTermID:value, topOptions:true, supressTermCode:true});
+                    defaultTermID:value, topOptions:true, supressTermCode:true, useHtmlSelect:false});
+                    
         }
+        
+        return $input;
     },
     
     //

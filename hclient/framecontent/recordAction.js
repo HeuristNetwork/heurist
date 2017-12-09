@@ -188,7 +188,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _fillSelectRecordTypes() {
         var rtSelect = $('#sel_recordtype');
         rtSelect.empty();
-        window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0) );
+        window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, null, false );
     }
     //
     // fill all field type selectors
@@ -441,6 +441,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('#div_result').hide();
             $('#div_parameters').show();
             $('#btn-ok').button('option','label',window.hWin.HR('Go'));
+            //to reseet all selectors 
+            selectRecordScope.val('').change();
             return;
         }
 
@@ -563,11 +565,18 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
             if(success){
                 $('#div_parameters').hide();
+                
+                /*
+                $('select').each(function(idx, item){
+                   if($(item).hSelect('instance')!==undefined) $(item).hSelect('destroy'); //destroy all hSelects 
+                });
+                */
+                $('.ui-selectmenu-menu').remove();
 
                 $('#div_result').empty();
 
                 response = response['data'];
- //console.log(response);
+ 
                 /*
                 *       passed - count of given rec ids
                 *       noaccess - no rights to edit

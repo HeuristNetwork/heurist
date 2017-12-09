@@ -299,7 +299,7 @@ $.widget( "heurist.queryBuilderItem", {
     this._super( key, value );
     if ( key === "recordtypes" ) {
 
-    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false);
+    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false, true);
     this._onSelectRectype();
     this._refresh();
     }

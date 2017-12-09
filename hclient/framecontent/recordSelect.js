@@ -103,7 +103,7 @@ console.log(arguments);
                 );
                 selectRectype.empty();
                 window.hWin.HEURIST4.ui.createRectypeSelect(selectRectype.get(0), rectype_set, 
-                    rectype_set?null:window.hWin.HR('Any Record Type'));
+                    rectype_set?null:window.hWin.HR('Any Record Type'), false);
                           
                 //init record list          
                 recordList = $('#recordList')

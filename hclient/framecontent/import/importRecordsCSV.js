@@ -441,7 +441,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             var $dlg, buttons = {};
         
             if($('#sa_primary_rectype > option').length==0){
-                window.hWin.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, window.hWin.HR('select...') );
+                window.hWin.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, window.hWin.HR('select...'), true);
 
                 //reload dependency tree on select change
                 $('#sa_primary_rectype').change( function(event){ 
@@ -2206,7 +2206,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
                             });
                             $.each(select_rectype, function(idx, item){
-                                window.hWin.HEURIST4.ui.createRectypeSelect( item, null, 'select...' );    
+                                window.hWin.HEURIST4.ui.createRectypeSelect( item, null, 'select...', true);    
                             });
 
                             $("input[id^='d_field']").change(function(evt){

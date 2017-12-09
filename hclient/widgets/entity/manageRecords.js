@@ -647,7 +647,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                              selRt.show();
                              //
                              if(selRt.is(':empty')){
-                                window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0));    
+                                window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0), null, null, true);    
                                 selRt.change(function(){
                                     
                                     if(that._getField('rec_RecTypeID')!=selRt.val()){
@@ -1300,7 +1300,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(!this._rt_select_dialog){
                     this._rt_select_dialog = $('<div>').css({'text-align': 'center'}).appendTo(this.element);
                     var selRt = $('<select>').addClass('text ui-corner-all ui-widget-content').appendTo(this._rt_select_dialog);
-                    window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0));    
+                    window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0), null, null, true);    
                 }
                 
                 var $dlg, btns = [

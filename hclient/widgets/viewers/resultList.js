@@ -355,7 +355,7 @@ $.widget( "heurist.resultList", {
 
             this._on( this.btn_actions, {
                 click: function() {
-                    $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                    $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
                     var menu = $( this.menu_actions )
                     //.css('width', this.div_search_as_user.width())
                     .show()
@@ -1599,7 +1599,7 @@ $.widget( "heurist.resultList", {
 
             this._on( this.btn_page_menu, {
                 click: function() {
-                    $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                    $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
                     var menu = $( this.menu_pages )
                     //.css('min-width', '80px')
                     .show()

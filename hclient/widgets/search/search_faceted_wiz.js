@@ -546,7 +546,7 @@ $.widget( "heurist.search_faceted_wiz", {
             svs_name.removeClass( "ui-state-error" );
 
             if($(opt_rectypes).is(':empty')){
-                window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
+                window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null, false);
                 
                 $dlg.find("#opt_rectypes").change(function(){
                     if(svs_name.val()=='') svs_name.val(opt_rectypes.options[opt_rectypes.selectedIndex].text+'s');
@@ -641,7 +641,7 @@ $.widget( "heurist.search_faceted_wiz", {
             var opt_mode_advanced = $dlg.find("#opt_mode_advanced");
 
             if($(opt_rectypes).is(':empty')){
-            window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
+            window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null, false);
             }
 
             this._on( opt_mode, {
