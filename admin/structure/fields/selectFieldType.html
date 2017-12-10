@@ -54,7 +54,7 @@
         <style>
         	.ft_col{
 				display:inline-block;
-				width:32%;
+				width:45%;
 				vertical-align:top;
 				padding-left:10px;
 				min-width:280px;
@@ -82,6 +82,7 @@
                 max-width:240px;
                 margin-left:5ex;
                 margin-right:5px;
+                display:none;
         	}
         </style>
     </head>
@@ -108,12 +109,12 @@
         
         <script src='../../../admin/structure/fields/selectFieldType.js'></script>
         
-        <i style="padding-left:10px">Please select a field type. Click on the example to view field behaviour.</i>
+<!--        <i style="padding-left:10px">Please select a field type. Click on the example to view field behaviour.</i> -->
 		<div style="width:100%;height:90%;padding:10px 10px 10px 0;overflow:none">
 			<div class="ft_col">
 				<h2 style="color:black">Simple fields</h2>
 
-				<input type="radio" name="ft_type" id="t_enum" value="enum">
+				<input type="radio" name="ft_type" id="t_enum" value="enum" checked>
 			 	<label for="t_enum">Dropdown (Terms)</label>
 			    <div class="ft_notes">
 			    	A flat or hierarchical list of categories, gnearally from a single vocabulary eg. countries, languages, source, condition, material, colour. Use where the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
@@ -141,17 +142,17 @@
 			    </div>
 			    <div id="inpt3" class="ft_preview"><img src="../../../common/images/edit_area.png"></div>
 
+                <input type="radio" name="ft_type" id="t_date" value="date">
+                 <label for="t_date">Date / time</label>
+                <div class="ft_notes">
+                    A calendar date with or without time of day. Whole years can be used. BCE dates are expressed as negative. Can also accommodate date range and uncertainty.
+                </div>
+                <div id="inpt4" class="ft_preview"><img src="../../../common/images/edit_date.png"></div>
+                
 			</div>
 			
 			<div class="ft_col">
 				<h2 style="color:black">Special fields</h2>
-			
-				<input type="radio" name="ft_type" id="t_date" value="date">
-			 	<label for="t_date">Date / time</label>
-			    <div class="ft_notes">
-			    	A calendar date with or without time of day. Whole years can be used. BCE dates are expressed as negative. Can also accommodate date range and uncertainty.
-			    </div>
-			    <div id="inpt4" class="ft_preview"><img src="../../../common/images/edit_date.png"></div>
 
 				<input type="radio" name="ft_type" id="t_geo" value="geo">
 			 	<label for="t_geo">Geospatial (point, line, polygon ...)</label>
@@ -175,9 +176,6 @@
 			    </div>
 			    <div id="inpt7" class="ft_preview"></div>
 -->
-			</div>
-
-			<div class="ft_col">
 				<h2 style="color:black">Record linking fields</h2>
                 
                 <!-- redundancy note: this functionality is repeated in selectLinkField.html/js -->
@@ -208,12 +206,14 @@
                 </div>
 			
 		        <div style="text-align:center;width:100%;padding-top:2em;">
-		            <button type="button" id="btnSelect" disabled="disabled"
+		            <button type="button" id="btnSelect" 
 		            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-		            role="button" aria-disabled="false" style="color:lightgray;padding:4px 10px;">
+		            role="button" aria-disabled="false" style="color:black;padding:4px 10px;">
 		            <span class="ui-button-text" style="font-size: 1.6em;">Use this field type</span>
 		            </button>
 		        </div>
+                
+                <!-- disabled="disabled" color:lightgray; -->
 			</div>
 
 

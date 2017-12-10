@@ -13,7 +13,7 @@
 */
 
 /**
-* brief description of file
+* 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -332,6 +332,8 @@ function SelectDetailType() {
 
 		}
 		_showSelectCount();
+        
+        
 	}//end of initialization ==============================
 
 	function _showSelectCount(){
