@@ -393,12 +393,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
 
-        $dlg.addClass('ui-heurist-border');
+        $dlg.addClass('ui-heurist-border').css('overflow','hidden');
 
         var content;
         if(message!=null){
             $dlg.empty();
-            content = $('<span>'+window.hWin.HR(message)+'</span>');
+            content = $('<span>'+window.hWin.HR(message)+'</span>').css('overflow','hidden');
             $dlg.append(content);
         }else{
             return;

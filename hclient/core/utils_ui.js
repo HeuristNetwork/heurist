@@ -1501,9 +1501,9 @@ window.hWin.HEURIST4.ui = {
         
         
         if(info['trm_ID']>0){
-            sRelBtn = '<div style="float:right"><div class="btn-rel"/><div class="btn-del"/></div>';
+            sRelBtn = '<div style="float:right;margin-left:0.5em"><div class="btn-rel"/><div class="btn-del"/></div>';
         }else{
-            sRelBtn = '<div style="float:right"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            sRelBtn = '<div style="float:right;margin-left:0.5em"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
@@ -1522,7 +1522,9 @@ window.hWin.HEURIST4.ui = {
                         //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
                         //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
                         + '<span data-recID="'+info['rec_ID'] +'">'
-                        + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</span>'
+                        + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])
+                        + '</span>'
+                        + (info['rec_IsChildRecord']==1?'<span style="float:right;font-size:0.8em;color:#999999;margin:0.2em 0.5em">(child)</span>':'')
                         + sRelBtn
                         + '</div>'
                         + '</div>')
@@ -1651,6 +1653,7 @@ window.hWin.HEURIST4.ui = {
                             var rec_Title = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title'));
                             
                             ele.find('span[data-recID='+recID+']').text(rec_Title);
+                            //+(info['rec_IsChildRecord']==1?'<span style="font-size:0.8em;color:#999999;margin:1em"> (child)</span>':''));
                         }
                     }}
                 );

@@ -656,13 +656,13 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .change(function(){that._onChange();})
             .appendTo( $inputdiv );
 
             window.hWin.HEURIST4.ui.createRectypeSelect($input.get(0),null, this.f('cst_EmptyValue'), true);
             if(value){
                 $input.val(value);
             }
+            $input.change(function(){that._onChange();})
 
         }else if(this.detailType=="user"){ //special case - only groups of current user
 
@@ -789,7 +789,7 @@ $.widget( "heurist.editing_input", {
                     //show popup dialog at once
                     //IJ ASKS to disbale it __show_addlink_dialog();
                     if(this.element.find('.rel_link').is(':visible')){
-                        window.hWin.HEURIST4.msg.showMsgFlash('Please define the first relationship before adding another');                          }
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please define the first relationship before adding another', 2000);                          }
                     
                     this.element.find('.rel_link').show();
                     
@@ -809,8 +809,11 @@ $.widget( "heurist.editing_input", {
         else if(this.detailType=='resource' && this.configMode.entity=='records'){
 
             if(value=='' && this.element.find('.sel_link2').is(':visible')){
-                window.hWin.HEURIST4.msg.showMsgFlash('Please select record before adding another pointer');                              return;
+                window.hWin.HEURIST4.msg.showMsgFlash('Please select record before adding another pointer',2000);
+                return;
             }
+            
+            var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
             
             //replace input with div
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
@@ -818,12 +821,12 @@ $.widget( "heurist.editing_input", {
             
             //define explicit add relationship button
             $( "<button>", {title: "Select record to be linked"})
-                        .button({icons:{primary: "ui-icon-triangle-1-e"},label:'&nbsp;&nbsp;&nbsp;select record'})
+                        .button({icon:"ui-icon-triangle-1-e",
+                               label:('&nbsp;&nbsp;&nbsp;select'+(isparententity?' child':'')+' record')})
                         .addClass('sel_link2')
                         .appendTo( $inputdiv );
             
-            //var $btn_rec_search_dialog = 
-            var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
+            
             var popup_options = {
                             isdialog: true,
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
@@ -856,7 +859,8 @@ $.widget( "heurist.editing_input", {
                                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
                                             {rec_ID: targetID, 
                                              rec_Title: rec_Title, 
-                                             rec_RecTypeID: rec_RecType}, __show_select_dialog);
+                                             rec_RecTypeID: rec_RecType,
+                                             rec_IsChildRecord:isparententity}, __show_select_dialog);
                                         //ele.appendTo($inputdiv);
                                         that._onChange();
                                         
@@ -896,7 +900,9 @@ $.widget( "heurist.editing_input", {
                                 window.hWin.HEURIST4.msg.showMsgFlash('Points to a child record; value cannot be changed (delete it or edit the child record itself)', 2500);
                                 return;
                             }
+                            __show_select_dialog(false); 
                             
+                            return; //cut out preliminary child dialog (since 2017-12-10)
                             
                             var btn_select_title = window.hWin.HR('Select');
                             //show preliminary dialog that offer to create new record instead 
@@ -934,12 +940,14 @@ $.widget( "heurist.editing_input", {
 
                             if(popup_options.rectype_set.indexOf(',')>0){ //multiconstraint need to show selector
                                 selector_rectype.empty().parent().show();
+                                window.hWin.HEURIST4.ui.createRectypeSelect(selector_rectype.get(0), 
+                                                popup_options.rectype_set, null, true);
+                                                
                                 selector_rectype.change(function(){
                                      btn_child_add.button({label:'Create new <i>'+
                                         window.hWin.HEURIST4.rectypes.names[selector_rectype.val()] + '</i> (child record)'});
                                 });
-                                window.hWin.HEURIST4.ui.createRectypeSelect(selector_rectype.get(0), 
-                                                popup_options.rectype_set, null, true);
+                                                
                                 btn_add_title = 'Create new <i>'+
                                         window.hWin.HEURIST4.rectypes.names[selector_rectype.val()] + '</i> (child record)';
                             }else{
@@ -1140,6 +1148,8 @@ $.widget( "heurist.editing_input", {
                     }
                 
                     $input.focusout( __url_input_state ); 
+                    
+                    this.input_prompt.text('This is a special URL field which is hyperlinked in search results. Use where one primary URL applies to each record, eg. for internet bookmarks. These URLs can be auto-checked. Turn on/off in record attributes');
                     
                     __url_input_state();               
                 
@@ -1789,7 +1799,7 @@ $.widget( "heurist.editing_input", {
     },
 
     //
-    //
+    // assign title of resource record or file name or related entity
     //
     _findAndAssignTitle: function(ele, value, selector_function){
         
@@ -1800,7 +1810,7 @@ $.widget( "heurist.editing_input", {
         
         var that = this;
         
-        if(this.isFileForRecord){
+        if(this.isFileForRecord){   //FILE FOR RECORD
             
             var rec_Title = value.ulf_ExternalFileReference;
             if(window.hWin.HEURIST4.util.isempty(rec_Title)){
@@ -1813,11 +1823,14 @@ $.widget( "heurist.editing_input", {
                 window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                     value.ulf_ObfuscatedFileID);
                     
-        }else if(this.detailType=='file'){
+        }else if(this.detailType=='file'){  // FILE FOR OTHER ENTITIES - @todo test
             
             window.hWin.HEURIST4.ui.setValueAndWidth(ele, value, 10);
             
-        }else if(this.configMode.entity==='records'){
+        }else if(this.configMode.entity==='records'){     //RECORD
+        
+                var isChildRecord = that.f('rst_CreateChildIfRecPtr');
+        
                 //assign initial display value
                 if(Number(value)>0){
                     var sTitle = null;
@@ -1830,7 +1843,9 @@ $.widget( "heurist.editing_input", {
                             window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
                                             {rec_ID: value, 
                                              rec_Title: rec_Title, 
-                                             rec_RecTypeID: relations.headers[value][1]}, selector_function);
+                                             rec_RecTypeID: relations.headers[value][1],
+                                             rec_IsChildRecord: isChildRecord},
+                                             selector_function);
 
                             //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
                         }
@@ -1850,7 +1865,8 @@ $.widget( "heurist.editing_input", {
                                         window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
                                                 {rec_ID: value, 
                                                  rec_Title: rec_Title, 
-                                                 rec_RecTypeID: rec_RecType}, selector_function);
+                                                 rec_RecTypeID: rec_RecType,
+                                                 rec_IsChildRecord: isChildRecord}, selector_function);
                                     }else{
                                         that._removeInput( ele.attr('id') );
                                     }
@@ -1862,7 +1878,8 @@ $.widget( "heurist.editing_input", {
                 }else{
                     window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
                 }
-        }else{                     
+        }else{    
+            //related entity                 
             window.hWin.HAPI4.EntityMgr.getTitlesByIds(this.configMode.entity, value.split(','),
                    function( display_value ){
                         var rec_Title  = display_value.join(',');           
