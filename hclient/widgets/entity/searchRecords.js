@@ -66,14 +66,21 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 this.startSearch();
         }});
 
-        if(this.selectRectype.val()>0){
-            this.selectRectype.change();
-        }
-
         if(this.options.parententity>0){
-            this.element.find('#row_parententity_helper').css({'display':'table-row'});//table-row
-            //this.element.find('#row_helper').css({'line-height':'3em'});//table-row
-            //this.element.find('#row_addbtn').css({'line-height':'4em'});//table-row
+            this.element.find('#row_parententity_helper').css({'display':'table-row'});
+            this.element.find('#row_parententity_helper2').css({'display':'table-row'});
+            this.element.find('#row_parententity_helper2').parent('.ent_header').css({'z-index':99});
+            
+            this.btn_search_start2 = this.element.find('#btn_search_start2').css({height:'20px',width:'20px'})
+                .button({showLabel:false, icon:"ui-icon-search", iconPosition:'end'});
+                
+            this._on( this.btn_search_start2, {click: this.startSearch });
+                
+            
+        }else{
+            if(this.selectRectype.val()>0){
+                this.selectRectype.change();
+            }
         }
         
         //if(this.searchForm && this.searchForm.length>0)
@@ -86,6 +93,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
     // public methods
     //
     startSearch: function(){
+        
+        this.element.find('#row_parententity_helper2').hide();
 
         this._super();
 

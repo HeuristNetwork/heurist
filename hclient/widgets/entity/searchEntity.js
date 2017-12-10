@@ -80,9 +80,9 @@ $.widget( "heurist.searchEntity", {
             //init buttons
             this.btn_search_start = this.element.find('#btn_search_start')
                 //.css({'width':'6em'})
-                .button({label: window.hWin.HR("Start search"), text:false, icons: {
-                    secondary: "ui-icon-search"
-                }});
+                .button({label: window.hWin.HR("Start search"), showLabel:false, 
+                        icon:"ui-icon-search", iconPosition:'end'});
+                 
                     
             //this is default search field - define it in your instance of html            
             this.input_search = this.element.find('#input_search');

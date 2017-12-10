@@ -18,33 +18,26 @@
         <input id="cb_modified" type="checkbox"/><label for="cb_modified" >modified</label>
     </div>
 </div>
-<!--
-<div style="display: table-row;line-height: 2em;">
-    <div class="div-table-cell"></div>
-    <div class="div-table-cell heurist-helper1">Select below or search on title here. [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search</div>
-</div>
-<div style="display: none;line-height: 2em;" id="parententity_helper">
-    <div class="div-table-cell"></div>
-    <div class="div-table-cell heurist-helper1">Note: child records are not shown in this search, unless created through a different record pointer field</div>
-</div>
-<div style="display: table-row;">
-    <div class="div-table-cell" style="padding-right:0.5em;text-align:right"><label id="lbl_add_record">or</label></div>
-    <div class="div-table-cell">
-        <div id="btn_add_record"></div>
-    </div>
-</div>
--->
+
 <div style="display: table-row;" id="row_helper">
     <div class="div-table-cell"></div>
     <div class="div-table-cell heurist-helper1">Select below or search on title here. [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search</div>
 </div>
 <div style="display: none;line-height: 2em" id="row_parententity_helper">
     <div class="div-table-cell"></div>
-    <div class="div-table-cell heurist-helper1">Note: child records are not shown in this search. Selecting a record below will make it a child of the current record</div>
+    <div class="div-table-cell heurist-helper1">Note: child records are not shown in this search</div>
 </div>
 <div style="display: table-row;height:3em;" id="row_addbtn">
     <div class="div-table-cell" style="padding-right:0.5em;text-align:right"><label id="lbl_add_record">or</label></div>
     <div class="div-table-cell">
         <div id="btn_add_record"></div>
+    </div>
+</div>
+<div style="display: none;height:3em;" id="row_parententity_helper2">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell" style="padding:20px 40px">
+        <p style="padding:10px 0"><span class="ui-icon ui-icon-arrowthick-1-n" style="width:23px;"></span>&nbsp;&nbsp;We recommend adding a new record</p>
+        <p><div id="btn_search_start2"></div>&nbsp;Click search icon to display existing records</p>
+        <p style="padding:15px 0"><span style="color:red">Warning</span> selecting an existing record makes it a child record</p>
     </div>
 </div>
