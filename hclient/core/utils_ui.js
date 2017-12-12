@@ -297,11 +297,17 @@ window.hWin.HEURIST4.ui = {
     //
     getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         
-        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
+        //var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
+        
+        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
+             defaultTermID:null, topOptions:null, needArray:false, useHtmlSelect:true});
+        
 
         var reslist = [];
 
         if(selObj){
+            selObj = selObj[0];
             for (var i=0; i<selObj.length; i++){
                 if(!selObj.options[i].disabled){
                     reslist.push({id:selObj.options[i].value, text:selObj.options[i].text});
@@ -316,9 +322,14 @@ window.hWin.HEURIST4.ui = {
     //
     isTermInList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         
-        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
+        //var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
 
+        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
+             defaultTermID:null, topOptions:null, needArray:false, useHtmlSelect:true});
+        
         if(selObj){
+            selObj = selObj[0];
             for (var i=0; i<selObj.length; i++){
                 if(!selObj.options[i].disabled){
                     if(selObj.options[i].value==selectedTermID){
@@ -337,7 +348,8 @@ window.hWin.HEURIST4.ui = {
     //
     getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
 
-        var termtree = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, null, null, true);
+        var termtree = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, 
+                                                                        null, null, true);
         /*
         function __setParents(parent, terms){
 
@@ -1137,14 +1149,22 @@ window.hWin.HEURIST4.ui = {
         }else{
             
             var menu = $(selObj).hSelect(       
-              { change: function( event, data ) {
+              { style: 'dropdown',
+                appendTo: $(selObj).parent(),
+                /*positionOptions: {
+                    collision: 'none',
+                    my: "left top",
+                    at: "left bottom",
+                    offset: null
+                },*/
+                  change: function( event, data ) {
     //console.log('onnn '+data.item.value);                
                         $(selObj).val(data.item.value);
                         $(selObj).trigger('change');
                 }});
             
             menu.hSelect( "menuWidget" ).css({'padding':0,'background':'#F4F2F4','zIndex':9999999});
-            menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu').addClass( "overflow" );
+            menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu overflow').css({'max-height':'300px'});
             menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF'}); //'#F4F2F4'
         }
         return $(selObj);
@@ -1513,9 +1533,10 @@ window.hWin.HEURIST4.ui = {
                             + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
                            :'')  
                         + '<div class="detail" '  // truncate
-                        + 'style="display:inline-block;min-width:35ex;padding:2px;max-width:160ex;">'
-                        + (isEdit?'<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block;vertical-align: middle;margin-left:6px"/>&nbsp;&nbsp;&nbsp;':'')
-                        + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right:10px;background-image:url(\''
+                        + 'style="display:inline-block;min-width:60ex;padding:2px;max-width:160ex;">'
+                        + (info['rec_IsChildRecord']==1?'<span style="font-size:0.8em;color:#999999;margin:2px">child</span>':'')
+                        + (isEdit?'<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block;vertical-align: middle;margin:2px"/>':'') //&nbsp;&nbsp;&nbsp;
+                        + '<img src="'+ph_gif+'" style="vertical-align:top;margin-top:2px;margin-right:10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
                         + '\');"/>'
                         //2017-11-08 no more link here
@@ -1524,7 +1545,6 @@ window.hWin.HEURIST4.ui = {
                         + '<span data-recID="'+info['rec_ID'] +'">'
                         + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])
                         + '</span>'
-                        + (info['rec_IsChildRecord']==1?'<span style="float:right;font-size:0.8em;color:#999999;margin:0.2em 0.5em">(child)</span>':'')
                         + sRelBtn
                         + '</div>'
                         + '</div>')
@@ -1653,7 +1673,6 @@ window.hWin.HEURIST4.ui = {
                             var rec_Title = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title'));
                             
                             ele.find('span[data-recID='+recID+']').text(rec_Title);
-                            //+(info['rec_IsChildRecord']==1?'<span style="font-size:0.8em;color:#999999;margin:1em"> (child)</span>':''));
                         }
                     }}
                 );

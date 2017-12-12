@@ -462,7 +462,7 @@ function hRecordAddLink() {
                         currvalue = null;
                     
                     window.hWin.HEURIST4.ui.createTermSelectExt($('#rec'+party+'_sel_'+dty).get(0), 
-                            'relation', terms, terms_dis, currvalue, null, false);    
+                            'relation', terms, terms_dis, currvalue, null, false, true);    
                     
                 }else{
                     $('#rec'+party+'_sel_'+dty).hide();   //hide relatiion type selector

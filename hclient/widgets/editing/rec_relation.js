@@ -157,7 +157,7 @@ $.widget( "heurist.rec_relation", {
         var headerTerms = this.options.reltype_headers;
 
         window.hWin.HEURIST4.ui.createTermSelectExt(this.w_reltype.get(0),
-            "relation", allTerms, headerTerms, this.options.reltype_value, false);
+            "relation", allTerms, headerTerms, this.options.reltype_value, false, true);
     },
 
     doCreate: function(){
