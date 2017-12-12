@@ -1194,10 +1194,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 sContent = sContent
                         +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"/>'
-                        +'<button label="wrpapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>'
+                        +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>'
                         +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"/>'
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_3" name="facet_Type'+idd+'" value="3"/><label for="facetType'+idd+'_3">list</label>'
-                //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_2" name="facet_Type'+idd+'" value="2"/><label for="facetType'+idd+'_2">wrpapped</label>'
+                //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_2" name="facet_Type'+idd+'" value="2"/><label for="facetType'+idd+'_2">wrapped</label>'
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_0" name="facet_Type'+idd+'" value="0"/><label for="facetType'+idd+'_0">search</label>'
                 + '</span></div></div>' 
 
@@ -1324,7 +1324,7 @@ $.widget( "heurist.search_faceted_wiz", {
             */
             
             listdiv.find('button[data-value="3"]').button({icon: "ui-icon-list-column",iconPosition:'end',showLabel:true,label:'list'});
-            listdiv.find('button[data-value="2"]').button({icon: "ui-icon-list-inline",iconPosition:'end',showLabel:true,label:'wrpapped'});
+            listdiv.find('button[data-value="2"]').button({icon: "ui-icon-list-inline",iconPosition:'end',showLabel:true,label:'wrapped'});
             listdiv.find('button[data-value="0"]').button({icon: "ui-icon-search",iconPosition:'end',showLabel:true,label:'search'});
             listdiv.find('button[data-type="slider"]').button({icon: "ui-icon-input-slider",iconPosition:'end',showLabel:true,label:'slider'});
             listdiv.find('button[data-type="dropdown"]').button({icon: "ui-icon-input-dropdown",iconPosition:'end',showLabel:true,label:'dropdown'});
