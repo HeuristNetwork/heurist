@@ -384,38 +384,42 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     // show buttonless dialog with given timeout
     //
-    showMsgFlash: function(message, timeout, title, position_to_element){
+    showMsgFlash: function(message, timeout, options, position_to_element){
 
         if(!$.isFunction(window.hWin.HR)){
             alert(message);
             return;
         }
 
+        if(!$.isPlainObject(options)){
+             options = {title:options};
+        }
+        
         $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
-
-        $dlg.addClass('ui-heurist-border').css('overflow','hidden');
 
         var content;
         if(message!=null){
             $dlg.empty();
-            content = $('<span>'+window.hWin.HR(message)+'</span>').css('overflow','hidden');
+            content = $('<span>'+window.hWin.HR(message)+'</span>')
+                    .css({'overflow':'hidden','font-weight':'bold','font-size':'1.2em'});
+                    
             $dlg.append(content);
         }else{
             return;
         }
         
-        var hideTitle = (title==null);
+        var hideTitle = (options.title==null);
+        if(options.title){
+            options.title = window.hWin.HR(options.title);
+        }
 
-        if(!title) title = window.hWin.HR(''); // was an unhelpful and inelegant "Info"
-                                                          
-        var options =  {
-            title: window.hWin.HR(title),
+        $.extend(options, {
             resizable: false,
             width: 'auto',
             modal: false,
+            height: 80,
             buttons: {}
-        };
-
+        });
 
         if(position_to_element){
            if($.isPlainObject(position_to_element)){
@@ -436,19 +440,26 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if(hideTitle)
             $dlg.parent().find('.ui-dialog-titlebar').hide();
+    
+        if(true){
+    //ui-dialog        
+            $dlg.parent().css({background: '#7092BE', 'border-radius': "6px", 'border-color': '#7092BE !important',
+                    'outline-style':'none', outline:'hidden'})
+    //ui-dialog-content         
+            $dlg.css({color:'white', border:'none', overflow:'hidden' });
+            //addClass('ui-heurist-border').
+        }
 
         if (!(timeout>200)) {
             timeout = 1000;
         }
 
+        
         setTimeout(function(){
             $dlg.dialog('close');
             $dlg.parent().find('.ui-dialog-titlebar').show();
-            /*if(callback && $.isFunction(callback)){
-                callback.call();
-            }*/
-            
         }, timeout);
+        
 
     },
 
