@@ -265,7 +265,7 @@ private static function __get_forempty($rec_id, $rt){
     $cnt = 0;
     $title = array();
     foreach($rdr as $dt_id => $detail){
-        if( is_numeric($dt_id) && in_array($detail['dty_Type'], $allowed) && $detail['rst_RequirementType']!='forbidden' ){
+        if( is_numeric($dt_id) && in_array($detail['dty_Type'], $allowed) && $detail['rst_RequirementType']!='forbidden'){
             $val = self::__get_field_value($dt_id, $rt, 0, $rec_id);
             $val = trim(substr($val,0,40));
             if($val){
@@ -400,14 +400,16 @@ private static function __get_record_value($rec_id, $reset=false) {
                 $ret = $row;
                 $ret['rec_Details'] = array();
 
-                $query = 'SELECT dtl_DetailTypeID, dtl_Value '
-                .'FROM recDetails, defRecStructure '
-                .'where rst_RecTypeID='.$ret['rec_RecTypeID']
-                   .' AND rst_DetailTypeID=dtl_DetailTypeID AND rst_RequirementType!="forbidden" '
-                   .' AND dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
+                $query = 'SELECT dtl_DetailTypeID, dtl_Value, rst_RequirementType '
+                .'FROM recDetails LEFT JOIN defRecStructure '
+                .'ON rst_RecTypeID='.$ret['rec_RecTypeID']
+                   .' AND rst_DetailTypeID=dtl_DetailTypeID ' 
+                   .' WHERE dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
                 $res2 = self::$mysqli->query($query);
                 while ($row = $res2->fetch_array()){
-                    array_push($ret['rec_Details'], $row);
+                    if($row[2]!='forbidden'){
+                        array_push($ret['rec_Details'], $row);
+                    }
                 }
                 $res2->close();
             }

@@ -371,15 +371,16 @@ function _titlemask__get_record_value($rec_id, $reset=false) {
                 $ret = $row;
                 $ret['rec_Details'] = array();
 
-                $query = 'SELECT dtl_DetailTypeID, dtl_Value '
-                .'FROM recDetails, defRecStructure '
-                .'where rst_RecTypeID='.$ret['rec_RecTypeID']
-                   .' AND rst_DetailTypeID=dtl_DetailTypeID AND rst_RequirementType!="forbidden" '
-                   .' AND dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
+                $query = 'SELECT dtl_DetailTypeID, dtl_Value, rst_RequirementType '
+                .'FROM recDetails LEFT JOIN defRecStructure ON rst_RecTypeID='.$ret['rec_RecTypeID']
+                   .' AND rst_DetailTypeID=dtl_DetailTypeID '
+                .'where dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
                 
                 $res = mysql_query($query);
                 while ($row = mysql_fetch_array($res)) {
-                    array_push($ret['rec_Details'], $row);
+                    if($row[2]!='forbidden'){
+                        array_push($ret['rec_Details'], $row);
+                    }
                 }
             }
         }
