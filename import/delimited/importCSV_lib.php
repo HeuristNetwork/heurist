@@ -2156,7 +2156,6 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
                             }
                             else if($fieldtype_type == "geo"){
-
                                 //verify WKT
                                 $geoType = null;
                                 //get WKT type
@@ -2169,7 +2168,12 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                                 }
 
                                 if($geoType){
-                                    $value = $geoType." ".$r_value;
+                                    if(strpos($r_value, $geoType)===0){
+                                        //already exists                                        
+                                        $value = $r_value;
+                                    }else{
+                                        $value = $geoType." ".$r_value;    
+                                    }
                                 }else{
                                     $value = null;
                                 }
