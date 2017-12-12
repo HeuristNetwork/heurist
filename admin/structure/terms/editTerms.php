@@ -433,7 +433,7 @@ if(isForAdminOnly("to modify database structure")){
         </div>
 
 
-        <div id="divTermMergeConfirm" style="display:none;width:500px;padding:20px">
+        <div id="divTermMergeConfirm" style="display:none;width:100%;padding:5px">
             <h2>Merge</h2>
             <br/>
             <table border="0" cellpadding="2px;">
@@ -467,8 +467,8 @@ if(isForAdminOnly("to modify database structure")){
                 </tr>
 
                 <tr>
-                    <td><br/>Standard Code:</td>
-                    <td><br/>
+                    <td><br>Standard Code:</td>
+                    <td><br>
                         <input id="rbMergeCode1" type="checkbox" name="rbMergeCode"/> <!-- initially was checked="checked"-->
                         <label for="rbMergeCode1" id="lblMergeCode1"></label>
                     </td>
@@ -482,9 +482,8 @@ if(isForAdminOnly("to modify database structure")){
                 </tr>
 
                 <tr>
-                    <td><br/>Description:</td>
-                    <td><br/>
-                        <input id="rbMergeDescr1" type="checkbox" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
+                    <td>Description:</td>
+                    <td><input id="rbMergeDescr1" type="checkbox" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
                         <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
                     </td>
                 </tr>
@@ -547,7 +546,7 @@ if(isForAdminOnly("to modify database structure")){
             </div>
             </div>
             -->
-            <div style="margin-top:30px;width:100%;text-align:center;">
+            <div style="margin-top:30px;width:100%;text-align:right;">
                 <input id="btnMergeOK" type="button" value="Merge"
                     title=""  style="width:70px"/>
                 <input id="btnMergeCancel" type="button" value="Cancel"
@@ -555,14 +554,18 @@ if(isForAdminOnly("to modify database structure")){
             </div>
 
             <div id="divInsertAsChild">
-                <br/> <br/><hr style="border-top: dotted 1px;"/>
+                <br/><hr style="border-top: dotted 1px;"/><br/>
                 <h2>Insert as child</h2>
                 <div>
                     <br/>
                     <span id ="moveText"></span>
                     <span>&nbsp;&nbsp;</span>
-                    <input id="moveBtn" type="button" value="Move"
-                        title=""  style="width:70px"/>
+                    <div style="float:right">
+                        <input id="moveBtn" type="button" value="Move"
+                            title=""  style="width:70px"/>
+                        <input id="moveBtnCancel" type="button" value="Cancel"
+                            title=""  style="width:70px; padding-left:10px"/>
+                    </div>
                 </div>
             </div>
         </div>

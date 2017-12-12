@@ -2292,7 +2292,7 @@ function EditTerms() {
                     }
                     else{
                         $('#rbMergeCode1').attr('disabled', 'disabled');
-                        $('#lblMergeCode1').html('&#60;none&#62;');
+                        $('#lblMergeCode1').css({'color':'gray','font-size':'0.8em'}).html('&#60;none&#62;');
                     }
                     if(cbCode2){
                         $("#rbMergeCode2").attr('checked', 'checked');
@@ -2300,7 +2300,7 @@ function EditTerms() {
                     }
                     else{
                         $("#rbMergeCode2").attr('disabled', 'disabled');
-                        $('#lblMergeCode2').html('&#60;none&#62;');
+                        $('#lblMergeCode2').css({'color':'gray','font-size':'0.8em'}).html('&#60;none&#62;');
                     }
                     if(cbDescr1)
                     {
@@ -2309,7 +2309,7 @@ function EditTerms() {
                     }
                     else{
                         $('#rbMergeDescr1').attr('disabled', 'disabled');
-                        $('#lblMergeDescr1').html('&#60;none&#62;');
+                        $('#lblMergeDescr1').css({'color':'gray','font-size':'0.8em'}).html('&#60;none&#62;');
                     }
                     if(cbDescr2){
                         $("#rbMergeDescr2").attr('checked', 'checked');
@@ -2317,7 +2317,7 @@ function EditTerms() {
                     }
                     else{
                         $("#rbMergeDescr2").attr('disabled', 'disabled');
-                        $('#lblMergeDescr2').html('&#60;none&#62;');
+                        $('#lblMergeDescr2').css({'color':'gray','font-size':'0.8em'}).html('&#60;none&#62;');
                     }
 
                 }
@@ -2404,8 +2404,8 @@ function EditTerms() {
                                                         }
 
                 var ele = document.getElementById('divTermMergeConfirm');
-                $("#moveText").html("Insert "+ "&#60;" +data.otherNode.data.label+"&#62; under " + "&#60;"+node.data.label
-                    +"&#62;");
+                $("#moveText").html("Move "+ "<b>" +data.otherNode.data.label+"</b> under <b>"+node.data.label
+                    +"</b>");
                 
                 var isVocabulary = (node === _findTopLevelForId(node.data.id));
                     
@@ -2419,6 +2419,7 @@ function EditTerms() {
                             $_dialogbox.find("#btnMergeOK").off('click');
                             $_dialogbox.find("#moveBtn").off('click');
                             $_dialogbox.find("#btnMergeCancel").off('click');
+                            $_dialogbox.find("#moveBtnCancel").off('click');
                         },
                         title: 'Select values to be retained',
                         height: 440,
@@ -2426,6 +2427,7 @@ function EditTerms() {
                 });
                 
                 
+                $_dialogbox.find("#moveBtnCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
                 $_dialogbox.find("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
                 $_dialogbox.find("#btnMergeOK").click(function(){
                         _doMerge(node, data.otherNode, data.hitMode);

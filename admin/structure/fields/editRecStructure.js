@@ -540,6 +540,7 @@ function EditRecStructure() {
                             '<div class="input-cell">'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
                                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
+                                '<span>'+    
                                 // Field width
                                 '<span><label style="min-width:65px;width:65px">Field width:</label>'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayWidth" '+
@@ -548,6 +549,7 @@ function EditRecStructure() {
                                 '<span id="span'+rst_ID+'_rst_DisplayHeight"><label style="min-width:35px;width:35px">&nbsp;Height:</label>'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayHeight" '+
                                     'title="Display height in rows of this field in the data entry form" style="width:40" size="4" onkeypress="Hul.validate(event)"/>'+
+                                '</span>'+
                                 '</span>'+
                             '</div></div>'+
 
@@ -558,6 +560,8 @@ function EditRecStructure() {
                         '<div class="input-cell">'+
                         '<textarea style="width:450px" cols="450" rows="3" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
+                        '<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
+                                            'This text is optional.</div>'+
                         '</div></div>'+
 
                         '<div class="input-row">'+
