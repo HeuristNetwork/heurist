@@ -686,6 +686,8 @@ window.hWin.HEURIST4.ui = {
 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
+        useHtmlSelect = (useHtmlSelect===true);
+        
         var rectypes = window.hWin.HEURIST4.rectypes,
         index;
 
@@ -733,17 +735,24 @@ window.hWin.HEURIST4.ui = {
                     if(notfound) continue;
                 }
                 
-                
-                var grp = document.createElement("optgroup");
-                grp.label = rectypes.groups[index].name;
-                selObj.appendChild(grp);
+                if(useHtmlSelect){
+                    var grp = document.createElement("optgroup");
+                    grp.label = rectypes.groups[index].name;
+                    selObj.appendChild(grp);
+                }else{
+                    var opt = window.hWin.HEURIST4.ui.addoption(selObj, 0, rectypes.groups[index].name);
+                    $(opt).attr('disabled', 'disabled');
+                    $(opt).attr('group', 1);
+                }
 
                 for (var recTypeIDIndex in rectypes.groups[index].showTypes)
                 {
                     var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
                     var name = rectypes.names[rectypeID];
 
-                    if(!window.hWin.HEURIST4.util.isnull(name)){
+                    if(!window.hWin.HEURIST4.util.isnull(name) && 
+                        (rectypeList.length==0 || rectypeList.indexOf(rectypeID)>=0) )
+                    {
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         $(opt).attr('depth', 1);
                     }
@@ -753,8 +762,6 @@ window.hWin.HEURIST4.ui = {
             
         }
         }
-        
-        useHtmlSelect = (useHtmlSelect===true);
         
         selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect);
 
@@ -1165,7 +1172,7 @@ window.hWin.HEURIST4.ui = {
             
             menu.hSelect( "menuWidget" ).css({'padding':0,'background':'#F4F2F4','zIndex':9999999});
             menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu overflow').css({'max-height':'300px'});
-            menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF'}); //'#F4F2F4'
+            menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF',width:'auto','min-width':'16em'}); //'#F4F2F4'
         }
         return $(selObj);
     },            
@@ -1837,8 +1844,13 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
       wrapper = $( "<div>", { text: item.label } );
 
     if ( item.disabled ) {
-      li.addClass( "ui-state-disabled" );
+        li.addClass( "ui-state-disabled" );
+    }      
+    if ( $(item.element).attr('group') == 1 ){
+        li.css({'opacity':1});  
+        wrapper.css({'font-weight':'bold'});
     }
+
 
 /*    
     if($(item.element).attr('depth')>0){
