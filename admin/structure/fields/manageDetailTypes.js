@@ -370,7 +370,14 @@ function DetailTypeManager() {
             YAHOO.widget.DataTable.Formatter.formatterDelete = formatterDelete;*/
 
             var myColumnDefs = [
-                { key: "id", label: "Code", sortable:true, width:20, className:'right',resizeable:false },
+                { key: "id", label: "Code", sortable:true, width:30, className:'right',resizeable:false,
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                         var str = oRecord.getData("id");
+                         var tit = oRecord.getData("conceptid");
+                         elLiner.innerHTML = str;//'<label title="'+tit+'">'+str+'</label>';
+                         elLiner.title = tit;
+                    }
+                },
                 // 8/10/12 - removed Ian to make space for more important fields, these should be shown as rollovers
                 { key: "conceptid", label: "Concept", sortable:true, className:'right',resizeable:false, hidden:true },
                 { key: "order", hidden:true },
