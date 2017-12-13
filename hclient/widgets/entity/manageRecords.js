@@ -480,7 +480,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         contentSelector: '.editForm-toolbar'
                     },*/
                     center:{
-                        minWidth:800,
+                        minWidth:400,
                         contentSelector: '.editForm'    
                     }
                 };
@@ -1223,7 +1223,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         if(this._editing.isModified()){
             
-                var sMsg = "Click YES to save changes and modify the record structure.<br>"
+                var sMsg = "Click YES to save changes and modify the record structure.<br><br>"
                             +"If you are unable to save changes, click Cancel and open<br>"
                             +"structure modification in a new tab (button next to clicked one)";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
@@ -1233,8 +1233,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             that._initEditForm_step3(that._currentEditID); //reload edit form                       
                             that.editRecordType();
                         })
-                });   
-                return;         
+                }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
+                return;                           
         }
         
 
@@ -1802,7 +1802,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         if(this.element.find('.chb_show_help').length==0){
         
-            $('<div style="display:block;text-align:right;padding:0 10px 5px 0;">'
+            $('<div style="display:block;text-align:left;padding:10px 0px 0px 35px;">'
                 +'<label><input type="checkbox" class="chb_show_help" '
                 +(ishelp_on?'checked':'')+'/>Show help</label>&nbsp;&nbsp;'
                 +'<label><input type="checkbox" class="chb_opt_fields" '
@@ -1852,6 +1852,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
             }
         }
+
+        //need refresh layout to init overflows(scrollbars)        
+        if(this.editFormSummary && this.editFormSummary.length>0){
+             this.editFormPopup.layout().resizeAll();
+        }
+        
+        if(this.element.find('.btn-modify_structure').length>0){
+            var that = this;
+            this.element.find('.btn-modify_structure').click(function(){that.editRecordType();});
+        }
+        
         this.onEditFormChange();
     },
 

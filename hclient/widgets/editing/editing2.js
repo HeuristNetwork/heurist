@@ -311,7 +311,9 @@ function hEditing(_options) {
 
         if($container.find('.forbidden').length>0){
             $('<div>').css({float: 'right',padding: '4px'})
-                .html('There are hidden fields in this form. <a href="#">Modify structure</a> to enable them.').appendTo($container);
+                .html('There are hidden fields in this form. <span class="btn-modify_structure"'
+                +'  style="cursor:pointer;display:inline-block;color:#7D9AAA;">'
+                +'Modify structure</span> to enable them.').appendTo($container);
         }
         
     }

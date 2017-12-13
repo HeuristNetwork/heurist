@@ -202,7 +202,7 @@ input.Temporal {
 
 /* INPUT FORM ----------------------------------   */
 fieldset {
-    padding:1em; border:0;
+    padding:10px; border:0;
 }
 
 fieldset > div, .input-row{

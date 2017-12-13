@@ -28,10 +28,26 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         //-----------------
         this.selectRectype = this.element.find('#sel_rectypes');
 
+
+        var rectypeList = this.options.rectype_set;
+        var topOption = null;
+        if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
+
+            if(!window.hWin.HEURIST4.util.isArray(rectypeList)){
+                rectypeList = rectypeList.split(',');
+            }
+        }else{
+            rectypeList = [];
+        }
+        if(rectypeList.length==0){
+            topOption =  window.hWin.HR('Any Record Type');
+        }else if(rectypeList.length>1){
+            topOption = window.hWin.HR('Select record type...')
+        }
+        
         this.selectRectype.empty();
         window.hWin.HEURIST4.ui.createRectypeSelect(this.selectRectype.get(0), 
-            this.options.rectype_set, 
-            this.options.rectype_set?null:window.hWin.HR('Any Record Type'), true);
+            rectypeList, topOption, false);
 
         this.btn_add_record = this.element.find('#btn_add_record')
         .css({'min-width':'11.9em','z-index':2})

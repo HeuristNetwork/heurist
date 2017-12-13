@@ -154,7 +154,8 @@ $.widget( "heurist.editing_input", {
                 //.css('display','table-cell')
                 //.css({width:'16px', height:'16px', display:'table-cell'})
                 .appendTo( this.element )
-                .button({icons:{primary: "ui-icon-circlesmall-plus"}, text:false, label:'Add another ' + lblTitle +' value'})
+                .button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
+                .attr('tabindex', '-1')
                 .css({display:'table-cell'});
                 
                 if(this.detailType=="blocktext"){
@@ -571,6 +572,7 @@ $.widget( "heurist.editing_input", {
 
                 var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
                 .addClass('smallicon ui-icon ui-icon-gear')
+                .css({'margin-top':'2px'})
                 .appendTo( $inputdiv );
                 //.button({icons:{primary: 'ui-icon-gear'},text:false});
                 
@@ -1692,6 +1694,7 @@ $.widget( "heurist.editing_input", {
                 'data-input-id': $input.attr('id')
             })
             .addClass("smallbutton")//btn_input_clear
+            .attr('tabindex', '-1')
             .css({position: 'absolute', 'margin-top': '3px'})
 /* @todo - need to prevent wrap of clear button for long fields
 'margin-left': (this.detailType=='relmarker' || this.detailType=='geo' || 
@@ -1952,7 +1955,11 @@ $.widget( "heurist.editing_input", {
             $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
                 {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms,
                     defaultTermID:value, topOptions:true, supressTermCode:true, useHtmlSelect:false});
-                    
+            
+            var opts = $input.find('option');      
+            if(opts.length==0 || (opts.length==1 && $(opts[0]).text()=='')){
+               $input.hSelect('widget').html('<span style="padding: 0.1em 2.1em 0.2em 0.2em">no terms defined, please add terms</span><span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-e"></span>'); 
+            }
         }
         
         return $input;

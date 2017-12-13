@@ -90,7 +90,9 @@ $.widget( "heurist.search_faceted_wiz", {
     options: {
         svsID: null,
         domain: null, // bookmark|all or usergroup ID
-        params: {},
+        params: {
+            viewport:10
+        },
         onsave: null
     },
     isversion:2,
@@ -156,7 +158,7 @@ $.widget( "heurist.search_faceted_wiz", {
             beforeClose: function( event, ui ) {
                 if(event && event.currentTarget){
                     var that_dlg = this;
-                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Please confirm discard of any changes"),
+                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Discard changes?"),
                         function(){ $( that_dlg ).dialog( "close" ); });
                     return false;
                 }
@@ -1227,7 +1229,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     facets[k].isfacet = 0;
                 }else if(facets[k].isfacet==true || !(Number(facets[k].isfacet)<4 && Number(facets[k].isfacet)>=0)){
                     //by default column for text and selector/slider for enum/dates
-                    facets[k].isfacet = (facets[k].type=='freetext')?3:1;
+                    //for text field default is search for others slider/dropdown
+                    facets[k].isfacet = (facets[k].type=='freetext')?0:1;
                 }
 
 

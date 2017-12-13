@@ -553,7 +553,9 @@ $.widget( "heurist.search", {
 
         if(this.select_rectype){ 
             this.select_rectype.empty();
-            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set, false);
+            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), 
+                        this.options.rectype_set, 
+                        !this.options.rectype_set, false);
         }
         if(!this.select_rectype_addrec){
 
@@ -864,7 +866,8 @@ $.widget( "heurist.search", {
             var sortasc =  $('#sa_sortasc');
             $dlg.find("#fld_enum").hide();
 
-            select_rectype = window.hWin.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), null, window.hWin.HR('Any record type'), false);
+            select_rectype = window.hWin.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), 
+                        null, window.hWin.HR('Any record type'), false);
 
             var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
             allowed.splice(allowed.indexOf("separator"),1);
