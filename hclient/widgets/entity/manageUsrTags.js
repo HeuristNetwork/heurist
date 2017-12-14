@@ -532,11 +532,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 + '<div class="rec_action_link" data-key="add" style="visibility:visible !important"/>'
                 + '</div>').appendTo(panel);
                 
+        $parent = panel.parents('.ui-dialog-content');
+        if($parent.length==0) $parent = panel.parents('body');
+                
         that.list_div = $('<div class="list_div">')
             .addClass('ui-heurist-header2')
-            .css({'z-index':99999, height:'auto', 'max-height':'200px', 'padding':'4px', 'font-size':'1.2em',
+            .css({'z-index':999999999, height:'auto', 'max-height':'200px', 'padding':'4px', 'font-size':'1.2em',
                   cursor:'pointer'})
-            .appendTo($('body')).hide();
+            .appendTo($parent).hide();
          
         var input_tag = mdiv.find('input');                             
 
@@ -661,16 +664,51 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                  var idx = that.options.selection_ids.indexOf(recID);
                  that.options.selection_ids.splice(idx, 1);
                  $(event.target).parents('.tagDiv2').remove();
-                 that._trigger( "onselect", null, {selection:that.options.selection_ids});
+                 that._trigger( "onselect", null, {selection:that.options.selection_ids, 
+                    astext:that._selectedTagsAsString()});
             });
             
                       //display:none;   inline-block
             if(that.options.selection_ids.indexOf(recID)<0){
                 that.options.selection_ids.push(recID);
-                that._trigger( "onselect", null, {selection:that.options.selection_ids});
+                that._trigger( "onselect", null, {selection:that.options.selection_ids,
+                    astext:that._selectedTagsAsString()});
             }
                          
         }
+    },
+    
+    
+    _selectedTagsAsString: function(){
+
+        var res = [];        
+        var recordset = this.selectedRecords();
+        
+        //add content
+        var records = recordset.getRecords();
+        var order = recordset.getOrder();
+        var recID, label, groupid, record;
+
+        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
+        
+        for (idx=0;idx<order.length;idx++){
+
+            recID = order[idx];
+            if(recID && records[recID]){
+                
+                record = records[recID];
+                label = recordset.fld(record,'tag_Text');
+                groupid = recordset.fld(record,'tag_UGrpID');
+                
+                if(window.hWin.HAPI4.currentUser['ugr_ID']==groupid){
+                    res.push(label);    
+                }else{
+                    res.push(groups[groupid][1]+'\\'+label);
+                }
+            }
+        }
+        
+        return res;
     }
     
     

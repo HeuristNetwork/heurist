@@ -44,6 +44,7 @@ regional['en'] = {
     +'<br/>Please set this in your  browser (it is normally in the content settings under Privacy).',
 
     //titles
+    'add_record':'Add new record',
     'add_detail':'Add field value',
     'replace_detail':'Replace field value',
     'delete_detail':'Delete field value',
@@ -52,6 +53,7 @@ regional['en'] = {
     'add_link':'Add new link or create a relationship between records',
 
     //helps
+    'record_action_add_record':' ',
     'record_action_add_detail':'This function adds a new value for a specific field to the set of records '
     +'selected in the dropdown. Existing values are unaffected. Addition will add values even if this '
     +'exceeds the valid repeat count (eg. more than one value for single-value fields) - check the database '

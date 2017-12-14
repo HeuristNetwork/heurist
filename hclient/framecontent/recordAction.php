@@ -49,7 +49,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];
-$allowed_actions = array('add_detail','replace_detail','delete_detail','merge_term','rectype_change','ownership');
+$allowed_actions = array('add_record','add_detail','replace_detail','delete_detail','merge_term','rectype_change','ownership');
 if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
@@ -106,7 +106,7 @@ if(!in_array($action_type, $allowed_actions)){
 <!-- HTML -->
 <body style="overflow:hidden">
 
-    <div id="div_parameters" class="popup_content_div">
+    <div id="div_parameters" class="popup_content_div ui-widget-content">
 
         <div id="div_header" tyle="padding: 0.2em; min-width: 600px;">
 
@@ -125,14 +125,21 @@ if(!in_array($action_type, $allowed_actions)){
             <div id="div_sel_rectype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
                 <div class="header" style="padding-left: 16px;"><label for="sel_recordtype">Convert to record type:</label></div>
                 <select id="sel_recordtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+                <div id="btnAddRecord" style="display:none;"></div><div id="btnAddRecordInNewWin" style="display:none;"></div>
             </div>
 
-            <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
+            <div id="div_more_options" style="padding: 0.2em; width: 100%;display:none">
+                <div id="btn_more_options" style="cursor:pointer;float:right;color:#7D9AAA;padding:2px 4px;">show more options</div>
+            </div>
             
-                <div class="detailRow" style="padding-bottom:2em;"> <!-- pulldown list of potential owner workgroups -->
-                    <label for="sel_Ownership">Record is editable by</label>
-                    <select id="sel_Ownership"></select>
-                </div>
+            <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
+                <div class="header" style="padding-left: 16px;"><label for="sel_Ownership">Record is editable by:</label></div>
+                <select id="sel_Ownership" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+            </div>
+            
+            <div id="div_sel_access" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
+                <div class="header" style="padding-left: 16px;"><label for="sel_Ownership">Access outside this group:</label></div>
+                
                 <div class="detailRow" style="padding-bottom:1em;">
                     <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
                     Only members of this group can view the record</label>
@@ -147,7 +154,7 @@ if(!in_array($action_type, $allowed_actions)){
                     <div style="margin-left: 20px; font-style: italic;">No effect on existing external views - hml, html etc.</div>
                     <div style="margin-left: 20px; font-style: italic;">Can be auto-set whenever a public record is edited.</div>
                 </div>
-                <div class="detailRow">
+                <div class="detailRow" style="padding-bottom:20px">
                     <label>
                     <input type="radio" name="rb_Access" value="public" id="rb_Access-public">
                     Published - written automatically to external views</label>
@@ -159,6 +166,20 @@ if(!in_array($action_type, $allowed_actions)){
                 <div class="header" style="padding-left: 16px;"><label for="cb_add_tags">Tag affected records (auto-generated tag)</label></div>
                 <input id="cb_add_tags" type="checkbox" class="text ui-widget-content ui-corner-all">
             </div>
+            
+            <div id="div_sel_tags" style="padding: 0.2em; min-width: 600px;display:none;" class="add_record">
+                <div class="header" style="padding-left: 16px;"><label>Select tags to be assigned:</label></div>
+                <div id="div_sel_tags2" style="padding-bottom:20px"></div>
+            </div>
+            <div id="div_add_link" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
+                <div class="header" style="padding-left: 16px;vertical-align:top">
+                        <label for="txt_add_link">Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records to this database with these characteristics</label>
+                </div>
+                <textarea id="txt_add_link" readonly
+                    onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
+                    class="text ui-widget-content ui-corner-all" rows=4 style="width:50ex"></textarea>
+            </div>
+            
         </fieldset>
 
         <div id="div_widget" style="padding: 0.2em; width: 100%;">

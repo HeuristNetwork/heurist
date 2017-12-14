@@ -1166,7 +1166,7 @@ window.hWin.HEURIST4.ui = {
                 },*/
                   change: function( event, data ) {
     //console.log('onnn '+data.item.value);                
-                        $(selObj).val(data.item.value);
+                        $(selObj).val(data.item.value);//.change();
                         $(selObj).trigger('change');
                 }});
             

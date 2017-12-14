@@ -695,8 +695,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'right','margin': '0 0 0.8em 7px', 'font-size': '0.8em', height: '14px', width: '14px'})
                     .click(function(){
-                    
-        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database+'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')+'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
+
+        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
+                +'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')
+                +'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
 
         window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:500,
             padding: '0px',
@@ -1295,7 +1297,32 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that.options.new_record_params['temp'] = 1;
             
             if(!(that.options.new_record_params['rt']>0)){
+                
+                //record type not defined
+                var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='
+                        + window.hWin.HAPI4.database
+                        + '&action=add_record&scope=popup';
 
+                window.hWin.HEURIST4.msg.showDialog(url, {height:500, width:700,
+                    padding: '0px',
+                    //resizable:false,
+                    title: window.hWin.HR('add_record'),
+                    callback: function(context){
+                        if(context && context.rt>0){
+
+                            that._currentEditRecTypeID = context.rt;
+                            that.options.new_record_params =  context;
+                                                
+                            window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                                    function(response){  response.is_insert=true; that._initEditForm_step4(response); });
+                            
+                        }else{
+                             that.closeDialog();
+                        }
+                    }
+                });
+
+                /*
                 //select record type first
                 if(!this._rt_select_dialog){
                     this._rt_select_dialog = $('<div>').css({'text-align': 'center'}).appendTo(this.element);
@@ -1331,7 +1358,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         title: window.hWin.HR('Select record type for new record'),                         
                         buttons: btns
                     });
-                       
+                */       
                
             }else{
                 //this._currentEditRecTypeID is set in add button
@@ -1339,9 +1366,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         function(response){ response.is_insert=true; that._initEditForm_step4(response); });
             }
         }
-        
-        
-        
 
         return;
     },

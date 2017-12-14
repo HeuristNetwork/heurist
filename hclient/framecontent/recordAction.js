@@ -38,7 +38,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     var action_type = _action_type,
         init_scope_type = _scope_type,
         init_field_type = _field_type,
-        init_field_value = _field_value;
+        init_field_value = _field_value,
+        add_rec_prefs = [];
 
 
     /*
@@ -53,13 +54,105 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     error
     */
     function _init(){
-
+        
         //fill header with description
         $('#div_header').html(window.hWin.HR('record_action_'+action_type));
         
         var btn_start_action = $('#btn-ok').button({label:window.hWin.HR('Go')});
         
+        //restore previously selected rectype and ownership/visibility
+        //defaults = [ rt, wg_id, vis , kwdList.options[kwdList.selectedIndex].value,
+        //$("#add-link-tags").val().replace(/,/g,'|'), 1];
+        add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+        if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+            add_rec_prefs = [0, window.hWin.HAPI4.currentUser['ugr_ID'], 'viewable', '']; //default                                                          
+        }
+        
         //fill selector for records: all, selected, by record type
+        if(action_type=='add_record'){
+            
+            $('#sel_record_scope').parent().hide();
+            $('#cb_add_tags').parent().hide();
+            
+            //record types
+            $('#div_sel_rectype').find('label[for="sel_recordtype"]').text('Type of record to add');
+            $('#div_sel_rectype').show();
+            
+            var $rec_select = _fillSelectRecordTypes();
+            $rec_select.hSelect({change: function(event, data){
+                   var selval = data.item.value;
+                   $('#sel_recordtype').val(selval);    
+                   _onAddRecordChange();        
+            
+            }});
+            $('#sel_recordtype').val(add_rec_prefs[0]);
+            $rec_select.hSelect('widget').find('.ui-selectmenu-text')
+                .text($('#sel_recordtype>option:selected').text());
+            
+            
+            $('#div_more_options').show();
+            $('#btn_more_options').click(function(){
+                $('.add_record').show();
+                $('#div_more_options').hide();
+            })
+            
+            //ownership visibility
+            //$('#div_sel_ownership').show();
+            //$('#div_sel_access').show();
+            _fillOwnership();
+
+            //tags
+            //$('#div_sel_tags').show()
+            window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                    container: $('#div_sel_tags2'),
+                    select_mode:'select_multi', 
+                    layout_mode: '<div class="recordList"/>',
+                    list_mode: 'compact', //special option for tags
+                    selection_ids: [], //already selected tags
+                    select_return_mode:'recordset', //ids by default
+                    onselect:function(event, data){
+                        if(data && data.selection){
+                            add_rec_prefs[3] = data.astext; //data.selection;
+                            _onAddRecordChange();
+                        }
+                    }
+            });
+            
+            //$('#div_add_link').show();
+            
+            $('.input').css({'height':'40px','border-top':'1px solid gray'});
+            
+            if(init_scope_type!='popup'){
+                
+                btn_start_action.parent().hide();
+                
+                $('#btnAddRecord').button({label:'Add Record'}).show().click(
+                    function(){
+                        
+                        var new_record_params = {};
+                        new_record_params['rt'] = add_rec_prefs[0];
+                        new_record_params['ro'] = add_rec_prefs[1];
+                        new_record_params['rv'] = add_rec_prefs[2];
+                        if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
+                                            
+                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
+                    }
+                );
+                $('#btnAddRecordInNewWin').button({label:'Add Record in New Window'}).show().click(
+                    function(){
+                        var url = $('#txt_add_link').val();
+                        if(url){
+                            window.open(url, '_blank');
+                        }
+                    }
+                )
+            }else{
+                btn_start_action.click(_startAction);
+            }
+            
+            
+            
+        }else
         if(init_scope_type!=='noscope'){
             
             selectRecordScope = $('#sel_record_scope')
@@ -78,6 +171,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             if(action_type=='ownership'){
                 $('#div_sel_ownership').show();
+                $('#div_sel_access').show();
                 _fillOwnership();
             }
             
@@ -87,6 +181,36 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).click(function(){window.close();});
     }
 
+    //
+    //
+    //
+    function _onAddRecordChange(){
+        
+        var url = '';
+        if($('#sel_recordtype').val()>0){
+            add_rec_prefs[0] = $('#sel_recordtype').val();
+            add_rec_prefs[1] = $('#sel_Ownership').val()
+            add_rec_prefs[2] = $('input[type="radio"][name="rb_Access"]:checked').val();
+            
+            url = window.hWin.HAPI4.baseURL+'hclient/framecontent/recordEdit.php?db='+window.hWin.HAPI4.database
+            +'&rec_rectype=' + add_rec_prefs[0]+'&rec_owner='+add_rec_prefs[1]+'&rec_visibility='+add_rec_prefs[2];
+            
+            if($.isArray(add_rec_prefs[3]) && add_rec_prefs[3].length>0){
+                add_rec_prefs[3] = add_rec_prefs[3].join(',');
+                //encodeuricomponent
+                url = url + '&tag='+add_rec_prefs[3];    
+            }
+            
+
+            window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
+            window.hWin.HEURIST4.util.setDisabled($('#btnAddRecordInNewWin'),false);
+            window.hWin.HEURIST4.util.setDisabled($('#btnAddRecord'),false);
+        }else{
+            window.hWin.HEURIST4.util.setDisabled($('#btnAddRecordInNewWin'),true);
+            window.hWin.HEURIST4.util.setDisabled($('#btnAddRecord'),true);
+        }
+        $('#txt_add_link').val(url);
+    }
     
     
     //
@@ -188,7 +312,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _fillSelectRecordTypes() {
         var rtSelect = $('#sel_recordtype');
         rtSelect.empty();
-        window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, null, false );
+        return window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), false );
     }
     //
     // fill all field type selectors
@@ -288,16 +412,21 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
         fieldSelect.html(sContent);
         
-        var currentOwner = window.hWin.HEURIST4.util.getUrlParameter('owner', window.location.search);
-        if(currentOwner>=0){
-            fieldSelect.val(currentOwner);
+
+        if(action_type=='add_record'){
+            $('#sel_Ownership').val(add_rec_prefs[1]);
+            $('#rb_Access-'+add_rec_prefs[2]).prop('checked', true);
+            $('#sel_Ownership').change(_onAddRecordChange);;
+            $('input[name="rb_Access"]').change(_onAddRecordChange);
+            _onAddRecordChange();
+        }else{
+            var currentOwner = window.hWin.HEURIST4.util.getUrlParameter('owner', window.location.search);
+            var currentAccess = window.hWin.HEURIST4.util.getUrlParameter('access', window.location.search);
+            if(currentOwner>=0 && currentAccess){
+                fieldSelect.val(currentOwner);
+                $('#rb_Access-'+currentAccess).prop('checked', true);
+            }
         }
-        
-        var currentAccess = window.hWin.HEURIST4.util.getUrlParameter('access', window.location.search);
-        if(currentAccess){
-            $('#rb_Access-'+currentAccess).prop('checked', true);
-        }
-        
     }
 
     //
@@ -429,6 +558,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 window.close();
             }
             return;
+            
+        }else if(action_type=='add_record'){
+            
+                var new_record_params = {};
+                    new_record_params['rt'] = add_rec_prefs[0];
+                    new_record_params['ro'] = add_rec_prefs[1];
+                    new_record_params['rv'] = add_rec_prefs[2];
+                    if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
+            
+                window.close(new_record_params);
+                return;
         }
 
         
@@ -635,7 +775,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     //public members
     var that = {
-
+        //setSelTags: function(val){ add_rec_prefs[3] = val},
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},

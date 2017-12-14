@@ -120,6 +120,22 @@ function haddDataMenu() {
         
         $('#menulink-add-record').click( //.attr('href', 
             function(event){
+/*                
+                    var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='
+                            +window.hWin.HAPI4.database
+                            +'&action=add_record';
+
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:500, width:600,
+                        padding: '0px',
+                        resizable:false,
+                        title: window.hWin.HR('ownership'),
+                        callback: function(context){
+
+                            if(context && context.owner && context.access){
+                            }
+                            
+                        } } );                    //, class:'ui-heurist-bg-light'
+*/                
             }
         );
         
@@ -179,6 +195,10 @@ function haddDataMenu() {
                 
                 $('.accordion_pnl').find('a').parent().removeClass('item-selected');
                 link.parent().addClass('item-selected');
+                
+                url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='
+                            +window.hWin.HAPI4.database
+                            +'&action=add_record';
                 __load_frame_content(url);
                 event.preventDefault();
                 return false;

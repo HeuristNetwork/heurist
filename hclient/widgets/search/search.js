@@ -556,10 +556,12 @@ $.widget( "heurist.search", {
             window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), 
                         this.options.rectype_set, 
                         !this.options.rectype_set, false);
+                        
         }
         if(!this.select_rectype_addrec){
 
             this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
+            this.select_rectype_addrec.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
 
             var that = this;
             this.select_rectype_addrec.hSelect({change: function(event, data){
@@ -569,7 +571,13 @@ $.widget( "heurist.search", {
                    var opt = that.select_rectype_addrec.find('option[value="'+selval+'"]');
                    that.btn_add_record.button({label: 'Add '+opt.text().trim()});
 
-                   window.hWin.HAPI4.save_pref('record-add-defaults',selval);
+                   var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                   if(!$.isArray(prefs) || prefs.length<4){
+                        prefs = [selval, window.hWin.HAPI4.currentUser['ugr_ID'], 'viewable', '']; //default
+                   }else{
+                        prefs[0] = selval; 
+                   }
+                   window.hWin.HAPI4.save_pref('record-add-defaults', prefs);
                    
                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:selval}});
                    return false;
@@ -1149,7 +1157,7 @@ $.widget( "heurist.search", {
                 */
             }
         });
-
+        
     }
 
     , _doLogin: function(){
