@@ -595,7 +595,7 @@
     }
     
     //
-    // remove reverse pointer detail field from child record in case ther is not direct pointer to child record
+    // remove reverse pointer detail field from child record in case there is not direct pointer to child record
     //
     function removeReverseChildToParentPointer($mysqli, $parent_id, $rectype){
 
@@ -926,6 +926,7 @@
                 $dtl_UploadedFileID = null;
                 $dtl_Geo = null;
                 $isValid = false;
+                $err_msg = '';
 
                 switch ($det_types[$dtyID]) {
 
@@ -933,10 +934,12 @@
                     case "blocktext":
                     case "date":
                         $isValid = (strlen(trim($dtl_Value)) > 0); //preg_match("/\\S/", $dtl_Value);
+                        if(!$isValid ) $err_msg = 'It is empty';
                         break;
                     case "float":
                         $isValid = preg_match("/^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+)?)\\s*$/", $dtl_Value);
                         //preg_match('/^0(?:[.]0*)?$/', $dtl_Value)
+                        if(!$isValid ) $err_msg = 'Not valid float value';
                         break;
                     case "enum":
                     case "relationtype":
@@ -957,6 +960,8 @@
                             $isValid = isValidTerm($system, $term_tocheck, $term_domain, $dtyID, $rectype);
                             if($isValid){
                                 $dtl_Value = $term_tocheck;
+                            }else{
+                                $err_msg = '';
                             }
                         }else{
                             $isValid = (intval($dtl_Value)>0);
@@ -972,9 +977,17 @@
                             if($rectype_tocheck){
                                 //check that this rectype is valid for given detail (constrained pointer)
                                 $isValid = isValidRectype($system, $rectype_tocheck, $dtyID, $rectype);
+                                if(!$isValid){
+                                    $err_msg = 'Record type '.$rectype_tocheck.' is not valid for specified constraints';
+                                }
+                            }else{
+                                $err_msg = 'Record with specified id does not exist';
                             }
                         }else{
                             $isValid = (intval($dtl_Value)>0);
+                            if(!$isValid){
+                                $err_msg = 'Record ID is valid integer';
+                            }
                         }
                         //this is parent-child resource
                         if($isValid && in_array($dtyID, $det_childpointers)){
@@ -1060,7 +1073,7 @@
 
                 }else{
                     $dt_names = dbs_GetDtLookups();
-                    array_push($errorValues, $dtl_Value." is not valid. Field type ".@$dt_names[$det_types[$dtyID]]);
+                    array_push($errorValues, $dtl_Value." is not valid. Field type ".@$dt_names[$det_types[$dtyID]]." (field id: $dtyID). ".$err_msg);
                 }
 
             }//for values
