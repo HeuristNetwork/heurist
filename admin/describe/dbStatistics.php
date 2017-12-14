@@ -312,7 +312,7 @@ function dirsize($dir)
                     // Determine selected databases
                     getSelectedDatabases();
                     if(this.databases.length>10){
-                        alert("You selected "+this.databases.length+" databases to be deleted. Max 10 allowed per once");
+                        alert("You selected "+this.databases.length+" databases to be deleted. Max 10 allowed at one time.");
                         return false;
                     }else if(this.databases.length == 0) {
                         alert("Select at least one database to delete");

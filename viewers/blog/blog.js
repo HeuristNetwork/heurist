@@ -101,7 +101,7 @@ var Blog = {
                 }
             },
             function(s,e) {	// onerror
-                alert("error loading records: " + e);
+                alert("Error loading records: " + e);
             }
         );
         HeuristScholarDB.loadRecords (
@@ -501,7 +501,7 @@ var Blog = {
                         that.relatedLoaded(r);
                     },
                     function (s, e) {
-                        alert("load failed: " + e);
+                        alert("Load failed: " + e);
                     }
                 )
             );
@@ -849,7 +849,7 @@ var Blog = {
                             ///that.renderAdditionalData();
                         },
                         function(r,e) {
-                            alert("file save failed: " + e);
+                            alert("File save failed: " + e);
                         }
                     ));
                 }
@@ -915,7 +915,7 @@ var Blog = {
 
                 },
                 function(r,e) {
-                    alert("record delete failed: " + e);
+                    alert("Record delete failed: " + e);
                 }
             ));
         };
@@ -1007,7 +1007,7 @@ var Blog = {
                         Blog.displayArchives();
                     },
                     function(r,e) {
-                        alert("record save failed: " + e);
+                        alert("Record save failed: " + e);
                     }
                 ));
             };
@@ -1289,7 +1289,7 @@ var Blog = {
                 if (onSave) onSave(r);
             },
             function(r,e) {
-                alert("record save failed: " + e);
+                alert("Record save failed: " + e);
             }
         ));
     },

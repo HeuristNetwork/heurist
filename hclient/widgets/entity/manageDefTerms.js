@@ -332,7 +332,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
             }
         }else{
-            window.hWin.HEURIST4.msg.showMsgFlash('Save current term before add a child term');
+            window.hWin.HEURIST4.msg.showMsgFlash('Save current term before adding a child term');
         }
         
     },

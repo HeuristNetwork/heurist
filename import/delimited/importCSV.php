@@ -239,7 +239,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                         dataType: "json",
                         cache: false,
                         error: function(jqXHR, textStatus, errorThrown ) {
-                            alert('Error connecting server. '+textStatus);
+                            alert('Error connecting to server. '+textStatus);
                         },
                         success: function( response, textStatus, jqXHR ){
                             if(response=="ok"){

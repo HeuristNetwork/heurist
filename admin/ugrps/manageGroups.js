@@ -414,7 +414,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
 
 						}else{
-							//alert("Impossible to delete group in usage");
+							//alert("Impossible to delete group which is in use");
 						}
 
 				}

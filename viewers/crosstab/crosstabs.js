@@ -696,7 +696,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
             });
             */
         }else{
-            alert('no more available terms');
+            alert('There are no more terms available');
         }
 
 
@@ -745,7 +745,7 @@ function CrosstabsAnalysis(_database, _query, _query_domain) {
             }
 
             if(!recordtype || recordtype<1){
-                alert('Record Type is not defined');
+                alert('Record type is not defined');
                 $('#cbRectypes').focus();
                 return;
             }

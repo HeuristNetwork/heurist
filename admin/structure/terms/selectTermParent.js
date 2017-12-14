@@ -123,7 +123,7 @@ function SelectTermParent() {
         }else if(_currentNode){
             if(top.HEURIST.parameters.mode==1){
                 if (_currentNode === _findTopLevelForId(_currentNode.data.id)){
-                    alert("You can't select top vocabulary for merge");
+                    alert("You can't select a top level vocabulary for merge.");
                     return;
                 }
             }

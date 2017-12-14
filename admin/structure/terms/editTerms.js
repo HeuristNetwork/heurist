@@ -513,7 +513,7 @@ function EditTerms() {
                 var nodeid = sel.options[sel.selectedIndex].value;
                 var node = _findNodeById(nodeid, false);
                 if(false && _currentNode.data.id===nodeid){
-                    alert("Not possible to inverse on itself");
+                    alert("Not possible for a term to be inverse of itself");
                 }
                 else if(_currentNode === _findTopLevelForId(_currentNode.data.id))
                 {
@@ -917,7 +917,7 @@ function EditTerms() {
                 return;
             }
             if((_currentDomain=="relation") && document.getElementById ('cbInverseTermOther').checked && iInverseId==null){
-                alert("Please find inverse term, or select non-directional in the radio buttons");
+                alert("Please select the inverse term, or select non-directional in the radio buttons");
                 document.getElementById ('edInverseTermId').setFocus();
                 return;
             }
@@ -995,11 +995,11 @@ function EditTerms() {
         for (ind in sibs){
             if(!Hul.isnull(ind)){
                 if(sibs[ind].label == new_name){
-                    alert("Duplicate term '"+new_name+"' - there is already a term with the same label in this branch at this level");
+                    alert("Duplicate term '"+new_name+"' - there is already a term with the same label in this branch at this level.");
                     return false;
                 }
                 if(new_code!='' && sibs[ind].data.termcode == new_code){
-                    alert("There is already a term with the standard code '"+new_code+"' in this branch");
+                    alert("There is already a term with the standard code '"+new_code+"' in this branch.");
                     return false;
                 }
             }
@@ -1040,11 +1040,11 @@ function EditTerms() {
         for (ind in sibs){
         if(!Hul.isnull(ind)){
         if(sibs[ind].label == node.label){
-        alert("There is already the term with the same label in this branch");
+        alert("There is already a term with the same label in this branch");
         return;
         }
         if(sibs[ind].data.termcode == node.data.termcode){
-        alert("There is already the term with the same code in this branch");
+        alert("There is already a term with the same code in this branch");
         return;
         }
         }
@@ -1305,7 +1305,7 @@ function EditTerms() {
         if(_currentNode===null) return;
         if (_currentNode === _findTopLevelForId(_currentNode.data.id))
         {
-            alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms).Vocabularies cannot be moved or merged");
+            alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms). Vocabularies cannot be moved or merged.");
             return;
         }
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1506,15 +1506,15 @@ function EditTerms() {
             var nodeid = sel.options[sel.selectedIndex].value;
             var node = _findNodeById(nodeid, false);
             if(false && _currentNode.data.id===nodeid){
-                alert("Not possible to inverse on itself");
+                alert("It is not possible to make a term the inverse of itself.");
             }
             else if(_currentNode === _findTopLevelForId(_currentNode.data.id))
             {
-                alert("you can't set inverse on top level vocabulary");
+                alert("you can't set inverse on a top level vocabulary");
 
             }
             else if( node === _findTopLevelForId(nodeid) ){
-                alert("you can't make top level vocabulary an inverse");
+                alert("you can't make a top level vocabulary an inverse");
             }else{
 
                 document.getElementById ('edInverseTerm').value = sel.options[sel.selectedIndex].text;

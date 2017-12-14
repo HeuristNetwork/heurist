@@ -1026,12 +1026,12 @@ function DetailTypeManager() {
         grp; //object in HEURIST
 
         if(Hul.isempty(name)){
-            alert('Group name is required. Please specify it');
+            alert('Group name is required');
             Dom.get('edName').focus();
             return;
         }
         if(Hul.isempty(description)){
-            alert('Group description is required. Please specify it');
+            alert('Group description is required');
             Dom.get('edDescription').focus();
             return;
         }
@@ -1173,7 +1173,7 @@ function DetailTypeManager() {
 
         if(!Hul.isnull(grp.types) && grp.types.length>0)
         {
-            alert("This group cannot be deleted as it contains field types - please move them first");
+            alert("This group contains field types. Please move them to another group before deleting.");
         }else{
             var r=confirm("Confirm the deletion of group '"+grp.name+"'");
             if (r) {

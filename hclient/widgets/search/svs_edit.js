@@ -484,7 +484,7 @@ function hSvsEdit(args) {
                                 $dlg.dialog( "close" );
                             } catch(e) {
                                 succeed = false;
-                                alert('Browser does not support');
+                                alert('Not supported by browser');
                             }                            
                             
                         }; 

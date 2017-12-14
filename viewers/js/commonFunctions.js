@@ -740,7 +740,7 @@ function parseDate(input){
 	  			//string
 				return input.value;
 	  		} else {
-				alert ("Invalid date. The date should be in yyyy-mm-dd format optionally followed by space then hh:mm:ss, where ss is also optional. Date formats yyyy, mm-yyyy or yyyy-mm will aslo be accepted but without time string");
+				alert ("Invalid date. The date should be in yyyy-mm-dd format optionally followed by space then hh:mm:ss, where ss is also optional. Date formats yyyy, mm-yyyy or yyyy-mm will also be accepted but without time string.");
 				return;
 			}
 		}

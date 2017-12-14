@@ -249,7 +249,7 @@
             function cbRemove(results){
                 var html = "",i;
                 if(top.HEURIST.util.isnull(results)){
-                    alert("Failed to return results from replace detail (value) action!");
+                    alert("Failed to return results from replace value action!");
                     return
                 }
                 if (results.none){
@@ -332,7 +332,7 @@
                         };
                     }
                     if (!searchInput) {
-                        alert("no valid search input element found, unable to proceed with replace");
+                        alert("No valid search input element found, unable to proceed with replace");
                         return;
                     }
                     sValue = (searchInput.value || searchInput.input.value ||

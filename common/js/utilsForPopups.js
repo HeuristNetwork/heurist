@@ -150,7 +150,7 @@ function inner_popup_iframe_loaded(ifr, popup_div) {
 function popup_timeout(ifr) {
 	removeListener(ifr, 'load', ifr.loader_fn);
 	top.close_popup();
-	alert('Problem contacting server - try again in a moment');
+	alert('Problem contacting server - please try again in a moment');
 
 	// gradually increase the timeout interval each time it occurs - compensate for slow connections
 	top.timeoutLength += 1500;

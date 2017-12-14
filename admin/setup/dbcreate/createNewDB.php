@@ -380,7 +380,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                         var bd_reg_idx = document.forms[0].elements['dbreg'].value;
                         if(!bd_reg_idx){
-                            alert('Select database you wish use as a template');
+                            alert('Select database you wish to use as a template');
                             return false;
                         }else{
                             var reginfo = registeredDBs[bd_reg_idx];

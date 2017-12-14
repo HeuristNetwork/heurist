@@ -143,7 +143,7 @@
                     }
                 }
 
-                alert('Check several groups and then click any "ignore in future" link to set this for multiple groups');
+                alert('Check several groups and then click any of the "ignore in future" links to set this for multiple groups.');
             }
         </script>
 

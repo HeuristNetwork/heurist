@@ -554,10 +554,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 alert(arc[k]+" is not number value");
                 return null;
             }else if(!islat && Math.abs(crd)>180){
-                alert(arc[k]+" is wrong longitude value");
+                alert(arc[k]+" is an invalid longitude value");
                 return null;
             }else if(islat && Math.abs(crd)>90){
-                alert(arc[k]+" is wrong latitude value");
+                alert(arc[k]+" is an invalid latitude value");
                 return null;
             }
             islat = !islat;
@@ -702,7 +702,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             }
         }
         if(window.hWin.HEURIST4.util.isnull(mdata) || $.isEmptyObject(mdata)){
-            alert('Wrong GeoJSON provided');
+            alert('Incorrect GeoJSON provided');
             return;            
         }
 

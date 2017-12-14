@@ -157,7 +157,7 @@
                         $("#bloglogo a").attr("href", "?g=" + matches[1] + (database ? "&db="+database : ""));
                     }
                 }
-                if (! (user || group)) { alert("user / group ID invalid or not provided"); return; }
+                if (! (user || group)) { alert("User / group ID invalid or not provided"); return; }
 
                 matches = location.href.match(/[?&]t=(\d+)/);	// extract the typeID from the URI
                 if (matches) {

@@ -518,7 +518,7 @@ function EditRectypeTitle() {
         
         var res = _varsTree.getNodesBy(__loopNodes);
         if(res && res.length>0){
-            alert('You have not yet inserted the selected fields in the title mask. Please click Insert Fields, or unselect the fields in the tree');
+            alert('You have not yet inserted the selected fields in the title mask. Please click Insert Fields, or unselect the fields in the tree.');
             return;
         }
         

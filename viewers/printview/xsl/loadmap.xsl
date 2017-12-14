@@ -56,7 +56,7 @@
 		}
 	},
 	
-	function(s,e) { alert("load failed: " + e); });
+	function(s,e) { alert("Load failed: " + e); });
 	HeuristScholarDB.loadRecords(mysearch, loader);
 	
 	function loadMap(value, type) {	

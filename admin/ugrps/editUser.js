@@ -249,7 +249,7 @@ function UserEditor() {
 
 			if(Dom.get(field).value==="") {
 				if(isShowWarn) {
-					alert(label+" is mandatory field");
+					alert(label+" is a mandatory field");
 				}
 				Dom.get(field).focus();
 				_updatedFields = [];

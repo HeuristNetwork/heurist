@@ -1512,7 +1512,7 @@ function searchAddress(address) {
              $(el).position({ my: "right top", at: "right bottom", of:$('#btnGeocode') });
              document.body.appendChild(el);              
           }else{
-            alert("Sorry, Google Maps reports " + status + ". Could not find the specified place name. <br/>Please check spelling");      
+            alert("Sorry, Google Maps reports " + status + ". Could not find the specified place name. <br/>Please check spelling.");      
           }
       }
   });
@@ -2071,7 +2071,7 @@ function applyManualEntry(){
     if(k==2 && type=="c" && arc[k].indexOf("r=")==0){   //circle
       var d = Number(arc[k].substr(2));
       if(isNaN(d)){
-        alert(arc[k]+" is wrong radius value");
+        alert(arc[k]+" is an invalid radius value");
         return;
       }
 
@@ -2083,13 +2083,13 @@ function applyManualEntry(){
     }
     var crd = Number(arc[k]);
     if(isNaN(crd)){
-      alert(arc[k]+" is not number value");
+      alert(arc[k]+" is not a numeric value");
       return;
     }else if(islng && Math.abs(crd)>180){
-      alert(arc[k]+" is wrong longitude value");
+      alert(arc[k]+" is an ivalid longitude value");
       return;
     }else if(!islng && Math.abs(crd)>90){
-      alert(arc[k]+" is wrong latitude value");
+      alert(arc[k]+" is an invalid latitude value");
       return;
     }
 
@@ -2115,7 +2115,7 @@ function applyManualEntry(){
     }else if(type=="p" && coords.length<2){
       alert("Define at least one pair of coordinates for point/marker");
     }else if(type=="c" && coords.length<5){
-      alert("For circle define at least one pair of coordinates and radious or 2 pairs of coordinates");
+      alert("For circle define at least one pair of coordinates and radius or 2 pairs of coordinates");
     }else{
       isok = true;
     }

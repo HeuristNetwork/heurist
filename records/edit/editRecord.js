@@ -3512,7 +3512,7 @@ console.log('heurist not defined');
         editLink.className = "geo-edit";
         editLink.onclick = function() {
             if (top.HEURIST.browser.isEarlyWebkit) {
-                alert("Geographic objects use Google Maps API, which doesn't work on this browser - please update to a recent version");
+                alert("Geographic objects use Google Maps API, which doesn't work on this browser - please update to a recent version.");
                 return;
             }
 

@@ -38,7 +38,7 @@ function search(query) {
 			displayResults(s,r);
 		},
 		function(s,e) {
-			alert("load failed: " + e);
+			alert("Load failed: " + e);
 		}
 	);
 	loadAllRecords(query, null, loader);

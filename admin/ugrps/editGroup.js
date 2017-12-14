@@ -202,7 +202,7 @@ function GroupEditor() {
 		// check mandatory fields
 		if(Hul.isempty(Dom.get("ugr_Name").value)) {
 				if(isShowWarn) {
-					alert("Name is mandatory field");
+					alert("Name is a mandatory field");
 				}
 				Dom.get("ugr_Name").focus();
 				_updatedFields = [];

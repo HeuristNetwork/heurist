@@ -72,7 +72,7 @@
             alert(errorMsg + " Hint : " + e);
           }
         }else{
-          alert("Your browser doesn't process XSL. Unable to view content.");
+          alert("Sorry, your browser doesn't process XSL. Unable to view content.");
         }
         return xmlDoc;
       }
@@ -569,7 +569,7 @@
           }else if ( xsls[style].activeElement &&
                     (xsls[style].activeElement.nodeName == "parsererror" || xsls[style].activeElement.nodeName == "error")) {
                     //the transform is invalid, tell the user
-            alert("The tranformation you have chosen is invalid. \n Please contact the owner/creator of the tranform");
+            alert("The tranformation you have chosen is invalid. \n Please contact the owner/creator of the tranform.");
 
             //and remove it from the list of choices
             var sElt = document.getElementById("transform_select");
@@ -767,7 +767,7 @@
                 displayResultDoc(curStyle,xml);
                 //setScroll location
               } else {
-                alert("annotation didn't save please try again");
+                alert("Annotation didn't save please try again");
               }
             }
         });
@@ -788,7 +788,7 @@
                 displayResultDoc(curStyle,xml);
                 //setScroll location
               } else {
-                alert("annotation didn't save please try again");
+                alert("Annotation didn't save please try again");
               }
             }
         });

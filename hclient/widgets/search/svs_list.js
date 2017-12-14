@@ -1171,7 +1171,7 @@ console.log('saved searches tree was updated');
                         break;
                         */                            
                         default:
-                            alert("Unhandled command: " + data.cmd);
+                            alert("This command not handled: " + data.cmd);
                             return;
                     }
 

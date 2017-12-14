@@ -396,7 +396,7 @@ function loadXMLDocFromFile(filename)
 			alert(errorMsg + " Hint : " + e);
 		}
 	}else{
-		alert("Your browser doesn't process XSL. Unable to view content.");
+		alert("Sorry, your browser doesn't process XSL. Unable to view content.");
 	}
 	return xmlDoc;
 }

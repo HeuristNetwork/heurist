@@ -621,8 +621,8 @@ if (isForAdminOnly()) exit();
                             alert('Mark at least one file');
                             return;
                         }else if(res.length>2000){
-                            alert('You can only process 2000 files at a time due to limitations on server side. '+
-                            'Please repeat the operation for this number of files as many times as needed');
+                            alert('You can only process 2000 files at a time due to server side limitations. '+
+                            'Please repeat the operation for this number of files as many times as needed.');
                             return;
                         }
                         

@@ -550,7 +550,7 @@ function ImageAnnotation(imageviewer, _recID) {
 														_selAnnotations.options[_selAnnotations.selectedIndex].text = title;
 
 													} else {
-														alert("The annotation was not saved. The marker/rectangle will be removed unless you edit and save an annotation");
+														alert("The annotation was not saved. The marker/rectangle will be removed unless you edit and save an annotation.");
 													}
 												}
 									});

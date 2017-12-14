@@ -172,7 +172,7 @@ function init() {
             sel_rt = $('span[class^="idfield_'+rectype+'"]');
 
             if(sel_rt.length<1){
-            //alert("There are no fields for selected record type defined as ID field");
+            //alert("There are no fields defined as ID field for the selected record type ");
             }else{
             sel_rt.show();  //show current only
             }*/
@@ -393,7 +393,7 @@ function doMatching(){
     var cb_keyfields1 = $('input[id^="cbsa_keyfield_"]:checked');
     var cb_keyfields2 = $('input[id^="cbsa_keyfield_"][multivalue="yes"]:checked');
     if(cb_keyfields1.length==0){
-        alert('You have to select one or more KEY fields for matching');
+        alert('You must select one or more KEY fields for matching');
     }else if(cb_keyfields2.length>1){
         //alert('You selected more than one Key field with multivalues (values separated by |). This field can be the only ONE. Unselect other fields');
         //alert('You selected Key field with multivalues (values separated by |). This field can be the only ONE. Unselect other fields');
@@ -808,7 +808,7 @@ function verifySubmit()
                     ($("#div_idfield_exist").is(":visible") && $("#rb_idfield0").is(":checked") && $("#new_idfield").val()=='')
                 ){
 
-                    alert("To search/match records you have to define New column to hold record identifiers");
+                    alert("To search/match records you must define New column to hold record identifiers");
 
                 }else if($("#div_idfield_exist").is(":visible") && $("#idfield").val()==''){
 

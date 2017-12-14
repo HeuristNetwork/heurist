@@ -217,7 +217,7 @@ function ReportScheduleEditor() {
                 }
                 if(Hul.isempty(el.value) && !(fname==='rps_FilePath' || fname==='rps_URL' || fname==='rps_IntervalMinutes') ) {
                     if(isShowWarn) {
-                        alert(fname.substr(4)+" is mandatory field");
+                        alert(fname.substr(4)+" is a mandatory field");
                     }
                     el.focus();
                     _updatedFields = [];

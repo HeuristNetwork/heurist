@@ -460,7 +460,7 @@ function updateRectypeOnServer_continue()
     }
     if(_rectype_icon==''){
         $('#btnSave').removeAttr('disabled');
-        alert("Please select Icon for new record type");
+        alert("Please select icon for new record type");
         return;
     }
 
