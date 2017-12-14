@@ -29,6 +29,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this.selectRectype = this.element.find('#sel_rectypes');
 
 
+        /*
         var rectypeList = this.options.rectype_set;
         var topOption = null;
         if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
@@ -41,13 +42,15 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
         if(rectypeList.length==0){
             topOption =  window.hWin.HR('Any Record Type');
-        }else if(rectypeList.length>1){
-            topOption = window.hWin.HR('Select record type...')
-        }
+        }*/
         
         this.selectRectype.empty();
         window.hWin.HEURIST4.ui.createRectypeSelect(this.selectRectype.get(0), 
-            rectypeList, topOption, false);
+            this.options.rectype_set, 
+            window.hWin.HEURIST4.util.isempty(this.options.rectype_set)
+            ?window.hWin.HR('Any Record Type')
+                :'',  // (this.options.parententity>0)?window.hWin.HR('select record type')
+            false);
 
         this.btn_add_record = this.element.find('#btn_add_record')
         .css({'min-width':'11.9em','z-index':2})
@@ -62,17 +65,21 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
         });  
         
-        //force search if rectype_set is defined
-        this._on( this.selectRectype, {
-            change: function(event){
-
-                if(this.selectRectype.val()>0){
-                    lbl = window.hWin.HR('Add')+' '+ this.selectRectype.find( "option:selected" ).text().trim();
+        
+        function __onSelectRecType(sel){
+                if(sel.val()>0){
+                    lbl = window.hWin.HR('Add')+' '+ sel.find( "option:selected" ).text().trim();
                 }else{
                     lbl = window.hWin.HR("Add Record");
                 }
-
-                this.btn_add_record.button('option','label',lbl);
+                that.btn_add_record.button('option','label',lbl);
+                
+        }
+        
+        //force search if rectype_set is defined
+        this._on( this.selectRectype, {
+            change: function(event){
+                __onSelectRecType(this.selectRectype);
                 this.startSearch();
             }
         });
@@ -92,10 +99,11 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 
             this._on( this.btn_search_start2, {click: this.startSearch });
                 
-            
+            __onSelectRecType(this.selectRectype);
         }else{
+            //start search
             if(this.selectRectype.val()>0){
-                this.selectRectype.change();
+                this.selectRectype.change(); 
             }
         }
         
