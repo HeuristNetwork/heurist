@@ -246,7 +246,9 @@ $.widget( "heurist.editing_input", {
                   return;
             }
             
-        }else{
+        }else if(this.detailType=='file' || this.detailType=='geo'){
+            values_to_set = this.options.values;
+        }else {
             values_to_set = window.hWin.HEURIST4.util.uniqueArray(this.options.values); //.slice();//.unique();
         }
         

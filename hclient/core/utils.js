@@ -987,7 +987,9 @@ window.hWin.HEURIST4.util = {
             var n = {},r=[];
             for(var i = 0; i < arr.length; i++) 
             {
-                if (!n[arr[i]]) 
+                if($.isPlainObject(arr[i])){
+                    r.push(arr[i]);
+                }else if (!n[arr[i]]) 
                 {
                     n[arr[i]] = true; 
                     r.push(arr[i]); 
