@@ -107,7 +107,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 padding: 5px;
                 font-weight: normal;
                 width:190px;
-                min-height:190px;
+                min-height:100px;
                 border:1px solid #000000;
                 font-size:0.9em;
                 text-align:left;
@@ -125,11 +125,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <div class="div-table-cell">
                     <label>Find:</label>
                     <input id="input_search" class="text ui-widget-content ui-corner-all" 
-                            style="max-width: 150px; min-width: 10em; width: 150px; margin-right:0.2em"/>
+                            style="max-width: 100px; min-width: 6em; width: 100px; margin-right:0.2em"/>
                     <div id="btn_search_start"></div>
                 </div>
                 <div class="div-table-cell" style="padding-left: 2em;">
-                    <label for="sel_viewpoints">Zoom to saved location</label>
+                    <label for="sel_viewpoints">Zoom to extent</label>
                     <select id="sel_viewpoints" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
                     <div id="btn_viewpoint_delete"></div>
                     <div id="btn_viewpoint_save"></div>
@@ -139,7 +139,9 @@ require_once(dirname(__FILE__)."/initPage.php");
                 
                 <div class="div-table-cell" style="padding-left: 2em;">
                     <label for="sel_overlays">Background</label>
-                    <select id="sel_overlays" class="text ui-widget-content ui-corner-all" style="max-width:120px"></select>
+                    <select id="sel_overlays" class="text ui-widget-content ui-corner-all" style="max-width:120px">
+                        <option>none</option>
+                    </select>
                 </div>
             
                 <div style="position: absolute; right: 0.2em; top:1em;" class="map-inited">
@@ -151,15 +153,19 @@ require_once(dirname(__FILE__)."/initPage.php");
 
             <div id="rightpanel">
 
-                <div id="color-palette"></div>
+                <label style="display:inline-block;padding-botton:8px;vertical-align:top;">Draw color:</label>
+                <div style="width:auto !important;display:inline-block" id="color-palette"></div>
 
-                <div style="padding-top:35px">
+                
+                <div style="padding-top:25px">
+                    <label>Select shape to draw</label><br>
+                    <label>Click to add points</label><br><br>
                     <button id="save-button" style="font-weight:bold">Save</button>
                 </div> 
-                <div style="padding-top:10px">
+                <div style="padding-top:40px">
                     <button id="cancel-button">Cancel</button>
                 </div>
-                <div style="padding-top:40px">
+                <div>
                     <button id="delete-button">Delete Selected</button>
                 </div> 
                 <div>
@@ -172,10 +178,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                     <button id="get-geometry-button">Get Geometry</button>
                 </div> 
                 
-                <div style="padding-top:15px;bottom:0;position: absolute">
-                    <textarea id="coords1" cols="2" rows="2">
-                        Click on the map. The code for the selected shape you create will be presented here.
-                    </textarea>
+                <div style="padding-top:15px;bottom:30;position: absolute;height:130px">
+                    <textarea id="coords1">Click on the map. The code for the selected shape you create will be presented here.</textarea>
                     <button id="apply-coords-button" style="margin-top:10px">Apply Coordinates</button>
                 </div> 
             </div>            

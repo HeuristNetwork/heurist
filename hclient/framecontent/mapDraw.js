@@ -950,9 +950,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         });
 
         $('#btn_viewpoint_delete')
-        .button({label: window.hWin.HR("Delete selected location"), text:false, icons: {
-            secondary: "ui-icon-close"
-        }})
+        .button({label: window.hWin.HR("Delete selected extent"), showLabel:false, icon:"ui-icon-close"})
+        .css({'font-size':'0.9em'})
         .click(function(){
             var selval = $sel_viepoints.val();
             if(selval!=''){
@@ -975,9 +974,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         });
 
         $('#btn_viewpoint_save')
-        .button({label: window.hWin.HR("Save location")})
+        .button({label: window.hWin.HR("Save extent")})
         .click(function(){
-            window.hWin.HEURIST4.msg.showPrompt('Name of location', function(location_name){
+            window.hWin.HEURIST4.msg.showPrompt('Name for extent', function(location_name){
                 if(!window.hWin.HEURIST4.util.isempty(location_name)){
                     //save into preferences 
                     if($.isEmptyObject(map_viewpoints)){
@@ -1002,7 +1001,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                         gmap.getBounds().toUrlValue(), location_name);
 
                 }
-            });
+            }, {title:'Save map extent',yes:'Save',no:"Cancel"});
         });
 
         // apply coordinates
@@ -1140,7 +1139,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         google.maps.event.addListener(gmap, 'click', clearSelection);
         google.maps.event.addListener(gmap, 'mousemove', function (event) {
             var pnt = event.latLng;
-            $('#coords2').html(formatPnt(pnt),4);
+            $('#coords2').html(formatPnt(pnt,5));
         });        
 
         buildColorPalette();
@@ -1209,6 +1208,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                         }
                     }//for
                     
+                   
                     var $sel_overlays = $('#sel_overlays');
                     window.hWin.HEURIST4.ui.createSelector( $sel_overlays.get(0),
                         $.isEmptyObject(map_overlays)?window.hWin.HR('none defined'): map_overlays);
