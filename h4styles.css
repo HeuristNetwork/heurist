@@ -1148,9 +1148,10 @@ background: #8ea9b9
     padding-top: 0.5em;
 }
 
-.ent_wrapper.editor .header{
+.ent_wrapper.editor .header, .header>label{
     color:#6A7C99; /*#354F75*/
 }
+
 
 .ent_wrapper.editor .text{
     background: none repeat scroll 0 0 #FFF  !important;
@@ -1491,3 +1492,4 @@ label.small-header{
     left: 14px;
 }
 option {padding-left:15px;}
+

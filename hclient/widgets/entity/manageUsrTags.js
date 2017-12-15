@@ -527,9 +527,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }  
         
         //add group selector and search/add input     
-        var mdiv = $('<div class="tagDiv" style="text-decoration:none;padding:3px 4px"><label>Add </label>'
-                + ' <input type="text" style="width:15ex" size="60"/> in <select></select>&nbsp;'
-                + '<div class="rec_action_link" data-key="add" style="visibility:visible !important"/>'
+        var mdiv = $('<div class="tagDiv" style="text-decoration:none;padding:3px 4px">' //<label>Add </label>'
+                + ' <input type="text" style="width:15ex;margin-right:20px" size="60"/>&nbsp;in&nbsp;&nbsp;<select></select>&nbsp;'
+                + '<div class="rec_action_link" data-key="add" style="margin-left:20px;visibility:visible !important"/>'
                 + '</div>').appendTo(panel);
                 
         $parent = panel.parents('.ui-dialog-content');

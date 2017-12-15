@@ -91,9 +91,8 @@ if($dt_SourceRecordID==0){
 
 
         if(!defined('HEURIST_ZOTEROSYNC') && HEURIST_ZOTEROSYNC==''){
-            die(
-                " <p>Library key for Zotero synchronisation is not defined. Please go to " +
-                "Manage > Database > Properties to enter access details for your Zotero library.");
+            die(' <p>Library key for Zotero synchronisation is not defined. '
+                .'Please configure Zotero connection in Manage > Database > Properties');
         }
 
         //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";

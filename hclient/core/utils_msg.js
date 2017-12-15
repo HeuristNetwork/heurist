@@ -476,7 +476,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(message_text!=''){
                                           
                                           //'<div class="ui-state-error" style="padding:10px">XXXX'+        +'</div>'
-            window.hWin.HEURIST4.msg.showMsgFlash('<span class="ui-state-error" style="padding:10px;border:0;">'+message_text+'</span>', 3000);
+                                          
+                                          //class="ui-state-error" 
+            window.hWin.HEURIST4.msg.showMsgFlash('<span style="padding:10px;border:0;">'+message_text+'</span>', 3000);
             
             /*
             if(message){

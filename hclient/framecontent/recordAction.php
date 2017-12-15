@@ -104,9 +104,9 @@ if(!in_array($action_type, $allowed_actions)){
 </head>
 
 <!-- HTML -->
-<body style="overflow:hidden">
+<body style="overflow:hidden;background:white">
 
-    <div id="div_parameters" class="popup_content_div ui-widget-content">
+    <div id="div_parameters" class="popup_content_div">
 
         <div id="div_header" tyle="padding: 0.2em; min-width: 600px;">
 
@@ -114,31 +114,29 @@ if(!in_array($action_type, $allowed_actions)){
 
         <fieldset>
             <div style="padding: 0.2em; width: 100%;" class="input">
-                <div class="header" style="padding-left: 16px;"><label for="sel_record_scope">Records scope:</label></div>
+                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_record_scope">Records scope:</label></div>
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
             <div id="div_sel_fieldtype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding-left: 16px;"><label for="sel_record_scope">Field to modify:</label></div>
-                <select id="sel_fieldtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_record_scope">Field to modify:</label></div>
+                <select id="sel_fieldtype" class="ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
 
             <div id="div_sel_rectype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding-left: 16px;"><label for="sel_recordtype">Convert to record type:</label></div>
-                <select id="sel_recordtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
-                <div id="btnAddRecord" style="display:none;"></div><div id="btnAddRecordInNewWin" style="display:none;"></div>
+                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_recordtype">Convert to record type:</label></div>
+                <select id="sel_recordtype" style="max-width:30em"></select>
+                
+                <div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>
+                <div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>
             </div>
 
-            <div id="div_more_options" style="padding: 0.2em; width: 100%;display:none">
-                <div id="btn_more_options" style="cursor:pointer;float:right;color:#7D9AAA;padding:2px 4px;">show more options</div>
+            <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
+                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Record is editable by:</label></div>
+                <select id="sel_Ownership" style="max-width:30em"></select>
             </div>
             
-            <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
-                <div class="header" style="padding-left: 16px;"><label for="sel_Ownership">Record is editable by:</label></div>
-                <select id="sel_Ownership" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
-            </div>
-            
-            <div id="div_sel_access" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
-                <div class="header" style="padding-left: 16px;"><label for="sel_Ownership">Access outside this group:</label></div>
+            <div id="div_sel_access" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
+                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Access outside this group:</label></div>
                 
                 <div class="detailRow" style="padding-bottom:1em;">
                     <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
@@ -160,24 +158,45 @@ if(!in_array($action_type, $allowed_actions)){
                     Published - written automatically to external views</label>
                 </div>
             </div>
-
             
+            <div id="div_sel_access2" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
+                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Outside this group record is:</label></div>
+            
+                            <select name="sel_Access" id="sel_Access" style="min-width: 3   00px;">
+                                <option value="hidden">Hidden (restricted to owners)</option>
+                                <option value="viewable" selected>Viewable (logged-in users only)</option>
+                                <option value="pending">Pending (marked for potential publication)</option>
+                                <option value="public">Public (automatically published to hml etc.)</option>
+                            </select>
+            </div>
+            
+
             <div style="padding: 0.2em; width: 100%;" class="input">
-                <div class="header" style="padding-left: 16px;"><label for="cb_add_tags">Tag affected records (auto-generated tag)</label></div>
+                <div class="header" style="padding:16px;"><label for="cb_add_tags">Tag affected records (auto-generated tag)</label></div>
                 <input id="cb_add_tags" type="checkbox" class="text ui-widget-content ui-corner-all">
             </div>
             
+            <div id="div_more_options" style="padding: 0.2em; width: 100%;display:none">
+                <div id="btn_more_options" style="cursor:pointer;float:right;color:#7D9AAA;padding:2px 4px;">show more options</div>
+            </div>
+
+            <hr class="add_record" style="display:none;color:#6A7C99"/>
+            
+            <div style="padding: 0.2em; min-width: 600px;display:none;border-top:1px solid #6A7C99" class="add_record">
+                <div class="header" style="padding:0 16px;padding-top:20px;text-align:left"><label>ADVANCED</label></div>
+            </div>
+            
             <div id="div_sel_tags" style="padding: 0.2em; min-width: 600px;display:none;" class="add_record">
-                <div class="header" style="padding-left: 16px;"><label>Select tags to be assigned:</label></div>
+                <div class="header" style="padding:0 16px;"><label>Add these tags:</label></div>
                 <div id="div_sel_tags2" style="padding-bottom:20px"></div>
             </div>
             <div id="div_add_link" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
-                <div class="header" style="padding-left: 16px;vertical-align:top">
-                        <label for="txt_add_link">Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records to this database with these characteristics</label>
+                <div class="header" style="padding: 0 16px;vertical-align:top">
+                        <label for="txt_add_link">Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records</label>
                 </div>
                 <textarea id="txt_add_link" readonly
                     onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
-                    class="text ui-widget-content ui-corner-all" rows=4 style="width:50ex"></textarea>
+                    class="text ui-widget-content ui-corner-all" rows=4 style="width:80ex"></textarea>
             </div>
             
         </fieldset>

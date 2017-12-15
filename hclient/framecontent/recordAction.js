@@ -73,9 +73,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             $('#sel_record_scope').parent().hide();
             $('#cb_add_tags').parent().hide();
+            $('#div_parameters').css({'min-width':'1100px'});
             
             //record types
-            $('#div_sel_rectype').find('label[for="sel_recordtype"]').text('Type of record to add');
+            $('#div_sel_rectype').find('label[for="sel_recordtype"]').text('Type of record to add:');
             $('#div_sel_rectype').show();
             
             var $rec_select = _fillSelectRecordTypes();
@@ -97,8 +98,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             })
             
             //ownership visibility
-            //$('#div_sel_ownership').show();
-            //$('#div_sel_access').show();
+            $('#div_sel_ownership').show();
+            $('#div_sel_access2').show();
             _fillOwnership();
 
             //tags
@@ -126,7 +127,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 
                 btn_start_action.parent().hide();
                 
-                $('#btnAddRecord').button({label:'Add Record'}).show().click(
+                $('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() }).show().click(
                     function(){
                         
                         var new_record_params = {};
@@ -138,7 +139,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
                     }
                 );
-                $('#btnAddRecordInNewWin').button({label:'Add Record in New Window'}).show().click(
+                $('#btnAddRecordInNewWin').button({label:window.hWin.HR('Add Record in New Window').toUpperCase() }).show().click(
                     function(){
                         var url = $('#txt_add_link').val();
                         if(url){
@@ -189,8 +190,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         var url = '';
         if($('#sel_recordtype').val()>0){
             add_rec_prefs[0] = $('#sel_recordtype').val();
-            add_rec_prefs[1] = $('#sel_Ownership').val()
-            add_rec_prefs[2] = $('input[type="radio"][name="rb_Access"]:checked').val();
+            add_rec_prefs[1] = $('#sel_Ownership').val();
+            add_rec_prefs[2] = $('#sel_Access').val(); //$('input[type="radio"][name="rb_Access"]:checked').val();
             
             url = window.hWin.HAPI4.baseURL+'hclient/framecontent/recordEdit.php?db='+window.hWin.HAPI4.database
             +'&rec_rectype=' + add_rec_prefs[0]+'&rec_owner='+add_rec_prefs[1]+'&rec_visibility='+add_rec_prefs[2];
@@ -415,9 +416,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         if(action_type=='add_record'){
             $('#sel_Ownership').val(add_rec_prefs[1]);
-            $('#rb_Access-'+add_rec_prefs[2]).prop('checked', true);
+            //$('#rb_Access-'+add_rec_prefs[2]).prop('checked', true);
+            $('#sel_Access').val(add_rec_prefs[2]);
             $('#sel_Ownership').change(_onAddRecordChange);;
-            $('input[name="rb_Access"]').change(_onAddRecordChange);
+            $('#sel_Access').change(_onAddRecordChange);
             _onAddRecordChange();
         }else{
             var currentOwner = window.hWin.HEURIST4.util.getUrlParameter('owner', window.location.search);
