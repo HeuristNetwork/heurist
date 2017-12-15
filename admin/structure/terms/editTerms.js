@@ -2419,7 +2419,7 @@ function EditTerms() {
                             $_dialogbox.find("#btnMergeOK").off('click');
                             $_dialogbox.find("#moveBtn").off('click');
                             $_dialogbox.find("#btnMergeCancel").off('click');
-                            $_dialogbox.find("#moveBtnCancel").off('click');
+                            //$_dialogbox.find("#moveBtnCancel").off('click');
                         },
                         title: 'Select values to be retained',
                         height: 440,
@@ -2427,7 +2427,7 @@ function EditTerms() {
                 });
                 
                 
-                $_dialogbox.find("#moveBtnCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
+                //$_dialogbox.find("#moveBtnCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
                 $_dialogbox.find("#btnMergeCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
                 $_dialogbox.find("#btnMergeOK").click(function(){
                         _doMerge(node, data.otherNode, data.hitMode);

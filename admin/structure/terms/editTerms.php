@@ -434,10 +434,32 @@ if(isForAdminOnly("to modify database structure")){
 
 
         <div id="divTermMergeConfirm" style="display:none;width:100%;padding:5px">
-            <h2>Merge</h2>
-            <br/>
-            <table border="0" cellpadding="2px;">
 
+            <div id="divInsertAsChild" style="border-bottom: dotted 1px;">
+                <br/>
+                <h2 style="width: 300px;display: inline-block;">Insert as child</h2>
+                <div style="float:right;margin-right:30px">
+                    <input id="moveBtn" type="button" value="Move"
+                        title=""  style="width:70px"/>
+                </div>
+                <div>
+                    <br/>
+                    <span id ="moveText"></span>
+                    <span>&nbsp;&nbsp;</span>
+                </div>
+                <br/>
+            </div>
+            
+            <br/>
+            <h2 style="width: 200px;display: inline-block;">Merge</h2>
+            <div style="margin-right:30px;float:right;">
+                <input id="btnMergeOK" type="button" value="Merge"
+                    title=""  style="width:70px"/>
+            </div>
+            <br/><br/>
+            <table border="0" cellpadding="2px;">
+            
+            
                 <!--<tr>
                 <td><h2>Insert as child</h2></td>
                 <td></td>
@@ -546,29 +568,17 @@ if(isForAdminOnly("to modify database structure")){
             </div>
             </div>
             -->
-            <div style="margin-top:30px;width:100%;text-align:right;">
-                <input id="btnMergeOK" type="button" value="Merge"
-                    title=""  style="width:70px"/>
-                <input id="btnMergeCancel" type="button" value="Cancel"
-                    title=""  style="width:70px; padding-left:10px"/>
-            </div>
-
-            <div id="divInsertAsChild">
-                <br/><hr style="border-top: dotted 1px;"/><br/>
-                <h2>Insert as child</h2>
-                <div>
-                    <br/>
-                    <span id ="moveText"></span>
-                    <span>&nbsp;&nbsp;</span>
-                    <div style="float:right">
-                        <input id="moveBtn" type="button" value="Move"
-                            title=""  style="width:70px"/>
-                        <input id="moveBtnCancel" type="button" value="Cancel"
-                            title=""  style="width:70px; padding-left:10px"/>
-                    </div>
-                </div>
+            
+            <div style="margin-right:30px;float:right;">
+                    <input id="btnMergeCancel" type="button" value="Cancel"
+                        title=""  style="width:70px; padding-left:10px"/>
+                    <!-- input id="moveBtnCancel" type="button" value="Cancel"
+                                title=""  style="width:70px; padding-left:10px"/ -->
             </div>
         </div>
+
+        
+        
 
         <div id=move_mergeTerms style="display:none ">
             <div id="mergeText" style="font-weight:bold;">Are you sure you want to Merge terms?</div>
