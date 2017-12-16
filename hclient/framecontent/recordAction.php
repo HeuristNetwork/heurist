@@ -108,7 +108,7 @@ if(!in_array($action_type, $allowed_actions)){
 
     <div id="div_parameters" class="popup_content_div">
 
-        <div id="div_header" tyle="padding: 0.2em; min-width: 600px;">
+        <div id="div_header" style="padding: 0.2em; min-width: 600px;">
 
         </div>
 
