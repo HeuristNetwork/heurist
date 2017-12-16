@@ -1826,11 +1826,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         if(this.element.find('.chb_show_help').length==0){
         
-            $('<div style="display:block;text-align:left;padding:10px 0px 0px 35px;">'
+            $('<div style="display:block;text-align:left;padding:10px 0px 5px 35px;">'
                 +'<label><input type="checkbox" class="chb_show_help" '
                 +(ishelp_on?'checked':'')+'/>Show help</label>&nbsp;&nbsp;'
                 +'<label><input type="checkbox" class="chb_opt_fields" '
                 +(isfields_on?'checked':'')+'/>Optional fields</label>'
+                +'<br/>&nbsp;<br/><hr style="width:25%">'
             +'</div>').insertBefore(this.editForm.first('fieldset'));
                 
             var that = this;    
