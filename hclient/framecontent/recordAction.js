@@ -121,7 +121,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             //$('#div_add_link').show();
             
-            $('.input').css({'height':'40px','border-top':'1px solid gray'});
+            $('.input').css({'height':'45px','border-top':'1px solid gray'});
             
             if(init_scope_type!='popup'){
                 
@@ -139,7 +139,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
                     }
                 );
-                $('#btnAddRecordInNewWin').button({label:window.hWin.HR('Add Record in New Window').toUpperCase() }).show().click(
+                /* TODO: 17/12/17: This button is "Add Record in New Window", but wraps in an ugly fashion. This is a fudgy way of hiding it (althoguh still there if you know about it). To be reinstated */
+                $('#btnAddRecordInNewWin').button({label:window.hWin.HR('').toUpperCase() }).show().click(
                     function(){
                         var url = $('#txt_add_link').val();
                         if(url){
@@ -147,6 +148,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         }
                     }
                 )
+                
             }else{
                 btn_start_action.click(_startAction);
             }
@@ -443,7 +445,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _createInputElement('fld-1', window.hWin.HR('Value to be added'));
         }else if(action_type=='replace_detail'){                              
             
-            $('<div tyle="padding: 0.2em; width: 100%;" class="input">'
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 +'<span></span><div class="header" style="padding-left: 16px;">'
                 +'<label for="cb_replace_all">Replace all occurrences</label></div>'
                 +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 4px 0">'
@@ -457,7 +459,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _createInputElement('fld-2', window.hWin.HR('Replace with'));
         }else if(action_type=='delete_detail'){
 
-            $('<div tyle="padding: 0.2em; width: 100%;" class="input">'
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 +'<div class="header" style="padding-left: 16px;">'
                 +'<label for="cb_remove_all">Remove all occurrences</label></div>'
                 +'<input id="cb_remove_all" type="checkbox" class="text ui-widget-content ui-corner-all">'

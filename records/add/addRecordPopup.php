@@ -332,7 +332,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["reco
                     //style="float:right; margin-left:30px;" 
                     // class="actionButtons"
                     ?>
-                    <span style="float:right; margin:3 0 0 30" >
+                    <span style="display: none; float:right; margin:3 0 0 30" >
                         <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event, false);">Add Record in new window</button>
                     </span>
                     <span style="float:right; margin:3 0 0 30" >

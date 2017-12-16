@@ -192,11 +192,11 @@ if(!in_array($action_type, $allowed_actions)){
             </div>
             <div id="div_add_link" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
                 <div class="header" style="padding: 0 16px;vertical-align:top">
-                        <label for="txt_add_link">Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records</label>
+                        <label for="txt_add_link">Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records:</label>
                 </div>
                 <textarea id="txt_add_link" readonly
                     onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
-                    class="text ui-widget-content ui-corner-all" rows=4 style="width:80ex"></textarea>
+                    class="text ui-widget-content ui-corner-all" rows=8 style="width:110ex"></textarea>
             </div>
             
         </fieldset>
