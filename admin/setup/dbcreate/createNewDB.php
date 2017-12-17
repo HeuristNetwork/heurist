@@ -612,7 +612,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 style="padding-left: 38px; wdith:620px;display:none">
                                 <div><b>Suggested next steps</b></div>
                                 <div>
-                                    <br />After the database is created, we suggest visiting Database &gt; Acquire from databases and Database > Acquire from templates
+                                    <br />After the database is created, we suggest visiting Manage &gt; Structure &gt; Browse templates
                                     to download pre-configured templates or individual record types and fields from databases registered with the Heurist Network.
                                     <br />New databases are created on the current server. You will become the owner and administrator of the new database.
                                 </div>
@@ -1072,7 +1072,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         <p style="padding-left:6em">
                             After logging in to your new database, we suggest you import some additional entity types from one of the<br />
                             curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
-                            using Database &gt; Structure &gt; Acquire from Databases 
+                            using Manage &gt; Structure &gt; Browse templates 
                             <!--or Database &gt; Structure &gt; Acquire from Templates -->
                         </p>
                     </div>

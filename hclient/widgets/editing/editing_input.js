@@ -2155,10 +2155,10 @@ $.widget( "heurist.editing_input", {
                 //error highlight
                 $(this.inputs[0]).addClass( "ui-state-error" );
                 //add error message
-                errorMessage = 'Field is requried. Please specify value';
+                errorMessage = 'Field is required';
 
             }else if((data_type=='freetext' || data_type=='url' || data_type=='blocktext') && ress[0].length<4){
-                //errorMessage = 'Field is requried. Please specify value';
+                //errorMessage = 'Field is required';
             }
         }
         //verify max alowed size
@@ -2172,7 +2172,7 @@ $.widget( "heurist.editing_input", {
                     //error highlight
                     $(this.inputs[idx]).addClass( "ui-state-error" );
                     //add error message
-                    errorMessage = 'Field is requried. Please specify value';
+                    errorMessage = 'Field is required';
                 }
             }
         }

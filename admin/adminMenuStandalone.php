@@ -227,7 +227,7 @@ if (array_key_exists('mode', $_REQUEST)) {
                         'Add new or modify existing record types, including general characteristics '.
                         'and the data fields and rules which compose a record');
 
-                        menuEntry('','Acquire from databases','structure/import/selectDBForImport.php?db='.HEURIST_DBNAME,
+                        menuEntry('','Browse templates','structure/import/selectDBForImport.php?db='.HEURIST_DBNAME,
                         'Selectively import structural elements (record types, fields, terms and connected record types) '.
                         'from other Heurist databases into the current database');
 

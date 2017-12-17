@@ -518,7 +518,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         }else{
             window.hWin.HEURIST4.msg.showMsgDlg(
                 "The required record type "+rt+" has not been defined.<br><br>"+
-                "Please download from the HeuristReferenceSet database using Database &gt; Structure &gt; Acquire from Databases.",
+                "Please download from the HeuristReferenceSet database using Manage &gt; Structure &gt; Browse templates.",
                 {'Show Mapping Help':function() {  $("#helper").dialog( "open" ); var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) },
                     'Close':function() { var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) }
                 }

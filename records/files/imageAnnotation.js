@@ -142,7 +142,7 @@ function ImageAnnotation(imageviewer, _recID) {
 			lblInfo = document.createElement('label');
 			lblInfo.id = 'lblInfoCoords';
 			lblInfo.style.color = '#ff0000';
-			lblInfo.innerHTML = "To enable image annotation, use Database &gt; Structure &gt; Acquire from Databases to obtain Annotation record type (2-15) from HeuristReferenceSet or HeuristToolSupport database";
+			lblInfo.innerHTML = "To enable image annotation, use Manage &gt; Structure &gt; Browse templates to obtain Annotation record type (2-15) from HeuristReferenceSet or HeuristToolSupport database";
 			edittoolbar.appendChild(lblInfo);
 			image_digitizer_container.appendChild(edittoolbar);
 

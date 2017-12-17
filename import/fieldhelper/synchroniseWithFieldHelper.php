@@ -147,7 +147,7 @@ if (! is_logged_in()) {
             "</b><br />Note: these fields may appear to be present, but do not have the correct origin codes ".
             "(source of the field definition) for this function to use them.".
             "<p>We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
-            "<ul><li>Go to Database &gt; Structure &gt; Acquire from Databases<br>&nbsp;</li>".
+            "<ul><li>Go to Manage &gt; Structure &gt; Browse templates<br>&nbsp;</li>".
             "<li>Navigate to the HeuristCoreDefinitions database<br>&nbsp;</li>".
             "<li>Check 'Show existing record types'</li>&nbsp;".
             "<li>Check 'Click the download icon on the Digital Media Item'</li></ul>".
