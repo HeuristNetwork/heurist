@@ -215,7 +215,8 @@ fieldset input:focus,
 fieldset select:focus,
 fieldset textarea:focus,
 fieldset button:focus,
-btnset_radio:focus {
+btnset_radio:focus,
+outline_suppress {
     outline: none;
     outline-style:none;
     box-shadow:none;
@@ -311,7 +312,7 @@ input.text, select.text {
 .readonly {
     color: #999999;
 }
-.required {
+.required,  .required>label{
     color: #CC0000 !important;
     font-weight: bold;
 }

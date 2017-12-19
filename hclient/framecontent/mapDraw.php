@@ -23,7 +23,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
 
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing,geometry"></script>
+        <!-- script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE&libraries=drawing,geometry"></script -->
 
         <script type="text/javascript" src="mapDraw.js"></script>
         <script type="text/javascript" src="mapLayer.js"></script>
@@ -39,21 +39,41 @@ require_once(dirname(__FILE__)."/initPage.php");
                 
                 if(!success) return;
 
-                var initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
-                
-                // Mapping data
-                mapping = new hMappingDraw('map_digitizer', initial_wkt);
-                
                 // init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
                             'Mapping Drawing Overview', 
                             '../../context_help/mapping_drawing.html #content');
 
+
+                if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {
+console.log('google map api: already loaded')                    
+                    handleApiReady();
+                }else{                            
+console.log('load google map api')                    
+                    $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk'
+                    +'&libraries=drawing,geometry&callback=handleApiReady');                                           
+                    //AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE
+                }
+
             } //onPageInit
+            
+            function handleApiReady(){
+                var initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
+                // Mapping data
+                mapping = new hMappingDraw('map_digitizer', initial_wkt);
+            }
+            
+            function assignParameters(params){
+                if(params && params['wkt']){
+                    var initial_wkt = params['wkt'];
+                    
+                    mapping.loadWKT(initial_wkt);
+                }
+            }
 
         </script>
         <style type="text/css">
-            #map_digitizer {
+            #map_container {
                 position: absolute;
                 top: 50px;
                 left: 0px;
@@ -61,6 +81,12 @@ require_once(dirname(__FILE__)."/initPage.php");
                 bottom: 0px;
                 background-color: #ffffff;
             }  
+            #map_digitizer {
+                height:100%;
+                width:100%;
+            }  
+            
+            
             .color-button {
                 width: 14px;
                 height: 14px;
@@ -149,7 +175,9 @@ require_once(dirname(__FILE__)."/initPage.php");
                 </div>
             </div>
             
-            <div id="map_digitizer">Mapping</div>
+            <div id="map_container">
+                <div id="map_digitizer">Mapping</div>
+            </div>
 
             <div id="rightpanel">
 
