@@ -352,22 +352,33 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         mapdiv_id = _mapdiv_id;
         initial_wkt = _initial_wkt;
 
+        _init_DeleteMenu();
+ 
         var map = new google.maps.Map(document.getElementById(mapdiv_id), {
             zoom: 2,
             center: new google.maps.LatLng(31.2890625, 5), //22.344, 114.048),
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
             disableDefaultUI: true,
-            zoomControl: true
+            zoomControl: true,
+            zoomControlOptions: {
+                position: google.maps.ControlPosition.RIGHT_TOP
+            },
+            mapTypeId: google.maps.MapTypeId.TERRAIN,
+            mapTypeControl: true,
+            mapTypeControlOptions: {
+                //style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                mapTypeIds: ['terrain', 'roadmap','satellite','hybrid'],                
+                position: google.maps.ControlPosition.LEFT_TOP
+            }            
         });
-
-        gmap = map;
-
 
         // deal with initial tile loading
         var loadListener = google.maps.event.addListener(map, 'tilesloaded', function(){
             google.maps.event.removeListener( loadListener );
             _onMapInited();
         });
+        
+        
+        gmap = map;
     } 
 
     //
@@ -932,6 +943,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         var $sel_viepoints = $('#sel_viewpoints');
 
         //fill sel_viewpoints with bounds
+        if(!$.isEmptyObject(map_viewpoints)){
+            //map_viewpoints.unshift({key:'', title:window.hWin.HR("select extent")});
+        }
         window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), 
             $.isEmptyObject(map_viewpoints)?window.hWin.HR('none defined'): map_viewpoints);
 
@@ -1071,7 +1085,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function _loadSavedExtentOnInit(){
         var bounds = window.hWin.HAPI4.get_prefs('map_viewpoint_last');
-        if(bounds!=''){
+        if(!window.hWin.HEURIST4.util.isempty(bounds)){          
                 bounds = bounds.split(',');
                 gmap.fitBounds({south:Number(bounds[0]), west:Number(bounds[1]),
                     north:Number(bounds[2]), east:Number(bounds[3]) }, -1);
@@ -1370,6 +1384,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
+        loadWKT: function(wkt){
+            _removeOverlay();
+            _loadWKT(wkt);
+        }
     }
 
     _init(_mapdiv_id, _initial_wkt);
@@ -1391,6 +1409,12 @@ function DeleteMenu() {
         menu.removeVertex();
     });
 }
+
+//
+//
+//
+function _init_DeleteMenu(){
+
 DeleteMenu.prototype = new google.maps.OverlayView();
 
 DeleteMenu.prototype.onAdd = function() {
@@ -1468,3 +1492,5 @@ DeleteMenu.prototype.removeVertex = function() {
     }
     this.close();
 };
+
+}

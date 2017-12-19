@@ -398,6 +398,6 @@ var fin_time = new Date().getTime() / 1000;
 
         <div id="heurist-dialog">
         </div>
-        
+
     </body>
 </html>

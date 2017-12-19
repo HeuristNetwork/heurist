@@ -550,21 +550,65 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     
     /**
     * show url in iframe within popup dialog
+    * 
+    * options
+    *   dialogid - unique id to reuse dialog  (in this case dialog will not be removed on close)
     */
     showDialog: function(url, options){
 
-                if(!options) options = {};
+            if(!options) options = {};
 
-                if(!options.title) options.title = ''; // removed 'Information'  which is not a particualrly useful title
+            if(!options.title) options.title = ''; // removed 'Information'  which is not a particualrly useful title
 
-                var opener = options['window']?options['window'] :window;
+            var opener = options['window']?options['window'] :window;
 
-                //.appendTo( that.document.find('body') )
+            //.appendTo( that.document.find('body') )
+            var $dlg = [];
+            
+            if(options['dialogid']){
+                $dlg = $(opener.document).find('body #'+options['dialogid']);
+            }
+                
+           if($dlg.length>0){
+                    //reassign dialog onclose and call new parameters
+                    var $dosframe = $dlg.find('iframe');
+                    var content = $dosframe[0].contentWindow;
+                    
+                    //close dialog from inside of frame
+                    content.close = function() {
+                        var did = $dlg.attr('id');
 
+                        var rval = true;
+                        var closeCallback = options['callback'];
+                        if($.isFunction(closeCallback)){
+                            rval = closeCallback.apply(opener, arguments);
+                        }
+                        if ( rval===false ){ //!rval  &&  rval !== undefined){
+                            return false;
+                        }
+                        $dlg.dialog('close');
+                        return true;
+                    };       
+                    
+                    $dlg.dialog('open');  
+                   
+                    if(options['params']) {
+                        content.assignParameters(options['params']);
+                    }
+                    
+           }else{
+                
                 //create new div for dialogue with $(this).uniqueId();
-                var $dlg = $('<div>')
-                        .addClass('loading')
-                        .appendTo( $(opener.document).find('body') ).uniqueId();
+                $dlg = $('<div>')
+                    .addClass('loading')
+                    .appendTo( $(opener.document).find('body') );
+                    
+                if(options['dialogid']){
+                    $dlg.attr('id', options['dialogid']);
+                }else{
+                    $dlg.uniqueId();
+                }
+                
                         
                 if(options.class){
                     $dlg.addClass(options.class);
@@ -650,7 +694,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         //functions in internal document
                         //content.close = $dosframe[0].close;    // make window.close() do what we expect
                         
-                        //close diaog from inside of frame
+                        //close dialog from inside of frame
                         content.close = function() {
                             var did = $dlg.attr('id');
 
@@ -713,7 +757,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                     if($.isFunction(closeCallback)){
                                         closeCallback.apply();
                                     }
-                                    $dlg.remove();
+                                    if(!options['dialogid']){
+                                        $dlg.remove();
+                                    }
                                 }
                         };
                         $dlg.dialog(opts);
@@ -725,6 +771,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         $dosframe.attr('src', url);
                         
                         return $dosframe;
+                        
+           }
 
     },
     

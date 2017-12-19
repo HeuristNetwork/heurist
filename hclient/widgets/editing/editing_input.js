@@ -148,21 +148,22 @@ $.widget( "heurist.editing_input", {
                 .appendTo( this.element );
                 
             }else{ //multiplier button
-                this.btn_add = $( "<button>")
-                .addClass("smallbutton editint-inout-repeat-button")
-                //.css({'font-size':'2em'})
-                //.css('display','table-cell')
-                //.css({width:'16px', height:'16px', display:'table-cell'})
+                this.btn_add = $( "<span>")
+                .addClass("smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus")
                 .appendTo( this.element )
-                .button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
+                //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
-                .css({display:'table-cell'});
+                .attr('title', 'Add another ' + lblTitle +' value' )                    
+                .css({display:'table-cell', 'font-size':'2em', cursor:'pointer','vertical-align':'top',
+//outline_suppress does not work - so list all these props here explicitely                
+                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
+                });
                 
                 if(this.detailType=="blocktext"){
-                    this.btn_add.css({'vertical-align':'top','margin-top':'3px'});    
+                    this.btn_add.css({'margin-top':'3px'});    
                 }
                 
-                this.btn_add.find('span.ui-icon').css({'font-size':'2em'});
+                //this.btn_add.find('span.ui-icon').css({'font-size':'2em'});
                 
                 // bind click events
                 this._on( this.btn_add, {
@@ -1636,26 +1637,29 @@ $.widget( "heurist.editing_input", {
                       
                 __show_mapdigit_dialog = function __show_select_dialog(event){
                     event.preventDefault();
-
-                    var url = window.hWin.HAPI4.baseURL +
-                    'hclient/framecontent/mapDraw.php?db='+window.hWin.HAPI4.database+
-                    '&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
                     
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
-                        title: window.hWin.HR('Heurist map digitizer'),
-                        window:  window.hWin, //opener is top most heurist window
-                        class:'ui-heurist-bg-light',
-                        callback: function(location){
-                            if( !window.hWin.HEURIST4.util.isempty(location) ){
-                                //that.newvalues[$input.attr('id')] = location
-                                that.newvalues[$input.attr('id')] = location.type+' '+location.wkt;
-                                var geovalue = window.hWin.HEURIST4.util.wktValueToDescription(location.type+' '+location.wkt);
-                                
-                                $input.val(geovalue.type+'  '+geovalue.summary).change();
-                                //$input.val(location.type+' '+location.wkt)
+                        var url = window.hWin.HAPI4.baseURL +
+                        'hclient/framecontent/mapDraw.php?db='+window.hWin.HAPI4.database+
+                        '&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
+                       
+                       var wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
+                        
+                        window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+                            window: window.hWin,  //opener is top most heurist window
+                            dialogid: 'map_digitizer_dialog',
+                            params: wkt_params,
+                            title: window.hWin.HR('Heurist map digitizer'),
+                            class:'ui-heurist-bg-light',
+                            callback: function(location){
+                                if( !window.hWin.HEURIST4.util.isempty(location) ){
+                                    //that.newvalues[$input.attr('id')] = location
+                                    that.newvalues[$input.attr('id')] = location.type+' '+location.wkt;
+                                    var geovalue = window.hWin.HEURIST4.util.wktValueToDescription(location.type+' '+location.wkt);
+                                    $input.val(geovalue.type+'  '+geovalue.summary).change();
+                                    //$input.val(location.type+' '+location.wkt)
+                                }
                             }
-                        }
-                    } );
+                        } );
                 };
 
                 //this._on( $link_digitizer_dialog, { click: __show_mapdigit_dialog } );
@@ -1691,27 +1695,24 @@ $.widget( "heurist.editing_input", {
         if(this.options.showclear_button && this.options.dtID!='rec_URL')
         {
 
-            var $btn_clear = $('<button>',{
-                title: 'Clear entered value',
-                'data-input-id': $input.attr('id')
-            })
-            .addClass("smallbutton")//btn_input_clear
+            var $btn_clear = $('<span>')
+            .addClass("smallbutton ui-icon ui-icon-circlesmall-close")//   ui-icon
             .attr('tabindex', '-1')
-            .css({position: 'absolute', 'margin-top': '3px'})
-/* @todo - need to prevent wrap of clear button for long fields
-'margin-left': (this.detailType=='relmarker' || this.detailType=='geo' || 
-                this.detailType=='file' || this.detailType=='resource' || this.detailType=='enum'  || this.detailType=='date')
-                        ?'0px':'-17px'
-            })*/
+            .attr('title', 'Clear entered value')
+            .attr('data-input-id', $input.attr('id'))
             .appendTo( $inputdiv )
-            .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
-            //.position( { my: "right top", at: "right top", of: $($input) } );
-
+            //.button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
+            .css({position: 'absolute', 'margin-top': '3px',
+                 cursor:'pointer',             //'font-size':'2em',
+//outline_suppress does not work - so list all these props here explicitely                
+                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
+            });
+            
             // bind click events
             this._on( $btn_clear, {
                 click: function(e){
 
-                    var input_id = $(e.target).parent().attr('data-input-id');
+                    var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
                     
                     if(that.detailType=="resource" && that.configMode.entity=='records' 
                             && that.f('rst_CreateChildIfRecPtr')==1){
