@@ -133,7 +133,7 @@ console.log('load google map api')
                 padding: 5px;
                 font-weight: normal;
                 width:190px;
-                min-height:100px;
+                min-height:140px;
                 border:1px solid #000000;
                 font-size:0.9em;
                 text-align:left;
@@ -181,8 +181,8 @@ console.log('load google map api')
 
             <div id="rightpanel">
 
-                <label style="display:inline-block;padding-botton:8px;vertical-align:top;">Draw color:</label>
-                <div style="width:auto !important;display:inline-block" id="color-palette"></div>
+                <label style="display:inline-block;">Draw color:</label>
+                <div style="width:auto !important;display:inline-block;height: 14px" id="color-palette"></div>
 
                 
                 <div style="padding-top:25px">
@@ -191,14 +191,14 @@ console.log('load google map api')
                     <button id="save-button" style="font-weight:bold">Save</button>
                 </div> 
                 <div style="padding-top:40px">
+                    <button id="delete-all-button">Clear all</button>
+                </div> 
+                <div>
+                    <button id="delete-button">Clear Selected</button>
+                </div> 
+                <div>
                     <button id="cancel-button">Cancel</button>
                 </div>
-                <div>
-                    <button id="delete-button">Delete Selected</button>
-                </div> 
-                <div>
-                    <button id="delete-all-button">Clear Map</button>
-                </div> 
                 <div style="padding-top:20px">
                     <button id="load-geometry-button">Add Geometry</button>
                 </div> 
@@ -206,7 +206,7 @@ console.log('load google map api')
                     <button id="get-geometry-button">Get Geometry</button>
                 </div> 
                 
-                <div style="padding-top:15px;bottom:30;position: absolute;height:130px">
+                <div style="bottom:30;position: absolute;height:165px">
                     <textarea id="coords1">Click on the map. The code for the selected shape you create will be presented here.</textarea>
                     <button id="apply-coords-button" style="margin-top:10px">Apply Coordinates</button>
                 </div> 

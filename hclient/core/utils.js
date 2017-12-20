@@ -97,13 +97,18 @@ window.hWin.HEURIST4.util = {
           }
           $.each(element, function(idx, ele){
               ele = $(ele);
-              if (mode) {
-                    ele.prop('disabled', 'disabled');
-                    ele.addClass('ui-state-disabled');
-              }else{
-                    ele.removeProp('disabled');
-                    ele.removeClass('ui-state-disabled ui-button-disabled');
-              }
+              
+              //if(mode !== (ele.prop('disabled')=='disabled')){
+              
+                  if (mode) {
+                        ele.prop('disabled', 'disabled');
+                        ele.addClass('ui-state-disabled');
+                  }else{
+                        ele.removeProp('disabled');
+                        ele.removeClass('ui-state-disabled ui-button-disabled');
+                  }
+              
+              //}
           });
       }
     },

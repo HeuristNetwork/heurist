@@ -345,8 +345,6 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function _init(_mapdiv_id, _initial_wkt) {
 
-        map_viewpoints = window.hWin.HAPI4.get_prefs('map_viewpoints');
-
         _initUIcontrols();
 
         mapdiv_id = _mapdiv_id;
@@ -431,6 +429,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         });        
     }
 
+    //
+    //
+    //
     function _zoomToSelection() {
 
         var bounds = null;
@@ -446,13 +447,16 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 processPoints(shape.getPath(), bounds.extend, bounds);
 
             }else if(shape.type==google.maps.drawing.OverlayType.RECTANGLE ||
-                shape.type==google.maps.drawing.OverlayType.CIRCLE){
+                shape.type==google.maps.drawing.OverlayType.CIRCLE)
+            {
 
-                    bounds = shape.getBounds();
+                bounds = shape.getBounds();
 
-                }else if(shape.type==google.maps.drawing.OverlayType.MARKER){
-                    gmap.setCenter(shape.getPosition());   
-                }
+            }else if(shape.type==google.maps.drawing.OverlayType.MARKER){
+                
+                gmap.setCenter(shape.getPosition()); 
+                gmap.setZoom(14);  
+            }
 
         }
 
@@ -942,14 +946,22 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         //get save bounds (viewpoints) ------------------------------------
         var $sel_viepoints = $('#sel_viewpoints');
 
-        //fill sel_viewpoints with bounds
-        if(!$.isEmptyObject(map_viewpoints)){
-            //map_viewpoints.unshift({key:'', title:window.hWin.HR("select extent")});
-        }
-        window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), 
-            $.isEmptyObject(map_viewpoints)?window.hWin.HR('none defined'): map_viewpoints);
+        map_viewpoints = window.hWin.HAPI4.get_prefs('map_viewpoints');
 
-        $sel_viepoints.change(function(){
+
+        //fill sel_viewpoints with bounds
+        if($.isEmptyObject(map_viewpoints) || map_viewpoints.length<1){
+            map_viewpoints = [];
+            map_viewpoints.push({key:'', title:window.hWin.HR("none defined")});
+        }else{
+            //add to begin
+            map_viewpoints.unshift({key:'', title:window.hWin.HR("select...")});
+        }
+        
+        $sel_viepoints.empty();
+        window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), map_viewpoints);
+
+        $sel_viepoints.click(function(){
             var bounds = $(this).val();
             if(bounds!=''){
                 //get LatLngBounds from urlvalue lat_lo,lng_lo,lat_hi,lng_hi
@@ -957,7 +969,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 gmap.fitBounds({south:Number(bounds[0]), west:Number(bounds[1]),
                     north:Number(bounds[2]), east:Number(bounds[3]) }, -1);
 
-                window.hWin.HAPI4.save_pref('map_viewpoints_sel', $(this).find('option:selected').text());                
+                //now we always keep last extent window.hWin.HAPI4.save_pref('map_viewpoints_sel', $(this).find('option:selected').text());                
+                
                 //gmap.fitBounds(new LatLngBounds(new LatLng(Number(bounds[1]), Number(bounds[2]))
                 //    , new LatLng(Number(bounds[3]), Number(bounds[0])) );
             }
@@ -976,11 +989,12 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                         return false;
                     }
                 });
-                window.hWin.HAPI4.save_pref('map_viewpoints', map_viewpoints);
+                window.hWin.HAPI4.save_pref('map_viewpoints', map_viewpoints.slice(1));
 
                 // remove from selector
                 $sel_viepoints.find('option:selected').remove(); 
-                if($.isEmptyObject(map_viewpoints)){
+                if(map_viewpoints.length==1){
+                    $sel_viepoints.empty();
                     window.hWin.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
                         '', window.hWin.HR('none defined'));
                 }
@@ -991,15 +1005,14 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         .button({label: window.hWin.HR("Save extent")})
         .click(function(){
             window.hWin.HEURIST4.msg.showPrompt('Name for extent', function(location_name){
-                if(!window.hWin.HEURIST4.util.isempty(location_name)){
+                if(!window.hWin.HEURIST4.util.isempty(location_name) && location_name!='none defined'){
                     //save into preferences 
-                    if($.isEmptyObject(map_viewpoints)){
-                        map_viewpoints=[];   
-                        $sel_viepoints.empty();
+                    if($.isEmptyObject(map_viewpoints) || map_viewpoints.length<2){
+                        map_viewpoints = [{key:'',title:'select...'}];   
                     }
                     var not_found = true;
                     $.each(map_viewpoints, function(idx, item){
-                        if(item.title == location_name){
+                        if(item.title == location_name){ //we already have such name
                             map_viewpoints[idx].key = gmap.getBounds().toUrlValue();
                             not_found = false;
                             return false;
@@ -1007,12 +1020,15 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     });
                     if(not_found){
                         map_viewpoints.push({key:gmap.getBounds().toUrlValue(), title:location_name});
-                        window.hWin.HAPI4.save_pref('map_viewpoints', map_viewpoints);
+                        window.hWin.HAPI4.save_pref('map_viewpoints', map_viewpoints.slice(1));
                     }
-                    window.hWin.HAPI4.save_pref('map_viewpoints_sel', location_name);
+                    
+                    //now we always keep last extent  window.hWin.HAPI4.save_pref('map_viewpoints_sel', location_name);
+                    
                     // and add to selector
-                    window.hWin.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
-                        gmap.getBounds().toUrlValue(), location_name);
+                    $sel_viepoints.empty();
+                    window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), map_viewpoints);
+                    //window.hWin.HEURIST4.ui.addoption( $sel_viepoints.get(0), gmap.getBounds().toUrlValue(), location_name);
 
                 }
             }, {title:'Save map extent',yes:'Save',no:"Cancel"});
@@ -1162,11 +1178,14 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         if(!window.hWin.HEURIST4.util.isempty(initial_wkt)){
             setTimeout(function(){
                 _loadWKT(initial_wkt);
-                }, 2000);
+                }, 1000);
+        }else{
+            _loadSavedExtentOnInit();  //load last extent of previous session
         }
 
         if(!$.isEmptyObject(map_viewpoints)){
 
+            /* now we always keep last extent 
             var map_viewpoints_sel = window.hWin.HAPI4.get_prefs('map_viewpoints_sel');
 
             var $sel_viepoints = $('#sel_viewpoints');
@@ -1184,9 +1203,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 $sel_viepoints.find('option:last-child').attr('selected', 'selected');
             }
             $sel_viepoints.change();
+            */
         }    
         
-        _loadSavedExtentOnInit(); 
+        
         
         //load overlays from server        
         var rts = [window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'],
@@ -1318,6 +1338,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 return;
         }
 
+        _removeOverlay();
+        
         drawingManager.setDrawingMode(mode);
         $("#coords1").val(sCoords);
         _applyCoordsForSelectedShape();
@@ -1385,7 +1407,6 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
         loadWKT: function(wkt){
-            _removeOverlay();
             _loadWKT(wkt);
         }
     }
