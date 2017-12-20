@@ -79,6 +79,34 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('#div_sel_rectype').find('label[for="sel_recordtype"]').text('Type of record to add:');
             $('#div_sel_rectype').show();
             
+            if(init_scope_type!='popup'){
+                btn_start_action.parent().hide();
+                
+                $('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() }).show().click(
+                    function(){
+                        
+                        var new_record_params = {};
+                        new_record_params['rt'] = add_rec_prefs[0];
+                        new_record_params['ro'] = add_rec_prefs[1];
+                        new_record_params['rv'] = add_rec_prefs[2];
+                        if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
+                                            
+                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
+                    }
+                );
+
+                $('#btnAddRecordInNewWin').button({icon:'ui-icon-extlink', 
+                        label:window.hWin.HR('Add Record in New Window'), showLabel:false }).show().click(
+                    function(){
+                        var url = $('#txt_add_link').val();
+                        if(url){
+                            window.open(url, '_blank');
+                        }
+                    }
+                )
+            }
+            
+            
             var $rec_select = _fillSelectRecordTypes();
             $rec_select.hSelect({change: function(event, data){
                    var selval = data.item.value;
@@ -86,6 +114,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                    _onAddRecordChange();        
             
             }});
+            
+            if(!(add_rec_prefs[0]>0)) add_rec_prefs[0] = '';
             $('#sel_recordtype').val(add_rec_prefs[0]);
             $rec_select.hSelect('widget').find('.ui-selectmenu-text')
                 .text($('#sel_recordtype>option:selected').text());
@@ -123,37 +153,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             $('.input').css({'height':'45px','border-top':'1px solid gray'});
             
-            if(init_scope_type!='popup'){
-                
-                btn_start_action.parent().hide();
-                
-                $('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() }).show().click(
-                    function(){
-                        
-                        var new_record_params = {};
-                        new_record_params['rt'] = add_rec_prefs[0];
-                        new_record_params['ro'] = add_rec_prefs[1];
-                        new_record_params['rv'] = add_rec_prefs[2];
-                        if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
-                                            
-                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
-                    }
-                );
-                /* TODO: 17/12/17: This button is "Add Record in New Window", but wraps in an ugly fashion. This is a fudgy way of hiding it (althoguh still there if you know about it). To be reinstated */
-                $('#btnAddRecordInNewWin').button({label:window.hWin.HR('').toUpperCase() }).show().click(
-                    function(){
-                        var url = $('#txt_add_link').val();
-                        if(url){
-                            window.open(url, '_blank');
-                        }
-                    }
-                )
-                
-            }else{
+            if(init_scope_type=='popup'){
                 btn_start_action.click(_startAction);
             }
-            
-            
             
         }else
         if(init_scope_type!=='noscope'){
