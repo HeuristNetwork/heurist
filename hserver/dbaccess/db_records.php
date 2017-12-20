@@ -712,9 +712,15 @@
         if(!($ownerid>=0)){
             $ownerid = $record["rec_OwnerUGrpID"];
         }
-        if(!$access){
+        
+        //change public to pending in case db system preferences
+        if($access=='public' && $record["rec_NonOwnerVisibility"]=='public' 
+            && $system->get_system('sys_SetPublicToPendingOnEdit')==1){
+                $access='pending';
+        }else if(!$access){
             $access = $record["rec_NonOwnerVisibility"];
         }
+        
         if(is_array($rectypes)){
             $rectypes[$recID] = $record["rec_RecTypeID"];
         }
