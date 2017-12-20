@@ -2049,7 +2049,10 @@ $.widget( "heurist.editing_input", {
         var $input = $(input_id);
 
         if(!(this.detailType=="resource" || this.detailType=='file' || this.detailType=='date' || this.detailType=='geo')){
-            res = $input.val().trim();
+            res = $input.val();
+            if(!window.hWin.HEURIST4.util.isnull(res) && res!=''){
+                res = res.trim();
+            }
         }else {
             res = this.newvalues[$input.attr('id')];
         }

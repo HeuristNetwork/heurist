@@ -1821,6 +1821,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //show-hide optional fields     
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
+        $(this.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
 
         $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
         
@@ -1847,6 +1848,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             var isfields_on = $(event.target).is(':checked');
                             that.usrPreferences['optfields'] = isfields_on;
                             $(that.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
+                            $(that.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
                         });
         }
         
@@ -1856,26 +1858,26 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
             this.editHeader.find('.ui-heurist-header2').remove();
             
-            if(!this._isInsert){
-                
-                //define header - rectype icon, retype name and record title
-            
-                var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-                //this.editForm.parent().find('.ui-heurist-header2').remove();
-                //.insertBefore(this.editForm.first('fieldset'));
-                $('<div class="ui-heurist-header2" style="text-align:left">'
+            //define header - rectype icon, retype name and record title
+            var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+            var sheader = '<div class="ui-heurist-header2" style="text-align:left">'
                     + '<img src="'+ph_gif
                         + '" width=25 height=25 style="vertical-align:middle;margin-right: 10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+this._currentEditRecTypeID
-                        + 'm&color=rgb(255,255,255)\');"/><h3 style="display:inline-block;vertical-align:middle">'
+                        + 'm&color=rgb(255,255,255)\');"/><span style="display:inline-block;vertical-align:middle">'
                         + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
-                    + '</h3>&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
-                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle" class="truncate">'+ this._getField('rec_Title')+'</h3></div>')
-                    .appendTo(this.editHeader);
-
-            }else{
-
+                    + '</span>';
+                    
+            if(!this._isInsert){
+                sheader = sheader + 
+                    '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
+                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle" class="truncate">'
+                    + this._getField('rec_Title')+'</h3>';            
+                
+            
             }
+            sheader = sheader + '</div>';
+            $(sheader).appendTo(this.editHeader);
         }
 
         //need refresh layout to init overflows(scrollbars)        

@@ -309,11 +309,16 @@ function hEditing(_options) {
             }
         }
 
+        var $div_hints = $('<div>').css({float: 'right'}).appendTo($container);
         if($container.find('.forbidden').length>0){
-            $('<div>').css({float: 'right',padding: '4px'})
+            $('<div>').css({padding: '4px'})
                 .html('There are hidden fields in this form. <span class="btn-modify_structure"'
                 +'  style="cursor:pointer;display:inline-block;color:#7D9AAA;">'
-                +'Modify structure</span> to enable them.').appendTo($container);
+                +'Modify structure</span> to enable them.').appendTo($div_hints);
+        }
+        if($container.find('div.optional').length>0){
+            $('<div>').css({padding: '4px'}).addClass('optional_hint')
+                .html('Fields missing? Turn on <u>optional fields</u> (checkbox at the top of page)').appendTo($div_hints);
         }
         
     }
