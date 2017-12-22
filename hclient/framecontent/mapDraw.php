@@ -133,7 +133,7 @@ console.log('load google map api')
                 padding: 5px;
                 font-weight: normal;
                 width:190px;
-                min-height:140px;
+                min-height:135px;
                 border:1px solid #000000;
                 font-size:0.9em;
                 text-align:left;
@@ -206,7 +206,7 @@ console.log('load google map api')
                     <button id="get-geometry-button">Get Geometry</button>
                 </div> 
                 
-                <div style="bottom:30;position: absolute;height:165px">
+                <div style="bottom:30;position: absolute;height:150px">
                     <textarea id="coords1">Click on the map. The code for the selected shape you create will be presented here.</textarea>
                     <button id="apply-coords-button" style="margin-top:10px">Apply Coordinates</button>
                 </div> 

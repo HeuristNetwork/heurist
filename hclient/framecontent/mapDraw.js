@@ -1338,7 +1338,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 return;
         }
 
-        _removeOverlay();
+        //_removeOverlay();
         
         drawingManager.setDrawingMode(mode);
         $("#coords1").val(sCoords);
@@ -1407,6 +1407,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
         loadWKT: function(wkt){
+            _deleteAllShapes();
             _loadWKT(wkt);
         }
     }
