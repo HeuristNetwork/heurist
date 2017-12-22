@@ -86,6 +86,14 @@ function hEditing(_options) {
         }
     }
     
+    function _setDisabled(mode){
+            var idx, ele;
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                ele.editing_input('setDisabled', mode);
+            }
+    }
+    
     function _initEditForm(_recstructure, _recdata){
         
         wasModified = 0;
@@ -310,7 +318,7 @@ function hEditing(_options) {
         }
 
         var $div_hints = $('<div>').css({float: 'right'}).appendTo($container);
-        if($container.find('.forbidden').length>0){
+        if($container.find('.forbidden').length>0 && window.hWin.HAPI4.is_admin()){
             $('<div>').css({padding: '4px'})
                 .html('There are hidden fields in this form. <span class="btn-modify_structure"'
                 +'  style="cursor:pointer;display:inline-block;color:#7D9AAA;">'
@@ -529,7 +537,12 @@ function hEditing(_options) {
         
         getContainer: function(){
             return $container;
+        },
+        
+        setDisabled: function(mode){
+            _setDisabled(mode);
         }
+        
         
         
     }

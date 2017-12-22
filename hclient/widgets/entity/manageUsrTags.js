@@ -497,7 +497,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
        
         panel.empty().css({'font-size': '0.9em'});
         
-        $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>')
+        $('<div><i style="display:inline-block;width:110px;text-align:right;">Personal:&nbsp;</i></div>')
             .css({'padding':'3px 4px'})
             .attr('data-id', window.hWin.HAPI4.currentUser['ugr_ID'])
             .hide().appendTo(panel);
@@ -510,7 +510,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 var name = groups[idx][1];
                 if(!window.hWin.HEURIST4.util.isnull(name))
                 {
-                    $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>')
+                    $('<div><i style="display:inline-block;width:110px;text-align:right;">'+name+':&nbsp;</i></div>')
                         .css({'padding':'3px 4px'})
                         .attr('data-id', groupID).hide().appendTo(panel);
                 }
@@ -528,8 +528,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         //add group selector and search/add input     
         var mdiv = $('<div class="tagDiv" style="text-decoration:none;padding:3px 4px">' //<label>Add </label>'
-                + ' <input type="text" style="width:15ex;margin-right:20px" size="60"/>&nbsp;in&nbsp;&nbsp;<select></select>&nbsp;'
-                + '<div class="rec_action_link" data-key="add" style="margin-left:20px;visibility:visible !important"/>'
+                + ' <input type="text" style="width:15ex;margin-right:10px" size="60"/>&nbsp;in&nbsp;&nbsp;<select></select>&nbsp;'
+                + '<div class="rec_action_link" data-key="add" style="margin-left:10px;visibility:visible !important"/>'
                 + '</div>').appendTo(panel);
                 
         $parent = panel.parents('.ui-dialog-content');
@@ -553,13 +553,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
        }); 
         
         //add button
-        var btn_add = mdiv.find('div.rec_action_link').height('14px')
-                        .css({'vertical-align': 'bottom'})
+        var btn_add = mdiv.find('div.rec_action_link')
+                        .css({'vertical-align': 'bottom', height:'10px', 'font-size': '0.8em'})
                         .button({
                         //icons: {primary: 'ui-icon-circle-plus'}, 
                         //text: false, 
                          title: window.hWin.HR('Click to add tag'),
-                         label: window.hWin.HR('OK')});
+                         label: window.hWin.HR('ADD')});
 
         this._on(input_tag, {'keypress': function(event){
             

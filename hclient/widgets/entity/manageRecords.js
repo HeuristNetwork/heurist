@@ -563,7 +563,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                 var recRecTypeID = that._getField('rec_RecTypeID');
                 sContent =  
-'<div style="margin:10px 4px;"><div style="padding-bottom:0.5em;display: inline-block;width: 100%;">'
+'<div style="margin:10px 4px;"><div style="padding-bottom:0.5em;display:inline-block;width: 100%;">'
 
 +'<h2 class="truncate rectypeHeader" style="float:left;max-width:400px;margin-right:8px;">'
                 + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
@@ -571,13 +571,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
 +'<select class="rectypeSelect ui-corner-all ui-widget-content" '
 +'style="display:none;z-index: 20;position: absolute;border: 1px solid gray;'  //background:white;
-+'top: 5.7em;" size="20"></select><div class="btn-modify"/>'
-+'<div style="display:inline-block;float:right;">'
-    +'<div class="btn-config2"/><div class="btn-config"/>'
++'top: 5.7em;" size="20"></select><div class="btn-modify non-owner-disable"/></div>'
+
+/* this section is moved on top of editForm 2017-12-21
++'<div style="display:inline-block;float:right;">'   
+    +'<div class="btn-config2"/><div class="btn-config"/>'  //buttons
     +'<span class="btn-config3" style="cursor:pointer;display:inline-block;float:right;color:#7D9AAA;padding:2px 4px;">Modify structure</span>'
 +'</div>'
 +'</div>'
-
+*/
 /* moved to editForm 
 +'<div style="display:block;text-align:right;width:100%;padding-bottom:10px;">' // 8px 10px 27px
     +'<label><input type="checkbox" class="chb_show_help"/>Show help</label>&nbsp;&nbsp;'
@@ -585,18 +587,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 +'</div>'
 */
 
-+'<div style="display:inline-block;float:left;"><label class="small-header" style="min-width:0">Owner:</label><span id="recOwner">'
-    +that._getField('rec_OwnerUGrpID')+'</span>'
-+'<div class="btn-access"/>'        
-    +'<br>'
-+'<label class="small-header" style="min-width:0">Access:</label><span id="recAccess">'
-    +that._getField('rec_NonOwnerVisibility')+'</span></div>'
++'<div style="padding-bottom:0.5em;width: 100%;">'
++'<div><label class="small-header">Owner:</label><span id="recOwner">'
+    +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access non-owner-disable"/>'        
++'</div>'
++'<div><label class="small-header">Access:</label><span id="recAccess">'
+    +that._getField('rec_NonOwnerVisibility')+'</span>'
++'</div></div>'
 
-
-+'<div style="display:inline-block;float:right;">'
++'<div>'
 +'<div><label class="small-header">Added By:</label><span id="recAddedBy">'+that._getField('rec_AddedByUGrpID')+'</span></div>'
 +'<div><label class="small-header">Added:</label>'+that._getField('rec_Added')+'</div>'
-+'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')+'</div>';
++'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')+'</div>'
++'</div>'
 +'</div>';
 
 
@@ -614,6 +617,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 
                 //activate buttons
+                /* moved to top of editForm 2017-12-21
                 panel.find('.btn-config2').button({text:false,label:top.HR('Modify record type structure in new window'),
                         icons:{primary:'ui-icon-extlink'}})
                     .addClass('ui-heurist-btn-header1')
@@ -628,6 +632,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
                     .click(function(){that.editRecordType();});
                 panel.find('.btn-config3').click(function(){that.editRecordType();});
+                */
                     
                 var btn_change_rt = panel.find('.btn-modify');                        
                 btn_change_rt.button({text:false, label:top.HR('Change record type'),
@@ -859,7 +864,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 ele.editing_input('option',{showclear_button:false, show_header:false});
                 ele[0].parentNode.removeChild(ele[0]);                
                 ele.css({'display':'block','width':'99%'});
-                ele.find('textarea').attr('rows', 10).css('width','100%');
+                ele.find('textarea').attr('rows', 10).css('width','90%');
                 ele.show().appendTo(panel);
                 
                 break;
@@ -868,8 +873,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                 if(panel.text()!='') return;
                 
-                panel.append('<div class="bookmark" style="min-height:2em;padding:4px 2px"/>'
-                +'<div class="reminders" style="min-height:2em;padding:4px 2px"/>');
+                panel.append('<div class="bookmark" style="min-height:2em;padding:4px 30px 4px 0"/>'
+                +'<div class="reminders" style="min-height:2em;padding:4px 30px 4px 0"/>');
                 
                 //find bookmarks and reminders
                 that._renderSummaryBookmarks(null, panel);
@@ -982,7 +987,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
         
             if(recordset.length()==0){
-                sContent = 'no reminders';
+                sContent = '<i>no reminders</i>';
             }else{
                 
                 var rec = recordset.getFirstRecord();
@@ -1009,8 +1014,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //append/manage button
             $('<div>').button({label:top.HR('Manage reminders'), text:false,
                 icons:{primary:'ui-icon-pencil'}})  //ui-icon-mail
-                .css({float:'right', height: '18px'})
-                //.addClass('ui-heurist-btn-header1')
+                .css({position:'absolute',right:'13px', height: '18px'})
+                .addClass('non-owner-disable')
                 .click(function(){
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
@@ -1058,7 +1063,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
             //rating and password reminder
             if(recordset.length()==0){
-                sContent = 'not bookmarked';
+                sContent = '<i>not bookmarked (no passwords, rating or notes)</i>';
             }else{
                 var rec = recordset.getFirstRecord();
                 var val = recordset.fld(rec, 'bkm_Rating');
@@ -1066,7 +1071,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 val = recordset.fld(rec, 'bkm_PwdReminder');
                 sContent = sContent + '&nbsp;&nbsp;&nbsp;Pwd: '+((!window.hWin.HEURIST4.util.isempty(val))?val:''); 
                 val = recordset.fld(rec, 'bkm_Notes');
-                sContent = sContent + ' &nbsp;&nbsp;&nbsp;Notes: '+((!window.hWin.HEURIST4.util.isempty(val))
+                sContent = sContent + '<br>Notes: '+((!window.hWin.HEURIST4.util.isempty(val))
                         ?(val.substr(0,500)+(val.length>500?'...':'')):''); 
                 
             }
@@ -1075,8 +1080,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //append/manage button
             $('<div>').button({label:top.HR('Manage bookmark info'), text:false,
                 icons:{primary:'ui-icon-pencil'}})  //ui-icon-bookmark
-                //.addClass('ui-heurist-btn-header1')
-                .css({float:'right', height: '18px'})
+                .addClass('non-owner-disable')
+                .css({position:'absolute',right:'13px', height: '18px'})
                 .click(function(){
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrBookmarks', {
@@ -1630,19 +1635,48 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var no_access = that._getField('rec_OwnerUGrpID')>0 &&  //0 is everyone
                             window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'))<0;
             
-            
             //2. Popup for resource field
             var dlged = that._getEditDialog();
             if(dlged && (no_access || this.options.edit_obstacle)){ 
                 var ele = $('<div><div class="ui-heurist-header2" style="margin: 40px auto;width: 200px;padding:4px;border-radius:4px">'
                             +'<h2>View only mode</h2><a href="#">Edit</a><span>No enough rights</span></div></div>')
                        .addClass('coverall-div-bare')
-                       .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto', bottom: '40px'}) //, 'background':'red'
+                       .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto'}) //, bottom: '40px', 'background':'red'
                        .appendTo(dlged);
+                
+                var eles = dlged.find('.ui-layout-center > div');       
+                if(no_access){
+                    eles.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/non-editable-watermark.png)'});                    
+                }else{
+                    eles.css({'background':'lightgray'});    
+                }
+                that._editing.setDisabled(true);
+                
+                eles = dlged.find('.ui-layout-east > .editFormSummary');
+                if(no_access){
+                    eles.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/non-editable-watermark.png)'});                    
+                }else{
+                    eles.css({'background':'lightgray'});    
+                }
+                //screen for summary
+                $('<div>').addClass('coverall-div-bare')
+                    .css({top:0,height:'100%',left:35,right:0,'zIndex':9999999999})
+                    .appendTo(eles);
+                    
+                       
                 if(no_access){
                     ele.find('a').hide();
                 }else{       
-                    ele.find('a').click(function(){ele.remove()});
+                    ele.find('a').click(function(){
+                        ele.remove();
+                        //restore edit ability 
+                        that._editing.setDisabled(false);
+                        dlged.find('.ui-layout-center > div').css({'background':'none'});
+                        var eles = dlged.find('.ui-layout-east > .editFormSummary')
+                        eles.css({'background':'none'});
+                        //remove screen
+                        eles.find('.coverall-div-bare').remove();
+                    });
                     ele.find('span').hide();
                 }
                 this.options.edit_obstacle = false;
@@ -1832,10 +1866,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 +(ishelp_on?'checked':'')+'/>Show help</label>&nbsp;&nbsp;'
                 +'<label><input type="checkbox" class="chb_opt_fields" '
                 +(isfields_on?'checked':'')+'/>Optional fields</label>'
-                +'<br/>&nbsp;<br/><hr style="width:25%">'
+                +'<span class="btn-config4" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Modify structure</span>'
+                +'<span class="btn-config5 ui-icon ui-icon-gear smallicon"></span>'
+                +'<hr style="margin-top: 10px;width:300px">'
             +'</div>').insertBefore(this.editForm.first('fieldset'));
                 
             var that = this;    
+            
+            if(window.hWin.HAPI4.is_admin()){
+                this.element.find('.btn-config5')
+                        .css({height: '18px', 'margin-left':'4px'})
+                        .click(function(){that.editRecordType();});
+                this.element.find('.btn-config4').click(function(){that.editRecordType();});
+            }else{
+                this.element.find('.btn-config5').hide();
+                this.element.find('.btn-config4').hide();
+            }
+            
                 
             this.element.find('.chb_show_help') //.attr('checked', ishelp_on)
                         .change(function( event){

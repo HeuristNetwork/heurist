@@ -51,6 +51,7 @@ $.widget( "heurist.editing_input", {
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
     
     isFileForRecord:false,
+    is_disabled: false,
 
     // the constructor
     _create: function() {
@@ -168,6 +169,9 @@ $.widget( "heurist.editing_input", {
                 // bind click events
                 this._on( this.btn_add, {
                     click: function(){
+                        
+                        if(that.is_disabled) return;
+
                         if( !(Number(this.f('rst_MaxValues'))>0)  || this.inputs.length < this.f('rst_MaxValues')){
                             this._addInput('');
                         }
@@ -532,6 +536,8 @@ $.widget( "heurist.editing_input", {
 
                 this._on( $btn_termsel, { click: function(){
                     
+                    if(that.is_disabled) return;
+                    
                     var all_term_ids = $.map($input.find('option'), function(e) { return e.value; });
                     
                     var request = {};
@@ -580,6 +586,8 @@ $.widget( "heurist.editing_input", {
                 //.button({icons:{primary: 'ui-icon-gear'},text:false});
                 
                 this._on( $btn_termedit, { click: function(){
+                    
+                if(that.is_disabled) return;
                     
                 if(isVocabulary){
 
@@ -701,6 +709,8 @@ $.widget( "heurist.editing_input", {
                     }
                 
                     var __show_addlink_dialog = function(){
+                            if(that.is_disabled) return;
+                        
                             var url = window.hWin.HAPI4.baseURL 
                                 +'hclient/framecontent/recordAddLink.php?db='+window.hWin.HAPI4.database
                                 +'&source_ID=' + that.options.recID
@@ -893,6 +903,8 @@ $.widget( "heurist.editing_input", {
             // event is false for confirmation of select mode for parententity
             // 
             var __show_select_dialog = function(event){
+                
+                    if(that.is_disabled) return;
                 
                     if(event!==false){
                 
@@ -1263,6 +1275,8 @@ $.widget( "heurist.editing_input", {
                             dateFormat: 'yy-mm-dd',
                             beforeShow: function(){
                                 
+                                if(that.is_disabled) return false;
+                                
                                 var prev_dp_value = window.hWin.HAPI4.get_prefs('edit_record_last_entered_date'); 
                                 if($input.val()=='' && !window.hWin.HEURIST4.util.isempty(prev_dp_value)){
                                     //$datepicker.datepicker( "setDate", prev_dp_value );    
@@ -1288,12 +1302,12 @@ $.widget( "heurist.editing_input", {
                             .addClass('smallicon ui-icon ui-icon-calendar')
                             .appendTo( $inputdiv );
                         //.button({icons:{primary: 'ui-icon-calendar'},text:false});
-
-                       
                        
                         
                         this._on( $btn_datepicker, { click: function(){
                             
+                                if(that.is_disabled) return;
+
                                 $datepicker.datepicker( 'show' ); 
                                 $("#ui-datepicker-div").css("z-index", "999999 !important"); 
                                 //$(".ui-datepicker").css("z-index", "999999 !important");   
@@ -1310,6 +1324,8 @@ $.widget( "heurist.editing_input", {
                     
                     this._on( $btn_temporal, { click: function(){
                         
+                                if(that.is_disabled) return;
+
                                 var url = window.hWin.HAPI4.baseURL 
                                     + 'common/html/editTemporalObject.html?'
                                     + encodeURIComponent(that.newvalues[$input.attr('id')]
@@ -1337,7 +1353,7 @@ $.widget( "heurist.editing_input", {
                 
                 $input.val(value);    
                 $input.change();   
-
+                                     
             }else 
             if(this.detailType=='resource' || this.isFileForRecord)
             {
@@ -1499,6 +1515,8 @@ $.widget( "heurist.editing_input", {
 
                         __show_select_dialog = function(event){
                             
+                                if(that.is_disabled) return;
+
                                 event.preventDefault();
                                 
                                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
@@ -1636,7 +1654,9 @@ $.widget( "heurist.editing_input", {
                 $input.val(geovalue.type+'  '+geovalue.summary).css('cursor','hand');
                       
                 __show_mapdigit_dialog = function __show_select_dialog(event){
-                    event.preventDefault();
+                        event.preventDefault();
+                        
+                        if(that.is_disabled) return;
                     
                         var url = window.hWin.HAPI4.baseURL +
                         'hclient/framecontent/mapDraw.php?db='+window.hWin.HAPI4.database+
@@ -1711,6 +1731,8 @@ $.widget( "heurist.editing_input", {
             // bind click events
             this._on( $btn_clear, {
                 click: function(e){
+
+                    if(that.is_disabled) return;
 
                     var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
                     
@@ -2091,10 +2113,13 @@ $.widget( "heurist.editing_input", {
         if(!(this.options.readonly || this.f('rst_Display')=='readonly')){
             var idx;
             for (idx in this.inputs) {
-                var input_id = this.inputs[idx];
-                var $input = $(input_id);
-                window.hWin.HEURIST4.util.setDisabled($input, is_disabled);
+                if(!this.isFileForRecord) {  //this.detailType=='file'
+                    var input_id = this.inputs[idx];
+                    var $input = $(input_id);
+                    window.hWin.HEURIST4.util.setDisabled($input, is_disabled);
+                }
             }
+            this.is_disabled = is_disabled;
         }
 
     },
