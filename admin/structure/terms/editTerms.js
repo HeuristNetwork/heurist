@@ -37,6 +37,9 @@ function getParentLabel(_node){
     }
 }
 
+//
+// get vocabulary id - top most terms
+//
 function getVocabId(_node){
     //if(_node.parent._type==="RootNode"){
     if(_node.getLevel()==1){
@@ -46,6 +49,14 @@ function getVocabId(_node){
     }
 }
 
+function getParentId(_node){
+    //if(_node.parent._type==="RootNode"){
+    if(_node.getLevel()==1){
+        return _node.data.id;
+    }else{
+        return _node.data.parent_id;
+    }
+}
 
 //aliases
 var Hul = top.HEURIST.util;
@@ -942,8 +953,11 @@ function EditTerms() {
                                 _doDelete2(nodeForAction, false);           //@todo - to fix - not removed from fancytree
                             }
                      };
-                    
-                     window.hWin.HEURIST4.msg.showMsgDlg("Term was modified. Save it?", buttons, "");
+
+                     window.hWin.HEURIST4.msg.showMsgDlg("Term "+
+                        _currentNode.data.id+'  '
+                        +_currentNode.data.label+',  '+sName
+                        +" was modified. Save it?", buttons, "");
                 }else{
                     var r = confirm("Term was modified. Save it?");
                     if (!r) {
@@ -2123,7 +2137,7 @@ function EditTerms() {
                         return false;
                         }*/
 
-                        _onNodeClick(node);
+                        //_onNodeClick(node);
                         return true;
                     },
                     dragEnter: function(node, data) {
@@ -2517,44 +2531,55 @@ function EditTerms() {
                 }
                 
                 //find vocabs for source and destination
-                vocab_id_Source = getVocabId(node);
-                vocab_id_Target = getVocabId(data.otherNode);
-
+                vocab_id_Target = getVocabId(node);
+                vocab_id_Source = getVocabId(data.otherNode);
+                
                 //move to another vocab
-                if (parentNodeId!=null && vocab_id_Source != vocab_id_Target){
-
-                    // verify whether term is in use in field that uses vocabulry
-                    // if yes it means it can not be moved into different vocabulary
-                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-                    var params = "method=checkTerm&termID=" + data.otherNode.data.id + "&db="+_db;
-                    Hul.getJsonData(baseurl, function(context){
+                if (parentNodeId!=null){
+                    
+                    function __proceed(need_reload){
+                        //everything is OK
+                        need_reload = false;
+                        var nodeForAction = data.otherNode;            
+                        if(nodeForAction.data.parent_id != parentNodeId){
+                            nodeForAction.data.parent_id = parentNodeId; //new parent
+                            _updateTermsOnServer(nodeForAction, need_reload, (need_reload?null:__moveNode));
+                        }
+                        //document.getElementById('edParentId').value = parentNodeId>0?parentNodeId:0;
+                        //_doSave(false, true);
+                        
+                    }
+                                
+                    if(vocab_id_Source != vocab_id_Target){
+                        
+                        // verify whether term is in use in field that uses vocabulry
+                        // if yes it means it can not be moved into different vocabulary
+                        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                        var params = "method=checkTerm&termID=" + data.otherNode.data.id + "&db="+_db;
+                        Hul.getJsonData(baseurl, function(context){
                         if(!Hul.isnull(context) && !context.error){
                             
-                            function __proceed(){
-                                //everything is OK
-                                document.getElementById('edParentId').value = parentNodeId>0?parentNodeId:0;
-                                _doSave(false, true);
-                                // _updateTermsOnServer(_currentNode,false);
-                                __moveNode();
-                            }
-                                
                             if(context.warning){
                                 if(hasH4()){
                                     //msg = {message:context.warning, error_title:context.error_title};
                                     //window.hWin.HEURIST4.msg.showMsgErr(msg);
                                     window.hWin.HEURIST4.msg.showMsgDlg(context.warning, function(){
-                                        __proceed();
+                                        __proceed(true);
                                     },{title:context.error_title, yes:'Proceed'})
                                 }else{
                                     if (confirm(context.warning)) {
-                                        __proceed();
+                                        __proceed(true);
                                     }
                                 }
                             }else{
-                                __proceed();
+                                __proceed(true);
                             }
                             
                         }}, params);
+                        
+                    }else{
+                        __proceed(false);
+                    } 
 
                 }else{
                     __moveNode();
