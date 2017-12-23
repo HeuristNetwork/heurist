@@ -196,6 +196,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             
                     }else{
                         this._toolbar.find('#divNav').html( (idx+1)+' of '+order.length);
+                        
+                        window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnPrev'), (idx==0));
+                        window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnNext'), (idx+1==order.length));
+                        
                         if(dest!=0){
                             this.addEditRecord(newRecID);
                         }
@@ -436,7 +440,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
             }
 
-            
             var recset = this.recordList.resultList('getRecordSet');
             if(recset && recset.length()>1 && recID>0){
                 this._toolbar.find('#btnPrev').css({'display':'inline-block'});
