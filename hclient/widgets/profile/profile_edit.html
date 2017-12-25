@@ -22,7 +22,7 @@
 -->
 
 
-<div  style="position:absolute;top:0;bottom:3.5em;left:0;right:0;overflow-y: auto;">
+<div  style="position:absolute;top:0;bottom:0;left:0;right:0;overflow-y: auto;">
 <fieldset>
 
     <div class="mode-edit">
@@ -45,7 +45,7 @@
         <div class="header"><label for="ugr_Name">Login name</label></div>
         <input type="text" name="ugr_Name" id="ugr_Name" class="text ui-widget-content ui-corner-all mandatory" 
             style="width:20em" maxlength="60" />
-        <div class="prompt" style="display:none;">
+        <div class="heurist-helper1" style="display:none;">
             The login field is auto-populated with your email address.
             <br />You may change it to a shorter name, eg. your given name or family name.
         </div>
@@ -61,7 +61,7 @@
     <div>
         <div class="header"><label for="password2">Repeat password</label></div>
         <input type="password" name="password2" id="password2" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16"/>
-        <div class="prompt"  style="display:none;">
+        <div class="heurist-helper1"  style="display:none;">
             Note: http:// web traffic is non-encrypted. You should not assume this server is secure.<br />
             Therefore, please don't use an important password such as institutional or banking login.<br />
             If you need to store data of a confidential nature, such as personal records, please<br />
@@ -73,7 +73,7 @@
         <div class="header"><label for="ugr_Captcha">
             <span id="imgdiv" style="float:right;display:inline-block;display:none;"></span></label>
         </div>
-        <div class="prompt">
+        <div class="heurist-helper1">
         </div>
         <input type="text" name="ugr_Captcha" id="ugr_Captcha" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16" />
         <i>&nbsp;&nbsp;&nbsp;to prove you're human</i>
@@ -84,7 +84,7 @@
     <div>
         <div class="header"><label for="ugr_Organisation">Institution/company</label></div>
         <input type="text" name="ugr_Organisation" id="ugr_Organisation" class="text ui-widget-content ui-corner-all mandatory" style="width:35em;" maxlength="120"/>
-        <div class="prompt" style="display:none;">
+        <div class="heurist-helper1" style="display:none;">
             Enter 'None' if not affiliated with an institution or company.
         </div>
     </div>
@@ -93,47 +93,53 @@
         <div class="header" style="vertical-align:top;"><label for="ugr_Interests">Research interests</label></div>
         <textarea id="ugr_Interests" name="ugr_Interests" rows="2" cols="80" style="width:35em;"
             class="text ui-widget-content ui-corner-all mandatory"></textarea>
-        <div class="prompt" style="display:none;">
+        <div class="heurist-helper1" style="display:none;">
             Enter a concise description (up to 250 characters) of your research interests.
         </div>
     </div>
     <div class="mode-admin">
         <div class="header"><label for="ugr_Enabled">Enabled</label></div>
         <input type="checkbox" id="ugr_Enabled" name="ugr_Enabled" class="text ui-widget-content ui-corner-all" checked="checked"/>
-        <div class="prompt">
+        <div class="heurist-helper1">
             Check to enable the user, unchecked users will not be able to log in.
         </div>
     </div>
-
     <div style="display:none;">
         <div class="header"><label for="ugr_IsModelUser">Model user</label></div>
         <input type="checkbox" id="ugr_IsModelUser" name="ugr_IsModelUser" class="text ui-widget-content ui-corner-all"/>
-        <div class="prompt">
+        <div class="heurist-helper1">
             If checked, user's tags, searches and bookmarks will appear in Profile &gt; Load Profiles.
         </div>
     </div>
+    
+    <div class="mode-registration" style="height:40px">
+        <div class="header"></div>
+        <input type="checkbox" id="agree" onClick="enable_register(this.checked)" style="margin-top:20px">
+        <label for="agree"><b>I have read and agree to the Terms and Conditions of Use below</b></label>
+    </div>
+    
 </fieldset>
 
 
 <div class="mode-registration" style="margin-left: 60px; margin-bottom: 20px;">
-<p>Please read the Terms and Conditions of Use below
-<p style="font-size:0.9em">
-Note: This system should not be used for the storage of confidential and/or personally-identifiable
-<br>information, such as health information, without the express permission of the system managers.</p>
-<p id="contactDetails"> (database owner)</p>
+    <p style="font-size:0.9em">
+        Note: This system should not be used for the storage of confidential and/or personally-identifiable
+        <br>information, such as health information, without the express permission of the system managers.
+    </p>
+    <p id="contactDetails"> (database owner)</p>
 </div>
 
 
 <!-- OPTIONAL FIELDS  -->
 <div id="accordion" style="margin-left: 60px; margin-right: 70px;">
     <h3><label>Optional information</label></h3>
-    <fieldset style="display: none;" class="ui-heurist-bg-light">
+    <fieldset style="display: none;padding:1em 0;" class="ui-heurist-bg-light">
 
         <div>
             <div class="header" style="vertical-align:top;"><label for="ugr_IncomingEmailAddresses">Incoming email addresses</label></div>
             <textarea id="ugr_IncomingEmailAddresses" name="ugr_IncomingEmailAddresses" rows="3" cols="80" style="width:35em;"
                 class="text ui-widget-content ui-corner-all"></textarea>
-            <div class="prompt">
+            <div class="heurist-helper1" style="padding-bottom: 1em">
                 Comma-separated list of email addresses you may use to send email to the database
                 Email sent from these addresses may be harvested into database records
             </div>
@@ -142,7 +148,7 @@ Note: This system should not be used for the storage of confidential and/or pers
             <div class="header" style="vertical-align:top;"><label for="ugr_TargetEmailAddresses">Outgoing email addresses</label></div>
             <textarea id="ugr_TargetEmailAddresses" name="ugr_TargetEmailAddresses" rows="3" cols="80" style="width:35em;"
                 class="text ui-widget-content ui-corner-all"></textarea>
-            <div class="prompt">
+            <div class="heurist-helper1" style="padding-bottom: 1em">
                 Comma-separated list of email addresses to which you may want to send database records as email.
                 This will be added to the default list for the database when choosing an email destination to which to email records.
             </div>
@@ -242,7 +248,9 @@ Note: This system should not be used for the storage of confidential and/or pers
 <p class="messages"></p>
 
 </div>
+<!--
 <div class="mode-registration" style="position:absolute;height:2em;bottom:0;width:90%; margin-left: 60px;">
 <input type="checkbox" id="agree" onClick="enable_register(this.checked)">
 <label for="agree">I have read and agree to the Terms and Conditions of Use above</label>
 </div>
+-->
