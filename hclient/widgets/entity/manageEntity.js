@@ -134,7 +134,7 @@ $.widget( "heurist.manageEntity", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        this.element.disableSelection();
+        //it prevents inputs in FF this.element.disableSelection();
     }, //end _create
     
     //

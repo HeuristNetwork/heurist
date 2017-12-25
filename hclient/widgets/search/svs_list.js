@@ -1179,7 +1179,8 @@ console.log('saved searches tree was updated');
                 }
             )
             .on("keydown", function(e){
-                var c = String.fromCharCode(e.which),
+                var code = e.charCode || e.keyCode; //e.which
+                var c = String.fromCharCode(code),
                 cmd = null;
 
                 if( c === "N" && e.ctrlKey && e.shiftKey) {     //add new folder

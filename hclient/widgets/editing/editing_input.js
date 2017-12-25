@@ -447,11 +447,11 @@ $.widget( "heurist.editing_input", {
 
             var dheight = this.f('rst_DisplayHeight');
             
-            $input = $( "<textarea>",{rows:dheight})
+            $input = $( "<textarea>",{rows:dheight,})
             .uniqueId()
+            .val(value)
             .addClass('text ui-widget-content ui-corner-all')
             .css({'overflow-x':'hidden'})
-            .val(value)
             .keydown(function(e){
                 if (e.keyCode == 65 && e.ctrlKey) {
                     e.target.select()
@@ -1174,8 +1174,8 @@ $.widget( "heurist.editing_input", {
             else if(this.detailType=="integer" || this.detailType=="year"){
 
                 $input.keypress(function (e) {
-                    var code = (e.keyCode ? e.keyCode : e.which);
-                    var charValue = String.fromCharCode(e.keyCode);
+                    var code = e.charCode || e.keyCode;
+                    var charValue = String.fromCharCode(code);
                     var valid = false;
 
                     if(charValue=='-' && this.value.indexOf('-')<0){
@@ -1200,8 +1200,8 @@ $.widget( "heurist.editing_input", {
             if(this.detailType=="float"){
 
                     $input.keypress(function (e) {
-                        var code = (e.keyCode ? e.keyCode : e.which);
-                        var charValue = String.fromCharCode(e.keyCode);
+                        var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
+                        var charValue = String.fromCharCode(code);
                         var valid = false;
 
                         if(charValue=='-' && this.value.indexOf('-')<0){
@@ -2109,7 +2109,7 @@ $.widget( "heurist.editing_input", {
     //
     //
     setDisabled: function(is_disabled){
-
+        //return;
         if(!(this.options.readonly || this.f('rst_Display')=='readonly')){
             var idx;
             for (idx in this.inputs) {
