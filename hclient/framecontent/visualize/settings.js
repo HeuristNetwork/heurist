@@ -59,11 +59,12 @@ function getURL() {
 function getSetting(key, defvalue) {
     var value = localStorage.getItem(getURL()+key);
     
-    if ((isNaN(value) && $.isNumeric(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
+    if (   //(isNaN(value) && $.isNumeric(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
         (window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue))){
         value = defvalue;
         putSetting(key, value);
     }
+//console.log(key+'  '+value+'  '+defvalue);    
     return value;
 }
 
@@ -71,6 +72,10 @@ function getSetting(key, defvalue) {
 * Stores a value in the localStorage
 */
 function putSetting(key, value) {
+//    if(key==setting_linecolor){
+//console.log('put '+key+'  '+value);        
+//    }
+
     localStorage.setItem(getURL()+key, value);
 }
 
@@ -402,7 +407,8 @@ function initRecTypeSelector(){
     
     $('#showRectypeSelector').button(
         {icons:{secondary:'ui-icon-carat-1-s'}}   //triangle-1-s
-    ).click(
+    ).css({'padding':'4px 2px'})
+    .click(
         function(){
             var ele = $('#list_rectypes');
             if(ele.is(':visible')){
@@ -424,19 +430,18 @@ function _syncUI(){
     $('#toolbar').find('button[value="'+selectionMode+'"]').addClass('ui-heurist-btn-header1');
     $('#toolbar').find('button[value="'+currentMode+'"]').addClass('ui-heurist-btn-header1');
 
-    var grv = getSetting(setting_gravity);
+    var grv = getSetting(setting_gravity,'off');
     if(grv=='agressive') grv = 'touch';
-    $('#toolbar').find('button[value="'+grv+'"]').addClass('ui-heurist-btn-header1');
+    $('#toolbar').find('button[name="gravityMode"][value="'+grv+'"]').addClass('ui-heurist-btn-header1');
     
-    var formula = getSetting(setting_formula)
-    $('#toolbar').find('button[value="'+formula+'"]').addClass('ui-heurist-btn-header1');
+    var formula = getSetting(setting_formula,'linear')
+    $('#toolbar').find('button[name="nodesMode"][value="'+formula+'"]').addClass('ui-heurist-btn-header1');
     
-    var linetype = getSetting(setting_linetype);
-    $('#toolbar').find('button[value="'+linetype+'"]').addClass('ui-heurist-btn-header1');
+    var linetype = getSetting(setting_linetype,'straight');
+    $('#toolbar').find('button[name="linksMode"][value="'+linetype+'"]').addClass('ui-heurist-btn-header1');
 }
 
 function changeViewMode(mode){
-    
     
     if(mode!=currentMode){
         if(mode=='infoboxes'){ // && currentMode=='icons'

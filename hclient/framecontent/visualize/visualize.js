@@ -147,7 +147,7 @@ var svg;        // The SVG where the visualisation will be executed on
         }, options );
  
         // Handle settings (settings.js)
-        checkStoredSettings();
+        checkStoredSettings();  //restore default settings
         handleSettingsInUI();
 
         // Check visualisation limit
@@ -503,7 +503,7 @@ var lines = svg.append("svg:g").selectAll("path")
         }
         
         $('#showRectypeSelector').button({label:sText, icons:{secondary:'ui-icon-carat-1-'
-            +($('#list_rectypes').is(':visible')?'n':'s')   }});
+            +($('#list_rectypes').is(':visible')?'n':'s')   }}).css({'padding':'4px 2px'});
     }
     
     $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
@@ -542,14 +542,14 @@ function addContainer() {
     var translateY = getSetting(setting_translatey);
     
     var s ='';
-    if(isNaN(translateX) || isNaN(translateY) || 
+    if(isNaN(translateX) || isNaN(translateY) ||  translateX==null || translateY==null ||
         Math.abs(translateX)==Infinity || Math.abs(translateY)==Infinity){
         
         translateX = 1;
         translateY = 1;
     }
     s = "translate("+translateX+", "+translateY+")";    
-    if(!isNaN(scale)){
+    if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity)){
         s = s + "scale("+scale+")";
     }
     
@@ -700,7 +700,7 @@ function addForce() {
 * Adds marker definitions to a container
 */
 function addMarkerDefinitions() {
-    var linetype = getSetting(setting_linetype);
+    var linetype = getSetting(setting_linetype,'straight');
     var linelength = getSetting(setting_linelength);
     var markercolor = getSetting(setting_markercolor);
     
@@ -763,7 +763,7 @@ function addLines(name, color, thickness) {
     // Add the chosen lines [using the linetype setting]
     var lines;
     
-    var linetype = getSetting(setting_linetype);
+    var linetype = getSetting(setting_linetype,'straight');
     
     if(true){ //getSetting(setting_linetype) != "straight"){//} == "curved") {
         // Add curved lines
@@ -831,7 +831,7 @@ function tick() {
     var topLines = d3.selectAll(".top-lines"); 
     var bottomLines = d3.selectAll(".bottom-lines");
     
-    var linetype = getSetting(setting_linetype);
+    var linetype = getSetting(setting_linetype,'straight');
     if(linetype == "curved") {
         updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);     

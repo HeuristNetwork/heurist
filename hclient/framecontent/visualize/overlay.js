@@ -135,7 +135,7 @@ function getRelationOverlayData(line) {
 function getRelationOverlayData_old(line) {
     var array = [];
     var maxLength = getSetting(setting_textlength);
-    var linetype = getSetting(setting_linetype);
+    var linetype = getSetting(setting_linetype,'straight');
     
     // Header
     var header1 = truncateText(line.source.name, maxLength);
@@ -342,7 +342,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           .attr("y", function(d, i) {
                               // Multiline check
                               if(!d.multiline) {
-                                  position += (d.height*1.2);
+                                  if(!(isNaN(d.height) || d.height==null)){
+                                    position += (d.height*1.2);
+                                  }
                               }
                               return position; // Position calculation
                           })
@@ -606,7 +608,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         }
                   
       }else{
-          maxHeight = maxHeight + fontSize*1;
+          maxHeight = maxHeight + 12; //fontSize*1;
       }
       
       

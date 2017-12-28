@@ -23,13 +23,24 @@
 if(!defined('PDIR')) define('PDIR','../../../');
 require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
+<!--link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css"-->
         <style>
+        
+A:visited {
+    color: #6A7C99;
+    text-decoration: none;
+}
+A:link {
+    color: #6A7C99;
+    text-decoration: none;
+}        
+
             #rectypes {
                 height: 100%;
             }
 
             table {
+                font-size: 11px;
                 table-layout: auto;
                 border-color: black;
                 border-collapse: collapse;
@@ -145,7 +156,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         </script>
     </head>
 
-    <body class="popup">
+    <body class="popup" style="background-color: #FFF;">
     
         <div class="ent_wrapper">
                 <div id="list_rectypes" class="ent_wrapper" style="width:350px;display:none">
