@@ -211,6 +211,11 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                                 if (! array_key_exists($type, $records[$index]['details'])) {
                                     $records[$index]['details'][$type] = array();
                                 }
+                                
+                                if(!in_array($type, array_keys($enum_bdts))){
+                                       $row['trm_Label'] = null;
+                                }
+                                
                                 array_push($records[$index]['details'][$type], $row);
                             }
                         }
