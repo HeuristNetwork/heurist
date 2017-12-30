@@ -507,8 +507,10 @@ $.widget( "heurist.editing_input", {
             }
             
             var allTerms = this.f('rst_FieldConfig');    
-            //allow edit terms only for true defTerms enum
-            if(window.hWin.HEURIST4.util.isempty(allTerms)){
+            //allow edit terms only for true defTerms enum and if not DT_RELATION_TYPE
+            
+            if(window.hWin.HEURIST4.util.isempty(allTerms) 
+                && (this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])){
                 
                 allTerms = this.f('rst_FilteredJsonTermIDTree');        
 
@@ -1972,9 +1974,14 @@ $.widget( "heurist.editing_input", {
 
         }else{ //this is usual enumeration from defTerms
 
-            allTerms = this.f('rst_FilteredJsonTermIDTree');        
-            //headerTerms - not used anymore
-            var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
+            var headerTerms = '';
+            if(this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']){ //specific behaviour - show all
+                allTerms = 0;
+            }else{
+                allTerms = this.f('rst_FilteredJsonTermIDTree');        
+                //headerTerms - disabled terms
+                headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
+            }
 
             //vocabulary
             $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
