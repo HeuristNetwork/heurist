@@ -78,7 +78,7 @@ $(document).ready(function() {
         top.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
                             'Link types', 
                             top.HAPI4.baseURL+'context_help/link_types.html #content_body',
-                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
+                            { my: "left top", at: "left top", of:$(window.frameElement)}, true); 
 /*                            
         top.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
                             'Field data type: Relationship marker', 
