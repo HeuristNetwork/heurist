@@ -67,6 +67,11 @@ external/php/phpZotero.php (114-121) support proxy settings
 2017-12-04  jquery.layout-latest.js
          fix cssWidth, cssHeight and sizePane function in case pane is not defined
             
+
+2018-01-02  geoPHP and Smarty/libs/sysplugins
+
+        Including the reference to base abstract class file in code  explicitly. Since v5.4 php autoloader 
+        can't find file if class name is not the same as file name. (for example Geometry and Geometry.class.php)
             
 -----------------------------------------------------------------------------------------------------------------------------------
 
