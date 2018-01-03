@@ -906,10 +906,10 @@
 
         $det_required = array();
         if($is_strict){
-            //load list of required details
-            $det_required = mysql__select_assoc($mysqli, "defRecStructure",
+            //load list of required details except relmarker
+            $det_required = mysql__select_assoc($mysqli, "defRecStructure, defDetailTypes",
                 "rst_DetailTypeID", "rst_DisplayName",
-                "rst_RecTypeID=$rectype and rst_RequirementType='required'");
+                "rst_RecTypeID=$rectype and rst_RequirementType='required' and dty_ID=rst_DetailTypeID and dty_Type!='relmarker");
         }
 
         $det_childpointers =  mysql__select_list($mysqli, "defRecStructure",

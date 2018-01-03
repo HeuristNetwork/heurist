@@ -2184,17 +2184,25 @@ $.widget( "heurist.editing_input", {
         var errorMessage = '';
 
         if(req_type=='required'){
+            
+            if(data_type=='relmarker'){
+                    if(this.element.find('.link-div').length==0){
+                        $(this.inputs[0]).addClass( "ui-state-error" );
+                        //add error message
+                        errorMessage = 'Define a relationship. It is required.';
+                    }
+            }else{
+                var ress = this.getValues();
 
-            var ress = this.getValues();
+                if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || ress[0].trim()=='' ){
+                    //error highlight
+                    $(this.inputs[0]).addClass( "ui-state-error" );
+                    //add error message
+                    errorMessage = 'Field is required';
 
-            if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || ress[0].trim()=='' ){
-                //error highlight
-                $(this.inputs[0]).addClass( "ui-state-error" );
-                //add error message
-                errorMessage = 'Field is required';
-
-            }else if((data_type=='freetext' || data_type=='url' || data_type=='blocktext') && ress[0].length<4){
-                //errorMessage = 'Field is required';
+                }else if((data_type=='freetext' || data_type=='url' || data_type=='blocktext') && ress[0].length<4){
+                    //errorMessage = 'Field is required';
+                }
             }
         }
         //verify max alowed size
