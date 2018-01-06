@@ -31,8 +31,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     defaultPrefs:{
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
-        help_on:true, 
         optfields:true, 
+        //help_on:true,
         summary_closed:false,          
         summary_width:400, 
         summary_tabs:['0','1']},
@@ -583,12 +583,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 +'</div>'
 +'</div>'
 */
-/* moved to editForm 
-+'<div style="display:block;text-align:right;width:100%;padding-bottom:10px;">' // 8px 10px 27px
-    +'<label><input type="checkbox" class="chb_show_help"/>Show help</label>&nbsp;&nbsp;'
-    +'<label><input type="checkbox" class="chb_opt_fields"/>Optional fields</label>'
-+'</div>'
-*/
 
 +'<div style="padding-bottom:0.5em;width: 100%;">'
 +'<div><label class="small-header">Owner:</label><span id="recOwner">'
@@ -757,22 +751,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             });
             
   
-/* moved to editForm - see _afterInitEditForm
-                    
-                panel.find('.chb_show_help').attr('checked', this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true')
-                    .change(function( event){
-                        var ishelp_on = $(event.target).is(':checked');
-                        that.usrPreferences['help_on'] = ishelp_on;
-                        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element));
-                    });
-                panel.find('.chb_opt_fields').attr('checked', this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true')
-                    .change(function( event){
-                        var isfields_on = $(event.target).is(':checked');
-                        that.usrPreferences['optfields'] = isfields_on;
-                        $(that.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
-                    });
-*/            
-            
                 break;
                 
             case 3:   //find all reverse links
@@ -1851,10 +1829,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _afterInitEditForm: function(){
         
         
-        //show-hide help text below fields     
-        var ishelp_on = this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true';
-        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
-        
         //show-hide optional fields     
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
@@ -1862,11 +1836,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
         
-        if(this.element.find('.chb_show_help').length==0){
+        if(this.element.find('.chb_opt_fields').length==0){
         
             $('<div style="display:block;text-align:left;padding:10px 0px 5px 35px;">'
-                +'<label><input type="checkbox" class="chb_show_help" '
-                +(ishelp_on?'checked':'')+'/>Show help</label>&nbsp;&nbsp;'
+                //+'<label><input type="checkbox" class="chb_show_help" '
+                //+(ishelp_on?'checked':'')+'/>Show help</label>&nbsp;&nbsp;'
                 +'<label><input type="checkbox" class="chb_opt_fields" '
                 +(isfields_on?'checked':'')+'/>Optional fields</label>'
                 +'<span class="btn-config4" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Modify structure</span>'
@@ -1887,12 +1861,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
                 
+            /*    
             this.element.find('.chb_show_help') //.attr('checked', ishelp_on)
                         .change(function( event){
                             var ishelp_on = $(event.target).is(':checked');
                             that.usrPreferences['help_on'] = ishelp_on;
                             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element));
                         });
+            */
             this.element.find('.chb_opt_fields') //.attr('checked', isfields_on)
                         .change(function( event){
                             var isfields_on = $(event.target).is(':checked');
@@ -1940,6 +1916,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this.element.find('.btn-modify_structure').click(function(){that.editRecordType();});
         }
         
+        //show-hide help text below fields     
+        //var ishelp_on = this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true';
+        //window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
+        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
+        
         this.onEditFormChange();
     },
 
@@ -1968,8 +1949,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             isClosed = false,
             activeTabs = [],
             sz = 400,
-            optfields = true,
-            help_on = true;
+            //help_on = true,
+            optfields = true;
             
         var params = this.getUiPreferences();    
             
@@ -1987,7 +1968,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 sz = myLayout.state.east.size;
                 isClosed = myLayout.state.east.isClosed;
                 
-                help_on = that.element.find('.chb_show_help').is(':checked');
+                //help_on = that.element.find('.chb_show_help').is(':checked');
                 optfields = that.element.find('.chb_opt_fields').is(':checked');
         }
             
@@ -2017,7 +1998,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         params.width = dwidth;
         params.height = dheight;
-        params.help_on = help_on;
+        //params.help_on = help_on;
         params.optfields = optfields;
         params.summary_closed = isClosed;
         params.summary_width = sz;

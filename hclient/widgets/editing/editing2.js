@@ -28,7 +28,8 @@ function hEditing(_options) {
          editing_inputs = [],
          recstructure,
          wasModified = 0, //0 not modified (on init), 1 was modified, 2 - finalized(not modified)
-         onChangeCallBack=null;
+         onChangeCallBack=null,
+         entityConfig = null;
 
     /**
     * Initialization
@@ -46,6 +47,12 @@ function hEditing(_options) {
         if($container==null || $container.length==0){
             $container = null;
             alert('Container element for editing not found');
+        }
+        
+        if(_options.entity){
+            entityConfig = _options.entity;
+        }else{
+            entityConfig = null;
         }
         
         onChangeCallBack = _options.onchange;
@@ -225,9 +232,8 @@ function hEditing(_options) {
                         if(is_header_visible){
                              $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
                              var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px').addClass('heurist-helper1').appendTo(groupContainer);
-                             if(window.hWin.HAPI4.get_prefs('help_on')!=1){
-                                div_prompt.hide();
-                             }
+                             //see applyCompetencyLevel
+                             //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                         }
                         fieldContainer.appendTo(groupContainer);
                     }
@@ -245,9 +251,8 @@ function hEditing(_options) {
                     if(fields[idx]['dty_Type']=="separator"){
                         $('<h4>').text(fields[idx]['rst_DisplayName']).addClass('separator').appendTo(fieldContainer);
                         var div_prompt = $('<div>').text(fields[idx]['rst_DisplayHelpText']).addClass('heurist-helper1').appendTo(fieldContainer);
-                        if(window.hWin.HAPI4.get_prefs('help_on')!=1){
-                            div_prompt.hide();
-                        }
+                        //see applyCompetencyLevel
+                        //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                     }else  
                     //if(fields[idx]['dtFields']['rst_Display']!="hidden") 
                     {
@@ -302,6 +307,13 @@ function hEditing(_options) {
         if($container.parents('.editor').length==0){
                $container.addClass('ui-heurist-bg-light');
         }
+
+
+        if(entityConfig && entityConfig.entityDescription){
+            //add description at the beginning of form
+            $('<div>').css({padding: '4px'}).addClass('heurist-helper2')
+                .html(entityConfig.entityDescription).appendTo($container);
+        }
         
         __createGroup(recstructure, $container, null);
         
@@ -316,7 +328,7 @@ function hEditing(_options) {
                 }
             }
         }
-
+        
         var $div_hints = $('<div>').css({float: 'right'}).appendTo($container);
         if($container.find('.forbidden').length>0 && window.hWin.HAPI4.is_admin()){
             $('<div>').css({padding: '4px'})
@@ -324,7 +336,7 @@ function hEditing(_options) {
                 +'  style="cursor:pointer;display:inline-block;color:#7D9AAA;">'
                 +'Modify structure</span> to enable them.').appendTo($div_hints);
         }
-        if($container.find('div.optional').length>0){
+        if($container.find('div.optional').length>0 && recdata && recdata.entityName=='Records'){
             $('<div>').css({padding: '4px'}).addClass('optional_hint')
                 .html('Fields missing? Turn on <u>optional fields</u> (checkbox at the top of page)').appendTo($div_hints);
         }

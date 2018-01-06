@@ -152,7 +152,7 @@
 
                         if(@$res['ok']){
                             //remove gpl 
-                            unlink($dir.$filename);
+                            if(file_exists($dir.$filename)) unlink($dir.$filename);
                             array_push($results, array( 'filename'=>$filename_tpl, 'name'=>$name));
                         }else{
                             error_log('Cant save template '.$dir.$filename_tpl.' '.print_r($res,true)); 

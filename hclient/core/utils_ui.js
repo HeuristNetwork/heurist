@@ -1175,24 +1175,72 @@ window.hWin.HEURIST4.ui = {
             menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF',width:'auto','min-width':'16em'}); //'#F4F2F4'
         }
         return $(selObj);
-    },            
+    },           
     
+    //
+    // exp_level 2 beginner, 1 intermediate, 0 expert
+    //
+    applyCompetencyLevel: function(exp_level, $context){
+
+            if(!(exp_level>=0)){
+                exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+            }
+            
+            var is_exit = false;
+            if(!$context){
+                is_exit = true;
+                $context = $(window.hWin.document);
+            }
+        
+            if(exp_level>1){
+                //show beginner level
+                $context.find('.heurist-helper2').css('display','block');
+                $context.find('.heurist-table-helper2').css('display','table-cell');
+            }else{
+                $context.find('.heurist-table-helper2').css('display','none');
+                $context.find('.heurist-helper2').css('display','none');
+            }
+      
+            if(exp_level>0){
+                //show beginner and intermediate levels
+                $context.find('.heurist-helper1').css('display','block');
+                $context.find('.heurist-table-helper1').css('display','table-cell');
+            }else{
+                $context.find('.heurist-table-helper1').css('display','none');
+                $context.find('.heurist-helper1').css('display','none');
+            }
+            
+            if(is_exit) return;
+        
+            //window.hWin.HEURIST4.ui.applyCompetencyLevel( exp_level );
+    }, 
+      
     // Init button that show/hide help tips
+    //
+    //  usrPrefKey - prefs_entityName - context 
+    //
     initDialogHintButtons: function($dialog, usrPrefKey, helpcontent_url, hideHelpButton){
         
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         
         if(!hideHelpButton){
-            var $help_menu = $('<ul><li data-level="1"><a><span class="ui-icon"/>Beginner</a></li>'
-                +'<li data-level="2"><a><span class="ui-icon"/>Intermediate</a></li>'
-                +'<li data-level="3"><a><span class="ui-icon"/>Expert</a></li><ul>')
+            var $help_menu = $('<ul><li data-level="2"><a><span class="ui-icon"/>Beginner</a></li>'
+                +'<li data-level="1"><a><span class="ui-icon"/>Intermediate</a></li>'
+                +'<li data-level="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
                 .width(150).menu().hide().appendTo($dialog);
             
         $help_menu.on( {
             //mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
             click: function(event){ 
+                    //change level
                     var exp_level = $(event.target).parents('li').attr('data-level');
+                    
                     window.hWin.HAPI4.save_pref('userCompetencyLevel', exp_level);
+                    
+                    window.hWin.HEURIST4.ui.applyCompetencyLevel(exp_level, $dialog);
+                    
+                    $help_menu.find('span').removeClass('ui-icon-check');
+                    $help_menu.find('li[data-level="'+exp_level+'"] > a > span').addClass('ui-icon-check');
                     $help_menu.hide();
             },
             mouseleave : function(){ $help_menu.hide()}
@@ -1204,17 +1252,20 @@ window.hWin.HEURIST4.ui = {
                     .css({'right':'48px'})
                     .appendTo(titlebar)
                     .on('click', function(event){
-                           var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel',1);
-                           if(exp_level=='beginner') exp_level = 1;
+                           //show popup menu 
+                           var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+                           if(exp_level=='beginner') exp_level = 2;
                            
                            $help_menu.find('span').removeClass('ui-icon-check');
                            $help_menu.find('li[data-level="'+exp_level+'"] > a > span').addClass('ui-icon-check');
                            
                            $help_menu.show()
-                            .position({my: "left top", at: "left bottom", of: $help_button });
-                            //window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, true);   
+                            .position({my: "right top+10", at: "right bottom", of: $help_button });
+                            
+                           //window.hWin.HEURIST4.ui.applyCompetencyLevel(exp_level, $dialog); 
                     });
-                    
+
+
            //window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, false);         
         }
 
@@ -1230,7 +1281,7 @@ window.hWin.HEURIST4.ui = {
     },
       
     //
-    //
+    // not used anymore
     //                  
     switchHintState: function(usrPrefKey, $dialog, needReverse){
             
@@ -1260,7 +1311,7 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    //
+    //  not used anymore
     //
     switchHintState2: function(state, $container){
         
@@ -1812,7 +1863,8 @@ window.hWin.HEURIST4.ui = {
             var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
             var scripts = [ path+widgetName+'.js'];
             
-            if(!(entityName=='UsrBookmarks')){ //entities without search option
+            //entities without search option
+            if(!(entityName=='UsrBookmarks' || entityName=='DefDetailTypeGroups')){ 
                 scripts.push(path+'search'+entityName+'.js');
             }
             

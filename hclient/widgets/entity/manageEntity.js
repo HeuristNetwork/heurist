@@ -349,6 +349,9 @@ $.widget( "heurist.manageEntity", {
             this.popupDialog();
         }
         
+        
+        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
+        
         return true;
         //place this code in extension ===========    
         /* init search header
@@ -495,10 +498,13 @@ $.widget( "heurist.manageEntity", {
                     
             }        
             this._on(btn, {'click':function( event ) {
-                        var key = $(event.target).parent().attr('data-key');
+                        var ele = $(event.target);
+                        var key = ele.attr('data-key') || ele.parent().attr('data-key');
                         this._onActionListener(null, key);
                         //that._trigger( "onaction", null, key );
                     }});
+                    
+            return btn;
         }
         
     },
@@ -919,10 +925,15 @@ $.widget( "heurist.manageEntity", {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
         
-            this._currentEditID = null;
+            
             window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'));
             if(this.options.edit_mode=='popup'){
+                this._currentEditID = null;
                 this.editFormPopup.dialog('close');
+            }else if(this.options.edit_mode=='inline'){
+                    //reload
+                    this._currentEditID = recID;
+                    this._initEditForm_step3(this._currentEditID); //reload 
             }
             
             if(this.options.use_cache){
@@ -998,9 +1009,6 @@ $.widget( "heurist.manageEntity", {
                 //close itself
                 this.closeDialog();
                 return;
-            }else{
-                //hide inline edit form 
-                this.addEditRecord(null);
             }
             
             if(this.options.list_mode=='default'){
@@ -1008,6 +1016,13 @@ $.widget( "heurist.manageEntity", {
                 var recset = this.recordList.resultList('getRecordSet');
                 recset.removeRecord(recID);
                 this.recordList.resultList('refreshPage');  
+            }
+            
+            if(this.options.edit_mode=='inline'){
+                //for inline - reload edit page with first item in list
+                var new_recID = this._getField2(this.options.entity.keyField); 
+                if(!(new_recID>0)) new_recID = null;
+                this.addEditRecord(new_recID); //null - hide inline edit form 
             }
     },
     
@@ -1053,13 +1068,10 @@ $.widget( "heurist.manageEntity", {
         
         var mode = 'hidden';
         if(force_hide!==true){
-            var isChanged = true;
-            if(force_hide!==false){
-                isChanged = this._editing.isModified();
-            }
+            var isChanged = this._editing.isModified();
             mode = isChanged?'visible':'hidden';
         }
-        //show/hide save buttons
+        //show/hide save,cancel,remove buttons
         var ele = this._toolbar;
         if(ele){
             if(this.options.edit_mode=='inline') { //for popup and editonly always visible
@@ -1097,7 +1109,7 @@ $.widget( "heurist.manageEntity", {
         this._afterInitCallback = afterInitCallback;    
 
         if(!this._editing){
-            this._editing = new hEditing({container:this.editForm, onchange:function(){
+            this._editing = new hEditing({entity:this.options.entity, container:this.editForm, onchange:function(){
                 that.onEditFormChange(this); //this is changed_element
             }}); //pass container
             this._initEditForm_step2(recID);
@@ -1270,6 +1282,24 @@ $.widget( "heurist.manageEntity", {
         }
     },
     
+    //
+    //
+    //
+    _getField2: function(fname, record){
+        var value = '';
+        var recset = this.recordList.resultList('getRecordSet');
+        if(recset){
+            if(!record){
+                record = recset.getFirstRecord();
+            }
+            if(record){
+                value = recset.fld(record, fname);    
+            }
+        }
+        return value;
+    },
+
+    
     //-----
     // perform required after edit form init modifications (show/hide fields, assign event listener )
     // for example hide/show some fields based on value of field
@@ -1289,15 +1319,15 @@ $.widget( "heurist.manageEntity", {
 */                       
         }
         
-        window.hWin.HEURIST4.ui.switchHintState('prefs_'+this._entityName, this.element, false);
-        
-
         this.onEditFormChange();
         // to EXTEND         
         
         if($.isFunction(this._afterInitCallback)){
             this._afterInitCallback.call();
         }
+        
+        //old way window.hWin.HEURIST4.ui.switchHintState('prefs_'+this._entityName, this.element, false);
+        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm); 
     },
 
     //

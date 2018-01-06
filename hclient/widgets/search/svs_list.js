@@ -111,10 +111,6 @@ $.widget( "heurist.svs_list", {
                 .css({'padding':'0.2em 0 0 1.2em','color':'rgb(142, 169, 185)','font-size':'1em','font-style':'italic'})
                 .appendTo(this.div_header) );
         }
-        //.appendTo( this.accordeon ); 'height':'1.3em', 
-        //if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
-
-
 
         if(this.options.btn_visible_filter){
 

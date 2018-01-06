@@ -369,11 +369,6 @@ $.widget( "heurist.search_faceted_wiz", {
                                 $dlg.find('#svs_Query').val(res);
                         });
 
-                        var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
-                        $dlg.find('.heurist-helper1').css({'display':ishelp_on?'block':'none'});
-
-
-
                     });
                 }else{
                     this._initStep0_options();
@@ -486,6 +481,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
         }
 
+        
+        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
     }
 
     , _showStep :function(newstep){

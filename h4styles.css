@@ -1004,11 +1004,13 @@ ul.fancytree-container ul{
     padding: 0 0 0 26px !important;
 }
 
-
-.heurist-helper2{ /*display and visibility*/
+/* beginner level */
+.heurist-helper2{
+    font-style: italic;
     font-size: 0.8em;
 }
 
+/* intermediate level */
 .heurist-helper1{
     font-style:italic;
     font-size: 0.9em;
@@ -1494,3 +1496,8 @@ label.small-header{
 }
 option {padding-left:15px;}
 
+.ui-state-error{
+    color:red !important;
+    font-weight: bold;
+    opacity: 1;
+}

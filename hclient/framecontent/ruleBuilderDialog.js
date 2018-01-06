@@ -33,6 +33,8 @@ function onPageInit(success) //callback function of hAPI initialization
         $('#btn_save').attr('title', 'explanatory rollover' ).button().on('click', 3, saveRules);
 
         //$('#btn_apply').button().on('click', 3, applyRules);
+        
+        //@todo - use common helper/competency level functionality
         $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
         $( "#helper" ).dialog({
             autoOpen: (window.hWin.HAPI4.get_prefs('help_on')=='1'), width:800,

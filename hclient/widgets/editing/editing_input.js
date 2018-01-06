@@ -203,9 +203,10 @@ $.widget( "heurist.editing_input", {
         this.input_prompt = $( "<div>")
         .text( help_text && !this.options.suppress_prompts ?help_text:'' )
         .addClass('heurist-helper1').css('padding-bottom','1em');
-        if(window.hWin.HAPI4.get_prefs('help_on')!=1){
-            this.input_prompt.hide();
-        }
+        // we use applyCompetencyLevel from now
+        //if(window.hWin.HAPI4.get_prefs('help_on')!=1){
+        //    this.input_prompt.hide();
+        //}
         this.input_prompt.appendTo( this.input_cell );
 
 

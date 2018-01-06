@@ -242,11 +242,6 @@ $.widget( "heurist.mainMenu", {
         });
 
 
-        setTimeout(function(){
-            var ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
-            that._toggleHelp(ishelp_on);
-            },2000);
-
         this._refresh();
 
     }, //end _create
@@ -582,13 +577,6 @@ $.widget( "heurist.mainMenu", {
             window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportFeed('rss')}); p=true;
         }else if(action == "menu-export-atom"){
             window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportFeed('atom')}); p=true;
-        }else if(action == "menu-help-inline"){
-
-            var ishelp_on = (window.hWin.HAPI4.get_prefs('help_on')=='1')?'0':'1';
-            window.hWin.HAPI4.currentUser['ugr_Preferences']['help_on'] = ishelp_on;
-
-            this._toggleHelp(ishelp_on); p=true;
-
         }else if(action == "menu-help-tipofday"){
             showTipOfTheDay(false); p=true;
         }
@@ -896,9 +884,8 @@ $.widget( "heurist.mainMenu", {
                                 prefs['mapcluster_zoom'] != request['mapcluster_zoom']);
                                 
                             //check help toggler and bookmark search - show/hide
-                            if(prefs['help_on'] != request['help_on']){
-                                that._toggleHelp(request['help_on']);
-                            }
+                            window.hWin.HEURIST4.ui.applyCompetencyLevel(request['userCompetencyLevel']);
+                            
                             if(prefs['bookmarks_on'] != request['bookmarks_on']){
                                 $('.heurist-bookmark-search').css('display',
                                     (request['bookmarks_on']=='1')?'inline-block':'none');
@@ -957,27 +944,6 @@ $.widget( "heurist.mainMenu", {
         });
 
     }
-
-
-
-    , _toggleHelp: function(ishelp_on){
-
-        ishelp_on = (ishelp_on=='1');
-
-        if(ishelp_on){
-            $('.heurist-helper1').css('display','block');
-            $('.heurist-helper2').css('visibility','visible');
-        }else{
-            $('.heurist-helper1').css('display','none');
-            $('.heurist-helper2').css('visibility','hiddden');
-        }
-
-        var a1 = $("#menu-help-inline").find('a');
-        a1.attr('title', (ishelp_on?'Hide':'Show')+' inline help');
-        a1.html('Inline help - turn '+(ishelp_on?'Off':'On'));
-
-    }
-
 
 
     // the same in profile.js
