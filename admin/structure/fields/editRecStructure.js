@@ -84,7 +84,7 @@ function EditRecStructure() {
         '<a href="#" onclick="{onEditRecordType();}">edit general description<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;'+
         '<a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>&nbsp;&nbsp;&nbsp;&nbsp;</span>'+
         '<span style="float:right; text-align:right;">'+ 
-        '<input type="button" value="Save/Close" onClick="editStructure.closeWin();"/>'+
+        '<input class="save-btn" type="button" value="Save/Close" onClick="editStructure.closeWin();"/>'+
         '</span>'+
         
         '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;display:none;\">'+
@@ -1816,12 +1816,16 @@ function EditRecStructure() {
      
             var updateResult = function(context){
                 if(!Hul.isnull(context)){
-                    top.HEURIST.rectypes = context.rectypes;
-                    top.HEURIST.detailTypes = context.detailTypes;
-                        if(top.hWin && top.hWin.HEURIST4){
-                            top.hWin.HEURIST4.rectypes = context.rectypes;
-                            top.hWin.HEURIST4.detailtypes = context.detailTypes;
-                            top.hWin.HEURIST4.terms = context.terms;
+/*console.log(top);
+console.log(window);
+var win = !win?window:top;*/
+                    var win = top;
+                    win.HEURIST.rectypes = context.rectypes;
+                    win.HEURIST.detailTypes = context.detailTypes;
+                        if(win.hWin && win.hWin.HEURIST4){
+                            win.hWin.HEURIST4.rectypes = context.rectypes;
+                            win.hWin.HEURIST4.detailtypes = context.detailTypes;
+                            win.hWin.HEURIST4.terms = context.terms;
                         }
                     
                     editStructure._structureWasUpdated = true;
@@ -1831,7 +1835,12 @@ function EditRecStructure() {
                     //fnCallback(false, oNewValue);    
                 }
                 _isServerOperationInProgress = false;
+                
+                $('.save-btn').removeProp('disabled').css('opacity','1');
             };
+            
+            $('.save-btn').prop('disabled', 'disabled').css('opacity','0.3');
+            
             var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
             var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
