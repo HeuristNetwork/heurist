@@ -52,6 +52,9 @@ $.widget( "heurist.resultList", {
         renderer: null,    // custom renderer function to draw item
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         searchfull: null,  // search full list data
+        
+        sortable: false,
+        onSortStop: null,
 
         //event
         onselect: null,  //on select event for non event based
@@ -1755,6 +1758,29 @@ $.widget( "heurist.resultList", {
                 }
             });
         }
+        
+        if(this.options.sortable){
+            var that = this;
+            this.div_content.sortable({stop:function(event, ui){
+                
+                var rec_order = that._currentRecordset.getOrder();
+                var idx = that.current_page*that.options.pagesize;
+                //var len = Math.min(that._currentRecordset.length(), idx+that.options.pagesize);
+                //var pagesize = this.options.pagesize;
+                
+                that.div_content.find('.recordDiv').each(function(index, rdiv){
+                    var rec_id = $(rdiv).attr('recid');
+                    rec_order[idx+index] = rec_id;
+                });
+                that._currentRecordset.setOrder(rec_order);
+                
+                if($.isFunction(that.options.onSortStop)){
+                    that.options.onSortStop.call(that, this.div_content);    
+                }
+            }});
+            //$allrecs.draggable({containment:this.div_content});    
+        }
+        
 
         /* show image on hover
         var that = this;

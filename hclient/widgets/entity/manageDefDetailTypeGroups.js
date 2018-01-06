@@ -22,44 +22,84 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     
     
     _entityName:'defDetailTypeGroups',
+    btnAddRecord:null,
+    btnApplyOrder:null,
+    
+    _init: function() {
+
+        this.options.layout_mode = 'short';
+        this.options.use_cache = true;
+        if(this.options.select_mode!='manager'){
+            this.options.edit_mode = 'none';
+            this.options.width = 300;
+        }else{
+            this.options.edit_mode = 'inline';    
+            this.options.width = 890;
+        }
+        
+        this._super();
+        
+        if(this.options.select_mode!='manager'){
+            //hide form 
+            this.editForm.parent().hide();
+            this.recordList.parent().css('width','100%');
+        }
+    },
+    
     //  
     // invoked from _init after load entity config    
     //
     _initControls: function() {
-        
+
         if(!this._super()){
             return false;
         }
 
-        //hide header
-        this.searchForm.css('height',0);
+        var that = this;
         
         this.recordList.resultList('option', 'show_toolbar', false);
-
-        var that = this;
-        window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
-            function(response){
-                that._cachedRecordset = response;
-                that.recordList.resultList('updateResultSet', response);
+        if(this.options.edit_mode = 'inline'){
+            this.recordList.resultList('option', 'sortable', true);
+            this.recordList.resultList('option', 'onSortStop', function(){
+                if(that.btnApplyOrder) that.btnApplyOrder.show()
             });
-            
-        
+        }
+
        //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
        //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
        if(this.options.edit_mode!='none'){
             
                //define add button on left side
-               this._defineActionButton({key:'add', label:'Add New Group', title:'', icon:'ui-icon-plus'}, 
-                        this.editFormToolbar, 'full',{float:'left'});
+               this.btnAddRecord = this._defineActionButton({key:'add', label:'Add New Group', title:'', icon:'ui-icon-plus'}, 
+                        this.searchForm, 'full', {float:'left'});
+
+               this.btnApplyOrder = this._defineActionButton({key:'save-order', label:'Save Order', title:'', icon:null}, 
+                        this.searchForm, 'full', {float:'right'});
        
-               if(this.options.edit_mode=='inline'){            
+               this.btnApplyOrder.hide();
+
+               /*if(this.options.edit_mode=='inline'){            
                     //define delete on right side
                     this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
                         this.editFormToolbar,'full',{float:'right'});
-               }
+               }*/
        }
-        
+
+        window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
+            function(response){
+                that._cachedRecordset = response.getSubSetByRequest({'sort:dtg_Order':1}, null);
+                that.recordList.resultList('updateResultSet', that._cachedRecordset);
                 
+                
+                //init inline editor at once
+                if(that.options.edit_mode=='inline'){
+                    var new_recID = that._getField2(that.options.entity.keyField); 
+                    if(new_recID>0){
+                        that.addEditRecord(new_recID);
+                    }
+                }
+            });
+            
         return true;
     },    
     
@@ -90,7 +130,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             html = html + '<div>';
         }
         
-        html = html + fld2('dtg_Name') + '</div>';
+        html = html + fld2('dtg_Name') + '<div style="position:absolute;right:4px;top:6px">'+fld('dtg_FieldCount')+'</div></div>';
         
         if(this.options.edit_mode=='popup'){
             html = html
@@ -118,10 +158,81 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         if (data){
             if(this.options.use_cache){
                 this._cachedRecordset = data.recordset;
-                //there is n filter feature in this form - thus, show list directly
+                //there is no filter feature in this form - thus, show list directly
             }
             this.recordList.resultList('updateResultSet', data.recordset, data.request);
         }
+    },
+    
+    onEditFormChange: function( changed_element ){
+        
+        this._super();
+        
+        if(this._currentEditID == -1){
+            this.btnAddRecord.hide();
+        }else{
+            this.btnAddRecord.show();
+        }
+        
+    },
+    
+    _deleteAndClose: function(){    
+            if(this._getField('dtg_FieldCount')>0){
+                window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
+                return;                
+            }
+            
+            this._super();
+    },
+    
+    _onActionListener: function(event, action){
+
+        this._super(event, action);
+
+        if(action=='save-order'){
+
+
+            var recordset = this.recordList.resultList('getRecordSet');
+            //assign new value for dtg_Order and save on server side
+            var rec_order = recordset.getOrder();
+            var idx = 0, len = rec_order.length;
+            var fields = [];
+            for(; (idx<len); idx++) {
+                var record = recordset.getById(rec_order[idx]);
+                var oldval = recordset.fld(record, 'dtg_Order');
+                var newval = String(idx+1).lpad(0,3);
+                if(oldval!=newval){
+                    recordset.setFld(record, 'dtg_Order', newval);        
+                    fields.push({"dtg_ID":rec_order[idx], "dtg_Order":newval});
+                }
+            }
+            if(fields.length>0){
+
+                var request = {
+                    'a'          : 'save',
+                    'entity'     : this._entityName,
+                    'request_id' : window.hWin.HEURIST4.util.random(),
+                    'fields'     : fields                     
+                };
+
+                var that = this;                                                
+                //that.loadanimation(true);
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            //that._afterSaveEventHandler( recID, fields );
+                            that.btnApplyOrder.hide();
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                });
+
+            }else{
+                this.btnApplyOrder.hide();    
+            }
+
+        }
+
     },
     
     

@@ -1013,6 +1013,12 @@ String.prototype.htmlEscape = function() {
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
+String.prototype.lpad = function(padString, length) {
+    var str = this;
+    while (str.length < length)
+        str = padString + str;
+    return str;
+}
 
 if (!Array.prototype.indexOf)
 {

@@ -34,8 +34,10 @@
     require_once (dirname(__FILE__).'/../dbaccess/dbUsrTags.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysGroups.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysUsers.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbDefDetailTypeGroups.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbDefFileExtToMimetype.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbDefTerms.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypeGroups.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysImportFiles.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecThreadedComments.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');

@@ -1058,6 +1058,7 @@
                         $response = array('status'=>HEURIST_OK,
                             'data'=> array(
                                 'queryid'=>@$params['id'],  //query unqiue id
+                                'entityName'=>'Records',
                                 'count'=>$total_count_rows,
                                 'offset'=>get_offset($params),
                                 'reccount'=>count($records),
@@ -1311,6 +1312,7 @@ $loop_cnt++;
                                 //'query'=>$query,
                                 'queryid'=>@$params['id'],  //query unqiue id
                                 'pageno'=>@$params['pageno'],  //to sync page 
+                                'entityName'=>'Records',
                                 'count'=>$total_count_rows,
                                 'offset'=>get_offset($params),
                                 'reccount'=>count($records),

@@ -1,17 +1,17 @@
 {
-        "entityName": "defDetailTypeGroups",
+        "entityName": "defRecTypeGroups",
 
-        "tableName": "defDetailTypeGroups",
-        "tablePrefix": "dtg",
+        "tableName": "defRecTypeGroups",
+        "tablePrefix": "rtg",
         
-        "helpContent": "defDetailTypes.html",
+        "helpContent": "defRecTypes.html",
         
         "searchFormContent": "",
         
-        "entityTitle": "Field Type Group",
-        "entityTitlePlural": "Field Type Groups",
+        "entityTitle": "Record Type Group",
+        "entityTitlePlural": "Record Type Groups",
         "empty_remark":"None of group defined",
-        "entityDescription": "This form allows you to add/edit field groups to facilitate manipulation of fields. Drag and drop in the list to change display order. Edit name and description. You can remove empty groups. Ian, write more help in defDetailTypeGroups.json",
+        "entityDescription": "This form allows you to add/edit record type groups to facilitate manipulation of record typesf. Drag and drop in the list to change display order. Edit name and description. You can remove empty groups. Ian, please write more help in defRecTypeGroups.json",
 
         "sel_actions": [{"key":"edit", "title":"Edit"},
                         {"key":"delete", "title":"Delete"}],
@@ -21,7 +21,7 @@
         
         "fields": [
                 {
-                    "dtID": "dtg_ID",
+                    "dtID": "rtg_ID",
                     "keyField": true,
                     "dtFields":{
                         "dty_Type":"integer",
@@ -31,7 +31,7 @@
                     }
                 },
                 {
-                    "dtID": "dtg_Name",
+                    "dtID": "rtg_Name",
                     "titleField": true,
                     "dtFields":{
                         "dty_Type":"freetext",
@@ -43,7 +43,7 @@
                     }
                 },
                 {
-                    "dtID": "dtg_Description",
+                    "dtID": "rtg_Description",
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":255,
@@ -52,7 +52,7 @@
                     }
                 },
                 {
-                    "dtID": "dtg_Order",
+                    "dtID": "rtg_Order",
                     "dtFields":{
                         "dty_Type":"integer",
                         "rst_Display":"hidden",
@@ -62,16 +62,16 @@
                     }
                 },
                 {
-                    "dtID": "dtg_Modified",
+                    "dtID": "rtg_Modified",
                     "dtFields":{
                         "dty_Type":"date",
                         "rst_Display":"hidden"
                     }
                 },
                 {
-                    "dtID": "dtg_FieldCount",
+                    "dtID": "rtg_RtCount",
                     "dtFields":{
-                        "rst_DisplayName": "Contains fields:",
+                        "rst_DisplayName": "Contains record types:",
                         "rst_Display":"readonly",
                         "dty_Type":"integer",
                         "dty_Role":"virtual"

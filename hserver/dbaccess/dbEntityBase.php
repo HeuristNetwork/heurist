@@ -384,6 +384,8 @@ class DbEntityBase
     //
     // extract records from data parameter - it is used in delete, save
     //            
+    //  fields:[fldname:value,fieldname2:values,.....]
+    //
     protected function prepareRecords(){
 
         if(!is_array(@$this->data['fields']) || count($this->data['fields'])<1){

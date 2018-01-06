@@ -336,7 +336,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&pl
 
                 var container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
                 
-                this._editing2 = new hEditing({container:container, 
+                this._editing2 = new hEditing({entity:this.options.entity, container:container, 
                  onchange:
                 function(){
                     var ele = that._editing2.getFieldByName('ulf_FileUpload');

@@ -21,37 +21,12 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
+require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
-class DbDefRecTypeGroups
+class DbDefRecTypeGroups extends DbEntityBase 
 {
-    private $system;  
-    
-    /*  
-     parametrs
-    
-     list of fields to search or update
-     
-    
-    */    
-    private $data;  
-    
-    //data types: ids, int, float, date, bool, enum
-    private static $fields = array( 
-    'rtg_ID'=>'ids',    //ids
-    'rtg_Name'=>63,     //title
-    'rtg_Domain'=>array('functionalgroup','modelview'),
-    'rtg_Order'=>'int',
-    'rtg_Description'=>250,
-    'rtg_Modified'=>'date'
-    );
-    
-    function __construct( $system, $data ) {
-       $this->system = $system;
-       $this->data = $data;
-    }
-
     /**
     *  search user or/and groups
     * 
@@ -75,21 +50,9 @@ class DbDefRecTypeGroups
     */
     public function search(){
         
-//error_log(print_r($this->data,true));        
-        $this->searchMgr = new dbEntitySearch( $this->system, DbDefRecTypeGroups::$fields);
+        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
 
-        /*
-        if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
-            return false;
-        }
-        
-        if(!$this->_validateParamsAndCounts()){
-            return false;
-        }else if (count(@$this->recIDs)==0){
-            return $this->result_data;
-        }
-        */
+
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
             $this->data = $res;
@@ -108,6 +71,7 @@ class DbDefRecTypeGroups
 
        
         //compose SELECT it depends on param 'details' ------------------------
+        //@todo - take it form fiels using some property
         if(@$this->data['details']=='id'){
         
             $this->data['details'] = 'rtg_ID';
@@ -118,24 +82,29 @@ class DbDefRecTypeGroups
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'rtg_ID,rtg_Name,rtg_Description,rtg_Order';
+            $this->data['details'] = 'rtg_ID,rtg_Name,rtg_Description,rtg_Order,'
+            .'(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount';
             
         }else if(@$this->data['details']=='full'){
+            
+            $fields2 = $this->fields;
+            unset($fields2['rtg_RtCount']);
 
-            $this->data['details'] = implode(',', DbDefRecTypeGroups::$fields );
+            $this->data['details'] = implode(',', $fields2 )
+             .'(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount';
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
         
-        //validate names of fields
+        /*validate names of fields
         foreach($this->data['details'] as $fieldname){
-            if(!@DbDefRecTypeGroups::$fields[$fieldname]){
+            if(!@$this->fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                 return false;
             }            
-        }
+        }*/
 
         //ID field is mandatory and MUST be first in the list
         $idx = array_search('rtg_ID', $this->data['details']);
@@ -149,8 +118,9 @@ class DbDefRecTypeGroups
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM defRecTypeGroups';
-                
+        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
+        .' FROM '.$this->config['tableName'];
+
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
@@ -159,11 +129,32 @@ class DbDefRecTypeGroups
         
 //error_log($query);     
 
-        $res = $this->searchMgr->execute($query, $is_ids_only);
+        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName']);
         return $res;
-
     }
-     
+    
+    //
+    //
+    //
+    public function delete(){
+
+        $this->recordIDs = prepareIds($this->data['recID']);
+
+        if(count($this->recordIDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
+            return false;
+        }        
+        
+        $query = 'select count(rty_ID) from defRecTypes where rtg_ID in ('.implode(',', $this->recordIDs).')';
+        $ret = mysql__select_value($mysqli, $query);
+        
+        if($ret>0){
+            $this->system->addError(HEURIST_ERROR, 'Cannot delete non empty group');
+            return false;
+        }
+
+        return parent::delete();        
+    }
     
 }
 ?>

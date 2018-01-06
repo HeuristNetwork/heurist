@@ -82,24 +82,29 @@ class DbDefDetailTypeGroups extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'dtg_ID,dtg_Name,dtg_Description,dtg_Order';
+            $this->data['details'] = 'dtg_ID,dtg_Name,dtg_Description,dtg_Order,'
+            .'(select count(dty_ID) from defDetailTypes where dtg_ID=dty_DetailTypeGroupID) as dtg_FieldCount';
             
         }else if(@$this->data['details']=='full'){
+            
+            $fields2 = $this->fields;
+            unset($fields2['dtg_FieldCount']);
 
-            $this->data['details'] = implode(',', $this->fields );
+            $this->data['details'] = implode(',', $fields2 )
+             .'(select count(dty_ID) from defdetailtypes where dtg_ID=dty_DetailTypeGroupID) as dtg_FieldCount';
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
         
-        //validate names of fields
+        /*validate names of fields
         foreach($this->data['details'] as $fieldname){
             if(!@$this->fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                 return false;
             }            
-        }
+        }*/
 
         //ID field is mandatory and MUST be first in the list
         $idx = array_search('dtg_ID', $this->data['details']);
@@ -113,8 +118,9 @@ class DbDefDetailTypeGroups extends DbEntityBase
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM defDetailTypeGroups';
-                
+        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
+        .' FROM '.$this->config['tableName'];
+
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
@@ -123,11 +129,32 @@ class DbDefDetailTypeGroups extends DbEntityBase
         
 //error_log($query);     
 
-        $res = $this->searchMgr->execute($query, $is_ids_only, 'defDetailTypeGroups');
+        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName']);
         return $res;
-
     }
+    
+    //
+    //
+    //
+    public function delete(){
 
+        $this->recordIDs = prepareIds($this->data['recID']);
+
+        if(count($this->recordIDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
+            return false;
+        }        
+        
+        $query = 'select count(dty_ID) from defDetailTypes where dtg_ID in ('.implode(',', $this->recordIDs).')';
+        $ret = mysql__select_value($mysqli, $query);
+        
+        if($ret>0){
+            $this->system->addError(HEURIST_ERROR, 'Cannot delete non empty group');
+            return false;
+        }
+
+        return parent::delete();        
+    }
 
 }
 ?>

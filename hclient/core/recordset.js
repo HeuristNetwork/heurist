@@ -826,6 +826,7 @@ function hRecordSet(initdata) {
             }
             
             return new hRecordSet({
+                entityName: that.entityName,
                 queryid: queryid,
                 count: _order.length,
                 total_count: _order.length,
@@ -874,6 +875,8 @@ function hRecordSet(initdata) {
         //
         //  returns subset by rerquest/filter
         //
+        // request:  { sort:fieldName , =fieldName:value, fieldName:value }
+        // structure [{dtID:fieldname, dtFields:{dty_Type: } }]
         getSubSetByRequest: function(request, structure){
             
             var _records = {}, _order=[], that = this;
@@ -883,12 +886,16 @@ function hRecordSet(initdata) {
             
             function __getDataType(fieldname){
                 var idx;
-                for (idx in structure){
-                    if(structure[idx]['dtID']==fieldname){
-                          return structure[idx]['dtFields']['dty_Type'];
+                if(structure!=null){
+                    for (idx in structure){
+                        if(structure[idx]['dtID']==fieldname){
+                              return structure[idx]['dtFields']['dty_Type'];
+                        }
                     }
+                    return null;
+                }else{
+                    return 'freetext';
                 }
-                return null;
             }
             
             var recID, fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
@@ -1039,6 +1046,7 @@ function hRecordSet(initdata) {
             relationship2 = jQuery.unique( relationship2 );
             
             return new hRecordSet({
+                entityName: that.entityName,
                 queryid: queryid,
                 count: total_count, //keep from original
                 offset: 0,
@@ -1087,6 +1095,10 @@ function hRecordSet(initdata) {
             return order;
         },
 
+        setOrder: function(_order){
+            order = _order;
+        },
+        
         /**
         * Returns first record from recordSet
         */

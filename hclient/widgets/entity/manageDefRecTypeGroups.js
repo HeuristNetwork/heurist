@@ -1,5 +1,5 @@
 /**
-* manageSysGroups.js - main widget mo manage sys groups
+* manageDefRecTypeGroups.js - main widget mo record type groups
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -20,48 +20,93 @@
 
 $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     
-    // the widget's constructor
-    _create: function() {
-        
-        this._super();
-
-        this._entityTitle = 'Record Type Group',
-        this._entityTitlePlural = 'Record Type Groups',
-        this._empty_remark = 'Please use the search field above to locate relevant group (partial string match on title)',
-        
-        this._default_sel_actions = [{key:'edit', title:'Edit'},
-                          {key:'delete', title:'Delete'}];
-                          
-        this._default_btn_actions = [{key:'add', title:'Add New Group'}];
-        
-    }, //end _create
+    _entityName:'defRecTypeGroups',
+    btnAddRecord:null,
+    btnApplyOrder:null,
     
-    // Any time the widget is called with no arguments or with only an option hash, 
-    // the widget is initialized; this includes when the widget is created.
     _init: function() {
+
+        this.options.layout_mode = 'short';
+        this.options.use_cache = true;
+        if(this.options.select_mode!='manager'){
+            this.options.edit_mode = 'none';
+            this.options.width = 300;
+        }else{
+            this.options.edit_mode = 'inline';    
+            this.options.width = 890;
+        }
         
         this._super();
-
-        // init search header
-        this.searchForm.searchDefRecTypeGroups(this.options);
-            
-        this._on( this.searchForm, {
-                "searchdefrectypegroupsonresult": this.updateRecordList
-                });
-                
-        this.element.find('.ent_header').css('height',0);
-        this.element.find('.ent_content_full').css('top',0);
         
-        this.wrapper.css('min-width','300px');
-        
-        this.recordList.resultList('option','show_toolbar', false);
+        if(this.options.select_mode!='manager'){
+            //hide form 
+            this.editForm.parent().hide();
+            this.recordList.parent().css('width','100%');
+        }
     },
+    
+    //  
+    // invoked from _init after load entity config    
+    //
+    _initControls: function() {
+
+        if(!this._super()){
+            return false;
+        }
+
+        var that = this;
+        
+        this.recordList.resultList('option', 'show_toolbar', false);
+        if(this.options.edit_mode = 'inline'){
+            this.recordList.resultList('option', 'sortable', true);
+            this.recordList.resultList('option', 'onSortStop', function(){
+                if(that.btnApplyOrder) that.btnApplyOrder.show()
+            });
+        }
+
+       //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
+       //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
+       if(this.options.edit_mode!='none'){
+            
+               //define add button on left side
+               this.btnAddRecord = this._defineActionButton({key:'add', label:'Add New Group', title:'', icon:'ui-icon-plus'}, 
+                        this.searchForm, 'full', {float:'left'});
+
+               this.btnApplyOrder = this._defineActionButton({key:'save-order', label:'Save Order', title:'', icon:null}, 
+                        this.searchForm, 'full', {float:'right'});
+       
+               this.btnApplyOrder.hide();
+
+               /*if(this.options.edit_mode=='inline'){            
+                    //define delete on right side
+                    this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
+                        this.editFormToolbar,'full',{float:'right'});
+               }*/
+       }
+
+        window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
+            function(response){
+                that._cachedRecordset = response.getSubSetByRequest({'sort:rtg_Order':1}, null);
+                that.recordList.resultList('updateResultSet', that._cachedRecordset);
+                
+                
+                //init inline editor at once
+                if(that.options.edit_mode=='inline'){
+                    var new_recID = that._getField2(that.options.entity.keyField); 
+                    if(new_recID>0){
+                        that.addEditRecord(new_recID);
+                    }
+                }
+            });
+            
+        return true;
+    },    
     
     //----------------------
     //
+    // customized item renderer for search result list
     //
-    //
-    _recordListItemRenderer:function(recordset, record){
+    _recordListItemRenderer: function(recordset, record){
         
         function fld(fldname){
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
@@ -77,40 +122,117 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         var recID   = fld('rtg_ID');
         var recTitle = fld2('rtg_ID','4em')+fld2('rtg_Name');
         
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
+        if(this.options.select_mode=='select_multi'){
+            html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle">';
+        }else{
+            html = html + '<div>';
+        }
+        
+        html = html + fld2('rtg_Name') + '<div style="position:absolute;right:4px;top:6px">'+fld('rtg_RtCount')+'</div></div>';
+        
+        if(this.options.edit_mode=='popup'){
+            html = html
+            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
+            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
+             /*
+            + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+            + '</div>&nbsp;&nbsp;'
+            
+             
+            + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+            +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+            + '</div>';
+            */
+        }
+        
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
-        + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordTitle">'
-        +     recTitle
-        + '</div>'
-        + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        + '</div>';
-
-        return html;
+        return html+'</div>';
         
     },
 
-    //
-    //
-    //
-    _recordListGetFullData:function(arr_ids, pageno, callback){
+    updateRecordList: function( event, data ){
+        //this._super(event, data);
+        if (data){
+            if(this.options.use_cache){
+                this._cachedRecordset = data.recordset;
+                //there is no filter feature in this form - thus, show list directly
+            }
+            this.recordList.resultList('updateResultSet', data.recordset, data.request);
+        }
+    },
+    
+    onEditFormChange: function( changed_element ){
         
-        var request = {
-                'a'          : 'search',
-                'entity'     : 'defRecTypeGroups',
-                'details'    : 'list',
-                'request_id' : pageno,
-                'ugr_ID'     : arr_ids
-                //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
-        };
+        this._super();
         
-        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
-    }
+        if(this._currentEditID == -1){
+            this.btnAddRecord.hide();
+        }else{
+            this.btnAddRecord.show();
+        }
+        
+    },
+    
+    _deleteAndClose: function(){    
+            if(this._getField('rtg_RtCount')>0){
+                window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
+                return;                
+            }
+            
+            this._super();
+    },
+    
+    _onActionListener: function(event, action){
+
+        this._super(event, action);
+
+        if(action=='save-order'){
+
+
+            var recordset = this.recordList.resultList('getRecordSet');
+            //assign new value for rtg_Order and save on server side
+            var rec_order = recordset.getOrder();
+            var idx = 0, len = rec_order.length;
+            var fields = [];
+            for(; (idx<len); idx++) {
+                var record = recordset.getById(rec_order[idx]);
+                var oldval = recordset.fld(record, 'rtg_Order');
+                var newval = String(idx+1).lpad(0,3);
+                if(oldval!=newval){
+                    recordset.setFld(record, 'rtg_Order', newval);        
+                    fields.push({"rtg_ID":rec_order[idx], "rtg_Order":newval});
+                }
+            }
+            if(fields.length>0){
+
+                var request = {
+                    'a'          : 'save',
+                    'entity'     : this._entityName,
+                    'request_id' : window.hWin.HEURIST4.util.random(),
+                    'fields'     : fields                     
+                };
+
+                var that = this;                                                
+                //that.loadanimation(true);
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            //that._afterSaveEventHandler( recID, fields );
+                            that.btnApplyOrder.hide();
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                });
+
+            }else{
+                this.btnApplyOrder.hide();    
+            }
+
+        }
+
+    },
     
 });
 
