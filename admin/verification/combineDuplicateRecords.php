@@ -255,7 +255,13 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                                     print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
                                     print '<td style="padding-left:10px;">';
                                     foreach($detail as $i => $rg){
-                                        if ($rg['dtl_Value']) {
+
+                                        
+                                        if ($rg['dtl_UploadedFileID']) {
+                                            $rd_temp = mysql_fetch_array(mysql_query('select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']));
+                                            $rd_temp = $rd_temp[0];
+                                        }else {
+                                            
                                             if ($rg['dtl_Geo']) {
                                                 $rd_temp = $rg['dtl_Geo'];
                                             }
@@ -266,9 +272,7 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                                             else {
                                                 $rd_temp = $rg['dtl_Value'];
                                             }
-                                        }elseif ($rg['dtl_UploadedFileID']) {
-                                            $rd_temp = mysql_fetch_array(mysql_query('select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']));
-                                            $rd_temp = $rd_temp[0];
+                                                                                     
                                         }
                                         if(! @$temp) $temp=$rd_temp;
                                         elseif(!is_array($temp)){
