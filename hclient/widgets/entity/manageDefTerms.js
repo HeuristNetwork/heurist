@@ -65,7 +65,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
         }
-        //add two elements - treeview and thumb viewer
+        //add two elements - treeview on recordList (left side) and thumb viewer on ent_wrapper (right side)
         this.treeview_Container = $('<div>')
             .css({position:'absolute', top:0,bottom:0, left:0, width:300, 'overflow-y':'auto'})
             .appendTo(this.recordList);

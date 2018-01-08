@@ -46,6 +46,7 @@ function RectypeManager() {
     arrDataSources = [];
 
     var currentTipId,
+    _rt_counts = {}, //counts by recorc type
     _rolloverInfo;
 
     var _groups = [],  //for dropdown list
@@ -153,6 +154,31 @@ function RectypeManager() {
         initTabView();
 
         dragDropEnable();
+        
+        
+        if(top.hWin && top.hWin.HAPI4){
+            var request = {
+                'a'       : 'counts',
+                'entity'  : 'defRecTypes',
+                'mode'    : 'record_count'
+                };
+        
+            top.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == top.hWin.HAPI4.ResponseStatus.OK){
+                    _rt_counts = response.data;
+                    //refresh datatable
+                    var _currentTabIndex = tabView.get('activeIndex');
+                    var dt = arrTables[_currentTabIndex];
+                    if(!Hul.isnull(dt)) {
+                        dt.render();
+                    }
+                }else{
+                    top.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+            
+        }
     }//end _init
 
     /*
@@ -394,7 +420,7 @@ function RectypeManager() {
                     },
                 },
                 */
-                { key: "id", label: "Add", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'right',
+                { key: "id", label: "Add", sortable:false, minWidth:20, maxAutoWidth:20, width:20, className:'right',
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = 
                             '<a href="#addrec">'
@@ -402,7 +428,7 @@ function RectypeManager() {
                             +' title="Click this button to insert a new '+oRecord.getData("name")+'"></a>';
                     }
                 },
-                { key: "conceptid", label: "Filter", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'right', 
+                { key: "conceptid", label: "Filter", sortable:false, minWidth:20, maxAutoWidth:20, width:20, className:'right', 
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = 
                             '<a href="#search">'
@@ -411,18 +437,25 @@ function RectypeManager() {
                     }
                 },
 
-                { key: "icon", label: "Icon", className:'center', sortable:false,   width:40,
+                { key: "id", label: "n=", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'center', 
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        var id = oRecord.getData("id");
+                        elLiner.innerHTML = (_rt_counts[id]>0)?_rt_counts[id]:'';
+                    }
+                },
+                
+                { key: "icon", label: "Icon", className:'center', sortable:false,   width:30,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
 
                         var str1 = top.HEURIST.iconBaseURL + id + "&t=" + curtimestamp;
                         var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png&t=" + curtimestamp;
                         var icon ="<div class=\"rectypeImages\">"+
-                        "<a href=\"#edit_icon\">"+
+                        "<a href=\"#\">"+  //edit_icon
                         "<img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
                         "</a>"+
                         "<div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\">"+
-                        "<a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+
+                        "<a href=\"#\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+ //edit_icon
                         "</div>"+
                         "</div>";
                         elLiner.innerHTML = icon;

@@ -21,24 +21,20 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
+require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
-class DbDefRecTypes
+class DbDefRecTypes extends DbEntityBase 
 {
-    private $system;  
-    
-    /*  
-     parametrs
-    
-     list of fields to search or update
-     
-    
-    */    
-    private $data;  
-    
-    //data types: ids, int, float, date, bool, enum
-    private static $fields = array( 
+    //remove
+    function __construct( $system, $data ) {
+       $this->system = $system;
+       $this->data = $data;
+       
+       
+       $this->config = array(); 
+       $this->fields = array( 
     'rty_ID'=>'ids',    //ids
     'rty_Name'=>63,     //title
    
@@ -63,10 +59,6 @@ class DbDefRecTypes
     'rty_Modified'=>'date',
     'rty_LocallyModified'=>'bool2'
     );
-    
-    function __construct( $system, $data ) {
-       $this->system = $system;
-       $this->data = $data;
     }
     
 
@@ -190,6 +182,23 @@ class DbDefRecTypes
         $res = $this->searchMgr->execute($query, $is_ids_only);
         return $res;
 
+    }
+    
+    //
+    //
+    //
+    public function counts(){
+
+        $res = null;
+                
+        if(@$this->data['mode']=='record_count'){
+            $query = 'SELECT d.rty_ID, count(r.rec_ID) FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID '
+            .' GROUP BY d.rty_ID';
+          
+           $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
+        }
+        
+        return $res;
     }
      
     

@@ -173,7 +173,23 @@ $.widget( "heurist.manageEntity", {
                         +    '<div class="ent_content_full editForm"/>'
                         +'</div>'
                 +'</div>';
+
+        }else if(this.options.layout_mode=='tabbed'){ //for terms
         
+            layout = 
+                '<div class="ent_wrapper">'
+                        +'<div class="ent_wrapper" style="width:320px">'
+                        +    '<div class="ent_header searchForm"/>'     
+                        +    '<div class="ent_content_full">'
+                                +'<div class="ent_content_full recordList" style="width:320px"/>' //treeview
+                                +'<div class="ent_wrapper" style="left:321px">'
+                                +    '<div class="ent_header editForm-toolbar"/>'
+                                +    '<div class="ent_content_full editForm"/>'
+                                +'</div>'
+                                +'<div class="ent_content_full" style="display:none;left:321px"/>' //image list
+                        +'</div>'
+                +'</div>';
+                
         }else if(this.options.layout_mode=='editonly'){
 
             layout = 

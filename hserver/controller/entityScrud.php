@@ -38,6 +38,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/dbDefFileExtToMimetype.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbDefTerms.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypeGroups.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypes.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysImportFiles.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecThreadedComments.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');
@@ -77,6 +78,8 @@
             $res = $entity->delete();
         }else if(@$_REQUEST['a'] == 'config'){
             $res = $entity->config();
+        }else if(@$_REQUEST['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
+            $res = $entity->counts();
         }else if(@$_REQUEST['a'] == 'action'){ //batch action. see details of operaion for method of particular class
             $res = $entity->batch_action();
         }else {

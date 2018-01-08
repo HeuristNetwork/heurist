@@ -205,6 +205,12 @@ class DbEntityBase
         
         return true;
     }
+
+    //
+    // various counts(aggregations) request - implementation depends on entity
+    //
+    public function counts(){
+    }
     
     //
     // see specific implemenation for every class 

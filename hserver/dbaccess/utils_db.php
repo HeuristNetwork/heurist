@@ -159,11 +159,16 @@
     */
     function mysql__select_assoc($mysqli, $table, $key_column, $val_column, $condition) {
 
+        $query = "SELECT $key_column, $val_column FROM $table WHERE $condition";
+        return mysql__select_assoc2($mysqli, $query);
+        
+    }
+    
+    function mysql__select_assoc2($mysqli, $query){
+        
         $matches = null;
-        if($mysqli){
+        if($mysqli && $query){
             
-            $query = "SELECT $key_column, $val_column FROM $table WHERE $condition";
- 
             $res = $mysqli->query($query);
             if ($res){
                 $matches = array();

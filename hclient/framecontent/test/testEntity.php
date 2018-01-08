@@ -306,9 +306,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 
                 
                 if(entity=='DefTerms'){
-                    options.select_mode = 'images';
+                    //test purpose options.select_mode = 'images';
                     //options.initialTermsIds = [414,415,5424,528,5426,5449];
-                    options.initialTermsIds = [5321,5317];
+                    //options.initialTermsIds = [5321,5317];
                 }
                 
                 
@@ -404,10 +404,10 @@ print $targetPath.'<br>';
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>
-                            <option value="DefRecTypeGroups" selected>Record Type Groups</option>
+                            <option value="DefRecTypeGroups">Record Type Groups</option>
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
-                            <option value="DefTerms">Terms</option>
+                            <option value="DefTerms" selected>Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
                             <option value="RecThreadedComments">Record Comments</option>
                             <option value="Smarty">Smarty Reports</option>
