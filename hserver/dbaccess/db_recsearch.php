@@ -247,7 +247,7 @@
                 
                 }//for
                 return array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], 
-                            "request_id"=>@$params['request_id'] //, 'dbg_query'=>$query,
+                            "request_id"=>@$params['request_id'], //'dbg_query'=>$query,
                             "facet_index"=>@$params['facet_index'], 'q'=>$params['q'] );
                 
             }
@@ -363,7 +363,7 @@
                     array_push($data, array($row[0], $row[1], $third_element ));
                 }
                 $response = array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], 
-                            "request_id"=>@$params['request_id'] //, 'dbg_query'=>$query,
+                            "request_id"=>@$params['request_id'], //'dbg_query'=>$query,
                             "facet_index"=>@$params['facet_index'], 'q'=>$params['q'] );
                 $res->close();
             }
