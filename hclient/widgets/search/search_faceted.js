@@ -977,7 +977,7 @@ $.widget( "heurist.search_faceted", {
                     __fillQuery(query);                
                     
                     //add other parameters for rectype of this facet
-                    if(this._current_query){
+                    if(this._current_query && false){ //2018-01-09 Do not use other parameters since we use IDS
                         var copyquery = window.hWin.HEURIST4.util.cloneJSON(this._current_query); 
                         var otherparams = __getOtherParameters(copyquery, field['rtid']);
                         if(null!=otherparams){
@@ -1024,7 +1024,8 @@ $.widget( "heurist.search_faceted", {
                     step_level = 1; //always full value for this type of facet
                 }
         
-//console.log(query);
+//DEBUG console.log(query);
+
                 var request = {q: query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  field['id'],
@@ -1081,6 +1082,9 @@ $.widget( "heurist.search_faceted", {
         
                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
+                    
+//DEBUG if(response.dbg_query) console.log(response.dbg_query);
+                    
                     if(keep_cache){
                         response.q = window.hWin.HEURIST4.util.hashString(JSON.stringify(response.q));
                         this.cached_counts.push(response);
