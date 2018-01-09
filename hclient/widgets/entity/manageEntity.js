@@ -178,15 +178,15 @@ $.widget( "heurist.manageEntity", {
         
             layout = 
                 '<div class="ent_wrapper">'
-                        +'<div class="ent_wrapper" style="width:320px">'
+                        +'<div class="ent_wrapper">'
                         +    '<div class="ent_header searchForm"/>'     
-                        +    '<div class="ent_content_full">'
+                        +    '<div class="ent_content_full" style="top:4.4em">'
                                 +'<div class="ent_content_full recordList" style="width:320px"/>' //treeview
-                                +'<div class="ent_wrapper" style="left:321px">'
+                                +'<div class="ent_wrapper" style="top:4em;left:321px">'
                                 +    '<div class="ent_header editForm-toolbar"/>'
                                 +    '<div class="ent_content_full editForm"/>'
                                 +'</div>'
-                                +'<div class="ent_content_full" style="display:none;left:321px"/>' //image list
+                                +'<div class="ent_content_full recordList2" style="display:none;left:321px"/>' //image list
                         +'</div>'
                 +'</div>';
                 

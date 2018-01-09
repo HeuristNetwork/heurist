@@ -28,28 +28,20 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _currentParentID:null,
     
     _init: function() {
-        this.options.layout_mode = 'short';
+        this.options.layout_mode = 'tabbed';
         this.options.use_cache = true;
 
         //for selection mode set some options
-        if(this.options.select_mode!='manager'){
+        if (this.options.select_mode=='manager' || this.options.select_mode=='images') {
+            this.options.width = 940;                   
+            this.options.height = Math.min(1200, $(this.document).find('body').innerHeight()-10);                 
+        }else{
             this.options.width = 390;                    
             this.options.edit_mode = 'none'
         }
-        if(this.options.select_mode=='images'){
-            this.options.width = 700;                   
-            this.options.height = Math.min(1200, $(this.document).find('body').innerHeight()-10);                 
-        }
     
         this._super();
-        
-        //if(this.options.edit_mode=='inline'){
-        if(this.options.select_mode!='manager'){
-            //hide form 
-            this.editForm.parent().hide();
-            this.recordList.parent().css('width','100%');
-        }
-        
+                                         
     },
     //  
     // invoked from _init after load entity config    
@@ -61,28 +53,41 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(!this._super()){
             return false;
         }
+        
+        this.recordList.css('top','10px');
+        this.recordList2 = this.element.find('.recordList2');
+        
 
         if(this.options.select_mode=='manager'){
-            this.recordList.parent().css({'border-right':'lightgray 1px solid'});
+            //this.recordList.parent().css({'border-right':'lightgray 1px solid'});
+        }else{
+            //hide form 
+            this.editForm.parent().hide();
+            //
+            if(this.options.select_mode=='images'){
+                this.recordList.hide();
+                this.recordList2.show().css({'width':'100%',left:0});
+            }
         }
-        //add two elements - treeview on recordList (left side) and thumb viewer on ent_wrapper (right side)
-        this.treeview_Container = $('<div>')
-            .css({position:'absolute', top:0,bottom:0, left:0, width:300, 'overflow-y':'auto'})
-            .appendTo(this.recordList);
         
-        this.thumb_Container = $('<div>')
-            .css({position:'absolute', top:0,bottom:0, left:300, right:0, 'overflow-y':'auto'})
-            .appendTo(this.recordList);
+        //add two elements - treeview on recordList (left side) and thumb viewer on ent_wrapper (right side)
+        /*this.treeview_Container = $('<div>')
+            .css({position:'absolute', top:0,bottom:0, left:0, right:0, 'overflow-y':'auto'})
+            .appendTo(this.recordList);*/
+        this.treeview_Container = this.recordList.css('top','10px');
+        
+        /*this.thumb_Container = $('<div>')
+            .css({position:'absolute', top:0,bottom:0, left:0, right:0, 'overflow-y':'auto'})
+            .appendTo(this.recordList2);*/
+        this.thumb_Container = this.recordList2.css('top','10px');
         
         if(this.options.select_mode=='images'){
             
             this.options.select_mode = 'select_single';
             
             this.searchForm.css({'height':0});
-            this.recordList.css({'top':0});
-            
-            this.thumb_Container.css('left',0);
-            this.treeview_Container.hide();
+            this.recordList.parent().css({'top':0});
+
             
             this._initTreeView(null);
             //search for given list of ids
@@ -98,23 +103,34 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var iheight = 2;
             //if(this.searchForm.width()<200){  - width does not work here  
             if(this.options.select_mode=='manager'){            
-                iheight = iheight + 2;
+                //iheight = iheight + 2;
             }
             if(window.hWin.HEURIST4.util.isempty(this.options.filter_groups)){
                 iheight = iheight + 2;    
             }
-
             
             this.searchForm.css({'height':iheight+'em'});
-            this.recordList.css({'top':iheight+0.4+'em'});
+            this.recordList.parent().css({'top':iheight+'em'});
+            //this.recordList.css({'top':iheight+0.4+'em'});
+            //this.recordList2.css({'top':iheight+0.4+'em'});
+            if(this.options.edit_mode=='inline'){
+                this.editForm.parent().css({'top':'10px'});
+            }
             // init search header
             this.searchForm.searchDefTerms(this.options);
             
             this._on( this.searchForm, {
-                    "searchdeftermsonresult": this.updateRecordList          //called once
-                    });
-            this._on( this.searchForm, {
-                    "searchdeftermsonfilter": this.filterRecordList
+                    "searchdeftermsonresult": this.updateRecordList,          //called once
+                    "searchdeftermsonfilter": this.filterRecordList,
+                    "searchdeftermsonviewmode": function(){
+                        
+                        var mode = this.searchForm.find('#sel_viewmode').tabs('option','active');
+                        if(mode==0){
+                            this.recordList2.hide();
+                        }else{
+                            this.recordList2.show();
+                        }
+                    }
                     });
                 
         }
@@ -122,7 +138,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
        //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
        //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
        if(this.options.edit_mode!='none'){
-
+           /*
            //define add button on left side
            this._defineActionButton({key:'add', label:'Add New Vocabulary', title:'', icon:'ui-icon-plus'}, 
                         this.editFormToolbar, 'full',{float:'left'});
@@ -137,6 +153,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
            //define delete on right side
            this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
                     this.editFormToolbar,'full',{float:'right'});
+           */
        }
         
        return true;
@@ -545,6 +562,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             rec_ids.push(node.key);
                         }
                     }
+
+                   setTimeout(function(){
+                    $.each( $('.fancytree-node'), function( idx, item ){
+                        that.__defineActionIcons(item);
+                    });
+                    }, 500);  
+                    
                     var subset = that._cachedRecordset.getSubSetByIds(rec_ids);
                     that._thumbs.resultList('applyViewMode', 'thumbs3'); 
                     that._thumbs.resultList('updateResultSet', subset);  
@@ -609,6 +633,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             this._treeview = this.treeview_Container.fancytree(fancytree_options); //was recordList
 
+            
+       setTimeout(function(){
+            //var tree = $treediv.fancytree("getTree");
+            //tree.getRootNode().sortChildren(null, true); //true - deep sort
+            $.each( $('.fancytree-node'), function( idx, item ){
+                that.__defineActionIcons(item);
+            });
+        }, 500);  
+
+            
+            
             this._thumbs = this.thumb_Container.resultList(
                       {
                        eventbased: false, 
@@ -664,6 +699,96 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this._thumbs.resultList('updateResultSet', recordset);               
         }
 
-    }
+    },
+    
+    //
+    // for treeview on mouse over toolbar
+    //
+    __defineActionIcons: function(item){ 
+           if($(item).find('.svs-contextmenu3').length==0){
+               
+               if(!$(item).hasClass('fancytree-hide')){
+                    $(item).css('display','block');   
+               }
+
+               var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:4px;display:none;padding-top:2px">'
+                   +'<span class="ui-icon ui-icon-plus" title="Add a child term (a term hierarchichally below the current vocabulary or term)"></span>'
+                   +((this._currentDomain=="relation")
+                      ?'<span class="ui-icon ui-icon-reload" title="Set the inverse term for this term"></span>' //for relations only
+                      :'')
+                   +'<span class="ui-icon ui-icon-close" title="Delete this term (if unused in database)"></span>'
+                   //+'<span class="ui-icon ui-icon-image" title="Add an image which illustrates this term"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-w" title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-e" title="EXPORT this vocabulary to a text file"></span>'
+                   +'</div>').appendTo(item);
+                   
+                   
+               actionspan.find('.ui-icon').click(function(event){
+                    var ele = $(event.target);
+                    
+                    //timeour need to activate current node    
+                    setTimeout(function(){                         
+                        if(ele.hasClass('ui-icon-plus')){
+                            //td _doAddChild(false);
+                        }else if(ele.hasClass('ui-icon-reload')){
+                             $("#btnInverseSetClear").click();
+                             //_setOrclearInverseTermId();
+                        }else if(ele.hasClass('ui-icon-close')){
+                            $("#btnDelete").click();
+                            //_doDelete();
+                        }else if(ele.hasClass('ui-icon-arrowthick-1-w')){
+                            //td_import(false)
+                        }else if(ele.hasClass('ui-icon-arrowthick-1-e')){
+                            //td_export(false);
+                        }else if(ele.hasClass('ui-icon-image')){
+                            //td that.showFileUploader();
+                        }
+                    },500);
+                    //window.hWin.HEURIST4.util.stopEvent(event); 
+                    //return false;
+               });
+               /*
+               $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
+               .click(function(event){ 
+               //tree.contextmenu("open", $(event.target) ); 
+               
+               ).appendTo(actionspan);
+               */
+
+               //hide icons on mouse exit
+               function _onmouseexit(event){
+                       var node;
+                       if($(event.target).is('li')){
+                          node = $(event.target).find('.fancytree-node');
+                       }else if($(event.target).hasClass('fancytree-node')){
+                          node =  $(event.target);
+                       }else{
+                          //hide icon for parent 
+                          node = $(event.target).parents('.fancytree-node');
+                          if(node) node = $(node[0]);
+                       }
+                       var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
+                       ele.hide();//css('visibility','hidden');
+               }               
+               
+               $(item).hover(
+                   function(event){
+                       var node;
+                       if($(event.target).hasClass('fancytree-node')){
+                          node =  $(event.target);
+                       }else{
+                          node = $(event.target).parents('.fancytree-node');
+                       }
+                       var ele = $(node).find('.svs-contextmenu3');
+                       ele.css('display','inline-block');//.css('visibility','visible');
+                   }
+               );               
+               $(item).mouseleave(
+                   _onmouseexit
+               );
+           }
+    },
+    
+    
 
 });

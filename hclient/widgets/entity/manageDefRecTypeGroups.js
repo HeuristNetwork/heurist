@@ -236,7 +236,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     
 });
 
-//
+/*
 // Show as dialog
 //
 function showManageDefRecTypeGroups( options ){
@@ -254,3 +254,4 @@ function showManageDefRecTypeGroups( options ){
 
     manage_dlg.manageDefRecTypeGroups( 'popupDialog' );
 }
+*/

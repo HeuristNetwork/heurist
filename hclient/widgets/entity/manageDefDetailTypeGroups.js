@@ -238,7 +238,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     
 });
 
-//
+/*
 // Show as dialog
 //
 function showManageDefDetailTypeGroups( options ){
@@ -256,3 +256,4 @@ function showManageDefDetailTypeGroups( options ){
 
     manage_dlg.manageDefDetailTypeGroups( 'popupDialog' );
 }
+*/

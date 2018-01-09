@@ -24,7 +24,15 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
         this._super();
         
         var that = this;
-            
+
+        this.selectViewmode = this.element.find('#sel_viewmode');
+        this.selectViewmode.tabs()
+            .css({position:'absolute','height':'1.8em','bottom':0,'background':'none','border':'none'});
+        this.selectViewmode.find('ul').css({'background':'none','border':'none'});
+        this._on( this.selectViewmode, { tabsactivate:  
+                function(){this._trigger("onviewmode", null, this.selectViewmode.tabs('option','active'));} } );
+        
+        
         this.selectGroup = this.element.find('#sel_group');
         
         //only one domain to show
@@ -32,13 +40,13 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
             this.options.filter_group_selected = this.options.filter_groups;
             this.selectGroup.hide();
         }
-            this.selectGroup.css({position:'absolute','height':'1.8em','bottom':0});
-            this.selectGroup.tabs();
-            if(!window.hWin.HEURIST4.util.isempty(this.options.filter_group_selected)){
-                this.selectGroup.tabs('option','active',this.options.filter_group_selected=='relation'?1:0);
-            }
-            this.selectGroup.find('ul').css({'background':'none','border':'none'});
-            this.selectGroup.css({'background':'none','border':'none'});
+        
+        this.selectGroup.tabs()
+            .css({position:'absolute','height':'1.8em','bottom':0,'background':'none','border':'none'});
+        if(!window.hWin.HEURIST4.util.isempty(this.options.filter_group_selected)){
+            this.selectGroup.tabs('option','active',this.options.filter_group_selected=='relation'?1:0);
+        }
+        this.selectGroup.find('ul').css({'background':'none','border':'none'});
         
         this._on( this.selectGroup, { tabsactivate: this.startSearch  });
         

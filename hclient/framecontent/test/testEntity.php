@@ -306,9 +306,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 
                 
                 if(entity=='DefTerms'){
-                    //test purpose options.select_mode = 'images';
+                    //options.select_mode = 'images';
                     //options.initialTermsIds = [414,415,5424,528,5426,5449];
-                    //options.initialTermsIds = [5321,5317];
                 }
                 
                 
