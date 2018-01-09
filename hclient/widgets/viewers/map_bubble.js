@@ -45,6 +45,14 @@ $.widget( "heurist.bubble", $.ui.tooltip, {
         }*/
         };
 
+        this.liveRegion = $( "<div>" )
+            .attr( {
+                role: "log",
+                "aria-live": "assertive",
+                "aria-relevant": "additions"
+            } )
+            .appendTo( this.document[ 0 ].body );
+        this._addClass( this.liveRegion, null, "ui-helper-hidden-accessible" );        
 
         if ( this.options.disabled ) {
             this._disable();
@@ -55,12 +63,11 @@ $.widget( "heurist.bubble", $.ui.tooltip, {
       
         var that = this;
         
-        $.each( this.tooltips, function( id, element ) {
+        $.each( this.tooltips, function( id, tooltipData ) {
             var event = $.Event( "blur" );
-            event.target = event.currentTarget = element[0];
+            event.target = event.currentTarget = tooltipData.element[ 0 ];
             that.close( event, true );
-        });
-
+        } );        
         
     },
     

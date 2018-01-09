@@ -308,7 +308,7 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 
 		print "<div".(! $allowed ? ' class=greyed' : '').">";
 		print ' <p><input type="checkbox" name="bib[]" value="'.$rec_id.'"'.($is_checked ? ' checked' : '').(! $allowed ? ' disabled' : ' onchange="onSelect(this)"').'>';
-		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$rec_id.'"><img src='.HEURIST_BASE_URL.'common/images/external_link_16x16.gif></a>';
+		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id.'"><img src='.HEURIST_BASE_URL.'common/images/external_link_16x16.gif></a>';
 		print ' ' . $rec_title ."</p>";
 
 		print ' <p style="margin-left: 20px;"><b>' . $bkmk_count . '</b> bookmark' . ($bkmk_count == 1 ? '' : 's') . ($bkmk_count > 0 ? ':' : '') . "  ";
@@ -318,7 +318,7 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 		if ($refs) {
 			print ' <p style="margin-left: 20px;">Referenced by: ';
 			while ($row = mysql_fetch_assoc($refs_res)) {
-				print '  <a target=_new href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>';
+				print '  <a target=_new href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>';
 			}
 			print "</p>";
 		}

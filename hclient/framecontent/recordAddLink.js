@@ -78,7 +78,7 @@ function onPageInit(success) //callback function of hAPI initialization
                 
                 $('#rec_titles').html(rec_titles.join(' and '));
                 $('#link_rec_edit').attr('href', window.hWin.HAPI4.baseURL
-                                +'records/edit/editRecord.html?db='
+                                +'?fmt=edit&db='
                                 +window.hWin.HAPI4.database+'&recID='+source_ID);
                 
                 var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 

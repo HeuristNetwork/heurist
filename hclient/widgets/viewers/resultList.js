@@ -1134,7 +1134,7 @@ $.widget( "heurist.resultList", {
 
             }else if (action=='edit_ext'){
 
-                var url = window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
+                var url = window.hWin.HAPI4.baseURL + "?fmt=edit&db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                 window.open(url, "_new");
             }
             return;
@@ -1725,7 +1725,6 @@ $.widget( "heurist.resultList", {
                     var selected_rec_ID = $rdiv.attr('recid');
 
                     event.preventDefault();
-                    //window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID, "_new");
 
                     var query = null;
                     if(this._currentRecordset && this._currentRecordset.length()<1000){

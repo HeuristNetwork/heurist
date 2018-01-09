@@ -573,8 +573,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                             _editRecStructure(rty_ID);    
                       }else{
                             window.open(window.hWin.HAPI4.baseURL
-                                +'records/edit/editRecord.html?db='
-                                +window.hWin.HAPI4.database+'&recID='+rec_ID, '_new');
+                                +'?fmt=edit&db='+window.hWin.HAPI4.database+'&recID='+rec_ID, '_new');
                       }
                       
                       

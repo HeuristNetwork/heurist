@@ -151,12 +151,8 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 		$bkm_ID = $bkmk['bkm_ID'];
         $rec_ID = $bkmk['rec_ID'];
         
-        if(false && @$_REQUEST['ver']=='h3') { //since 2017-09-29
-            $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate;
-            header('Location: ' . $url);    
-        }else{
-            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_ID );
-        }
+        $url = HEURIST_BASE_URL . '?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID;
+        header('Location: ' . $url);    
 		
 		return;
 	}
@@ -478,13 +474,9 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
         
-        if(false && @$_REQUEST['ver']=='h3') { //since 2017-09-29
-            $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
-            header('Location: ' . $url );
-        }else{        
-            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_id );
-            //header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
-        }
+        $url = HEURIST_BASE_URL . '?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id;
+        header('Location: ' . $url);    
+        
 		return;
 	}
 }
@@ -575,19 +567,8 @@ if ($rec_id) {
 
 	if ($bkm_ID) {
         
-        if (true || @$_REQUEST['ver']!='h3') {//since 2017-09-29
-            //open edit record in standalone page
-            header( 'Location: ../../hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$rec_id );
-            //open edit above main screen as popup dialog
-            //header( 'Location: ../../?db='.HEURIST_DBNAME.'&edit_id='.$rec_id );
-        }
-        else if ($isNewRecID) {
-            $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bib' . $outdate . $wg;
-			header('Location: ' . $url);
-		} else {
-            $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bkmk' . $outdate . $wg;
-			header('Location: ' . $url);
-		}
+        $url = HEURIST_BASE_URL . '?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id;
+        header('Location: ' . $url);    
 		return;
 	}
 }

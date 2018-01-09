@@ -491,7 +491,6 @@ require_once(dirname(__FILE__)."/initPage.php");
         var recID = $("#mapSelectorBtn").attr('mapdoc-selected');
         if(recID>0){
             editRecord(parseInt(recID), window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']);
-            //window.open(window.hWin.HAPI4.baseURL + "records/edit/editRecord.html?db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
         }
     }
     function editRecord(recID, rt){
@@ -514,7 +513,6 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         if(parseInt(rt)>0){
             editRecord(-1, rt);
-            //window.open(window.hWin.HAPI4.baseURL + 'records/add/addRecord.php?addref=1&db='+window.hWin.HAPI4.database+'&rec_rectype='+rt);
         }else{
             window.hWin.HEURIST4.msg.showMsgDlg(
                 "The required record type "+rt+" has not been defined.<br><br>"+

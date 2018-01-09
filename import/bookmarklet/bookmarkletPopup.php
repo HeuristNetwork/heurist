@@ -144,7 +144,7 @@ render: function() {
 
 		a = td.appendChild(document.createElement("a"));
 		a.target = "_blank";
-        a.href= Heurist.uriBase +'hclient/framecontent/recordEdit.php?db='+Heurist.database+'&recID='+ HEURIST_url_bib_id;
+        a.href= Heurist.uriBase +'?fmt=edit&db='+Heurist.database+'&recID='+ HEURIST_url_bib_id;
 		//a.href= Heurist.uriBase +'records/edit/editRecord.html?db='+Heurist.database+'&bkmk_id=' + HEURIST_url_bkmk_id;
 		a.onclick = function() { Heurist.close() };
 		a.innerHTML = "edit record";

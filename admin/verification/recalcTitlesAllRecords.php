@@ -154,7 +154,7 @@
                     else
                         print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 
-                    print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.
+                    print ' <a target=_blank href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.
                         '&recID='.$rec_id.'">*</a> <br> <br>';
 
                     if ($rec_id % $step_uiupdate == 0) {

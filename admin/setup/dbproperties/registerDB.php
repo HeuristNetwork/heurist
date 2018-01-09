@@ -190,7 +190,7 @@ if($sError){
                 "<div class='input-cell'><b>ID:</b> " . $dbID . " </div></div>";
                 echo "<div class='input-row'><div class='input-header-cell'>Description:</div>".
                 "<div class='input-cell'>". $dbDescription . "</div></div>";
-                $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=Heurist_Master_Index";
+                $url = HEURIST_INDEX_BASE_URL."?fmt=edit&recID=".$dbID."&db=Heurist_Master_Index";
                 echo "<div class='input-row'><div class='input-header-cell'><b>Please edit the collection metadata ".
                 "describing this database:</b></div><div class='input-cell'>".
                 "<a href=$url target=_blank style='color:red;'>Click here to edit</a> (login as person who registered this database - ".
@@ -328,7 +328,7 @@ if($sError){
                         "<div class='input-cell'>" . $dbID . "</div></div>";
                         echo "<div class='input-row'><div class='input-header-cell'></div>".
                         "<div class='input-cell'>Basic description: " . $dbDescription . "</div></div>";
-                        $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=Heurist_Master_Index";
+                        $url = HEURIST_INDEX_BASE_URL."?fmt=edit&recID=".$dbID."&db=Heurist_Master_Index";
                         echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div>".
                         "<div class='input-cell'><a href=$url target=_blank>Click here to edit</a> " .
                         "(login - if asked - as yourself) </div></div>";

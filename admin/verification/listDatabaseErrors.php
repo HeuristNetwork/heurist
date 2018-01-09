@@ -336,7 +336,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                         <tr>
                             <td><input type=checkbox name="recCB" value=<?= $row['dtl_RecID'] ?>></td>
                             <td style="white-space: nowrap;"><a target=_new
-                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                     <?= $row['dtl_RecID'] ?>
                                     <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </a></td>
@@ -392,8 +392,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                             ?>
                             <tr>
                                 <td style="white-space: nowrap;"><a target=_new
-                                        href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=
-                                        <?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
+href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
                                         <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                     </a></td>
                                 <td><?= $row['dty_Name'] ?></td>
@@ -465,8 +464,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                    
                     <div>To REMOVE empty fields, please click here:
                         <button
-                            onclick="{document.getElementById('page-inner').style.display = 'none';
-                                window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixempty=1','_self')}">
+onclick="{document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixempty=1','_self')}">
                             Remove all null values</button>
                     </div>
                 </div>
@@ -482,7 +480,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                     <tr>
                         <td><input type=checkbox name="recCB6" value=<?= $row['dtl_RecID'] ?>></td>
                         <td style="white-space: nowrap;"><a target=_new
-                                href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
@@ -501,7 +499,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             }
             ?>
             
-            <hr/>
+            <hr>
 
             <?php
             // ----- Fields of type "Date" with  wrong values -------------------
@@ -568,8 +566,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                     </span>
                     <div>To fix faulty date values as suggested, please click here:
                         <button
-                            onclick="{document.getElementById('page-inner').style.display = 'none';
-                                window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1','_self')}">
+onclick="{document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1','_self')}">
                             Correct</button>
                     </div>
                 </div>
@@ -581,7 +578,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                     <tr>
                         <td><input type=checkbox name="recCB5" value=<?= $row['dtl_RecID'] ?>></td>
                         <td style="white-space: nowrap;"><a target=_new
-                                href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
@@ -595,7 +592,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             }
             ?>
 
-            <hr />
+            <hr>
 
 
 
@@ -668,7 +665,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                     <tr>
                         <td><input type=checkbox name="recCB1" value=<?= $row['dtl_RecID'] ?>></td>
                         <td style="white-space: nowrap;"><a target=_new
-                                href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
@@ -681,7 +678,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             }
             ?>
 
-            <hr/>
+            <hr>
             <div>
 
 
@@ -730,7 +727,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                         <tr>
                             <td style="width:50px; padding-left: 5px;">
                                 <a target=_new  title='Click to edit record'
-                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
 <img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" 
 title="<?php echo $row['rty_Name']?>" 
 src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dtl_RecID'] ?>
@@ -812,7 +809,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                     <input type=checkbox name="recCB2" value=<?= $row['dtl_RecID'] ?>>
                                 </td>
                                 <td style="white-space: nowrap;">
-                                    <a target=_blank href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    <a target=_blank href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                     <?= $row['dtl_RecID'] ?></a>
                                     <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </td>
@@ -889,7 +886,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                 </td>
                                 <td style="white-space: nowrap;">
                                     <a target=_new
-                                        href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                        href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                         <?= $row['rec_ID'] ?>
                                         <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                     </a>
@@ -964,7 +961,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                     </td>
                                     <td style="white-space: nowrap;">
                                         <a target=_new
-                                            href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                            href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                             <?= $row['rec_ID'] ?>
                                             <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                         </a>

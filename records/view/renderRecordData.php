@@ -342,7 +342,7 @@ function print_header_line($bib) {
 
         <div id=recID>ID:<?= htmlspecialchars($rec_id) ?><span class="link"><a id=edit-link class="normal"
             onClick="return sane_link_opener(this);"
-            target=_new href="<?php echo ($is_map_popup)?'../../records/':'../'?>edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span>
+            target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span>
         </div>
 
         <?php

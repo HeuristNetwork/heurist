@@ -61,7 +61,7 @@ if( array_key_exists("error", $out) ){
     if($mode=="edit"){ //open edit for new duplicated record 
         
         $new_recid = @$out['added'];  
-        header('Location: '.HEURIST_BASE_URL.'records/edit/editRecord.html?recID='.$new_recid.'&db='.HEURIST_DBNAME);
+        header('Location: '.HEURIST_BASE_URL.'?fmt=edit&recID='.$new_recid.'&db='.HEURIST_DBNAME);
         
     }
 }
