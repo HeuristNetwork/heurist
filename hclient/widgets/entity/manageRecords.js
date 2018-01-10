@@ -702,7 +702,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 +'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')
                 +'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
 
-        window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:500,
+        window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:620,
             padding: '0px',
             resizable:false,
             title: window.hWin.HR('ownership'),

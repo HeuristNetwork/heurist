@@ -300,10 +300,7 @@ if (@$_REQUEST['ulf_ID']){
     
     
 </script>
-<!--
-<script src="../../common/php/getMagicNumbers.php"></script>
-<script type="text/javascript" src="../../records/files/imageAnnotation.js"></script>
--->
+
 <script type="text/javascript" src="../../records/files/initViewer.js"></script>
 
 <?php

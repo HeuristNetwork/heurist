@@ -132,7 +132,7 @@ if(!in_array($action_type, $allowed_actions)){
 
             <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
                 <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Record is editable by:</label></div>
-                <select id="sel_Ownership" style="max-width:30em"></select>
+                <select id="sel_Ownership" style="max-width:30em;margin-bottom: 1em;"></select>
             </div>
             
             <div id="div_sel_access" style="padding: 0.2em; min-width: 600px;display:none;" class="input">

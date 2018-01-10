@@ -59,8 +59,6 @@ $(document).ready(function() {
             '../../../common/php/getMagicNumbers.php?db='+dbname,
             '../../../common/php/loadUserInfo.php?db='+dbname,
             '../../../common/php/loadCommonInfo.php?db='+dbname,
-            //'../../../records/edit/editRecord.js'
-            //'../../common/php/loadHAPI.php?db='+dbname,
         ])
         .done(onScriptsReady)
         .fail(function(error) {

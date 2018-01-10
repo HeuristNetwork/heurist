@@ -167,6 +167,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }
             );
             _fillSelectRecordScope();
+
+            if(action_type=='ownership'){
+                $('#cb_add_tags').parent().hide();
+                $('#div_sel_ownership').show();
+                $('#div_sel_access').show();
+                _fillOwnership();
+            }
             
             btn_start_action.addClass('ui-state-disabled'); //.click(_startAction);
         }else{
@@ -555,7 +562,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _startAction(){
         
-        if(init_scope_type=='noscope'){
+        if(init_scope_type=='noscope'){   //change ownership/access from edit record
             if(action_type=='ownership'){
                 window.close({owner:$('#sel_Ownership').val(), 
                               access:$('input[type="radio"][name="rb_Access"]:checked').val()});
@@ -594,7 +601,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         var request = { tag: $('#cb_add_tags').is(':checked')?1:0 };
 
-        if(action_type!='rectype_change'){
+        if(action_type!='rectype_change' && action_type!='ownership'){
 
             var dtyID = $('#sel_fieldtype').val();
             if(window.hWin.HEURIST4.util.isempty(dtyID)) {
@@ -654,8 +661,16 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }
         }
 
-
-        if(action_type=='rectype_change'){
+        if(action_type=='ownership'){
+            //@todo use new h4 batch method (to implement))
+                
+                var _data = {rec_ids: request['recIDs'],
+                             wg_id  :$('#sel_Ownership').val(),
+                             vis : $('input[type="radio"][name="rb_Access"]:checked').val() };
+                //that.executeAction( "set_wg_and_vis", _data );
+                window.close(_data);
+            
+        }else if(action_type=='rectype_change'){
             
             var rtyID = $('#sel_recordtype').val();
             if(!(rtyID>0)){

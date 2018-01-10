@@ -1001,36 +1001,8 @@ function EditRecStructure() {
     
     /**
     * Opens popup with preview
-    *
-    * Button is hident in UI
-    * Preview record structure - doesn't always work reliably. It hasn't been fully debugged.
-    * Option:   use records/add/formAddRecordPopup.html
-    *
     */
     function _initPreview(){
-
-        if(Hul.isnull(popupSelect))
-        {
-            //save all changes
-            _doExpliciteCollapse(null, true);
-
-            var url = top.HEURIST.baseURL +
-            "admin/structure/fields/editRecStructurePreview.html?rty_ID="+editStructure.getRty_ID()+"&db="+db;
-
-            window.open(url,'','scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,location=no,status=no');
-            /*
-            popupSelect = Hul.popupURL(top, url,
-            {	"close-on-blur": false,
-            "no-resize": false,
-            height: 640,
-            width: 800,
-            callback: function(context) {
-            popupSelect = null;
-            }
-            });
-            */
-        }
-
     }
 
     /**

@@ -139,7 +139,7 @@
             }
         </style>
         <script type="text/javascript">
-            var showReps, isEditorVisible=false;
+            var showReps, isEditorVisible=false, isInited=false;
 
             // inserts variable (false,false), repeat loop (true,false, or if test (false,true)
             function insertVar(isloop, isif){
@@ -147,6 +147,13 @@
                     showReps.insertSelectedVars( null, isloop, isif );
                 }
             }
+            function onResize(){
+                if(window.showReps){
+                       window.showReps.onResize(this.innerWidth);
+                }
+            }
+
+            
 /*
             if(!top.HEURIST.rectypes){
                 top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadCommonInfo.php")
@@ -451,10 +458,12 @@
                     if (oDoc.document) oDoc = oDoc.document;
                     oDoc.write("<head><title></title>");
                     oDoc.write("</head><body onload=\"this.focus(); this.print();\">");
-                    oDoc.write(oContent + "</body>");
+                    oDoc.write(oContent);
+                    oDoc.write('</body>');
                     oDoc.close();
                 }
                 catch(e){
+console.log(e)
                     //self.print();
                 }
             }
@@ -609,10 +618,6 @@
                 }
             }
 
-            function onResize(){
-                window.showReps.onResize(this.innerWidth);
-            }
-
             //
             //  starts initialization on load completion of this window
             function loadHandler(){
@@ -640,6 +645,7 @@
                 }});
                 */
 
+                isInited = true;
 
             }
 

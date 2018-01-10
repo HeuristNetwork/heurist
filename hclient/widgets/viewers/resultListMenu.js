@@ -291,10 +291,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             this.selectShow();
 
-        }else if(action == "menu-selected-relateto"){  //show add relation dialog
-
-            this.addRelationshipsPopup();
-
         }else if(action == "menu-selected-merge"){  //show add relation dialog
 
             this.fixDuplicatesPopup();
@@ -325,7 +321,8 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         }else if(action == "menu-selected-ownership"){
 
-            this.setWorkgroupPopup();
+            //this.setWorkgroupPopup();
+            this.detailBatchEditPopup('ownership');
 
         }else if(action == "menu-selected-delete"){
 
@@ -672,6 +669,8 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         })
     },
 
+    // replaced  with this.detailBatchEditPopup('ownership');
+    /* not used anymore
     setWorkgroupPopup: function() {
 
         var recIDs_list = this.getSelectionIds("Please select at least one record to set workgroup ownership and visibility");
@@ -680,7 +679,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         var that = this;
 
         this.convertGroupsForH3();
-
+        
         var url = window.hWin.HAPI4.baseURL+ "records/permissions/setRecordOwnership.html?db=" + window.hWin.HAPI4.database;
 
         window.hWin.HEURIST4.msg.showDialog(url, { height:300, width:650, title: window.hWin.HR('Set workgroup / access'),
@@ -695,7 +694,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                 that.executeAction( "set_wg_and_vis", _data );
             }
         });
-    },
+    }, */
 
     //-------------------------------------- SELCT ALL, NONE, SHOW -------------------------------
 
@@ -856,38 +855,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
 
     //-------------------------------------- RELATION, MERGE -------------------------------
-
-    addRelationshipsPopup: function(){
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to add relationships");
-        if(Hul.isempty(recIDs_list)) return;
-
-        var that = this;
-
-        if(top.HEURIST && !top.HEURIST.rectypes){
-            $.getScript(window.hWin.HAPI4.baseURL + 'common/php/loadCommonInfo.php?db='+window.hWin.HAPI4.database, function(){ that.addRelationshipsPopup(); } );
-            return
-        }
-
-        var url = window.hWin.HAPI4.baseURL + "search/actions/setRelationshipsPopup.html?db=" + window.hWin.HAPI4.database;
-
-        window.hWin.HEURIST4.msg.showDialog(url, {
-            title: window.hWin.HR('Add Relationships'),
-            onpopupload: function(frame){
-                var ele = frame.contentDocument.getElementById("record-count");
-                if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
-
-                ele.innerHTML = recIDs_list.length;
-                ele = frame.contentDocument.getElementById("record-selected");
-                ele.innerHTML = recIDs_list.join(",");
-            },
-            callback: function(context) {
-                that.reloadSearch();
-            }
-        });
-
-    },
-
     fixDuplicatesPopup: function(){
 
 
@@ -961,12 +928,21 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         
         var script_name = 'recordAction';
         var callback = null;
+        
         if(action_type=='add_link'){
             script_name = 'recordAddLink';
             callback = function(context) {
                         if(context!="" && context!=undefined) {
                             var sMsg = (context==true)?'Link created...':context;
                             hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
+                        }
+            };            
+        }else if(action_type=='ownership'){
+
+            var that = this;
+            callback = function(context) {
+                        if(context!="" && context!=undefined) {
+                                that.executeAction( "set_wg_and_vis", context );
                         }
             };            
         }
