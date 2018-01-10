@@ -1511,9 +1511,10 @@ window.hWin.HEURIST4.ui = {
     
             var url = window.hWin.HAPI4.baseURL,
                 dwidth, dheight, dtitle;    
+            
+            if(!popup_options) popup_options = {};
                 
             if(isEdit==true){
-                if(!popup_options) popup_options = {};
                 window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, popup_options);
                 return;
                 
@@ -1548,22 +1549,22 @@ window.hWin.HEURIST4.ui = {
                 dtitle = 'Record Info';
                 dheight = 640;
                 dwidth = 800;
-            }        
             
-            var $dosframe = window.hWin.HEURIST4.msg.showDialog(url, {
-                height:dheight, 
-                width:dwidth,
-                padding:0,
-                title: window.hWin.HR(dtitle),
-                class:'ui-heurist-bg-light',
-                callback: callback,
-                beforeClose: function(){
-                    //access manageRecord within frame within this popup and call close prefs
-                    if($.isFunction($dosframe[0].contentWindow.onBeforeClose)){
-                            $dosframe[0].contentWindow.onBeforeClose();
+                var $dosframe = window.hWin.HEURIST4.msg.showDialog(url, {
+                    height:dheight, 
+                    width:dwidth,
+                    padding:0,
+                    title: window.hWin.HR(dtitle),
+                    class:'ui-heurist-bg-light',
+                    callback: popup_options.callback,
+                    beforeClose: function(){
+                        //access manageRecord within frame within this popup and call close prefs
+                        if($.isFunction($dosframe[0].contentWindow.onBeforeClose)){
+                                $dosframe[0].contentWindow.onBeforeClose();
+                        }
                     }
-                }
-                });
+                    });
+            }        
     },
     
     //

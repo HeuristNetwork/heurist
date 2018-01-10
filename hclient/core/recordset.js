@@ -235,6 +235,15 @@ function hRecordSet(initdata) {
                     }
                 }
                 
+                if(startDate==null && endDate!=null){
+                    if(dres==null){
+                        startDate = endDate;    
+                        endDate = null;
+                    }else{
+                        startDate = dres[0];
+                    }
+                }
+                
                 //need to verify date and convert from Temporal
                 dres = window.hWin.HEURIST4.util.parseDates(startDate, endDate);
                 if(dres){

@@ -718,8 +718,12 @@ window.hWin.HEURIST4.util = {
 
     // @todo change temporal to moment.js for conversion
     parseDates: function(start, end){
-         if(window['Temporal'] && start){   
+         if(window['Temporal'] && (start || end)){   
                 //Temporal.isValidFormat(start)){
+                if(start==null && end!=null){
+                    start = end;
+                    end = null;
+                }
                 
                             // for VISJS timeline
                             function __forVis(dt){
