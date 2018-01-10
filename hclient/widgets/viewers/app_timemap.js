@@ -240,7 +240,7 @@ $.widget( "heurist.app_timemap", {
             //this.mapframe.css('cursor', 'progress');
         }else{
             //this.framecontent.css('cursor', 'auto');
-            //this.mapframe.css('background','none');
+            this.mapframe.css('background','none');
         }
     }
 

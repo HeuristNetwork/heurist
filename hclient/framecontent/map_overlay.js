@@ -49,7 +49,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     * Performs an API call which contains data - all map documents/layer/dataset related info.
     * The list of map documents will be loaded into selector
     */
-    function _loadMapDocuments(startup_mapdocument) {
+    function _loadMapDocuments(startup_mapdocument, onload_callback) {
 
         loading_mapdoc_list = true;
         
@@ -114,9 +114,14 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                                 menu_mapdocuments.hide();
                         }});
 
+                    menu_mapdocuments.hide();
+                    
                     var lt = window.hWin.HAPI4.sysinfo['layout'];   
+                    
                     if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
                         menu_mapdocuments.hide();
+                    }else if($.isFunction(onload_callback)) {
+                        onload_callback.call();
                     }
                     
                     if(startup_mapdocument>=0){
@@ -124,7 +129,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                             _loadMapDocumentById_init(startup_mapdocument);
                         }
                     }else{
-                        menu_mapdocuments.show().position({my: "right top", at: "right bottom", of: $('#mapSelectorBtn') });    
+                        
                     }
 
                 }else{
@@ -1749,14 +1754,16 @@ map.data.addListener('mouseover', function(event) {
                 $('.menu-or-popup').hide(); //hide other
                 
                 if(loading_mapdoc_list) return;
-                _loadMapDocuments();
+                _loadMapDocuments(null, function(){
+                     menu_mapdocuments.show().position({my: "right top", at: "right bottom", of: $('#mapSelectorBtn') });    
+                });
                 
                 $( document ).one( "click", function() { menu_mapdocuments.hide(); });
                 return false;
         });
                 
 
-        _loadMapDocuments(startup_mapdocument_id>0?startup_mapdocument_id:0);
+        _loadMapDocuments(startup_mapdocument_id>0?startup_mapdocument_id:0, null);
 
     }
 
@@ -1781,7 +1788,7 @@ map.data.addListener('mouseover', function(event) {
         
         loadMapDocuments:function(startup_mapdocument){
             current_map_document_id = 0;
-            _loadMapDocuments(startup_mapdocument);
+            _loadMapDocuments(startup_mapdocument, null);
         },
         
         loadMapDocumentById: function(mapdocument_id, isforce){
