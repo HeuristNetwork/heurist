@@ -1749,19 +1749,18 @@ function EditRecStructure() {
         
         _isServerOperationInProgress = false;
         
-        //do not expand 
-        return;
-        
-        //emulate click on last record
-        setTimeout(function(){
-            
-            var oRecord = _getRecordById(lastID).record;
-            var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_DisplayName')});
-            //$.find("tr.yui-dt-last > td.yui-dt-col-rst_DisplayName")[0]
-            var oArgs = {event:'MouseEvent', target: elLiner};
-            onCellClickEventHandler(oArgs);
-        },500);
-        
+        //remark this exit to prevent expand after insert
+        if($('#showEditOnNewField').is(':checked')){
+            //emulate click on just added row
+            setTimeout(function(){
+                
+                var oRecord = _getRecordById(lastID).record;
+                var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('expandColumn')});
+                //$.find("tr.yui-dt-last > td.yui-dt-col-rst_DisplayName")[0]
+                var oArgs = {event:'MouseEvent', target: elLiner};
+                onCellClickEventHandler(oArgs);
+            },500);
+        }
     }
 
     /**

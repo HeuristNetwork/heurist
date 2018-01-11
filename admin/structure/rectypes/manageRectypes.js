@@ -451,11 +451,11 @@ function RectypeManager() {
                         var str1 = top.HEURIST.iconBaseURL + id + "&t=" + curtimestamp;
                         var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png&t=" + curtimestamp;
                         var icon ="<div class=\"rectypeImages\">"+
-                        "<a href=\"#\">"+  //edit_icon
+                        "<a href=\"#edit_rectype\">"+  //edit_icon
                         "<img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
                         "</a>"+
                         "<div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\">"+
-                        "<a href=\"#\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+ //edit_icon
+                        "<a href=\"#edit_rectype\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+ //edit_icon
                         "</div>"+
                         "</div>";
                         elLiner.innerHTML = icon;
