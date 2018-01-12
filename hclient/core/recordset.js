@@ -1286,10 +1286,8 @@ function hRecordSet(initdata) {
                 }else if($.isArray(record)){
                     records[recID] = record;
                 } 
-                
-                
-                
-                
+            }else{
+                this.addRecord(recID, record);
             }
         },
         

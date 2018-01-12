@@ -82,6 +82,10 @@ class DbSysUsers extends DbEntityBase
             
                 array_push($where, '(ugl_UserID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
+        }else if (@$this->data['needRole']==1) {
+                $needRole = true;
+                array_push($where, '(ugl_UserID = ugr_ID)');
+                array_push($from_table, 'sysUsrGrpLinks');
         }
         
         //compose SELECT it depends on param 'details' ------------------------
@@ -190,11 +194,16 @@ class DbSysUsers extends DbEntityBase
             $this->records[$idx]['ugr_Modified'] = null; //reset
             
             //add password by default
-            if(@$this->records[$idx]['ugr_Password']){
+            if(@$this->records[$idx]['ugr_Password']==''){
+                unset($this->records[$idx]['ugr_Password']);
+
+            }else if(@$this->records[$idx]['ugr_Password']){
+
                 $tmp_password = $this->records[$idx]['ugr_Password'];
                 $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
                 $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
                 $this->records[$idx]['ugr_Password'] = crypt($tmp_password, $salt);
+
             }
             if(!@$this->records[$idx]['ugr_Name']){
                 $this->records[$idx]['ugr_Name'] = $this->records[$idx]['ugr_eMail'];
@@ -231,6 +240,20 @@ class DbSysUsers extends DbEntityBase
             }
         }//after save loop
         */
+        
+        if($ret!==false){
+            //treat group image
+            foreach($this->records as $record){
+                if(in_array(@$record['ugr_ID'], $ret)){
+                    $thumb_file_name = @$record['ugr_Thumb'];
+            
+                    //rename it to recID.png
+                    if($thumb_file_name){
+                        parent::renameEntityImage($thumb_file_name, $record['ugr_ID']);
+                    }
+                }
+            }
+        }        
         return $ret;
     }  
             
@@ -246,13 +269,26 @@ class DbSysUsers extends DbEntityBase
         }
         
         $mysqli = $this->system->get_mysqli();
+
+        //@todo
+        /*check for last admin   !!!!!
+        $cnt = mysql__select_value($mysqli, 
+                'SELECT ugl_GroupID, count() from sysUsrGrpLinks where ugl_UserID='
+                .$this->recordIDs.' AND ugl_Role="admin"');
+        if($cnt==1){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                        'It is not possible to remove the only admin from group');
+            return false;
+        }
+        */
+        
         
         $keep_autocommit = mysql__begin_transaction($mysqli);
         
         $ret = parent::delete();
         
-        
         if($ret){
+            
             //remove from roles table
             $query = 'DELETE FROM sysUsrGrpLinks'
                 . ' WHERE ugl_UserID in (' . implode(',', $this->recordIDs) . ')';

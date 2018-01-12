@@ -658,7 +658,8 @@ class System {
             case 'database':
             default:
                 $sysvals = $this->get_system();
-                return  ( "admin" ==  @$this->current_User['ugr_Groups'][$sysvals['sys_OwnerGroupID']] ); //admin in db owners group
+                //admin in db owners group
+                return  ( "admin" ==  @$this->current_User['ugr_Groups'][$sysvals['sys_OwnerGroupID']] ); 
         }
     }
 

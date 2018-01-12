@@ -122,7 +122,8 @@ $.widget( "heurist.editing_input", {
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
-            .css('vertical-align', (this.detailType=="blocktext")?'top':'')  //|| this.detailType=='file'
+            .css('vertical-align', (this.detailType=="blocktext" 
+                            || (this.detailType=='file' && this.configMode.entity!='records')  )?'top':'') 
             .html('<label>' + lblTitle + '</label>')
             .appendTo( this.element );
         }
@@ -1550,7 +1551,7 @@ $.widget( "heurist.editing_input", {
             if( this.detailType=='file' ){
                 
                         //url for thumb
-                        var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumbnail');
+                        var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumb', 1);
                         
                         $input.css({'padding-left':'30px'});
                         $('<span class="ui-icon ui-icon-folder-open"></span>')
@@ -1581,7 +1582,7 @@ $.widget( "heurist.editing_input", {
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
-                //{name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
+                {name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
                 {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
@@ -1611,7 +1612,7 @@ $.widget( "heurist.editing_input", {
                     }
                 });
             }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                window.hWin.HEURIST4.msg.showMsgErr(response);// .message
             }
             var inpt = this;
             $input_img.off('click');

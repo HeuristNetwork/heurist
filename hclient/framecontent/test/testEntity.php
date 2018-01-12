@@ -395,7 +395,7 @@ print $targetPath.'<br>';
                     <label>Entity:
                         <select id="entity-sel">
                             <option value="Records">Records</option>
-                            <option value="SysUsers">Users +</option>
+                            <option value="SysUsers" selected>Users +</option>
                             <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
@@ -406,7 +406,7 @@ print $targetPath.'<br>';
                             <option value="DefRecTypeGroups">Record Type Groups</option>
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
-                            <option value="DefTerms" selected>Terms</option>
+                            <option value="DefTerms"d>Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
                             <option value="RecThreadedComments">Record Comments</option>
                             <option value="Smarty">Smarty Reports</option>

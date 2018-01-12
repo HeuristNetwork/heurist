@@ -92,12 +92,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
 
         this._on( this.searchForm, {
-                "searchrecuploadedfilesonresult": this.updateRecordList
-                });
-        this._on( this.searchForm, {
-                "searchrecuploadedfilesonaddext": function() { this.addEditRecord(-1); }
-                });
-        this._on( this.searchForm, {
+                "searchrecuploadedfilesonresult": this.updateRecordList,
+                "searchrecuploadedfilesonaddext": function() { this.addEditRecord(-1); },
                 "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister
                 });
         

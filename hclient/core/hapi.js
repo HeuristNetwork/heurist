@@ -793,7 +793,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = window.hWin.HEURIST4.util.random();
-                request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
+                //request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
                 _callserver('entityScrud', request, callback);
             },
 
@@ -894,7 +894,14 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         /**
-        * Returns true is current user is database owner
+        * Returns true is current user is database owner - user id 2
+        */ 
+        is_dbowner: function(){
+            return that.currentUser['ugr_DbOwner'];
+        },
+
+        /**
+        * Returns true is current user is database admin (admin in group Database Managers)
         */
         is_admin: function(){
             return that.currentUser['ugr_Admin'];
@@ -910,7 +917,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         /**
-        * Return userGroup ID if currentUser is database owner or admin of given group
+        * Return userGroup ID if currentUser is database admin or admin of given group
         *
         * @param ugrID - userGroup ID
         */
@@ -1097,16 +1104,16 @@ function hAPI(_db, _oninit) { //, _currentUser
                 return null;
         }
 
-        , getImageUrl: function(entityName, recID, version){
-            if(recID>0){
-                     return window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php'
-                            +'?db='+ window.hWin.HAPI4.database
-                            +'&entity='+entityName
-                            +'&recID='+recID
-                            +'&version='+version;
-            }else{
-                return '';
-            }
+        , getImageUrl: function(entityName, recID, version, def){
+                
+            if(!(def>=0||def<3)) def = 2;
+
+            return window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php'
+                    +'?db='+ window.hWin.HAPI4.database
+                    +'&entity='+entityName
+                    +'&id='+recID
+                    +'&version='+version
+                    +'&def='+def;
         }
 
         //

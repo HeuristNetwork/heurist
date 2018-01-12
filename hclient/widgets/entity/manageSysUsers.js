@@ -69,11 +69,21 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
 
         this._on( this.searchForm, {
-                "searchsysusersonresult": this.updateRecordList
-                });
-        this._on( this.searchForm, {
+                "searchsysusersonresult": this.updateRecordList,
                 "searchsysusersonadd": function() { this.addEditRecord(-1); }
                 });
+        
+        
+        this._on( this.recordList, {
+                        "resultlistonpagerender": function(event){
+                            //init role selector
+                            this.recordList.find('select.user-role')
+                                .each(function(idx,item){$(item).val($(item).attr('data-value'))})
+                                .change(function(event){console.log($(event.target).val())});
+                            
+                        }
+                        });
+                        
         
         return true;
     },
@@ -98,28 +108,31 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
         var recID   = fld('ugr_ID');
-        var rectype = 'user';//fld('ugr_Type');
         
-        var recTitle = fld2('ugr_ID','4em')+fld2('ugr_Name','14em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
-        var recTitleHint = recID+' : '+fld('ugr_Organisation');
+        //var recTitle = fld2('ugr_ID','3em')+fld2('ugr_Name','10em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
+        var recTitleHint = fld('ugr_Organisation');
         
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectype + '&entity=sysUGrps';
-
-        var html_thumb = '';
-        if(fld('ugr_ThumbnailURL')){
-            html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('ugr_ThumbnailURL') + '&quot;);opacity:1"></div>';
-        }else{
-            html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ 
-                window.hWin.HAPI4.iconBaseURL + 'thumb/' + rectype + '&entity=sysUGrps&quot;);"></div>';
-        }
-
+        var recTitle = fld2('ugr_ID','3em')
+                    + '<a class="item" style="width:8em" href="mailto:'+fld('ugr_eMail')+'" title="'+fld('ugr_eMail')+'">'
+                    + fld('ugr_Name')+'</a>'
+                    + '<div class="item" style="width:15em">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>'
+                    + fld2('ugr_Organisation','8em');
+        
+        var recOpacity = (fld('ugr_Enabled')=='y')?1:0.3;
+        
+        var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
+        //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
+        var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+        
+        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:'+recOpacity+'">'
+        +'</div>';
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        + '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'
+        +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);opacity:'+recOpacity+'">'
         + '</div>'
         + '<div class="recordTitle" title="'+recTitleHint+'">'
         +     recTitle
@@ -127,8 +140,24 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+            
+            var ugl_GroupID = this.searchForm.find('#input_search_group').val();
+            if(ugl_GroupID>0){
+                if(window.hWin.HAPI4.has_access(ugl_GroupID)){
+                    html = html 
+                        + '<select title="Role" style="position:absolute;top:4px;right:56px;width:7em" class="user-role" data-value="'
+                        + fld('ugl_Role')+'">'
+                        +'<option>admin</option><option>member</option></select>';
+                    
+                }else{
+                    html = html 
+                        + '<div title="Role" style="position:absolute;top:4px;right:56px;width:5em">'
+                        + fld('ugl_Role')+'</div>';
+                }
+            }
+            
             html = html 
-                + '<div title="Click to edit user" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                + '<div title="Click to edit user" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="right:30px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>&nbsp;&nbsp;';
            if(recID!=2){
@@ -146,6 +175,23 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
     },
     
+    //overwritten    
+    _recordListGetFullData:function(arr_ids, pageno, callback){
+
+        var request = {
+                'a'          : 'search',
+                'entity'     : this.options.entity.entityName,
+                'details'    : 'list',
+                'pageno'     : pageno,
+                'needRole'   : (this.searchForm.find('#input_search_group').val()>0?1:0)
+        };
+        
+        request[this.options.entity.keyField] = arr_ids;
+        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
+    },
+    
+    // update list after save
+    //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         // close on addition of new record in select_single mode    
@@ -158,6 +204,18 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 return;        
         }
         this._super( recID, fieldvalues );
-    }
-    
+        
+        this.getRecordSet().setRecord(recID, fieldvalues);
+        this.recordList.resultList('refreshPage');  
+    },
+
+    _afterInitEditForm: function(){
+        this._super();
+        //hide after edit init btnRecRemove for group=2
+        if(this._currentEditID==2){
+            var ele = this._toolbar;
+            ele.find('#btnRecRemove').hide();
+        }
+        
+    }    
 });

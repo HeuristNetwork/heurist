@@ -810,7 +810,7 @@ div .selected_last{
     bottom: 1px;
     left: 33px;
     right: 3px;
-    height: 24px;
+    /*height: 24px;*/
     width: 150px;
 }
 

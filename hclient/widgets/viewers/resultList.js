@@ -814,54 +814,62 @@ $.widget( "heurist.resultList", {
     //
     _renderEmptyMessage: function(mode){
 
-        if( !window.hWin.HEURIST4.util.isempty (this.options['empty_remark']) ){
+        if( !window.hWin.HEURIST4.util.isempty(this.options['empty_remark']) ){
             $('<div>').css('padding','10px').html(this.options['empty_remark']).appendTo(this.div_content);
-            return;
-        }
-        
-        var $emptyres = $('<div>')
-        .css('padding','1em')
-        .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListEmptyMsg.html',
-            function(){
-                $emptyres.find('.acc').accordion({collapsible:true,heightStyle:'content'});
-                $emptyres.find('p').css({'padding-top':'10px'});
-                
-                $emptyres.find('.acc > h3').css({
-                    background: 'none',
-                    border: 'none',
-                    'font-size': 'larger',
-                    'font-weight': 'bold'
-                });
-                $emptyres.find('.acc > div').css({
-                    background: 'none', border: 'none'});    
-                    
-                if(mode==0){   //no filter
-                    $emptyres.find('.no-filter').show();
-                    $emptyres.find('.not-found').hide();
-                    $emptyres.find('.acc1').accordion({active:false});
-                }else{       //no result
-                    $emptyres.find('.no-filter').hide();
-                    $emptyres.find('.not-found').show();
-                    $emptyres.find('.acc2').accordion({active:false});
 
-                     //logged in and current search was by bookmarks
-                    if(window.hWin.HAPI4.currentUser.ugr_ID>0 && this._query_request){
-                        var domain = this._query_request.w
-                        if((domain=='b' || domain=='bookmark')){
-                            var $al = $('<a href="#">')
-                            .text(window.hWin.HR('Click here to search the whole database'))
-                            .appendTo($emptyres);
-                            this._on(  $al, {
-                                click: this._doSearch4
-                            });
+        }else
+        if(this.options.entityName!='records'){
+
+            $('<div>').css('padding','10px')
+                .html('<h3 class="not-found" style="color:teal">No entites match the filter criteria</h3>')
+                .appendTo(this.div_content);
+            
+        }else{
+        
+            var $emptyres = $('<div>')
+            .css('padding','1em')
+            .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListEmptyMsg.html',
+                function(){
+                    $emptyres.find('.acc').accordion({collapsible:true,heightStyle:'content'});
+                    $emptyres.find('p').css({'padding-top':'10px'});
+                    
+                    $emptyres.find('.acc > h3').css({
+                        background: 'none',
+                        border: 'none',
+                        'font-size': 'larger',
+                        'font-weight': 'bold'
+                    });
+                    $emptyres.find('.acc > div').css({
+                        background: 'none', border: 'none'});    
+                        
+                    if(mode==0){   //no filter
+                        $emptyres.find('.no-filter').show();
+                        $emptyres.find('.not-found').hide();
+                        $emptyres.find('.acc1').accordion({active:false});
+                    }else{       //no result
+                        $emptyres.find('.no-filter').hide();
+                        $emptyres.find('.not-found').show();
+                        $emptyres.find('.acc2').accordion({active:false});
+
+                         //logged in and current search was by bookmarks
+                        if(window.hWin.HAPI4.currentUser.ugr_ID>0 && this._query_request){
+                            var domain = this._query_request.w
+                            if((domain=='b' || domain=='bookmark')){
+                                var $al = $('<a href="#">')
+                                .text(window.hWin.HR('Click here to search the whole database'))
+                                .appendTo($emptyres);
+                                this._on(  $al, {
+                                    click: this._doSearch4
+                                });
+                            }
                         }
+                    
                     }
-                
+                    
                 }
-                
-            }
-        ).appendTo(this.div_content);
-                
+            ).appendTo(this.div_content);
+        
+        }        
     },
     
     //
@@ -1831,6 +1839,9 @@ $.widget( "heurist.resultList", {
         }
 
 
+        this._trigger( "onpagerender", null, this );
+        
+        //@toto replace it to event listener in manageRecUploadedFiles
         if($.isFunction(this.options.onPageRender)){
             this.options.onPageRender.call(this);
         }

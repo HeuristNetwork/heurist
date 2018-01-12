@@ -35,36 +35,47 @@ if($path){
   exit();
 }
 
+/*
+
+id - record id
+entity - by default recordtypes
+def - if file not found return empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
+version - thumb|icon|full (thumb is default)
+
+*/
+
+
 //main purpose - download entity images
-$entity_name = @$_REQUEST['entity'];
-$recID = @$_REQUEST['recID'];
 $db = @$_REQUEST['db'];
+$entity_name = @$_REQUEST['entity'];
 $filename = @$_REQUEST['file'];
-$csv_encoding = @$_REQUEST['encoding'];
 
 $error = null;
 
 if(!$db){
     $error = "Db parameter is not defined";
-}else 
+}
+/*
 if(!$entity_name && !$filename){
     $error = "Entity parameter is not defined";
 }else 
 if(!$filename){
     $error = "File name not defined"; //to get file from scratch
 }else
-if($entity_name && !($recID>0)){
-    $error = "Entity ID is not defined";
+if(!$entity_name){
+    $error = "Entity is not defined";
 }else{
-
-    $system = new System(); //without db connection
-    $system->initPathConstants($db);
+*/
+$system = new System(); //without db connection
+$system->initPathConstants($db);
     
-    if($filename){ //download from scratch
-        
+if($filename){ //download from scratch
+         
         $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
 
         $content_type = null;//'image/'.$file_ext;
+        
+        $csv_encoding = @$_REQUEST['encoding'];
         
         if($csv_encoding && $csv_encoding!='UTF-8'){ //force convert to utf8       
         
@@ -112,46 +123,70 @@ if($entity_name && !($recID>0)){
                 print 'Cant save temporary file (with UTF-8 encoded csv data) '.$file_read;
                 exit();
             }
-    
+            
         }
-        
+        download_file($file_read, null);
         
     }else{
+        
+        $content_type = 'image/png';
 
-        $filename = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
-
-        $version  = @$_REQUEST['version'];
-        if($version=='thumbnail' || $version=='icon'){
-            $filename =  $filename.$version.'/';   
+        $viewmode = @$_REQUEST['version'] ?$_REQUEST['version']:'thumb'; //icon, thumb, full
+        if($viewmode=='thumbnail') $viewmode='thumb';
+        
+        $rec_id = @$_REQUEST['id'];
+        
+        if($rec_id>0){
+        
+            $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';    
+            
+            if($viewmode=='thumb'){
+                $filename = $path.'thumbnail/'.$rec_id.'.png'; 
+            }else if($viewmode=='icon'){
+                $filename = $path.'icon/'.$rec_id.'.png';    
+            }else{
+                $exts = array('png','jpg','jpeg','gif');
+                foreach ($exts as $ext){
+                    if(file_exists($path.$rec_id.'.'.$ext)){
+                        $content_type = 'image/'.$ext;
+                        $filename = $path.$rec_id.'.'.$ext;
+                        break;
+                    }
+                }
+            }                  
+            if(file_exists($filename)){
+                download_file($filename, $content_type);
+                exit();
+            }
+        }    
+        
+        //entity id either not defined or requested file doesn't exist
+        //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
+        $default_mode = @$_REQUEST['def'] ?$_REQUEST['def']:2;
+        
+        //at the moment we don't have full images that describe entity
+        $path = HEURIST_FILESTORE_DIR . 'entity-icons/'.(($viewmode=='icon')?'':'thumb/'); 
+        
+        if($default_mode==2) //get entity default icon or thumb
+        {
+            $filename = $path.$_REQUEST['entity'].'.png';    
+            if(file_exists($filename)){
+                download_file($filename, $content_type);
+                exit();
+            }
         }
-        //find file by recID
-        $filename = $filename.$recID.'.';
-        
-        $exts = array('png','jpg','jpeg','gif');
-        
-        $file_read = HEURIST_DIR.'hclient/assets/13x13.gif';
-        $file_ext = 'gif';
-        
-        foreach ($exts as $ext) {
-           
-            if(file_exists($filename.$ext)){
-                $file_read = $filename.$ext;
-                $file_ext = $ext;
-                break;
-            }        
+                
+        if ($default_mode==1){ //show invitation to add image
+            download_file(dirname(__FILE__).'/../../hclient/assets/100x100click.png', $content_type);
+        }else {
+            $content_type = 'image/gif';
+            if($viewmode = 'icon'){
+                download_file(dirname(__FILE__).'/../../hclient/assets/16x16.gif', $content_type);
+            }else{
+                download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', $content_type);
+            }
         }
-        
-        $content_type = 'image/'.$file_ext;
-    }
-    
-    ob_start();    
-    if($content_type) header('Content-type: '.$content_type);
-    header('Pragma: public');
-    header('Content-Length: ' . filesize($file_read));
-    @ob_clean();
-    flush();        
-    readfile($file_read);
-    
+        exit();
 }
 
 if($error){
@@ -161,5 +196,15 @@ if($error){
     
     }
 }
+
+function download_file($filename, $content_type){
+        ob_start();    
+        if($content_type) header('Content-type: '.$content_type);
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filename));
+        @ob_clean();
+        flush();        
+        readfile($filename);
+}    
 ?>
 

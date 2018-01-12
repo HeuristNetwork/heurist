@@ -41,7 +41,7 @@ if($system->init(@$_REQUEST['db'])){
             $response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
     }else if ( $system->get_user_id()<1 ) {
             $response = $system->addError(HEURIST_REQUEST_DENIED);
-    }else if ($entity_name=='sysUGrps') {
+    }else if ($entity_name=='sysGroups') {
             if(!$system->is_admin2($recID)){ //only user or group admin
               $response = $system->addError(HEURIST_REQUEST_DENIED);
             }

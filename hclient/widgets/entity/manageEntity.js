@@ -301,11 +301,12 @@ $.widget( "heurist.manageEntity", {
                        select_mode: this.options.select_mode,
                        selectbutton_label: this.options.selectbutton_label,
                        
+                       entityName: this._entityName,
                        //view_mode: this.options.view_mode?this.options.view_mode:null,
                        
                        pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
                        empty_remark: 
-                            (this.options.select_mode!='manager')
+                            (this.options.select_mode!='manager' || this.options.entityName!='records')
                             ?'<div style="padding:1em 0 1em 0">'+this.options.entity.empty_remark+'</div>'
                             :'',
                        searchfull: function(arr_ids, pageno, callback){
@@ -758,7 +759,7 @@ $.widget( "heurist.manageEntity", {
             
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
                 'prefs_'+this._entityName,
-                window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+                window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content', false);
             
         }
     },
@@ -909,9 +910,17 @@ $.widget( "heurist.manageEntity", {
     //
     getRecordSet: function(recIDs){
         if(this.options.use_cache){
-            return this._cachedRecordset.getSubSetByIds(recIDs);
+            if(window.hWin.HEURIST4.util.isnull(recIDs)){
+                return this._cachedRecordset;
+            }else{
+                return this._cachedRecordset.getSubSetByIds(recIDs);    
+            }
         }else if(this.options.list_mode=='default'){
-            return this.recordList.resultList('getRecordsById', recIDs);
+            if(window.hWin.HEURIST4.util.isnull(recIDs)){
+                return this.recordList.resultList('getRecordSet')
+            }else{
+                return this.recordList.resultList('getRecordsById', recIDs);
+            }
         }
     },
 
@@ -987,12 +996,14 @@ $.widget( "heurist.manageEntity", {
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
-                            var recID = ''+response.data[0];
-                            fields[ that.options.entity.keyField ] = recID;
+                            var recID = response.data[0];
+                            fields[ that.options.entity.keyField ] = (''+recID);
                             
                             //update record in cache
                             if(that.options.use_cache){
-                                that._cachedRecordset.addRecord(recID, fields);
+                                this._cachedRecordset.addRecord(recID, fields);
+                            }else{
+                                //add/update record in recordset in _afterSaveEventHandler depends on entity
                             }
                             
                             that._afterSaveEventHandler( recID, fields );
@@ -1199,7 +1210,7 @@ $.widget( "heurist.manageEntity", {
                     //help and tips buttons on dialog header
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this.editFormPopup,
                         'prefs_'+this._entityName,
-                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content', false);
                      
                 this._toolbar = this._edit_dialog.parent();     
                      

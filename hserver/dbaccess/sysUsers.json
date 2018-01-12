@@ -119,6 +119,33 @@
                         ]
                     }
                 }, 
+
+        {
+        "groupHeader": "Optional information",
+        "groupTitleVisible": true,
+        "groupType": "accordion",
+            "children":[
+
+                {
+                    "dtID": "ugr_IncomingEmailAddresses",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":4000,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Incoming email addresses:",
+                        "rst_DisplayHelpText": "Comma-separated list of email addresses you may use to send email to the database Email sent from these addresses may be harvested into database records"
+                    }
+                },
+                {
+                    "dtID": "ugr_TargetEmailAddresses",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Outgoing email addresses:",
+                        "rst_DisplayHelpText": "Comma-separated list of email addresses to which you may want to send database records as email. This will be added to the default list for the database when choosing an email destination to which to email records."
+                    }
+                },
                 {
                     "dtID": "ugr_Department",
                     "dtFields":{
@@ -176,7 +203,31 @@
                         "rst_FieldConfig":["admin","member"],
                         "rst_Display":"hidden"
                     }
+                },
+                {
+                    "dtID": "ugr_URLs",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":2000,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Personal Website URLs:",
+                        "rst_DisplayHelpText": ""
+                    }
+                },
+                {
+                    "dtID": "ugr_Thumb",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"User picture:",
+                        "rst_DisplayHelpText": "Image to represent this user", 
+                        "rst_FieldConfig":{"entity":"sysUsers", "accept":".png,.jpg,.gif", "size":200},
+                        "dty_Role":"virtual"
+                    }
                 }
+            ]
+        }
+                
+                
                 
                 
      ]

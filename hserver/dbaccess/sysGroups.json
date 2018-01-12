@@ -116,7 +116,18 @@
                         "rst_Display":"hidden",
                         "rst_DefaultValue": "PASSWORD NOT REQUIRED"
                     }
+                },
+                {
+                    "dtID": "ugr_Thumb",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Group picture:",
+                        "rst_DisplayHelpText": "Image to represent this group", 
+                        "rst_FieldConfig":{"entity":"sysGroups", "accept":".png,.jpg,.gif", "size":200},
+                        "dty_Role":"virtual"
+                    }
                 }
+                
                 
      ]
 }

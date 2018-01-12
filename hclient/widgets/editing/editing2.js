@@ -183,7 +183,7 @@ function hEditing(_options) {
                         //init previous one 
                         if(groupEle!=null){
                             if(currGroupType == 'accordion'){
-                                groupEle.accordion({heightStyle: "content"});
+                                groupEle.accordion({heightStyle: "content", active:false, collapsible: true});
                             }else if(currGroupType == 'tabs'){
                                 groupEle.tabs();
                             }
@@ -296,7 +296,7 @@ function hEditing(_options) {
             //init last one
             if(groupEle!=null){
                 if(currGroupType == 'accordion'){
-                    groupEle.accordion({heightStyle: "content"});
+                    groupEle.accordion({heightStyle: "content", active:false, collapsible: true });
                 }else if(currGroupType == 'tabs'){
                     groupEle.tabs();
                 }

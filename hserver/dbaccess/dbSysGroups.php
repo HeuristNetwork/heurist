@@ -80,6 +80,10 @@ class DbSysGroups extends DbEntityBase
             
                 array_push($where, '(ugl_GroupID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
+        /*}else if (@$this->data['needRole']==1) {  //for current user
+                $needRole = true;
+                array_push($where, '(ugl_GroupID = ugr_ID) AND (ugl_UserID = 2)');
+                array_push($from_table, 'sysUsrGrpLinks');                       */
         }
         
         //compose SELECT it depends on param 'details' ------------------------
@@ -210,23 +214,38 @@ class DbSysGroups extends DbEntityBase
 
         $ret = parent::save();
    
-        if($ret!==false)
-        //foreach($this->records as $rec_idx => $record){
-        //    $usr_ID = $this->records[$rec_idx][$this->primaryField];
-        foreach($ret as $usr_ID){  
-            
-            if(!in_array($usr_ID ,$this->recordIDs )){ //add admin for new group
+        if($ret!==false){
+            //foreach($this->records as $rec_idx => $record){
+            //    $usr_ID = $this->records[$rec_idx][$this->primaryField];
+            foreach($ret as $usr_ID){  
+                
+                if(!in_array($usr_ID ,$this->recordIDs )){ //add admin for new group
+                        
+                    $admin_role = array();
+                    $admin_role['ugl_GroupID'] = $usr_ID;
+                    $admin_role['ugl_UserID'] = $this->system->get_user_id();
+                    $admin_role['ugl_Role'] = 'admin';
                     
-                $admin_role = array();
-                $admin_role['ugl_GroupID'] = $usr_ID;
-                $admin_role['ugl_UserID'] = $this->system->get_user_id();
-                $admin_role['ugl_Role'] = 'admin';
-                
-                $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $admin_role);
-                
+                    $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $admin_role);
+                    
+                }
+            }//after save loop
+
+            //treat group image
+            foreach($this->records as $record){
+                if(in_array(@$record['ugr_ID'], $ret)){
+                    $thumb_file_name = @$record['ugr_Thumb'];
+            
+                    //rename it to recID.png
+                    if($thumb_file_name){
+                        parent::renameEntityImage($thumb_file_name, $record['ugr_ID']);
+                    }
+                }
             }
-        }//after save loop
+        }
+        
         return $ret;
+        
     }     
     
     //
@@ -276,10 +295,14 @@ class DbSysGroups extends DbEntityBase
     
     //
     // batch action for groups - add/remove users to/from group
+    // parameters 
+    // groupID  - affected group
+    // userIDs  - user roles to be changed
+    // remove - 1 remove user from group
     //
     public function batch_action(){
         
-        //tags ids
+        //group ids
         $this->recordIDs = prepareIds(@$this->data['groupID']);
         if(count($this->recordIDs)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid group identificator');
@@ -297,7 +320,7 @@ class DbSysGroups extends DbEntityBase
             return false;
         }
         
-        $isRemove = (@$this->data['remove']!=null);
+        $isRemove = (@$this->data['role']=='remove');
         
         $mysqli = $system->get_mysqli();
         

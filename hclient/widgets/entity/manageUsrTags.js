@@ -444,7 +444,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 this.recordList.find('div[recid='+recID+'] > label').text(fields['tag_Text']
                 (fields['tag_Usage']>0?(' ('+fields['tag_Usage']+')'):''));
                 //reload
-                this._cachedRecordset.setRecord(recID, fields);
                 var recordset = this.getRecordSet([recID]);
                 this._initEditForm_step4(recordset);
             }
