@@ -22,7 +22,7 @@
         recordAdd  - create temporary record for given user
         recordSave - Save record
         recordDuplicate - Duplicate record
-        recordDelete  - TODO!!!
+        recordDelete  
         
         isWrongAccessRights - validate parameter values
         isWrongOwnership

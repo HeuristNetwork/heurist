@@ -23,7 +23,7 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
-require_once (dirname(__FILE__).'/utils_mail.php');
+require_once (dirname(__FILE__).'/../utilities/utils_mail.php');
 
 class DbUsrReminders extends DbEntityBase
 {

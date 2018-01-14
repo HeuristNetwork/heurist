@@ -539,6 +539,7 @@ div .selected_last{
     position: absolute;
     text-align: left;
     overflow: hidden;
+    text-shadow: 3px 3px 5px white;
 
     /*line-height: 12px;*/
 }
@@ -1500,4 +1501,12 @@ option {padding-left:15px;}
     color:red !important;
     font-weight: bold;
     opacity: 1;
+}
+
+.user-list-edit{
+    border-radius:8px;
+    color:white;
+    background-color:gray;
+    cursor:pointer;
+    padding-left:4px;
 }

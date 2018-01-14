@@ -78,12 +78,12 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.input_search_url =  this.element.find('#input_search_url');
 
         this.input_search_my = this.element.find('#input_search_my');
-        this.input_search_recent =  this.element.find('#input_search_recent');
+        this.input_sort_type =  this.element.find('#input_sort_type');
         
         this._on( this.input_search_url, { keypress: this.startSearchOnEnterPress });
         this._on( this.input_search_path, { keypress: this.startSearchOnEnterPress });
         this._on(this.input_search_my,  { change:this.startSearch });
-        this._on(this.input_search_recent,  { change:this.startSearch });
+        this._on(this.input_sort_type,  { change:this.startSearch });
 
         
         if(this.options.select_mode=='manager'){
@@ -164,9 +164,17 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             if(this.input_search_my.is(':checked')){
                 request['ulf_UploaderUGrpID'] = window.hWin.HAPI4.currentUser.ugr_ID; 
             }
-            if(this.input_search_recent.is(':checked')){
+            
+            this.input_sort_type = this.element.find('#input_sort_type');
+            if(this.input_sort_type.val()=='size'){
+                request['sort:ulf_FileSizeKB'] = '-1' 
+            }else if(this.input_sort_type.val()=='recent'){
                 request['sort:ulf_Added'] = '-1' 
+            }else{
+                request['sort:ulf_OrigFileName'] = '-1';   
             }
+            
+            
             
             if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );

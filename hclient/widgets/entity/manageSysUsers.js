@@ -29,6 +29,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
+        //this.options.edit_mode = 'popup';
         
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
@@ -55,12 +56,12 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchSysUsers(this.options);
         
-        var iheight = 4;
+        var iheight = 6;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
         this.searchForm.css({'height':iheight+'em'});
-        this.recordList.css({'top':iheight+0.4+'em'});
+        this.recordList.css({'top':iheight+0.5+'em'});
         //init viewer 
         var that = this;
         
@@ -70,7 +71,31 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         this._on( this.searchForm, {
                 "searchsysusersonresult": this.updateRecordList,
-                "searchsysusersonadd": function() { this.addEditRecord(-1); }
+                "searchsysusersonadd": function() { this.addEditRecord(-1); },
+                "searchsysusersonfind": function() { 
+                    
+                        var options = {select_mode: 'select_multi',
+                                //ugl_GroupID: group_ID,
+                                isdialog: true,
+                                edit_mode:'none',
+                                title: ("Select Users to add to Workgroup #"+group_ID),
+                                onselect:function(event, data){
+                        
+                                    //$('#selected_div').empty();
+                                    var s = 'Selected ';
+                                    if(data && data.selection)
+                                    for(i in data.selection){
+                                        if(i>=0)
+                                            s = s+data.selection[i]+'<br>';
+                                    }
+                                    console.log(s);
+                                    //$('#selected_div').html(s);
+                                }};                    
+                        
+                        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
+                    
+                        this.addEditRecord(-1); 
+                    }
                 });
         
         
@@ -80,7 +105,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                             this.recordList.find('select.user-role')
                                 .each(function(idx,item){$(item).val($(item).attr('data-value'))})
                                 .change(function(event){console.log($(event.target).val())});
-                            
+
                         }
                         });
                         
@@ -143,11 +168,11 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             
             var ugl_GroupID = this.searchForm.find('#input_search_group').val();
             if(ugl_GroupID>0){
-                if(window.hWin.HAPI4.has_access(ugl_GroupID)){
+                if(window.hWin.HAPI4.has_access(ugl_GroupID)>0){    //admin of this group
                     html = html 
                         + '<select title="Role" style="position:absolute;top:4px;right:56px;width:7em" class="user-role" data-value="'
                         + fld('ugl_Role')+'">'
-                        +'<option>admin</option><option>member</option></select>';
+                        +'<option>admin</option><option>member</option><option>remove</option></select>';
                     
                 }else{
                     html = html 
@@ -156,16 +181,25 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 }
             }
             
-            html = html 
-                + '<div title="Click to edit user" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="right:30px">'
-                +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                + '</div>&nbsp;&nbsp;';
-           if(recID!=2){
-                html = html      
-                + '<div title="Click to delete user" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-                +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-                + '</div>';
-           }
+            if(window.hWin.HAPI4.has_access(recID)>0){
+                
+                html = html 
+                    + '<div title="Click to edit user" class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;&nbsp;';
+               if(recID!=2){
+                    html = html      
+                    + '<div title="Click to delete user" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                    + '</div>';
+               }
+               
+            }else{
+                html = html 
+                    + '<div title="Status: not admin - locked" class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;&nbsp;';
+            }
         }
         
 
@@ -182,9 +216,12 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 'a'          : 'search',
                 'entity'     : this.options.entity.entityName,
                 'details'    : 'list',
-                'pageno'     : pageno,
-                'needRole'   : (this.searchForm.find('#input_search_group').val()>0?1:0)
+                'pageno'     : pageno
         };
+        if(this.searchForm.find('#input_search_group').val()>0){
+            request['ugl_GroupID'] = this.searchForm.find('#input_search_group').val();
+        }
+        
         
         request[this.options.entity.keyField] = arr_ids;
         window.hWin.HAPI4.EntityMgr.doRequest(request, callback);

@@ -23,6 +23,7 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
+require_once (dirname(__FILE__).'/db_records.php'); //for recordDelete
 require_once (dirname(__FILE__).'/db_files.php');
 
 
@@ -80,10 +81,6 @@ class DbSysGroups extends DbEntityBase
             
                 array_push($where, '(ugl_GroupID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
-        /*}else if (@$this->data['needRole']==1) {  //for current user
-                $needRole = true;
-                array_push($where, '(ugl_GroupID = ugr_ID) AND (ugl_UserID = 2)');
-                array_push($from_table, 'sysUsrGrpLinks');                       */
         }
         
         //compose SELECT it depends on param 'details' ------------------------
@@ -126,6 +123,8 @@ class DbSysGroups extends DbEntityBase
             if($value!=null){
                 array_push($order, 'ugr_Members '.($value>1?'ASC':'DESC'));
                 $needCount = true;
+            }else{
+                array_push($order, 'ugr_Name ASC');
             }
         }  
         
@@ -201,6 +200,18 @@ class DbSysGroups extends DbEntityBase
             $this->records[$idx]['ugr_Modified'] = null; //reset
             $this->records[$idx]['ugr_Password'] = 'PASSWORD NOT REQUIRED';
             $this->records[$idx]['ugr_eMail'] = 'EMAIL NOT SET FOR '.$this->records[$idx]['ugr_Name'];
+            
+            
+            //validate duplication
+            $mysqli = $this->system->get_mysqli();
+            $res = mysql__select_value($mysqli,
+                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_Name='"
+                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."'");
+            if($res!=@$this->records[$idx]['ugr_ID']){
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Workgroup cannot be saved. The provided name already exists');
+                return false;
+            }
+            
         }
 
         return $ret;
@@ -215,30 +226,26 @@ class DbSysGroups extends DbEntityBase
         $ret = parent::save();
    
         if($ret!==false){
-            //foreach($this->records as $rec_idx => $record){
-            //    $usr_ID = $this->records[$rec_idx][$this->primaryField];
-            foreach($ret as $usr_ID){  
-                
-                if(!in_array($usr_ID ,$this->recordIDs )){ //add admin for new group
-                        
-                    $admin_role = array();
-                    $admin_role['ugl_GroupID'] = $usr_ID;
-                    $admin_role['ugl_UserID'] = $this->system->get_user_id();
-                    $admin_role['ugl_Role'] = 'admin';
-                    
-                    $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $admin_role);
-                    
-                }
-            }//after save loop
 
             //treat group image
             foreach($this->records as $record){
-                if(in_array(@$record['ugr_ID'], $ret)){
+                $grpoup_ID = @$record['ugr_ID'];
+                if($grpoup_ID && in_array($grpoup_ID, $ret)){
                     $thumb_file_name = @$record['ugr_Thumb'];
             
                     //rename it to recID.png
                     if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $record['ugr_ID']);
+                        parent::renameEntityImage($thumb_file_name, $grpoup_ID);
+                    }
+                    
+                    if(!in_array($grpoup_ID, $this->recordIDs )){ //add current user as admin for new group
+                            
+                        $admin_role = array();
+                        $admin_role['ugl_GroupID'] = $grpoup_ID;
+                        $admin_role['ugl_UserID'] = $this->system->get_user_id();
+                        $admin_role['ugl_Role'] = 'admin';
+                        $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $admin_role);
+                        
                     }
                 }
             }
@@ -254,37 +261,53 @@ class DbSysGroups extends DbEntityBase
     public function delete(){
         
         $this->recordIDs = prepareIds($this->data['recID']);
-        if(in_array( 1, $this->recordIDs)){
+        if(in_array(1, $this->recordIDs)){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot remove "Database Owners" group');
             return false;
         }
-        
-        //@todo check if user to be deleted is last admin for some group
-        
-        
         $mysqli = $this->system->get_mysqli();
+        
+        //check for existing records
+        $query = 'SELECT count(rec_ID) FROM Records WHERE rec_OwnerUGrpID in (' 
+                        . implode(',', $this->recordIDs) . ') AND rec_FlagTemporary=0 limit 1';
+        $res = mysql__select_value($mysqli, $query);
+        if($res>0){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Deleting Group with existing Records not allowed');
+            return false;
+        }
         
         $keep_autocommit = mysql__begin_transaction($mysqli);
         
-        $ret = parent::delete();
+        //remove temporary records
+        $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in (' 
+                        . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
+        $rec_ids_to_delete = mysql__select_list($mysqli, $query);
+        if(count($rec_ids_to_delete)>0){
+            $res = recordDelete($this->system, $rec_ids_to_delete);
+            if(@$res['status']!=HEURIST_OK) return false;
+        }
+
+        //remove from roles table
+        $query = 'DELETE FROM sysUsrGrpLinks'
+            . ' WHERE ugl_UserID in (' . implode(',', $this->recordIDs) . ')';
         
-        
+        $res = $mysqli->query($query);
+        if(!$res){
+            $system->addError(HEURIST_DB_ERROR,
+                            'Cannot remove entries from user/group links (sysUsrGrpLinks)',
+                            $mysqli->error );
+            $ret = false;
+        }   
+                 
         if($ret){
-            //remove from roles table
-            $query = 'DELETE FROM sysUsrGrpLinks'
-                . ' WHERE ugl_UserID in (' . implode(',', $this->recordIDs) . ')';
-            
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR,
-                                'Cannot remove entries from user/group links (sysUsrGrpLinks)',
-                                $mysqli->error );
-                $ret = false;
-            }            
+            $ret = parent::delete();
         }
 
         if($ret){
             $mysqli->commit();
+            
+            //@todo   $groups = reloadUserGroups(get_user_id());
+            //@todo   updateSessionForUser(get_user_id(), 'user_access', $groups);
         }else{
             $mysqli->rollback();
         }
@@ -298,14 +321,19 @@ class DbSysGroups extends DbEntityBase
     // parameters 
     // groupID  - affected group
     // userIDs  - user roles to be changed
-    // remove - 1 remove user from group
+    // role - remove admin member
     //
     public function batch_action(){
+        
+        if(!in_array(@$this->data['role'],array('remove','admin','member'))){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid parameter "role"');
+            return false;
+        }
         
         //group ids
         $this->recordIDs = prepareIds(@$this->data['groupID']);
         if(count($this->recordIDs)==0){             
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid group identificator');
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid workgroup identificator');
             return false;
         }
         
@@ -320,50 +348,70 @@ class DbSysGroups extends DbEntityBase
             return false;
         }
         
-        $isRemove = (@$this->data['role']=='remove');
-        
         $mysqli = $system->get_mysqli();
         
         $ret = true;
         
-        if($isRemove){
-            //can't remove last admin
-            $cnt = mysql__select_value($mysqli, 
-                    'SELECT count() from sysUsrGrpLinks where ugl_GroupID='
-                    .$this->recordIDs[0].' AND ugl_Role="admin"');
-            if($cnt==1){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                            'It is not possible to remove the only admin from group');
-                return false;
+        
+        //group can not be without admin. 
+        if($this->data['role']=='remove' || $this->data['role']=='member'){
+            
+            //verification
+            foreach ($this->recordIDs as $groupID){
+                foreach ($assignIDs as $usrID){
+                    
+                    $query = 'SELECT count(g2.ugl_ID) FROM sysUsrGrpLinks AS g2 LEFT JOIN sysUsrGrpLinks AS g1 '
+                                .'ON g1.ugl_GroupID=g2.ugl_GroupID AND g2.ugl_Role="admin" '                             //is it the only admin
+                                .'WHERE g1.ugl_UserID='.$usrID.' AND g1.ugl_Role="admin" AND g1.ugl_GroupID='.$groupID;  //is this user admin
+                                
+                    //can't remove last admin
+                    $cnt = mysql__select_value($mysqli, $query);
+                    if($cnt<2){
+                        $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                            'It is not possible to '.($this->data['role']=='remove')?'remove':' change role to" member" for'
+                            .' user #'.$usrID.' from group #'.$groupID.'. This user is the only admin of the workgroup');
+                        return false;
+                    }
+                }
             }
             
-            $query = 'DELETE FROM sysUsrGrpLinks'
-                . ' WHERE ugl_GroupID='
-                . $this->recordIDs[0].' ugl_UserID in (' . implode(',', $assignIDs) . ')';
+        }
+        
+        
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+            
+        $query = 'DELETE FROM sysUsrGrpLinks'
+            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')'
+            . ' AND ugl_UserID in (' . implode(',', $assignIDs) . ')';
+            
+        $res = $mysqli->query($query);
+        if(!$res){
+            $system->addError(HEURIST_DB_ERROR, 'Can\'t remove users from workgroup', $mysqli->error );
+            $ret = false;
+        }
+            
+        if($this->data['role']!='remove'){
                 
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Can\'t remove users from group', $mysqli->error );
-                $ret = false;
-            }
-            
-        }else{
-            
-            $keep_autocommit = mysql__begin_transaction($mysqli);
-            
-            foreach ($assignIDs as $usrID){
-                $query = 'INSERT INTO sysUsrGrpLinks (ugl_GroupID, ugl_UserID, ugl_Role)'
-                    .' ('. $this->recordIDs[0] .' , '. $usrID .', "member")';
+            foreach ($this->recordIDs as $groupID){
+                $query = array();
+                foreach ($assignIDs as $usrID){
+                    array_push($query, ' ('. $groupID .' , '. $usrID .', "'.$this->data['role'].'")');
+                }    
+                $query = 'INSERT INTO sysUsrGrpLinks (ugl_GroupID, ugl_UserID, ugl_Role) '
+                        .implode(',', $query);
                 $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;
                     $mysqli->rollback();
-                    $system->addError(HEURIST_DB_ERROR, 'Can\'t add users to group', $mysqli->error );
+                    $system->addError(HEURIST_DB_ERROR, 'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
                     break;
-                }else{
-                    $mysqli->commit();
                 }
-            }//foreach            
+            }//foreach      
+            
+            if($ret){
+                $mysqli->commit();
+            }
+                  
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         }
         

@@ -510,6 +510,7 @@ class System {
                 "sysinfo"=>array(
                     "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
                     "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
+                    "db_managers_groupid"=>($this->get_system('sys_OwnerGroupID')>0?$this->get_system('sys_OwnerGroupID'):1),
                     "help"=>HEURIST_HELP,
                     
                     //code version

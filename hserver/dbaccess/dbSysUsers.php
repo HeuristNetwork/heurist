@@ -24,6 +24,8 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 require_once (dirname(__FILE__).'/db_files.php');
+require_once (dirname(__FILE__).'/db_records.php'); //for recordDelete
+require_once (dirname(__FILE__).'/db_users.php'); //send email methods
 
 
 class DbSysUsers extends DbEntityBase
@@ -80,10 +82,6 @@ class DbSysUsers extends DbEntityBase
                     array_push($where, $pred);
                 }
             
-                array_push($where, '(ugl_UserID = ugr_ID)');
-                array_push($from_table, 'sysUsrGrpLinks');
-        }else if (@$this->data['needRole']==1) {
-                $needRole = true;
                 array_push($where, '(ugl_UserID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
         }
@@ -188,6 +186,8 @@ class DbSysUsers extends DbEntityBase
     
         $ret = parent::prepareRecords();
 
+        //@todo captcha validation for registration
+        
         //add specific field values
         foreach($this->records as $idx=>$record){
             $this->records[$idx]['ugr_Type'] = 'user';
@@ -203,6 +203,7 @@ class DbSysUsers extends DbEntityBase
                 $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
                 $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
                 $this->records[$idx]['ugr_Password'] = crypt($tmp_password, $salt);
+                $this->records[$idx]['tmp_password'] = $tmp_password;
 
             }
             if(!@$this->records[$idx]['ugr_Name']){
@@ -211,45 +212,79 @@ class DbSysUsers extends DbEntityBase
             if(!@$this->records[$idx]['ugr_ID'] || $this->records[$idx]['ugr_Type']<0){
                 $this->records[$idx]['ugr_Enabled'] = 'n';
             }
-        }
 
+            //validate duplication
+            $mysqli = $this->system->get_mysqli();
+            $res = mysql__select_value($mysqli,
+                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_Name='"
+                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."' OR ugr_eMail='"
+                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_eMail'])."'");
+            if($res!=@$this->records[$idx]['ugr_ID']){
+                $system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided name or email already exists');
+                return false;
+            }
+            
+            //find records to be approved and new ones
+            if($this->system->is_admin() && "y"==@$this->records[$idx]['ugr_Enabled'] && @$this->records[$idx]['ugr_ID']>0){
+                $row = mysql__select_row($mysqli,
+                         'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_LoginCount=0 AND ugr_Type="user" AND ugr_ID='
+                                .$this->records[$idx]['ugr_ID']);
+                if($res=='n'){
+                    $this->records[$idx]['is_approvement'] = true;
+                }
+            }
+            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['ugr_ID']>0));
+            
+        }
+        
         return $ret;
         
     }    
-      
+
+    //      
     //
-    // add current user as admin for new group
     //
     public function save(){
 
+
         $ret = parent::save();
 
-        /*  @todo add user to group if ugl_GroupID is specified   
-        if($ret!==false)
-        foreach($ret as $usr_ID){  
-            
-            if(!in_array($usr_ID ,$this->recordIDs )){ //add admin for new group
-                    
-                $admin_role = array();
-                $admin_role['ugl_GroupID'] = $usr_ID;
-                $admin_role['ugl_UserID'] = $this->system->get_user_id();
-                $admin_role['ugl_Role'] = 'admin';
-                
-                $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $admin_role);
-                
-            }
-        }//after save loop
-        */
-        
+       
         if($ret!==false){
-            //treat group image
-            foreach($this->records as $record){
-                if(in_array(@$record['ugr_ID'], $ret)){
-                    $thumb_file_name = @$record['ugr_Thumb'];
             
+            foreach($this->records as $idx=>$record){
+                $ugr_ID = @$record['ugr_ID'];
+                if($ugr_ID>0 && in_array($ugr_ID, $ret)){
+                    
+                    //treat user image
+                    $thumb_file_name = @$record['ugr_Thumb'];
                     //rename it to recID.png
                     if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $record['ugr_ID']);
+                        parent::renameEntityImage($thumb_file_name, $ugr_ID);
+                    }
+                    
+                    //add user to specified group
+                    if($record[$idx]['ugl_GroupID']>0){
+                        $group_role = array();
+                        $group_role['ugl_GroupID'] = $record[$idx]['ugl_GroupID'];
+                        $group_role['ugl_UserID'] = $ugr_ID;
+                        $group_role['ugl_Role'] = 'member';
+                        
+                        $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $group_role);
+                    }
+                    
+                    //send approvement or registration email
+                    $rv = true;
+                    $is_new = (@$this->records[$idx]['is_new']===true);
+                    $is_approvement = (@$this->records[$idx]['is_approvement']===true);
+                    if($is_new && $this->system->get_user_id()<1){ //this is independent registration of new user
+                        $rv = user_EmailAboutNewUser($this->system, $ugr_ID);
+                    }else if($is_new || $is_approvement){ //this is approvement or registration FOR user
+                        $rv = user_EmailApproval($this->system, $ugr_ID, $this->records[$idx]['tmp_password'], $is_approvement);
+                    }
+                    if(!$rv){
+                        //can not sent email 
+                        //return false;
                     }
                 }
             }
@@ -270,36 +305,52 @@ class DbSysUsers extends DbEntityBase
         
         $mysqli = $this->system->get_mysqli();
 
-        //@todo
-        /*check for last admin   !!!!!
-        $cnt = mysql__select_value($mysqli, 
-                'SELECT ugl_GroupID, count() from sysUsrGrpLinks where ugl_UserID='
-                .$this->recordIDs.' AND ugl_Role="admin"');
-        if($cnt==1){
+        $query = 'SELECT g2.ugl_GroupID, count(g2.ugl_ID) AS adm FROM sysUsrGrpLinks AS g2 LEFT JOIN sysUsrGrpLinks AS g1 '
+                    .'ON g1.ugl_GroupID=g2.ugl_GroupID AND g2.ugl_Role="admin" '                        //is it the only admin
+                    .'WHERE g1.ugl_UserID='.$usrID.' AND g1.ugl_Role="admin" GROUP BY g1.ugl_GroupID  HAVING adm=1';  //is this user admin
+                    
+        //can't remove last admin
+        $res = mysql__select_row($mysqli, $query);
+        if($res!=null){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                        'It is not possible to remove the only admin from group');
+                'It is not possible to remove  user #'.$usrID.'. This user is the only admin of the workgroup #'.$res[0]);
             return false;
         }
-        */
         
+        //check for existing records
+        $query = 'SELECT count(rec_ID) FROM Records WHERE rec_OwnerUGrpID in (' 
+                        . implode(',', $this->recordIDs) . ') AND rec_FlagTemporary=0 limit 1';
+        $res = mysql__select_value($mysqli, $query);
+        if($res>0){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Deleting user with existing Records not allowed');
+            return false;
+        }
         
         $keep_autocommit = mysql__begin_transaction($mysqli);
+
+        //remove temporary records
+        $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in (' 
+                        . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
+        $rec_ids_to_delete = mysql__select_list($mysqli, $query);
+        if(count($rec_ids_to_delete)>0){
+            $res = recordDelete($this->system, $rec_ids_to_delete);
+            if(@$res['status']!=HEURIST_OK) return false;
+        }
         
-        $ret = parent::delete();
+        //remove from roles table
+        $query = 'DELETE FROM sysUsrGrpLinks'
+            . ' WHERE ugl_UserID in (' . implode(',', $this->recordIDs) . ')';
         
+        $res = $mysqli->query($query);
+        if(!$res){
+            $system->addError(HEURIST_DB_ERROR,
+                            'Cannot remove entries from user/group links (sysUsrGrpLinks)',
+                            $mysqli->error );
+            $ret = false;
+        }            
+            
         if($ret){
-            
-            //remove from roles table
-            $query = 'DELETE FROM sysUsrGrpLinks'
-                . ' WHERE ugl_UserID in (' . implode(',', $this->recordIDs) . ')';
-            
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR,
-                                'Cannot remove entries from user/group links (sysUsrGrpLinks)',
-                                $mysqli->error );
-                $ret = false;
-            }            
+            $ret = parent::delete();
         }
 
         if($ret){

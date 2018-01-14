@@ -26,21 +26,28 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         var that = this;
         
         this.btn_add_record = this.element.find('#btn_add_record');
+        this.btn_find_record = this.element.find('#btn_find_record');
 
         if(this.options.edit_mode=='none'){
             this.btn_add_record.hide();
+            this.btn_find_record.hide();
         }else{
             this.btn_add_record.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Add New User"), icons: {
-                            primary: "ui-icon-plus"
-                    }})
+                    .button({label: window.hWin.HR("Add New User"), icon: "ui-icon-plus"})
                 .click(function(e) {
                     that._trigger( "onadd" );
                 }); 
+
+            this.btn_find_record.css({'min-width':'9m','z-index':2})
+                    .button({label: window.hWin.HR("Find/Add User"), icon: "ui-icon-search"})
+                .click(function(e) {
+                    that._trigger( "onfind" );
+                }); 
                 
+            //@todo proper alignment
             if(this.options.edit_mode=='inline'){
                 this.btn_add_record.css({'float':'left','border-bottom':'1px lightgray solid',
-                'width':'100%', 'min-height': '2.4em', 'margin-bottom': '0.4em'});    
+                'min-height': '2.4em', 'margin-bottom': '0.4em'});    
             }                       
         }
 
@@ -62,6 +69,22 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         this._on(this.input_search_role,  { change:this.startSearch });
         this._on(this.input_search_inactive,  { change:this.startSearch });
         
+        if(this.options.ugl_GroupID>0){
+            this.input_search_group.parent().hide();
+            this.input_search_group.val(this.options.ugl_GroupID);
+            
+            this.input_search_role.parent().show();
+            
+            if(!window.hWin.HAPI4.is_admin()){
+                this.btn_add_record.hide();
+            }
+            if(window.hWin.HAPI4.has_access(this.options.ugl_GroupID)<0){
+                this.btn_find_record.hide(); 
+            }
+            
+        }else{
+            this.btn_find_record.hide();
+        }
                       
         this.startSearch();            
     },  

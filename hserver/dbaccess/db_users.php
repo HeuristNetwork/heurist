@@ -40,7 +40,7 @@
     define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
     */
 
-    require_once (dirname(__FILE__).'/utils_mail.php');
+    require_once (dirname(__FILE__).'/../utilities/utils_mail.php');
 
     /**
     * Get user/group by field value
@@ -284,7 +284,7 @@
         $ret = false;
 
         if($system->is_admin() && $recID>0){
-            $res = mysql__select_row($system->get_mysqli(),
+            $row = mysql__select_row($system->get_mysqli(),
                 "select ugr_Type, ugr_Enabled, ugr_LoginCount from sysUGrps  where ugr_ID=".$recID);
             $ret = ($row[0]=="user" && $row[1]=="n" && $row[2]==0);
         }
@@ -336,7 +336,7 @@
 
                 $res = mysql__select_value($mysqli,
                     "select ugr_ID from sysUGrps  where ugr_Name='"
-                    .$mysqli->real_escape_string( $record['ugr_Enabled'])."' or ugr_eMail='"
+                    .$mysqli->real_escape_string( $record['ugr_Name'])."' or ugr_eMail='"
                     .$mysqli->real_escape_string($record['ugr_eMail'])."'");
                 if($res!=$recID){
                     $system->addError(HEURIST_INVALID_REQUEST, 'The provided name or email already exists');

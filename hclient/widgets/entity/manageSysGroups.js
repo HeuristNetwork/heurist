@@ -78,10 +78,33 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                             //init role selector
                             this.recordList.find('select.user-role')
                                 .each(function(idx,item){$(item).val($(item).attr('data-value'))})
-                                .change(function(event){console.log($(event.target).val())});
-                            
-                        }
-                        });
+                                .change(function(event){
+                                    console.log($(event.target).val());
+                                    //call server 
+                                    
+                                });
+                          
+                            this.recordList.find('.user-list-edit')
+                                .each(function(idx,item){
+                                    $(item).attr('title','View users in a group or assign users to a group');
+//To view users in a group or assign users to a group, click on the edit icon in the Edit Membership column
+                                    
+                                    /*$(item).button({icon:'ui-icon-pencil', iconPosition:"end"})
+                                    .css({'background':'gray !important', 'max-height':'1em'});*/
+                                })
+                                .click(function(event){
+                                    var group_ID = $(event.target).parents('.recordDiv').attr('recid');
+                                    
+                                    var options = {select_mode: 'manager',
+                                            ugl_GroupID: group_ID,
+                                            isdialog: true,
+                                            edit_mode:'popup',
+                                            title: ("Manage Users of Workgroup #"+group_ID)};
+                                    
+//console.log(group_ID);                                    
+                                    window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
+                                });
+                        }});
         
         return true;
     },
@@ -128,18 +151,24 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
         + '</div>'
         + '<div class="recordTitle">'
-        +     recTitle + '(' + fld('ugr_Members') + ')'
+        +     recTitle 
         + '</div>';
         
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+
+                html = html 
+                    + '<div class="user-list-edit" style="position:absolute;top:4px;right:140px;width:30px">' // style="border-radius:8px;color:white;background-color:gray;padding: 1px 2px 1px 10px">' 
+                    + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
+
             
             if(this.searchForm.find('#input_search_type').val()!='any'){
-                if(window.hWin.HAPI4.has_access(recID)){ //current user is admin for this group
+                
+                if(window.hWin.HAPI4.has_access(recID)>0){ //current user is admin for this group
                     html = html 
-                        + '<select title="Role" style="position:absolute;top:4px;right:56px;width:7em" class="user-role" data-value="'
+                        + '<select title="Role" style="position:absolute;top:4px;right:56px;width:80px" class="user-role" data-value="'
                         + fld('ugl_Role')+'">'
-                        +'<option>admin</option><option>member</option></select>';
+                        +'<option>admin</option><option>member</option><option>remove</option></select>';
                     
                 }else{
                     html = html 
@@ -148,16 +177,23 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 }
             }
             
-            html = html 
-                + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="right:30px">'
-                +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                + '</div>&nbsp;&nbsp;';
-           if(recID!=1){
-                html = html      
-                + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-                +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-                + '</div>';
-           }
+            if(window.hWin.HAPI4.has_access(recID)>0){
+                html = html 
+                    + '<div title="Click to edit group" class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;&nbsp;';
+               if(recID!=1){
+                    html = html      
+                    + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                    + '</div>';
+               }
+            }else{
+                html = html 
+                    + '<div title="Status: not admin - locked" class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;&nbsp;';
+            }
         }
         
 
@@ -205,7 +241,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
     _afterInitEditForm: function(){
         this._super();
         //hide after edit init btnRecRemove for group=2
-        if(this._currentEditID==1){
+        if(this._currentEditID==window.hWin.HAPI4.sysinfo.db_managers_groupid){ //sys_OwnerGroupID
             var ele = this._toolbar;
             ele.find('#btnRecRemove').hide();
         }

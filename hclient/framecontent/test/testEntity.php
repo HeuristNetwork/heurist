@@ -100,7 +100,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     //testUsers();
                     //testUsers();
                     
+                    
+                    $('#curr_user').html(window.hWin.HAPI4.currentUser['ugr_ID']+'  '+window.hWin.HAPI4.currentUser['ugr_Name']);
                 }
+                
                 
                         var $datepicker = $('#datepicker').datepicker({
                             showOn: "button",
@@ -395,10 +398,10 @@ print $targetPath.'<br>';
                     <label>Entity:
                         <select id="entity-sel">
                             <option value="Records">Records</option>
-                            <option value="SysUsers" selected>Users +</option>
+                            <option value="SysUsers" >Users +</option>
                             <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
-                            <option value="RecUploadedFiles">Uploaded Files +</option>
+                            <option value="RecUploadedFiles" selected>Uploaded Files +</option>
                             <option value="UsrReminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>
@@ -412,6 +415,9 @@ print $targetPath.'<br>';
                             <option value="Smarty">Smarty Reports</option>
                             <option value="SmartySchedule">Smarty Reports Schedule</option>
                         </select></label>
+                        
+                        
+                        <label id="curr_user"></label>
                 </div>
                 
                 <div style="padding:5px; xborder-bottom:1px solid lightgrey">

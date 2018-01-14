@@ -49,12 +49,20 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         }
         
         this.input_search_type = this.element.find('#input_search_type');
+        
+        if(!window.hWin.HAPI4.is_admin()){
+            this.input_search_type.find('option[value="any"]').remove();    
+        }
+        
         this._on(this.input_search_type,  { change:this.startSearch });
 
         if(this.options.select_mode=='manager'){
             this.element.find('#input_search_type_div').css('float','left');
         }
-                      
+           
+        this.input_sort_type = this.element.find('#input_sort_type');
+        this._on(this.input_sort_type,  { change:this.startSearch });
+        
         this.startSearch();            
     },  
 
@@ -84,6 +92,15 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
                 if(gr_role=='member'){  
                     request['ugl_Role'] = 'member';
                 }
+            }
+            
+            this.input_sort_type = this.element.find('#input_sort_type');
+            if(this.input_sort_type.val()=='member'){
+                request['sort:ugr_Members'] = '-1' 
+            }else if(this.input_sort_type.val()=='recent'){
+                request['sort:ugr_Modified'] = '-1' 
+            }else{
+                request['sort:ugr_Name'] = '-1';   
             }
             
             
