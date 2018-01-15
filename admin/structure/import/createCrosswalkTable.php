@@ -400,9 +400,9 @@
                     //myDataSource = new YAHOO.util.DataSource();
                     var index, grpID;
                     for (index in rectypeGroups) {
-                        if(index>0 && tableDataByGrp[rectypeGroups[index].id]){
+                        if(index>=0 && tableDataByGrp[rectypeGroups[index].id]){
                             grpID = rectypeGroups[index].id;
-                            
+
                             var tableData = tableDataByGrp[grpID];
                             
                             myDataSource = new YAHOO.util.LocalDataSource(tableData, {
