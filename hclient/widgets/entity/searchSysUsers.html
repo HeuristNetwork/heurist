@@ -1,7 +1,7 @@
 <div>
     <div style="float:right;width:12em">
         <div id="btn_add_record"></div>
-        <div id="btn_find_record"></div>
+        <div id="btn_find_record" style="margin-top:4px"></div>
     </div>
 
     <div>
@@ -18,8 +18,19 @@
             <input id="input_search_inactive" type="checkbox" class="text ui-widget-content ui-corner-all" 
                 style="margin-right:0.2em"/>
         </div>
+
+        <div style="display:inline-block;padding:0.2em" id="input_sort_type_div">
+            <div class="header4" style="display: inline-block;width:4em;text-align:right;">
+                <label for="input_sort_type" accesskey="M"><U>S</U>ort by</label></div>
+            <select id="input_sort_type" class="text ui-widget-content ui-corner-all" 
+                style="width:90px; margin-right:0.2em">
+                    <option value="name">User Name</option>            
+                    <option value="lastname">Last Name</option>
+                    <option value="recent">Recent</option>
+                </select>
+        </div>
         
-        <div id="btn_search_start" style="display:inline-block;margin-left:8em"></div>   
+        <div id="btn_search_start" style="display:inline-block;"></div>   
     </div>    
     
     <div>
@@ -39,6 +50,19 @@
                     <option value="member">member</option>
                 </select>
         </div>
+        
+        <!--
+        <div style="display:inline-block;padding:0.2em" id="input_sort_type_div">
+            <div class="header4" style="display: inline-block;width:8em;text-align:right;">
+                <label for="input_sort_type" accesskey="M"><U>S</U>ort by</label></div>
+            <select id="input_sort_type" class="text ui-widget-content ui-corner-all" 
+                style="width:90px; margin-right:0.2em">
+                    <option value="name">User Name</option>            
+                    <option value="lastname">Last Name</option>
+                    <option value="recent">Recent</option>
+                </select>
+        </div>
+        -->
     </div>
 
 

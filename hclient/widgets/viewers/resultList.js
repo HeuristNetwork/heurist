@@ -679,19 +679,22 @@ $.widget( "heurist.resultList", {
                 ?this.options.rendererHeader()
                 :'';
 
+                var header_height = (this.div_header!=null)?this.div_header.height():0;
+                
                 if(header_html!=''){
                     if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
-                        this.div_content_header = $('<div>')
-                        .css({'height':'2em','width':'100%'})
-                        //.addClass('ui-widget-content"') //ui-widget ui-widget-header
+                        this.div_content_header = $('<div>').addClass('table_header')
                         .insertBefore(this.div_content);
                     }
-                    //this.div_content.css('top',(this.div_header!=null)?'7em':'4em');
+                    
                     this.div_content_header.show(); 
-                    this.div_content_header.html( header_html );       
+                    this.div_content_header.html( header_html )
+                    .css('top',header_height);       
+                    this.div_content.css('top',header_height+this.div_content_header.height());
                 }else if(!window.hWin.HEURIST4.util.isnull(this.div_content_header)){
                     //this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
                     this.div_content_header.hide();        
+                    this.div_content.css('top',header_height);
                 }   
             }
 

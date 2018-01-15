@@ -117,14 +117,17 @@ class DbSysGroups extends DbEntityBase
         
         $value = @$this->data['sort:ugr_Modified'];
         if($value!=null){
-            array_push($order, 'ugr_Modified '.($value>1?'ASC':'DESC'));
+            array_push($order, 'ugr_Modified '.($value>0?'ASC':'DESC'));
         }else{
             $value = @$this->data['sort:ugr_Members'];
             if($value!=null){
-                array_push($order, 'ugr_Members '.($value>1?'ASC':'DESC'));
+                array_push($order, 'ugr_Members '.($value>0?'ASC':'DESC'));
                 $needCount = true;
             }else{
-                array_push($order, 'ugr_Name ASC');
+                $value = @$this->data['sort:ugr_Name'];
+                if($value!=null){
+                    array_push($order, 'ugr_Name ASC');
+                }
             }
         }  
         
@@ -208,7 +211,7 @@ class DbSysGroups extends DbEntityBase
                     "SELECT ugr_ID FROM sysUGrps  WHERE ugr_Name='"
                     .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."'");
             if($res!=@$this->records[$idx]['ugr_ID']){
-                $system->addError(HEURIST_ACTION_BLOCKED, 'Workgroup cannot be saved. The provided name already exists');
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Workgroup cannot be saved. The provided name already exists');
                 return false;
             }
             
@@ -229,19 +232,19 @@ class DbSysGroups extends DbEntityBase
 
             //treat group image
             foreach($this->records as $record){
-                $grpoup_ID = @$record['ugr_ID'];
-                if($grpoup_ID && in_array($grpoup_ID, $ret)){
+                $group_ID = @$record['ugr_ID'];
+                if($group_ID && in_array($group_ID, $ret)){
                     $thumb_file_name = @$record['ugr_Thumb'];
             
                     //rename it to recID.png
                     if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $grpoup_ID);
+                        parent::renameEntityImage($thumb_file_name, $group_ID);
                     }
                     
-                    if(!in_array($grpoup_ID, $this->recordIDs )){ //add current user as admin for new group
+                    if(!in_array($group_ID, $this->recordIDs )){ //add current user as admin for new group
                             
                         $admin_role = array();
-                        $admin_role['ugl_GroupID'] = $grpoup_ID;
+                        $admin_role['ugl_GroupID'] = $group_ID;
                         $admin_role['ugl_UserID'] = $this->system->get_user_id();
                         $admin_role['ugl_Role'] = 'admin';
                         $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $admin_role);
@@ -293,7 +296,7 @@ class DbSysGroups extends DbEntityBase
         
         $res = $mysqli->query($query);
         if(!$res){
-            $system->addError(HEURIST_DB_ERROR,
+            $this->system->addError(HEURIST_DB_ERROR,
                             'Cannot remove entries from user/group links (sysUsrGrpLinks)',
                             $mysqli->error );
             $ret = false;
@@ -348,7 +351,7 @@ class DbSysGroups extends DbEntityBase
             return false;
         }
         
-        $mysqli = $system->get_mysqli();
+        $mysqli = $this->system->get_mysqli();
         
         $ret = true;
         
@@ -366,9 +369,9 @@ class DbSysGroups extends DbEntityBase
                                 
                     //can't remove last admin
                     $cnt = mysql__select_value($mysqli, $query);
-                    if($cnt<2){
+                    if($cnt==1){
                         $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                            'It is not possible to '.($this->data['role']=='remove')?'remove':' change role to" member" for'
+                            'It is not possible to '.(($this->data['role']=='remove')?'remove':' change role to" member" for')
                             .' user #'.$usrID.' from group #'.$groupID.'. This user is the only admin of the workgroup');
                         return false;
                     }
@@ -386,7 +389,7 @@ class DbSysGroups extends DbEntityBase
             
         $res = $mysqli->query($query);
         if(!$res){
-            $system->addError(HEURIST_DB_ERROR, 'Can\'t remove users from workgroup', $mysqli->error );
+            $this->system->addError(HEURIST_DB_ERROR, 'Can\'t remove users from workgroup', $mysqli->error );
             $ret = false;
         }
             
@@ -397,13 +400,13 @@ class DbSysGroups extends DbEntityBase
                 foreach ($assignIDs as $usrID){
                     array_push($query, ' ('. $groupID .' , '. $usrID .', "'.$this->data['role'].'")');
                 }    
-                $query = 'INSERT INTO sysUsrGrpLinks (ugl_GroupID, ugl_UserID, ugl_Role) '
+                $query = 'INSERT INTO sysUsrGrpLinks (ugl_GroupID, ugl_UserID, ugl_Role) VALUES '
                         .implode(',', $query);
                 $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;
                     $mysqli->rollback();
-                    $system->addError(HEURIST_DB_ERROR, 'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
+                    $this->system->addError(HEURIST_DB_ERROR, 'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
                     break;
                 }
             }//foreach      

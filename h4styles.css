@@ -451,7 +451,7 @@ h3 > #rec_add_link,
 div.recordDiv  .rec_actions {
     display: none;
     position: absolute;
-    top: 2px;
+    /*top: 2px;*/
     right: 2px;
 }
 
@@ -1503,6 +1503,27 @@ option {padding-left:15px;}
     opacity: 1;
 }
 
+
+.recordList > .table_header{
+    height: 1.2em;
+    width: 100%;
+    position: absolute;    
+    background: #D8D8DA;
+}
+.recordList > .table_header > div{
+    border-right: 1px solid gray;
+    display: inline-block;
+    height: 1em;
+    padding-left:4px;
+}
+
+.list div.recordDiv > .user-list {
+    display:block;
+}
+.user-list > div{
+    display:inline-block;
+}
+
 .user-list-edit{
     border-radius:8px;
     color:white;
@@ -1510,3 +1531,20 @@ option {padding-left:15px;}
     cursor:pointer;
     padding-left:4px;
 }
+
+.list .user-list-edit{
+     position: absolute;
+     top: 4px;
+     right: 145px !important;
+     height: 16px;
+}
+
+.icons .user-list-edit, 
+.thumbs .user-list-edit, 
+.thumbs3 .user-list-edit {
+    position: absolute;
+    bottom: 2px;
+    height: 16px;
+    right: 2px;
+}
+

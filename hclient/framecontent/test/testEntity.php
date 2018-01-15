@@ -399,9 +399,9 @@ print $targetPath.'<br>';
                         <select id="entity-sel">
                             <option value="Records">Records</option>
                             <option value="SysUsers" >Users +</option>
-                            <option value="SysGroups">Workgroups +</option>
+                            <option value="SysGroups" selected>Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
-                            <option value="RecUploadedFiles" selected>Uploaded Files +</option>
+                            <option value="RecUploadedFiles" >Uploaded Files +</option>
                             <option value="UsrReminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>

@@ -92,11 +92,11 @@ class DbRecUploadedFiles extends DbEntityBase
         //if($pred!=null) array_push($order, $pred);
         $value = @$this->data['sort:ulf_Added'];
         if($value!=null){
-            array_push($order, 'ulf_Added '.($value>1?'ASC':'DESC'));
+            array_push($order, 'ulf_Added '.($value>0?'ASC':'DESC'));
         }else{
             $value = @$this->data['sort:ulf_FileSizeKB'];
             if($value!=null){
-                array_push($order, 'ulf_FileSizeKB '.($value>1?'ASC':'DESC'));
+                array_push($order, 'ulf_FileSizeKB '.($value>0?'ASC':'DESC'));
             }else{
                 array_push($order, 'ulf_OrigFileName ASC');
             }

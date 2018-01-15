@@ -66,6 +66,18 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
+            
+            this.recordList.resultList('option','rendererHeader',
+                    function(){
+        return '<div style="width:60px"></div><div style="width:3em">ID</div>'
+                +'<div style="width:10em">Name</div>'
+                +'<div style="width:16em;border:none">Description</div>'
+                +'<div style="position:absolute;right:150px;width:60px;border-left:1px solid gray">Members</div>'
+                +'<div style="position:absolute;right:74px;width:60px">Role</div>'
+                +'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                    }
+                );
+            this.recordList.resultList('applyViewMode');
         }
 
         this._on( this.searchForm, {
@@ -133,7 +145,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         
         var recTitle = fld2('ugr_ID','4em')
                       +fld2('ugr_Name','12em')
-                      +fld2('ugr_Description','20em');
+                      +fld2('ugr_Description','25em');
         var recTitleHint = '';//recID+' : '+fld('ugr_Description');
         
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
@@ -157,43 +169,49 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
 
-                html = html 
-                    + '<div class="user-list-edit" style="position:absolute;top:4px;right:140px;width:30px">' // style="border-radius:8px;color:white;background-color:gray;padding: 1px 2px 1px 10px">' 
+            html = html 
+                    + '<div class="rec_actions user-list user-list-edit" style="width:50px;">' //position:absolute;top:4px;right:145px; style="border-radius:8px;color:white;background-color:gray;padding: 1px 2px 1px 10px">' 
                     + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
 
+            html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">'
             
             if(this.searchForm.find('#input_search_type').val()!='any'){
                 
-                if(window.hWin.HAPI4.has_access(recID)>0){ //current user is admin for this group
-                    html = html 
-                        + '<select title="Role" style="position:absolute;top:4px;right:56px;width:80px" class="user-role" data-value="'
+                //current user is admin for this group
+                if(window.hWin.HAPI4.has_access(recID)>0){ 
+                    html = html                        
+                        + '<select title="Role" style="width:70px;margin:0 4px" class="user-role" data-value="'
                         + fld('ugl_Role')+'">'
                         +'<option>admin</option><option>member</option><option>remove</option></select>';
                     
                 }else{
-                    html = html 
-                        + '<div title="Role" style="position:absolute;top:4px;right:56px;width:5em">'
+                    html = html                      
+                        + '<div title="Role" style="min-width:78px;">'
                         + fld('ugl_Role')+'</div>';
                 }
+            }else{
+                //placeholder
+                html = html + '<div style="min-width:78px;"></div>';
             }
             
             if(window.hWin.HAPI4.has_access(recID)>0){
-                html = html 
-                    + '<div title="Click to edit group" class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                html = html                                    
+                    + '<div title="Click to edit group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                     + '</div>&nbsp;&nbsp;';
                if(recID!=1){
-                    html = html      
-                    + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                    html = html                                
+                    + '<div title="Click to delete group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                     + '</div>';
                }
             }else{
-                html = html 
-                    + '<div title="Status: not admin - locked" class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+                html = html                                    
+                    + '<div title="Status: not admin - locked" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
                     + '</div>&nbsp;&nbsp;';
             }
+            html = html + '</div>';
         }
         
 

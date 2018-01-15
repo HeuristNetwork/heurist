@@ -44,6 +44,7 @@ class DbSysUsers extends DbEntityBase
     */
     public function search(){
 
+        $not_in_group = @$this->data['not:ugl_GroupID'];
                 
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
 
@@ -84,6 +85,13 @@ class DbSysUsers extends DbEntityBase
             
                 array_push($where, '(ugl_UserID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
+        }
+        
+        //special case - users must not be in given group
+        
+        if($not_in_group>0){
+            array_push($where, '(ugr_ID NOT IN (SELECT ugr_ID FROM sysUGrps,sysUsrGrpLinks '
+                .'WHERE (ugl_UserID = ugr_ID) AND (ugl_GroupID='.$not_in_group.') ))');
         }
         
         //compose SELECT it depends on param 'details' ------------------------
@@ -127,13 +135,24 @@ class DbSysUsers extends DbEntityBase
         }
 
         //----- order by ------------
-        //compose ORDER BY 
+        //compose ORDER BY
         $order = array();
         
         $value = @$this->data['sort:ugr_Modified'];
         if($value!=null){
-            array_push($order, 'ugr_Modified '.($value>1?'ASC':'DESC'));
+            array_push($order, 'ugr_Modified '.($value>0?'ASC':'DESC'));
+        }else{
+            $value = @$this->data['sort:ugr_LastName'];
+            if($value!=null){
+                array_push($order, 'ugr_LastName '.($value>0?'ASC':'DESC'));
+            }else{
+                $value = @$this->data['sort:ugr_Name'];
+                if($value!=null){
+                    array_push($order, 'ugr_Name ASC');
+                }
+            }
         }  
+         
         
         $is_ids_only = (count($this->data['details'])==1);
             
@@ -220,7 +239,7 @@ class DbSysUsers extends DbEntityBase
                     .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."' OR ugr_eMail='"
                     .$mysqli->real_escape_string( $this->records[$idx]['ugr_eMail'])."'");
             if($res!=@$this->records[$idx]['ugr_ID']){
-                $system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided name or email already exists');
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided name or email already exists');
                 return false;
             }
             
@@ -264,9 +283,9 @@ class DbSysUsers extends DbEntityBase
                     }
                     
                     //add user to specified group
-                    if($record[$idx]['ugl_GroupID']>0){
+                    if($record['ugl_GroupID']>0){
                         $group_role = array();
-                        $group_role['ugl_GroupID'] = $record[$idx]['ugl_GroupID'];
+                        $group_role['ugl_GroupID'] = $record['ugl_GroupID'];
                         $group_role['ugl_UserID'] = $ugr_ID;
                         $group_role['ugl_Role'] = 'member';
                         
@@ -343,7 +362,7 @@ class DbSysUsers extends DbEntityBase
         
         $res = $mysqli->query($query);
         if(!$res){
-            $system->addError(HEURIST_DB_ERROR,
+            $this->system->addError(HEURIST_DB_ERROR,
                             'Cannot remove entries from user/group links (sysUsrGrpLinks)',
                             $mysqli->error );
             $ret = false;

@@ -21,9 +21,20 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
 
     //
     _initControls: function() {
-        this._super();
         
         var that = this;
+        
+        this.input_search_group = this.element.find('#input_search_group');   //user group
+        if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, [{key:'any',title:'any group'}],
+                function(){ that._initControls() });
+            return;    
+        }else{
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, [{key:'any',title:'any group'}]);
+        }
+         
+        
+        this._super();
         
         this.btn_add_record = this.element.find('#btn_add_record');
         this.btn_find_record = this.element.find('#btn_find_record');
@@ -50,17 +61,6 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                 'min-height': '2.4em', 'margin-bottom': '0.4em'});    
             }                       
         }
-
-/*        
-        if(this.options.edit_mode=='inline'){
-            this.btn_search_start.css('float','right');   
-        }
-*/        
-//        this.btn_search_start.css('float','right');   
-
-        //@todo replace to entity selector
-        this.input_search_group = this.element.find('#input_search_group');   //user group
-        window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, [{key:'any',title:'any group'}]);
         
         this.input_search_inactive = this.element.find('#input_search_inactive');
         this.input_search_role = this.element.find('#input_search_role');
@@ -69,7 +69,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         this._on(this.input_search_role,  { change:this.startSearch });
         this._on(this.input_search_inactive,  { change:this.startSearch });
         
-        if(this.options.ugl_GroupID>0){
+        if( this.options.ugl_GroupID>0 ){
             this.input_search_group.parent().hide();
             this.input_search_group.val(this.options.ugl_GroupID);
             
@@ -78,13 +78,16 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             if(!window.hWin.HAPI4.is_admin()){
                 this.btn_add_record.hide();
             }
-            if(window.hWin.HAPI4.has_access(this.options.ugl_GroupID)<0){
-                this.btn_find_record.hide(); 
-            }
-            
+        }else if( this.options.ugl_GroupID<0 ){
+            //find any user not in given group
+            //exclude this group from selector
+            this.input_search_group.find('option[value="'+Math.abs(this.options.ugl_GroupID)+'"]').remove();
         }else{
             this.btn_find_record.hide();
         }
+             
+        this.input_sort_type = this.element.find('#input_sort_type');
+        this._on(this.input_sort_type,  { change:this.startSearch });
                       
         this.startSearch();            
     },  
@@ -101,6 +104,11 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         
             if(this.input_search.val()!=''){
                 request['ugr_Name'] = this.input_search.val();
+            }
+            
+            if( this.options.ugl_GroupID<0 ){
+                //find any user not in given group
+                request['not:ugl_GroupID'] = Math.abs(this.options.ugl_GroupID);
             }
         
             if(this.input_search_group.val()>0){
@@ -119,13 +127,29 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                         request['ugl_Role'] = 'member';
                     }
                 }
+                
+                if(window.hWin.HAPI4.has_access(this.input_search_group.val())>0 && this.options.edit_mode!='none'){
+                    this.btn_find_record.show();
+                }
             }else{
                 this.input_search_role.parent().hide();
+                this.btn_find_record.hide(); 
             }
             
             if(this.input_search_inactive.is(':checked')){
                 request['ugr_Enabled'] = 'n';
             }
+            
+            
+            this.input_sort_type = this.element.find('#input_sort_type');
+            if(this.input_sort_type.val()=='lastname'){
+                request['sort:ugr_LastName'] = '1' 
+            }else if(this.input_sort_type.val()=='recent'){
+                request['sort:ugr_Modified'] = '-1' 
+            }else{
+                request['sort:ugr_Name'] = '1';   
+            }
+                 
             
 /*
             if(this.element.find('#cb_selected').is(':checked')){
@@ -154,7 +178,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
-                
+           
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
