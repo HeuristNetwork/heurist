@@ -205,7 +205,12 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 that.onEditFormChange();
             });
         }else{
-            this.onEditFormChange(false); //force show save button
+            //this.onEditFormChange(false); 
+            //force show save button
+            var ele = this._toolbar;
+            if(ele){
+                ele.find('#btnRecSave').css('visibility', 'visible');
+            }
         }        
                 
                 
