@@ -1537,7 +1537,7 @@ class FieldPredicate extends Predicate {
             $isin = false;
             $isnumericvalue = is_numeric($this->value);
         }
-
+        
         /*
         if($isin){
             $match_pred_for_term = $match_pred;
@@ -1549,12 +1549,6 @@ class FieldPredicate extends Predicate {
         
         $timestamp = $isin?false:true; //$this->isDateTime();
 
-        if ($timestamp) {
-            $date_match_pred = $this->makeDateClause();
-        }else{
-            $date_match_pred = $match_pred;
-        }
-        
         if($this->field_type_value=='resource'){ //field type is found - search for specific detailtype
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' left join Records link on rd.dtl_Value=link.rec_ID '
@@ -1577,6 +1571,13 @@ class FieldPredicate extends Predicate {
             if(trim($this->value)==''){
                 $res = $res. " and rd.dtl_Value !='' )";
             }else{
+                
+                if ($timestamp) {
+                    $date_match_pred = $this->makeDateClause();
+                }else{
+                    $date_match_pred = $match_pred;
+                }
+                
                 $res = $res. ' and getTemporalDateString(rd.dtl_Value) ' . $date_match_pred. ')';
             }
             return $res;
@@ -1585,14 +1586,22 @@ class FieldPredicate extends Predicate {
 
             if($this->field_type_value=='file'){
                 $fieldname = 'rd.dtl_UploadedFileID';
+                
+                if(!($isnumericvalue || $isin)){
+                    return $not . 'exists (select rd.dtl_ID from recDetails rd, recUploadedFiles rf '
+                    . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rf.ulf_ID=rd.dtl_UploadedFileID'
+                    . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
+                    . ' and (rf.ulf_OrigFileName ' . $match_pred. ' or rf.ulf_MimeExt '. $match_pred.'))';
+                }
             }else{
                 $fieldname = 'rd.dtl_Value';
-            }
+            }    
     
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
-            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-            . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
-            . ' and ' . $fieldname . ' ' . $match_pred. ')';
+                . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
+                . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
+                . ' and ' . $fieldname . ' ' . $match_pred. ')';
+            
             
         }else{
         
@@ -1606,6 +1615,15 @@ class FieldPredicate extends Predicate {
                     $rd_type_clause = " and rdt.dty_Name ".$rd_type_clause;
                 }
             }
+            
+            
+        
+                if ($timestamp) {
+                    $date_match_pred = $this->makeDateClause();
+                }else{
+                    $date_match_pred = $match_pred;
+                }
+            
 
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
             . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
