@@ -1471,6 +1471,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             len = (imp_session && imp_session['columns'])?imp_session['columns'].length:0;
 
         //find index field for selected id field
+        $('#mapping_column_header').text((currentStep==3)
+                                                    ?'Column to Field mapping (record match)'
+                                                    :'Fields to update');
         var stype = (currentStep==3)?'mapping_keys':'mapping_flds';
         var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=field type id
         if(!mapping_flds) mapping_flds = {};
@@ -1548,11 +1551,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             sRemain = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>'
             + ((currentStep==3) ?'Matching - not yet used'
                                 :'Not yet Imported')
-            +'</b></td></tr>'
+            +'</b>'
+            + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (in red) if you plan to create new records</span>')
+            +'</td></tr>'
                 +sRemain;
         }
         if(sProcessed!=''){
-            sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Already used</b></td></tr>'
+            sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br />'
+            +'<b>Already used</b>'
+             + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (in red) if you plan to create new records</span>')
+            +'</td></tr>'
                 +sProcessed;
         }
         
@@ -2355,6 +2363,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             }else{
                 $('#btnMatchingStart').button({label:'Match against existing records'});
             }
+        
+            if($('#sa_match0').is(':checked')){ // normal matching
+                $("input[id^='cbsa_dt_']").show();
+                $("select[id^='sa_dt_']").css('visibility','visible');
+            }else{
+                $("input[id^='cbsa_dt_']").hide();
+                $("select[id^='sa_dt_']").css('visibility','hidden');
+            }
+        
         
         }
         $('#divMatchingSettingHelp').html(shelp);

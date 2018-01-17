@@ -570,7 +570,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <th style="width:75px;">Use&nbsp;<br/>value</th>
                 <th style="width:75px;">Unique&nbsp;<br/>values</th>
                 <th style="width:300px;">Column</th>
-                <th style="width:300px;">Column to Field Mapping</th>
+                <th style="width:300px;" id="mapping_column_header">Column to Field Mapping</th>
                 <!-- last column allows step through imported data records-->
                 <th style="text-align: left;padding-left: 16px;">
                     <a href="#" class="navigation" style="display: inline-block;"><span data-dest="0" class="ui-icon ui-icon-seek-first"/></a>
