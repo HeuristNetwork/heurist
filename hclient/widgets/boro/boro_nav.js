@@ -912,7 +912,7 @@ $.widget( "heurist.boro_nav", {
                         date: that.__getYear(sDate), 
                         date2: sDate,
                         story: sDeathType.toLowerCase(),
-                        description: that.__getYear(sDate,9998)+'  '+(sDeathType?(sDeathType+', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):''))
+                        description: (sDeathType?(sDeathType+', '+place.link+(sDate?(' on '+that.__formatDate(sDate)):''))
                                                 :'Death' ) });
             
             leftside['p_lifetime'] = html;
@@ -1067,7 +1067,8 @@ $.widget( "heurist.boro_nav", {
                                 date2: eventDate.date,
                                 eventTypeID: termID,
                                 story: sEventType.toLowerCase(),
-                                description: that.__getYear(eventDate.date, ord)+'  '+sEventType+(place.link?', '+place.link:'')+eventDate.desc });
+                                                    //that.__getYear(eventDate.date, ord)+'  '+
+                                description: sEventType+(place.link?', '+place.link:'')+eventDate.desc });
                         }
                     }
                 }
