@@ -32,7 +32,7 @@ $.widget( "heurist.resultList", {
         action_buttons:null,
 
         recordview_onselect: false, //show record viewer on select
-        multiselect: true,    //@todo replace to select_mode
+        multiselect: true,    //allows highlight several records
         isapplication: true,  //if false it does not listen global events @todo merge with eventbased
 
         show_toolbar: true,
@@ -261,6 +261,7 @@ $.widget( "heurist.resultList", {
         .css('padding','0.7em 0 0 0.7em')
         .appendTo(this.div_header);
 
+        //add label to display number of selected, button and selected onlu checkbox
         if(this.options.select_mode=='select_multi'){
             this.show_selected_only = $( "<div>" )
             .addClass('ent_select_multi')  //ui-widget-content 
@@ -460,9 +461,12 @@ $.widget( "heurist.resultList", {
         this._refresh();
     },
 
-    /*_setOption: function( key, value ) {
-    this._super( key, value );
-    },*/
+    _setOption: function( key, value ) {
+        this._super( key, value );
+        if(key == 'rendererHeader'){
+            this.applyViewMode(this.options.view_mode, true);
+        }
+    },
 
 
     /* private function */
@@ -643,7 +647,7 @@ $.widget( "heurist.resultList", {
     //
     // switcher listener - list;icons;thumbs
     //
-    applyViewMode: function(newmode){
+    applyViewMode: function(newmode, forceapply){
 
         var allowed = ['list','icons','thumbs','thumbs3'];
 
@@ -651,7 +655,7 @@ $.widget( "heurist.resultList", {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode');
         }
 
-        if(!this.div_content.hasClass(newmode)){
+        if(!this.div_content.hasClass(newmode) || forceapply===true){
             //var $allrecs = this.div_content.find('.recordDiv');
             if(newmode){
                 //var oldmode = this.options.view_mode;
@@ -1175,6 +1179,7 @@ $.widget( "heurist.resultList", {
             }
         }
 
+        //select/deselect on click
         if(this.options.select_mode=='select_multi'){
             if($rdiv.hasClass('selected')){
                 $rdiv.removeClass('selected');

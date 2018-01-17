@@ -57,6 +57,7 @@ class DbSysUsers extends DbEntityBase
         
         $needCheck = false;
         $needRole = false;
+        $needCount = false;
         
         //compose WHERE 
         $where = array('ugr_Type="user"');
@@ -83,6 +84,11 @@ class DbSysUsers extends DbEntityBase
                     array_push($where, $pred);
                 }
             
+                array_push($where, '(ugl_UserID = ugr_ID)');
+                array_push($from_table, 'sysUsrGrpLinks');
+        }
+        else if (@$this->data['needRole']){ //not used
+                $needRole = true;
                 array_push($where, '(ugl_UserID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
         }
@@ -113,7 +119,11 @@ class DbSysUsers extends DbEntityBase
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_FirstName,ugr_LastName,ugr_eMail,ugr_Department,ugr_Organisation,'
             .'ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled';
             
-            if($needRole) $this->data['details'] .= ',ugl_Role';
+            if($needRole){
+                $this->data['details'] .= ',ugl_Role';  
+            }else{
+                $needCount = true;  //need count only for all groups
+            } 
             
         }else{
             $needCheck = true;
@@ -153,6 +163,10 @@ class DbSysUsers extends DbEntityBase
             }
         }  
          
+        if($needCount){    
+            array_push($this->data['details'],
+                '(select count(ugl_ID) from sysUsrGrpLinks where (ugl_UserID=ugr_ID)) as ugr_Member');
+        }
         
         $is_ids_only = (count($this->data['details'])==1);
             

@@ -311,6 +311,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 if(entity=='DefTerms'){
                     //options.select_mode = 'images';
                     //options.initialTermsIds = [414,415,5424,528,5426,5449];
+                }else if(entity=='SysGroups'){
+                    //options.edit_mode = 'none';
+                    //options.select_mode = 'select_role';
+                    //options.ugl_UserID = 
+                }else if(entity=='UsrTags'){
+                    
                 }
                 
                 
@@ -399,8 +405,8 @@ print $targetPath.'<br>';
                         <select id="entity-sel">
                             <option value="Records">Records</option>
                             <option value="SysUsers" >Users +</option>
-                            <option value="SysGroups" selected>Workgroups +</option>
-                            <option value="UsrTags">Tags +</option>
+                            <option value="SysGroups" >Workgroups +</option>
+                            <option value="UsrTags" selected>Tags +</option>
                             <option value="RecUploadedFiles" >Uploaded Files +</option>
                             <option value="UsrReminders">Reminders</option>
                             <option value="Databases">Databases</option>

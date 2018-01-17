@@ -52,7 +52,39 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         if(!this._super()){
             return false;
         }
-
+        
+        //update dialog title
+        if(this.options.isdialog){
+            var title = null;
+            var usr_ID = 0;
+            if(this.options.ugl_GroupID>0){
+                usr_ID = this.options.ugl_GroupID;
+                title = 'Manage Users of Workgroup #'+this.options.ugl_GroupID+': ';
+            }else if(this.options.ugl_GroupID<0){
+                usr_ID = Math.abs(this.options.ugl_GroupID);
+                title = 'Select Users to add to Workgroup #'+usr_ID+': ';
+            }else{
+                if(window.hWin.HAPI4.is_admin()){
+                    title = 'Manage All Users as Database Administrator';    
+                }else{                    
+                    usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+                    title = 'Manage workgroups for user #'+window.hWin.HAPI4.currentUser['ugr_ID']+': ';    
+                }
+            }
+            
+            if(usr_ID>0 && title){
+                function __set_dlg_title(data){
+                    if(data && data.status==window.hWin.HAPI4.ResponseStatus.OK){
+                        this._as_dialog.dialog('option','title', title+data.res);    
+                    }
+                } 
+                window.hWin.HAPI4.usr_names({UGrpID: usr_ID}, __set_dlg_title);
+            }else{
+                this._as_dialog.dialog('option','title', title);    
+            }
+        }
+        
+        
         // init search header
         this.searchForm.searchSysUsers(this.options);
         
@@ -75,11 +107,11 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 +'<div style="width:7em">Name</div>'
                 +'<div style="width:12em;">Full name</div>'
                 +'<div style="width:7em;border:none">Institution/Organisation</div>'
-                +'<div style="position:absolute;right:74px;width:60px;border-left:1px solid gray">Role</div>'
+                +'<div style="position:absolute;right:76px;width:80px;border-left:1px solid gray">Role</div>'
                 +'<div style="position:absolute;right:4px;width:60px">Edit</div>';
                     }
                 );
-            this.recordList.resultList('applyViewMode');
+            //this.recordList.resultList('applyViewMode');
         }
 
         this._on( this.searchForm, {
@@ -133,7 +165,27 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                 .change(function(event){
 
                                         var ugl_GroupID = that.searchForm.find('#input_search_group').val(); 
-                                        if(!(ugl_GroupID>0)) return;
+                                        if(!(ugl_GroupID>0)) {
+                                            
+                                            this.recordList.find('.user-list-edit')
+                                                .each(function(idx,item){
+                                                    $(item).attr('title','Edit user membership');
+                                                })
+                                                .click(function(event){
+                                                    var user_ID = $(event.target).parents('.recordDiv').attr('recid');
+                                                    
+                                                    var options = {select_mode: 'manager',
+                                                            ugl_UserID: user_ID,
+                                                            isdialog: true,
+                                                            edit_mode:'none',
+                                                            title: ("Manage Membership for User #"+user_ID)};
+                                                    
+
+                                                    window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options);
+                                                });
+
+                                            return;   
+                                        }
                                           
                                         var selector = $(event.target);
                                         var usr_ID = selector.parents('.recordDiv').attr('recid');  
@@ -148,7 +200,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                         request['request_id'] = window.hWin.HEURIST4.util.random();
                                         
                                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                            function(response){
+                                            function(response){             
                                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                     //reload
                                                     //that.searchForm.searchSysUsers('startSearch');
@@ -167,9 +219,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                                     window.hWin.HEURIST4.msg.showMsgErr(response);      
                                                 }
                                             });
-                                
-                                
                                 });
+                                
 
                         }
                         });
@@ -230,6 +281,13 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+        
+            var ugl_GroupID = this.searchForm.find('#input_search_group').val(); 
+            if(window.hWin.HAPI4.is_admin() && !(ugl_GroupID>0)){  //show count of groups where user is a member
+                html = html 
+                    + '<div class="rec_actions user-list user-list-edit" style="width:50px;">AA'
+                    + fld('ugr_Member') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>';
+            }
             
             html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">'
             

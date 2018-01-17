@@ -70,17 +70,25 @@ class DbSysGroups extends DbEntityBase
         //find groups where this user is member or admin
         $pred = $this->searchMgr->getPredicate('ugl_UserID');
         if($pred!=null) {
-            
-                array_push($where, $pred);
+
                 $needRole = true;
-            
+                $where2 = array();                                
+                array_push($where2, $pred);
                 $pred = $this->searchMgr->getPredicate('ugl_Role');
                 if($pred!=null) {
-                    array_push($where, $pred);
+                    array_push($where2, $pred);
                 }
+                array_push($where2, '(ugl_GroupID = ugr_ID)');
             
-                array_push($where, '(ugl_GroupID = ugr_ID)');
-                array_push($from_table, 'sysUsrGrpLinks');
+                if(@$this->data['ugl_Join']){
+                    
+                    $from_table[0] = $from_table[0].' LEFT JOIN sysUsrGrpLinks ON '.implode(' AND ',$where2);
+                    
+                }else{
+                    $where = array_merge($where,$where2);
+                    array_push($from_table, 'sysUsrGrpLinks');
+                }
+
         }
         
         //compose SELECT it depends on param 'details' ------------------------
