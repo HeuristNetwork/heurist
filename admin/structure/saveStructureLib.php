@@ -346,6 +346,14 @@
                 $ret = $ret['error'];
             } else {
                 $rtyID = $mysqli->insert_id;
+                
+                if(HEURIST_DBID>0){
+                    $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.HEURIST_DBID
+                        .', rty_NameInOriginatingDB=rty_Name'
+                        .', rty_IDInOriginatingDB='.$rtyID.' WHERE rty_ID='.$rtyID;
+                        $res = mysql_query($query);
+                }
+                
                 $ret = -$rtyID;
                 if($isAddDefaultSetOfFields){
                     //add default set of detail types
@@ -395,13 +403,15 @@
 
 		$ret = null;
 
-		$res = $mysqli->query("select rty_OriginatingDBID from defRecTypes where rty_ID = $rtyID");
+		$res = $mysqli->query("select rty_OriginatingDBID, rty_IDInOriginatingDB from defRecTypes where rty_ID = $rtyID");
 
 		if ($res->num_rows<1){ //$mysqli->affected_rows<1){
 			$ret = "invalid rty_ID ($rtyID) passed in data to updateRectype";
 			return $ret;
 		}
 
+        
+        
 		//		$row = $res->fetch_object();
 		//		$query = "rty_LocallyModified=".(($row->rty_OriginatingDBID>0)?"1":"0").",";
 
@@ -449,6 +459,14 @@
 					//	$ret = "error updating $rtyID in updateRectype - ".$mysqli->error;
 				} else {
 					$ret = $rtyID;
+                    
+                    if(HEURIST_DBID>0){
+                        $query= 'UPDATE defRecTypes SET rty_NameInOriginatingDB=rty_Name '
+                            .' WHERE rty_ID='.$rtyID
+                            .' AND rty_IDInOriginatingDB='.$rtyID.' AND rty_OriginatingDBID='.HEURIST_DBID;
+                        $res = mysql_query($query);
+                    }
+                    
 				}
 			}
 		}

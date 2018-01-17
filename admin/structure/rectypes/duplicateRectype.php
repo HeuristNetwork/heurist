@@ -57,18 +57,27 @@
 
     mysql_connection_overwrite(DATABASE);
     $old_rt_id = $_REQUEST['rtyID'];
+    
+    
 
-    $query= "INSERT into defRecTypes (rty_Name, rty_OrderInGroup, rty_Description, rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_OriginatingDBID, "
-    ."rty_NameInOriginatingDB, rty_IDInOriginatingDB, rty_NonOwnerVisibility, rty_ShowInLists, rty_RecTypeGroupID, rty_RecTypeModelIDs, rty_FlagAsFieldset,"
+    $query= "INSERT into defRecTypes (rty_Name, rty_OrderInGroup, rty_Description, rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, rty_Status, "
+    ."rty_NonOwnerVisibility, rty_ShowInLists, rty_RecTypeGroupID, rty_RecTypeModelIDs, rty_FlagAsFieldset,"
     ."rty_ReferenceURL, rty_AlternativeRecEditor, rty_Type, rty_ShowURLOnEditForm, rty_ShowDescriptionOnEditForm, rty_Modified, rty_LocallyModified) "
-    ." SELECT CONCAT('Duplication of ', rty_Name), rty_OrderInGroup, rty_Description, rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, 'open', rty_OriginatingDBID, "
-    ."rty_NameInOriginatingDB, rty_IDInOriginatingDB, rty_NonOwnerVisibility, rty_ShowInLists, rty_RecTypeGroupID, rty_RecTypeModelIDs, rty_FlagAsFieldset,"
+    ." SELECT CONCAT('Duplication of ', rty_Name), rty_OrderInGroup, rty_Description, rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, 'open', "
+    ."rty_NonOwnerVisibility, rty_ShowInLists, rty_RecTypeGroupID, rty_RecTypeModelIDs, rty_FlagAsFieldset,"
     ."rty_ReferenceURL, rty_AlternativeRecEditor, rty_Type, rty_ShowURLOnEditForm, rty_ShowDescriptionOnEditForm, rty_Modified, rty_LocallyModified "
     ."FROM defRecTypes where rty_ID=".$old_rt_id;
 
 
     $res = mysql_query($query);
     $new_rt_id = mysql_insert_id();
+    
+    if(HEURIST_DBID>0){
+        $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.HEURIST_DBID
+                .', rty_NameInOriginatingDB=rty_Name'
+                .', rty_IDInOriginatingDB='.$new_rt_id.' WHERE rty_ID='.$new_rt_id;
+        $res = mysql_query($query);
+    }
 
     $query= "INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue,
