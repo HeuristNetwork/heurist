@@ -609,6 +609,7 @@ function _showRecordDataH4(recordset, reference_recordset) {
     
     var recID, i, j;
     var k = g_exportMap.length;
+    var gpref = ['p','c','r','pl','l'];
     
     for (i = 0; i < len; ++i) {
         recID = rec_order[i];
@@ -643,6 +644,19 @@ function _showRecordDataH4(recordset, reference_recordset) {
                                    if(term) val[m] = term[0];
                                 }
                             }
+                        }else if (baseType == HVariety.GEOGRAPHIC) { //geographic object
+                        
+                            if(top.HEURIST4.util.isArrayNotEmpty(val)){
+                                for (var m = 0; m < val.length; m++) {
+                                    
+                                   var k = val[m].indexOf(' ');  //exclude p|c|r|pl|l  
+                                   if(k>0 && gpref.indexOf(val[m].substring(0,k))>=0){
+                                        val[m] = val[m].substring(k+1);   
+                                   } 
+                                    
+                                }
+                            }
+
                         }else if (baseType == HVariety.REFERENCE){
                             //take record title
                             if(reference_recordset && reference_recordset.length()>0){
