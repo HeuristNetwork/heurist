@@ -377,6 +377,12 @@ $.widget( "heurist.search_faceted_wiz", {
             }
             else if(this.step==0 && newstep==1){ //select record types
 
+                if(!($(opt_rectypes).val()>0)){
+                    window.hWin.HEURIST4.msg.showMsgErr('Select record type');
+                    $(opt_rectypes).focus();
+                    return;
+                }
+            
                 var svs_name = this.step0.find('#svs_Name');
                 var message = this.step0.find('.messages');
                 var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
@@ -545,11 +551,14 @@ $.widget( "heurist.search_faceted_wiz", {
             svs_name.removeClass( "ui-state-error" );
 
             if($(opt_rectypes).is(':empty')){
-                window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null, false);
+                window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, [{key:'',title:'select...'}], false);
                 
                 $dlg.find("#opt_rectypes").change(function(){
-                    if(svs_name.val()=='') svs_name.val(opt_rectypes.options[opt_rectypes.selectedIndex].text+'s');
-                    svs_name.focus();
+                    if($(opt_rectypes).val()>0){
+                        if(svs_name.val()=='') 
+                            svs_name.val(opt_rectypes.options[opt_rectypes.selectedIndex].text+'s');
+                        svs_name.focus();
+                    }
                 });
             }
 
