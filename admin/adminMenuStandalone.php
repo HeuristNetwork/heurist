@@ -357,6 +357,8 @@ if (array_key_exists('mode', $_REQUEST)) {
                         menuEntry('','Verify uploaded files','verification/listUploadedFilesErrors.php?db='.HEURIST_DBNAME,
                             'Find errors in database uploaded files');
 
+                        menuEntry('','Verify concept codes','verification/verifyConceptCodes.php?db='.HEURIST_DBNAME,
+                            'Find duplications of concept codes in all databases');
                         ?>
                         <li><a href="<?=HEURIST_BASE_URL?>?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
                                 title="Show bookmarked records which you have not tagged">
