@@ -158,6 +158,8 @@
                 $new_pointer_fields = array();
 
                 foreach ($details as $dtID => $dtValue){
+                    
+                    if($dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') continue;
 
                     $dt_type = $dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type']];
                     if($dt_type=='resource' || $dt_type=='relmarker'){
@@ -166,6 +168,8 @@
                 }
                 
                 foreach ($details as $dtID => $dtValue){
+                    
+                    if($dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') continue;
                     
                     $res_dt = __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, 
                                                             $fieldtypes, null, $new_pointer_fields);

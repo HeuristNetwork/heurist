@@ -175,6 +175,9 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
             }
             
             foreach ($details as $dtKey => $dtValue){
+                
+                if($dtValue[$rst_fi['rst_RequirementType']]=='forbidden') continue;
+                
                 if($dtValue[$rst_fi['dty_Type']]=='resource' && $dtValue[$rst_fi['rst_CreateChildIfRecPtr']]==1){
                     
                     $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
@@ -262,8 +265,9 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
             $rtNames = $rtStructs['names']; //???need
             $rst_fi = $rtStructs['typedefs']['dtFieldNamesToIndex'];
         
-            $detailType = $dtValue[$rst_fi['dty_Type']];
+            if($dtValue[$rst_fi['rst_RequirementType']]=='forbidden') return null;
         
+            $detailType = $dtValue[$rst_fi['dty_Type']];
             $dt_label   = $dtValue[$rst_fi['rst_DisplayName']];
             $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']]; //help text
         
