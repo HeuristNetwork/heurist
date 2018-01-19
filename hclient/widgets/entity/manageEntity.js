@@ -758,7 +758,7 @@ $.widget( "heurist.manageEntity", {
             this._as_dialog.dialog("open");
             
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
-                'prefs_'+this._entityName,
+                null, //'prefs_'+this._entityName,
                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content', false);
             
         }
@@ -1209,7 +1209,7 @@ $.widget( "heurist.manageEntity", {
                     
                     //help and tips buttons on dialog header
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this.editFormPopup,
-                        'prefs_'+this._entityName,
+                     null,  //  'prefs_'+this._entityName,
                      window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content', false);
                      
                 this._toolbar = this._edit_dialog.parent();     

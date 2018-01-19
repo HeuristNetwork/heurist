@@ -408,7 +408,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                 //help and tips buttons on dialog header
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
-                    'prefs_'+this._entityName,
+                    null, //'prefs_'+this._entityName,
                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
         
                 this._toolbar = this._edit_dialog.parent(); //this.editFormPopup.parent();
@@ -1836,17 +1836,22 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
         
-        if(this.element.find('.chb_opt_fields').length==0){
-        
-            $('<div style="display:block;text-align:left;padding:10px 0px 5px 35px;">'
-                //+'<label><input type="checkbox" class="chb_show_help" '
-                //+(ishelp_on?'checked':'')+'/>Show help</label>&nbsp;&nbsp;'
-                +'<label><input type="checkbox" class="chb_opt_fields" '
-                +(isfields_on?'checked':'')+'/>Optional fields</label>'
+        if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
+            
+            $('<div style="display:inline-block;text-align:left;padding:10px 0px 5px 35px;">'
+                    //?'<label><input type="checkbox" class="chb_show_help" '
+                    //    +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
+                    +'<label><input type="checkbox" class="chb_opt_fields" '
+                    +(isfields_on?'checked':'')+'/>Optional fields</label>'
+                    +'<hr style="margin-top: 10px;width:150px">'
+             +'</div>'
+             +'<div style="float:right;padding: 20px 40px 0px 0px;font-weight: bold;">'
                 +'<span class="btn-config4" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Modify structure</span>'
                 +'<span class="btn-config5 ui-icon ui-icon-gear smallicon"></span>'
-                +'<hr style="margin-top: 10px;width:300px">'
-            +'</div>').insertBefore(this.editForm.first('fieldset'));
+             +'</div>').insertBefore(this.editForm.first('fieldset'));
+
+
+
                 
             var that = this;    
             
@@ -1869,6 +1874,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element));
                         });
             */
+            
             this.element.find('.chb_opt_fields') //.attr('checked', isfields_on)
                         .change(function( event){
                             var isfields_on = $(event.target).is(':checked');
@@ -1904,6 +1910,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             sheader = sheader + '</div>';
             $(sheader).appendTo(this.editHeader);
+            
+            if(!this._as_dialog){
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this.element, 
+                    '.ui-heurist-header2', //where to put button
+                    window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+            }
         }
 
         //need refresh layout to init overflows(scrollbars)        

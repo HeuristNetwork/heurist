@@ -1219,9 +1219,12 @@ window.hWin.HEURIST4.ui = {
     //
     //  usrPrefKey - prefs_entityName - context 
     //
-    initDialogHintButtons: function($dialog, usrPrefKey, helpcontent_url, hideHelpButton){
+    initDialogHintButtons: function($dialog, button_container_id, helpcontent_url, hideHelpButton){
         
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
+        if(titlebar.length==0){
+            titlebar = $dialog.find(button_container_id);
+        } 
         
         if(!hideHelpButton){
             var $help_menu = $('<ul><li data-level="2"><a><span class="ui-icon"/>Beginner</a></li>'
