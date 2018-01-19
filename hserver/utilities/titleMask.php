@@ -702,7 +702,8 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     $rt = $rec_value['rec_RecTypeID'];
                     $fld_value = self::__fill_field($inner_field_name, $rt, $mode, $rec_id);
                     if(is_array($fld_value)){
-                        return $fld_value; //ERROR
+                        //for multiconstraint it may return error since field may belong to different rt
+                        return '';//$fld_value; //ERROR
                     }else if($fld_value) {
                         array_push($res, $fld_value);
                     }
@@ -715,23 +716,29 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
             $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs'); //$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
             $inner_rec_type = explode(",",$inner_rec_type);
-            foreach ($inner_rec_type as $rtID){
-                $rtid = intval($rtID);
-                if (!$rtid) continue;
-                $inner_rdt = self::__fill_field($inner_field_name, $rtid, $mode);
-                if(is_array($inner_rdt)){
-                    return $inner_rdt; //ERROR
-                }else if ($inner_rdt) {
+            if(count($inner_rec_type)>0){ //constrained
+                $field_not_found = null;
+                foreach ($inner_rec_type as $rtID){
+                    $rtid = intval($rtID);
+                    if (!$rtid) continue;
+                    $inner_rdt = self::__fill_field($inner_field_name, $rtid, $mode);
+                    if(is_array($inner_rdt)){
+                        //it may be found in another record type for multiconstaints
+                        $field_not_found = $inner_rdt; //ERROR
+                    }else if ($inner_rdt) {
 
-                    if($mode==1){
-                        $s1 = $rdt_id;
-                    }else{
-                        $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+                        if($mode==1){
+                            $s1 = $rdt_id;
+                        }else{
+                            $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+                        }
+                        return $s1. "." .$inner_rdt;
                     }
-                    return $s1. "." .$inner_rdt;
+                }
+                if($field_not_found){
+                    return $field_not_found;
                 }
             }
-
             if($mode==1){
                 $s1 = $rdt_id;
             }else{

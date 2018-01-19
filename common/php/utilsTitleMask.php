@@ -692,8 +692,8 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                     if (!$rtid) continue;
                     $inner_rdt = _titlemask__fill_field($inner_field_name, $rtid, $mode);
                     if(is_array($inner_rdt)){
-                        $field_not_found = $inner_rdt; //ERROR
                         //it may be found in another record type for multiconstaints
+                        $field_not_found = $inner_rdt; //ERROR
                     }else if ($inner_rdt) {
 
                         if($mode==1){
