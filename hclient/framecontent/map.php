@@ -107,7 +107,7 @@ require_once(dirname(__FILE__)."/initPage.php");
         text-overflow: ellipsis;
     }
     .vis-item-bbox{
-        background-color:lightgray;
+        background-color:rgb(142, 169, 185);
     }
 </style>
 
