@@ -312,7 +312,7 @@ function EditRectypeTitle() {
 
                             var _varname = term.id;
                             
-                            rt_term.label =  '<div style="padding-left:10px;"><b>'+child[k].rt_name + '</b></div>';
+                            rt_term.label =  '<div style="padding-left:10px;"><b>'+child[k].rt_name + '</b>('+child[0]+')</div>';
                             //rt_term.href = "javascript:void(0)";
 
                             var rectypeNode = new YAHOO.widget.TextNode(rt_term, parentNode, false);
