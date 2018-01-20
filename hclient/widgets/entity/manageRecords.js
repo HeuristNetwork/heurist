@@ -195,7 +195,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             {title:'Confirm',yes:'Save changes', no:'Cancel'});
                             
                     }else{
-                        this._toolbar.find('#divNav').html( (idx+1)+' of '+order.length);
+                        this._toolbar.find('#divNav').html( (idx+1)+'/'+order.length);
                         
                         window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnPrev'), (idx==0));
                         window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnNext'), (idx+1==order.length));
@@ -240,7 +240,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               click: function() { that.closeEditDialog(); }},*/
                        
                         {text:window.hWin.HR('Save'), id:'btnRecSaveAndClose',
-                              css:{'visibility':'hidden','margin-right':'15px'},
+                              css:{'margin-right':'15px'},
                               click: function() { that._saveEditAndClose( null, 'close' ); }}
                 
                 ];
@@ -248,7 +248,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
                         click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                               
-                        {text:window.hWin.HR('Duplicate'), id:'btnRecDuplicate',
+                        {showText:false, icons:{primary:'ui-icon-circle-triangle-w'},title:window.hWin.HR('Previous'),
+                              css:{'display':'none','margin-right':'0.5em','float':'left'}, id:'btnPrev',
+                              click: function() { that._navigateToRec(-1); }},
+                        {showText:false, icons:{secondary:'ui-icon-circle-triangle-e'},title:window.hWin.HR('Next'),
+                              css:{'display':'none','margin-left':'0.5em','float':'left'}, id:'btnNext',
+                              click: function() { that._navigateToRec(1); }},
+                              
+                        {text:window.hWin.HR('Dupe'), id:'btnRecDuplicate',
+                                css:{'margin-left':'1em'},
                                 click: function(event) { 
                                     var btn = $(event.target);
                                     btn.hide();
@@ -276,32 +284,30 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             }
                                         }); 
                                 }},
-                        {text:window.hWin.HR('Save + new'), id:'btnRecSaveAndNew',
-                              css:{'visibility':'hidden', 'margin-right':'60px'},
+                        {text:window.hWin.HR('New'), id:'btnRecSaveAndNew',
+                              css:{'margin-left':'0.5em','margin-right':'10em'},
                               click: function() { that._saveEditAndClose( null, 'newrecord' ); }},
                                 
-                        {text:window.hWin.HR('Previous'),icons:{primary:'ui-icon-circle-triangle-w'},
-                              css:{'display':'none'}, id:'btnPrev',
-                              click: function() { that._navigateToRec(-1); }},
-                        {text:window.hWin.HR('Next'),icons:{secondary:'ui-icon-circle-triangle-e'},
-                              css:{'display':'none','margin-right':'60px'}, id:'btnNext',
-                              click: function() { that._navigateToRec(1); }},
-                              
-                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
-                              css:{'visibility':'hidden','margin-right':'15px'},
-                              click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
-                       
+                                
+                                
                         {text:window.hWin.HR('Save'), id:'btnRecSave',
                               accesskey:"S",
-                              css:{'visibility':'hidden','margin-right':'5px'},
+                              css:{'font-weight':'bold'},
                               click: function() { that._saveEditAndClose( null, 'none' ); }},
-                        {text:window.hWin.HR('Save / Close'), id:'btnRecSaveAndClose',
-                              css:{'visibility':'hidden','margin-right':'15px'},
+                        {text:window.hWin.HR('Save + Close'), id:'btnRecSaveAndClose',
+                              css:{'margin-left':'0.5em'},
                               click: function() { that._saveEditAndClose( null, 'close' ); }},
                         {text:window.hWin.HR('Close'), 
+                              css:{'margin-left':'0.5em'},
                               click: function() { 
                                   that.closeEditDialog(); 
-                              }}]; 
+                              }},
+                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
+                              css:{'margin-left':'3em'},
+                              click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
+                              
+                              
+                              ]; 
                               
             }
             return btns;
@@ -423,8 +429,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                      .css({
                         padding: '0.8em 1em .2em .4em',
                         background: 'none',
-                        'background-color': '#95A7B7 !important',
-                        'text-align':'right'
+                        'background-color': '#95A7B7 !important'
                      });
                 }
                 
@@ -439,13 +444,26 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }
                 }
             }
-
+            
+            if(this._toolbar){
+                this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
+            }
+            
+            
+            if(this._toolbar.find('#divNav3').length===0){
+                    $('<div id="divNav3" style="font-weight:bold;padding-left:10em;display:inline-block;text-align:right">Save then</div>')
+                        .insertBefore(this._toolbar.find('#btnRecDuplicate'));
+            }
+            
             var recset = this.recordList.resultList('getRecordSet');
             if(recset && recset.length()>1 && recID>0){
                 this._toolbar.find('#btnPrev').css({'display':'inline-block'});
                 this._toolbar.find('#btnNext').css({'display':'inline-block'});
                 if(this._toolbar.find('#divNav').length===0){
-                    $('<div id="divNav" style="min-width:40px;padding:0 1em;display:inline-block;text-align:center">')
+                    $('<div id="divNav2" style="font-weight:bold;padding:0.8em 1em;float:left;text-align:right">Step through filtered subset</div>')
+                        .insertBefore(this._toolbar.find('#btnPrev'));
+                        
+                    $('<div id="divNav" style="font-weight:bold;padding-top:0.8em;min-width:40px;float:left;text-align:center">')
                         .insertAfter(this._toolbar.find('#btnPrev'));
                 }
                 this._navigateToRec(0); //reload
@@ -453,6 +471,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this._toolbar.find('#btnPrev').hide();
                 this._toolbar.find('#btnNext').hide();
                 this._toolbar.find('#divNav').hide();
+                this._toolbar.find('#divNav2').hide();
             }
             
             //summary tab - specific for records only    
@@ -1813,12 +1832,25 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //show/hide save buttons
         var ele = this._toolbar;
-        ele.find('#btnRecCancel').css('visibility', mode);
+        /*ele.find('#btnRecCancel').css('visibility', mode);
         ele.find('#btnRecSaveAndNew').css('visibility', mode);
         ele.find('#btnRecSave').css('visibility', mode);
-        ele.find('#btnRecSaveAndClose').css('visibility', mode);
+        ele.find('#btnRecSaveAndClose').css('visibility', mode);*/
         
-        ele.find('#btnRecDuplicate').css({'display':((this._currentEditID>0)?'inline-block':'none')});
+        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecDuplicate'), (mode=='hidden'));
+        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecCancel'), (mode=='hidden'));
+        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndNew'), (mode=='hidden'));
+        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndClose'), (mode=='hidden'));
+        
+        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSave'), (mode=='hidden'));
+        
+        //save buton is always enabled - just greyout in nonchanged state
+        if(mode=='hidden'){
+            ele.find('#btnRecSave').css({opacity: '.35'});  //addClass('ui-state-disabled'); 
+        }else{
+            ele.find('#btnRecSave').css({opacity: '1'}); //.removeClass('ui-state-disabled'); // ui-button-disabled
+        }
+        
         
         //ele.find('#btnRecReload').css('visibility', !mode);
     },
