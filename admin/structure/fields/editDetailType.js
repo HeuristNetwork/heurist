@@ -728,14 +728,34 @@ function DetailTypeEditor() {
         //take only changed values
         for (i = 0, l = fnames.length; i < l; i++){
             var fname = fnames[i];
-            el = Dom.get(fname);
+            el = $('#'+fname);
+      
+            if( el.length>0 ){
+                if (Hul.isempty(el.val())) {
+                    if(fname=='dty_Status'){
+                        el.val('open');
+                    }else if(fname=='dty_NonOwnerVisibility'){
+                        el.val('viewable');
+                    }
+                }
+
+        
+                if(_dtyID<0 || (el.val()!==String(_detailType[i]) && !(el.val()==="" && _detailType[i]===null)))
+                {
+                    _updatedFields.push(fname);
+                    _updatedDetails.push(el.val());
+                }
+            }
+            
+            
+            /*el = Dom.get(fname);
             if( !Hul.isnull(el) ){
                 if(_dtyID<0 || (el.value!==String(_detailType[i]) && !(el.value==="" && _detailType[i]===null)))
                 {
                     _updatedFields.push(fname);
                     _updatedDetails.push(el.value);
                 }
-            }
+            }*/
         }
 
         // check mandatory fields
