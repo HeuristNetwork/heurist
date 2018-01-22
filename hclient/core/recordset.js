@@ -215,7 +215,7 @@ function hRecordSet(initdata) {
                     //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
                 }
                 
-                var k, m, dates = [], startDate=null, endDate=null, dres=null;
+                var k, m, dates = [], startDate=null, endDate=null, dres=null, singleFieldName;
                 for(k=0; k<timefields.length; k++){
                     var datetime = _getFieldValues(record, timefields[k]);
                     if(!isnull(datetime)){   
@@ -223,12 +223,16 @@ function hRecordSet(initdata) {
                         for(m=0; m<datetime.length; m++){
                             if(timefields[k]==DT_START_DATE){
                                 startDate = datetime[m];
+                                if(singleFieldName==null){
+                                     singleFieldName = window.hWin.HEURIST4.detailtypes.names[timefields[k]];
+                                }    
                             }else if(timefields[k]==DT_END_DATE){
                                 endDate  = datetime[m]; 
                             }else{
                                 dres = window.hWin.HEURIST4.util.parseDates(datetime[m]);
                                 if(dres){
                                     dates.push(dres);
+                                    singleFieldName = window.hWin.HEURIST4.detailtypes.names[timefields[k]];
                                 }     
                             }
                         }
@@ -269,7 +273,7 @@ function hRecordSet(initdata) {
                                 group: dataset_name,
                                 content: 
                                 '<img src="'+iconImg + 
-                                           '"  align="absmiddle" style="padding-right:3px;"/>&nbsp;<span>'+recName+'</span>',
+                                           '"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'+recName+'</span>',
                                 //'<span>'+recName+'</span>',
                                 title: recName,
                                 start: dres[0],
@@ -280,6 +284,7 @@ function hRecordSet(initdata) {
                                 titem['end'] = dres[1];
                             }else{
                                 titem['type'] = 'point';
+                                titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
                             }
                             titems.push(titem);
                         }

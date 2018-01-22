@@ -48,7 +48,7 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
     var tmap = null,  // timemap object
     vis_timeline = null, // vis timeline object
     vis_timeline_range = null,
-    vis_timeline_label_mode = 2,
+    vis_timeline_label_mode = 0, //default full label
     drawingManager,     //manager to draw the selection rectnagle
     lastSelectionShape,
 
@@ -642,9 +642,9 @@ if(_mapdata.limit_warning){
 
 
 
-        var menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span/>Full label</a></li>'
+        var menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span class="ui-icon ui-icon-check"/>Full label</a></li>'
                         +'<li id="tlm1"><a href="#"><span/>Truncate to bar</a></li>'
-                        +'<li id="tlm2"><a href="#"><span class="ui-icon ui-icon-check"/>Fixed length</a></li>'
+                        +'<li id="tlm2"><a href="#"><span/>Fixed length</a></li>'
                         +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li>'
                         +'<li id="tlm4"><a href="#"><span/>Hide labels/No stack</a></li></ul>')
         .addClass('menu-or-popup')
@@ -731,7 +731,7 @@ if(_mapdata.limit_warning){
                 $('div .vis-item-overflow').css('overflow',(mode===1)?'hidden':'visible');
 
                 //'label_in_bar':(mode==1),
-                vis_timeline.setOptions({'margin':1,  'stack':(mode!=4)});
+                vis_timeline.setOptions({'margin':1,'stack':(mode!=4)});
 
                 if(mode>=3){ //hide labels at all
                     contents.find("span").hide();
