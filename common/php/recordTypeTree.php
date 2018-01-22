@@ -161,9 +161,9 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     
     
     
-    //find parent recordtype
+    //find ALL parent recordtypes
     $rst_fi = $rtStructs['typedefs']['dtFieldNamesToIndex'];
-    $parent_Rt = null;
+    $parent_Rts = array();
     
     foreach ($rtStructs['typedefs'] as $rtKey => $recstruct){
         if($rtKey>0){
@@ -182,22 +182,22 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
                     
                     $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
                     if($constraint && in_array($recTypeId, explode(',',$constraint))){
-                        $parent_Rt = $rtKey;    
-                        break;
+                        array_push($parent_Rts, $rtKey);    
+                        //break;
                     }
                     
                 }
             }
         }
     }
-    if($parent_Rt){
+    if(count($parent_Rts)>0){
         //$res['recParent'] = 'Record Parent';
         $dtKey = DT_PARENT_ENTITY;
         
         //create fake rectype structure field
         $ffr = array();
         $ffr[$rst_fi['rst_DisplayName']] = 'Parent entity';//'Record Parent ('.$rtStructs['names'][$parent_Rt].')';
-        $ffr[$rst_fi['rst_PtrFilteredIDs']] = $parent_Rt;
+        $ffr[$rst_fi['rst_PtrFilteredIDs']] = implode(',',$parent_Rts);
         $ffr[$rst_fi['dty_Type']] = 'resource';
         $ffr[$rst_fi['rst_DisplayHelpText']] = 'Reverse pointer to parent record';
 
