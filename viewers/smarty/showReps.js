@@ -870,7 +870,9 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
-
+            //squery = squery + '&DBGSESSID=425944380594800002;d=1,p=0,c=07';
+            
+            
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
             infoMessageBox.show();
             

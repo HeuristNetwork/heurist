@@ -26,6 +26,10 @@
 * 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only),
 *
 * other parameters are hquery's
+* 
+* 
+* smarty_function_wrap  - function for var wrap
+* 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -781,10 +785,19 @@ function smarty_function_wrap($params, &$smarty)
 
                     if($type_media == 'image'){
                         $sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
-                    }else if($value['remoteSource']=='youtube' ){
-
+                    }else if($value['remoteSource']=='youtube' || $value['mimeType'] == 'video/youtube' || $value['ext'] == 'youtube'){
+                     //video/youtube
                         $sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
 
+                        
+                    }else if($value['mimeType'] == 'video/vimeo' || $value['ext'] == 'vimeo'){
+                     //video/viemo
+                        $sres = $sres.linkifyVimeoURLs($value['URL'], $size);
+                        
+                    }else if($value['mimeType'] == 'audio/soundcloud' || $value['ext'] == 'soundcloud'){
+                     //audio/soundcloud
+                        $sres = $sres.linkifySoundcloudURL($value['URL'], $size);                        
+                                                    
                     }else if($value['remoteSource']=='gdrive' ){
                         $sres = $sres.linkifyGoogleDriveURLs($value['URL'], $size);
 
@@ -792,13 +805,13 @@ function smarty_function_wrap($params, &$smarty)
 
                         $sres = $sres.'<embed $size name="plugin" src="'.$value['URL'].'" type="'.$value['mimeType'].'" />';
 
-                    }else if($type_media=='video'){
+                    }else if($type_media=='video' ||  strpos($value['mimeType'],'video')===0){
                         // UNFORTUNATELY HTML5 rendering does not work properly
                         // $sres = $sres.createVideoTag($value['URL'], $value['mimeType'], $size);
 
                         $sres = $sres.createVideoTag2($value['URL'], $value['mimeType'], $size);
 
-                    }else if($type_media=='audio'){
+                    }else if($type_media=='audio' ||  strpos($value['mimeType'],'audio')===0){
                         $sres = $sres.createAudioTag($value['URL'], $value['mimeType']);
                     }else{
                         $sres = $sres."Unsupported media type ".$type_media;
@@ -808,7 +821,7 @@ function smarty_function_wrap($params, &$smarty)
 
                     $lurl = strtolower($value['URL']);
 
-                    if( $value['remoteSource']=='youtube' ){
+                    if( $value['remoteSource']=='youtube' || $value['mimeType'] == 'video/youtube' || $value['ext'] == 'youtube' ){
                         $sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
                     }else if( $value['remoteSource']=='gdrive' ){
                         $sres = $sres.linkifyGoogleDriveURLs($value['URL'], $size);
@@ -816,8 +829,8 @@ function smarty_function_wrap($params, &$smarty)
 
                         $sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
                     }else{
-
-                        $sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
+                        $sname = ($value['origName']=='_remote')?$value['URL']:$value['origName'];
+                        $sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$sname."</a>";
                     }
                 }
 

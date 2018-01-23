@@ -249,6 +249,42 @@
     return $text;
   }
 
+  function linkifyVimeoURLs($text, $size) {
+
+    if($size==null || $size==''){
+      $size = 'width="640" height="360"';
+    }
+                                                                                                          
+    $res = preg_replace('/(https?:\/\/)?(www\.)?(player\.)?vimeo\.com\/([a-z]*\/)*([??0-9]{6,11})[?]?.*/',
+      '<iframe '.$size.' src="https://player.vimeo.com/video/$5" frameborder="0" '
+      .' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>',
+      $text);
+
+    /*
+    if(preg_match(, $text, $matches)>0){
+       $res =  '<iframe '.$size.' src="https://player.vimeo.com/video/'.$matches[5].'" frameborder="0" '
+      .' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+    }
+    */
+      
+      
+      //https://vimeo.com/6370469
+//https://vimeo.com/channels/vimeogirls/249801250  
+  
+    return $res;
+  }  
+
+  function linkifySoundcloudURL($url, $size) {
+
+    if($size==null || $size==''){
+      $size = 'height="166"';
+    }
+  
+  return '<iframe width="100%" '.$size.' scrolling="no" frameborder="no" allow="autoplay" '
+  .'src="https://w.soundcloud.com/player/?url='.$url.'&amp;auto_play=false&amp;hide_related=false&amp;show_comments=false&amp;show_user=false&amp;show_reposts=false&amp;show_teaser=false&amp;visual=true"></iframe>';
+  
+  }
+  
 function linkifyGoogleDriveURLs($text, $size) {
     if($size==null || $size==''){
         $size = 'width="420" height="345"';
