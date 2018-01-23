@@ -64,7 +64,7 @@ of the codebase and rename it to index.html
 
 $version = "4.5.7"; // sets current program version number, determined by Heurist development lead
 
-// 4.5.7  23 Jan 18 A large nubmer of cosmetic changes and bugfixes particularly to editing function, merging recods 
+// 4.5.7 23 Jan 18 A large nubmer of cosmetic changes and bugfixes particularly to editing function, merging recods 
 // 4.5.6 30 Dec 17  Finalise new record edit, lota of bug fixes. Update production version
 // 4.5.4 9 Dec 17  Improvements to new field definition, term list dropdowns, KML import, bug fixes
 // 4.5.3 28 Nov 17  Minor bug fixes
