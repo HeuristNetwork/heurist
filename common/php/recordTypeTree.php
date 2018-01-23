@@ -181,7 +181,7 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
                 if($dtValue[$rst_fi['dty_Type']]=='resource' && $dtValue[$rst_fi['rst_CreateChildIfRecPtr']]==1){
                     
                     $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
-                    if($constraint && in_array($recTypeId, explode(',',$constraint))){
+                    if($constraint && in_array($recTypeId, explode(',',$constraint)) && !in_array($rtKey, $parent_Rts) ){
                         array_push($parent_Rts, $rtKey);    
                         //break;
                     }
