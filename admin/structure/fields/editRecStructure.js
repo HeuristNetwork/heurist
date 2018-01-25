@@ -726,7 +726,6 @@ function EditRecStructure() {
             _myDataTable.subscribe('linkClickEvent', function(oArgs){
 
                 if(!Hul.isnull(popupSelect) || _isServerOperationInProgress) { 
-//console.log('popup or action-in-progress');
                     return; 
                 }
 
@@ -1770,9 +1769,10 @@ function EditRecStructure() {
     function _updateSingleField(dty_ID, fieldName, oOldValue, oNewValue, fnCallback){
          
          fnCallback(true, oNewValue);
-         
           
          if(oOldValue!=oNewValue){
+    
+            _isServerOperationInProgress = true;             
              
             _myDataTable.render();
             //create and fill the data structure
@@ -1787,9 +1787,6 @@ function EditRecStructure() {
      
             var updateResult = function(context){
                 if(!Hul.isnull(context)){
-/*console.log(top);
-console.log(window);
-var win = !win?window:top;*/
                     var win = top;
                     win.HEURIST.rectypes = context.rectypes;
                     win.HEURIST.detailTypes = context.detailTypes;
@@ -1798,7 +1795,7 @@ var win = !win?window:top;*/
                             win.hWin.HEURIST4.detailtypes = context.detailTypes;
                             win.hWin.HEURIST4.terms = context.terms;
                         }
-                    
+    
                     editStructure._structureWasUpdated = true;
                     
                     //fnCallback(true, oNewValue);
@@ -1815,7 +1812,7 @@ var win = !win?window:top;*/
             var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
             var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
-            _isServerOperationInProgress = true;
+
             Hul.getJsonData(baseurl, callback, params);           
          }else{
             //fnCallback(true, oNewValue); 
@@ -1900,8 +1897,6 @@ var win = !win?window:top;*/
         btnSaveOrder.style.display = "none";
         btnSaveOrder.style.visibility = "hidden";
 
-//console.log(str);
-        
         if(!Hul.isnull(str)){
             var updateResult = function(context){
                 if(!Hul.isnull(context)){
@@ -2460,7 +2455,18 @@ var win = !win?window:top;*/
             }
             if(_checkForRequired()){
 
-                _checkForTitleMask(function(){ window.close(editStructure._structureWasUpdated); });
+                _checkForTitleMask(function(){ 
+                        //wait for inline editor
+                        function __waitForInlineEditor(){
+                             if(_isServerOperationInProgress){ //wait next 500 seconds
+                                setTimeout(__waitForInlineEditor, 300);
+                             }else{
+                                window.close(editStructure._structureWasUpdated);          
+                             }
+                        }
+                        
+                        setTimeout(__waitForInlineEditor, 300);
+                });
 
             }else{
                 alert("You should have at least one required field and at least one of them should appear in the title mask to ensure that the constructed title is not blank. \n\nPlease set one or more fields to Required.");
