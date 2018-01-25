@@ -258,7 +258,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         {text:window.hWin.HR('Dupe'), id:'btnRecDuplicate',
                                 css:{'margin-left':'1em'},
                                 click: function(event) { 
-                                    var btn = $(event.target);
+
+                                    that._saveEditAndClose( null, function(){ 
+                                    
+                                    var btn = $(event.target);                        
                                     btn.hide();
                                     
                                     var dlged = that._getEditDialog();
@@ -269,7 +272,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                                             window.hWin.HEURIST4.msg.sendCoverallToBack();
                                             
-                                            btn.css('display','inline-block');
+                                            btn.css('display','inline-block');  //restore button visibility
                                             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                 window.hWin.HEURIST4.msg.showMsgFlash(
                                                     window.hWin.HR('Record has been duplicated'));
@@ -283,6 +286,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                                             }
                                         }); 
+                                        
+                                    });
                                 }},
                         {text:window.hWin.HR('New'), id:'btnRecSaveAndNew',
                               css:{'margin-left':'0.5em','margin-right':'10em'},
@@ -1837,9 +1842,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ele.find('#btnRecSave').css('visibility', mode);
         ele.find('#btnRecSaveAndClose').css('visibility', mode);*/
         
-        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecDuplicate'), (mode=='hidden'));
+        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecDuplicate'), (mode=='hidden'));
+        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndNew'), (mode=='hidden'));
+        
         window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecCancel'), (mode=='hidden'));
-        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndNew'), (mode=='hidden'));
         window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndClose'), (mode=='hidden'));
         
         //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSave'), (mode=='hidden'));
