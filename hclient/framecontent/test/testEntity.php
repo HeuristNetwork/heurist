@@ -28,6 +28,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/fancytree/skin-themeroller/ui.fancytree.css" />
         <script type="text/javascript" src="<?php echo PDIR;?>ext/fancytree/jquery.fancytree-all.min.js"></script>
 
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/fancybox/jquery.fancybox.css" />
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/fancybox/jquery.fancybox.js"></script>
+        
         <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
         <!-- script type="text/javascript" src="<?php echo PDIR;?>ext/yoxview/jquery.yoxview-2.21.js"></script -->
         <script type="text/javascript" src="<?php echo PDIR;?>ext/yoxview/yoxview-init.js"></script>
@@ -80,6 +83,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
             .fancytree-title{
                 font-weight: normal !important;
                 white-space:normal;                
+            }
+            .fancybox-container{
+                z-index:99999999;
             }
         </style>
         
@@ -406,8 +412,8 @@ print $targetPath.'<br>';
                             <option value="Records">Records</option>
                             <option value="SysUsers" >Users +</option>
                             <option value="SysGroups" >Workgroups +</option>
-                            <option value="UsrTags" selected>Tags +</option>
-                            <option value="RecUploadedFiles" >Uploaded Files +</option>
+                            <option value="UsrTags" >Tags +</option>
+                            <option value="RecUploadedFiles" selected>Uploaded Files +</option>
                             <option value="UsrReminders">Reminders</option>
                             <option value="Databases">Databases</option>
                             <option value="Records">Saved Searches</option>

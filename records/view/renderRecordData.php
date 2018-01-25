@@ -593,14 +593,23 @@ function print_private_details($bib) {
 
                         $filedata = $filedata['file'];
                         $remoteSrc = $filedata['remoteSource'];
+                        
+                        if(strpos($filedata['mimeType'],'audio/')===0 || 
+                           strpos($filedata['mimeType'],'image/')===0 || 
+                           strpos($filedata['mimeType'],'video/')===0){
+                               
+                            $filedata['playerURL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$filedata['nonce'].'&mode=tag';
+                        }
 
                         //add to thumbnail list
                         $isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
                         if (is_image($filedata) || $isplayer)
                         {
+                            /*
                             if($isplayer && is_image($filedata) && is_logged_in()){
                                 $filedata['playerURL'] .= "&annedit=yes";
                             }
+                            */
                             
                             //$filedata standart thumb with 200px image
                             if(!$is_map_popup && $filedata['URL']!=$filedata['remoteURL']){
@@ -616,9 +625,12 @@ function print_private_details($bib) {
                                 'id' => $filedata['id'],
                                 'url' => $filedata['URL'],   //download
                                 'mediaType'=>$filedata['mediaType'], 
+                                'mimeType'=>$filedata['mimeType'], 
                                 'thumb_size'=>$thumb_size,
                                 'thumb' => $filedata['thumbURL'],
-                                'player' => $isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  //link to generate player html
+                                'player' => $filedata['playerURL']
+                                //link to generate player html
+                                //$isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  
                             ));
                         }
 
@@ -736,9 +748,15 @@ if($is_map_popup){
                         print '</a></div></div>';
                     }else
                     */
+                    
                     if($thumb['player'] && !$is_map_popup){
-                        print '<img id="img'.$thumb['id'].'" style="width:'.$thumb['thumb_size'].'px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
-                        print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
+                        
+                        if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
+                            print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">'.file_get_contents($thumb['player']).'</div>';    
+                        }else{
+                            print '<img id="img'.$thumb['id'].'" style="width:'.$thumb['thumb_size'].'px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
+                            print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
+                        }
                     }else{  //for usual image
                         print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
                     }
@@ -747,7 +765,7 @@ if($is_map_popup){
                         print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
                     }
 
-                    print '<a href="' . htmlspecialchars($thumb['url']) . '" target=_surf class="image_tool">DOWNLOAD</a></div>';
+                    print '<a href="' . htmlspecialchars($thumb['url']) . '" class="external-link" target=_surf class="image_tool">DOWNLOAD</a></div>';
                     print '</div>';
                     if($is_map_popup){
                         print '<br>';

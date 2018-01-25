@@ -78,10 +78,12 @@
       $height =  '100%';
     }
 
-    if($type_source=='youtube')
+    
+    if($type_source=='youtube' || $filedata['mimeType'] == 'video/youtube' || $filedata['ext'] == 'youtube')
     {
       print linkifyYouTubeURLs($filedata['URL'], $size); //returns iframe
-    }else if($type_source=='gdrive')
+    }
+    else if($type_source=='gdrive')
     {
         print linkifyGoogleDriveURLs($filedata['URL'], $size); //returns iframe
     }
@@ -254,22 +256,16 @@
     if($size==null || $size==''){
       $size = 'width="640" height="360"';
     }
-                                                                                                          
-    $res = preg_replace('/(https?:\/\/)?(www\.)?(player\.)?vimeo\.com\/([a-z]*\/)*([??0-9]{6,11})[?]?.*/',
-      '<iframe '.$size.' src="https://player.vimeo.com/video/$5" frameborder="0" '
-      .' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>',
-      $text);
-
-    /*
-    if(preg_match(, $text, $matches)>0){
-       $res =  '<iframe '.$size.' src="https://player.vimeo.com/video/'.$matches[5].'" frameborder="0" '
-      .' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+    
+    $hash = json_decode(file_get_contents("https://vimeo.com/api/oembed.json?url=".$text), true);
+    $video_id = @$hash['video_id'];
+    if($video_id>0){
+       $res = '<iframe '.$size.' src="https://player.vimeo.com/video/'.$video_id.'" frameborder="0" '
+      . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+    }else{
+       $res = $text;  
     }
-    */
-      
-      
-      //https://vimeo.com/6370469
-//https://vimeo.com/channels/vimeogirls/249801250  
+    //$res = preg_replace('(https?:\/\/)?(www\.)?(player\.)?vimeo\.com\/([a-z]*\/)*([??0-9]{6,11})[?]?.*', $text);
   
     return $res;
   }  

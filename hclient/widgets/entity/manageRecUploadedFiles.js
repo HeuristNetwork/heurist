@@ -81,7 +81,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             this.recordList.resultList('option','onPageRender',function(){
                 //$(that.recordList.find('.ent_content_full'))
                 var ele = $(that.recordList.find('.ent_content_full')); //.find('a')
-                ele.yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
+                
+//@todo repalce with fancybox                ele.yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
             });
         }
         
@@ -251,8 +252,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var recIcon = '';//@todo window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
 
 
-var needplayer = false;//file_param && !(file_param.indexOf('video')<0 && file_param.indexOf('audio')<0);
-
         
         var html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
         window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
@@ -260,7 +259,7 @@ var needplayer = false;//file_param && !(file_param.indexOf('video')<0 && file_p
             
         if(this.options.select_mode=='manager'){
         html_thumb = '<a href="'+            
-window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + (needplayer?'&player=1':'')
+window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + //(needplayer?'&player=1':'')
  + '&file='+fld('ulf_ObfuscatedFileID')+'" target="yoxview" class="yoxviewLink">' +  html_thumb + '</a>';                   
         }
 

@@ -108,7 +108,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     searchRecent: function(domain){
         this.clearInputs();
         
-        this.input_search_recent.prop('checked', true);
+        //this.input_search_recent.prop('checked', true);
+        this.input_sort_type.val('recent');
         this.selectGroup.tabs('option','active',domain=='external'?1:0);
         this.startSearch();
     },

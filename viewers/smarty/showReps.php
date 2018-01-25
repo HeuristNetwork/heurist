@@ -774,15 +774,28 @@ function smarty_function_wrap($params, &$smarty)
 
                 if($limit>0 && $idx>=$limit) break;
 
-                $type_media = $value['mediaType'];
+                $mimeType = $value['mimeType'];
+                
+                $value['playerURL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$value['nonce'].'&mode=tag';
+                //$value['URL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$value['nonce'];
+                
+                if($mode=="link") {
 
-                if($mode=="thumbnail"){
+                    $sname = ($value['origName']=='_remote')?$value['URL']:$value['origName'];
+                    $sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$sname."</a>";
+                    
+                }else 
+                if($mode=="thumbnail" ){
 
-                    $sres = $sres."<a href='".($value['playerURL']?$value['playerURL']:$value['URL'])."' target='_blank'>".
+                    $sres = $sres."<a href='".$value['URL']."' target='_blank'>".
                     "<img src='".$value['thumbURL']."' title='".$value['description']."'/></a>";
 
-                }else if($mode=="player"){
+                }else{ //player is default
 
+                    $value['playerURL'] = $value['playerURL'].'&size='.$size;
+                    $sres = $sres.file_get_contents($value['playerURL']);
+                    
+                    /*
                     if($type_media == 'image'){
                         $sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
                     }else if($value['remoteSource']=='youtube' || $value['mimeType'] == 'video/youtube' || $value['ext'] == 'youtube'){
@@ -816,22 +829,7 @@ function smarty_function_wrap($params, &$smarty)
                     }else{
                         $sres = $sres."Unsupported media type ".$type_media;
                     }
-
-                }else{
-
-                    $lurl = strtolower($value['URL']);
-
-                    if( $value['remoteSource']=='youtube' || $value['mimeType'] == 'video/youtube' || $value['ext'] == 'youtube' ){
-                        $sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
-                    }else if( $value['remoteSource']=='gdrive' ){
-                        $sres = $sres.linkifyGoogleDriveURLs($value['URL'], $size);
-                    }else if($type_media == 'image' || strpos($lurl,".jpg")>0 || strpos($lurl,".png")>0 || strpos($lurl,".gif")>0) {
-
-                        $sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
-                    }else{
-                        $sname = ($value['origName']=='_remote')?$value['URL']:$value['origName'];
-                        $sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$sname."</a>";
-                    }
+                    */
                 }
 
             }

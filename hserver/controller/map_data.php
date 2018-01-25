@@ -41,21 +41,7 @@ $detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, rf.ulf_ObfuscatedFileID, AsW
 * @return mixed Image URL
 */
 function getFileURL($system, $fileID) {
-
     return HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileID;
-/*
-    $paths = fileGetPath_URL_Type($system, $fileID);
-    //print_r($paths);
-
-    if(isset($paths[0][0])) {
-        // Heurist URL
-        return HEURIST_FILES_URL . $paths[0][0];
-    }else if(isset($paths[0][1])) {
-        // External URL
-        return $paths[0][1];
-    }
-    return "null";
-*/
 }
 
 /**
