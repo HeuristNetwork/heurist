@@ -55,6 +55,16 @@
     foreach ($databases as $idx=>$db_name){
         
         print $db_name.'<br>';
+/* 
+$query = 'ALTER TABLE `'.$db_name.'`.`defDetailTypes` '
+.' CHANGE COLUMN `dty_PtrTargetRectypeIDs` `dty_PtrTargetRectypeIDs` VARCHAR(250) NULL DEFAULT NULL COMMENT "CSVlist of target Rectype IDs, null = any"';
+        $res = mysql_query($query);
+        if(!$res){
+            print mysql_error();
+            break;
+        }
+        continue;
+*/
 
         $query = 'USE '.$db_name;
         $res = mysql_query($query);
