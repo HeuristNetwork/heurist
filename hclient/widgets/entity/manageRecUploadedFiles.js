@@ -170,7 +170,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     this._editing.getValue('ulf_ObfuscatedFileID')[0], 
                     this._editing.getValue('fxm_MimeType')[0]]]}); //nonce + memtype
                 
-                
+            
+            //list of records that refer to this file    
             var relations = this._currentEditRecordset.getRelations();    
             if(relations && relations.direct && relations.direct.length>0){
                 $('<div class="detailRowHeader">Records that refer this file</div>').appendTo(this.editForm);
@@ -200,7 +201,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
             ele.editing_input('option', 'change', function(){ 
                 var res = ele.editing_input('getValues'); 
-                var ext = window.hWin.HEURIST4.util.getFileExtension(res[0]);
+                var ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
+                if(ext==null){
+                    ext = window.hWin.HEURIST4.util.getFileExtension(res[0]);
+                }
                 var ele2 = that._editing.getFieldByName('ulf_MimeExt');
                 ele2.editing_input('setValue', ext );
                 that.onEditFormChange();

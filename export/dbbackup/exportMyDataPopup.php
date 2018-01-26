@@ -106,19 +106,18 @@ if($mode=='2' && file_exists($folder.".zip") ){
 <?php if(@$_REQUEST['inframe']==1) { ?>                    
                 <input name='inframe' value='1' type='hidden'>
 <?php } ?>                
-
-                <div class="input-row">
-                    <div class="input-header-cell" 
-                        title="Adds fully self-documenting HML (Heurist XML) file">
-                        Include HML</div>
-                    <div class="input-cell"><input type="checkbox" name="include_hml" value="1"></div>
-                </div>
-                
                 <div class="input-row">
                     <div class="input-header-cell">Include attached (uploaded) files eg. images</div> <!--  (output everything as one ZIP file) -->
                     <div class="input-cell"><input type="checkbox" name="includeresources" value="1" checked></div>
                 </div>
 
+                <div class="input-row">
+                    <div class="input-header-cell" 
+                        title="Adds fully self-documenting HML (Heurist XML) file">
+                        Include HML</div>
+                    <div class="input-cell"><input type="checkbox" name="include_hml" value="1" checked></div>
+                </div>
+                
                 <div class="input-row">
                     <div class="input-header-cell" 
                         title="Adds documents describing Heurist structure and data formats - check this box if the output is for long-term archiving">

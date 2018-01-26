@@ -888,6 +888,19 @@ window.hWin.HEURIST4.util = {
       }
       return null;
     },
+
+    getMediaServerFromURL:function(filename){
+        filename = filename.toLowerCase();
+        if(filename.indexOf('youtu.be')>=0 || filename.indexOf('youtube.com')>=0){
+            return 'youtube';
+        }else if(filename.indexOf('vimeo.com')>=0){
+            return 'vimeo';
+        }else if(filename.indexOf('soundcloud.com')>=0){
+            return 'soundcloud';            
+        }else{
+            return null;
+        }
+    },
     
     getFileExtension:function(filename){
         // (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
