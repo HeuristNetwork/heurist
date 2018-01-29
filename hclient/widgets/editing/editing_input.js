@@ -1576,6 +1576,22 @@ $.widget( "heurist.editing_input", {
                         //temp file name 
                         var newfilename = '~'+window.hWin.HEURIST4.util.random();
 
+                        //crate progress dialog
+                        var $progress_dlg = $('<div title="File Upload"><div class="progress-label">Starting upload...</div>'
+                        +'<div class="progressbar" style="margin-top: 20px;"></div></div>').appendTo( $inputdiv );
+                        var $progress_bar = $progress_dlg.find('.progressbar');
+                        var $progressLabel = $progress_dlg.find('.progress-label');
+         
+                        $progress_bar.progressbar({
+                              value: false,
+                              change: function() {
+                                $progressLabel.text( "Current Progress: " + $progress_bar.progressbar( "value" ) + "%" );
+                              },
+                              complete: function() {
+                                    $progressLabel.text( "Complete!" );
+                              }
+                          });
+         
                         //init upload widget
                         $input.fileupload({
     url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
@@ -1590,7 +1606,22 @@ $.widget( "heurist.editing_input", {
     dataType: 'json',
     dropZone: $input_img,
     // add: function (e, data) {  data.submit(); },
+    submit: function (e, data) { //start upload
+    
+        $progress_dlg = $progress_dlg.dialog({
+            autoOpen: false,
+            modal: true,
+            closeOnEscape: false,
+            resizable: false,
+            buttons: []
+          });                        
+        $progress_dlg.dialog('open'); 
+        $progress_dlg.parent().find('.ui-dialog-titlebar-close').hide();
+    },
     done: function (e, response) {
+            //hide progress bar
+            $progress_dlg.dialog( "close" );
+        
             response = response.result;
             if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
                 var data = response.data;
@@ -1620,10 +1651,11 @@ $.widget( "heurist.editing_input", {
                         $(inpt).click();
             }});
             },                            
-    progressall: function (e, data) { // to implement
+    progressall: function (e, data) { //@todo to implement
         var progress = parseInt(data.loaded / data.total * 100, 10);
 //console.log(progress + '%  '+data.loaded + ' of ' + data.total);
         //$('#progress .bar').css('width',progress + '%');
+        $progress_bar.progressbar( "value", progress );        
     }                            
                         });
                 

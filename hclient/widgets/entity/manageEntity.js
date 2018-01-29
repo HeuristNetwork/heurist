@@ -76,6 +76,7 @@ $.widget( "heurist.manageEntity", {
         filter_groups: null,
 
         in_popup_dialog: false, //rare case when it is opened in popup iframe
+        coverall_on_save: false,
         
         //EDIT section
         // none - edit from and buttons are hiiden
@@ -989,11 +990,20 @@ $.widget( "heurist.manageEntity", {
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'fields'     : fields                     
                 };
+             
+                if(this.options.coverall_on_save) {
+                    if(this.options.edit_mode=='popup' && this._edit_dialog){
+                        window.hWin.HEURIST4.msg.bringCoverallToFront(this._edit_dialog.parents('.ui-dialog'));   
+                    }
+                }
                 
                 var that = this;                                                
                 //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
+                        
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                             var recID = response.data[0];

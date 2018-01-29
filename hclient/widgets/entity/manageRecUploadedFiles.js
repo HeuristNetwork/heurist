@@ -22,7 +22,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
    
     _entityName:'recUploadedFiles',
     
-    _editing2:null, //hidden edit form to upload file
+    _editing_uploadfile:null, //hidden edit form to upload file
     
     _isAdditionOfLocal:false, //flag to enabel "Save" button on file upload completion
     
@@ -31,6 +31,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _init: function() {
         
+        this.options.coverall_on_save = true;
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
         //this.options.select_return_mode = 'recordset';
@@ -199,7 +200,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         if(!isLocal){
             var that = this;
             var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
-            ele.editing_input('option', 'change', function(){ 
+            ele.editing_input('option', 'change', function(){
+             
+                //auto detect extension of external service
                 var res = ele.editing_input('getValues'); 
                 var ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
                 if(ext==null){
@@ -336,14 +339,14 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + //(needplayer?'&
         //find file element
         var that = this;
         
-            if(!this._editing2){
+            if(!this._editing_uploadfile){
 
                 var container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
                 
-                this._editing2 = new hEditing({entity:this.options.entity, container:container, 
+                this._editing_uploadfile = new hEditing({entity:this.options.entity, container:container, 
                  onchange:
                 function(){
-                    var ele = that._editing2.getFieldByName('ulf_FileUpload');
+                    var ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');
                     var res = ele.editing_input('getValues'); 
                     var ulf_ID = res[0];
 
@@ -357,7 +360,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + //(needplayer?'&
             }
         
             //init hidden edit form  that contains the only field - file uploader
-            this._editing2.initEditForm([                {
+            this._editing_uploadfile.initEditForm([                {
                     "dtID": "ulf_FileUpload",
                     "dtFields":{
                         "dty_Type":"file",
@@ -366,9 +369,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + //(needplayer?'&
                         "dty_Role":"virtual"
                     }
                 }], null);
-            this._editing2.getContainer().hide();
-            var ele = this._editing2.getFieldByName('ulf_FileUpload');    
-            ele.find('.fileupload').click();
+            this._editing_uploadfile.getContainer().hide(); //this form is hidden
+            var ele = this._editing_uploadfile.getFieldByName('ulf_FileUpload');    
+            ele.find('.fileupload').click(); //open file select dialog
         /*
         that._initEditForm_step1(-1, function(){
             var ele = that._editing.getFieldByName('ulf_FileUpload');

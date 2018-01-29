@@ -74,6 +74,10 @@
             }
         </style>
         <!-- blueimp Gallery styles -->
+<!--        
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+-->
         <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
         <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
         <link rel="stylesheet" href="../../external/jquery-file-upload/css/jquery.fileupload.css">
@@ -362,6 +366,8 @@
 
 
         <script src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
         <!-- The Templates plugin is included to render the upload/download listings -->
         <script src="http://blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
         <!-- The Load Image plugin is included for the preview images and image resizing functionality -->

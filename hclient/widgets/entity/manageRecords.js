@@ -1762,6 +1762,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     function(response){
                         
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             
                             that._editing.setModified(false); //reset modified flag after save
