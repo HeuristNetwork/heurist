@@ -46,7 +46,6 @@ require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
 
-
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
@@ -598,6 +597,7 @@ function print_private_details($bib) {
                            strpos($filedata['mimeType'],'image/')===0 || 
                            strpos($filedata['mimeType'],'video/')===0){
                                
+                            //$filedata['URL'] = ;
                             $filedata['playerURL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$filedata['nonce'].'&mode=tag';
                         }
 
@@ -628,7 +628,8 @@ function print_private_details($bib) {
                                 'mimeType'=>$filedata['mimeType'], 
                                 'thumb_size'=>$thumb_size,
                                 'thumb' => $filedata['thumbURL'],
-                                'player' => $filedata['playerURL']
+                                'player' => $filedata['playerURL'],
+                                'nonce' => $filedata['nonce']
                                 //link to generate player html
                                 //$isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  
                             ));
@@ -752,7 +753,10 @@ if($is_map_popup){
                     if($thumb['player'] && !$is_map_popup){
                         
                         if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
-                            print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">'.file_get_contents($thumb['player']).'</div>';    
+                            print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">';
+                            // print file_get_contents($thumb['player']); it does not work
+                            print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
+                            print '</div>';    
                         }else{
                             print '<img id="img'.$thumb['id'].'" style="width:'.$thumb['thumb_size'].'px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
                             print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';

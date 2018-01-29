@@ -792,8 +792,10 @@ function smarty_function_wrap($params, &$smarty)
 
                 }else{ //player is default
 
-                    $value['playerURL'] = $value['playerURL'].'&size='.$size;
-                    $sres = $sres.file_get_contents($value['playerURL']);
+                    
+                    $sres = $sres.getPlayerTag($value['nonce'], $value['mimeType'], $value['URL'], $size);
+                    //$value['playerURL'] = $value['playerURL'].'&size='.$size;
+                    //it does not work  $sres = $sres.file_get_contents($value['playerURL']);
                     
                     /*
                     if($type_media == 'image'){

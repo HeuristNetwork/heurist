@@ -71,7 +71,7 @@ if($db){
                     </head>
                     <body>
                        <?php 
-                         print file_get_contents($url);
+                         print file_get_contents($url);   //execute this script to get html tag for player
                        ?>
                     </body>
                 </html>
