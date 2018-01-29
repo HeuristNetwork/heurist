@@ -275,7 +275,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 
             $url = $file['ulf_ExternalFileReference'];
 
-            $hash = json_decode(file_get_contents("https://vimeo.com/api/oembed.json?url=".$url), true);
+            $hash = json_decode(loadRemoteURLContent("http://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);
             $thumb_url = @$hash['thumbnail_url'];
             if($thumb_url){
                 $img = get_remote_image($thumb_url);    

@@ -225,7 +225,7 @@ function getPlayerURL($mimeType, $url){
         
     }else if( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
         
-        $hash = json_decode(file_get_contents("https://vimeo.com/api/oembed.json?url=".$url), true);
+        $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".$url, false), true);
         $video_id = @$hash['video_id'];
         if($video_id>0){
            $url =  'https://player.vimeo.com/video/'.$video_id;

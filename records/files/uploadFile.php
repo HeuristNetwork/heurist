@@ -38,6 +38,7 @@
 
     require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
     require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+    require_once("fileUtils.php");
 
     /**
     * Invoked from HAPI.saveFile.php
@@ -1081,8 +1082,8 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
     //
     function getPlayerTag($fileid, $mimeType, $url, $size){
             
-            $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);
-            $is_audio = (strpos($mimeType,"audio/")===0 || strpos($params,"audio")!==false);
+            $is_video = (strpos($mimeType,"video/")===0);
+            $is_audio = (strpos($mimeType,"audio/")===0);
             $is_image = (strpos($mimeType,"image/")===0);
             
             $res = '';
@@ -1109,15 +1110,16 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                     
                         $playerURL = getPlayerURL($mimeType, $url);
                         
-                        $res ='<iframe '.$size.' src="'.$playerURL.'" frameborder="0" '
+                        $res = '<iframe '.$size.' src="'.$playerURL.'" frameborder="0" '
                             . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
+                            
                         
                     }else{
-                        $player = HEURIST_BASE_URL."ext/mediaelement/flashmediaelement.swf";
                         //preload="none"
                         $res = "<video  type='$size'  controls='controls''>"
                                 ."<source type='$mimeType' src='$filepath'/></video>";
                          /*
+                        $player = HEURIST_BASE_URL."ext/mediaelement/flashmediaelement.swf";
                          //note: we may remove flash fallback since it is blocked in most modern browsers
                                 <!-- Flash fallback for non-HTML5 browsers -->
                                 <object width="640" height="360" type="application/x-shockwave-flash" data="<?php echo $player;?>">
@@ -1173,6 +1175,8 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             return $res;
     }
     
+    
+
 //
 // get player url for youtube, vimeo, soundcloud
 //
@@ -1186,7 +1190,7 @@ function getPlayerURL($mimeType, $url){
         
     }else if( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
         
-        $hash = json_decode(file_get_contents("https://vimeo.com/api/oembed.json?url=".$url), true);
+        $hash = json_decode(loadRemoteURLContent("http://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);
         $video_id = @$hash['video_id'];
         if($video_id>0){
            $url =  'https://player.vimeo.com/video/'.$video_id;

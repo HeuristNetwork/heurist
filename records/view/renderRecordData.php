@@ -754,7 +754,7 @@ if($is_map_popup){
                         
                         if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
                             print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">';
-                            // print file_get_contents($thumb['player']); it does not work
+
                             print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
                             print '</div>';    
                         }else{
