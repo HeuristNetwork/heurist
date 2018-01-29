@@ -69,7 +69,7 @@ $.widget( "heurist.resultList", {
 
     _query_request: null, //keep current query request
 
-    _events: null,
+    _events: null,                                                   
     _lastSelectedIndex: null, //required for shift-click selection
     _count_of_divs: 0,
 

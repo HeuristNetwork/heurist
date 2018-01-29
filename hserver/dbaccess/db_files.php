@@ -128,7 +128,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
     " left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt".
     " where dtl_RecID = $recID" .
     " and (dtl_UploadedFileID is not null)".    // no dty_ID of zero so undefined are ignored
-    " and (fxm_MimeType like 'image%' or ulf_Parameters like '%mediatype=image%')".
+    " and (fxm_MimeType like 'image%' or fxm_MimeType='video/youtube' or fxm_MimeType='video/vimeo')".
     " limit 1";
 
     $fileid = mysql__select_value($system->get_mysqli(), $query);
