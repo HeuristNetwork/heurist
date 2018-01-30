@@ -954,6 +954,7 @@ function validateImport($mysqli, $imp_session, $params){
         "count_insert"=>0,       //records to be inserted
         "count_update_rows"=>0,
         "count_insert_rows"=>0,  //row that are source of insertion
+        "count_ignore_rows"=>0,
         "count_error"=>0, 
         "error"=>array(),
         "count_warning"=>0, 
@@ -1296,7 +1297,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if($ignore_insert){
             $only_for_specified_id = " (".$id_field." > 0) AND ";
         }else{
-            $only_for_specified_id = "";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+            $only_for_specified_id = " (".$id_field."!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
         }
     }else{
         $only_for_specified_id = "";
@@ -1950,6 +1951,8 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
         if($ignore_insert){
             $select_query = $select_query." WHERE (".$id_field.">0) ";  //use records with defined value in index field
+        }else{
+            $select_query = $select_query." WHERE (".$id_field."!='') "; //ignore empty values
         }
         $select_query = $select_query." ORDER BY ".$id_field;
         

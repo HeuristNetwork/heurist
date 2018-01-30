@@ -1752,6 +1752,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             
             $('#mrr_cnt_update').text('');//counts[0]);                                 
             $('#mrr_cnt_insert').text('');//counts[2]);                                 
+            $('#mrr_cnt_ignore').text('');//counts[2]);                                 
             if(counts[1]>0){
                 $('#mrr_cnt_update_rows').text(counts[1]);                                     
                 $('.mrr_update').show();                                     
@@ -1763,6 +1764,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 $('.mrr_insert').show();                                     
             }else{
                 $('.mrr_insert').hide();                                     
+            }
+            if(counts[4]>0){
+                $('#mrr_cnt_ignore_rows').text(counts[4]);                                     
+                $('.mrr_ignore').show();                                     
+            }else{
+                $('.mrr_ignore').hide();                                     
             }
             
             //show counts in sequence list
@@ -1793,10 +1800,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     
          var counts = _getInsertUpdateCounts(idx);                                     
          var s_count = '';
-         if(counts[2]!=imp_session['reccount']){
+         if(counts[2]!=imp_session['reccount']){  //record to be inserted
+            
              s_count = '<span style="font-size:0.8em"> [ '
              + ((counts[0]>0)?'<span title="Records matched">Matched='+counts[0]+'</span> ':'')
              + (counts[2]>0? ((counts[0]>0?', ':'')+'<span title="New records to create">New='+counts[2]+'</span>'):'')
+             + (counts[4]>0? (((counts[0]>0||counts[2]>0)?', ':'')+'<span title="Blank match fields">Ignore='+counts[4]+'</span>'):'')
              + ']</span>';
          }
          return s_count;
@@ -1805,13 +1814,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     //
     // return counts array from imp_session, set it to default values if it is not defined
     //
+    // 0 records to be updated
+    // 1 rows matched
+    // 2 records to be inserted
+    // 3 rows source for insert 
+    // 4 rows ignored
     function _getInsertUpdateCounts(idx){
         
         if(idx>=0 && idx<imp_session['sequence'].length){
             var counts = imp_session['sequence'][idx]['counts'];
             
             if(!counts) {
-                counts = [0,0,0,0];
+                counts = [0,0,0,0,0];
                 //reccount - total records in import table
                 //uniqcnt - unique values per column
                 var idx = _getFieldIndexForIdentifier(idx); 
@@ -2542,6 +2556,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 $('.mr_insert').hide();                                     
                             }
                             
+                            if(res['count_ignore_rows']>0){
+                                $('#mr_cnt_ignore_rows').text(res['count_ignore_rows']);                                     
+                                $('.mr_ignore').show();                                     
+                            }else{
+                                $('.mr_ignore').hide();                                     
+                            }
+                            
                             var disambig_keys = Object.keys(res['disambiguation']);
                             
                             if(disambig_keys.length>0){
@@ -2699,7 +2720,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         var res = imp_session['validation'];
                         
                         $('#mr_cnt_update').text(res['count_update']);                                 
-                        $('#mr_cnt_insert').text(res['count_insert']);                                 
+                        $('#mr_cnt_insert').text(res['count_insert']);   
+                                                      
                         if(res['count_update_rows']>0){
                             $('#mr_cnt_update_rows').text(res['count_update_rows']);                                     
                             $('.mr_update').show();                                     
@@ -2712,6 +2734,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         }else{
                             $('.mr_insert').hide();                                     
                         }
+                        
+                        if(res['count_ignore_rows']>0){
+                            $('#mr_cnt_ignore_rows').text(res['count_ignore_rows']);                                     
+                            $('.mr_ignore').show();                                     
+                        }else{
+                            $('.mr_ignore').hide();                                     
+                        }
+                            
+                        
 
                         if(res['count_warning']>0){
 

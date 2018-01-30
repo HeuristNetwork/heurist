@@ -488,9 +488,10 @@ If you have missing data for Required fields, you may find it convenient to set 
             <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
             <label for="sa_match1" id="lbl_sa_match1" style="padding-right:3em">Use Heurist ID column</label>
 
+<!--            
             <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
             <label for="sa_match2">Skip matching (all new records)</label>
-
+-->
             <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em;padding-bottom:3px;">
             </div>
         </div>
@@ -528,17 +529,17 @@ If you have missing data for Required fields, you may find it convenient to set 
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
-                                        <td rowspan="2" width="250">
+                                        <td rowspan="3" width="250">
                                             <h2 id="mrr_big">Existing: 586  New: 100</h2>
                                         </td>
-                                        <td rowspan="2">
+                                        <td rowspan="3">
                                             <div id="prepareWarnings" 
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_warning" style="display:inline-block;margin:0 10px;">Warnings: 0</h2>
                                                 <div id="btnShowWarnings"></div>
                                             </div>
                                         </td>
-                                        <td rowspan="2">
+                                        <td rowspan="3">
                                             <div id="prepareErrors" 
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Errors: 0</h2>
@@ -558,6 +559,13 @@ If you have missing data for Required fields, you may find it convenient to set 
                                         <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>
                                         <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',false)">show</a></td>
                                         <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',true)">download</a></td>
+                                    </tr>
+                                    <tr><td align=left style="padding-left:30px">Blank match fields:</td>
+                                        <td width="50" id="mrr_cnt_ignore"></td>
+                                        <td width="50" class="mrr_ignore">rows:</td>
+                                        <td width="50" class="mrr_ignore" id="mrr_cnt_ignore_rows"></td>
+                                        <td width="50"></td>
+                                        <td width="50"></td>
                                     </tr>
                 </tbody>
             </table>
