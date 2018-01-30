@@ -909,7 +909,7 @@ $.widget( "heurist.resultList", {
                             var extended = new_recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']);
 
                             //compose
-                            that._startupInfo = '<div style="padding:1em"><h2>'+title+'</h2><div style="padding-top:10px">'
+                            that._startupInfo = '<div style="padding:20px 2em"><h2>'+title+'</h2><div style="padding-top:10px">'
                             +(summary?summary:'')+'</div><div>'
                             +(extended?extended:'')+'</div></div>';
 

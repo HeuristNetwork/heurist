@@ -148,11 +148,11 @@ var cfg_layouts = [
     {id:'WebSearch', name:'Heurist Embed', theme:'heurist', type:'cardinal',
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false,
                 options:{buttons_mode: true},
-                css:{border:'none'} }]},  //saved searches
+                css:{border:'none','font-size':'14px'} }]},  //saved searches
         center:{minsize:300, dropable:false, 
                 apps:[{appid:'h3_resultList', hasheader:false,
                         dockable:false, dragable:false, 
-                            css:{'background-color':'white'}, 
+                            css:{'background-color':'white','font-size':'14px'}, 
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
                             show_inner_header: true} }]}  //search result
      },

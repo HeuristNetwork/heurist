@@ -32,6 +32,7 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
 
     var mapdiv_id = null,
     timelinediv_id = null,
+    _current_stack_setting = true,
 
     all_mapdata = {}, // array of all datasets
     selection = [],   // array of selected record ids
@@ -640,22 +641,33 @@ if(_mapdata.limit_warning){
             .click(function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
 
-
-
         var menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span class="ui-icon ui-icon-check"/>Full label</a></li>'
                         +'<li id="tlm1"><a href="#"><span/>Truncate to bar</a></li>'
                         +'<li id="tlm2"><a href="#"><span/>Fixed length</a></li>'
                         +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li>'
-                        +'<li id="tlm4"><a href="#"><span/>Hide labels/No stack</a></li></ul>')
+                        /*+'<li class="separator">-</li>'
+                        +'<li id="tlm10"><a href="#"><span/>No stack</a></li>'
+                        +'<li id="tlm11"><a href="#"><span/>Label after bar</a></li>'*/
+                        +'</ul>')
+                        //+'<li id="tlm4"><a href="#"><span/>Hide labels/No stack</a></li>
         .addClass('menu-or-popup')
         .css({'position':   'absolute', 'padding':'2px', zIndex:99999})
         .appendTo( $('body') )
         .menu({
             select: function( event, ui ) {
 
+                var mode =  Number(ui.item.attr('id').substr(3));
+                
+                if(mode>=10){
+                    
+                    
+                    return;
+                }
+                
+                //remove all checks
                 menu_label_settings.find('span').removeClass('ui-icon ui-icon-check');
                 ui.item.find('span').addClass('ui-icon ui-icon-check');
-                var mode =  Number(ui.item.attr('id').substr(3));
+                
                 vis_timeline_label_mode = mode;
                 var spinner = $("#timeline_spinner");
                 if(mode==2){
@@ -711,6 +723,14 @@ if(_mapdata.limit_warning){
             .click(function(){ __timelineShowLabels(); })
             .appendTo(toolbar);
         */
+        
+        var el = $('<label style="padding:3px 4px;background:#DDDDDD"><input type="checkbox" checked>Stack</label>').appendTo(toolbar);
+        el.find('input').change(function(event){ 
+              _current_stack_setting = $(event.target).is(':checked');
+              vis_timeline.setOptions({'stack':_current_stack_setting}); //(mode!=4)
+//              vis_timeline.redraw();
+        });
+
 
     }
     
@@ -731,7 +751,7 @@ if(_mapdata.limit_warning){
                 $('div .vis-item-overflow').css('overflow',(mode===1)?'hidden':'visible');
 
                 //'label_in_bar':(mode==1),
-                vis_timeline.setOptions({'margin':1,'stack':(mode!=4)});
+                vis_timeline.setOptions({'margin':1,'stack':_current_stack_setting}); //(mode!=4)
 
                 if(mode>=3){ //hide labels at all
                     contents.find("span").hide();
@@ -763,7 +783,7 @@ if(_mapdata.limit_warning){
         var groups = new vis.DataSet( timeline_groups );
         var items = new vis.DataSet( timeline_data ); //options.items );
 
-        var is_stack = true;//(timeline_groups.length<2 && timeline_data.length<250);
+        var is_stack = _current_stack_setting;//(timeline_groups.length<2 && timeline_data.length<250);
 
  //DEBUG console.log('TIMELINE DATASET '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
         window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
