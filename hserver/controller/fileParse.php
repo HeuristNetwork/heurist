@@ -1681,7 +1681,6 @@ function validateImport($params){
     $imp_session['validation'] = array( 
         "count_update"=>0,
         "count_insert"=>0,       //records to be inserted
-        "count_ignore_rows"=>0,
         "count_update_rows"=>0,
         "count_insert_rows"=>0,  //row that are source of insertion
         "count_ignore_rows"=>0, 

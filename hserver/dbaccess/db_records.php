@@ -25,10 +25,7 @@
         recordDelete  
         
         isWrongAccessRights - validate parameter values
-        isWrongOwnership
         recordCanChangeOwnerwhipAndAccess  - Verifies access right value and is the current user able to change ownership for given record
-        recordSetOwnerwhipAndAccess - change access rights and ownership for record
-        
     
         recordUpdateTitle
         prepareDetails - validate records detail (need to combine with validators in fileParse)
@@ -115,10 +112,13 @@
             $access = 'viewable';
         }
 
-        if(isWrongOwnership($system, $ownerid)){
-            return $system->addError(HEURIST_REQUEST_DENIED, 
-            'Sorry, you are not allowed to edit this record. You are neither the owner nor a member of the group that owns this record');
-        }
+        
+        if ($ownerid>0  && !($system->is_admin() || $system->is_member($ownerid))){ 
+            $system->addError(HEURIST_REQUEST_DENIED,
+                    'Current user does not have sufficient authority to add record with default ownership ('.$ownerid
+                    .'). User must be member of the group that will own this record');
+            return false;
+        }  
             
         if(isWrongAccessRights($system, $access)){
             return $system->getError();
@@ -629,59 +629,25 @@
     }
 
     /**
-    * Verifies user/group id for record ownership and is the current user is member of ownership group
-    *
-    * @param mixed $system
-    * @param mixed $ownerid
-    */
-    function isWrongOwnership($system, $ownerid)
-    {
-        if( $system->is_member($ownerid) )
-        {
-            return false;
-        }else{
-            return true;
-            /* not used: since only group member can set ownership - it means that it exists
-            $mysqli = $system->get_mysqli();
-            $user = user_getById($mysqli, $ownerid);
-            if (!($user && $user['ugr_ID']>0 & $user['ugr_Enabled']=='y')){
-            $system->addError(HEURIST_INVALID_REQUEST, "Owner not defined or not found");
-            return true;
-            }
-            */
-        }
-
-        return false;
-    }
-
-    /**
     * Verifies access right value and is the current user able to change ownership for given record
     *
     * @param mixed $system
     * @param mixed $recID
     * @param mixed $ownerid
     * @param mixed $access
+    *   $rectypes  - return record type of current record
     */
+    
     function recordCanChangeOwnerwhipAndAccess($system, $recID, &$ownerid, &$access, &$rectypes)
     {
 
-       if($ownerid && isWrongOwnership($system, $ownerid)) {
-            $system->addError(HEURIST_REQUEST_DENIED, 
-                'Cannot set ownership of record to the group without membership in this group');
-            return false;    
-       }
         
-        //if defined and wrong it fails
-        if($access && isWrongAccessRights($system, $access))
-        {
-            return false;
-        }
-
-
+        
         $mysqli = $system->get_mysqli();
         //get current values
         $query = 'select rec_OwnerUGrpID, rec_NonOwnerVisibility, rec_RecTypeID from Records where rec_ID = '.$recID;
         $res = $mysqli->query($query);
+        
         if($res){
             $record = $res->fetch_assoc();
             $res->close();
@@ -691,28 +657,53 @@
         }
         
         $ownerid_old = $record["rec_OwnerUGrpID"]; //current ownership
-        $res = true;
-        if(!($system->is_admin() || $ownerid == $ownerid_old)){
-
+        if(!($ownerid>=0)){
+            $ownerid = $record["rec_OwnerUGrpID"];
+        }
+        
+        //1. Can current user edit this record?
+        // record is not "everyone" and current user is_admin or itself or member of group
+        if ($ownerid_old>0  && !($system->is_admin() || $system->is_member($ownerid_old))){ 
+                                          //!$system->is_admin2($ownerid_old)) { 
+            $system->addError(HEURIST_REQUEST_DENIED,
+                    'Current user does not have sufficient authority to change the record ID:'.$recID
+                    .'. User must be either the owner or member of the group that owns this record');
+            return false;
+        }  
+        
+        //2. Can current user change ownership of this record
+        if($ownerid != $ownerid_old && !$system->is_admin()){
+            
+            $res = true;
+            //A. Has rights for current ownership 
+            //current user is db admin or itself or admin of currrent onwership group
             if($ownerid_old>0 && !$system->is_admin('group', $ownerid_old)) {  //changing ownership
 
                 $system->addError(HEURIST_REQUEST_DENIED,
-                    $ownerid>0?'Cannot change ownership. User is not a group admin'
-                    :'Cannot change record. User does not have ownership rights');
+                    'Cannot change ownership. User does not have ownership rights. '
+                    .'User must be either database administrator, record owner or administrator or record\'s ownership group');
                 $res = false;
-
+            }
+            //B. Has rights for new ownership 
+            else if ($ownerid>0 && !$system->is_member($ownerid)){
+                
+                $system->addError(HEURIST_REQUEST_DENIED,
+                    'Cannot set ownership of record to the group without membership in this group');
+                $res = false;
+            
+            //C. Only DB admin can change "Everyone" record to group record
             }else if($ownerid_old == 0 && $ownerid>0) {
                 $system->addError(HEURIST_REQUEST_DENIED,
                     'User does not have sufficient authority to change public record to group record');
                 $res = false;
             }
+            if(!$res){
+                return false;
+            }
         }
-        
-        //if not defined set current values
-        if(!($ownerid>=0)){
-            $ownerid = $record["rec_OwnerUGrpID"];
-        }
-        
+
+
+        //---------------------------        
         //change public to pending in case db system preferences
         if($access=='public' && $record["rec_NonOwnerVisibility"]=='public' 
             && $system->get_system('sys_SetPublicToPendingOnEdit')==1){
@@ -720,45 +711,19 @@
         }else if(!$access){
             $access = $record["rec_NonOwnerVisibility"];
         }
-        
+        //if defined and wrong it fails
+        if($access && isWrongAccessRights($system, $access))
+        {
+            return false;
+        }
+
+        //return record type for given record id        
         if(is_array($rectypes)){
             $rectypes[$recID] = $record["rec_RecTypeID"];
         }
+        
         return $res;
 
-
-    }
-
-    /**
-    * update ownership and access rights for given record
-    *
-    * @param mixed $system
-    * @param mixed $recID
-    * @param mixed $ownerid
-    * @param mixed $access
-    */
-    function recordSetOwnerwhipAndAccess($system, $recID, $ownerid, $access)
-    {
-        $rectypes = array();
-
-        if(recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes))
-        {
-            $query = "UPDATE Records (rec_OwnerUGrpID, rec_NonOwnerVisibility)"
-            ." VALUES (?, ?) where rec_ID=".$recID;
-
-            $stmt = $mysqli->prepare($query);
-
-            $stmt->bind_param('is', $ownerid, $access );
-            if(!$stmt->execute()){
-                $syserror = $mysqli->error;
-                $stmt->close();
-                return $system->addError(HEURIST_DB_ERROR, 'Cannot save record', $syserror);
-            }
-            $stmt->close();
-
-        }else{
-            return $system->getError();
-        }
 
     }
 
@@ -1170,13 +1135,12 @@ array_push($errorValues,
         }
 
         $new_owner = 0;
-        //if (!$system->is_admin()) {
-            $owner = mysql__select_value($mysqli, "SELECT rec_OwnerUGrpID FROM Records WHERE rec_ID = ".$id);
-            if (!$system->is_member($owner)){
-                $new_owner = $system->get_user_id();
-                //return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
-            }
-        //}
+
+        $owner = mysql__select_value($mysqli, "SELECT rec_OwnerUGrpID FROM Records WHERE rec_ID = ".$id);
+        if (!$system->is_member($owner)){   //current user is not member of current group
+            $new_owner = $system->get_user_id();
+            //return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
+        }
 
         $bkmk_count = 0;
         $rels_count = 0;
