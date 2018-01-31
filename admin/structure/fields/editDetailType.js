@@ -788,7 +788,8 @@ function DetailTypeEditor() {
             var dd = Dom.get("dty_JsonTermIDTree").value;
             if( dd==="" || dd==="{}" ) {
                 if(isShowWarn) {
-                    top.HEURIST.util.showError("For a terms list field you must select at least one term. Please click 'Change vocabulary'");
+                    top.HEURIST.util.showError(
+                        'Please select or add a vocabulary. Vocabularies must contain at least one term.', 'Warning');
                 }
                 _updatedFields = [];
                 return "mandatory";
