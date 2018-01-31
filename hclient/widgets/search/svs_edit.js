@@ -518,14 +518,14 @@ function hSvsEdit(args) {
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 575,
-                    width: 650,
+                    height: 600,
+                    width: 650,                                                                                               
                     modal: true,
                     resizable: false,
                     title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
                     buttons: [
-                        {text:window.hWin.HR('Get filter + rules as string'), click: __getFilterString},  //svs_GetQuery
-                        {text:window.hWin.HR('Save'), click: __doSave},
+                        {text:window.hWin.HR('Get filter + rules as string'), click: __getFilterString, css:{'margin-right':'60px'} },
+                        {text:window.hWin.HR('Save'), click: __doSave, css:{'margin-right':'10px'}},
                         {text:window.hWin.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );
                         }}
