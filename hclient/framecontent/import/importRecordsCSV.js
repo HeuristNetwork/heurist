@@ -1715,7 +1715,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 var sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(item, rtyID, 
                     $item.hasClass('indexes')?allowed2:allowed, 
                     $item.hasClass('indexes')?topitems2:topitems,
-                    {show_dt_name:true, 
+                    {useHtmlSelect:false, 
+                     show_dt_name:true, 
                      show_latlong:(currentStep==4), 
                      show_required:(currentStep==4)});    
                     
@@ -1723,6 +1724,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         $("#cbsa_dt_"+field_idx).prop('checked', true);
                         $(item).parent().show(); //show selector
                         $(item).val(dt_id);
+                        if(sel.hSelect("instance")!=undefined){
+                           sel.hSelect("refresh"); 
+                        }
                }
                
                $(sel).change(function(){

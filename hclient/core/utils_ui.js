@@ -981,6 +981,8 @@ window.hWin.HEURIST4.ui = {
 
             for (dtyID in details){
                 if(dtyID){
+                    
+                    if(details[dtyID][fir]=="forbidden") continue;
 
                     if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
                     {
@@ -995,7 +997,8 @@ window.hWin.HEURIST4.ui = {
                                 arrterm.push([dtyID, name, (details[dtyID][fir]=="required") ]);    
                         }
                         
-                    }else if(addLatLongForGeo && details[dtyID][fit]=="geo"){
+                    }
+                    if(addLatLongForGeo && details[dtyID][fit]=="geo"){
                         arrterm.push([ 'longitude', 'geo: Longitude', false ]);
                         arrterm.push([ 'latitude', 'geo: Latitude', false ]);
                     } 
@@ -1909,6 +1912,9 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     if ( $(item.element).attr('group') == 1 ){
         li.css({'opacity':1});  
         wrapper.css({'font-weight':'bold'});
+    }
+    if( $(item.element).hasClass('required')) {
+        wrapper.addClass('required');  
     }
 
 
