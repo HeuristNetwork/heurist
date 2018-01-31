@@ -186,13 +186,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                     if(this._editing.isModified()){
                         
-                        window.hWin.HEURIST4.msg.showMsgDlg(
+                        var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                         'Save changes and move to '+((dest<0)?'previous':'next')+' record?',
-                            function(){ 
+                        {'Save changes' :function(){ 
                                 //save changes and go to next step
                                 that._saveEditAndClose( null, function(){ that.addEditRecord(newRecID); } );
+                                $__dlg.dialog( "close" );
                             },
-                            {title:'Confirm',yes:'Save changes', no:'Cancel'});
+                         'Drop changes':function(){ 
+                                that._currentEditID = null;
+                                that.addEditRecord(newRecID);
+                                //that._initEditForm_step3(that._currentEditID)
+                                $__dlg.dialog( "close" );
+                            },
+                         'Cancel':function(){ 
+                                $__dlg.dialog( "close" );
+                            }},
+                            {title:'Confirm'});
                             
                     }else{
                         this._toolbar.find('#divNav').html( (idx+1)+'/'+order.length);
@@ -307,7 +317,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               click: function() { 
                                   that.closeEditDialog(); 
                               }},
-                        {text:window.hWin.HR('Cancel'), id:'btnRecCancel', 
+                        {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
                               css:{'margin-left':'3em'},
                               click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
                               
@@ -1639,6 +1649,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //1. No enough premission
             var no_access = that._getField('rec_OwnerUGrpID')>0 &&  //0 is everyone
                             window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'))<0;
+                            //!window.hWin.HAPI4.is_admin()
             
             //2. Popup for resource field
             var dlged = that._getEditDialog();

@@ -309,7 +309,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 html = html + '<div style="min-width:78px;"></div>';
             }
             
-            if(window.hWin.HAPI4.has_access(recID)>0){
+            if( window.hWin.HAPI4.has_access(recID)>0){
                 
                 html = html 
                     + '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'

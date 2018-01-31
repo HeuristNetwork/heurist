@@ -128,7 +128,8 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                     }
                 }
                 
-                if(window.hWin.HAPI4.has_access(this.input_search_group.val())>0 && this.options.edit_mode!='none'){
+                if( ( window.hWin.HAPI4.has_access(this.input_search_group.val())>0 )
+                    && this.options.edit_mode!='none'){
                     this.btn_find_record.show();
                 }
             }else{

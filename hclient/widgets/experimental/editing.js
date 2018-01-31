@@ -200,7 +200,7 @@ function hEditing() {
                 var dtID = order[i];
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
-                    (window.hWin.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
+                    ( window.hWin.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
                         rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
                 {
                     continue;

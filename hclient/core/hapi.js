@@ -926,7 +926,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             if(!ugrID){
                 ugrID = that.currentUser['ugr_ID'];
             }
-            if(ugrID==that.currentUser['ugr_ID'] || that.is_admin() ||
+            if(ugrID==that.currentUser['ugr_ID'] || that.is_admin() || 
                 (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][ugrID]=="admin"))
             {
                 return ugrID;
