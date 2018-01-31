@@ -1998,6 +1998,9 @@ $.widget( "heurist.editing_input", {
                         }
                         allTerms = options;
                     }
+                    //add empty value as a first option
+                    //allTerms.unshift({key:'', title:''});
+                    
                     //array of key:title objects
                     window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                 }
@@ -2055,6 +2058,13 @@ $.widget( "heurist.editing_input", {
                     this.element.find('.rel_link').show();
                 }else{
                     $input.val( display_value?display_value :value);    
+                    
+                    if(that.detailType=='enum' || that.detailType=='relationtype'){    
+                        //selectmenu
+                        if($($input).hSelect("instance")!=undefined){
+                           $($input).hSelect("refresh"); 
+                        }
+                    }
                 }
                 if(that.detailType=='date' || that.detailType=='file'){
                     $input.change();
