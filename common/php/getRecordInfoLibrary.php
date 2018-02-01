@@ -908,6 +908,9 @@ function getTermOffspringList($termID, $parentlist = null) {
     }
     return $offspring;
 }
+//
+// get tree for domain
+//
 function getTermListAll($termDomain) {
         $terms = array();
         $res = mysql_query('SELECT * FROM defTerms

@@ -676,9 +676,9 @@ function copyRectypeIcon($sourceDBName, $importRtyID, $importedRecTypeID, $thumb
 }
 
 //
+//   OLD - trm_ChildCount is not reliable
 //
-//
-function getCompleteVocabulary($termId){
+function getCompleteVocabulary_OLD($termId){
     global $tempDBName;
 
     $query = "select a.trm_ID as pID, b.trm_ID as cID, b.trm_ChildCount as cCnt
@@ -704,6 +704,28 @@ function getCompleteVocabulary($termId){
 
     return $terms;
 
+}
+
+function getCompleteVocabulary($termID, $parentlist=null) {
+    global $tempDBName;
+    if(@$parentlist==null) $parentlist = array($termID);
+    $offspring = array($termID);
+    if ($termID) {
+        $res = mysql_query("select * from ".$tempDBName.".defTerms where trm_ParentTermID=$termID");
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_assoc($res)) { // for each child node
+                $subTermID = $row['trm_ID'];
+                if(array_search($subTermID, $parentlist)===false){
+                    array_push($offspring, $subTermID);
+                    array_push($parentlist, $subTermID);
+                    $offspring = array_unique(array_merge($offspring, getCompleteVocabulary($subTermID, $parentlist)));
+                }else{
+                    error_log('Database '.$tempDBName.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
+                }
+            }
+        }
+    }
+    return $offspring;
 }
 
 //
