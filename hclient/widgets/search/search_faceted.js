@@ -1316,6 +1316,11 @@ $.widget( "heurist.search_faceted", {
                                     var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
                                     $opt.attr('selected',true);
                                 }
+                                
+                                //convert to jquery selectmenu
+                                selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
+                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+                                
                                 $sel.change(function(event){ that._onTermSelect(event); });
                         }
                         
