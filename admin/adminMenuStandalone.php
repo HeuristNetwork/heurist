@@ -205,11 +205,8 @@ if (array_key_exists('mode', $_REQUEST)) {
 
                             */
 
-                            // June 2014: TODO: need to fix the triggers on record creation and editing for this function to work.
-                            /*
                             menuEntry('','Rollback','rollback/rollbackRecords.php?db=',
                             'Selectively roll back the data in the database to a specific date and time)');
-                            */
                         }
                         ?>
                     </ul>
