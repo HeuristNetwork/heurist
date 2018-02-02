@@ -657,6 +657,7 @@ DELIMITER $$
 --    END$$
 
 --    DROP PROCEDURE IF EXISTS logRecordDetail$$
+--    CREATE PROCEDURE logRecordDetail(dtl_RecID INT, dtl_RecID INT)
 --    
 --        SET @colnames = (SELECT GROUP_CONCAT('COALESCE(CONCAT(\'"\',',COLUMN_NAME,',\'"\'),\'NULL\')') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'recDetails' AND TABLE_SCHEMA = (SELECT DATABASE()));
 --        SET @exp = CONCAT('SELECT CONCAT_WS(\',\',', @colnames, ') FROM Records where rec_ID=', @rec_ID, ' INTO @raw_record');
