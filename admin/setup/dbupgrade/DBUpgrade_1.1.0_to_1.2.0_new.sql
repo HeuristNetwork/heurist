@@ -38,7 +38,7 @@ DROP PROCEDURE IF EXISTS sp_AlterTable;
 DROP PROCEDURE IF EXISTS sp_ExecSQL;
 DELIMITER $$
 
-CREATE PROCEDURE sp_ExecSQL(IN exp varchar(2000))
+CREATE PROCEDURE sp_ExecSQL(exp varchar(2000))
 BEGIN
     
     SET @s = exp;

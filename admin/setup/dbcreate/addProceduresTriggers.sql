@@ -502,6 +502,15 @@ DELIMITER $$
 	BEFORE UPDATE ON `recDetails`
 	FOR EACH ROW
 	begin
+
+        if @suppress_update_trigger is null then
+        -- archive previous version into sysArchive
+SELECT CONCAT_WS(',',COALESCE(CONCAT('"',dtl_ID,'"'),'NULL'),COALESCE(CONCAT('"',dtl_RecID,'"'),'NULL'),COALESCE(CONCAT('"',dtl_DetailTypeID,'"'),'NULL'),COALESCE(CONCAT('"',dtl_Value,'"'),'NULL'),COALESCE(CONCAT('"',dtl_AddedByImport,'"'),'NULL'),COALESCE(CONCAT('"',dtl_UploadedFileID,'"'),'NULL'),COALESCE(CONCAT('"',asText(dtl_Geo),'"'),'NULL'),COALESCE(CONCAT('"',dtl_ValShortened,'"'),'NULL'),COALESCE(CONCAT('"',dtl_Modified,'"'),'NULL'),COALESCE(CONCAT('"',dtl_Certainty,'"'),'NULL'),COALESCE(CONCAT('"',dtl_Annotation,'"'),'NULL')) 
+FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_record;       
+        insert into sysArchive (arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_DataBeforeChange, arc_ContentType)
+            values ('dtl', OLD.dtl_ID, COALESCE(@logged_in_user_id,0), NULL, OLD.dtl_RecID, @raw_record, 'raw');
+        end if;
+    
 		if asbinary(NEW.dtl_Geo)=asbinary(OLD.dtl_Geo) then
 			set NEW.dtl_Geo = OLD.dtl_Geo;
 		end if;
@@ -579,6 +588,15 @@ DELIMITER $$
     AFTER DELETE ON `recDetails`
     FOR EACH ROW
     begin
+    
+        if @suppress_update_trigger is null then
+        -- archive previous version into sysArchive
+SELECT CONCAT_WS(',',COALESCE(CONCAT('"',dtl_ID,'"'),'NULL'),COALESCE(CONCAT('"',dtl_RecID,'"'),'NULL'),COALESCE(CONCAT('"',dtl_DetailTypeID,'"'),'NULL'),COALESCE(CONCAT('"',dtl_Value,'"'),'NULL'),COALESCE(CONCAT('"',dtl_AddedByImport,'"'),'NULL'),COALESCE(CONCAT('"',dtl_UploadedFileID,'"'),'NULL'),COALESCE(CONCAT('"',asText(dtl_Geo),'"'),'NULL'),COALESCE(CONCAT('"',dtl_ValShortened,'"'),'NULL'),COALESCE(CONCAT('"',dtl_Modified,'"'),'NULL'),COALESCE(CONCAT('"',dtl_Certainty,'"'),'NULL'),COALESCE(CONCAT('"',dtl_Annotation,'"'),'NULL')) 
+FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_record;       
+        insert into sysArchive (arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_DataBeforeChange, arc_ContentType)
+            values ('dtl', OLD.dtl_ID, COALESCE(@logged_in_user_id,0), NULL, OLD.dtl_RecID, @raw_record, 'raw');
+        end if;
+    
         delete ignore from recLinks where rl_DetailID=OLD.dtl_ID;
     end$$
     
@@ -622,32 +640,61 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
-	DROP TRIGGER IF EXISTS update_record_trigger$$
+-- dynamic expression is not allowed in triggers
+--    DROP PROCEDURE IF EXISTS logRecord$$
+--    CREATE PROCEDURE logRecord(rec_ID INT)
+--    BEGIN
+--        SET @colnames = (SELECT GROUP_CONCAT('COALESCE(CONCAT(\'"\',',COLUMN_NAME,',\'"\'),\'NULL\')') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Records' AND TABLE_SCHEMA = (SELECT DATABASE()));
+--        SET @exp = CONCAT('SELECT CONCAT_WS(\',\',', @colnames, ') FROM Records where rec_ID=', @rec_ID, ' INTO @raw_record');
+--
+--        PREPARE stmt FROM @exp;
+--        EXECUTE stmt;
+--        DEALLOCATE PREPARE stmt;  
+            
+--        insert into sysArchive (arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_DataBeforeChange, arc_ContentType)
+--            values ('rec', rec_ID, COALESCE(@logged_in_user_id,0), OLD.rec_OwnerUGrpID, rec_ID, @raw_record, 'raw');
 
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `update_record_trigger`
-	BEFORE UPDATE ON `Records`
-	FOR EACH ROW
-	begin
-		if @suppress_update_trigger is null then
---			insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date, arec_URL, arec_Title, arec_ScratchPad, arec_RecTypeID)
---				values (NEW.rec_ID, @logged_in_user_id, now(),
---						if (NEW.rec_URL=OLD.rec_URL, NULL, NEW.rec_URL),
---						if (NEW.rec_Title=OLD.rec_Title, NULL, NEW.rec_Title),
---						if (NEW.rec_ScratchPad=OLD.rec_ScratchPad, NULL, NEW.rec_ScratchPad),
---						if (NEW.rec_RecTypeID=OLD.rec_RecTypeID, NULL, NEW.rec_RecTypeID));
+--    END$$
 
--- 14/2/11 Ian: Do we need this value set by the previous insert?
-			set @rec_version := last_insert_id();
+--    DROP PROCEDURE IF EXISTS logRecordDetail$$
+--    
+--        SET @colnames = (SELECT GROUP_CONCAT('COALESCE(CONCAT(\'"\',',COLUMN_NAME,',\'"\'),\'NULL\')') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'recDetails' AND TABLE_SCHEMA = (SELECT DATABASE()));
+--        SET @exp = CONCAT('SELECT CONCAT_WS(\',\',', @colnames, ') FROM Records where rec_ID=', @rec_ID, ' INTO @raw_record');
+--
+--        PREPARE stmt FROM @exp;
+--        EXECUTE stmt;
+--        DEALLOCATE PREPARE stmt;  
+            
+--        insert into sysArchive (arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_DataBeforeChange, arc_ContentType)
+--            values ('dtl', dtl_ID, COALESCE(@logged_in_user_id,0), NULL, dtl_RecID, @raw_record, 'raw');
 
-		end if;
-		if NEW.rec_URL != OLD.rec_URL OR NEW.rec_URL is null then
-			set NEW.rec_URLLastVerified := NULL;
-		end if;
-	end$$
+--    END$$
+
+
+    DROP TRIGGER IF EXISTS update_record_trigger$$
+
+    CREATE
+    DEFINER=`root`@`localhost`
+    TRIGGER `update_record_trigger`
+    BEFORE UPDATE ON `Records`
+    FOR EACH ROW
+    begin
+        if @suppress_update_trigger is null then
+        -- archive previous version of record into sysArchive
+        SELECT CONCAT_WS(',',COALESCE(CONCAT('"',rec_ID,'"'),'NULL'),COALESCE(CONCAT('"',rec_URL,'"'),'NULL'),COALESCE(CONCAT('"',rec_Added,'"'),'NULL'),COALESCE(CONCAT('"',rec_Modified,'"'),'NULL'),COALESCE(CONCAT('"',rec_Title,'"'),'NULL'),COALESCE(CONCAT('"',rec_ScratchPad,'"'),'NULL'),COALESCE(CONCAT('"',rec_RecTypeID,'"'),'NULL'),COALESCE(CONCAT('"',rec_AddedByUGrpID,'"'),'NULL'),COALESCE(CONCAT('"',rec_AddedByImport,'"'),'NULL'),COALESCE(CONCAT('"',rec_Popularity,'"'),'NULL'),COALESCE(CONCAT('"',rec_FlagTemporary,'"'),'NULL'),COALESCE(CONCAT('"',rec_OwnerUGrpID,'"'),'NULL'),COALESCE(CONCAT('"',rec_NonOwnerVisibility,'"'),'NULL'),COALESCE(CONCAT('"',rec_URLLastVerified,'"'),'NULL'),COALESCE(CONCAT('"',rec_URLErrorMessage,'"'),'NULL'),COALESCE(CONCAT('"',rec_URLExtensionForMimeType,'"'),'NULL'),COALESCE(CONCAT('"',rec_Hash,'"'),'NULL')) 
+        FROM Records where rec_ID=OLD.rec_ID INTO @raw_record;
+        insert into sysArchive (arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_DataBeforeChange, arc_ContentType)
+            values ('rec', OLD.rec_ID, COALESCE(@logged_in_user_id,0), OLD.rec_OwnerUGrpID, OLD.rec_ID, @raw_record, 'raw');
+
+        end if;
+        
+        if NEW.rec_URL != OLD.rec_URL OR NEW.rec_URL is null then
+            set NEW.rec_URLLastVerified := NULL;
+        end if;
+    end$$
 
 DELIMITER ;
+
 DELIMITER $$
 
 	DROP TRIGGER IF EXISTS usrRecentRecords_updater$$
@@ -726,12 +773,16 @@ DELIMITER $$
 	TRIGGER `delete_record_trigger`
 	AFTER DELETE ON `Records`
 	FOR EACH ROW
-	begin
---		insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date)
---			values (OLD.rec_ID, @logged_in_user_id, now());
-
--- 14/2/11 Ian: Do we need this value set by the previous insert?
-		set @rec_version := last_insert_id();
+	begin 
+    
+      if @suppress_update_trigger is null then
+        -- archive previous version of record into sysArchive
+        SELECT CONCAT_WS(',',COALESCE(CONCAT('"',rec_ID,'"'),'NULL'),COALESCE(CONCAT('"',rec_URL,'"'),'NULL'),COALESCE(CONCAT('"',rec_Added,'"'),'NULL'),COALESCE(CONCAT('"',rec_Modified,'"'),'NULL'),COALESCE(CONCAT('"',rec_Title,'"'),'NULL'),COALESCE(CONCAT('"',rec_ScratchPad,'"'),'NULL'),COALESCE(CONCAT('"',rec_RecTypeID,'"'),'NULL'),COALESCE(CONCAT('"',rec_AddedByUGrpID,'"'),'NULL'),COALESCE(CONCAT('"',rec_AddedByImport,'"'),'NULL'),COALESCE(CONCAT('"',rec_Popularity,'"'),'NULL'),COALESCE(CONCAT('"',rec_FlagTemporary,'"'),'NULL'),COALESCE(CONCAT('"',rec_OwnerUGrpID,'"'),'NULL'),COALESCE(CONCAT('"',rec_NonOwnerVisibility,'"'),'NULL'),COALESCE(CONCAT('"',rec_URLLastVerified,'"'),'NULL'),COALESCE(CONCAT('"',rec_URLErrorMessage,'"'),'NULL'),COALESCE(CONCAT('"',rec_URLExtensionForMimeType,'"'),'NULL'),COALESCE(CONCAT('"',rec_Hash,'"'),'NULL')) 
+        FROM Records where rec_ID=OLD.rec_ID INTO @raw_record;
+        insert into sysArchive (arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_DataBeforeChange, arc_ContentType)
+            values ('rec', OLD.rec_ID, COALESCE(@logged_in_user_id,0), OLD.rec_OwnerUGrpID, OLD.rec_ID, @raw_record, 'del');
+      end if;  
+        
 --		declare relRT integer;
 --		select rty_ID into relRT
 --			from defRecTypes

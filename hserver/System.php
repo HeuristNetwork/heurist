@@ -129,6 +129,9 @@ class System {
 
                 $this->login_verify(); //load user info from session
 
+                //set current user for stored procedures (log purposes)
+                $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
+                
                 // consts
                 // @todo constants inited once in initPage for index (main) page only
                 $this->defineConstants();  
@@ -812,6 +815,8 @@ class System {
                 //update cookie - to keep it alive for next 30 days
                 setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/');//, HEURIST_SERVER_NAME);
             }
+            
+            
 
         }
         return $islogged;

@@ -91,9 +91,6 @@
             $mysqli->query('set character set "utf8"');
             $mysqli->query('set names "utf8"');
 
-            // @todo verify that in stored procedures we use user_id
-            // if so, set this mysql variable on session open 
-            // if (function_exists('get_user_id')) $mysqli->query('set @logged_in_user_id = ' . get_user_id());
         }
         return true;
     }

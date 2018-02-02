@@ -201,7 +201,6 @@
                 return $system->addError(HEURIST_UNKNOWN_ERROR, 
                     'Are you a bot? Please enter the correct answer to the challenge question');
             }else{
-                if($system->get_user_id()<1){ //if captcha is valies allow 
                     $system->setCurrentUser(array('ugr_ID'=>5, 'ugr_FullName'=>'Guest'));
                 }
             }
