@@ -495,9 +495,8 @@
         .$id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
         $child_records = mysql__select_list2($mysqli, $query);
         if(count($child_records)>0){
-            //$query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE rec_ID in ('.implode(',',$child_records).')';    
-            $child_records = mysql__select_assoc($mysqli, 'Records', 'rec_ID', 'rec_RecTypeID', 
-                    'rec_ID in ('.implode(',',$child_records).')');
+            $query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE rec_ID in ('.implode(',',$child_records).')';    
+            $child_records = mysql__select_assoc2($mysqli, $query);
         }
 
         while(true){
@@ -866,15 +865,15 @@
         }
 
         //get list of fieldtypes for all details
-        $det_types = mysql__select_assoc($mysqli, "defDetailTypes", "dty_ID", "dty_Type",
-            "dty_ID in (" . join(array_keys($details2), ",") . ")");
+        $query = 'SELECT dty_ID, dty_Type FROM defDetailTypes WHERE dty_ID in (' . implode(',', array_keys($details2)) . ')';    
+        $det_types = mysql__select_assoc2($mysqli, $query);
 
         $det_required = array();
         if($is_strict){
             //load list of required details except relmarker
-            $det_required = mysql__select_assoc($mysqli, "defRecStructure, defDetailTypes",
-                "rst_DetailTypeID", "rst_DisplayName",
-                "rst_RecTypeID=$rectype and rst_RequirementType='required' and dty_ID=rst_DetailTypeID and dty_Type!='relmarker");
+            $query = 'SELECT rst_DetailTypeID, rst_DisplayName FROM defRecStructure, defDetailTypes WHERE '
+            ."rst_RecTypeID=$rectype and rst_RequirementType='required' and dty_ID=rst_DetailTypeID and dty_Type!='relmarker'";
+            $det_required = mysql__select_assoc2($mysqli, $query);
         }
 
         $det_childpointers =  mysql__select_list($mysqli, "defRecStructure",

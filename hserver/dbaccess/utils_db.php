@@ -5,7 +5,7 @@
     *
     *  mysql_connection - establish connection
     *  mysql__getdatabases4 - get list of databases
-    *  mysql__select_assoc - returns array  key_column=>val_column for given table
+    *  mysql__select_assoc2 - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of column values
     *  mysql__select_value   - return the first column of first row
     *  mysql__select_row   - returns first row
@@ -157,13 +157,6 @@
     /**
     * returns array  key_column=>val_column for given table
     */
-    function mysql__select_assoc($mysqli, $table, $key_column, $val_column, $condition) {
-
-        $query = "SELECT $key_column, $val_column FROM $table WHERE $condition";
-        return mysql__select_assoc2($mysqli, $query);
-        
-    }
-    
     function mysql__select_assoc2($mysqli, $query){
         
         $matches = null;

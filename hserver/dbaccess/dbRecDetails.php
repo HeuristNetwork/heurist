@@ -156,8 +156,9 @@ class DbRecDetails
         $mysqli = $this->system->get_mysqli();
         
         //get array of max allowed values per record type
-        $rtyLimits = mysql__select_assoc($mysqli, "defRecStructure","rst_RecTypeID","rst_MaxValues",
-                        "rst_DetailTypeID = $dtyID and rst_RecTypeID in (".implode(",",$this->rtyIDs).")");
+        $query = "SELECT rst_RecTypeID,rst_MaxValues FROM defRecStructure WHERE rst_DetailTypeID = $dtyID and rst_RecTypeID in ("
+                        .implode(',', $this->rtyIDs).')';
+        $rtyLimits = mysql__select_assoc2($mysqli, $query);
 
         $now = date('Y-m-d H:i:s');
         $dtl = Array('dtl_DetailTypeID'  => $dtyID,
@@ -304,8 +305,8 @@ class DbRecDetails
         
         foreach ($this->recIDs as $recID) {
             //get matching detail value for record if there is one
-            $valuesToBeReplaced = mysql__select_assoc($mysqli, "recDetails","dtl_ID", "dtl_Value",
-                        "dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause");
+            $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
+            $valuesToBeReplaced = mysql__select_assoc2($mysqli, $query);
             
             if($mysqli->error!=null || $mysqli->error!=''){
                 $sqlErrors[$recID] = $mysqli->error;

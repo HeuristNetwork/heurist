@@ -75,9 +75,9 @@
         $ugr_IDs = prepareIds($ugr_IDs);
         if(count($ugr_IDs)>0){
             $mysqli = $system->get_mysqli();
-            return mysql__select_assoc($mysqli, 'sysUGrps', 'ugr_ID'
-                , 'IF(ugr_Type=\'workgroup\',ugr_Name,concat(ugr_FirstName, \' \', ugr_LastName))'
-                , 'ugr_ID in ('.implode(',',$ugr_IDs).')');
+            $query = 'SELECT ugr_ID, IF(ugr_Type=\'workgroup\',ugr_Name,concat(ugr_FirstName, \' \', ugr_LastName)) '
+            .' FROM sysUGrps WHERE ugr_ID in ('.implode(',',$ugr_IDs).')';
+            return mysql__select_assoc2($mysqli, $query);
         }else{
             $system->addError(HEURIST_INVALID_REQUEST,'User ids are not defined');
             return false;
@@ -214,7 +214,8 @@
 
     function user_getAllWorkgroups($mysqli){
 
-        $result = mysql__select_assoc($mysqli, 'sysUGrps', 'ugr_ID', 'ugr_Name', '(ugr_Type != "user") OR (ugr_ID=2)');
+        $query = 'SELECT ugr_ID, ugr_Name FROM sysUGrps WHERE (ugr_Type != "user") OR (ugr_ID=2)';
+        $result = mysql__select_assoc2($mysqli, $query);
         
         if($result==null) $result = array();
         
