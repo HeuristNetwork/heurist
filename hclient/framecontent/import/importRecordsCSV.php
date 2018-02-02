@@ -297,8 +297,8 @@ If you have missing data for Required fields, you may find it convenient to set 
                     <div class="header" style="min-width: 50px;"><label>Line separator:</label></div>
                     <div class="input-cell">        
                         <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;">
-                            <option selected value="auto">auto detect</option>
-                            <option value="win">Windows</option>
+                            <option value="auto">auto detect</option>
+                            <option selected value="win">Windows</option>
                             <option value="nix">Unix</option>
                             <option value="mac">Mac</option>
                         </select>
@@ -513,7 +513,7 @@ If you have missing data for Required fields, you may find it convenient to set 
             <label for="sa_upd1">Add new data only if field is empty (new data ignored for non-empty fields)</label><br>
 
             <input type="radio" name="sa_upd" id="sa_upd2" value="2" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
-            <label for="sa_upd2">Add and replace all existing value(s) for the record with new data</label>
+            <label for="sa_upd2">Add and replace all existing value(s) for the fields specified below</label>
             
                     <div style="padding-left: 60px; font-size: 0.9em; vertical-align: top; display: none;" id="divImport2">
                         <input type="radio" checked="" name="sa_upd2" id="sa_upd20" value="0" class="text">&nbsp;
@@ -525,7 +525,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         </div>
 <!-- end radiogroup setting divs -->     
 
-        <div id="divFieldMapping2" style="display:none;padding:0.5em 0;margin-left:2em;">
+        <div id="divFieldMapping2" class="step4" style="display:none;padding:0.5em 0;margin-left:2em;">
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>

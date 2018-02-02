@@ -1720,6 +1720,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                      show_latlong:(currentStep==4), 
                      show_required:(currentStep==4)});    
                     
+               if(sel.hSelect("instance")!=undefined){
+                    sel.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+               }
+               
                if(!window.hWin.HEURIST4.util.isnull(selected_value)){
                         $("#cbsa_dt_"+field_idx).prop('checked', true);
                         $(item).parent().show(); //show selector
@@ -1780,7 +1784,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             var s_count = _getInsertUpdateCountsForSequence(currentSeqIndex);
             $('#rt_count_'+currentSeqIndex).html(s_count);
         
-            $('#divFieldMapping2').show();
+            //2018-02-01 $('#divFieldMapping2').show();
 
             
             //show hide skip to next rectype buttons if no insert, only update
@@ -2077,7 +2081,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             var msg = 'Wrong field count in parsed data. Expected field count '
                                         + '(determined by the first line of the file) = '
                                         + response.data['col_count']
-                                        + '. Either change parse parameters or correct source data';
+                                        //+ '. Either change parse parameters or correct source data'
+                                        '. Check that the field and line separators have been correctly set, then click Analyse data again';
                             $( window.hWin.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
 
                             tbl  = $('<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>')
@@ -2290,6 +2295,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         var shelp = '';
         
+        $('#divFieldMapping2').hide();
         
         if(currentSeqIndex>=0 && imp_session['sequence'][currentSeqIndex]){
             var key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
@@ -2752,11 +2758,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
 
                             $('#mrr_warning').text('Warnings: '+res['count_warning']);
                             $('#prepareWarnings').show();//.css('display','inline-block');
-console.log(res);                            
+//console.log(res);                            
                             if(res['missed_required']==true){
                                 window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
                                 +' missing values for fields set to Required.<br><br> '
-                                +' You can find and correct these values using Manage > Structure > Verify<br><br>'
+                                +' You may continue to import required data with missing or invalid values.'
+                                +' After import, you can find and correct these values using Manage > Structure > Verify<br><br>'
                                 + 'Click "Show" button  for a list of rows with missing values');                            
                             }
                         }else{
@@ -3189,15 +3196,20 @@ console.log(res);
                     s = s + '<div id="tabs_records"><ul>';
                     
                     for (;k<tabs.length;k++){
+                        
+                        var cnt = ($.isArray(tabs[k]['values_error']) && tabs[k]['values_error'].length>0)
+                                        ?(tabs[k]['values_error'].length+' '):'';
+                        
                         var colname = imp_session['columns'][tabs[k]['field_checked'].substr(6)]; //field_
                         s = s + '<li><a href="#rec__'+k+'" style="color:red">'
                                     +colname+'<br><span style="font-size:0.7em">'
-                                    +tabs[k]['short_message']+'</span></a></li>';
+                                    +cnt+tabs[k]['short_message']+'</span></a></li>';
                     }
                     s = s + '</ul>';
                 }
                 
-                
+                   
+                   
                 for (k=0;k<tabs.length;k++){
                     var rec_tab = tabs[k];
                     s = s + '<div id="rec__'+k+'">'
@@ -3232,6 +3244,7 @@ console.log(res);
                     var detLookup = detDefs['lookups'];
                     detDefs = detDefs['typedefs'];
                     var idx_dt_type = detDefs['fieldNamesToIndex']['dty_Type'];
+                    var idx_dt_name = detDefs['fieldNamesToIndex']['dty_Name'];
     /*
         //find distinct terms values
         $is_enum = false;
@@ -3282,9 +3295,10 @@ console.log(res);
                 
                         
                     if(dt_id>0 && detDefs[dt_id]['commonFields'][idx_dt_type]=='enum'){ //button to add terms
-                        s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" '
-                        +'title="Adds the unrecognised terms below to the field definition">'
-                        +'Add unrecognised terms</button><br><br>';     
+                        s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;"'
+                        +'>'
+                        +'Adds '+tabs[k]['values_error'].length+' new terms to the field "'+
+                         detDefs[dt_id]['commonFields'][idx_dt_name]+'"</button><br><br>';     
                     }
     
     
@@ -3675,6 +3689,8 @@ console.log(res);
     //
     function _onUpdateModeSet(){
         
+            $('#divFieldMapping2').show();
+        
             if ($("#sa_upd2").is(":checked")) {
                 $("#divImport2").css('display','block');
             }else{
@@ -3730,8 +3746,14 @@ console.log(res);
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
         $('#prepareErrors').hide();
-        if(!(page==4 || page==5)) $('#prepareWarnings').hide();
+        if(!(page==4 || page==5)){
+            $('#prepareWarnings').hide();
+            $('#divFieldMapping2').show();
+        }else{
         //$('#mr_cnt_disamb').parent().hide();
+            $('#divFieldMapping2').hide();
+        }
+
         
         if(page==1){
             $('#selImportId').val('');  //clear selection

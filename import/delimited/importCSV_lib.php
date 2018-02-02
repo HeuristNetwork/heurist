@@ -1368,8 +1368,9 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $idx = array_search($field, $sel_query)+1;
             
-            $wrong_records = validateEnumerations($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType,
-                "Term list values read must match existing terms defined for the field", "Invalid Terms");
+            $wrong_records = validateEnumerations($mysqli, $query, $imp_session, $field, $dt_mapping[$field], 
+                $idx, $recStruc, $recordType,
+                "Term list values read must match existing terms defined for the field", "new terms");
 
         }else{
 
@@ -1504,7 +1505,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 * @param mixed $fields_checked
 * @param mixed $type  error or warning
 */
-function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsage, $fields_checked, $type='error'){
+function getWrongRecords($mysqli, $query, $imp_session, $message, $short_message, $fields_checked, $type='error'){
 
 //error_log('valquery: '.$query);
 
@@ -1525,7 +1526,7 @@ function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsag
             $error["recs_error_ids"] = $wrong_records_ids;
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = $message;
-            $error["short_message"] = $short_messsage;
+            $error["short_message"] = $short_message;
 
             $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
             array_push($imp_session['validation'][$type], $error);
@@ -1551,9 +1552,10 @@ function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsag
 * @param mixed $field_idx - index of validation field in query result (to get value)
 * @param mixed $recStruc - record type structure
 * @param mixed $message - error message
-* @param mixed $short_messsage
+* @param mixed $short_message
 */
-function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $message, $short_messsage){
+function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, 
+            $message, $short_message){
 
 
     $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
@@ -1624,7 +1626,7 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
             $error["values_error"] = array_slice($wrong_values,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = $message;
-            $error["short_messsage"] = $short_messsage;
+            $error["short_message"] = $short_message;
 
             $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
             array_push($imp_session['validation']['error'], $error);
@@ -1692,7 +1694,7 @@ function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = "Record pointer fields must reference an existing record of valid type in the database";
-            $error["short_messsage"] = "Invalid Pointers";
+            $error["short_message"] = "Invalid Pointers";
 
             $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
             array_push($imp_session['validation']['error'], $error);
@@ -1752,7 +1754,7 @@ function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $f
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation";
-            $error["short_messsage"] = "Invalid Numerics";
+            $error["short_message"] = "Invalid Numerics";
             $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
             array_push($imp_session['validation'][$type], $error);
 
@@ -1832,7 +1834,7 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats";
-            $error["short_messsage"] = "Invalid Dates";
+            $error["short_message"] = "Invalid Dates";
             $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
             array_push($imp_session['validation'][$type], $error);
 
