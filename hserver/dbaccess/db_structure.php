@@ -192,31 +192,35 @@
 
 
         $res = $mysqli->query($query);
-        while ($row = $res->fetch_row()) {
-            if($imode!=1){
-                $rtg_ID = $row[1];
-                if(!@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]){
-                    if($rtg_ID>0){
-                        //error_log('Database '.HEURIST_DBNAME.' Definitions error: wrong group id '.$rtg_ID.' for record type '.$row[0]);
+        if($res){
+            while ($row = $res->fetch_row()) {
+                if($imode!=1){
+                    $rtg_ID = $row[1];
+                    if(!@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]){
+                        if($rtg_ID>0){
+                            //error_log('Database '.HEURIST_DBNAME.' Definitions error: wrong group id '.$rtg_ID.' for record type '.$row[0]);
+                        }
+                        
+                        $idxs = array_keys($rtStructs['groups']['groupIDToIndex']);
+                        $rtg_ID = $idxs[0];
                     }
                     
-                    $idxs = array_keys($rtStructs['groups']['groupIDToIndex']);
-                    $rtg_ID = $idxs[0];
+                    array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['allTypes'], $row[0]);
+                    if ($row[14]) { //rty_ShowInList
+                        array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['showTypes'], $row[0]);
+                    }
                 }
-                
-                array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['allTypes'], $row[0]);
-                if ($row[14]) { //rty_ShowInList
-                    array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['showTypes'], $row[0]);
+                if($imode>0){
+                    $commonFields = array_slice($row, 3);
+                    $rtStructs['typedefs'][$row[0]]['commonFields'] = $commonFields;
                 }
+                $rtStructs['names'][$row[0]] = $row[3];
+                $rtStructs['pluralNames'][$row[0]] = $row[8];
             }
-            if($imode>0){
-                $commonFields = array_slice($row, 3);
-                $rtStructs['typedefs'][$row[0]]['commonFields'] = $commonFields;
-            }
-            $rtStructs['names'][$row[0]] = $row[3];
-            $rtStructs['pluralNames'][$row[0]] = $row[8];
+            $res->close();
+        }else{
+            error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving rectype structure '.$mysqli->error);
         }
-        $res->close();
 
 
         //ARTEM setCachedData($cacheKey, $rtStructs);
