@@ -146,7 +146,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             if(this.input_sort_type.val()=='lastname'){
                 request['sort:ugr_LastName'] = '1' 
             }else if(this.input_sort_type.val()=='recent'){
-                request['sort:ugr_Modified'] = '-1' 
+                request['sort:ugr_ID'] = '-1' 
             }else{
                 request['sort:ugr_Name'] = '1';   
             }

@@ -256,7 +256,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             recTitleHint = recID+' : '+fld('ulf_OrigFileName') + ' @ ' + fld('ulf_FilePath');
         }
         
-        var recIcon = '';//@todo window.hWin.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
+        var recIcon = '';//@todo take default icon from extnstions table and or for default image/audio/video
 
 
         

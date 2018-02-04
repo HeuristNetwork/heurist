@@ -58,7 +58,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             var usr_ID = 0;
             if(this.options.ugl_UserID>0){
                 usr_ID = this.options.ugl_UserID;
-                title = 'Manage Membership for User #'+this.options.ugl_UserID+': '
+                title = 'Manage Workgroups for User #'+this.options.ugl_UserID+': '
             /*}else if(this.options.ugl_UserID<0){
                 usr_ID = Math.abs(this.options.ugl_UserID);
                 title = 'Define Roles for User #'+usr_ID+': '; */
@@ -72,12 +72,13 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             }
             
             if(usr_ID>0 && title){
-                function __set_dlg_title(data){
-                    if(data && data.status==window.hWin.HAPI4.ResponseStatus.OK){
-                        this._as_dialog.dialog('option','title', title+data.res);    
+            var that = this;
+                function __set_dlg_title(res){
+                    if(res && res.status==window.hWin.HAPI4.ResponseStatus.OK){
+                        that._as_dialog.dialog('option', 'title', title+res.data[usr_ID]);    
                     }
                 } 
-                window.hWin.HAPI4.usr_names({UGrpID: usr_ID}, __set_dlg_title);
+                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID: usr_ID}, __set_dlg_title);
             }else{
                 this._as_dialog.dialog('option','title', title);    
             }
@@ -101,27 +102,25 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             
             this.recordList.resultList('option','rendererHeader',
                     function(){
-        return '<div style="width:60px"></div><div style="width:3em">ID</div>'
+        sHeader = '<div style="width:60px"></div><div style="width:3em">ID</div>'
                 +'<div style="width:10em">Name</div>'
-                +'<div style="width:16em;border:none">Description</div>'
-                +'<div style="position:absolute;right:150px;width:60px;border-left:1px solid gray">Members</div>'
-                +'<div style="position:absolute;right:74px;width:60px">Role</div>'
-                +'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                +'<div style="width:16em;border:none">Description</div>';
+                
+                if(that.options.ugl_UserID>0){
+                       sHeader = sHeader                
+                       +'<div style="position:absolute;right:150px;width:60px;border-left:1px solid gray">Admin</div>'
+                       +'<div style="position:absolute;right:74px;width:60px">Member</div>';
+                       +'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                }else{
+                       sHeader = sHeader                
+                       +'<div style="position:absolute;right:150px;width:60px;border-left:1px solid gray">Members</div>'
+                       +'<div style="position:absolute;right:74px;width:60px">Role</div>'
+                       +'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                }
+                
+                return sHeader;
                     }
                 );
-
-        }else if(this.options.ugl_UserID>0){ //select_role
-
-            this.recordList.resultList('option','rendererHeader',
-                    function(){
-        return '<div style="width:60px"></div><div style="width:3em">ID</div>'
-                +'<div style="width:10em">Name</div>'
-                +'<div style="width:16em;border:none">Description</div>'
-                +'<div style="position:absolute;right:80px;width:60px;border-left:1px solid gray">Admin</div>'
-                +'<div style="position:absolute;right:10px;width:60px">Member</div>';
-                    }
-                );
-            
         }
 
         this._on( this.searchForm, {
@@ -201,20 +200,64 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                                 
                             //event listeners for adminSelector and memberSelector    
                             function __onRoleSelectorClick(event){
-                                var ele = $(event.target);
+                                        var ele = $(event.target);
+                                        
+                                        var newRole = 'remove';
+                                        var currentStatus = ele.is(':checked');                                                    
+                                        if(currentStatus){
+                                            if(ele.parent().hasClass('adminSelector')){
+                                                newRole = 'admin';
+                                            }else{
+                                                newRole = 'member';
+                                            }
+                                        }
+                                        
+                                        var item = ele.parents('.recordDiv');
+                                        var group_ID = item.attr('recid');  
+                                          
+                                        var request = {};
+                                        request['a']        = 'action';
+                                        request['entity']   = 'sysGroups';
+                                        request['role']     = newRole;
+                                        request['userIDs']  = that.options.ugl_UserID;
+                                        request['groupID']  = group_ID;
+                                        request['request_id'] = window.hWin.HEURIST4.util.random();
+                                        
+                                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                            function(response){             
+                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                    //reload
+                                                    //that.searchForm.searchSysUsers('startSearch');
+                                                    if(newRole=='remove'){
+                                                        if(false && that.searchForm.find('#input_search_type').val()!='any'){
+                                                            var recset = that.recordList.resultList('getRecordSet');
+                                                            recset.removeRecord(group_ID);
+                                                            that.recordList.resultList('refreshPage');  
+                                                        }
+                                                        window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
+                                                    }else{
+                                                        item.attr('data-value', newRole);
+                                                        var cb2;
+                                                        if(ele.parent().hasClass('adminSelector')){
+                                                            cb2 = item.find('.memberSelector > input');
+                                                        }else{
+                                                            cb2 = item.find('.adminSelector > input');
+                                                        } 
+                                                        cb2.attr('checked',false);      
+                                                        
+                                                        window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
+                                                    }
+                                                }else{
+                                                    //restore current value
+                                                    var restoreRole = item.attr('data-value');
+                                                    item.find('.adminSelector > input').prop('checked', (restoreRole=='admin') );
+                                                    item.find('.memberSelector > input').prop('checked',(restoreRole=='member') );
+                                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
+                                                }
+                                            });
                                 
-                                var item = ele.parents('.recordDiv');
-                                var ugl_GroupID = item.attr('recid');
-//console.log( ugl_GroupID );                                                                   
-                                if(ele.is(':checked')){
-                                        var cb2;
-                                        if(ele.parent().hasClass('adminSelector')){
-                                            cb2 = ele.parents('.recordDiv').find('.memberSelector > input');
-                                        }else{
-                                            cb2 = ele.parents('.recordDiv').find('.adminSelector > input');
-                                        } 
-                                        cb2.attr('checked',false);      
-                                }
+                                
+                                
                             }
                             this.recordList.find('.adminSelector').change( __onRoleSelectorClick );
                             this.recordList.find('.memberSelector').change( __onRoleSelectorClick );
@@ -259,7 +302,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
         +'</div>';
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" data-value="'+ fld('ugl_Role')+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
@@ -270,43 +313,47 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         +     recTitle 
         + '</div>';
         
-        // add edit/remove action buttons
-        if(this.options.ugl_UserID>0){ //select_role
-
-            html = html + '<div class="rec_actions user-list" style="top:4px;width:120px">'
-                +'<div class="adminSelector" style="width:60px"><input type="checkbox" '
-                        +(fld('ugl_Role')=='admin'?'checked':'')+'/></div>'
-                +'<div class="memberSelector" style="width:60px"><input type="checkbox" '
-                        +(fld('ugl_Role')=='member'?'checked':'')+'/></div></div>';
-
-            
-        }else
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
-
-            html = html 
-                    + '<div class="rec_actions user-list user-list-edit" style="width:50px;">' //position:absolute;top:4px;right:145px; style="border-radius:8px;color:white;background-color:gray;padding: 1px 2px 1px 10px">' 
-                    + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
-
-            html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">'
             
-            if(this.searchForm.find('#input_search_type').val()!='any'){
-                
-                //current user is admin for this group
-                /*if(window.hWin.HAPI4.has_access(recID)>0){ 
-                    html = html                        
-                        + '<select title="Role" style="width:70px;margin:0 4px" class="user-role" data-value="'
-                        + fld('ugl_Role')+'">'
-                        +'<option>admin</option><option>member</option><option>remove</option></select>';
+                // admin/member checkboxes
+                if(this.options.ugl_UserID>0){ //select_role
+
+                    html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">'
+                        +'<div class="adminSelector" style="width:60px"><input type="checkbox" '
+                                +(fld('ugl_Role')=='admin'?'checked':'')+'/></div>'
+                        +'<div class="memberSelector" style="width:60px"><input type="checkbox" '
+                                +(fld('ugl_Role')=='member'?'checked':'')+'/></div></div>';
+            
+                    html = html + '<div class="rec_actions user-list" style="top:4px;width:60px">'
                     
-                }else{}*/
-                    html = html                      
-                        + '<div title="Role" style="min-width:70px;margin:0 4px">'
-                        + fld('ugl_Role')+'</div>';
-                
-            }else{
-                //placeholder
-                html = html + '<div style="min-width:78px;"></div>';
-            }
+                }else{
+                    
+                    html = html 
+                            + '<div class="rec_actions user-list user-list-edit" style="width:50px;">' //position:absolute;top:4px;right:145px; style="border-radius:8px;color:white;background-color:gray;padding: 1px 2px 1px 10px">' 
+                            + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
+
+                    html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">'
+                    
+                    if(this.searchForm.find('#input_search_type').val()!='any'){
+                        
+                        //current user is admin for this group
+                        /*if(window.hWin.HAPI4.has_access(recID)>0){ 
+                            html = html                        
+                                + '<select title="Role" style="width:70px;margin:0 4px" class="user-role" data-value="'
+                                + fld('ugl_Role')+'">'
+                                +'<option>admin</option><option>member</option><option>remove</option></select>';
+                            
+                        }else{}*/
+                            html = html                      
+                                + '<div title="Role" style="min-width:70px;margin:0 4px">'
+                                + fld('ugl_Role')+'</div>';
+                        
+                    }else{
+                        //placeholder
+                        html = html + '<div style="min-width:78px;"></div>';
+                    }
+                }
+
             
             if(window.hWin.HAPI4.has_access(recID)>0){
                 html = html                                    
@@ -344,6 +391,12 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 'details'    : 'list',
                 'pageno'     : pageno
         };
+        
+        //add additional parameter - need to get a Role
+        if(this.options.ugl_UserID>0){
+            request['ugl_UserID'] = this.options.ugl_UserID;
+            request['ugl_Join'] = true;
+        }else 
         if(this.searchForm.find('#input_search_type').val()!='any'){
             request['ugl_UserID'] = window.hWin.HAPI4.currentUser['ugr_ID'];
         }

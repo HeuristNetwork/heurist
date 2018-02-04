@@ -112,7 +112,11 @@ class DbSysUsers extends DbEntityBase
         }else if(@$this->data['details']=='list'){
             
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_FirstName,ugr_LastName,ugr_eMail,ugr_Organisation,ugr_Enabled';
-            if($needRole) $this->data['details'] .= ',ugl_Role';
+            if($needRole) {
+                $this->data['details'] .= ',ugl_Role';   
+            }else{
+                $needCount = true;  //need count only for all groups
+            } 
             
         }else if(@$this->data['details']=='full'){
 
@@ -156,14 +160,19 @@ class DbSysUsers extends DbEntityBase
             if($value!=null){
                 array_push($order, 'ugr_LastName '.($value>0?'ASC':'DESC'));
             }else{
-                $value = @$this->data['sort:ugr_Name'];
+                $value = @$this->data['sort:ugr_ID'];
                 if($value!=null){
-                    array_push($order, 'ugr_Name ASC');
+                    array_push($order, 'ugr_ID '.($value>0?'ASC':'DESC'));
+                }else{
+                    $value = @$this->data['sort:ugr_Name'];
+                    if($value!=null){
+                        array_push($order, 'ugr_Name ASC');
+                    }
                 }
             }
         }  
          
-        if($needCount){    
+        if($needCount){ //find count of groups where given user is a memmber   
             array_push($this->data['details'],
                 '(select count(ugl_ID) from sysUsrGrpLinks where (ugl_UserID=ugr_ID)) as ugr_Member');
         }

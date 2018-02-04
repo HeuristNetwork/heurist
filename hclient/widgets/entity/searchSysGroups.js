@@ -96,10 +96,11 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
                 } 
                 
                 //only groups for current user
-                request['ugl_UserID'] = window.hWin.HAPI4.currentUser['ugr_ID']; 
-            }
-            
-            //search any group for user (JOIN)
+                request['ugl_UserID'] = (this.options.ugl_UserID>0)
+                                ?this.options.ugl_UserID
+                                :window.hWin.HAPI4.currentUser['ugr_ID']; 
+            }else 
+            //for group mgm per user search role for any request
             if(this.options.ugl_UserID>0){
                 request['ugl_UserID'] = this.options.ugl_UserID; 
                 request['ugl_Join'] = true;
@@ -110,7 +111,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
             if(this.input_sort_type.val()=='member'){
                 request['sort:ugr_Members'] = '-1' 
             }else if(this.input_sort_type.val()=='recent'){
-                request['sort:ugr_Modified'] = '-1' 
+                request['sort:ugr_ID'] = '-1' 
             }else{
                 request['sort:ugr_Name'] = '-1';   
             }

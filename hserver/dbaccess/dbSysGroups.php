@@ -80,7 +80,7 @@ class DbSysGroups extends DbEntityBase
                 }
                 array_push($where2, '(ugl_GroupID = ugr_ID)');
             
-                if(@$this->data['ugl_Join']){
+                if(@$this->data['ugl_Join']){ //always search for role
                     
                     $from_table[0] = $from_table[0].' LEFT JOIN sysUsrGrpLinks ON '.implode(' AND ',$where2);
                     
@@ -88,7 +88,6 @@ class DbSysGroups extends DbEntityBase
                     $where = array_merge($where,$where2);
                     array_push($from_table, 'sysUsrGrpLinks');
                 }
-
         }
         
         //compose SELECT it depends on param 'details' ------------------------
@@ -103,7 +102,9 @@ class DbSysGroups extends DbEntityBase
         }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Enabled';
-            if($needRole) $this->data['details'] .= ',ugl_Role';
+            if($needRole) {
+                $this->data['details'] .= ',ugl_Role';   
+            }
             $needCount = true;
             
         }else{
@@ -132,9 +133,14 @@ class DbSysGroups extends DbEntityBase
                 array_push($order, 'ugr_Members '.($value>0?'ASC':'DESC'));
                 $needCount = true;
             }else{
-                $value = @$this->data['sort:ugr_Name'];
+                $value = @$this->data['sort:ugr_ID'];
                 if($value!=null){
-                    array_push($order, 'ugr_Name ASC');
+                    array_push($order, 'ugr_ID '.($value>0?'ASC':'DESC'));
+                }else{
+                    $value = @$this->data['sort:ugr_Name'];
+                    if($value!=null){
+                        array_push($order, 'ugr_Name ASC');
+                    }
                 }
             }
         }  

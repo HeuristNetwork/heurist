@@ -73,12 +73,13 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             }
             
             if(usr_ID>0 && title){
-                function __set_dlg_title(data){
-                    if(data && data.status==window.hWin.HAPI4.ResponseStatus.OK){
-                        this._as_dialog.dialog('option','title', title+data.res);    
+                var that = this;
+                function __set_dlg_title(res){
+                    if(res && res.status==window.hWin.HAPI4.ResponseStatus.OK){
+                        that._as_dialog.dialog('option','title', title+res.data[usr_ID]);    
                     }
                 } 
-                window.hWin.HAPI4.usr_names({UGrpID: usr_ID}, __set_dlg_title);
+                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID: usr_ID}, __set_dlg_title);
             }else{
                 this._as_dialog.dialog('option','title', title);    
             }
@@ -221,6 +222,20 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                             });
                                 });
                                 
+                                //init role selector
+                                this.recordList.find('.user-list-edit')
+                                    .click(function(event){
+                                        var user_ID = $(event.target).parents('.recordDiv').attr('recid');
+                                        
+                                        var options = {select_mode: 'manager',
+                                                ugl_UserID: user_ID,
+                                                isdialog: true,
+                                                edit_mode:'popup',
+                                                title: ("Manage Workgroups for User")};
+
+                                        window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options);
+                                    });
+                                
 
                         }
                         });
@@ -285,7 +300,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             var ugl_GroupID = this.searchForm.find('#input_search_group').val(); 
             if(window.hWin.HAPI4.is_admin() && !(ugl_GroupID>0)){  //show count of groups where user is a member
                 html = html 
-                    + '<div class="rec_actions user-list user-list-edit" style="width:50px;">AA'
+                    + '<div class="rec_actions user-list user-list-edit" style="width:50px;" title="Edit participation of user in groups">'
                     + fld('ugr_Member') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>';
             }
             

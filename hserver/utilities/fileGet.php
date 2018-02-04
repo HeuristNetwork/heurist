@@ -164,12 +164,12 @@ if($filename){ //download from scratch
         //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
         $default_mode = @$_REQUEST['def'] ?$_REQUEST['def']:2;
         
-        //at the moment we don't have full images that describe entity
-        $path = HEURIST_FILESTORE_DIR . 'entity-icons/'.(($viewmode=='icon')?'':'thumb/'); 
-        
         if($default_mode==2) //get entity default icon or thumb
         {
-            $filename = $path.$_REQUEST['entity'].'.png';    
+            //at the moment we don't have full images that describe entity - only icons and thumbs
+            $filename = dirname(__FILE__).'/../../hclient/assets/'
+                            .$_REQUEST['entity'].(($viewmode=='icon')?'':'_thumb').'.png';    
+                            
             if(file_exists($filename)){
                 download_file($filename, $content_type);
                 exit();

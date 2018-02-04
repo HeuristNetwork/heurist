@@ -587,7 +587,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                             </a></td>
                         <td><?= substr($row['rec_Title'],0,50) ?></td>
                         <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                        <td><?= $row['new_value'] ?></td>
+                        <td><?= $row['new_value']?('=>&nbsp;&nbsp;'.$row['new_value']):'' ?></td>
                     </tr>
                     <?php
                 }

@@ -1578,7 +1578,7 @@ $.widget( "heurist.editing_input", {
 
                         //crate progress dialog
                         var $progress_dlg = $('<div title="File Upload"><div class="progress-label">Starting upload...</div>'
-                        +'<div class="progressbar" style="margin-top: 20px;"></div></div>').appendTo( $inputdiv );
+                        +'<div class="progressbar" style="margin-top: 20px;"></div></div>').hide().appendTo( $inputdiv );
                         var $progress_bar = $progress_dlg.find('.progressbar');
                         var $progressLabel = $progress_dlg.find('.progress-label');
          
