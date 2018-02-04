@@ -558,13 +558,13 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                 ?>
 
                 <div>
-                    <h3>Records with wrong Date fields</h3>
+                    <h3>Records with incorrect Date fields</h3>
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                     </span>
-                    <div>To fix faulty date values as suggested, please click here:
+                    <div>To fix faulty date values as suggested, mark desired records and please click here:
                         <button
 onclick="{document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1','_self')}">
                             Correct</button>
@@ -576,7 +576,10 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                 foreach ($bibs as $row) {
                     ?>
                     <tr>
-                        <td><input type=checkbox name="recCB5" value=<?= $row['dtl_RecID'] ?>></td>
+                        <td><?php if($row['new_value']) 
+                             print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>';
+                            ?>
+                        </td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
