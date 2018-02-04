@@ -871,7 +871,8 @@
         $det_required = array();
         if($is_strict){
             //load list of required details except relmarker
-            $query = 'SELECT rst_DetailTypeID, rst_DisplayName FROM defRecStructure, defDetailTypes WHERE '
+            $query = 'SELECT rst_DetailTypeID, IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
+            .'FROM defRecStructure, defDetailTypes WHERE '
             ."rst_RecTypeID=$rectype and rst_RequirementType='required' and dty_ID=rst_DetailTypeID and dty_Type!='relmarker'";
             $det_required = mysql__select_assoc2($mysqli, $query);
         }
