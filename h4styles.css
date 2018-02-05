@@ -1517,10 +1517,12 @@ option {padding-left:15px;}
     padding-left:4px;
 }
 
-.list div.recordDiv > .user-list {
+/* always visible */
+.list div.recordDiv > .user-list, .list div.recordDiv > .user-list-member {
     display:block;
 }
-.user-list > div{
+
+.user-list > div, .user-list-member > div{
     display:inline-block;
 }
 
@@ -1529,22 +1531,32 @@ option {padding-left:15px;}
     color:white;
     background-color:gray;
     cursor:pointer;
-    padding-left:4px;
+    text-align:center;
 }
 
 .list .user-list-edit{
      position: absolute;
      top: 4px;
-     right: 145px !important;
+     right: 145px;
      height: 16px;
+}
+.list .user-list-member{
+     right: 70px !important;
+     background:none;
+}
+.list .user-list-member label{
+     display:none;
 }
 
 .icons .user-list-edit, 
 .thumbs .user-list-edit, 
-.thumbs3 .user-list-edit {
+.thumbs3 .user-list-edit
+{
     position: absolute;
     bottom: 2px;
     height: 16px;
-    right: 2px;
+    right: 2px !important;
+    max-width:120px;
+    font-size:10px;
 }
 

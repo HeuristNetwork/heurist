@@ -57,7 +57,7 @@ class DbSysUsers extends DbEntityBase
         
         $needCheck = false;
         $needRole = false;
-        $needCount = false;
+        $needCount = false; //find cound where user is a member
         
         //compose WHERE 
         $where = array('ugr_Type="user"');
@@ -108,6 +108,11 @@ class DbSysUsers extends DbEntityBase
         }else if(@$this->data['details']=='name'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name';
+
+        }else if(@$this->data['details']=='count'){
+            
+            $this->data['details'] = 'ugr_ID';
+            $needCount = true;
             
         }else if(@$this->data['details']=='list'){
             
@@ -259,10 +264,16 @@ class DbSysUsers extends DbEntityBase
             $mysqli = $this->system->get_mysqli();
             $res = mysql__select_value($mysqli,
                     "SELECT ugr_ID FROM sysUGrps  WHERE ugr_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."' OR ugr_eMail='"
+                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."'");
+            if($res>0 && $res!=@$this->records[$idx]['ugr_ID']){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided name already exists');
+                return false;
+            }
+            $res = mysql__select_value($mysqli,
+                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_eMail='"
                     .$mysqli->real_escape_string( $this->records[$idx]['ugr_eMail'])."'");
-            if($res!=@$this->records[$idx]['ugr_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided name or email already exists');
+            if($res>0 && $res!=@$this->records[$idx]['ugr_ID']){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided email already exists');
                 return false;
             }
             
@@ -373,11 +384,13 @@ class DbSysUsers extends DbEntityBase
         //remove temporary records
         $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in (' 
                         . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
-        $rec_ids_to_delete = mysql__select_list($mysqli, $query);
+        $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
         if(count($rec_ids_to_delete)>0){
             $res = recordDelete($this->system, $rec_ids_to_delete);
             if(@$res['status']!=HEURIST_OK) return false;
         }
+                
+        $ret = true;        
         
         //remove from roles table
         $query = 'DELETE FROM sysUsrGrpLinks'

@@ -768,8 +768,13 @@ $.widget( "heurist.manageEntity", {
     //
     // close dialog
     //
-    closeDialog: function(){
+    closeDialog: function(is_force){
         if(this.options.isdialog){
+            
+            if(is_force===true){
+                this._as_dialog.dialog('option','beforeClose',null);
+            }
+            
             this._as_dialog.dialog("close");
             //this.element.dialog('close');
         }
@@ -1011,7 +1016,7 @@ $.widget( "heurist.manageEntity", {
                             
                             //update record in cache
                             if(that.options.use_cache){
-                                this._cachedRecordset.addRecord(recID, fields);
+                                that._cachedRecordset.addRecord(recID, fields);
                             }else{
                                 //add/update record in recordset in _afterSaveEventHandler depends on entity
                             }
@@ -1214,6 +1219,31 @@ $.widget( "heurist.manageEntity", {
                         resizeStop: function( event, ui ) {//fix bug
                             that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                         },
+                        beforeClose: function(){
+                            //show warning in case of modification
+                            if(that._editing.isModified() && that._currentEditID!=null){
+                                var $dlg, buttons = {};
+                                buttons['Save'] = function(){ 
+                                    that._saveEditAndClose(null, 'close'); 
+                                    $dlg.dialog('close'); 
+                                }; 
+                                buttons['Ignore and close'] = function(){ 
+                                        that._currentEditID = null; 
+                                        //that.closeDialog(); 
+                                        that._edit_dialog.dialog('close'); 
+                                        $dlg.dialog('close'); 
+                                };
+                                
+                                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                        'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
+                                        buttons,
+                                        {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                                return false;   
+                            }
+                            that.saveUiPreferences();
+                            return true;
+                        },
+                        
                         buttons: this._getEditDialogButtons()
                     });        
                     

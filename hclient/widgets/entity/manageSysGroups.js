@@ -129,142 +129,173 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 });
         
         this._on( this.recordList, {
-                        "resultlistonpagerender": function(event){
-                            //init role selector
-                            /*
-                            this.recordList.find('select.user-role')
-                                .each(function(idx,item){$(item).val($(item).attr('data-value'))})
-                                .change(function(event){
+                "resultlistonpagerender": function(event){
+                    //init role selector
+                    /*
+                    this.recordList.find('select.user-role')
+                    .each(function(idx,item){$(item).val($(item).attr('data-value'))})
+                    .change(function(event){
 
-                                        if(this.searchForm.find('#input_search_type').val()=='any')return;
-                                    
-                                        var usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
-                                        if(!(usr_ID>0)) return;
-                                          
-                                        var selector = $(event.target);
-                                        var ugl_GroupID = selector.parents('.recordDiv').attr('recid');  
-                                        var newRole = selector.val();
-                                          
-                                        var request = {};
-                                        request['a']        = 'action';
-                                        request['entity']   = 'sysGroups';
-                                        request['role']     = newRole;
-                                        request['userIDs']  = usr_ID;
-                                        request['groupID']  = ugl_GroupID;
-                                        request['request_id'] = window.hWin.HEURIST4.util.random();
-                                        
-                                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                            function(response){
-                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                                    //reload
-                                                    //that.searchForm.searchSysUsers('startSearch');
-                                                    if(newRole=='remove'){
-                                                        var recset = that.recordList.resultList('getRecordSet');
-                                                        recset.removeRecord(ugl_GroupID);
-                                                        that.recordList.resultList('refreshPage');  
-                                                        window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
-                                                    }else{
-                                                        selector.attr('data-value', newRole);
-                                                        window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
-                                                    }
-                                                }else{
-                                                    //restore current value
-                                                    selector.val( selector.attr('data-value') );
-                                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
-                                                }
-                                            });
-                                    
-                                    
-                                });
-                            */
-                            this.recordList.find('.user-list-edit')
-                                .each(function(idx,item){
-                                    $(item).attr('title','View users in a group or assign users to a group');
-//To view users in a group or assign users to a group, click on the edit icon in the Edit Membership column
-                                    
-                                    /*$(item).button({icon:'ui-icon-pencil', iconPosition:"end"})
-                                    .css({'background':'gray !important', 'max-height':'1em'});*/
-                                })
-                                .click(function(event){
-                                    var group_ID = $(event.target).parents('.recordDiv').attr('recid');
-                                    
-                                    var options = {select_mode: 'manager',
-                                            ugl_GroupID: group_ID,
-                                            isdialog: true,
-                                            edit_mode:'popup',
-                                            title: ("Manage Users of Workgroup #"+group_ID)};
-                                    
+                    if(this.searchForm.find('#input_search_type').val()=='any')return;
 
-                                    window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
-                                });
-                                
-                            //event listeners for adminSelector and memberSelector    
-                            function __onRoleSelectorClick(event){
-                                        var ele = $(event.target);
-                                        
-                                        var newRole = 'remove';
-                                        var currentStatus = ele.is(':checked');                                                    
-                                        if(currentStatus){
-                                            if(ele.parent().hasClass('adminSelector')){
-                                                newRole = 'admin';
-                                            }else{
-                                                newRole = 'member';
-                                            }
+                    var usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+                    if(!(usr_ID>0)) return;
+
+                    var selector = $(event.target);
+                    var ugl_GroupID = selector.parents('.recordDiv').attr('recid');  
+                    var newRole = selector.val();
+
+                    var request = {};
+                    request['a']        = 'action';
+                    request['entity']   = 'sysGroups';
+                    request['role']     = newRole;
+                    request['userIDs']  = usr_ID;
+                    request['groupID']  = ugl_GroupID;
+                    request['request_id'] = window.hWin.HEURIST4.util.random();
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    //reload
+                    //that.searchForm.searchSysUsers('startSearch');
+                    if(newRole=='remove'){
+                    var recset = that.recordList.resultList('getRecordSet');
+                    recset.removeRecord(ugl_GroupID);
+                    that.recordList.resultList('refreshPage');  
+                    window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
+                    }else{
+                    selector.attr('data-value', newRole);
+                    window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
+                    }
+                    }else{
+                    //restore current value
+                    selector.val( selector.attr('data-value') );
+                    window.hWin.HEURIST4.msg.showMsgErr(response);      
+                    }
+                    });
+
+
+                    });
+                    */
+                    this.recordList.find('.edit-members')
+                    .each(function(idx,item){
+                        $(item).attr('title','View users in a group or assign users to a group');
+                        //To view users in a group or assign users to a group, click on the edit icon in the Edit Membership column
+
+                        /*$(item).button({icon:'ui-icon-pencil', iconPosition:"end"})
+                        .css({'background':'gray !important', 'max-height':'1em'});*/
+                    })
+                    .click(function(event){
+                        var group_ID = $(event.target).parents('.recordDiv').attr('recid');
+
+                        var options = {select_mode: 'manager',
+                            ugl_GroupID: group_ID,
+                            isdialog: true,
+                            edit_mode:'popup',
+                            title: ("Manage Users of Workgroup #"+group_ID),
+
+                            //before close - count for membership and refresh
+                            beforeClose:function(){
+
+                                var request = {
+                                    'a'          : 'search',
+                                    'entity'     : 'sysGroups',
+                                    'details'    : 'count',
+                                    'ugr_ID'     : group_ID
+                                };
+                                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                    function(response){
+                                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                            var resp = new hRecordSet( response.data );
+                                            var rec_updated = resp.getFirstRecord();
+                                            var cnt = resp.fld(rec_updated, 'ugr_Members');
+                                            var record = that.getRecordSet().getById(group_ID);
+                                            that.getRecordSet().setFld(record, 'ugr_Members', cnt);
+                                            that.recordList.resultList('refreshPage');  
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }
-                                        
-                                        var item = ele.parents('.recordDiv');
-                                        var group_ID = item.attr('recid');  
-                                          
-                                        var request = {};
-                                        request['a']        = 'action';
-                                        request['entity']   = 'sysGroups';
-                                        request['role']     = newRole;
-                                        request['userIDs']  = that.options.ugl_UserID;
-                                        request['groupID']  = group_ID;
-                                        request['request_id'] = window.hWin.HEURIST4.util.random();
-                                        
-                                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                            function(response){             
-                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                                    //reload
-                                                    //that.searchForm.searchSysUsers('startSearch');
-                                                    if(newRole=='remove'){
-                                                        if(false && that.searchForm.find('#input_search_type').val()!='any'){
-                                                            var recset = that.recordList.resultList('getRecordSet');
-                                                            recset.removeRecord(group_ID);
-                                                            that.recordList.resultList('refreshPage');  
-                                                        }
-                                                        window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
-                                                    }else{
-                                                        item.attr('data-value', newRole);
-                                                        var cb2;
-                                                        if(ele.parent().hasClass('adminSelector')){
-                                                            cb2 = item.find('.memberSelector > input');
-                                                        }else{
-                                                            cb2 = item.find('.adminSelector > input');
-                                                        } 
-                                                        cb2.attr('checked',false);      
-                                                        
-                                                        window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
-                                                    }
-                                                }else{
-                                                    //restore current value
-                                                    var restoreRole = item.attr('data-value');
-                                                    item.find('.adminSelector > input').prop('checked', (restoreRole=='admin') );
-                                                    item.find('.memberSelector > input').prop('checked',(restoreRole=='member') );
-                                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
-                                                }
-                                            });
-                                
-                                
-                                
+                                    }
+                                );
+                                return true;
                             }
-                            this.recordList.find('.adminSelector').change( __onRoleSelectorClick );
-                            this.recordList.find('.memberSelector').change( __onRoleSelectorClick );
+
+
+
+
+                        };
+
+
+                        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
+                    });
                                 
-                                
-                        }});
-        
+                //event listeners for adminSelector and memberSelector    
+                function __onRoleSelectorClick(event){
+                    var ele = $(event.target);
+
+                    var newRole = 'remove';
+                    var currentStatus = ele.is(':checked');                                                    
+                    if(currentStatus){
+                        if(ele.parent().hasClass('adminSelector')){
+                            newRole = 'admin';
+                        }else{
+                            newRole = 'member';
+                        }
+                    }
+
+                    var item = ele.parents('.recordDiv');
+                    var group_ID = item.attr('recid');  
+
+                    var request = {};
+                    request['a']        = 'action';
+                    request['entity']   = 'sysGroups';
+                    request['role']     = newRole;
+                    request['userIDs']  = that.options.ugl_UserID;
+                    request['groupID']  = group_ID;
+                    request['request_id'] = window.hWin.HEURIST4.util.random();
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                        function(response){             
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                //reload
+                                //that.searchForm.searchSysUsers('startSearch');
+                                if(newRole=='remove'){
+                                    if(false && that.searchForm.find('#input_search_type').val()!='any'){
+                                        var recset = that.recordList.resultList('getRecordSet');
+                                        recset.removeRecord(group_ID);
+                                        that.recordList.resultList('refreshPage');  
+                                    }
+                                    window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
+                                }else{
+                                    item.attr('data-value', newRole);
+                                    var cb2;
+                                    if(ele.parent().hasClass('adminSelector')){
+                                        cb2 = item.find('.memberSelector > input');
+                                    }else{
+                                        cb2 = item.find('.adminSelector > input');
+                                    } 
+                                    cb2.attr('checked',false);      
+
+                                    window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
+                                }
+                            }else{
+                                //restore current value
+                                var restoreRole = item.attr('data-value');
+                                item.find('.adminSelector > input').prop('checked', (restoreRole=='admin') );
+                                item.find('.memberSelector > input').prop('checked',(restoreRole=='member') );
+                                window.hWin.HEURIST4.msg.showMsgErr(response);      
+                            }
+                    });
+
+
+
+                }
+                this.recordList.find('.adminSelector').change( __onRoleSelectorClick );
+                this.recordList.find('.memberSelector').change( __onRoleSelectorClick );
+
+
+        }});
+
         return true;
     },
 
@@ -318,18 +349,20 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 // admin/member checkboxes
                 if(this.options.ugl_UserID>0){ //select_role
 
-                    html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">'
-                        +'<div class="adminSelector" style="width:60px"><input type="checkbox" '
-                                +(fld('ugl_Role')=='admin'?'checked':'')+'/></div>'
-                        +'<div class="memberSelector" style="width:60px"><input type="checkbox" '
-                                +(fld('ugl_Role')=='member'?'checked':'')+'/></div></div>';
+                    html = html + '<div class="rec_actions user-list-edit user-list-member">'
+                        +'<div class="adminSelector" style="padding-top:2px;width:60px"><input type="checkbox" id="adm'+recID
+                                +'" '+(fld('ugl_Role')=='admin'?'checked':'')
+                                +'/><label for="adm'+recID+'">Admin</label></div>' 
+                        +'<div class="memberSelector" style="padding-top:2px;width:60px"><input type="checkbox" id="mem'+recID
+                                +'" '+(fld('ugl_Role')=='member'?'checked':'')
+                                +'/><label for="mem'+recID+'">Member</label></div></div>';
             
                     html = html + '<div class="rec_actions user-list" style="top:4px;width:60px">'
                     
                 }else{
                     
                     html = html 
-                            + '<div class="rec_actions user-list user-list-edit" style="width:50px;">' //position:absolute;top:4px;right:145px; style="border-radius:8px;color:white;background-color:gray;padding: 1px 2px 1px 10px">' 
+                            + '<div class="rec_actions user-list user-list-edit edit-members" style="right:140px;width:50px;">' //position:absolute;top:4px;right:145px; style="border-radius:8px;color:white;background-color:gray;padding: 1px 2px 1px 10px">' 
                             + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
 
                     html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">'
@@ -345,7 +378,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                             
                         }else{}*/
                             html = html                      
-                                + '<div title="Role" style="min-width:70px;margin:0 4px">'
+                                + '<div title="Role" style="min-width:70px;text-align:center">'
                                 + fld('ugl_Role')+'</div>';
                         
                     }else{
