@@ -202,7 +202,7 @@ $.widget( "heurist.editing_input", {
         //add prompt
         var help_text = this.f('rst_DisplayHelpText');
         this.input_prompt = $( "<div>")
-        .text( help_text && !this.options.suppress_prompts ?help_text:'' )
+        .html( help_text && !this.options.suppress_prompts ?help_text:'' )
         .addClass('heurist-helper1').css('padding-bottom','1em');
         // we use applyCompetencyLevel from now
         //if(window.hWin.HAPI4.get_prefs('help_on')!=1){

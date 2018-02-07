@@ -49,6 +49,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysIdentification.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysDatabases.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDatabases.js"></script>
         <!--      
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
@@ -337,7 +341,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             {"key":"Tags",title:"Tags",icon:'ui-icon-tag'},
                             {"key":"RecUploadedFiles",title:"Uploaded Files",icon:'ui-icon-image'},
                             {"key":"usrReminders",title:"Reminders",icon:'ui-icon-mail-closed'},
-                            {"key":"Databases",title:"Databases",icon:'ui-icon-database'},
+                            {"key":"sysDatabases",title:"Databases",icon:'ui-icon-database'},
                             {"key":"",title:"Saved Searches",icon:'ui-icon-search'},
                             {"key":"DefRecTypes",title:"Record Types",icon:'ui-icon-image'},
                             {"key":"DefRecTypeGroups",title:"Record Type Groups"},
@@ -410,12 +414,13 @@ print $targetPath.'<br>';
                     <label>Entity:
                         <select id="entity-sel">
                             <option value="Records">Records</option>
-                            <option value="SysUsers" selected>Users +</option>
+                            <option value="SysUsers" >Users +</option>
                             <option value="SysGroups" >Workgroups +</option>
                             <option value="UsrTags" >Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="UsrReminders">Reminders</option>
-                            <option value="Databases">Databases</option>
+                            <option value="SysIdentification">Database Property</option>
+                            <option value="SysDatabases" selected>Databases</option>
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>
                             <option value="DefRecTypeGroups">Record Type Groups</option>

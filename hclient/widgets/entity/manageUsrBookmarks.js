@@ -120,7 +120,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );
-        this.closeDialog();
+        this.closeDialog(true); //force to avoid warning
     },
     
     

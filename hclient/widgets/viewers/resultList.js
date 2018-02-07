@@ -1338,7 +1338,7 @@ $.widget( "heurist.resultList", {
 
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
                     var rec_id = $(rdiv).attr('recid');
-                    if(recIDs_list.indexOf(rec_id)>=0){
+                    if(recIDs_list.indexOf(rec_id)>=0){  //important must be the same type: string or int
                         $(rdiv).addClass('selected');
                         //if(that._lastSelectedIndex==rec_id){
                         //    $(rdiv).addClass('selected_last');

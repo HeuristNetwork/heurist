@@ -134,12 +134,23 @@ if($filename){ //download from scratch
         $viewmode = @$_REQUEST['version'] ?$_REQUEST['version']:'thumb'; //icon, thumb, full
         if($viewmode=='thumbnail') $viewmode='thumb';
         
-        $rec_id = @$_REQUEST['id'];
+        $rec_id = @$_REQUEST['id'];  
+        
+        $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
+                
+        if($entity_name=='sysDatabases' && $rec_id){
+            
+            $db_name = $rec_id;
+            if(strpos($rec_id,'hdb_')===0){
+                $db_name = substr($rec_id,4);    
+            }
+            $rec_id = 1;    
+            $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
+            
+        }
         
         if($rec_id>0){
         
-            $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';    
-            
             if($viewmode=='thumb'){
                 $filename = $path.'thumbnail/'.$rec_id.'.png'; 
             }else if($viewmode=='icon'){

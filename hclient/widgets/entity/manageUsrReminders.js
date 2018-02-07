@@ -174,7 +174,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );
         if(this.options.edit_mode=='editonly'){
-            this.closeDialog();
+            this.closeDialog(true);
         }
     },
     

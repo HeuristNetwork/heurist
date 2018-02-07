@@ -237,23 +237,3 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     
     
 });
-
-/*
-// Show as dialog
-//
-function showManageDefDetailTypeGroups( options ){
-
-    var manage_dlg = $('#heurist-records-dialog');  //@todo - unique ID
-
-    if(manage_dlg.length<1){
-        
-        options.isdialog = true;
-
-        manage_dlg = $('<div id="heurist-records-dialog">')
-        .appendTo( $('body') )
-        .manageDefDetailTypeGroups( options );
-    }
-
-    manage_dlg.manageDefDetailTypeGroups( 'popupDialog' );
-}
-*/

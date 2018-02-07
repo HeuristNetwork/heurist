@@ -619,7 +619,7 @@ CREATE TABLE sysIdentification (
   sys_MediaFolders varchar(10000) default NULL COMMENT 'Additional comma-sep directories which can contain files indexed in database',
   sys_MediaExtensions varchar(1024) default 'jpg,png,gif,tif,tiff,wmv,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff' COMMENT 'The file extensions to be harvested from the MediaFolders directories',
   PRIMARY KEY  (sys_ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec)';
 
 -- --------------------------------------------------------
 

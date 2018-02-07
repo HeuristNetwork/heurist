@@ -32,6 +32,8 @@
     require_once (dirname(__FILE__).'/../dbaccess/dbDefDetailTypeGroups.php');
     */
     require_once (dirname(__FILE__).'/../dbaccess/dbUsrTags.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbSysDatabases.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbSysIdentification.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysGroups.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysUsers.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbDefDetailTypeGroups.php');

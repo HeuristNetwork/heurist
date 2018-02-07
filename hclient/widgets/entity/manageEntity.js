@@ -600,6 +600,7 @@ $.widget( "heurist.manageEntity", {
     //
     _recordListItemRenderer:function(recordset, record){
         //TO EXTEND        
+        return 'implement _recordListItemRenderer';
     },
 
     //
@@ -671,7 +672,7 @@ $.widget( "heurist.manageEntity", {
                 if(!options.beforeClose){
                     options.beforeClose = function(){
                         //show warning in case of modification
-                        if(that._editing.isModified() && that._currentEditID!=null){
+                        if(that._editing && that._editing.isModified() && that._currentEditID!=null){
                             var $dlg, buttons = {};
                             buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
                             buttons['Ignore and close'] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
