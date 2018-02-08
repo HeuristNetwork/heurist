@@ -1041,6 +1041,12 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             print '<b>Warning: Failed to copy navigation tree for user 2 (DB Owner) to new database, error:</b>'.$res;
                         }
                         
+                        //register in cetral index
+                        mysql_query('insert into `heurist_index`.`sysIdentifications` select "'
+                                .$newname.'" as dbName, s.* from `sysIdentification` as s');
+                        mysql_query("insert into `heurist_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
+                                .'values("'.$eMail.'","'.$newname.'","owner")');
+                        
                         // email the system administrator to tell them a new database has been created
                         user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName, $interests);
                     }

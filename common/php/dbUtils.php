@@ -529,6 +529,10 @@ function db_delete($db, $verbose=true) {
             deleteFolder($source);
             if($verbose) echo "<br/>Folder ".$source." has been deleted";
             
+            // Delete from central index
+            $mysqli->query('DELETE FROM `heurist_index`.`sysIdentifications` WHERE sys_Database="hdb_'.$db.'"');
+            $mysqli->query('DELETE FROM `heurist_index`.`sysUsers` WHERE sus_Database="hdb_'.$db.'"');
+            
             return true;
         }else{
             if($verbose) echo "<br/>Failed to zip ".$source." to ".$destination;
