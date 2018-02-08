@@ -61,14 +61,15 @@ class DbSysDatabases extends DbEntityBase
         }else{
             return false;
         }
-        
-        
+
         $is_ids_only = false;
             
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '
         .'sys_Database, sys_dbRegisteredID, concat(sys_dbVersion,".",sys_dbSubVersion,".",sys_dbSubSubVersion) as sys_Version, '
-        .'sys_dbName, sys_dbOwner, sys_dbDescription, sys_AllowRegistration, sus_Role from heurist_index.sysIdentifications '
+        .'sys_dbName, sys_dbOwner, sys_dbDescription, sys_AllowRegistration, sus_Role, '
+        .'(select count(distinct sus_Email) from heurist_index.sysUsers where sys_Database=sus_Database) as sus_Count '        
+        .' from heurist_index.sysIdentifications '
         .' LEFT JOIN heurist_index.sysUsers on sys_Database=sus_Database and sus_Email="'.$current_user_email.'"';
         
         /*

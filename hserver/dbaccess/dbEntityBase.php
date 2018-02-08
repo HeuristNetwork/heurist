@@ -376,12 +376,12 @@ class DbEntityBase
               if(!$info->isFile()) continue;
               
               $filename = $info->getFilename();
-              $extension = $info->getExtension();
-              
+              $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
+              //$extension = $info->getExtension(); since 5.3.6 
+
               if ($filename==$tempfile.'.'.$extension) {
                   $pathname = $info->getPath();
                   $new_name = $pathname.'/'.$recID.'.'.$extension;
-
                   rename ($info->getPathname(), $new_name);
               }
         }        

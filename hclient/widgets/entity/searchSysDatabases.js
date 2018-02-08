@@ -47,6 +47,14 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
                 request['sus_Role'] = this.input_search_type.val();
             }
             
+            if(this.input_sort_type.val()=='name'){
+                request['sort:sys_Database'] = 1;
+            }else if(this.input_sort_type.val()=='register'){
+                request['sort:sys_dbRegisteredID'] = -1;
+            }else  if(this.input_sort_type.val()=='member'){
+                request['sort:sus_Count'] = -1;
+            }
+            
             this._trigger( "onfilter", null, request);
     }
 

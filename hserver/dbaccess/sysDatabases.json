@@ -62,6 +62,12 @@
                 "dtFields":{
                     "dty_Type":"freetext"
                 }
+            },
+            {
+                "dtID": "sus_Count",
+                "dtFields":{
+                    "dty_Type":"integer"
+                }
             }
             
         ]

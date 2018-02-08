@@ -610,7 +610,17 @@ function hRecordSet(initdata) {
             
                 if(!isNaN(Number(fldname))){ //dt code
                     if(d[fldname] && d[fldname][0]){
+                        
+                        /*
+                        var dt = __getDataType(fieldName);
+                        if(dt=='integer' || dt=='float'){
+                            return Number(d[fldname][0]);
+                        }else{
+                            return d[fldname][0];    
+                        }
+                        */
                         return d[fldname][0];
+                        
                     }
                 }else if(fldname=="dtl_StartDate"){
                     if(d[DT_START_DATE] && d[DT_START_DATE][0]){
@@ -930,8 +940,10 @@ function hRecordSet(initdata) {
                             }
                         }
                     }else{
-                        sortFieldsOrder.push(Number(request[fieldName]));
-                        sortFields.push(fieldName.substr(5));
+                        var realFieldName = fieldName.substr(5);
+                        sortFieldsOrder.push(Number(request[fieldName])); //1 - ASC, -1 DESC
+                        sortFields.push(realFieldName);
+                        dataTypes[realFieldName] = __getDataType(realFieldName);
                     }
                 }
             }            
@@ -947,6 +959,10 @@ function hRecordSet(initdata) {
                     if(fieldName.indexOf('sort:')<0 && request.hasOwnProperty(fieldName)){
                         if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
                             
+                            if(window.hWin.HEURIST4.util.isnull(this.fld(record,fieldName))){
+                                isOK = false;
+                                break;                            
+                            }else
                             if(isexact[fieldName] && this.fld(record,fieldName).toLowerCase() != request[fieldName]){
                                 isOK = false;
                                 break;                            
@@ -969,10 +985,19 @@ function hRecordSet(initdata) {
             }
             
             if(sortFields.length>0){
-                _order.sort(function(a,b){  
-                    return sortFieldsOrder[0]*(that.fld(records[a], sortFields[0])<that.fld(records[b], sortFields[0])
-                            ?-1:1);
-                });
+                if(dataTypes[sortFields[0]]=='integer' || dataTypes[sortFields[0]]=='float'){
+
+                    _order.sort(function(a,b){  
+                        return sortFieldsOrder[0]*(Number(that.fld(records[a], sortFields[0]))<Number(that.fld(records[b], sortFields[0]))
+                                ?-1:1);
+                    });
+                    
+                }else{
+                    _order.sort(function(a,b){  
+                        return sortFieldsOrder[0]*(that.fld(records[a], sortFields[0])<that.fld(records[b], sortFields[0])
+                                ?-1:1);
+                    });
+                }
             }
             
             return this.getSubSet(_records, _order);

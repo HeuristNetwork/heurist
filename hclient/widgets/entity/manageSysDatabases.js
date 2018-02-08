@@ -47,9 +47,27 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
             this.searchForm.searchSysDatabases(this.options);   
         }
         
+        this.recordList.resultList('option','rendererHeader',
+                    function(){
+        sHeader = '<div style="width:60px"></div><div style="width:13em">Db Name</div>'
+                +'<div style="width:3em">Ver</div>'
+                +'<div style="width:3em">Reg#</div>'
+                +'<div style="width:20em">Title</div>'
+                +'<div style="width:5em">Role</div>'
+                +'<div style="width:5em">Users</div>';
+                
+                return sHeader;
+                    }
+                );
+        
+        
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parents('.ui-dialog')); 
+        
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
             function(response){
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
                 that._cachedRecordset = response;
                 that.recordList.resultList('updateResultSet', response);
             });
@@ -70,22 +88,28 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         function fld(fldname){
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
-        function fld2(fldname, col_width){
+        function frm(value, col_width){
             swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            var val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
-            return '<div class="item" '+swidth+'>'+val+'</div>';  //title="'+val+'"
+            var val = window.hWin.HEURIST4.util.htmlEscape(value);
+            return '<div class="item" '+swidth+'>'+value+'</div>';  //title="'+val+'"
         }
         
         
         var recID   = fld('sys_Database');
+        var dbName = fld('sys_dbName');
+        if(dbName=='Please enter a DB name ...') dbName = '';
+        var regID = fld('sys_dbRegisteredID');
+        regID = (regID>0?regID:'');
         
-        var recTitle = fld2('sys_Database','10em')
-                      +fld2('sys_Version','4em')
-                      +fld2('sys_dbRegisteredID','4em')
-                      +fld2('sys_dbName','12em');
+        var recTitle = frm(recID.substr(4),'14em')
+                      +frm(fld('sys_Version'),'4em')
+                      +frm(regID, '4em')
+                      +frm(dbName, '23em')
+                      +frm(fld('sus_Role'), '6em')
+                      +frm(fld('sus_Count'), '5em');
                       
         var recTitleHint = fld('sys_dbDescription');
         
