@@ -483,14 +483,16 @@ class System {
             $user['ugr_Password'] = ''; // do not send password to client side
             $user['ugr_Admin'] = $this->is_admin();
             $user['ugr_DbOwner'] = $this->is_dbowner();
-            if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getDefaultPreferences();
+            if(!@$user['ugr_Preferences']) {
+                $user['ugr_Preferences'] = @$_SESSION[$this->dbname_full]["ugr_Preferences"];   
+            }
         }
 
         if($this->mysqli && defined('HEURIST_DBNAME')){
 
             $dbowner = user_getDbOwner($this->mysqli);
 
-
+            //list of databases recently logged in
             $dbrecent = array();
             if(@$user['ugr_ID']>0){
                 foreach ($_SESSION as $db=>$session){
@@ -769,7 +771,7 @@ class System {
             return false;
         }
         if($this->start_my_session()){
-            return $this->login_verify()?'1':'0';
+            return (@$_SESSION[$this->dbname_full]['ugr_ID']>0)?1:0; //$this->login_verify()?'1':'0';
         }else{
             return false;
         }
@@ -779,11 +781,11 @@ class System {
     /**
     * Load user info from session
     */
-    public function login_verify(){
+    private function login_verify(){
         $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
 
-        if(!$userID){
-            // vsn 3 backward capability
+        if(FAlSE && !$userID){
+            // vsn 3 backward capability  - restore user id from old session
             $h3session = $this->dbname_full.'.heurist';
             $userID = @$_SESSION[$h3session]['user_id'];
             if($userID){
@@ -793,12 +795,13 @@ class System {
                 $_SESSION[$this->dbname_full]['keepalive']    = @$_SESSION[$h3session]['keepalive'];
             }
         }
-
+        
         $islogged = ($userID != null);
         if($islogged){
 
             //@todo do not update session on every request, update in on user membership changes
-            if(true || !@$_SESSION[$this->dbname_full]['ugr_Groups']){
+            if(!@$_SESSION[$this->dbname_full]['ugr_Groups']){
+error_log('get workgroups');                
                 $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
             }
             if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){
@@ -810,7 +813,7 @@ class System {
                 'ugr_FullName'=>$_SESSION[$this->dbname_full]['ugr_FullName'],
                 'ugr_Groups' => $_SESSION[$this->dbname_full]['ugr_Groups'],
                 'ugr_Preferences' => $_SESSION[$this->dbname_full]['ugr_Preferences']);
-
+                
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/');//, HEURIST_SERVER_NAME);
@@ -856,8 +859,10 @@ class System {
                     $_SESSION[$this->dbname_full]['ugr_ID'] = $user['ugr_ID'];
                     $_SESSION[$this->dbname_full]['ugr_Name'] = $user['ugr_Name'];
                     $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
-                    //@todo $_SESSION[$this->dbname_full]['user_access'] = $groups;
-                    //$_SESSION[$this->dbname_full]['cookie_version'] = COOKIE_VERSION;
+                    
+                    if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){
+                        $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getDefaultPreferences();
+                    }
 
                     $time = 0;
                     if($session_type == 'public'){
@@ -879,26 +884,19 @@ class System {
                     $user['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
                     $user['ugr_Password'] = '';
                     $user['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $user['ugr_ID'] );
-                    $user['ugr_Preferences'] = user_getDefaultPreferences();
+                    $user['ugr_Preferences'] = @$_SESSION[$this->dbname_full]["ugr_Preferences"];
                     $this->current_User = $user;
-                    /*
-                    $this->current_User = array(
-                    'ugr_ID'=>$user['ugr_ID'],
-                    'ugr_FullName'=>$user['ugr_FirstName'] . ' ' . $user['ugr_LastName'],
-                    'ugr_Groups' => user_getWorkgroups( $this->mysqli, $user['ugr_ID'] ),
-                    'ugr_Preferences' => user_getPreferences() );
-                    */
-
-                    //header('Location: http://localhost/h4/index.php?db='.$this->dbname);
 
                     //vsn 3 backward capability
-                    $h3session = $this->dbname_full.'.heurist';
-                    $_SESSION[$h3session]['cookie_version'] = 1;
-                    $_SESSION[$h3session]['user_name']     = $user['ugr_Name'];
-                    $_SESSION[$h3session]['user_realname'] = $user['ugr_FullName'];
-                    $_SESSION[$h3session]['user_id']       = $user['ugr_ID'];
-                    $_SESSION[$h3session]['user_access']   = $user['ugr_Groups'];
-                    $_SESSION[$h3session]['keepalive']     = ($session_type == 'remember');
+                    if(FALSE){
+                        $h3session = $this->dbname_full.'.heurist';
+                        $_SESSION[$h3session]['cookie_version'] = 1;
+                        $_SESSION[$h3session]['user_name']     = $user['ugr_Name'];
+                        $_SESSION[$h3session]['user_realname'] = $user['ugr_FullName'];
+                        $_SESSION[$h3session]['user_id']       = $user['ugr_ID'];
+                        $_SESSION[$h3session]['user_access']   = $user['ugr_Groups'];
+                        $_SESSION[$h3session]['keepalive']     = ($session_type == 'remember');
+                    }
 
                     return true;
                 }else{
@@ -925,12 +923,21 @@ class System {
     public function logout(){
         $cres = setcookie('heurist-sessionid', "", time() - 3600);
         $this->current_User = null;
-        session_destroy();
-        /*
-        unset($_SESSION[$this->dbname_full]['user_id']);
-        unset($_SESSION[$this->dbname_full]['user_name']);
-        unset($_SESSION[$this->dbname_full]['user_realname']);
-        */
+        //session_destroy();
+        
+        unset($_SESSION[$this->dbname_full]['ugr_ID']);
+        unset($_SESSION[$this->dbname_full]['ugr_Name']);
+        unset($_SESSION[$this->dbname_full]['ugr_FullName']);
+        if(@$_SESSION[$this->dbname_full]['ugr_Groups']) unset($_SESSION[$this->dbname_full]['ugr_Groups']);
+        
+        if(FALSE){
+            $h3session = $this->dbname_full.'.heurist';
+            if(@$_SESSION[$h3session]['user_id']){
+                unset($_SESSION[$h3session]['user_id']);
+                unset($_SESSION[$h3session]['user_name']);
+                unset($_SESSION[$h3session]['user_realname']);
+            }
+        }
         return true;
     }
 

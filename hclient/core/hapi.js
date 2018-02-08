@@ -942,6 +942,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         */
         get_prefs: function(name){
             if( !that.currentUser['ugr_Preferences'] ) {
+console.log('reset preferences to default')                
                 //preferences by default
                 that.currentUser['ugr_Preferences'] = {layout_language:'en',
                                          layout_theme: 'heurist',
@@ -996,7 +997,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         $.each(value, function(i, item){
                             if($.inArray(item, cur_value) === -1) cur_value.unshift(item);
                         });
-                        value = cur_value.join(',').slice(0, limit);
+                        value = cur_value.slice(0, limit).join(',');
                 }
 
                 var request = {};

@@ -165,6 +165,10 @@ switch (@$_REQUEST['method']) {
             $rv['error'] = "Can't delete system group 'Database Managers'";
         }else{
             $rv = deleteGroup($recID);
+            if(@$_SESSION[DATABASE]['ugr_Groups']){
+                unset($_SESSION[DATABASE]['ugr_Groups']);    
+            }
+            
         }
         break;
 
@@ -807,6 +811,11 @@ function changeRole($grpID, $recIds, $newRole, $oldRole, $needCheck, $updateSess
     }
 
     //update group info for affected users
+    if(@$_SESSION[DATABASE]['ugr_Groups']){
+        unset($_SESSION[DATABASE]['ugr_Groups']);    
+    }
+    
+    
     /*  TEMP - it does not work and affects on request (called several times)
     if($updateSession){
     foreach ($arrUsers as $userID) {
