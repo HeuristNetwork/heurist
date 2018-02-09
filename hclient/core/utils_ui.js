@@ -1187,6 +1187,7 @@ window.hWin.HEURIST4.ui = {
 
             if(!(exp_level>=0)){
                 exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+                if(isNaN(Number(exp_level))) exp_level = 2; //beginner by default
             }
             
             var is_exit = false;
@@ -1321,7 +1322,7 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    //  not used anymore
+    //  used in manageRecords only
     //
     switchHintState2: function(state, $container){
         

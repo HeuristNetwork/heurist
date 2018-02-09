@@ -32,7 +32,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         optfields:true, 
-        //help_on:true,
+        help_on:true,
         summary_closed:false,          
         summary_width:400, 
         summary_tabs:['0','1']},
@@ -1880,20 +1880,22 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         
         //show-hide optional fields     
-        var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
         $(this.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
 
         $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
+
+        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         
         if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
             
             $('<div style="display:inline-block;text-align:left;padding:10px 0px 5px 35px;">'
-                    //?'<label><input type="checkbox" class="chb_show_help" '
-                    //    +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
+                    +'<label><input type="checkbox" class="chb_show_help" '
+                        +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
                     +'<label><input type="checkbox" class="chb_opt_fields" '
-                    +(isfields_on?'checked':'')+'/>Optional fields</label>'
-                    +'<hr style="margin-top: 10px;width:150px">'
+                        +(isfields_on?'checked':'')+'/>Optional fields</label>'
+                    +'<hr style="margin-top: 10px;width:250px">'
              +'</div>'
              +'<div style="float:right;padding: 20px 40px 0px 0px;font-weight: bold;">'
                 +'<span class="btn-config4" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Modify structure</span>'
@@ -1916,14 +1918,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
                 
-            /*    
+                
             this.element.find('.chb_show_help') //.attr('checked', ishelp_on)
                         .change(function( event){
                             var ishelp_on = $(event.target).is(':checked');
                             that.usrPreferences['help_on'] = ishelp_on;
                             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element));
                         });
-            */
+            
             
             this.element.find('.chb_opt_fields') //.attr('checked', isfields_on)
                         .change(function( event){
@@ -1978,10 +1980,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this.element.find('.btn-modify_structure').click(function(){that.editRecordType();});
         }
         
-        //show-hide help text below fields     
-        //var ishelp_on = this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true';
-        //window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
+        //show-hide help text below fields - it overrides comptency level
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
         
         this.onEditFormChange();
     },
@@ -2011,7 +2012,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             isClosed = false,
             activeTabs = [],
             sz = 400,
-            //help_on = true,
+            help_on = true,
             optfields = true;
             
         var params = this.getUiPreferences();    
@@ -2060,7 +2061,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         params.width = dwidth;
         params.height = dheight;
-        //params.help_on = help_on;
+        params.help_on = help_on;
         params.optfields = optfields;
         params.summary_closed = isClosed;
         params.summary_width = sz;

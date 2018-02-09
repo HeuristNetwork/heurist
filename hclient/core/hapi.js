@@ -942,14 +942,14 @@ function hAPI(_db, _oninit) { //, _currentUser
         */
         get_prefs: function(name){
             if( !that.currentUser['ugr_Preferences'] ) {
-console.log('reset preferences to default')                
                 //preferences by default
-                that.currentUser['ugr_Preferences'] = {layout_language:'en',
-                                         layout_theme: 'heurist',
-                search_result_pagesize:100,
-                search_detail_limit: 2000, 'help_on':'0', 
-                userCompetencyLevel: 'beginner',
-                mapcluster_on: false};
+                that.currentUser['ugr_Preferences'] = 
+                {layout_language:'en',
+                 layout_theme: 'heurist',
+                 search_result_pagesize:100,
+                 search_detail_limit: 2000, 'help_on':'0', 
+                 userCompetencyLevel: 2, //'beginner',
+                 mapcluster_on: false};
             }
             if(window.hWin.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];
