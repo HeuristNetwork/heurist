@@ -25,14 +25,14 @@
 */
 
 
--- create heurist_index database
+-- create Heurist_DBs_index database
 -- create index tables - sysIdentifications and sysAdmins
 -- recreate triggers for all databases
 -- fill central index for all databases
 
--- create heurist_index database
-CREATE DATABASE IF NOT EXISTS heurist_index;
-use heurist_index;
+-- create Heurist_DBs_index database
+CREATE DATABASE IF NOT EXISTS Heurist_DBs_index;
+use Heurist_DBs_index;
 
 -- create index tables - sysIdentifications and sysAdmins
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS sysIdentifications
   sys_htmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write html representation of published records, default to html within upload directory',
   sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Group which by default owns new records, 0=everyone. Allow override per user',
   sys_NewRecAccess enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Default visibility for new records - allow override per user',
-   tinyint(1) unsigned NOT NULL default '0' COMMENT '0=immediate publish when ''public'' record edited, 1 = reset to ''pending''',
+  sys_SetPublicToPendingOnEdit tinyint(1) unsigned NOT NULL default '0' COMMENT '0=immediate publish when ''public'' record edited, 1 = reset to ''pending''',
   sys_ConstraintDefaultBehavior enum('locktypetotype','unconstrainedbydefault','allownullwildcards') NOT NULL default 'locktypetotype' COMMENT 'Determines default behaviour when no detail types are specified',
   sys_AllowRegistration tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set, people can apply for registration through web-based form',
   sys_MediaFolders varchar(10000) default NULL COMMENT 'Additional comma-sep directories which can contain files indexed in database',
@@ -122,12 +122,12 @@ BEGIN
 -- database is valid and sysIdentification table exists    
     IF (SELECT @sys_ID) >=0 THEN
 
-       call sp_ExecSQL(concat('delete from `heurist_index`.`sysIdentifications` where `sys_Database`="',db_name,'"'));
-       call sp_ExecSQL(concat('insert into `heurist_index`.`sysIdentifications` select "',db_name,'" as dbName, s.* from `',db_name,'`.`sysIdentification` as s;'));
+       call sp_ExecSQL(concat('delete from `Heurist_DBs_index`.`sysIdentifications` where `sys_Database`="',db_name,'"'));
+       call sp_ExecSQL(concat('insert into `Heurist_DBs_index`.`sysIdentifications` select "',db_name,'" as dbName, s.* from `',db_name,'`.`sysIdentification` as s;'));
 
 -- update users
-       call sp_ExecSQL(concat('delete from `heurist_index`.`sysUsers` where `sus_Database`="',db_name,'" AND sus_ID>0'));
-       call sp_ExecSQL(concat("insert into `heurist_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) ",
+       call sp_ExecSQL(concat('delete from `Heurist_DBs_index`.`sysUsers` where `sus_Database`="',db_name,'" AND sus_ID>0'));
+       call sp_ExecSQL(concat("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) ",
        "select ugr_Email, '",db_name,"' as dbaname, IF(ugr_ID=2,'owner',COALESCE(ugl_Role,'member')) as role from `",db_name,"`.sysUGrps ",
         "LEFT JOIN `",db_name,"`.sysUsrGrpLinks on ugr_ID=ugl_UserID and ugl_GroupID=1 and ugl_Role='admin' where ugr_Type='user'"));  
    
@@ -140,6 +140,7 @@ END $$
 DELIMITER ;
 
 -- disabled
+-- see centralIndex.php
 -- CALL sp_RunAllDatabases();
 
 DROP PROCEDURE IF EXISTS sp_RunAllDatabases;

@@ -845,7 +845,7 @@ DROP TRIGGER IF EXISTS sysUGrps_last_update$$
     begin
         update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps";
         if (OLD.ugr_eMail<>NEW.ugr_eMail) THEN
-            UPDATE `heurist_index`.`sysUsers` SET sus_Email=NEW.ugr_eMail WHERE `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=OLD.ugr_eMail;  
+            UPDATE `Heurist_DBs_index`.`sysUsers` SET sus_Email=NEW.ugr_eMail WHERE `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=OLD.ugr_eMail;  
         END IF;
     end$$
     
@@ -855,7 +855,7 @@ DROP TRIGGER IF EXISTS sysUGrps_last_update$$
     AFTER DELETE ON `sysUGrps`
     FOR EACH ROW
     begin
-        DELETE FROM `heurist_index`.`sysUsers` WHERE `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=OLD.ugr_eMail;  
+        DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=OLD.ugr_eMail;  
     end$$
 
 DELIMITER ;
@@ -873,8 +873,8 @@ DROP TRIGGER IF EXISTS update_sys_index_trigger$$
     AFTER UPDATE ON `sysIdentification`
     FOR EACH ROW
     begin
-       delete from `heurist_index`.`sysIdentifications` where `sys_Database`=(SELECT DATABASE());
-       insert into `heurist_index`.`sysIdentifications` select (SELECT DATABASE()) as dbName, s.* from `sysIdentification` as s;
+       delete from `Heurist_DBs_index`.`sysIdentifications` where `sys_Database`=(SELECT DATABASE());
+       insert into `Heurist_DBs_index`.`sysIdentifications` select (SELECT DATABASE()) as dbName, s.* from `sysIdentification` as s;
     end$$
 
 DELIMITER ;
@@ -902,16 +902,16 @@ DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_delete$$
         LEFT JOIN sysUsrGrpLinks on ugr_ID=ugl_UserID and ugl_GroupID=1 and ugl_Role='admin' 
         where ugr_ID=NEW.ugl_UserID INTO @email, @role;
        
-       select `sus_ID`,`sus_Role` from `heurist_index`.`sysUsers` 
+       select `sus_ID`,`sus_Role` from `Heurist_DBs_index`.`sysUsers` 
        where `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=@email 
        into @sus_id, @sus_role;
        
        IF (@sus_id>0)  THEN
         IF(@sus_role<>@role)  THEN
-            update `heurist_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
+            update `Heurist_DBs_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
         END IF;
        ELSE
-            insert into `heurist_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) values (@email, (SELECT DATABASE()), @role);
+            insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) values (@email, (SELECT DATABASE()), @role);
        END IF;
        
       END IF;
@@ -931,16 +931,16 @@ DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_delete$$
         LEFT JOIN sysUsrGrpLinks on ugr_ID=ugl_UserID and ugl_GroupID=1 and ugl_Role='admin' 
         where ugr_ID=NEW.ugl_UserID INTO @email, @role;
        
-       select `sus_ID`,`sus_Role` from `heurist_index`.`sysUsers` 
+       select `sus_ID`,`sus_Role` from `Heurist_DBs_index`.`sysUsers` 
        where `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=@email 
        into @sus_id, @sus_role;
        
        IF(@sus_id>0)  THEN
         IF(@sus_role<>@role) THEN
-            update `heurist_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
+            update `Heurist_DBs_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
         END IF;
        ELSE
-            insert into `heurist_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) values (@email, (SELECT DATABASE()), @role);
+            insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) values (@email, (SELECT DATABASE()), @role);
        END IF;
        
       END IF;
@@ -960,12 +960,12 @@ DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_delete$$
         where ugr_ID=OLD.ugl_UserID INTO @email, @role;       
        
         IF ((@email IS NOT NULL) AND (@email<>'')) THEN
-            select `sus_ID`,`sus_Role` from `heurist_index`.`sysUsers` 
+            select `sus_ID`,`sus_Role` from `Heurist_DBs_index`.`sysUsers` 
             where `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=@email 
             into @sus_id, @sus_role;
             
            IF ((@sus_id>0) AND (@sus_role<>@role)) THEN
-              update `heurist_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
+              update `Heurist_DBs_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
            END IF;
         END IF;
       END IF;

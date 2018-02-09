@@ -50,7 +50,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         this.recordList.resultList('option','rendererHeader',
                     function(){
         sHeader = '<div style="width:60px"></div><div style="width:13em">Db Name</div>'
-                +'<div style="width:3em">Ver</div>'
+                //+'<div style="width:3em">Ver</div>'
                 +'<div style="width:3em">Reg#</div>'
                 +'<div style="width:20em">Title</div>'
                 +'<div style="width:5em">Role</div>'
@@ -105,13 +105,13 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         regID = (regID>0?regID:'');
         
         var recTitle = frm(recID.substr(4),'14em')
-                      +frm(fld('sys_Version'),'4em')
+                      //+frm(fld('sys_Version'),'4em')
                       +frm(regID, '4em')
                       +frm(dbName, '23em')
                       +frm(fld('sus_Role'), '6em')
                       +frm(fld('sus_Count'), '5em');
                       
-        var recTitleHint = fld('sys_dbDescription');
+        var recTitleHint = '';//fld('sys_dbDescription');
         
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');

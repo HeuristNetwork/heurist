@@ -82,7 +82,7 @@
     //fill database
     foreach ($databases as $idx=>$db_name){
 
-        if($idx<304) continue;
+        //if($idx<304) continue;
         
         /* verification that all sysIdentification are valid
         $query = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = '$db_name' AND table_name = 'sysIdentification'";
@@ -95,31 +95,26 @@
         
        print $idx.'  '.$db_name.'<br>';     
        
-       $res = mysql_query("delete from `heurist_index`.`sysIdentifications` where `sys_Database`='$db_name'");
+       $res = mysql_query("delete from `Heurist_DBs_index`.`sysIdentifications` where `sys_Database`='$db_name'");
        if(!$res) {print mysql_error(); break;}
-       $res = mysql_query("insert into `heurist_index`.`sysIdentifications` select '$db_name' as dbName, s.* from `$db_name`.`sysIdentification` as s");
+       $res = mysql_query("insert into `Heurist_DBs_index`.`sysIdentifications` select '$db_name' as dbName, s.* from `$db_name`.`sysIdentification` as s");
        if(!$res) {print mysql_error(); break;}
 
-       $res = mysql_query("delete from `heurist_index`.`sysUsers` where `sus_Database`='$db_name' AND sus_ID>0");
+       $res = mysql_query("delete from `Heurist_DBs_index`.`sysUsers` where `sus_Database`='$db_name' AND sus_ID>0");
        if(!$res) {print mysql_error(); break;}
-       $res = mysql_query("insert into `heurist_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
+       $res = mysql_query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
        ."select ugr_Email, '$db_name' as dbaname, IF(ugr_ID=2,'owner',COALESCE(ugl_Role,'member')) as role from `$db_name`.sysUGrps "
        ."LEFT JOIN `$db_name`.sysUsrGrpLinks on ugr_ID=ugl_UserID and ugl_GroupID=1 and ugl_Role='admin' where ugr_Type='user'");
        if(!$res) {print mysql_error(); break;}
-       
-    }//while  databases
-        
-    exit();    
+    }  
     
-    //run sql script to update triggers    
+    print 'recreate triggers '.count($databases).' databases<br>';
     foreach ($databases as $idx=>$db_name){
-
-        print $idx.'  '.$db_name.'<br>';
-        
-        if(!executeScript($db_name, $filename2)){
+       print $idx.'  '.$db_name.'<br>';     
+       //run sql script to update triggers    
+       if(!executeScript($db_name, $filename2)){
               break;
-        }
-        
+       }
     }//while  databases
     
     //
