@@ -1878,6 +1878,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //    
     _afterInitEditForm: function(){
         
+        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         
         //show-hide optional fields     
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
@@ -1885,8 +1887,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
 
-        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
-        var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         
         if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
             
@@ -1979,7 +1979,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var that = this;
             this.element.find('.btn-modify_structure').click(function(){that.editRecordType();});
         }
-        
+
+
+        $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
+        $(this.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
+
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
         //show-hide help text below fields - it overrides comptency level
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
