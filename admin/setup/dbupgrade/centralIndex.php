@@ -51,7 +51,7 @@
     
     if( file_exists($filename1) && file_exists($filename2) ){
     
-        if(false){
+        if(true){
             print 'Create index database and fill it<br>';
             if(!executeScript(DATABASE, $filename1)){
                 exit;

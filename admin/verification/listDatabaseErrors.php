@@ -714,11 +714,11 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                     if($is_first){
                         $is_first = false;
                     ?>
-                    <h3>Records with terms not in the list of terms specified for the field</h3>
+                    <h3 style="padding-left:2px">Records with terms not in the list of terms specified for the field</h3>
                     <span><a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
                     <table>
                     <tr>
-                        <th style="width: 30px;">Record</th>
+                        <th style="width: 30px;text-align:left">Record</th>
                         <th style="width: 15ex;">Field</th>
                         <th style="width: 25ex;">Term</th>
                         <th>Record title</th>
@@ -728,7 +728,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                     }
                     ?>
                         <tr>
-                            <td style="width:50px; padding-left: 5px;">
+                            <td style="width:50px;">
                                 <a target=_new  title='Click to edit record'
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
 <img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" 

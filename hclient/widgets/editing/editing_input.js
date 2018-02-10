@@ -497,23 +497,18 @@ $.widget( "heurist.editing_input", {
                          opt.text(parentTerms+'.'+opt.attr('term-orig'));
                     }
                 }
+                that.error_message.hide();
                 that._onChange();
             }
             
             $input.change( __onTermChange );
-
-            
-            
-            if($input.val()!=value){ //value is not allowed
-            
-            }
             
             var allTerms = this.f('rst_FieldConfig');    
             //allow edit terms only for true defTerms enum and if not DT_RELATION_TYPE
             
             if(window.hWin.HEURIST4.util.isempty(allTerms) 
                 && (this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])){
-                
+
                 allTerms = this.f('rst_FilteredJsonTermIDTree');        
 
                 var isVocabulary = !isNaN(Number(allTerms)); 
@@ -2024,11 +2019,29 @@ $.widget( "heurist.editing_input", {
             $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
                 {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms,
                     defaultTermID:value, topOptions:true, supressTermCode:true, useHtmlSelect:false});
-            
+        
             var opts = $input.find('option');      
             if(opts.length==0 || (opts.length==1 && $(opts[0]).text()=='')){
                $input.hSelect('widget').html('<span style="padding: 0.1em 2.1em 0.2em 0.2em">no terms defined, please add terms</span><span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-e"></span>'); 
             }
+            
+            //show error message on init                    
+            //value is not allowed
+            if(!window.hWin.HEURIST4.util.isnull(value) && $input.val()!=value){
+                
+                var terms = window.hWin.HEURIST4.terms;
+                var termLookup = terms.termsByDomainLookup[this.detailType];
+                var sMsg = '';
+                if(window.hWin.HEURIST4.util.isnull(termLookup[value])){
+                    sMsg = 'The term code '+value+' recorded for this field is not recognised. Please select a term from the dropdown.';
+                }else{
+                    sMsg = 'The term "'+termLookup[value][terms.fieldNamesToIndex['trm_Label']]+'" (code '+value+') is not valid for this field. '
+                    +'Please select from dropdown or modify field definition to include this term';
+                }
+                this.error_message.text(sMsg).show();
+
+            }    
+            
         }
         
         return $input;

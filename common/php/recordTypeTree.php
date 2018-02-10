@@ -200,7 +200,8 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
         $ffr[$rst_fi['rst_PtrFilteredIDs']] = implode(',',$parent_Rts);
         $ffr[$rst_fi['dty_Type']] = 'resource';
         $ffr[$rst_fi['rst_DisplayHelpText']] = 'Reverse pointer to parent record';
-
+        $ffr[$rst_fi['rst_RequirementType']] = 'optional';
+              
         $rtStructs['typedefs'][$recTypeId][DT_PARENT_ENTITY] = $ffr;
         
         $res_dt = getDetailSection($dtKey, $ffr, $recursion_depth);

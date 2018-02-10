@@ -35,7 +35,12 @@
     }else {
         
         $dbRecDetails = new DbRecDetails($system, $_REQUEST);
-        
+
+        if(@$_REQUEST['a'] == 'add_child'){
+            
+           $res = $dbRecDetails->detailsAddChild();
+            
+        }else         
         if(@$_REQUEST['a'] == 'add'){
 
             $res = $dbRecDetails->detailsAdd();
@@ -48,7 +53,9 @@
 
             $res = $dbRecDetails->detailsDelete();
 
-        }else if(@$_REQUEST['a'] == 'add_child'){
+        }else if(@$_REQUEST['a'] == 'add_reverse_pointer_for_child'){
+            
+            $res = $dbRecDetails->addRevercePointerForChild();
             
         }else if(@$_REQUEST['a'] == 'rectype_change'){
 

@@ -825,7 +825,7 @@ function hRecordAddLink() {
             }        
         
             if(request.a=='add'){
-                window.hWin.HAPI4.RecordMgr.details(request, __callBack);
+                window.hWin.HAPI4.RecordMgr.batch_details(request, __callBack);
             }else{
                 window.hWin.HAPI4.RecordMgr.save(request, __callBack);
             }
