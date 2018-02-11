@@ -256,7 +256,7 @@ class DbRecDetails
                 $mysqli->rollback();
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 return $system->addError(HEURIST_DB_ERROR, 
-                    'Cannot insert reverse pointer for child record #'.$child_id, $syserror);
+                    'Unable to insert reverse pointer for child record ID:'.$child_id.' - ', $syserror);
             }else if($res==0){ 
                  array_push($childAlready, $child_id);
             }else{
