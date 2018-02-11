@@ -81,6 +81,8 @@ class TitleMask {
         self::$db_regid = $system->get_system('sys_dbRegisteredID');
         self::$initialized = true;
         self::$fields_correspondence = $fields_correspondence;
+        
+        $system->defineConstant('DT_PARENT_ENTITY');
     }
     
 /**

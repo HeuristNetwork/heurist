@@ -764,11 +764,13 @@
         }
         
         //SPECIAL CASE for relation type #6
-        if($imode>0 && @$dtStructs['typedefs'][DT_RELATION_TYPE]){
-            $idx = $dtStructs['typedefs']['fieldNamesToIndex']['dty_JsonTermIDTree'];
-            $dtStructs['typedefs'][DT_RELATION_TYPE]['commonFields'][$idx] = 0;
-            $idx = $dtStructs['typedefs']['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
-            $dtStructs['typedefs'][DT_RELATION_TYPE]['commonFields'][$idx] = '';
+        if($imode>0){
+            if($system->defineConstant('DT_RELATION_TYPE') && @$dtStructs['typedefs'][DT_RELATION_TYPE]){
+                $idx = $dtStructs['typedefs']['fieldNamesToIndex']['dty_JsonTermIDTree'];
+                $dtStructs['typedefs'][DT_RELATION_TYPE]['commonFields'][$idx] = 0;
+                $idx = $dtStructs['typedefs']['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+                $dtStructs['typedefs'][DT_RELATION_TYPE]['commonFields'][$idx] = '';
+            }
         }
         
         //ARTEM setCachedData($cacheKey, $dtStructs);

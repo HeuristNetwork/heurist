@@ -35,7 +35,7 @@ require_once (dirname(__FILE__).'/utilities/utils_file.php');
 *   a) establish connection to server
 *   b) define sytems constans - paths
 *   c) perform login and load current user info
-*   d) load system infor (from sysIdentification)
+*   d) load system info (from sysIdentification)
 *   e) keeps array of errors
 *
 * system constants:
@@ -58,7 +58,7 @@ class System {
     //private $guest_User = array('ugr_ID'=>0,'ugr_FullName'=>'Guest');
     private $current_User = null;
     private $system_settings = null;
-
+    
     /**
     * Read configuration parameters from config file
     *
@@ -108,9 +108,9 @@ class System {
                 }
 
                 //load system info from sysIdentification table    
-                if(!$this->get_system()){
-                    return false;
-                }
+                //if(!$this->get_system()){
+                //    return false;
+                //}
 
 
                 if(!defined('HEURIST_DBNAME')){
@@ -128,14 +128,18 @@ class System {
                 }
 
                 $this->login_verify(); //load user info from session
-
-                //set current user for stored procedures (log purposes)
-                $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
+                if($this->get_user_id()>0){
+                    //set current user for stored procedures (log purposes)
+                    $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
+                }
                 
                 // consts
                 // @todo constants inited once in initPage for index (main) page only
-                $this->defineConstants();  
+                // $this->defineConstants();    
             }
+            
+//error_log('init systme '.$_SERVER['PHP_SELF']);
+            
             $this->is_inited = true;
             return true;
         }
@@ -143,27 +147,51 @@ class System {
     }
 
 
-    // TODO: JJ Placed here by mistake: there is no reason to resolve all these constants on every request
-
     /**
     * Defines all constants
     */
     public function defineConstants() {
+
         // Record type constants
         global $rtDefines;
-        foreach ($rtDefines as $str => $id) {
+        foreach ($rtDefines as $str => $id)
+        if(!defined($str)){
             $this->defineRTLocalMagic($str, $id[1], $id[0]);
         }
 
         // Data type constants
         global $dtDefines;
-        foreach ($dtDefines as $str => $id) {
+        foreach ($dtDefines as $str => $id)
+        if(!defined($str)){
             $this->defineDTLocalMagic($str, $id[1], $id[0]);
         }
     }
 
+    //
+    // init the only constant
+    //
+    public function defineConstant($const_name) {
+        if(defined($const_name)){
+            return true;
+        }else{
+            global $rtDefines;
+            global $dtDefines;
+            if(@$rtDefines[$const_name]){
+                $this->defineRTLocalMagic($const_name, $rtDefines[$const_name][1], $rtDefines[$const_name][0]);
+            }else if(@$dtDefines[$const_name]){
+                $this->defineDTLocalMagic($const_name, $dtDefines[$const_name][1], $dtDefines[$const_name][0]);
+            }
+            return defined($const_name);
+        }
+    }
+
+    //
+    // get constants as array to use on client side
+    //
     function getLocalConstants(){
 
+        $this->defineConstants();
+        
         $res = array();
 
         global $rtDefines;
@@ -184,7 +212,6 @@ class System {
         return $res;
     }
 
-
     /**
     * bind Magic Number Constants to their local id
     * @param    string [$defString] define string
@@ -203,7 +230,6 @@ class System {
             // define($defString, $rtID);
         }
     }
-
 
 
     /**
@@ -242,7 +268,6 @@ class System {
     }
 
 
-
     /**
     * bind Magic Number Constants to their local id
     * @param    string [$defString] define string
@@ -259,7 +284,6 @@ class System {
             // define($defString, $dtID);
         }
     }
-
 
 
     /**
@@ -442,6 +466,28 @@ class System {
     }
 
 
+
+    /**
+    * Returns true if system is inited ccorretly and db connection is established
+    */
+    public function is_inted(){
+        return $this->is_inited;
+    }
+
+    /**
+    * Get database connection object
+    */
+    public function get_mysqli(){
+        return $this->mysqli;
+    }
+
+    /**
+    * Get full name of database
+    */
+    public function dbname_full(){
+        return $this->dbname_full;
+    }
+    
 
     /**
     * return list of errors
@@ -668,31 +714,6 @@ class System {
                 return  ( "admin" ==  @$this->current_User['ugr_Groups'][$sysvals['sys_OwnerGroupID']] ); 
         }
     }
-
-    /**
-    * Returns true if system is inited ccorretly and db connection is established
-    */
-    public function is_inted(){
-        return $this->is_inited;
-    }
-
-    /**
-    * Get database connection object
-    */
-    public function get_mysqli(){
-        return $this->mysqli;
-    }
-
-
-
-    /**
-    * Get full name of database
-    */
-    public function dbname_full(){
-        return $this->dbname_full;
-    }
-
-
 
     /**
     * Restore session by cookie id, or start new session

@@ -36,6 +36,7 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
     }else{
         $appcode = 0;
     }  
+    $system->defineConstants();
 }
 ?>
 <html>

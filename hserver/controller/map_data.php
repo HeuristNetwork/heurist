@@ -1,6 +1,6 @@
 <?php
 
-//ARTEM:   @todo JJ makes a lot duplication - many methods already exist
+//ARTEM:   @todo JJ made a lot of duplication - many methods already exist
 
 /**
 * Retrieves map data for a certain database.
@@ -398,7 +398,6 @@ function getMapDocuments($system, $recId) {
 // Initialize a System object that uses the requested database
 $system = new System();
 
-
 if( $system->init(@$_REQUEST['db']) ){
 
     $wg_ids = $system->get_user_group_ids();
@@ -407,6 +406,7 @@ if( $system->init(@$_REQUEST['db']) ){
     $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
     . 'rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
 
+    $system->defineConstants();
     // Get all Map Documents
     $documents = getMapDocuments($system, @$_REQUEST['id']);
 

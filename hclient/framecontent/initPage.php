@@ -76,6 +76,8 @@ if(defined('LOGIN_REQUIRED') && !$system->is_logged_in()){
     exit();
 }
 
+//$system->defineConstants(); //init constants for record and field types
+
 $user = $system->getCurrentUser();
 $layout_theme = @$user['ugr_Preferences']['layout_theme'];
 if(!$layout_theme) $layout_theme = 'heurist';

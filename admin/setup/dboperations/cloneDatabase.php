@@ -1,4 +1,5 @@
 <?php
+//MOVE TO H4
 
 /**
 * cloneDatabase.php: Copies an entire database verbatim

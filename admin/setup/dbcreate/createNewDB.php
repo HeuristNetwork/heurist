@@ -1,5 +1,5 @@
 <?php
-
+//MOVE TO H4
 /**
 * createNewDB.php: Create a new database by applying blankDBStructure.sql and coreDefinitions.txt
 *

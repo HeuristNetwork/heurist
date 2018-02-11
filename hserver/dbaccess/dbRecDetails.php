@@ -161,7 +161,7 @@ class DbRecDetails
             return false;
         }
         
-        if(!defined('DT_PARENT_ENTITY')){
+        if(!$this->system->defineConstant('DT_PARENT_ENTITY')){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type 2-247 is not defined in this database');
             return false;
         }

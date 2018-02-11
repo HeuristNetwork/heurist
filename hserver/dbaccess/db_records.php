@@ -344,7 +344,9 @@
                 }*/
                 
                 //add reverce field "Parent Entity" (#247) in child resource record
-                if(@$values['dtl_ParentChild']==true && defined('DT_PARENT_ENTITY')){
+                if(@$values['dtl_ParentChild']==true){
+                    
+                    if($system->defineConstant('DT_PARENT_ENTITY')){
                     
                         // $dtl_Value  is id of child record 
                         $res = addReverseChildToParentPointer($mysqli, $dtl_Value, $recID, $addedByImport, false);
@@ -362,6 +364,7 @@
                                 .$dtl_Value);
                             recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title);
                         }
+                    }
                 }
                 
             }
@@ -377,7 +380,7 @@
         $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['RecTitle']);
 
         if(!$is_insert){
-            removeReverseChildToParentPointer($mysqli, $recID, $rectype);    
+            removeReverseChildToParentPointer($system, $recID, $rectype);    
         }
         
         $mysqli->commit();
@@ -427,6 +430,8 @@
             $rels_count = 0;
             $deleted = array();
             $msg_error = '';
+            
+            $system->defineConstant('RT_RELATION');
                         
             foreach ($recids as $id) {
                 $stat = deleteOneRecord($mysqli, $id, $rectypes[$id]);
@@ -620,12 +625,14 @@
     //
     // remove reverse pointer detail field from child record in case there is not direct pointer to child record
     //
-    function removeReverseChildToParentPointer($mysqli, $parent_id, $rectype){
+    function removeReverseChildToParentPointer($system, $parent_id, $rectype){
 
-       if(defined('DT_PARENT_ENTITY')){
+       if($system->defineConstant('DT_PARENT_ENTITY')){
            //get list of valid record 
            $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
             .$parent_id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
+           
+           $mysqli = $system->get_mysqli();
            
            $recids = mysql__select_list2($mysqli, $query);
                    
@@ -1170,6 +1177,9 @@ array_push($errorValues,
         $rels_count = 0;
 
         $error = null;
+        
+        $system->defineConstant('DT_TARGET_RESOURCE');
+        $system->defineConstant('DT_PRIMARY_RESOURCE');
 
         while (true) {
 

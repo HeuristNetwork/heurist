@@ -596,6 +596,7 @@
              //get date,year and geo fields from structure
              $fieldtypes_ids = dbs_GetDetailTypes($system, array('date','year','geo'), 3);
              if($fieldtypes_ids==null || count($fieldtypes_ids)==0){
+                //this case nearly impossible since system always has date and geo fields 
                 $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE); //9,10,11,28';    
              }
              $fieldtypes_ids = implode(',', $fieldtypes_ids);

@@ -40,6 +40,8 @@
         echo 'Record ID is not defined';
         return;
     }
+    
+    $system->defineConstants();
 
     //echo '>1>'.@$_REQUEST['recID'];
 
