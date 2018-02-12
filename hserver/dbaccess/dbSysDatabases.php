@@ -52,25 +52,62 @@ class DbSysDatabases extends DbEntityBase
         
         //compose WHERE 
         $where = array(); 
-        $current_user_email = '';
+        $current_user_email = null;
         
         $mysqli = $this->system->get_mysqli(); 
         $user = user_getById($mysqli, $this->system->get_user_id());
         if($user){
             $current_user_email = $user['ugr_eMail'];
-        }else{
-            return false;
         }
 
-        $is_ids_only = false;
+        if(false){  
+            $order   = array();
+            $records = array();
             
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '
-        .'sys_Database, sys_dbRegisteredID, '//'concat(sys_dbVersion,".",sys_dbSubVersion,".",sys_dbSubSubVersion) as sys_Version, '
-        .'sys_dbName, sys_AllowRegistration, sus_Role, ' //sys_dbOwner, sys_dbDescription, 
-        .'(select count(distinct sus_Email) from Heurist_DBs_index.sysUsers where sys_Database=sus_Database) as sus_Count '        
-        .' from Heurist_DBs_index.sysIdentifications '
-        .' LEFT JOIN Heurist_DBs_index.sysUsers on sys_Database=sus_Database and sus_Email="'.$current_user_email.'"';
+            $query = "show databases";
+            $res = $this->system->get_mysqli()->query($query);
+            $result = array();
+            while ($row = $res->fetch_row()) {
+                $database  = $row[0];
+                $test = strpos($database, HEURIST_DB_PREFIX);
+                if ($test === 0){
+                    $records[$database] = array($database);
+                    //array_push($order, $database);
+                    $order[] = $database;
+                }
+            }
+            $res->close();
+            //natcasesort($order);
+        
+            return array(
+                            'queryid'=>@$this->data['request_id'],  //query unqiue id set in doRequest
+                            'pageno'=>@$this->data['pageno'],  //page number to sync
+                            'offset'=>@$this->data['offset'],
+                            'count'=>count($records),
+                            'reccount'=>count($records),
+                            'fields'=>array('sys_Database'),
+                            'records'=>$records,
+                            'order'=>$order,
+                            'entityName'=>$this->config['tableName']);
+        
+        }else {
+        
+        if($current_user_email){    
+            //compose query
+            $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '
+            .'sys_Database, sys_dbRegisteredID, '//'concat(sys_dbVersion,".",sys_dbSubVersion,".",sys_dbSubSubVersion) as sys_Version, '
+            .'sys_dbName, sys_AllowRegistration, sus_Role, ' //sys_dbOwner, sys_dbDescription, 
+            .'(select count(distinct sus_Email) from Heurist_DBs_index.sysUsers where sys_Database=sus_Database) as sus_Count '        
+            .' from Heurist_DBs_index.sysIdentifications '
+            .' LEFT JOIN Heurist_DBs_index.sysUsers on sys_Database=sus_Database and sus_Email="'.$current_user_email.'"';
+        }else{
+            $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '
+            .'sys_Database, sys_dbRegisteredID, '//'concat(sys_dbVersion,".",sys_dbSubVersion,".",sys_dbSubSubVersion) as sys_Version, '
+            .'sys_dbName, sys_AllowRegistration, "" as sus_Role, ' //sys_dbOwner, sys_dbDescription, 
+            .'0 as sus_Count '        
+            .' from Heurist_DBs_index.sysIdentifications ';
+        }
+        
         
         /*
          if(count($where)>0){
@@ -82,8 +119,10 @@ class DbSysDatabases extends DbEntityBase
 //error_log($query);     
 
         $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
-        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName']);
+        $res = $this->searchMgr->execute($query, false, $this->config['tableName']);
         return $res;
+        
+        }
     }
     
     //

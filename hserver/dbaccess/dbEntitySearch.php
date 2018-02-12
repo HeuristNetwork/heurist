@@ -448,7 +448,7 @@ class DbEntitySearch
                         }
                         
                         $records[$row[0]] = $row;
-                        array_push($order, $row[0]);
+                        $order[] = $row[0];
                     }
                     $res->close();
 

@@ -99,6 +99,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
         
         var recID   = fld('sys_Database');
+        
         var dbName = fld('sys_dbName');
         if(dbName=='Please enter a DB name ...') dbName = '';
         var regID = fld('sys_dbRegisteredID');

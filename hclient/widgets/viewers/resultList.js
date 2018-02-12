@@ -1671,7 +1671,7 @@ $.widget( "heurist.resultList", {
             }else if(pageno>=this.max_page){
                 pageno= this.max_page - 1;
             }
-            this.current_page = pageno;
+            this.current_page = pageno<0?0:pageno;
 
             idx = pageno*this.options.pagesize;
             len = Math.min(recordset.length(), idx+this.options.pagesize)

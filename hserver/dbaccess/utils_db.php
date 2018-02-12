@@ -111,7 +111,6 @@
 
         if($res){
             while ($row = $res->fetch_row()) {
-
                 $database  = $row[0];
                 $test = strpos($database, $prefix);
                 if ($test === 0) {
