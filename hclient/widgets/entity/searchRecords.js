@@ -53,17 +53,35 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             false);
 
         this.btn_add_record = this.element.find('#btn_add_record')
-        .css({'min-width':'11.9em','z-index':2})
-        .button({label: window.hWin.HR("Add Record"), icons: {
-            primary: "ui-icon-plus"
-        }})
+        .button({label: window.hWin.HR("Add Record"), icon: "ui-icon-plus"})
         .click(function(e) {
             if(that.selectRectype.val()>0){
                 that._trigger( "onaddrecord", null, that.selectRectype.val() );
             }else{
-                alert('Select record type first');
+                that.btn_select_rt.click();
             }
         });  
+
+        this.btn_select_rt = this.element.find( "#btn_select_rt")
+            .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
+            
+       //open and adjust position of dropdown    
+        this._on( this.btn_select_rt, {
+                click:  function(){
+                this.selectRectype.hSelect('open');
+                this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
+                return false;
+                    
+            }});
+       
+       //adjust position of dropdown    
+       this.sel_rectypes_btn = this.element.find( "#sel_rectypes-button");
+       this._on( this.sel_rectypes_btn, {
+                click:  function(){
+                this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.sel_rectypes_btn });
+            }});
+            
+        this.btn_add_record.parent().controlgroup();
         
         
         function __onSelectRecType(sel){

@@ -1893,7 +1893,9 @@ window.hWin.HEURIST4.ui = {
             });
             
         }
-    }
+    },
+ 
+    
     
 }//end ui
 
