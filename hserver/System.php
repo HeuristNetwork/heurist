@@ -805,7 +805,7 @@ class System {
     private function login_verify(){
         $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
 
-        if(FAlSE && !$userID){
+        if(!$userID){
             // vsn 3 backward capability  - restore user id from old session
             $h3session = $this->dbname_full.'.heurist';
             $userID = @$_SESSION[$h3session]['user_id'];
@@ -822,7 +822,7 @@ class System {
 
             //@todo do not update session on every request, update in on user membership changes
             if(!@$_SESSION[$this->dbname_full]['ugr_Groups']){
-error_log('get workgroups');                
+//error_log('get workgroups');                
                 $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
             }
             if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){
@@ -909,7 +909,7 @@ error_log('get workgroups');
                     $this->current_User = $user;
 
                     //vsn 3 backward capability
-                    if(FALSE){
+                    if(true){
                         $h3session = $this->dbname_full.'.heurist';
                         $_SESSION[$h3session]['cookie_version'] = 1;
                         $_SESSION[$h3session]['user_name']     = $user['ugr_Name'];
@@ -951,7 +951,7 @@ error_log('get workgroups');
         unset($_SESSION[$this->dbname_full]['ugr_FullName']);
         if(@$_SESSION[$this->dbname_full]['ugr_Groups']) unset($_SESSION[$this->dbname_full]['ugr_Groups']);
         
-        if(FALSE){
+        if(true){
             $h3session = $this->dbname_full.'.heurist';
             if(@$_SESSION[$h3session]['user_id']){
                 unset($_SESSION[$h3session]['user_id']);
