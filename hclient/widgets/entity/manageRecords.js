@@ -1391,6 +1391,40 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
+    // apparently it should be moved to ui?
+    //
+    __findParentRecordTypes: function(childRecordType){
+
+        var parentRecordTypes = []; //result
+        
+        var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+        //var dtyFieldNamesIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+        
+        childRecordType = ''+childRecordType; //must be strig otherwise indexOf fails
+        
+        var rtyID, dtyID, allrectypes = window.hWin.HEURIST4.rectypes.typedefs;
+        for (rtyID in allrectypes)
+        if(rtyID>0){
+
+            var fields = allrectypes[rtyID].dtFields;
+            
+            for (dtyID in fields)
+            if(dtyID>0 && 
+                fields[dtyID][fieldIndexMap['dty_Type']]=='resource' &&
+                fields[dtyID][fieldIndexMap['rst_CreateChildIfRecPtr']]==1)
+            { //for all fields in this rectype
+                var ptrIds = fields[dtyID][fieldIndexMap['rst_PtrFilteredIDs']];
+                if(ptrIds.split(',').indexOf(childRecordType)>=0){
+                    parentRecordTypes.push(rtyID);
+                    break;
+                }
+            }
+        }
+        
+        return parentRecordTypes;
+    },
+    
+    //
     // get record field structure. It needs to addition of non-standard fields
     //
     _getFakeRectypeField: function(detailTypeID, order){
@@ -1506,6 +1540,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 fi_defval = fi['rst_DefaultValue'],
                 fi_help =  fi['rst_DisplayHelpText'],
                 fi_reqtype =  fi['rst_RequirementType'],
+                fi_ptrs = fi['rst_PtrFilteredIDs'],
                 fi_maxval = fi['rst_MaxValues']; //need for proper repeat
             
             var s_fields = []; //sorted fields
@@ -1522,9 +1557,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var field_in_recset = that._currentEditRecordset.getDetailsFieldTypes();
 
             //add special 2-247 field "Parent Entity"
-            var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
-            if(this.options.parententity>0 && field_in_recset.indexOf(DT_PARENT_ENTITY)<0){
-                field_in_recset.push(DT_PARENT_ENTITY);
+            //verify that current record type is a child for pointer fields with rst_CreateChildIfRecPtr=1
+            var parentsIds = that.__findParentRecordTypes(rectypeID);
+            
+            var DT_PARENT_ENTITY  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
+            if(field_in_recset.indexOf(DT_PARENT_ENTITY)<0 && 
+                    (this.options.parententity>0 ||   //parent record id is set already (case: this is addition of new child from search record dialog)
+                     parentsIds.length>0))     //current rectype is referenced as a child
+            {
+                    field_in_recset.push(DT_PARENT_ENTITY);
             }
             
             var addhead = 0;
@@ -1535,8 +1576,24 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
                         rfr[fi_name] = 'Child record of';
                         rfr[fi_order] = -1;//top most
-                        rfr[fi_defval] = this.options.parententity;
-                        rfr[fieldNames.length] = 'readonly';
+                        rfr[fi_reqtype] = 'required';
+                        if(this.options.parententity>0){
+                            rfr[fi_defval] = this.options.parententity;  //parent Record ID
+                            rfr[fieldNames.length] = 'readonly';
+                        }
+                        if(parentsIds.length>0){
+                           rfr[fi_ptrs] = parentsIds; //constrained to parent record types
+                           
+                           //if the only value readonly as well
+                           if(that._currentEditID>0){
+                                record = that._currentEditRecordset.getById(that._currentEditID);
+                                var values = that._currentEditRecordset.values(record, DT_PARENT_ENTITY);
+                                if(values && values.length==1){
+                                    rfr[fieldNames.length] = 'readonly';   
+                                }
+                           }  
+                        }
+                        
                         fieldNames.push('rst_Display');
                         s_fields.push(rfr);
                         
