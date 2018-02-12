@@ -1711,8 +1711,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //2. Popup for resource field
             var dlged = that._getEditDialog();
             if(dlged && (no_access || this.options.edit_obstacle)){ 
-                var ele = $('<div><div class="ui-heurist-header2" style="margin: 40px auto;width: 200px;padding:4px;border-radius:4px">'
-                            +'<h2>View only mode</h2><a href="#">Edit</a><span>No enough rights</span></div></div>')
+                var ele = $('<div><div style="background-color:#f48642;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
+                            +'<h2 style="display:inline-block;color:white">View-only mode</h2>&nbsp;&nbsp;<a href="#" style="color:white">edit</a><span>No enough rights</span></div></div>')
                        .addClass('coverall-div-bare')
                        .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto'}) //, bottom: '40px', 'background':'red'
                        .appendTo(dlged);
@@ -1721,7 +1721,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(no_access){
                     eles.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/non-editable-watermark.png)'});                    
                 }else{
-                    eles.css({'background':'lightgray'});    
+                    dlged.find('.ui-layout-center').css({'background':'lightgray'});    
+                    //eles.css({'background':'lightgray'});    
                 }
                 that._editing.setDisabled(true);
                 
@@ -1745,6 +1746,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //restore edit ability 
                         that._editing.setDisabled(false);
                         dlged.find('.ui-layout-center > div').css({'background':'none'});
+                        dlged.find('.ui-layout-center').css({'background':'none'});
                         var eles = dlged.find('.ui-layout-east > .editFormSummary')
                         eles.css({'background':'none'});
                         //remove screen
