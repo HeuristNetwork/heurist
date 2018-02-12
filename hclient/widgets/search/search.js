@@ -300,7 +300,7 @@ $.widget( "heurist.search", {
         // Manage structure button
         if(window.hWin.HAPI4.sysinfo['layout']=='original'){
             
-        this.btn_mamage_structure = $( "<button>", {
+        this.btn_manage_structure = $( "<button>", {
                 label: window.hWin.HR("Manage Structure"),
                 title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
             })
@@ -660,7 +660,12 @@ $.widget( "heurist.search", {
         }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
             window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
-            //AAAA if(this.input_search.is(':visible')) this.input_search.focus();
+            //AAAA 
+            if(this.input_search.is(':visible')) {
+                try{
+                    this.input_search.focus();
+                }catch(e){}
+            }
             
             //show if there is resulst
             if(this.btn_search_save){
