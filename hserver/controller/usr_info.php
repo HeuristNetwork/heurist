@@ -37,6 +37,14 @@
         
         $res = $system->is_logged(@$_REQUEST['db']);
         
+    }else  if($action=='is_admin'){ //just check only if admin database or group
+
+        if(@$_REQUEST['ugrID']>0){ //group id
+            $res = $system->is_admin('group', $_REQUEST['ugrID']);
+        }else{
+            $res = $system->is_admin();
+        }
+    
     }else if( ! $system->init(@$_REQUEST['db'], ($action!='sysinfo') ) ){ //the only action that is possible without db 
 
         //get error and response

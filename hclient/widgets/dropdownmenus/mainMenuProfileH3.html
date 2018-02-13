@@ -24,17 +24,22 @@
 Since Jan 2016 Vsn 3 code this is blank, as this code is at the same level as Vsn 4 code
 See mainMenu.js for sizes of popups defined by portrait, large, very large and so forth -->
 
-<li>PROFILE</li>
+<li>PROFILE H3</li>
 
 <li style="padding-left:5px;" id="menu-profile-preferences" data-logaction="profPrefs"><a href="#" 
     title="Display preferences relating to behaviours related to this database">Preferences</a>
 </li>
 
-<li style="padding-left:5px;" id="menu-profile-tags" data-logaction="profTags">
-    <a href="#" title="Delete, combine, rename your personal and workgroup tags">Manage tags</a>
+<li style="padding-left:5px;">
+    <a href="admin/profile/configureProfile.php?body_only&amp;tag_edit=1" name="auto-popup" class="small h3link"
+        data-logaction="profTags"
+        onClick="{return false;}"
+        title="Delete, combine, rename your personal tags">Manage tags</a>
 </li>
 
-<li style="padding-left:5px;" id="menu-profile-reminders" data-logaction="profReminders"><a href="#"
+<li style="padding-left:5px;"><a href="admin/profile/manageReminders.php" name="auto-popup" class="h3link"
+    data-logaction="profReminders"
+    onClick="{return false;}"
     title="View and delete automatic notification emails sent from the records you have bookmarked">Manage reminders</a>
 </li>
 
@@ -42,25 +47,33 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 
 <li>ACCESS</li>
 
-<li style="padding-left:5px;" id="menu-profile-groups" data-logaction="profWorkgroups"><a href="#"
+<li style="padding-left:5px;"><a href="admin/ugrps/manageGroups.php?popup=yes" name="auto-popup" class="fixed2 h3link"
+    data-logaction="profWorkgroups"
+    onClick="{return false;}"
     title="List of groups you are member of">My workgroups</a>
 </li>
 
-<li style="padding-left:5px;" id="menu-profile-info" data-logaction="profUserinfo"><a href="#"
+<li style="padding-left:5px;"><a href="admin/ugrps/editUser.html" name="auto-popup" class="fixed2 h3link"
+    data-logaction="profUserinfo"
+    onClick="{return false;}"
     title="User personal information">My user info</a>
 </li>
 
-<li style="padding-left:5px;" class="admin-only" id="menu-profile-users" data-logaction="profUsers"><a href="#"
-    title="Add and edit database users, including authorization of new users. Use Manage Workgroups to allocate users to workgroups and define roles within workgroups">Manage users</a>
+<li style="padding-left:5px;" class="admin-only"><a href="admin/ugrps/manageUsers.php" name="auto-popup" class="fixed2 h3link"
+    data-logaction="profUsers"
+    title="Add and edit database users, including authorization of new users. Use Manage Workgroups to allocate users to workgroups and define roles within workgroups"
+    onClick="{return false;}">Manage users</a>
 </li>
 
-<li style="padding-left:5px;" class="admin-only" id="menu-profile-import" data-logaction="profImportUser"><a href="#"
-    title="Import users one at a time from another database on the system, including user name, password and email address - users are NOT assigned to workgroups">Import user</a>
+<li style="padding-left:5px;" class="admin-only"><a href="admin/ugrps/getUserFromDB.php" name="auto-popup" class="fixed2 h3link"
+    data-logaction="profImportUser"
+    title="Import users one at a time from another database on the system, including user name, password and email address - users are NOT assigned to workgroups"
+    onClick="{return false;}">Import user</a>
 </li>
 
 <li>-</li>
 
-<li style="padding-left:5px;"><a href="#"
+<li style="padding-left:5px;"><a href="admin/ugrps/editUser.html"
     onclick="{ 
         window.hWin.HAPI4.SystemMgr.logout(
             function(response){
@@ -74,5 +87,5 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
             }
         );
     return false;}"
-    title="Log out Heurist">Log out</a>
+    title="User personal information">Log out</a>
 </li>

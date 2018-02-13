@@ -418,7 +418,123 @@ class DbSysUsers extends DbEntityBase
         return $ret;
     }
     
+    //
+    // batch action for users
+    // 1) import users from another db
+    //
+    public function batch_action(){
 
-    
+        if(!$this->system->is_admin()){ 
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                'You are not admin and can\'t add/edit other users. Insufficient rights for this operation');
+            return false;
+        }
+        
+        // validate that current user is admin in source database as well
+        $sytem_source = new System();
+        if(!$sytem_source->init($this->data['sourceDB'], true, false)){
+            return false;
+        }
+
+        /* @todo
+        if(!$sytem_source->is_admin()){ 
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                'You are not admin in source database '.$sytem_source->dbname_full().'. Insufficient rights for this operation');
+            return false;
+        }
+        */
+
+        //user ids
+        $userIDs = prepareIds(@$this->data['userIDs']);
+        if(count($userIDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid user identificators');
+            return false;
+        }
+        //group roles 
+        $roles = @$this->data['roles'];
+        if(!$roles || count($roles)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Group roles for import users are not defined');
+            return false;
+        }
+
+        
+        $mysqli = $this->system->get_mysqli();
+        
+        //find users that are already in this database
+        $query = 'SELECT distinct src.ugr_ID from '.$sytem_source->dbname_full().'.sysUGrps as src, sysUGrps as dest'
+            .' where src.ugr_ID in ('.implode(',',$userIDs)
+            .') and ((src.ugr_eMail = dest.ugr_eMail) OR (src.ugr_Name=dest.ugr_Name))';       
+        
+        $userIDs_already_exists = mysql__select_list2($mysqli, $query);
+        
+        if(count($userIDs_already_exists)==count($userIDs)){
+            $this->system->addError(HEURIST_NOT_FOUND, 
+                'It appears that all users selected to import exist in current database.');
+            return false;
+        }
+        $userIDs = array_diff($userIDs, $userIDs_already_exists);
+        
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+
+        //1. import users from another database
+        $fields = "ugr_Type,ugr_Name,ugr_LongName,ugr_Description,ugr_Password,ugr_eMail,".
+                    "ugr_FirstName,ugr_LastName,ugr_Department,ugr_Organisation,ugr_City,".
+                    "ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,ugr_LastLoginTime,".
+                    "ugr_MinHyperlinkWords,ugr_LoginCount,ugr_IsModelUser,".
+                    "ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT";
+
+        $query1 = "insert into sysUGrps ($fields) ".
+                    "SELECT $fields ".
+                    "FROM ".$sytem_source->dbname_full().".sysUGrps where ugr_ID=";
+
+                    
+        $newUserIDs = array();                    
+                    
+        $ret = true;            
+        foreach($userIDs as $userID){
+            $res = $mysqli->query($query1.$userID);
+            if($res){
+                $newUserIDs[] = $mysqli->insert_id;    
+            }else{
+                $this->system->addError(HEURIST_DB_ERROR,'Can\'t import users from '.$this->data['sourceDB'], $mysqli->error);
+                $ret = false;
+                break;
+            }
+        }
+                    
+        //2. apply roles 
+        if($ret){
+
+            foreach ($roles as $groupID=>$role){
+                $values = array();
+                foreach ($newUserIDs as $usrID){
+                    array_push($values, ' ('. $groupID .' , '. $usrID .', "'.$role.'")');
+                }    
+                $query = 'INSERT INTO sysUsrGrpLinks (ugl_GroupID, ugl_UserID, ugl_Role) VALUES '
+                .implode(',', $values);
+
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $ret = false;
+                    $this->system->addError(HEURIST_DB_ERROR, 'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
+                    break;
+                }                            
+            }
+        }
+        
+        if($ret){
+            $mysqli->commit();
+            
+            $ret = 'Users imported: '.count($newUserIDs);
+            if (count($userIDs_already_exists)>0){
+                $ret = $ret.'. Users already exsist: '.count($userIDs_already_exists);
+            }
+        }else{
+            $mysqli->rollback();
+        }
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        return $ret;
+    }    
 }
 ?>

@@ -48,17 +48,21 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
             this.btn_search_start.css('float','right');   
         }
         
-        this.input_search_type = this.element.find('#input_search_type');
+        this.input_search_role = this.element.find('#input_search_type');
         
-        if(this.options.ugl_UserID>0){//select role mode
+        
+        if(this.options.select_mode=='select_roles'){
+            this.input_search_role.parent().hide(); //always search any group               
+        }else
+        if(this.options.ugl_UserID>0){//select roles for given user
             //this.options.select_mode=='select_role'){
-            //this.input_search_type.hide(); //always search any group    
+            //this.input_search_role.hide(); //always search any group    
         }else
         if(!window.hWin.HAPI4.is_admin()){
-            this.input_search_type.find('option[value="any"]').remove();    
+            this.input_search_role.find('option[value="any"]').remove();    
         }
         
-        this._on(this.input_search_type,  { change:this.startSearch });
+        this._on(this.input_search_role,  { change:this.startSearch });
 
         if(this.options.select_mode=='manager'){
             this.element.find('#input_search_type_div').css('float','left');
@@ -85,7 +89,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
             }
         
             // actually we may take list of groups from currentUser['ugr_Groups']
-            var gr_role = this.input_search_type.val();
+            var gr_role = this.input_search_role.val();
             if(gr_role!='' && gr_role!='any'){
                 
                 if(gr_role=='admin'){

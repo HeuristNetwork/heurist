@@ -28,6 +28,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         this.options.width = 800;
         this.options.height = 600;
         this.options.edit_mode = 'none';
+        this.options.except_current = false;
 
         this._super();
     },

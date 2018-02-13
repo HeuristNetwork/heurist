@@ -54,7 +54,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         //update dialog title
-        if(this.options.isdialog){
+        if(this.options.isdialog &&  !this.options.title){
             var title = null;
             var usr_ID = 0;
             if(this.options.ugl_GroupID>0){
@@ -182,6 +182,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                 return;   
                             } */
 
+                            //apply new role to user
+                            
                             var selector = $(event.target);
                             var usr_ID = selector.parents('.recordDiv').attr('recid');  
                             var newRole = selector.val();
@@ -229,6 +231,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                 //before close - count for membership and refresh
                                 beforeClose:function(){
                                     
+                                    //count user memebrship in groups
                                     var request = {
                                         'a'          : 'search',
                                         'entity'     : 'sysUsers',
@@ -391,7 +394,9 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 'a'          : 'search',
                 'entity'     : this.options.entity.entityName,
                 'details'    : 'list',
-                'pageno'     : pageno
+                'pageno'     : pageno,
+                'db'         : this.options.database  
+                
         };
         var ugl_GroupID = this.searchForm.find('#input_search_group').val();
         if(ugl_GroupID>0){

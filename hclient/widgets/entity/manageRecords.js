@@ -1563,7 +1563,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var DT_PARENT_ENTITY  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
             if(field_in_recset.indexOf(DT_PARENT_ENTITY)<0 && 
                     (this.options.parententity>0 ||   //parent record id is set already (case: this is addition of new child from search record dialog)
-                     parentsIds.length>0))     //current rectype is referenced as a child
+                    (parentsIds.length>0 && that._isInsert) ))   //current rectype is referenced as a child and this is ADDITION
             {
                     field_in_recset.push(DT_PARENT_ENTITY);
             }
@@ -1585,7 +1585,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                            rfr[fi_ptrs] = parentsIds; //constrained to parent record types
                            
                            //if the only value readonly as well
-                           if(that._currentEditID>0){
+                           if(!that._isInsert){
                                 record = that._currentEditRecordset.getById(that._currentEditID);
                                 var values = that._currentEditRecordset.values(record, DT_PARENT_ENTITY);
                                 if(values && values.length==1){

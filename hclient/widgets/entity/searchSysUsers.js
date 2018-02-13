@@ -78,7 +78,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             if(!window.hWin.HAPI4.is_admin()){
                 this.btn_add_record.hide();
             }
-        }else if( this.options.ugl_GroupID<0 ){
+        }else if( this.options.ugl_GroupID<0 ){  //addition of users to group
             //find any user not in given group
             //exclude this group from selector
             this.input_search_group.find('option[value="'+Math.abs(this.options.ugl_GroupID)+'"]').remove();
@@ -176,6 +176,9 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                 request['details']    = 'id'; //'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
+                //we may search users in any database
+                request['db']     = this.options.database;
+
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                

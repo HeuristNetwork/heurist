@@ -161,6 +161,9 @@ $.widget( "heurist.mainMenu", {
         .css({'float':'left', 'padding-right':'2em'})
         .appendTo( this.divMainMenu );
 
+        this.divProfileItems3 = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
+        this._initMenu('ProfileH3', this.divProfileItems3);
+
         this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         this._initMenu('Profile', this.divProfileItems);
         
@@ -173,6 +176,9 @@ $.widget( "heurist.mainMenu", {
         
         this.divMainMenuItems.menu();
         this.divProfileItems.menu();
+        this.divProfileItems3.menu();
+        
+        this.divProfileItems3.find('.ui-menu-item').css({'padding':'0em !important'});
 
 
         this.divMainMenuItems_lo = $('<ul>')
@@ -294,10 +300,11 @@ $.widget( "heurist.mainMenu", {
         this['btn_Profile'].find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
         
         //need to update position of carat icon according width of user name
-        var ele = $('#carat1');
+        /*var ele = $('#carat1');
         if(ele.length>0){
             ele.css({'left': (ele.parent().width())+'px'});// (link.width()-16+'px !important')});
         }
+        */
     },
 
 
@@ -371,22 +378,27 @@ $.widget( "heurist.mainMenu", {
             });
 
         }else if(name=='Profile'){
+
+            //<a href="#" style="padding:2px 24px 0 2px">
+            link = $('<a href="#">'                      // style="width:7em;display:inline-block;text-align:left;"
+            +'<span>Settings</span></a>');
+
+        }else if(name=='ProfileH3'){
             
-            link = $('<div><a href="#" style="padding:2px 24px 0 2px">'
-            +'<span style="width:7em;display:inline-block;text-align: left;">Settings</span>'
-            +'<span class="ui-icon-user" style="color:white;" style="vertical-align:middle;font-size:16px;width:16px;height:16px;"></span>'
-            +'&nbsp;<span class="usrFullName">'
+            link = $('<a href="#">'                        // style="vertical-align:middle;"
+            +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:10px;vertical-align:bottom;"></div>'
+            +'&nbsp;<div class="usrFullName" style="display:inline-block">'
             +window.hWin.HAPI4.currentUser.ugr_FullName
-            +'</span></a><span class="ui-icon ui-icon-carat-1-s"  style="vertical-align:middle;color:white;" id="carat1"></span></div>');
-                             
+            +'</div><div style="position:relative;" class="ui-icon ui-icon-carat-1-s"></div></a>');
+                                                                                                           
         }else{
             link = $('<a>',{
                 text: window.hWin.HR((name=='Help_lo'?'Help':name)), href:'#'
             });
             
-            if(name=='Help'){
+            /*if(name=='Help'){
                 link.css({'padding-top': '4px'});    
-            }            
+            }*/            
         }
         
         this['btn_'+name] = $('<li>').append(link)
@@ -559,6 +571,10 @@ $.widget( "heurist.mainMenu", {
         var p = false;
         if(action == "menu-profile-preferences"){
             window.hWin.HAPI4.SystemMgr.is_logged(function(){that._editPreferences()}); p=true;
+        }else if(action == "menu-profile-import"){
+            that._importUsers();
+            p  = true;
+            //window.hWin.HAPI4.SystemMgr.is_admin(function(){that._importUsers()}); p=true;
         }else if(action == "menu-database-refresh"){
             this._refreshLists( true ); p=true;
         }else if(action == "menu-import-csv"){ // Result set
@@ -943,8 +959,89 @@ $.widget( "heurist.mainMenu", {
             })
         });
 
-    }
+    } //end _editPreferences
 
+    
+    , _importUsers: function (){
+
+        var options = {
+            title: 'Select database with users to be imported',
+            select_mode: 'select_single',
+            pagesize: 300,
+            edit_mode: 'none',
+            use_cache: true,
+            isdialog: true,
+            except_current: true,
+            onselect:function(event, data){
+                if(data && data.selection && data.selection.length>0){
+                        var selected_database = data.selection[0].substr(4);
+                        
+                        var options2 = {
+                            title: 'Select users in '+selected_database+' to be imported',
+                            database: selected_database,
+                            select_mode: 'select_multi',
+                            edit_mode: 'none',
+                            isdialog: true,
+                            onselect:function(event, data){
+                                if(data && data.selection &&  data.selection.length>0){
+                                    var selected_users = data.selection;
+
+                                    var options3 = {
+                                        title: 'Allocate imported users to work groups',
+                                        select_mode: 'select_roles',
+                                        edit_mode: 'none',
+                                        isdialog: true,
+                                        onselect:function(event, data){
+                                            if(data && !$.isEmptyObject(data.selection)){
+                                                //selection is array of object
+                                                // [grp_id:role, ....]
+                                                /*
+                                                var s = '';
+                                                for(grp_id in data.selection)
+                                                if(grp_id>0 && data.selection[grp_id]){
+                                                    s = s + grp_id+':'+data.selection[grp_id]+',';
+                                                }
+                                                if(s!='')
+                                                    alert( selected_database+'  '+selected_users.join(',')
+                                                        +' '+s);  
+                                                */        
+                                                        
+                                            var request = {};
+                                            request['a']         = 'action';
+                                            request['entity']    = 'sysUsers';
+                                            request['roles']     = data.selection;
+                                            request['userIDs']   = selected_users;
+                                            request['sourceDB']  = selected_database;
+                                            request['request_id'] = window.hWin.HEURIST4.util.random();
+
+                                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                                function(response){             
+                                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                        window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
+                                                    }else{
+                                                        window.hWin.HEURIST4.msg.showMsgErr(response);      
+                                                    }
+                                            });
+                                                        
+                                            }
+                                        }
+                                    };              
+                                    
+                                    window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
+                                }
+                            }
+                        };
+                        
+                        
+                        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
+                }
+            }
+        };    
+    
+        window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
+    
+    
+    }    
 
     // the same in profile.js
     // TODO: use an include instead of repeating logout function in this file and profile.js

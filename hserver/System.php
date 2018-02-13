@@ -69,14 +69,19 @@ class System {
     * @param $dbrequired - if false only connect to server (for database list)
     * @return true on success
     */
-    public function init($db, $dbrequired=true){
+    public function init($db, $dbrequired=true, $init_session_and_constants=true){
 
         if($db){
             $this->dbname = $db;
-            if(!(strpos($db, HEURIST_DB_PREFIX)===0)){
+            if(strpos($db, HEURIST_DB_PREFIX)===0){
+                $this->dbname_full = $db;
+                $this->dbname = substr($db,strlen(HEURIST_DB_PREFIX));
+            }else{
+                $this->dbname = $db;
                 $db = HEURIST_DB_PREFIX.$db;
+                $this->dbname_full = $db;
             }
-            $this->dbname_full = $db;
+            
 
         }else if($dbrequired){
             $this->addError(HEURIST_INVALID_REQUEST, "Database parameter not defined");
@@ -84,10 +89,6 @@ class System {
             return false;
         }
 
-        if(!$this->start_my_session()){
-            return false;
-        }
-        
         //dbutils
         $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
         if ( is_array($res) ){
@@ -107,35 +108,41 @@ class System {
                     return false;
                 }
 
-                //load system info from sysIdentification table    
-                //if(!$this->get_system()){
-                //    return false;
-                //}
-
-
-                if(!defined('HEURIST_DBNAME')){
-                    define('HEURIST_DBNAME', $this->dbname);
-                    define('HEURIST_DBNAME_FULL', $this->dbname_full);
-                }
-
-                //@todo  - test upload and thumb folder exist and writeable
-                if(!$this->initPathConstants()){
-                    $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
-                        "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
-                        "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
-
-                    return false;
-                }
-
-                $this->login_verify(); //load user info from session
-                if($this->get_user_id()>0){
-                    //set current user for stored procedures (log purposes)
-                    $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
-                }
+                if($init_session_and_constants){
                 
-                // consts
-                // @todo constants inited once in initPage for index (main) page only
-                // $this->defineConstants();    
+                    //load system info from sysIdentification table    
+                    //if(!$this->get_system()){
+                    //    return false;
+                    //}
+
+                    if(!$this->start_my_session()){
+                        return false;
+                    }
+
+                    if(!defined('HEURIST_DBNAME')){
+                        define('HEURIST_DBNAME', $this->dbname);
+                        define('HEURIST_DBNAME_FULL', $this->dbname_full);
+                    }
+
+                    //@todo  - test upload and thumb folder exist and writeable
+                    if(!$this->initPathConstants()){
+                        $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
+                            "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
+                            "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
+
+                        return false;
+                    }
+
+                    $this->login_verify(); //load user info from session
+                    if($this->get_user_id()>0){
+                        //set current user for stored procedures (log purposes)
+                        $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
+                    }
+                    
+                    // consts
+                    // @todo constants inited once in initPage for index (main) page only
+                    // $this->defineConstants();    
+                }
             }
             
 //error_log('init systme '.$_SERVER['PHP_SELF']);

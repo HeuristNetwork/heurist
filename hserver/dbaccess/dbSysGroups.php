@@ -150,12 +150,12 @@ class DbSysGroups extends DbEntityBase
             }
         }  
         
+        $is_ids_only = (count($this->data['details'])==1);
+
         if($needCount){    
             array_push($this->data['details'],
                 '(select count(*) from sysUsrGrpLinks where (ugl_GroupID=ugr_ID)) as ugr_Members');
         }
-                   
-        $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])

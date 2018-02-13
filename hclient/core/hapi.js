@@ -269,7 +269,22 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             }
 
-
+            , is_admin: function(callback){
+                _callserver('usr_info', {a:'is_admin'},
+                function(response){
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK && response.data=='0'){
+                            response.status = window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED;
+                            response.message = 'To perform this operation you have to be logged in as administrator';
+                            response.sysmsg = 0;
+                    }
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        callback();
+                    }else{
+                       // window.hWin.HEURIST4.msg.showMsgErr(response, true); Login Page is already rendered no need to  display Error Message
+                    }
+                });
+            }
+            
             /**
             * Get current user if logged in, and global database settings
             */

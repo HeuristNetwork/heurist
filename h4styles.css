@@ -1533,7 +1533,13 @@ option {padding-left:15px;}
     cursor:pointer;
     text-align:center;
 }
-
+.list .user-list-count{
+     position: absolute;
+     top: 4px;
+     width:40px;
+     right: 180px;
+     height: 16px;
+}
 .list .user-list-edit{
      position: absolute;
      top: 4px;
@@ -1544,7 +1550,11 @@ option {padding-left:15px;}
      right: 70px !important;
      background:none;
 }
-.list .user-list-member label{
+.list .user-list-member label,
+.icons .user-list-count,
+.thumbs .user-list-count,
+.thumbs3 .user-list-count
+{
      display:none;
 }
 

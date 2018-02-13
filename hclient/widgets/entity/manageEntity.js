@@ -662,7 +662,7 @@ $.widget( "heurist.manageEntity", {
                     that = this;
         
             //dialog buttons SELECT and CLOSE
-            if(options['select_mode']=='select_multi'){ 
+            if(options['select_mode']=='select_multi' || options['select_mode']=='select_roles'){ 
                 btn_array.push({text:window.hWin.HR( options['selectbutton_label'] ),
                         click: function() { that._selectAndClose(); }}); 
             }
