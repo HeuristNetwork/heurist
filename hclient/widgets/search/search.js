@@ -833,6 +833,7 @@ $.widget( "heurist.search", {
             .button({icon: "ui-icon-triangle-1-n", showLabel:false});
             that._on( search_quick_close, {
                 click: function(event){
+                    //$(document).off('keypress');
                     $dlg.hide( "blind", {}, 500 );
                 }
             });
@@ -848,6 +849,7 @@ $.widget( "heurist.search", {
             .appendTo( dv );
             that._on( link, {  click: function(event){
                 $dlg.hide( "blind", {}, 500 );
+                //$(document).off('keypress');
                 that._showAdvancedAssistant();
             } });
 
@@ -887,7 +889,18 @@ $.widget( "heurist.search", {
             allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
 
-
+            function __startSearchOnEnterPress(e){
+                    var code = (e.keyCode ? e.keyCode : e.which);
+                    if (code == 13) {
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        $dlg.hide( "blind", {}, 500 );
+                        that._doSearch();
+                    }
+            }
+            
+            that._on( $dlg.find('.text'), { keypress: __startSearchOnEnterPress});
+            
             //change list of field types on rectype change
             that._on( select_rectype, {
                 change: function (event){
@@ -932,7 +945,10 @@ $.widget( "heurist.search", {
                         change: __onFieldTypeChange
                     });
                     that._on( select_sortby, {
-                        change: function(event){ this.calcShowSimpleSearch(); }
+                        change: function(event){ 
+                            this.calcShowSimpleSearch(); 
+                            search_quick_go.focus();
+                        }
                     });
                                 
                     $("#sa_fieldvalue").val("");
@@ -943,6 +959,7 @@ $.widget( "heurist.search", {
                     $dlg.find("#fld_enum").hide();
                     $dlg.find("#fld_coord").hide();
                     this.calcShowSimpleSearch();
+                    search_quick_go.focus();
                 }
             });
             
@@ -994,6 +1011,7 @@ $.widget( "heurist.search", {
                     }
 
                     this.calcShowSimpleSearch();
+                    search_quick_go.focus();
             }//__onFieldTypeChange
                 
             that._on( select_fieldtype, {
@@ -1001,10 +1019,12 @@ $.widget( "heurist.search", {
             });
             that._on( select_terms, { change: function(event){
                     this.calcShowSimpleSearch();
+                    search_quick_go.focus();
                 }
             } );
             that._on( select_sortby, { change: function(event){
                     this.calcShowSimpleSearch();
+                    search_quick_go.focus();
                 }
             } );
             that._on( $("#sa_fieldvalue"), {
@@ -1015,6 +1035,7 @@ $.widget( "heurist.search", {
             that._on( $("#sa_negate"), {
                 change: function(event){
                     this.calcShowSimpleSearch();
+                    search_quick_go.focus();
                 }
             });
             that._on( $("#sa_negate2"), {
