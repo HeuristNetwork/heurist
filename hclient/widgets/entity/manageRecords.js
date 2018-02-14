@@ -1711,8 +1711,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //2. Popup for resource field
             var dlged = that._getEditDialog();
             if(dlged && (no_access || this.options.edit_obstacle)){ 
-                var ele = $('<div><div style="background-color:#f48642;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
-                            +'<h2 style="display:inline-block;color:white">View-only mode</h2>&nbsp;&nbsp;<a href="#" style="color:white">edit</a><span>No enough rights</span></div></div>')
+                
+                var ele = $('<div><div class="edit-button" style="background:#f48642 !important;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
+                            +'<h2 style="display:inline-block;color:white">View-only mode</h2>&nbsp;&nbsp;'
+                            +'<a href="#" style="color:white">edit</a><span>No enough rights</span></div></div>')
                        .addClass('coverall-div-bare')
                        .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto'}) //, bottom: '40px', 'background':'red'
                        .appendTo(dlged);
@@ -1741,7 +1743,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(no_access){
                     ele.find('a').hide();
                 }else{       
-                    ele.find('a').click(function(){
+                    //find('a')
+                    ele.find('.edit-button').button().click(function(){
                         ele.remove();
                         //restore edit ability 
                         that._editing.setDisabled(false);
@@ -1752,7 +1755,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //remove screen
                         eles.find('.coverall-div-bare').remove();
                     });
-                    ele.find('span').hide();
+                    ele.find('span').hide(); //how no enough rights
                 }
                 this.options.edit_obstacle = false;
             } 
