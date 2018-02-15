@@ -36,6 +36,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = false;
         this.options.edit_height = 540;
+        this.options.height = 740;
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -156,27 +157,30 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                         //before close - count for membership and refresh
                         beforeClose:function(){
+                            
+                            if(window.hWin.HAPI4.has_access(group_ID)>0){
+                                var request = {
+                                    'a'          : 'search',
+                                    'entity'     : 'sysGroups',
+                                    'details'    : 'count',
+                                    'ugr_ID'     : group_ID
+                                };
+                                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                    function(response){
+                                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                            var resp = new hRecordSet( response.data );
+                                            var rec_updated = resp.getFirstRecord();
+                                            var cnt = resp.fld(rec_updated, 'ugr_Members');
 
-                            var request = {
-                                'a'          : 'search',
-                                'entity'     : 'sysGroups',
-                                'details'    : 'count',
-                                'ugr_ID'     : group_ID
-                            };
-                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                function(response){
-                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                        var resp = new hRecordSet( response.data );
-                                        var rec_updated = resp.getFirstRecord();
-                                        var cnt = resp.fld(rec_updated, 'ugr_Members');
-                                        var record = that.getRecordSet().getById(group_ID);
-                                        that.getRecordSet().setFld(record, 'ugr_Members', cnt);
-                                        that.recordList.resultList('refreshPage');  
-                                    }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                            var record = that.getRecordSet().getById(group_ID);
+                                            that.getRecordSet().setFld(record, 'ugr_Members', cnt);
+                                            that.recordList.resultList('refreshPage');  
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                                        }
                                     }
-                                }
-                            );
+                                );
+                            }
                             return true;
                         }
 

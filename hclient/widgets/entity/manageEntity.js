@@ -759,6 +759,10 @@ $.widget( "heurist.manageEntity", {
             
             this._as_dialog.dialog("open");
             
+            if(this.options.entity.entityName=='records'){ //special case for help
+                this._as_dialog.addClass('manageRecords');
+            }
+            
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
                 null, //'prefs_'+this._entityName,
                 window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content', false);
@@ -788,7 +792,7 @@ $.widget( "heurist.manageEntity", {
         
             var position = null;
             var tm = 0;
-//console.log($('div.ui-dialog[posid^="edit'+this._entityName+'"]').length);
+
             //detect position
             $('div.ui-dialog[posid^="edit'+this._entityName+'"]')
             //get the latest

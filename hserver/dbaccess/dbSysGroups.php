@@ -56,6 +56,7 @@ class DbSysGroups extends DbEntityBase
         $needCheck = false;
         $needRole = false;
         $needCount = false;  //find members count
+        $is_ids_only = false;
 
         //compose WHERE 
         $where = array('ugr_Type="workgroup"');
@@ -94,6 +95,7 @@ class DbSysGroups extends DbEntityBase
         if(@$this->data['details']=='id'){
         
             $this->data['details'] = 'ugr_ID';
+            $is_ids_only = true;
             
         }else if(@$this->data['details']=='name'){
 
@@ -150,7 +152,7 @@ class DbSysGroups extends DbEntityBase
             }
         }  
         
-        $is_ids_only = (count($this->data['details'])==1);
+        //$is_ids_only = (count($this->data['details'])==1);
 
         if($needCount){    
             array_push($this->data['details'],

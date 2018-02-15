@@ -1168,7 +1168,7 @@ window.hWin.HEURIST4.ui = {
                     offset: null
                 },*/
                   change: function( event, data ) {
-    //console.log('onnn '+data.item.value);                
+    
                         $(selObj).val(data.item.value);//.change();
                         $(selObj).trigger('change');
                 }});
@@ -1214,7 +1214,7 @@ window.hWin.HEURIST4.ui = {
                 $context.find('.heurist-helper1').css('display','none');
             }
             
-            if($context.addClass('manageRecords')){
+            if($context.hasClass('manageRecords')){
                 //special bhaviour for record edit form
                 var prefs = window.hWin.HAPI4.get_prefs_def('prefs_records');
                 if(prefs){

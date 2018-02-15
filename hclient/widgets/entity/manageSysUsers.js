@@ -34,13 +34,14 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
+        this.options.height = 640;
 
         if(this.options.edit_mode=='editonly'){
             this.options.edit_mode = 'editonly';
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
-            this.options.height = 640;
+            //this.options.height = 640;
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -115,13 +116,18 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             
             this.recordList.resultList('option','rendererHeader',
                     function(){
-        return '<div style="width:60px"></div><div style="width:3em">ID</div>'
+                    var s = '<div style="width:60px"></div><div style="width:3em">ID</div>'
                 +'<div style="width:7em">Name</div>'
                 +'<div style="width:12em;">Full name</div>'
                 +'<div style="width:7em;border:none">Institution/Organisation</div>'
                 +'<div style="position:absolute;right:76px;width:80px;border-left:1px solid gray">'
-                        +'Membership</div>'
-                +'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                        +'Membership</div>';
+                        
+                        if (window.hWin.HAPI4.is_admin()){
+                            s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                        }
+                        
+                        return s;
                     }
                 );
             //this.recordList.resultList('applyViewMode');
@@ -406,13 +412,13 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 //html = html + '<div style="min-width:78px;"></div>';
             }
             
-            if( window.hWin.HAPI4.has_access(recID)>0){
+            if( window.hWin.HAPI4.is_admin() ) { //window.hWin.HAPI4.has_access(recID)>0 ){
                 
                 html = html 
                     + '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                     + '</div>&nbsp;&nbsp;';
-               if(recID != window.hWin.HAPI4.sysinfo){ //owner
+               if(recID != 2){ //owner
                     html = html      
                     + '<div title="Click to delete user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
@@ -420,10 +426,12 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                }
                
             }else{
+               /*
                 html = html 
                     + '<div title="Status: not admin - locked" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
                     + '</div>&nbsp;&nbsp;';
+               */
             }
             html = html + '</div>';
             
@@ -476,11 +484,16 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             }
         }else
         //hide after edit init btnRecRemove for dbowner (user #2)
-        if(this._currentEditID==2){
+        if(this._currentEditID==2 || !window.hWin.HAPI4.is_admin()){
             var ele = this._toolbar;
             ele.find('#btnRecRemove').hide();
         }
         
+        if(!window.hWin.HAPI4.is_admin()){
+            var input_ele = this._editing.getFieldByName('ugr_Enabled');
+            input_ele.hide();
+            //input_ele.editing_input('f', 'rst_Display', 'hidden');
+        }
 
     },    
     
