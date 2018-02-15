@@ -84,7 +84,7 @@ $.widget( "heurist.manageEntity", {
         // inline - edit form next to list on the same screen
         // only  - list is hidden onle edit form is visible
         //  NOTE if select_mode is not manager edit mode is changed to popup forcefully
-        edit_mode:'inline', // none, popup, inline, only 
+        edit_mode: 'popup', // none, popup, inline, editonly 
         edit_height:null,
         edit_width :null,
         edit_title :null,

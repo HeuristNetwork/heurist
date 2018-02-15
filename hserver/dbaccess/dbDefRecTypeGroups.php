@@ -129,7 +129,7 @@ class DbDefRecTypeGroups extends DbEntityBase
         
 //error_log($query);     
 
-        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName']);
+        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
         return $res;
     }
     

@@ -266,7 +266,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
         if(this.options.select_mode=='manager'){
         html_thumb = '<a href="'+            
-window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + //(needplayer?'&player=1':'')
+window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&player=1':'')
  + '&file='+fld('ulf_ObfuscatedFileID')+'" target="yoxview" class="yoxviewLink">' +  html_thumb + '</a>';                   
         }
 

@@ -173,7 +173,7 @@ class DbSysGroups extends DbEntityBase
 
         $calculatedFields = null;
         
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields);
+        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
         
         return $result;
     }

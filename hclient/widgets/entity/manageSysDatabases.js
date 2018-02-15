@@ -28,7 +28,6 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         this.options.width = 800;
         this.options.height = 600;
         this.options.edit_mode = 'none';
-        this.options.except_current = false;
 
         this._super();
     },
@@ -64,13 +63,16 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parents('.ui-dialog')); 
         
+console.log('ssss');
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
             function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
                 that._cachedRecordset = response;
-                that.recordList.resultList('updateResultSet', response);
+                
+                that.filterRecordList(null, {});
+                //that.recordList.resultList('updateResultSet', response);
             });
             
         this._on( this.searchForm, {
@@ -154,5 +156,17 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
             this.recordList.resultList('updateResultSet', data.recordset, data.request);
         }
     },
+    
+    filterRecordList: function(event, request){
+        
+        if(this.options.except_current==true){
+            var subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
+            subset = subset.getSubSetByRequest({'sys_Database':'!=hdb_'+window.hWin.HAPI4.database}, this.options.entity.fields);
+            this.recordList.resultList('updateResultSet', subset, request);   
+        }else{
+            this._super(event, request); 
+        }
+    },
+    
     
 });

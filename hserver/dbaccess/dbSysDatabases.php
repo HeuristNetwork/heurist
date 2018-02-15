@@ -88,7 +88,7 @@ class DbSysDatabases extends DbEntityBase
                             'fields'=>array('sys_Database'),
                             'records'=>$records,
                             'order'=>$order,
-                            'entityName'=>$this->config['tableName']);
+                            'entityName'=>'sysDatabases');
         
         }else {
         
@@ -119,7 +119,7 @@ class DbSysDatabases extends DbEntityBase
 //error_log($query);     
 
         $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
-        $res = $this->searchMgr->execute($query, false, $this->config['tableName']);
+        $res = $this->searchMgr->execute($query, false, $this->config['entityName']);
         return $res;
         
         }

@@ -570,8 +570,30 @@ $.widget( "heurist.mainMenu", {
         
         var p = false;
         if(action == "menu-profile-preferences"){
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that._editPreferences()}); p=true;
-        }else if(action == "menu-profile-import"){
+            //window.hWin.HAPI4.SystemMgr.is_logged(function(){that._editPreferences()}); p=true;        
+            that._editPreferences();
+            p=true;        
+        }else 
+        if(action == "menu-profile-tags"){
+            window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {isdialog: true}); p=true;
+        }else 
+        if(action == "menu-profile-reminders"){
+            window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {isdialog: true}); p=true;
+        }else 
+        if(action == "menu-profile-files"){
+            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', {isdialog: true}); p=true;
+        }else 
+        if(action == "menu-profile-groups"){
+            window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', {isdialog: true}); p=true;
+        }else 
+        if(action == "menu-profile-info"){
+            window.hWin.HEURIST4.ui.showEntityDialog('SysUsers', 
+                {isdialog: true, edit_mode:'editonly', usr_ID: window.hWin.HAPI4.currentUser['ugr_ID']}); p=true;
+        }else 
+        if(action == "menu-profile-users"){
+            window.hWin.HEURIST4.ui.showEntityDialog('SysUsers', {isdialog: true}); p=true;
+        }else 
+        if(action == "menu-profile-import"){
             that._importUsers();
             p  = true;
             //window.hWin.HAPI4.SystemMgr.is_admin(function(){that._importUsers()}); p=true;
