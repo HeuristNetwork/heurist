@@ -428,6 +428,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //this._edit_dialog.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());
                     
                 //help and tips buttons on dialog header
+                this._edit_dialog.addClass('manageRecords'); //need for special behaviour in applyCompetencyLevel
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
                     null, //'prefs_'+this._entityName,
                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
@@ -2026,6 +2027,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             $(sheader).appendTo(this.editHeader);
             
             if(!this._as_dialog){
+                this.element.addClass('manageRecords');                
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this.element, 
                     '.ui-heurist-header2', //where to put button
                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
@@ -2097,9 +2099,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 sz = myLayout.state.east.size;
                 isClosed = myLayout.state.east.isClosed;
                 
-                //help_on = that.element.find('.chb_show_help').is(':checked');
-                optfields = that.element.find('.chb_opt_fields').is(':checked');
         }
+        help_on = that.element.find('.chb_show_help').is(':checked');
+        optfields = that.element.find('.chb_opt_fields').is(':checked');
             
         
         if(this.options.edit_mode=='editonly'){

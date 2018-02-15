@@ -1214,6 +1214,15 @@ window.hWin.HEURIST4.ui = {
                 $context.find('.heurist-helper1').css('display','none');
             }
             
+            if($context.addClass('manageRecords')){
+                //special bhaviour for record edit form
+                var prefs = window.hWin.HAPI4.get_prefs_def('prefs_records');
+                if(prefs){
+                    var ishelp_on = (prefs['help_on']==true || prefs['help_on']=='true');
+                    window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $context);
+                }
+            }
+            
             if(is_exit) return;
         
             //window.hWin.HEURIST4.ui.applyCompetencyLevel( exp_level );
