@@ -33,14 +33,14 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 800;
+        this.options.edit_height = 640;
 
         if(this.options.edit_mode=='editonly'){
             this.options.edit_mode = 'editonly';
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
-            this.options.height = 600;
+            this.options.height = 640;
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -288,7 +288,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             //load user for given record id
             if(this.options.usr_ID>0){
                     var request = {};
-                    request['usr_ID']  = this.options.usr_ID;
+                    request['ugr_ID']  = this.options.usr_ID;
                     request['a']          = 'search'; //action
                     request['entity']     = this.options.entity.entityName;
                     request['details']    = 'full';
@@ -355,7 +355,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
-        var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+        var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
         
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:'+recOpacity+'">'
         +'</div>';
@@ -502,6 +502,12 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         this._super( recID, fieldvalues );
         this.getRecordSet().setRecord(recID, fieldvalues);
-        this.recordList.resultList('refreshPage');  
+        
+        
+        if(this.options.edit_mode == 'editonly'){
+            this.closeDialog(true); //force to avoid warning
+        }else{
+            this.recordList.resultList('refreshPage');  
+        }
     },
 });

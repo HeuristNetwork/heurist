@@ -358,16 +358,21 @@ class DbSysUsers extends DbEntityBase
         
         $mysqli = $this->system->get_mysqli();
 
-        $query = 'SELECT g2.ugl_GroupID, count(g2.ugl_ID) AS adm FROM sysUsrGrpLinks AS g2 LEFT JOIN sysUsrGrpLinks AS g1 '
-                    .'ON g1.ugl_GroupID=g2.ugl_GroupID AND g2.ugl_Role="admin" '                        //is it the only admin
-                    .'WHERE g1.ugl_UserID='.$usrID.' AND g1.ugl_Role="admin" GROUP BY g1.ugl_GroupID  HAVING adm=1';  //is this user admin
-                    
-        //can't remove last admin
-        $res = mysql__select_row($mysqli, $query);
-        if($res!=null){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                'It is not possible to remove  user #'.$usrID.'. This user is the only admin of the workgroup #'.$res[0]);
-            return false;
+        //check for last admin        
+        foreach($this->recordIDs as $usrID){
+        
+            $query = 'SELECT g2.ugl_GroupID, count(g2.ugl_ID) AS adm FROM sysUsrGrpLinks AS g2 LEFT JOIN sysUsrGrpLinks AS g1 '
+                        .'ON g1.ugl_GroupID=g2.ugl_GroupID AND g2.ugl_Role="admin" '                        //is it the only admin
+                        .'WHERE g1.ugl_UserID='.$usrID.' AND g1.ugl_Role="admin" GROUP BY g1.ugl_GroupID  HAVING adm=1';  //is this user admin
+                        
+            //can't remove last admin
+            $res = mysql__select_row($mysqli, $query);
+            if($res!=null){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                    'It is not possible to remove  user #'.$usrID.'. This user is the only admin of the workgroup #'.$res[0]);
+                return false;
+            }
+        
         }
         
         //check for existing records
@@ -494,7 +499,26 @@ class DbSysUsers extends DbEntityBase
         foreach($userIDs as $userID){
             $res = $mysqli->query($query1.$userID);
             if($res){
-                $newUserIDs[] = $mysqli->insert_id;    
+                 $userID_new = $mysqli->insert_id;    
+                 $newUserIDs[] = $userID_new;
+
+                //copy user image 
+                $user_image = parent::getEntityImagePath($userID, null, $this->data['sourceDB']); //in source db
+                if(file_exists($user_image)){
+                    
+                    $extension = pathinfo($user_image, PATHINFO_EXTENSION);
+                    
+                    $user_image_new = parent::getEntityImagePath($userID_new,null,null,$extension); //in this database
+                    
+                    fileCopy($user_image, $user_image_new);
+                    
+                    $user_thumb = parent::getEntityImagePath($userID, 'thumb', $this->data['sourceDB']); //in source db
+                    $user_thumb_new = parent::getEntityImagePath($userID_new, 'thumb'); //in this db
+                    if(file_exists($user_thumb)){
+                        fileCopy($user_thumb, $user_thumb_new);    
+                    }                        
+                }
+                
             }else{
                 $this->system->addError(HEURIST_DB_ERROR,'Can\'t import users from '.$this->data['sourceDB'], $mysqli->error);
                 $ret = false;

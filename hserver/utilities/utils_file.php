@@ -73,8 +73,28 @@
 
         return true;
     }
+   
     
-    
+    //
+    //
+    //
+    function fileCopy($s1, $s2) {
+        $path = pathinfo($s2);
+        
+        if(folderCreate($path['dirname'], true)){
+            if (!copy($s1,$s2)) {
+                // "copy failed";
+                return false;
+            }
+        }else{
+           //can't crate folder or it is not writeable 
+           return false;
+        }
+        return true;
+    }    
+    //
+    //
+    //
     function fileSave($rawdata, $filename)
     {
         if($rawdata){
@@ -90,6 +110,7 @@
             return 0;
         }
     }
+
     
 //-----------------------
 //

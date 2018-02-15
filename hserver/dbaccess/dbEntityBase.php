@@ -388,6 +388,51 @@ class DbEntityBase
     }
 
     //
+    //
+    //
+    protected function getEntityImagePath($recID, $version=null, $db_name=null, $extension=null){
+            
+            $entity_name = $this->config['entityName'];
+            
+            if($entity_name=='sysDatabases'){
+                
+                $db_name = $recID;
+                if(strpos($recID,'hdb_')===0){
+                    $db_name = substr($recID,4);    
+                }
+                $rec_id = 1;    
+                $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
+            }else{
+                if($db_name==null) $db_name = HEURIST_DBNAME;
+                
+                $path = HEURIST_FILESTORE_ROOT.$db_name.'/entity/'.$entity_name.'/';
+                //$path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
+            }
+        
+            if($recID>0){
+        
+                if($version=='thumb' || $version=='thumbnail'){
+                    $filename = $path.'thumbnail/'.$recID.'.png'; 
+                }else if($version=='icon'){
+                    $filename = $path.'icon/'.$recID.'.png';    
+                }else{
+                    $filename = null;
+                    $exts = $extension?array($extension):array('png','jpg','jpeg','gif');
+                    foreach ($exts as $ext){
+                        $filename = $path.$recID.'.'.$ext;
+                        if(file_exists($filename)){
+                            $content_type = 'image/'.$ext;
+                            break;
+                        }
+                    }
+                }                  
+                
+                return $filename;     
+            }else{
+                return null;                     
+            }
+    }
+    //
     // extract records from data parameter - it is used in delete, save
     //            
     //  fields:[fldname:value,fieldname2:values,.....]

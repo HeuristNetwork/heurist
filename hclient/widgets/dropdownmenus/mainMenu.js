@@ -297,7 +297,7 @@ $.widget( "heurist.mainMenu", {
             this.menu_Profile.find('.admin-only').hide();    
         }
         
-        this['btn_Profile'].find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
+        $(this.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
         
         //need to update position of carat icon according width of user name
         /*var ele = $('#carat1');

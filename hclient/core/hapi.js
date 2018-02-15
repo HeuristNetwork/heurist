@@ -1122,12 +1122,13 @@ function hAPI(_db, _oninit) { //, _currentUser
                 return null;
         }
 
-        , getImageUrl: function(entityName, recID, version, def){
+        , getImageUrl: function(entityName, recID, version, def, database){
                 
+            //if file not found return empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
             if(!(def>=0||def<3)) def = 2;
 
             return window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php'
-                    +'?db='+ window.hWin.HAPI4.database
+                    +'?db='+ (database?database:window.hWin.HAPI4.database)
                     +'&entity='+entityName
                     +'&id='+recID
                     +'&version='+version

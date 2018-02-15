@@ -77,6 +77,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             
             if(!window.hWin.HAPI4.is_admin()){
                 this.btn_add_record.hide();
+                this.btn_find_record.hide();
             }
         }else if( this.options.ugl_GroupID<0 ){  //addition of users to group
             //find any user not in given group
