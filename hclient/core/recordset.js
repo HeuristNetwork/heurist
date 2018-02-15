@@ -924,6 +924,7 @@ function hRecordSet(initdata) {
             
             var recID, fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
             var isexact = {};
+            var isnegate= {};
             //remove empty fields from request
             for (fieldName in request) {
                 if (request.hasOwnProperty(fieldName) ){
@@ -932,8 +933,14 @@ function hRecordSet(initdata) {
                     }else if(fieldName.indexOf('sort:')<0){
                         //find data type
                         dataTypes[fieldName] = __getDataType(fieldName);
+                        
                         if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
                             request[fieldName] = request[fieldName].toLowerCase();
+                            
+                            if(request[fieldName].substring(0,2)=='!='){
+                                request[fieldName] = request[fieldName].substring(2);
+                                isnegate[fieldName] = true;
+                            }else
                             if(request[fieldName][0]=='='){
                                 request[fieldName] = request[fieldName].substring(1);
                                 isexact[fieldName] = true;
@@ -963,8 +970,12 @@ function hRecordSet(initdata) {
                                 isOK = false;
                                 break;                            
                             }else
-                            if(isexact[fieldName] && this.fld(record,fieldName).toLowerCase() != request[fieldName]){
-                                isOK = false;
+                            if(isnegate[fieldName]){
+                                isOK = (this.fld(record,fieldName).toLowerCase() != request[fieldName]);
+                                break;                            
+                            }else 
+                            if(isexact[fieldName]){
+                                isOK = (this.fld(record,fieldName).toLowerCase() == request[fieldName]);
                                 break;                            
                             }else
                             if(this.fld(record,fieldName).toLowerCase().indexOf(request[fieldName])<0){
@@ -994,8 +1005,11 @@ function hRecordSet(initdata) {
                     
                 }else{
                     _order.sort(function(a,b){  
-                        return sortFieldsOrder[0]*(that.fld(records[a], sortFields[0])<that.fld(records[b], sortFields[0])
-                                ?-1:1);
+                        var val1 = that.fld(records[a], sortFields[0]);
+                        var val2 = that.fld(records[b], sortFields[0]);
+                        if(val1) val1 = val1.toLowerCase();
+                        if(val2) val2 = val2.toLowerCase();
+                        return sortFieldsOrder[0]*(val1<val2?-1:1);
                     });
                 }
             }
