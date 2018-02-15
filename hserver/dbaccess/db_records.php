@@ -499,6 +499,9 @@
                 $mysqli->query('delete from usrReminders where rem_RecID = ' . $id);
                 if ($mysqli->error) break;
 
+                $mysqli->query('delete from recForwarding where rfw_NewRecID = ' . $id);
+                if ($mysqli->error) break;
+                
                 $mysqli->query('delete from usrRecTagLinks where rtl_RecID = ' . $id);
                 if ($mysqli->error) break;
 

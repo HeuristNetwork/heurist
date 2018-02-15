@@ -467,7 +467,7 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                     print '<input type="button" name="close_window" id="close_window" value="Close Window"   title="Cick here to close this window" onclick="window.close();">';
                 }
                 ?>
-                <input type="hidden" name="db" id="db" value="<?=HEURIST_DBNAME?>">
+                <input type="hidden" name="db" id="db" value="<?php echo HEURIST_DBNAME;?>">
             </form>
         </div>
     </body>
@@ -584,8 +584,9 @@ function do_fix_dupe() {
     unset($_SESSION['master_rec_id']);
     $_SESSION['finished_merge'] = 1;  // set state variable for next loop
     $dup_rec_ids=array();
-    if(in_array($master_rec_id,explode(',',$_REQUEST['bib_ids'])))
+    if(in_array($master_rec_id,explode(',',$_REQUEST['bib_ids']))){
         $dup_rec_ids = array_diff(explode(',',$_REQUEST['bib_ids']),array($master_rec_id) );
+    }
     $dup_rec_list = '(' . join(',', $dup_rec_ids) . ')';
     $add_dt_ids = array();   // array of detail ids to insert for the master record grouped by detail type is
     $update_dt_ids = array(); // array of detail ids to get value for updating the master record
@@ -660,11 +661,11 @@ function do_fix_dupe() {
                 $update_detail['dtl_RecID'] = $master_rec_id;   // set this as a detail of the master record
                 mysql__insert('recDetails',$update_detail);
             }
-        }
+        }//foreach
     }
     //process adds
     if($add_dt_ids){
-        $add_details = array();
+        $add_detail = array();
         // for each add detail
         foreach($add_dt_ids as $key => $detail_ids){
             foreach($detail_ids as $detail_id){
@@ -677,13 +678,17 @@ function do_fix_dupe() {
                     unset($add_detail['dtl_ID']); //the id is auto set during insert
                     $add_detail['dtl_RecID'] = $master_rec_id;
                     mysql__insert('recDetails',$add_detail);
-                }
+                #000000
             }
         }
     }
-
+    }
+    
     foreach ($dup_rec_ids as $dup_rec_id) {
         //saw FIXME we should be updating the chain of links
+        //find all references to $dup_rec_id that will be removed
+        mysql_query('update recForwarding set rfw_NewRecID='.$master_rec_id.' where rfw_NewRecID='.$dup_rec_id);
+        
         mysql_query('insert into recForwarding (rfw_OldRecID, rfw_NewRecID) values ('.$dup_rec_id.', '.$master_rec_id.')');
         //saw FIXME  we should update the relationship table on both rr_rec_idxxx  fields
     }
@@ -794,6 +799,6 @@ function do_fix_dupe() {
 
 
     header('Location: combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&bib_ids='.$_REQUEST['bib_ids']);
-}
 
+}
 ?>

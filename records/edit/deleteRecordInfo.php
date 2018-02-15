@@ -111,6 +111,9 @@ function deleteRecord($id, $needDeleteFile=true) {
 			mysql_query('delete from usrReminders where rem_RecID = ' . $id);
 			if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
 
+            mysql_query('delete from recForwarding where rfw_NewRecID = ' . $id);
+            if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
+            
 			mysql_query('delete from usrRecTagLinks where rtl_RecID = ' . $id);
 			if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
 
