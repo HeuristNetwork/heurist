@@ -484,8 +484,7 @@ $.widget( "heurist.resultList", {
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
 
-
-        /*
+/*
         var abtns = (this.options.actionbuttons?this.options.actionbuttons:"tags,share,more,sort,view").split(',');
         var that = this;
         $.each(this._allbuttons, function(index, value){
@@ -496,6 +495,7 @@ $.widget( "heurist.resultList", {
         }
         });
         */
+        
 
         //adjust top,height according to visibility settings -----------
 
@@ -711,7 +711,8 @@ $.widget( "heurist.resultList", {
             btn.addClass('ui-heurist-btn-header1')                
             //this.view_mode_selector.controlgroup('refresh');
         }
-
+        
+        $('.password-reminder-popup').dialog('close');
     },
 
     //
@@ -719,6 +720,7 @@ $.widget( "heurist.resultList", {
     //
     _clearAllRecordDivs: function(new_title){
 
+        $('.password-reminder-popup').dialog('close');
         //this._currentRecordset = null;
         this._lastSelectedIndex = null;
 
@@ -1158,7 +1160,10 @@ $.widget( "heurist.resultList", {
         var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
         if (ispwdreminder){
             var pwd = $rdiv.attr('pwd');
-            window.hWin.HEURIST4.msg.showMsgDlg(pwd, null, "Password reminder", $target);
+            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(pwd, null, "Password reminder", 
+                {my: "left top", at: "left bottom", of: $target, options:{modal:false}}
+            );
+            $dlg.addClass('password-reminder-popup'); //class all these popups on refresh
             return;
         }else{
 
