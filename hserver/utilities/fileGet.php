@@ -66,7 +66,7 @@ if(!$entity_name){
     $error = "Entity is not defined";
 }else{
 */
-$system = new System(); //without db connection
+$system = new System(); //without db connection and session - just paths
 $system->initPathConstants($db);
     
 if($filename){ //download from scratch

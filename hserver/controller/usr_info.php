@@ -33,37 +33,65 @@
     $system = new System();
         
     
-    if($action=='is_logged'){ //just check only if logged in
+    if($action=='verify_credentials'){ //just check only if logged in (db connection not required)
         
-        $res = $system->is_logged(@$_REQUEST['db']);
+        $res = $system->verify_credentials(@$_REQUEST['db']);
         
-    }else  if($action=='is_admin'){ //just check only if admin database or group
-
-        if(@$_REQUEST['ugrID']>0){ //group id
-            $res = $system->is_admin('group', $_REQUEST['ugrID']);
-        }else{
-            $res = $system->is_admin();
+        if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
+            //if exists file with userid it means need to reload system info
+            $reload_user_from_db = (@$_SESSION[$system->dbname_full()]['need_refresh']==1);
+            if(!$reload_user_from_db){
+                $system->initPathConstants(@$_REQUEST['db']);
+                $fname = HEURIST_FILESTORE_DIR.$res;
+                $reload_user_from_db = file_exists($fname);
+            }
+                
+            if($reload_user_from_db){
+                $system->init(@$_REQUEST['db'], false, false); //session and constant are defined already
+                $res = $system->getCurrentUserAndSysInfo();
+            }else{
+                $res = true;
+            }
         }
-    
-    }else if( ! $system->init(@$_REQUEST['db'], ($action!='sysinfo') ) ){ //the only action that is possible without db 
-
-        //get error and response
-        //$response = $system->getError();
+        
         
     }else if($action=='usr_log'){
         
+        $system->initPathConstants(@$_REQUEST['db']);
         $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary']);
         $res = true;
         
-    }else{
+    } else if ($action == "save_prefs"){ //save preferences into session
 
+        if($system->verify_credentials(@$_REQUEST['db'])>0){
+            user_setPreferences($system->dbname_full(), $_REQUEST);
+            $res = true;
+        }
+
+    } else if ($action == "logout"){ //save preferences into session
+    
+        if($system->set_dbname_full(@$_REQUEST['db'])){
+            
+                $system->initPathConstants(@$_REQUEST['db']);
+                $system->user_LogActivity('Logout');
+
+                if($system->logout()){
+                    $res = true;
+                }
+        }
+        
+    }else if( !$system->init( @$_REQUEST['db'] ) ){ 
+        
+        
+    }else{
+        
         $mysqli = $system->get_mysqli();
 
         //allowed actions for guest
-        $quest_allowed = array('login','logout','reset_password','svs_savetree','svs_gettree','usr_save','svs_get');
+        $quest_allowed = array('login','reset_password','svs_savetree','svs_gettree','usr_save','svs_get');
         
-        if ($action=="sysinfo") {
-            
+        if ($action=="sysinfo") { //it call once on hapi.init on client side - so it always need to reload sysinfo
+
             $res = $system->getCurrentUserAndSysInfo();
 
         }else        
@@ -95,14 +123,6 @@
                     $res = true;
                 }
 
-            } else if ($action=="logout") {
-                
-                $system->user_LogActivity('Logout');
-
-                if($system->logout()){
-                    $res = true;
-                }
-                
             } else  if ($action=="action_password") { //special passwords for some admin actions - defined in configIni.php
             
                     $action = @$_REQUEST['action'];
@@ -112,11 +132,6 @@
                         $res = (@$$varname==$password)?'ok':'wrong';
                     }
                         
-            } else if ($action == "save_prefs"){ //save preferences into session
-
-                user_setPreferences($system->dbname_full(), $_REQUEST);
-                $res = true;
-
             } else if ($action=="usr_save") {
 
                 $res = user_Update($system, $_REQUEST);
@@ -125,7 +140,7 @@
 
                 $ugrID = $_REQUEST['UGrpID'];
 
-                if($system->is_admin2($ugrID)){  //allowed for itself only
+                if($system->has_access($ugrID)){  //allowed for itself only
                     $res = user_getById($system->get_mysqli(), $ugrID);
                     if(is_array($res)){
                         $res['ugr_Password'] = '';

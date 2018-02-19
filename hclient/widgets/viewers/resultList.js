@@ -102,7 +102,7 @@ $.widget( "heurist.resultList", {
         //-----------------------     listener of global events
         if(this.options.eventbased)
         {
-            this._events = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT + " " + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE;
+            this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS + " " + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE;
             if(this.options.isapplication){
                 this._events = this._events + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
@@ -116,14 +116,12 @@ $.widget( "heurist.resultList", {
 
                     that._showHideOnWidth();
 
-
-                }else if(e.type == window.hWin.HAPI4.Event.LOGIN){
-
-                    that._refresh();
-
-                }else  if(e.type == window.hWin.HAPI4.Event.LOGOUT)
+                }else  if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS)
                 {
-                    that._clearAllRecordDivs('');
+                    if(!window.hWin.HAPI4.has_access()){ //logout
+                        that.updateResultSet(null);
+                    }
+                    that._refresh();
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
@@ -418,7 +416,7 @@ $.widget( "heurist.resultList", {
             this.btn_search_save.find('.ui-button-icon-primary').css({'left':'0.1em'});
 
             this._on( this.btn_search_save, {  click: function(){
-                window.hWin.HAPI4.SystemMgr.is_logged(function(){
+                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
                     if(app && app.widget){
                         $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
@@ -1815,7 +1813,7 @@ $.widget( "heurist.resultList", {
 
 
         //hide edit link
-        if(!window.hWin.HAPI4.is_logged()){
+        if(!window.hWin.HAPI4.has_access()){
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
 

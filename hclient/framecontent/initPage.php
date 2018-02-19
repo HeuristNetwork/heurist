@@ -63,12 +63,12 @@ $login_warning = 'To perform this action you must be logged in';
 // to limit access to particular page
 // define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
 //
-if(defined('LOGIN_REQUIRED') && !$system->is_logged_in()){
+if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //header('Location: '.ERROR_REDIR); //'&msg='.rawurlencode($login_warning)); //No Need to show error message when login is required, login page ia already rendered
     exit();
 
 
-}else if(defined('MANAGER_REQUIRED') && !$system->is_admin() & !$system->is_member(0)){ //A member should also be able to creatte and open database
+}else if(defined('MANAGER_REQUIRED') && !$system->is_admin() ){ //A member should also be able to create and open database
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Administrator of group \'Database Managers\''));
     exit();
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){

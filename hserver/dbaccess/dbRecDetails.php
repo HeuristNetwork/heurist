@@ -156,7 +156,6 @@ class DbRecDetails
     public function addRevercePointerForChild(){
         
         
-        if (!( $this->system->is_admin()>0 )) {
             $this->system->addError(HEURIST_REQUEST_DENIED);
             return false;
         }

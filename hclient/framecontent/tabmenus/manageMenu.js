@@ -143,7 +143,7 @@ function hmanageMenu() {
         if(link && link.attr('data-nologin')!='1'){
             
             //check if login
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                 //window.hWin.HEURIST4.msg.showDialog(url, options);
                 $('.accordion_pnl').find('a').parent().removeClass('item-selected'); //was #menu_container
                 link.parent().addClass('item-selected');

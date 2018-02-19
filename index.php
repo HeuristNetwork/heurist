@@ -236,7 +236,7 @@ _time_debug = new Date().getTime() / 1000;
                    //
                    // version to compare with server provided - to avoid caching issue
                    //
-                   if(window.hWin.HAPI4.is_logged() && window.hWin.HAPI4.sysinfo['version']){
+                   if(window.hWin.HAPI4.has_access() && window.hWin.HAPI4.sysinfo['version']){
                        if(version_in_cache){
                            var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, 
                                                                               window.hWin.HAPI4.sysinfo['version']);   

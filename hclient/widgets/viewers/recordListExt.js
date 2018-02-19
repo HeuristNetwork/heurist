@@ -50,20 +50,18 @@ $.widget( "heurist.recordListExt", {
         .appendTo( this.div_content );
 
         //-----------------------     listener of global events
-        this._events = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT + ' '
+        this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS + ' '
         + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
         + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
 
         $(this.document).on(this._events, function(e, data) {
 
-            if(e.type == window.hWin.HAPI4.Event.LOGIN){
-
-                that._refresh();
-
-            }else  if(e.type == window.hWin.HAPI4.Event.LOGOUT)
+            if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS)
             {
-                that.option("recordset", null);
-
+                if(!window.hWin.HAPI4.has_access()){ //logout
+                  that.option("recordset", null);  
+                }
+                that._refresh();
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){     //@todo???? with incremental    ON_REC_SEARCHRESULT
 
                 that.option("recordset", data); //hRecordSet

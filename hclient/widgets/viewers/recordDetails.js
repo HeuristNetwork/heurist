@@ -144,6 +144,7 @@ $.widget( "heurist.recordDetails", {
                     // call for tags - on response - draw tags
                     that.options.user_Tags = {}; //reset
                     //load all tags for current user and this groups with usagecount for current record
+                    /* todo replace to entity
                     window.hWin.HAPI4.RecordMgr.tag_get({recIDs:this.recIDloaded, UGrpID:'all'},
                         function(response) {
                             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
@@ -162,6 +163,7 @@ $.widget( "heurist.recordDetails", {
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                     });
+                    */
 
                     /* dynamic load of required js
                     var that = this;
@@ -355,7 +357,7 @@ $.widget( "heurist.recordDetails", {
                 var dtID = order[i];
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
-                    (window.hWin.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
+                    ( !window.hWin.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') ) &&
                         rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
                 {
                     continue;

@@ -96,7 +96,7 @@ function haddDataMenu() {
             function(event){
                 window.hWin.HAPI4.SystemMgr.user_log('impDelim');
                 
-                window.hWin.HAPI4.SystemMgr.is_logged(
+                window.hWin.HAPI4.SystemMgr.verify_credentials(
                 function(){
                    var url = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
                    
@@ -192,7 +192,8 @@ function haddDataMenu() {
 
 
         if(link.attr('id')=='menulink-add-record'){
-                
+            
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){    
                 $('.accordion_pnl').find('a').parent().removeClass('item-selected');
                 link.parent().addClass('item-selected');
                 
@@ -200,13 +201,15 @@ function haddDataMenu() {
                             +window.hWin.HAPI4.database
                             +'&action=add_record';
                 __load_frame_content(url);
-                event.preventDefault();
-                return false;
+            });
+            
+            event.preventDefault();
+            return false;
                 
         }else if(link.hasClass('embed')) {
         
             //check if login
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                 $('.accordion_pnl').find('a').parent().removeClass('item-selected');
                 link.parent().addClass('item-selected');
                 __load_frame_content(url);
@@ -217,7 +220,7 @@ function haddDataMenu() {
                 
         }else if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
         }else{
             window.hWin.HEURIST4.msg.showDialog(url, options);
         }        

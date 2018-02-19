@@ -328,7 +328,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             return btns;
     },
     
-    _initEditForm_step1: function(recID, afterInitCallback){
+    _initEditForm_step1: function(recID){
         if(this.options.edit_mode=='popup'){
 
             var query = null, popup_options={};
@@ -374,7 +374,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             window.hWin.HEURIST4.ui.openRecordEdit( recID, query, popup_options);
             
         }else{
-            this._super( recID, afterInitCallback );
+            this._super( recID );
         }
     },
     
@@ -923,6 +923,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             var recs = (response.data && response.data.records)?response.data.records:[];
                             
                             window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                                    isdialog: false,
                                     container: panel,
                                     select_mode:'select_multi', 
                                     layout_mode: '<div class="recordList"/>',
@@ -1035,7 +1036,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .click(function(){
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
-                                isdialog: true,
                                 edit_mode: 'editonly',
                                 rem_RecID: that._currentEditID,
                                 onClose:function(){
@@ -1101,7 +1101,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .click(function(){
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrBookmarks', {
-                                isdialog: true,
                                 bkm_RecID: that._currentEditID,
                                 height:400,
                                 onClose:function(){
@@ -1184,7 +1183,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         */
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
-                                isdialog: true,
                                 width: 800,
                                 height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
                                 select_mode:'select_multi', 
@@ -1706,7 +1704,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //show coverall to prevnt edit
             //1. No enough premission
             var no_access = that._getField('rec_OwnerUGrpID')>0 &&  //0 is everyone
-                            window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'))<0;
+                            !window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'));
                             //!window.hWin.HAPI4.is_admin()
             
             //2. Popup for resource field

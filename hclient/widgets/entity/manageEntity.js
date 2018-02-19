@@ -130,8 +130,6 @@ $.widget( "heurist.manageEntity", {
     _edit_dialog:null, //keep reference to popup dialog
     _toolbar:null,
     
-    _afterInitCallback:null,
-    
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
@@ -1147,14 +1145,12 @@ $.widget( "heurist.manageEntity", {
     //
     //  it creates hEditing object and warns about save previous data
     //
-    _initEditForm_step1: function(recID, afterInitCallback){
+    _initEditForm_step1: function(recID){
         
         if(!this.editForm || this.editForm.length==0) return;
 
         var that = this;
         
-        this._afterInitCallback = afterInitCallback;    
-
         if(!this._editing){
             this._editing = new hEditing({entity:this.options.entity, container:this.editForm, onchange:function(){
                 that.onEditFormChange(this); //this is changed_element
@@ -1393,10 +1389,6 @@ $.widget( "heurist.manageEntity", {
         
         this.onEditFormChange();
         // to EXTEND         
-        
-        if($.isFunction(this._afterInitCallback)){
-            this._afterInitCallback.call();
-        }
         
         //old way window.hWin.HEURIST4.ui.switchHintState('prefs_'+this._entityName, this.element, false);
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm); 

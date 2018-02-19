@@ -477,7 +477,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     _initCompactUI: function(){
         
         var that = this;
-        
+        /*
         var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
         if(!groups){
                 //load detailed info about Workgroups
@@ -489,7 +489,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         }
                 });
                 return;
-        }
+        }*/
         
         
         var idx, panel = this.recordList;
@@ -500,8 +500,24 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             .css({'padding':'3px 4px'})
             .attr('data-id', window.hWin.HAPI4.currentUser['ugr_ID'])
             .hide().appendTo(panel);
-        
+
         //render group divs
+        
+        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+        for (var idx in groups)
+        {
+            if(idx){
+                var groupID = idx;
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[idx];
+                if(!window.hWin.HEURIST4.util.isnull(name))
+                {   
+                    $('<div><i style="display:inline-block;width:110px;text-align:right;">'+name+':&nbsp;</i></div>')
+                        .css({'padding':'3px 4px'})
+                        .attr('data-id', groupID).hide().appendTo(panel);
+                }
+            }
+        }
+        /* OLD WAY        
         for (idx in groups)
         {
             if(idx){
@@ -515,7 +531,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 }
             }
         }
-        
+        */
         //add content - selected tags
         var recordset = this._cachedRecordset;
         var records = recordset.getRecords();

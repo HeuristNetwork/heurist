@@ -142,7 +142,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     
                         var options = {select_mode: 'select_multi',
                                 ugl_GroupID: -ugl_GroupID,
-                                isdialog: true,
                                 edit_mode:'none',
                                 title: ("Select Users to add to Workgroup #"+ugl_GroupID),
                                 onselect:function(event, data){
@@ -242,7 +241,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
                     var options = {select_mode: 'manager',
                         ugl_UserID: user_ID,
-                        isdialog: true,
                         edit_mode:'popup',
                         title: ("Manage Membership for User #"+user_ID),
                         //before close - count for membership and refresh
@@ -395,7 +393,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 if(recID==2 && ugl_GroupID==window.hWin.HAPI4.sysinfo.db_managers_groupid){
                     html = html + '<div style="min-width:78px;text-align:center">admin</div>';
                 }else 
-                if(window.hWin.HAPI4.has_access(ugl_GroupID)>0){    //admin of this group
+                if(window.hWin.HAPI4.has_access(ugl_GroupID)){//current user is admin of given group
                     html = html 
                         + '<select title="Role" style="min-width:70px;text-align:center;margin:0 4px;" class="user-role" data-value="'
                         + fld('ugl_Role')+'">'
@@ -412,7 +410,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 //html = html + '<div style="min-width:78px;"></div>';
             }
             
-            if( window.hWin.HAPI4.is_admin() ) { //window.hWin.HAPI4.has_access(recID)>0 ){
+            if( window.hWin.HAPI4.is_admin() ) {//current user is admin of database managers
                 
                 html = html 
                     + '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'

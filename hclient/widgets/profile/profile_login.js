@@ -114,7 +114,7 @@ function doLogin(isforsed){
                                     window.hWin.HAPI4.setCurrentUser(response.data.currentUser);
                                     window.hWin.HAPI4.sysinfo = response.data.sysinfo;
 
-                                    $(document).trigger(window.hWin.HAPI4.Event.LOGIN, [window.hWin.HAPI4.currentUser]);
+                                    $(document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, [window.hWin.HAPI4.currentUser]);
 
                                     $dlg.dialog( "close" );
                                     //that._refresh();
@@ -170,7 +170,7 @@ function doLogin(isforsed){
                 buttons: arr_buttons,
                 close: function() {
                     allFields.val( "" ).removeClass( "ui-state-error" );
-                    if( isforsed && !window.hWin.HAPI4.is_logged() ){
+                    if( isforsed && !window.hWin.HAPI4.has_access() ){
                         //redirect to select database
                         window.location  = window.HAPI4.baseURL; //+ "hserver/utilities/list_databases.php";
                     }

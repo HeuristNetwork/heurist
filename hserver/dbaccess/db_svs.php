@@ -130,8 +130,7 @@
             $system->addError(HEURIST_INVALID_REQUEST, "Query not defined");
         }else{
 
-            $record['svs_UGrpID'] = $system->is_admin2(@$record['svs_UGrpID']);
-            if (!$record['svs_UGrpID']) {
+            if (!$system->has_access(@$record['svs_UGrpID'])) {
                 $system->addError(HEURIST_REQUEST_DENIED, 
                     'Cannot update filter criteria. Current user must be an administrator for group');
             }else{
@@ -157,8 +156,7 @@
     function svsDelete($system, $rec_ids, $ugrID=null){
 
         //verify that current user can delete
-        $ugrID = $system->is_admin2($ugrID);
-        if (!$ugrID) {
+        if (!$system->has_access($ugrID)) {
             $system->addError(HEURIST_REQUEST_DENIED,
                 'Cannot delete filter criteria. Current user must be an administrator for group');
             return false;

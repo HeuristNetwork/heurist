@@ -135,6 +135,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             //tags
             //$('#div_sel_tags').show()
             window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                    isdialog : false,
                     container: $('#div_sel_tags2'),
                     select_mode:'select_multi', 
                     layout_mode: '<div class="recordList"/>',
@@ -388,6 +389,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     
     function _fillOwnership(){
         
+        /* use instead: window.hWin.HAPI4.sysinfo.db_usergroups and window.hWin.HAPI4.currentUser.ugr_Groups
         if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
             var that = this;
             //get details about Workgroups (names etc)
@@ -399,7 +401,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     }
             });
             return;
-        }
+        }*/
         
         
         var fieldSelect = $('#sel_Ownership');
@@ -409,6 +411,22 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 +'<option value="'+window.hWin.HAPI4.currentUser['ugr_ID']+'">'
                 +window.hWin.HEURIST4.util.htmlEscape(window.hWin.HAPI4.currentUser['ugr_FullName'])+'</option>';
         
+        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+        for (var idx in groups)
+        {
+            if(idx){
+                var groupID = idx;
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[idx];
+                if(!window.hWin.HEURIST4.util.isnull(name))
+                {   
+                    sContent = sContent + '<option value="'+groupID+'">'
+                                + window.hWin.HEURIST4.util.htmlEscape(name)+'</option>';
+                }
+            }
+        }
+        
+
+        /*        
         var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
         for (var idx in groups)
         {
@@ -422,6 +440,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }
             }
         }
+        */
+        
+        
         fieldSelect.html(sContent);
         
 

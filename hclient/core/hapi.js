@@ -82,21 +82,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }else{}*/
         // Get current user if logged in, and global database settings
         // see usr_info.php sysinfo method  and then system->getCurrentUserAndSysInfo
-        that.SystemMgr.sys_info(
-            function(response){
-                var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
-                if(success){
-                    if(response.data.currentUser) that.setCurrentUser(response.data.currentUser);
-                    that.sysinfo = response.data.sysinfo;
-                    that.baseURL = that.sysinfo['baseURL'];
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response.message);
-                }
-                if(_oninit){
-                    _oninit(that.database && success);
-                }
-            }
-        );
+        that.SystemMgr.sys_info( _oninit );
 
     }
 
@@ -135,9 +121,10 @@ function hAPI(_db, _oninit) { //, _currentUser
             cache: false,
             error: function( jqXHR, textStatus, errorThrown ) {
 
-                err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
+                err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
+                                            ?'Error_Connection_Reset':jqXHR.responseText;
+                                            
                 var response = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
-                //_processerror(response);
 
                 if(callback){
                     callback(response);
@@ -146,11 +133,20 @@ function hAPI(_db, _oninit) { //, _currentUser
             },
             success: function( response, textStatus, jqXHR ){
 
-                //_processerror(response);
-
                 if(callback){
                     callback(response);
                 }
+                
+                /*check response for special marker that forces to reload user and system info
+                //after update sysIdentification, dbowner and user role
+                if(response && 
+                    (response.status == window.hWin.HAPI4.ResponseStatus.OK) && 
+                     response.force_refresh_sys_info) {
+                         that.SystemMgr.sys_info(function(success){
+                             
+                         });
+                }*/
+                
             },
             fail: function(  jqXHR, textStatus, errorThrown ){
                 err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
@@ -203,8 +199,9 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   login        - login and get current user info
     *   logout
     *   reset_password
-    *   is_logged
-    *   sys_info     - get current user info and database settings
+    *   verify_credentials  - checks whether user is logged in and force_refresh_sys_info in case change roles or update db settings
+    * 
+    *   sys_info     - get current user info and database settings - used only in hapi.init and on force_refresh_sys_info
     *   save_prefs   - save user preferences  in session
     *   mygroups     - description of current user Workgroups
     *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber, or by list of ids
@@ -245,51 +242,98 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             /**
-            * Just check server side that session is not expired. Returns 1 if OK, 0 if expired
-            ,is_logged: function(callback){
-                _callserver('usr_info', {a:'is_logged'}, callback);
-            }
+            *  1) it verifies crendentials on server side and checks if they will be upated
+            *  2) in case they are changed it returns up-to-date user and sys info
+            *  3) in case needed level of credentials is defined it verifies the permissions
+            * 
+            * requiredLevel - 
+            *  -1 no verification
+            *  0 logged (DEFAULT)
+            *  groupid  - admin of group  
+            *  1 - db admin (admin of group #1)
+            *  2 - db owner
+            * 
+            *  need to call this method before every major action or open popup dialog
+            *  for internal actions use client side methods of hapi.is_admin, is_member, has_access
             */
-            , is_logged: function(callback){
+            , verify_credentials: function(callback, requiredLevel){
 
                 //check if login
-                _callserver('usr_info', {a:'is_logged'},
+                _callserver('usr_info', {a:'verify_credentials'},
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK && response.data=='0'){
+                    
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    
+                        if(response.data.sysinfo){
+                            window.hWin.HAPI4.sysinfo = response.data.sysinfo;
+                            window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+                        }
+                        if(response.data.currentUser) {
+                            window.hWin.HAPI4.setCurrentUser(response.data.currentUser);   
+                            //trigger global event ON_CREDENTIALS
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                        }
+
+                        //since currentUser is up-to-date - use client side method
+                        requiredLevel = Number(requiredLevel);
+                        
+                        if(!(requiredLevel<0  //not verify if reqlevel <0
+                            || window.hWin.HAPI4.has_access(requiredLevel))){ 
+
+                            response.sysmsg = 0;
                             response.status = window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED;
                             response.message = 'To perform this operation you have to be logged in';
-                            response.sysmsg = 0;
+                            
+                            if(requiredLevel==window.hWin.HAPI4.sysinfo.db_managers_groupid){
+                               response.message += ' as database administrator';// of group "Database Managers"' 
+                            }else if(requiredLevel==2){
+                               response.message += ' as database onwer';
+                            }else  if(requiredLevel>0){
+                               var sGrpName = '';
+                               if( window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[requiredLevel]){
+                                    sGrpName = ' "'+window.hWin.HAPI4.sysinfo.db_usergroups[requiredLevel]+'"';
+                               } 
+                               response.message += ' as administrator of group #'+requiredLevel+sGrpName;
+                            }
+                        }
                     }
+                    
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         callback();
                     }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response, true);
                        // window.hWin.HEURIST4.msg.showMsgErr(response, true); Login Page is already rendered no need to  display Error Message
                     }
                 });
 
             }
 
-            , is_admin: function(callback){
-                _callserver('usr_info', {a:'is_admin'},
-                function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK && response.data=='0'){
-                            response.status = window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED;
-                            response.message = 'To perform this operation you have to be logged in as administrator';
-                            response.sysmsg = 0;
-                    }
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                        callback();
-                    }else{
-                       // window.hWin.HEURIST4.msg.showMsgErr(response, true); Login Page is already rendered no need to  display Error Message
-                    }
-                });
-            }
-            
             /**
             * Get current user if logged in, and global database settings
+            * used only in hapi.init and on force_refresh_sys_info
             */
             ,sys_info: function(callback){
-                _callserver('usr_info', {a:'sysinfo'}, callback);
+                
+                _callserver('usr_info', {a:'sysinfo'}, 
+                    function(response){
+                        var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+                        if(success){
+                            
+                            if(response.data.currentUser) {
+                                window.hWin.HAPI4.setCurrentUser(response.data.currentUser);   
+                            }
+                            if(response.data.sysinfo){
+                                window.hWin.HAPI4.sysinfo = response.data.sysinfo;
+                                window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                        }
+                        if(callback){
+                            callback(success);
+                        }
+                    }
+                );
             }
 
             /**
@@ -484,15 +528,6 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   minmax
     *   get
     *
-    * @todo move those to entity
-    *   tag_save
-    *   tag_delete
-    *   tag_get
-    *   tag_set
-    *   tag_replace
-    *   tag_rating
-    *
-    *
     * @returns {Object}
     */
     function hRecordMgr(){
@@ -659,65 +694,6 @@ function hAPI(_db, _oninit) { //, _currentUser
             ,get: function(request, callback){
                 _callserver('record_get', request, callback);
             }
-
-            // add/save tag
-            // request  a: save
-            //          tag_ID (not specified if ADD)
-            //          tag_Text
-            //          tag_Description
-            //          tag_UGrpID
-            ,tag_save: function(request, callback){
-                if(request) request.a = 'save';
-                _callserver('record_tags', request, callback);
-            }
-            // remove tag
-            // request  a: delete
-            //          ids - list of tag ids to be deleted
-            ,tag_delete: function(request, callback){
-                if(request) request.a = 'delete';
-                _callserver('record_tags', request, callback);
-            }
-            // get list of tags for sepcified userid
-            // request  a: search
-            //          UGrpID
-            //          recIDs - record ids
-            //          info - full or short
-            // response  recIDs
-            //
-            ,tag_get: function(request, callback){
-                if(request) request.a = 'search';
-                _callserver('record_tags', request, callback);
-            }
-            // assign/remove list of tags for sepcified list of records
-            // request  a: assign_remove
-            //          assign: cs list of tag ids to be assigned
-            //          remove: tags to be removed from records
-            //          recIDs: cs list of record ids
-            //          UGrpID
-            ,tag_set: function(request, callback){
-                if(request) request.a = 'set';
-                _callserver('record_tags', request, callback);
-            }
-
-            // remove tag
-            // request  a: replace
-            //          ids - list of tag ids to be replaced and deleted
-            //          new_id - new tag id
-            ,tag_replace: function(request, callback){
-                if(request) request.a = 'replace';
-                _callserver('record_tags', request, callback);
-            }
-
-            // asign rating for given set of bookmarked records
-            // request  a: rating
-            //          ids - list of tag ids to be replaced and deleted
-            //          new_id - new tag id
-            ,tag_rating: function(request, callback){
-                if(request) request.a = 'rating';
-                _callserver('record_tags', request, callback);
-            }
-
-
         }
         return that;
     }
@@ -877,8 +853,9 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         Event: {
-            LOGIN: "LOGIN",
-            LOGOUT: "LOGOUT",
+            /*LOGIN: "LOGIN",
+            LOGOUT: "LOGOUT",*/
+            ON_CREDENTIALS: 'ON_CREDENTIALS', //login, logout, change user role, sysinfo (change sysIdentification) 
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
             ON_REC_SEARCH_FINISH: "ON_REC_SEARCH_FINISH",
             ON_REC_SEARCHRESULT: "ON_REC_SEARCHRESULT",
@@ -902,30 +879,21 @@ function hAPI(_db, _oninit) { //, _currentUser
                 that.currentUser = _guestUser;
             }
         },
-
-        /**
-        * Returns true if currentUser ID > 0 (not guest)
-        */
-        is_logged: function(){
-            return that.currentUser['ugr_ID']>0;
-        },
-
-        /**
-        * Returns true is current user is database owner - user id 2
-        */ 
-        is_dbowner: function(){
-            return that.currentUser['ugr_DbOwner'];
-        },
+        
+        // is_admin, is_member, has_access - verify credentials on client side
+        // they have to be used internally in widgets and loop operations to avoid server/network workload
+        // However, before start any action or open widget popup need to call 
+        // SystemMgr.verify_credentials
 
         /**
         * Returns true is current user is database admin (admin in group Database Managers)
         */
         is_admin: function(){
-            return that.currentUser['ugr_Admin'];
+            return window.hWin.HAPI4.has_access(window.hWin.HAPI4.sysinfo.db_managers_groupid);
         },
 
         /**
-        * Returns true if currentUser is member of given group ID or itself  (similar on server is_admin2)
+        * Returns true if currentUser is member of given group ID or itself
         * @param ug
         */
         is_member: function(ug){
@@ -934,22 +902,25 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         /**
-        * Return userGroup ID if currentUser is database admin or admin of given group
+        * Returns IF currentUser satisfies to required level
         *
-        * @param ugrID - userGroup ID
+        * @param requiredLevel 
+        * NaN or <1 - (DEFAULT) is logged in
+        * 1 - db admin (admin of group 1 "Database managers")
+        * 2 - db owner
+        * n - admin of given group
         */
-        has_access: function(ugrID){
+        has_access: function(requiredLevel){
 
-            if(!ugrID){
-                ugrID = that.currentUser['ugr_ID'];
+            requiredLevel = Number(requiredLevel);
+            
+            if(isNaN(requiredLevel) || requiredLevel<1){
+                return (that.currentUser && that.currentUser['ugr_ID']>0); 
             }
-            if(ugrID==that.currentUser['ugr_ID'] || that.is_admin() || 
-                (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][ugrID]=="admin"))
-            {
-                return ugrID;
-            }else{
-                return -1;
-            }
+            
+            return (requiredLevel==that.currentUser['ugr_ID'] ||   //iself 
+                    2==that.currentUser['ugr_ID'] ||   //db owner
+                    (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][requiredLevel]=="admin")); //admin of given group
         },
 
         /**

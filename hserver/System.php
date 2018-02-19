@@ -59,6 +59,22 @@ class System {
     private $current_User = null;
     private $system_settings = null;
     
+    /*
+    
+    init 
+        set_dbname_full
+        init_db_connection - connect to server and select database (move to db_utils?)
+        initPathConstants  - set path constants
+        login_verify  - load user info from session or reloads from database
+    
+    login
+        login_verify
+    
+    
+    
+    */
+    
+    
     /**
     * Read configuration parameters from config file
     *
@@ -71,25 +87,59 @@ class System {
     */
     public function init($db, $dbrequired=true, $init_session_and_constants=true){
 
-        if($db){
-            $this->dbname = $db;
-            if(strpos($db, HEURIST_DB_PREFIX)===0){
-                $this->dbname_full = $db;
-                $this->dbname = substr($db,strlen(HEURIST_DB_PREFIX));
-            }else{
-                $this->dbname = $db;
-                $db = HEURIST_DB_PREFIX.$db;
-                $this->dbname_full = $db;
-            }
-            
-
-        }else if($dbrequired){
-            $this->addError(HEURIST_INVALID_REQUEST, "Database parameter not defined");
-            $this->mysqli = null;
+        if( !$this->set_dbname_full($db, $dbrequired) ){
             return false;
         }
 
-        //dbutils
+        //dbutils?
+        if($this->init_db_connection()!==false){
+        
+                if($init_session_and_constants){
+                
+                    if(!$this->start_my_session()){
+                        return false;
+                    }
+                    
+                    if(!defined('HEURIST_DBNAME')){
+                        define('HEURIST_DBNAME', $this->dbname);
+                        define('HEURIST_DBNAME_FULL', $this->dbname_full);
+                    }
+
+                    //@todo  - test upload and thumb folder exist and writeable
+                    if(!$this->initPathConstants()){
+                        $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
+                            "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
+                            "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
+
+                        return false;
+                    }
+
+                    $this->login_verify( false ); //load user info from session
+                    if($this->get_user_id()>0){
+                        //set current user for stored procedures (log purposes)
+                        $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
+                    }
+                    
+                    // consts
+                    // @todo constants inited once in initPage for index (main) page only
+                    // $this->defineConstants();    
+                }
+       
+/*DEBUG            
+error_log('init systme '.$_SERVER['PHP_SELF']);
+error_log(print_r($_REQUEST, true));
+*/            
+            $this->is_inited = true;
+            return true;
+        }
+
+    }
+
+    //
+    //
+    //
+    private function init_db_connection(){
+        
         $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
         if ( is_array($res) ){
             //connection to server failed
@@ -107,53 +157,12 @@ class System {
                     $this->addError($res[0], $res[1]);
                     return false;
                 }
-
-                if($init_session_and_constants){
-                
-                    //load system info from sysIdentification table    
-                    //if(!$this->get_system()){
-                    //    return false;
-                    //}
-
-                    if(!$this->start_my_session()){
-                        return false;
-                    }
-
-                    if(!defined('HEURIST_DBNAME')){
-                        define('HEURIST_DBNAME', $this->dbname);
-                        define('HEURIST_DBNAME_FULL', $this->dbname_full);
-                    }
-
-                    //@todo  - test upload and thumb folder exist and writeable
-                    if(!$this->initPathConstants()){
-                        $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
-                            "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
-                            "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
-
-                        return false;
-                    }
-
-                    $this->login_verify(); //load user info from session
-                    if($this->get_user_id()>0){
-                        //set current user for stored procedures (log purposes)
-                        $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
-                    }
-                    
-                    // consts
-                    // @todo constants inited once in initPage for index (main) page only
-                    // $this->defineConstants();    
-                }
             }
-            
-//error_log('init systme '.$_SERVER['PHP_SELF']);
-            
-            $this->is_inited = true;
-            return true;
         }
-
+        return $res;
     }
 
-
+    //------------------------- RT DT CONSTANTS --------------------
     /**
     * Defines all constants
     */
@@ -195,7 +204,7 @@ class System {
     //
     // get constants as array to use on client side
     //
-    function getLocalConstants(){
+    private function getLocalConstants(){
 
         $this->defineConstants();
         
@@ -225,7 +234,7 @@ class System {
     * @param    int [$rtID] origin rectype id
     * @param    int [$dbID] origin database id
     */
-    function defineRTLocalMagic($defString, $rtID, $dbID) {
+    private function defineRTLocalMagic($defString, $rtID, $dbID) {
         
         $id = $this->rectypeLocalIDLookup($rtID, $dbID);
         
@@ -247,7 +256,7 @@ class System {
     * @param     int [$dbID] origin database id (default to 2 which is reserved for coreDefinition)
     * @return    int local rectype ID or null if not found
     */
-    function rectypeLocalIDLookup($rtID, $dbID = 2) {
+    private function rectypeLocalIDLookup($rtID, $dbID = 2) {
         global $talkToSysAdmin;
         static $RTIDs;
         
@@ -281,7 +290,7 @@ class System {
     * @param    int [$dtID] origin detailtype id
     * @param    int [$dbID] origin database id
     */
-    function defineDTLocalMagic($defString, $dtID, $dbID) {
+    private function defineDTLocalMagic($defString, $dtID, $dbID) {
         $id = $this->detailtypeLocalIDLookup($dtID, $dbID);
         if ($id) {
             //echo "\nDT DEFINING \"" . $defString . "\" AS " . $id;
@@ -301,7 +310,7 @@ class System {
     * @param     int [$dbID] origin database id (default to 2 which is reserved for coreDefinition)
     * @return    int local detailtype ID or null if not found
     */
-    function detailtypeLocalIDLookup($dtID, $dbID = 2) {
+    private function detailtypeLocalIDLookup($dtID, $dbID = 2) {
         global $talkToSysAdmin;
         static $DTIDs;
         
@@ -326,20 +335,17 @@ class System {
         return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID] : null);
     }
 
+    //------------------------- END RT DT CONSTANTS --------------------
 
     //
-    //
+    // $dbname - shortname (without prefix)
     //
     public function initPathConstants($dbname=null){
 
         global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
         if(!$dbname) $dbname = HEURIST_DBNAME;
 
-        $install_path = 'HEURIST/'; //$this->getInstallPath();
-        $dir_Filestore = "HEURIST_FILESTORE/";
-        $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
-        if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
-
+        //path is defined in configIni
         if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
 
 
@@ -368,8 +374,17 @@ class System {
 
 
 
-        }else{
+        }
+        else{
+            //path has defaul name
+            
+            $install_path = 'HEURIST/'; //$this->getInstallPath();
+            $dir_Filestore = "HEURIST_FILESTORE/";
 
+            $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
+            if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+            
+            
             if(!defined('HEURIST_FILESTORE_ROOT')){
                 define('HEURIST_FILESTORE_ROOT', $documentRoot . $install_path . $dir_Filestore );
             }
@@ -494,6 +509,35 @@ class System {
     public function dbname_full(){
         return $this->dbname_full;
     }
+
+    /**
+    * set dbname and dbname_full properties
+    * 
+    * @param mixed $db
+    */
+    public function set_dbname_full($db, $dbrequired=true){
+        
+        if($db){
+            if(strpos($db, HEURIST_DB_PREFIX)===0){
+                $this->dbname_full = $db;
+                $this->dbname = substr($db,strlen(HEURIST_DB_PREFIX));
+            }else{
+                $this->dbname = $db;
+                $db = HEURIST_DB_PREFIX.$db;
+                $this->dbname_full = $db;
+            }
+        }else{
+            $this->dbname = null;
+            $this->dbname_full = null;
+            
+            if($dbrequired){
+                $this->addError(HEURIST_INVALID_REQUEST, "Database parameter not defined");
+                $this->mysqli = null;
+                return false;
+            }
+        }
+        return true;
+    }
     
 
     /**
@@ -528,30 +572,26 @@ class System {
 
     /**
     * Returns all info for current user and some sys config parameters
+    * see usage usr_info.sysinfo and usr_info.login
+    * 
+    * it always reload user info from database
     */
     public function getCurrentUserAndSysInfo(){
+        
+        //current user reset - reload actual info from database
+        $this->login_verify( true );
 
-        $user = $this->current_User;
-        if($user) {
-            $user['ugr_Password'] = ''; // do not send password to client side
-            $user['ugr_Admin'] = $this->is_admin();
-            $user['ugr_DbOwner'] = $this->is_dbowner();
-            if(!@$user['ugr_Preferences']) {
-                $user['ugr_Preferences'] = @$_SESSION[$this->dbname_full]["ugr_Preferences"];   
-            }
-        }
+        if($this->mysqli){
 
-        if($this->mysqli && defined('HEURIST_DBNAME')){
-
-            $dbowner = user_getDbOwner($this->mysqli);
+            $dbowner = user_getDbOwner($this->mysqli); //info about user #2
 
             //list of databases recently logged in
             $dbrecent = array();
-            if(@$user['ugr_ID']>0){
+            if($this->current_User && @$this->current_User['ugr_ID']>0){
                 foreach ($_SESSION as $db=>$session){
 
                     $user_id = @$_SESSION[$db]['ugr_ID'] ?$_SESSION[$db]['ugr_ID'] :@$_SESSION[$db.'.heurist']['user_id'];
-                    if($user_id == $user['ugr_ID']){
+                    if($user_id == $this->current_User['ugr_ID']){
                         if(strpos($db, HEURIST_DB_PREFIX)===0){
                             $db = substr($db,strlen(HEURIST_DB_PREFIX));
                         }
@@ -564,7 +604,7 @@ class System {
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version();
 
             $res = array(
-                "currentUser"=>$user,
+                "currentUser"=>$this->current_User,
                 "sysinfo"=>array(
                     "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
                     "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
@@ -575,17 +615,19 @@ class System {
                     "version"=>HEURIST_VERSION,    
                     "version_new"=>$lastCode_VersionOnServer,
                     //db version
-                    "db_version"=> $this->get_system('sys_dbVersion').'.'.$this->get_system('sys_dbSubVersion').'.'.$this->get_system('sys_dbSubSubVersion'),         
+                    "db_version"=> $this->get_system('sys_dbVersion').'.'
+                                        .$this->get_system('sys_dbSubVersion').'.'
+                                        .$this->get_system('sys_dbSubSubVersion'),         
                     "db_version_req"=>HEURIST_MIN_DBVERSION,
                     
                     "dbowner_name"=>@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'],
                     "dbowner_email"=>@$dbowner['ugr_eMail'],
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
-                    "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
+                    "db_usergroups"=> user_getAllWorkgroups($this->mysqli), //all groups- to fast retrieve group name
                     "baseURL"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
-                    "dbrecent"=>$dbrecent,
+                    "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
                     'max_post_size'=>$this->get_php_bytes('post_max_size'),
                     'max_file_size'=>$this->get_php_bytes('upload_max_filesize')
                     )
@@ -642,16 +684,19 @@ class System {
     * Returns array of ID of all groups for current user plus current user ID
     */
     public function get_user_group_ids(){
+    
+        $ugrID = $this->get_user_id();
 
-        if($this->current_User){
+        if($ugrID>0){
             $groups = @$this->current_User['ugr_Groups'];
-            if($groups){
-                $groups = array_keys($groups);
-            }else{
-                $groups = array();
+            if(!is_array($groups)){
+                $groups = $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
             }
+
+            $groups = array_keys($groups);
+            
             //add user itself
-            array_push($groups, intval($this->current_User['ugr_ID']));
+            array_push($groups, intval($ugrID) );
             return $groups;
         }else{
             null;
@@ -669,66 +714,55 @@ class System {
         return ($ug==0 || $ug==null || $this->get_user_id()==$ug ||  @$this->current_User['ugr_Groups'][$ug]);
     }
 
-    public function is_logged_in(){
-        return ($this->get_user_id()>0);
-    }
-
+    /**
+    * Verifies is current user is database owner
+    * used to manage any recThereadedComments, recUploadedFiles, Reminders, Bookmarks, UsrTags
+    * otherwise only direct owners can modify them or members of workgroup tags
+    */
     public function is_dbowner(){
         return ($this->get_user_id()==2);
     }
-
-
+    
     /**
-    * Returns Workgroup ID if given id is id of database owner or admin of given group otehrwise it returns FALSE
-    *
-    * @param mixed $ugrID - Workgroup id, if it is omitted it takes current user ID
+    * id db owner or admin of database managers
+    * 
+    * @param mixed $ugrID
+    * @return mixed
     */
-    function is_admin2($ugrID){
-
-        if(!$ugrID){
-            $ugrID = $this->get_user_id();
-        }
-        if($this->is_admin() || $this->is_admin('group', $ugrID)){
-            return $ugrID;
-        }else{
-            return false;
-        }
+    public function is_admin(){
+        return ( $this->has_access( $this->get_system('sys_OwnerGroupID') ) );
     }
-
-
-    /**
-    * Returns true if current user is database owner admin or admin of given group (depends on context)
+    
+   /**
+    * Returns IF currentUser satisfies to required level
     *
-    * @param mixed $contx - databasde or group
-    * @param mixed $ug - group ID
+    * @param requiredLevel 
+    * null or <1 - (DEFAULT) is logged in
+    * 1 - db admin (admin of group 1 "Database managers")
+    * 2 - db owner
+    * n - admin of given group
     */
-    public function is_admin($contx = 'database', $ug = 0){
+    public function has_access( $requiredLevel=null ) {
 
-        if($this->get_user_id()<1) return false;     //not logged in
-
-        switch ($contx) {
-            case 'group':
-                if ($ug == 0 || $ug == $this->get_user_id()) return true; //itself
-                if ($ug > 0){
-                    return ( "admin" == @$this->current_User['ugr_Groups'][$ug] );
-                }
-                return false;
-                break;
-            case 'database':
-            default:
-                $sysvals = $this->get_system();
-                //admin in db owners group
-                return  ( "admin" ==  @$this->current_User['ugr_Groups'][$sysvals['sys_OwnerGroupID']] ); 
+        $ugrID = $this->get_user_id();
+        
+        if(!$requiredLevel || $requiredLevel<1){
+            return ($ugrID>0); 
         }
-    }
+        
+        return ($requiredLevel==$ugrID ||   //iself 
+                2==$ugrID ||   //db owner
+                @$this->current_User['ugr_Groups'][$requiredLevel]=='admin'); //admin of given group
+    }    
 
     /**
     * Restore session by cookie id, or start new session
     */
-    private function start_my_session(){
+    private function start_my_session($check_session_folder=true){
+        
         global $defaultRootFileUploadPath;
         //verify that session folder is writable
-        if(ini_get('session.save_handler')=='files'){
+        if($check_session_folder && ini_get('session.save_handler')=='files'){
             $folder = session_save_path();
             if(file_exists($folder) && !is_writeable($folder)){
                     $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
@@ -756,6 +790,7 @@ class System {
         }
         
 
+        //get session id from cookes    
         if (@$_COOKIE['heurist-sessionid']) {
             session_id($_COOKIE['heurist-sessionid']);
             session_cache_limiter('none');
@@ -783,72 +818,109 @@ class System {
 
 
     /*
-    * verify session only (without database connection and initialization)
+    * verify session only (without database connection and system initialization)
     */
-    public function is_logged($db){
+    public function verify_credentials($db){
 
-       if($db){
-            $this->dbname = $db;
-            if(!(strpos($db, HEURIST_DB_PREFIX)===0)){
-                $db = HEURIST_DB_PREFIX.$db;
-            }
-            $this->dbname_full = $db;
-        }else{
-            $this->addError(HEURIST_INVALID_REQUEST, "Database parameter not defined");
-            $this->mysqli = null;
-            return false;
-        }
-        if($this->start_my_session()){
-            return (@$_SESSION[$this->dbname_full]['ugr_ID']>0)?1:0; //$this->login_verify()?'1':'0';
+        if( $this->set_dbname_full($db) && $this->start_my_session(false) ){
+            return @$_SESSION[$this->dbname_full]['ugr_ID'];
         }else{
             return false;
         }
+        
     }
 
 
     /**
-    * Load user info from session
+    * Load user info from session - called on init only
+    * 
+    * $reload_user_from_db - true reload user info from database
     */
-    private function login_verify(){
-        $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
-
-        if(!$userID){
-            // vsn 3 backward capability  - restore user id from old session
-            $h3session = $this->dbname_full.'.heurist';
-            $userID = @$_SESSION[$h3session]['user_id'];
-            if($userID){
-                $_SESSION[$this->dbname_full]['ugr_ID']       = $_SESSION[$h3session]['user_id'];
-                $_SESSION[$this->dbname_full]['ugr_Name']     = $_SESSION[$h3session]['user_name'];
-                $_SESSION[$this->dbname_full]['ugr_FullName'] = $_SESSION[$h3session]['user_realname'];
-                $_SESSION[$this->dbname_full]['keepalive']    = @$_SESSION[$h3session]['keepalive'];
+    private function login_verify( $user ){
+        
+        $reload_user_from_db = false; 
+        $h3session = $this->dbname_full.'.heurist';
+        
+        if( is_array($user) ){  //user info already found (see login) - need reset session
+            $reload_user_from_db = true;            
+            $userID = $user['ugr_ID'];
+        }else{
+        
+            $reload_user_from_db = ($user==true);  //reload user unconditionally
+            
+            $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
+            
+            if(!$userID){ //in h4 session user not found
+                // vsn 3 backward capability  - restore user id from old session
+                $userID = @$_SESSION[$h3session]['user_id'];
+                if($userID){
+                    $_SESSION[$this->dbname_full]['keepalive'] = @$_SESSION[$h3session]['keepalive'];
+                    $reload_user_from_db = true;
+                }
             }
         }
         
         $islogged = ($userID != null);
         if($islogged){
-
-            //@todo do not update session on every request, update in on user membership changes
-            if(!@$_SESSION[$this->dbname_full]['ugr_Groups']){
-//error_log('get workgroups');                
-                $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
+            
+            if(@$_SESSION[$this->dbname_full]['need_refresh']) {
+                unset($_SESSION[$this->dbname_full]['need_refresh']);
             }
+            
+            $fname = HEURIST_FILESTORE_DIR.$userID;
+            if(file_exists($fname)){  //user info was updated by someone else
+                unlink($fname);
+                //marker for usr_info.verify_credentials to be sure that client side is also up to date 
+                if($user!==true) $_SESSION[$this->dbname_full]['need_refresh'] = 1;
+                $reload_user_from_db = true;
+            }
+            
+
+            if($reload_user_from_db){ //from database
+                
+                if(!is_array($user)){
+                    $user = user_getById($this->mysqli, $userID);
+                }
+                //user can be removed - check presence 
+                if($user==null){
+                    return false; //not logged in
+                }
+                
+                $_SESSION[$this->dbname_full]['ugr_ID'] = $userID;
+                $_SESSION[$this->dbname_full]['ugr_Groups']   = user_getWorkgroups( $this->mysqli, $userID );
+                $_SESSION[$this->dbname_full]['ugr_Name']     = $user['ugr_Name'];
+                $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
+                
+                
+                //vsn 3 backward capability
+                $_SESSION[$h3session]['cookie_version'] = 1;
+                $_SESSION[$h3session]['user_id']       = $userID;
+                $_SESSION[$h3session]['user_name']     = $_SESSION[$this->dbname_full]['ugr_Name'];
+                $_SESSION[$h3session]['user_realname'] = $_SESSION[$this->dbname_full]['ugr_FullName'];
+                $_SESSION[$h3session]['user_access']   = $_SESSION[$this->dbname_full]['ugr_Groups'];
+                $_SESSION[$h3session]['keepalive']     = @$_SESSION[$this->dbname_full]['keepalive'];
+                
+                
+                //remove semaphore file
+                
+            }//$reload_user_from_db from db
+            
             if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){
                 $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getDefaultPreferences();
             }
 
-            $this->current_User = array(
-                'ugr_ID'=>intval($userID),
-                'ugr_FullName'=>$_SESSION[$this->dbname_full]['ugr_FullName'],
-                'ugr_Groups' => $_SESSION[$this->dbname_full]['ugr_Groups'],
-                'ugr_Preferences' => $_SESSION[$this->dbname_full]['ugr_Preferences']);
+            $this->current_User = array('ugr_ID'=>intval($userID),
+                            'ugr_Name'        => @$_SESSION[$this->dbname_full]['ugr_Name'],
+                            'ugr_FullName'    => $_SESSION[$this->dbname_full]['ugr_FullName'],
+                            'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
+                            'ugr_Preferences' => $_SESSION[$this->dbname_full]['ugr_Preferences']);
                 
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
-                setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/');//, HEURIST_SERVER_NAME);
+                $cres = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/');//, HEURIST_SERVER_NAME);
             }
             
-            
-
+            session_write_close();
         }
         return $islogged;
     }
@@ -884,14 +956,6 @@ class System {
 
                 }else if ( $superuser || crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
 
-                    $_SESSION[$this->dbname_full]['ugr_ID'] = $user['ugr_ID'];
-                    $_SESSION[$this->dbname_full]['ugr_Name'] = $user['ugr_Name'];
-                    $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
-                    
-                    if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){
-                        $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getDefaultPreferences();
-                    }
-
                     $time = 0;
                     if($session_type == 'public'){
                         $time = 0;
@@ -905,26 +969,11 @@ class System {
                     if(!$cres){
                     }
 
+                    $_SESSION[$this->dbname_full]['ugr_ID'] = $user['ugr_ID'];
+                    //$this->login_verify( $user ); //save data into session
+                    
                     //update login time in database
                     user_updateLoginTime($this->mysqli, $user['ugr_ID']);
-
-                    //keep current user info
-                    $user['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
-                    $user['ugr_Password'] = '';
-                    $user['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $user['ugr_ID'] );
-                    $user['ugr_Preferences'] = @$_SESSION[$this->dbname_full]["ugr_Preferences"];
-                    $this->current_User = $user;
-
-                    //vsn 3 backward capability
-                    if(true){
-                        $h3session = $this->dbname_full.'.heurist';
-                        $_SESSION[$h3session]['cookie_version'] = 1;
-                        $_SESSION[$h3session]['user_name']     = $user['ugr_Name'];
-                        $_SESSION[$h3session]['user_realname'] = $user['ugr_FullName'];
-                        $_SESSION[$h3session]['user_id']       = $user['ugr_ID'];
-                        $_SESSION[$h3session]['user_access']   = $user['ugr_Groups'];
-                        $_SESSION[$h3session]['keepalive']     = ($session_type == 'remember');
-                    }
 
                     return true;
                 }else{
@@ -949,6 +998,9 @@ class System {
     * Clears cookie and destroy session and current_User info
     */
     public function logout(){
+        
+        $this->start_my_session(false);
+
         $cres = setcookie('heurist-sessionid', "", time() - 3600);
         $this->current_User = null;
         //session_destroy();
@@ -966,6 +1018,7 @@ class System {
                 unset($_SESSION[$h3session]['user_realname']);
             }
         }
+        session_write_close();
         return true;
     }
 
@@ -1055,10 +1108,9 @@ class System {
     }
     
     //
-    //
+    // check database version 
     //
     private function get_last_code_and_db_version(){
-        
         
         $version_last_check = 'unknown';
         $need_check_main_server = true;
@@ -1106,6 +1158,6 @@ class System {
         
         return $version_last_check; 
     }
-    
+
 }
 ?>

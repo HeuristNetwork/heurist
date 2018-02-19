@@ -218,7 +218,7 @@ $.widget( "heurist.mainMenu", {
             .button({icons: {
                 primary: "ui-icon-circle-plus"
             }})
-            .click( function(){window.hWin.HAPI4.SystemMgr.is_logged(that._addNewRecord);} );
+            .click( function(){window.hWin.HAPI4.SystemMgr.verify_credentials(that._addNewRecord);} );
         }
 
 
@@ -243,7 +243,7 @@ $.widget( "heurist.mainMenu", {
                 }
         });
 
-        $(this.document).on(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT, function(e, data) {
+        $(this.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
             that._refresh();
         });
 
@@ -275,7 +275,7 @@ $.widget( "heurist.mainMenu", {
     */
     _refresh: function(){
 
-        if(window.hWin.HAPI4.is_logged()){
+        if(window.hWin.HAPI4.has_access()){
             //this.divCurrentUser.html( window.hWin.HAPI4.currentUser.ugr_FullName );
             //': <a href="../../common/connect/login.php?logout=1&amp;db='+window.hWin.HAPI4.database+'">log&nbsp;out</a>');
 
@@ -312,7 +312,7 @@ $.widget( "heurist.mainMenu", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
 
-        $(this.document).off(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT);
+        $(this.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
         $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SELECT + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECTON_REC_SEARCHSTART);
 
         // remove generated elements
@@ -428,12 +428,6 @@ $.widget( "heurist.mainMenu", {
 
                 that._refresh();
                 
-                /*if(window.hWin.HAPI4.is_logged()){
-                    that['menu_'+name].find('.logged-in-only').show();
-                }else{
-                    that['menu_'+name].find('.logged-in-only').hide();
-                }*/
-
                 that._initLinks(that['menu_'+name]);
             })
             //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
@@ -502,7 +496,7 @@ $.widget( "heurist.mainMenu", {
         
         if(link && link.attr('data-nologin')!='1'){
             //check if login
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
         }else{
             window.hWin.HEURIST4.msg.showDialog(url, options);
         }        
@@ -568,60 +562,63 @@ $.widget( "heurist.mainMenu", {
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
         }
         
-        var p = false;
+        var requiredLevel = 0;
+        
+        window.hWin.HAPI4.SystemMgr.verify_credentials(
+        function(){
+        
         if(action == "menu-profile-preferences"){
-            //window.hWin.HAPI4.SystemMgr.is_logged(function(){that._editPreferences()}); p=true;        
             that._editPreferences();
-            p=true;        
         }else 
         if(action == "menu-profile-tags"){
-            window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {isdialog: true}); p=true;
+            window.hWin.HEURIST4.ui.showEntityDialog('usrTags');
         }else 
         if(action == "menu-profile-reminders"){
-            window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {isdialog: true}); p=true;
+            window.hWin.HEURIST4.ui.showEntityDialog('usrReminders');
         }else 
         if(action == "menu-profile-files"){
-            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', {isdialog: true}); p=true;
+            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles');
         }else 
         if(action == "menu-profile-groups"){
-            window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', {isdialog: true}); p=true;
+            window.hWin.HEURIST4.ui.showEntityDialog('sysGroups');
         }else 
         if(action == "menu-profile-info"){
-            window.hWin.HEURIST4.ui.showEntityDialog('SysUsers', 
-                {isdialog: true, edit_mode:'editonly', usr_ID: window.hWin.HAPI4.currentUser['ugr_ID']}); p=true;
+            window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', 
+                {edit_mode:'editonly', usr_ID: window.hWin.HAPI4.currentUser['ugr_ID']});
         }else 
-        if(action == "menu-profile-users"){
-            window.hWin.HEURIST4.ui.showEntityDialog('SysUsers', {isdialog: true}); p=true;
+        if(action == "menu-profile-users"){ //for admin only
+            window.hWin.HEURIST4.ui.showEntityDialog('sysUsers');
         }else 
-        if(action == "menu-profile-import"){
+        if(action == "menu-profile-import"){  //for admin only
             that._importUsers();
-            p  = true;
-            //window.hWin.HAPI4.SystemMgr.is_admin(function(){that._importUsers()}); p=true;
         }else if(action == "menu-database-refresh"){
-            this._refreshLists( true ); p=true;
+            that._refreshLists( true );
+            
         }else if(action == "menu-import-csv"){ // Result set
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.importCSV()}); p=true;
+            that.importCSV();
         }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rule-based expansion if applied
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,false,false)}); p=true; // isAll, includeRelated, multifile
+            that.exportHML(true,false,false); // isAll, includeRelated, multifile
         }else if(action == "menu-export-hml-selected"){ //Currently selected records only
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(false,false,false)}); p=true;
+            that.exportHML(false,false,false);
         }else if(action == "menu-export-hml-plusrelated"){ // Current resulktset with any related records
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,true,false)}); p=true;
+            that.exportHML(true,true,false);
         }else if(action == "menu-export-hml-multifile"){ // selected + related
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,false,true)}); p=true;
+            that.exportHML(true,false,true);
         }else if(action == "menu-export-kml"){
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportKML(true)}); p=true;
+            that.exportKML(true);
         }else if(action == "menu-export-rss"){
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportFeed('rss')}); p=true;
+            that.exportFeed('rss');
         }else if(action == "menu-export-atom"){
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){that.exportFeed('atom')}); p=true;
+            that.exportFeed('atom');
         }else if(action == "menu-help-tipofday"){
-            showTipOfTheDay(false); p=true;
+            showTipOfTheDay(false);
         }
+        
+        },
+        requiredLevel //needed level of credentials any, logged (by default), admin of group, db admin, db owner
+        );
 
-        if( p ){
-            event.preventDefault();
-        }
+        //event.preventDefault();
         
     },
 
@@ -992,7 +989,6 @@ $.widget( "heurist.mainMenu", {
             pagesize: 300,
             edit_mode: 'none',
             use_cache: true,
-            isdialog: true,
             except_current: true,
             onselect:function(event, data){
                 if(data && data.selection && data.selection.length>0){
@@ -1003,7 +999,6 @@ $.widget( "heurist.mainMenu", {
                             database: selected_database,
                             select_mode: 'select_multi',
                             edit_mode: 'none',
-                            isdialog: true,
                             onselect:function(event, data){
                                 if(data && data.selection &&  data.selection.length>0){
                                     var selected_users = data.selection;
@@ -1012,7 +1007,6 @@ $.widget( "heurist.mainMenu", {
                                         title: 'Allocate imported users to work groups',
                                         select_mode: 'select_roles',
                                         edit_mode: 'none',
-                                        isdialog: true,
                                         onselect:function(event, data){
                                             if(data && !$.isEmptyObject(data.selection)){
                                                 //selection is array of object
@@ -1075,7 +1069,7 @@ $.widget( "heurist.mainMenu", {
             function(response){
                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                     window.hWin.HAPI4.setCurrentUser(null);
-                    $(that.document).trigger(window.hWin.HAPI4.Event.LOGOUT);
+                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
                     that._refresh();
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);

@@ -1445,7 +1445,6 @@ window.hWin.HEURIST4.ui = {
                 }
                 
                 popup_options = $.extend(popup_options, {
-                    isdialog: true,
                     select_mode: 'manager',
                     edit_mode: 'editonly', //only edit form is visible, list is hidden
                     //height: usrPreferences.height,
@@ -1864,12 +1863,16 @@ window.hWin.HEURIST4.ui = {
         entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1); //entityName.capitalize();
                             
         var widgetName = 'manage'+entityName;
+        
+        if(!options) options = {};
+        if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
         if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
             
             if(!options.container){
+                
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
                     [widgetName]( options );

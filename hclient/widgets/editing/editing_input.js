@@ -559,7 +559,7 @@ $.widget( "heurist.editing_input", {
                                 if(recset.length()>0){                                  
                                 
                                     window.hWin.HEURIST4.ui.showEntityDialog('DefTerms', 
-                                        {select_mode:'images', recordset:recset, isdialog:true,
+                                        {select_mode:'images', recordset:recset,
                                         onselect:function(event, data){
                                             if(data && data.selection && data.selection.length>0){
                                                 $input.val(data.selection[0]);
@@ -842,7 +842,6 @@ $.widget( "heurist.editing_input", {
             
             
             var popup_options = {
-                            isdialog: true,
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
                             select_return_mode: 'recordset',
                             edit_mode: 'popup',
@@ -1112,12 +1111,17 @@ $.widget( "heurist.editing_input", {
             })
             .appendTo( $inputdiv );
             
-            if(!(this.options.dtID=='file' || this.detailType=='resource' || this.detailType=='date' || this.detailType=='geo')){
-                $input.keydown(function(e){
+            if(!(this.options.dtID=='file' || this.detailType=='resource' || 
+                 this.detailType=='date' || this.detailType=='geo')){
+                     
+                $input.keydown(function(e){  //Ctrl+A - select all
                     if (e.keyCode == 65 && e.ctrlKey) {
                                         e.target.select()
                     }    
                 });
+                if(this.detailType=='password'){
+                    $input.prop('type','password');
+                }
             }
             
             if(this.options.dtID=='rec_URL' || this.detailType=='url'){
