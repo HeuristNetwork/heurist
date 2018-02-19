@@ -1888,7 +1888,7 @@ window.hWin.HEURIST4.ui = {
             var scripts = [ path+widgetName+'.js'];
             
             //entities without search option
-            if(!(entityName=='UsrBookmarks' || entityName=='DefDetailTypeGroups')){ 
+            if(!(entityName=='UsrBookmarks' || entityName=='DefDetailTypeGroups' || entityName=='SysBugreport')){ 
                 scripts.push(path+'search'+entityName+'.js');
             }
             

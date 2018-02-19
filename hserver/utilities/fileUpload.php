@@ -45,7 +45,8 @@ if($system->init(@$_REQUEST['db'])){
             if(!$system->has_access($recID)){ //only user or group admin
               $response = $system->addError(HEURIST_REQUEST_DENIED);
             }
-    }else if($entity_name!='recUploadedFiles'){ //for all other entities other than recUploadedFile must be admin of dbowners group
+    }else if(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
+    { //for all other entities other than recUploadedFile must be admin of dbowners group
             if(!$system->is_admin()){
               $response = $system->addError(HEURIST_REQUEST_DENIED);
             }

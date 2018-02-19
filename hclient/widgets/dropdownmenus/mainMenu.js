@@ -567,6 +567,10 @@ $.widget( "heurist.mainMenu", {
         window.hWin.HAPI4.SystemMgr.verify_credentials(
         function(){
         
+        if(action == "menu-help-bugreport"){
+            
+           window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport');
+        }else 
         if(action == "menu-profile-preferences"){
             that._editPreferences();
         }else 

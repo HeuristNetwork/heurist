@@ -1018,7 +1018,7 @@ $.widget( "heurist.manageEntity", {
                             fields[ that.options.entity.keyField ] = (''+recID);
                             
                             //update record in cache
-                            if(that.options.use_cache){
+                            if(that.options.use_cache && that._cachedRecordset){
                                 that._cachedRecordset.addRecord(recID, fields);
                             }else{
                                 //add/update record in recordset in _afterSaveEventHandler depends on entity
