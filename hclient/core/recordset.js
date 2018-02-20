@@ -1298,6 +1298,7 @@ function hRecordSet(initdata) {
         
         removeRecord:function(recID){
             delete records[recID];           //@todo check how it affect select_multi
+            recID = ''+recID;
             var idx = order.indexOf(recID);
             if(idx>=0){
                 order.splice(idx,1);
@@ -1306,6 +1307,7 @@ function hRecordSet(initdata) {
         },
 
         addRecord:function(recID, record){
+            recID = ''+recID;
             var idx = order.indexOf(recID);
             if(idx<0){ //add new
                 records[recID] = [];
@@ -1317,6 +1319,7 @@ function hRecordSet(initdata) {
         },
         
         setRecord:function(recID, record){
+            recID = ''+recID;
             var idx = order.indexOf(recID);
             if(idx>=0){
                 

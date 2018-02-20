@@ -70,18 +70,32 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         if(this.options.isdialog){ // &&  !this.options.title
             var title = null;
             var usr_ID = 0;
+            
+            if(this.options.select_mode=='select_single'){
+               title = 'Select User'; 
+            }else
+            if(this.options.select_mode=='select_multi'){
+               title = 'Select Users'; 
+              
+              if(this.options.ugl_GroupID<0){ 
+                    usr_ID = Math.abs(this.options.ugl_GroupID);
+                    title += ' to add to Workgroup #'+usr_ID+': ';
+              }
+               
+            }else
             if(this.options.ugl_GroupID>0){
                 usr_ID = this.options.ugl_GroupID;
                 title = 'Manage Users of Workgroup #'+this.options.ugl_GroupID+': ';
-            }else if(this.options.ugl_GroupID<0){
+            }else /*if(this.options.ugl_GroupID<0){
                 usr_ID = Math.abs(this.options.ugl_GroupID);
                 title = 'Select Users to add to Workgroup #'+usr_ID+': ';
-            }else{
+            }else*/
+            {
                 if(window.hWin.HAPI4.is_admin()){
                     title = 'Manage All Users as Database Administrator';    
                 }else{                    
-                    usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
-                    title = 'Manage workgroups for user #'+window.hWin.HAPI4.currentUser['ugr_ID']+': ';    
+                    //usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+                    title = 'Manage Users';    
                 }
             }
             
@@ -530,7 +544,6 @@ console.log('ON_CRED???');
         
         this._super( recID, fieldvalues );
         this.getRecordSet().setRecord(recID, fieldvalues);
-        
         
         if(this.options.edit_mode == 'editonly'){
             this.closeDialog(true); //force to avoid warning

@@ -416,13 +416,13 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
-                            <option value="SysBugreport" selected>Bug report</option>
+                            <option value="SysBugreport">Bug report</option>
                             <option value="Records">Records</option>
                             <option value="SysUsers" >Users +</option>
                             <option value="SysGroups" >Workgroups +</option>
                             <option value="UsrTags" >Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
-                            <option value="UsrReminders">Reminders</option>
+                            <option value="UsrReminders" selected>Reminders</option>
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
                             <option value="Records">Saved Searches</option>

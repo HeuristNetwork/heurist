@@ -518,9 +518,14 @@ $.widget( "heurist.resultList", {
         if(this.div_content_header && this.div_content_header.is(':visible')){
             top = top + 2;    
         }
-
+        
         this.div_content.css({'top': (top+0.4)+'em'});
 
+        if(this.div_content_header && this.div_content_header.is(':visible')){ //table_header
+            this.div_content_header
+                    .position({my:'left bottom', at:'left top', of:this.div_content});
+        }
+        
         //show/hide elements on toolbar
         if(this.div_actions){
             if(this.options.show_menu){        
@@ -691,12 +696,12 @@ $.widget( "heurist.resultList", {
                     
                     this.div_content_header.show(); 
                     this.div_content_header.html( header_html )
-                    .css('top',header_height);       
-                    this.div_content.css('top',header_height+this.div_content_header.height());
+                    .position({my:'left bottom', at:'left top', of:this.div_content});
+                    //this.div_content.css('top',header_height+this.div_content_header.height());
                 }else if(!window.hWin.HEURIST4.util.isnull(this.div_content_header)){
                     //this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
                     this.div_content_header.hide();        
-                    this.div_content.css('top',header_height);
+                    //this.div_content.css('top',header_height);
                 }   
             }
 

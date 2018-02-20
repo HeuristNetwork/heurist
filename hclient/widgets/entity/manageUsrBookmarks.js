@@ -108,12 +108,16 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     },
     
 //----------------------------------------------------------------------------------    
-    _deleteAndClose: function(){
-        var that = this;
-        window.hWin.HEURIST4.msg.showMsgDlg(
-            'Are you sure you wish to delete this bookmark? Proceed?', function(){
-                that._super(); 
-            }, {title:'Warning',yes:'Proceed',no:'Cancel'});        
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this bookmark? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
     },
 
     _saveEditAndClose: function( fields, afteraction ){

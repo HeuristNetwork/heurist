@@ -52,6 +52,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "rst_DisplayName":"Reminder's message:",
+                        "rst_RequirementType":"required",
                         "rst_DisplayWidth":60,
                         "dty_Size":1000,
                         "rst_DisplayHelpText": "The message to be attached to the reminder, optional."
