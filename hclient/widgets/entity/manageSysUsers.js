@@ -67,7 +67,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         //update dialog title
-        if(this.options.isdialog &&  !this.options.title){
+        if(this.options.isdialog){ // &&  !this.options.title
             var title = null;
             var usr_ID = 0;
             if(this.options.ugl_GroupID>0){
@@ -162,6 +162,13 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                     //reload
                                                     that.searchForm.searchSysUsers('startSearch');
+                                                    
+console.log('ON_CRED???');                                                    
+                                                    if(data.selection.indexOf(window.hWin.HAPI4.currentUser['ugr_ID'])>=0){
+                                                        window.hWin.HAPI4.currentUser['ugr_Groups'][ugl_GroupID] = 'member';
+                                                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                                                    }
+                                                    
                                                 }else{
                                                     window.hWin.HEURIST4.msg.showMsgErr(response);      
                                                 }
@@ -226,6 +233,16 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                     selector.attr('data-value', newRole);
                                     window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
                                 }
+
+                                if(usr_ID==window.hWin.HAPI4.currentUser['ugr_ID']){
+                                    if(newRole=='remove'){
+                                        window.hWin.HAPI4.currentUserRemoveGroup(ugl_GroupID);
+                                    }else{
+                                        window.hWin.HAPI4.currentUser['ugr_Groups'][ugl_GroupID] = newRole;
+                                    }
+                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                                }
+                                
                             }else{
                                 //restore current value
                                 selector.val( selector.attr('data-value') );

@@ -283,7 +283,7 @@ class DbSysGroups extends DbEntityBase
     }     
     
     //
-    //
+    // delete group
     //
     public function delete(){
         
@@ -316,9 +316,14 @@ class DbSysGroups extends DbEntityBase
 
         $ret = true;
         
+        //find affected users 
+        $query = 'SELECT ugl_UserID FROM sysUsrGrpLinks'
+            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')';
+        $affectedUserIds = mysql__select_list2($mysqli, $query);            
+        
         //remove from roles table
         $query = 'DELETE FROM sysUsrGrpLinks'
-            . ' WHERE ugl_UserID in (' . implode(',', $this->recordIDs) . ')';
+            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')';
         
         $res = $mysqli->query($query);
         if(!$res){
@@ -335,7 +340,8 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $mysqli->commit();
             
-            foreach($this->recordIDs as $usrID)
+            if(count(@$affectedUserIds)>0)
+            foreach($affectedUserIds as $usrID)  //affected users
             if($usrID!=$this->system->get_user_id()){
                     $fname = HEURIST_FILESTORE_DIR.$usrID;
                     fileSave('X',$fname);  //on delete
@@ -447,7 +453,8 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $mysqli->commit();
             
-            foreach ($assignIDs as $usrID){
+            foreach ($assignIDs as $usrID)
+            if($usrID!=$this->system->get_user_id()){
                 $fname = HEURIST_FILESTORE_DIR.$usrID;
                 fileSave('X',$fname); //change role
             }

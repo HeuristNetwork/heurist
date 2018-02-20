@@ -882,6 +882,18 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
         },
         
+        currentUserRemoveGroup: function(groupID, isfinal){
+
+            if(window.hWin.HAPI4.currentUser['ugr_Groups'][groupID]){
+                window.hWin.HAPI4.currentUser['ugr_Groups'][groupID] = null;
+                delete window.hWin.HAPI4.currentUser['ugr_Groups'][groupID];
+            }
+            if(isfinal){
+                window.hWin.HAPI4.sysinfo.db_usergroups[groupID] = null;
+                delete window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+            }
+        },
+        
         // is_admin, is_member, has_access - verify credentials on client side
         // they have to be used internally in widgets and loop operations to avoid server/network workload
         // However, before start any action or open widget popup need to call 

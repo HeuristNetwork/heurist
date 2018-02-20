@@ -262,6 +262,16 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                                     window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
                                 }
+                                
+                                if(that.options.ugl_UserID==window.hWin.HAPI4.currentUser['ugr_ID']){
+                                    if(newRole=='remove'){
+                                        window.hWin.HAPI4.currentUserRemoveGroup(group_ID);
+                                    }else{
+                                        window.hWin.HAPI4.currentUser['ugr_Groups'][group_ID] = newRole;
+                                    }
+                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                                }
+                                
                             }else{
                                 //restore current value - rollback
                                 var restoreRole = item.attr('data-value');
@@ -453,17 +463,27 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
         //addition of new group - update fields in recordset and change current user credentials
         if(this._currentEditID<0){
-            fieldvalues['ugr_Members']=1;
-            fieldvalues['ugl_Role']='admin';
-            HAPI4
+            fieldvalues['ugr_Members'] = 1;
+            fieldvalues['ugl_Role'] = 'admin';
+            window.hWin.HAPI4.currentUser['ugr_Groups'][recID] = 'admin';
+            window.hWin.HAPI4.sysinfo.db_usergroups[recID] = fieldvalues['ugr_Name'];
+            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
         }
 //console.log(fieldvalues);
         this._super( recID, fieldvalues );
 
         this.getRecordSet().setRecord(recID, fieldvalues);
         this.recordList.resultList('refreshPage');  
+        
     },
-
+    
+    _afterDeleteEvenHandler: function( recID )   {
+        window.hWin.HAPI4.currentUserRemoveGroup(recID, true);
+        
+        this._super( recID );
+        
+        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+    },
 
     _afterInitEditForm: function(){
         this._super();
@@ -531,6 +551,18 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
 
 
+    }
+    
+    ,_deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this group? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
     }
 
 });

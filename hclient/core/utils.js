@@ -453,7 +453,7 @@ window.hWin.HEURIST4.util = {
         "'": '&#039;'
       };
 
-      return text?text.replace(/[&<>"']/g, function(m) { return map[m]; }):'';
+      return text? (''+text).replace(/[&<>"']/g, function(m) { return map[m]; }):'';
     },    
 
     isObject: function (a)

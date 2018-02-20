@@ -192,6 +192,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
 
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).click(function(){window.close();});
+
+        
+        //global listener
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
+            _fillOwnership();
+        });
     }
 
     //
@@ -391,23 +397,33 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
         var fieldSelect = $('#sel_Ownership');
         
+        var val_owner = fieldSelect.val();
+        
         window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], null,  //take groups of current user
                 [{key:0, title:'Everyone (no restriction)'}, 
                  {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
 
-        if(action_type=='add_record'){
-            $('#sel_Ownership').val(add_rec_prefs[1]);
-            //$('#rb_Access-'+add_rec_prefs[2]).prop('checked', true);
-            $('#sel_Access').val(add_rec_prefs[2]);
-            $('#sel_Ownership').change(_onAddRecordChange);;
-            $('#sel_Access').change(_onAddRecordChange);
-            _onAddRecordChange();
+
+        if(val_owner!=null && val_owner>=0){
+            fieldSelect.val(val_owner);
+
+            if(!(fieldSelect.val()>0)) fieldSelect.val(0); //set to everyone
         }else{
-            var currentOwner = window.hWin.HEURIST4.util.getUrlParameter('owner', window.location.search);
-            var currentAccess = window.hWin.HEURIST4.util.getUrlParameter('access', window.location.search);
-            if(currentOwner>=0 && currentAccess){
-                fieldSelect.val(currentOwner);
-                $('#rb_Access-'+currentAccess).prop('checked', true);
+            if(action_type=='add_record'){
+                    $('#sel_Ownership').val(add_rec_prefs[1]);
+                    
+                    //$('#rb_Access-'+add_rec_prefs[2]).prop('checked', true);
+                    $('#sel_Access').val(add_rec_prefs[2]);
+                    $('#sel_Ownership').change(_onAddRecordChange);;
+                    $('#sel_Access').change(_onAddRecordChange);
+                    _onAddRecordChange();
+            }else{
+                var currentOwner = window.hWin.HEURIST4.util.getUrlParameter('owner', window.location.search);
+                var currentAccess = window.hWin.HEURIST4.util.getUrlParameter('access', window.location.search);
+                if(currentOwner>=0 && currentAccess){
+                    fieldSelect.val(currentOwner);
+                    $('#rb_Access-'+currentAccess).prop('checked', true);
+                }
             }
         }
     }
