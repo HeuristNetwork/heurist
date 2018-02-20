@@ -271,8 +271,8 @@ class DbSysGroups extends DbEntityBase
                         $admin_role['ugl_Role'] = 'admin';
                         $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $admin_role);
                         
-                        $fname = HEURIST_FILESTORE_DIR.$system->get_user_id();
-                        fileSave('X',$fname);
+                        //$fname = HEURIST_FILESTORE_DIR.$this->system->get_user_id();
+                        //fileSave('X',$fname);  on save
                     }
                 }
             }
@@ -335,9 +335,10 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $mysqli->commit();
             
-            foreach($this->recordIDs as $usrID){
-                $fname = HEURIST_FILESTORE_DIR.$usrID;
-                fileSave('X',$fname);
+            foreach($this->recordIDs as $usrID)
+            if($usrID!=$this->system->get_user_id()){
+                    $fname = HEURIST_FILESTORE_DIR.$usrID;
+                    fileSave('X',$fname);  //on delete
             }
             
             //@todo   $groups = reloadUserGroups(get_user_id());
@@ -448,7 +449,7 @@ class DbSysGroups extends DbEntityBase
             
             foreach ($assignIDs as $usrID){
                 $fname = HEURIST_FILESTORE_DIR.$usrID;
-                fileSave('X',$fname);
+                fileSave('X',$fname); //change role
             }
         }
               

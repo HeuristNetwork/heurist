@@ -451,9 +451,11 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 this._selectAndClose();
                 return;       
         }
+        //addition of new group - update fields in recordset and change current user credentials
         if(this._currentEditID<0){
             fieldvalues['ugr_Members']=1;
             fieldvalues['ugl_Role']='admin';
+            HAPI4
         }
 //console.log(fieldvalues);
         this._super( recID, fieldvalues );

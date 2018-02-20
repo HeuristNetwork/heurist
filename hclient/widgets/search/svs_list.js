@@ -265,7 +265,7 @@ $.widget( "heurist.svs_list", {
             return;
 
         }else if(!window.hWin.HAPI4.has_access()){
-            window.hWin.HAPI4.currentUser.usr_GroupsList = [];
+            window.hWin.HAPI4.currentUser.ugr_Groups = {};
         }else if (!this.helper_btm) {
 
             //new
@@ -300,17 +300,6 @@ $.widget( "heurist.svs_list", {
                         that._refresh();
                     }
             });
-        /*}else if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
-
-            //get details about Workgroups (names etc)
-            window.hWin.HAPI4.SystemMgr.mygroups(
-                function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                        window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
-                        that._refresh();
-                    }
-                });
-        */
         }else{
             this._updateAccordeon();
         }
@@ -502,11 +491,9 @@ console.log('saved searches tree was updated');
 
                 
             var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
-            for (var idx in groups)
-            {
-                if(idx){
-                    var groupID = idx;
-                    var name = window.hWin.HAPI4.sysinfo.db_usergroups[idx];
+            for (var groupID in groups)
+            if(groupID>0){
+                    var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {   
                         this.helper_btm.before(
@@ -515,24 +502,8 @@ console.log('saved searches tree was updated');
                             .append( this._defineHeader(name, groupID))
                             .append( this._defineContent(groupID) ));
                     }
-                }
             }
-           /*     
-            var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-            if(groups){
-
-                for (var groupID in groups)
-                {
-                    if(groupID){
-                        var name = groups[groupID][1];
-                        this.helper_btm.before(
-                            $('<div>')
-                            .attr('grpid',  groupID).addClass('svs-acordeon')
-                            .append( this._defineHeader(name, groupID))
-                            .append( this._defineContent(groupID) ));
-                    }
-                }
-            }*/
+            
         }else{
             ($('<div>')
                 .attr('grpid',  'all').addClass('svs-acordeon')

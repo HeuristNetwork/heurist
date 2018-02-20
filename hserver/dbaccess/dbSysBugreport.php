@@ -60,15 +60,6 @@ class DbSysBugreport extends DbEntityBase
         return true;
     }
     
-    
-    //
-    //
-    //    
-    protected function prepareRecords(){
-        $ret = parent::prepareRecords();
-        return $ret;
-    }    
-
     //      
     //
     //
@@ -166,7 +157,7 @@ class DbSysBugreport extends DbEntityBase
         
         $message =  json_encode($message);
         $geekMail->message($message);
-
+        
         if (!$geekMail->send())
         {
              $this->system->addError(HEURIST_SYSTEM_CONFIG, 

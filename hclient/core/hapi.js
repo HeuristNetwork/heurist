@@ -359,15 +359,16 @@ function hAPI(_db, _oninit) { //, _currentUser
             //get user full names by id
             ,usr_names:function(request, callback){
 
+                //first try to take on client side
                 var sUserName = null;
                 var usr_ID = Number(request.UGrpID);
+                
                 if(usr_ID==0){
                     sUserName = window.hWin.HR('Everyone');
                 }else if(usr_ID == window.hWin.HAPI4.currentUser['ugr_ID']){
                     sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
-                }else if(window.hWin.HAPI4.currentUser.usr_GroupsList 
-                        && window.hWin.HAPI4.currentUser.usr_GroupsList[usr_ID]){
-                    sUserName = window.hWin.HAPI4.currentUser.usr_GroupsList[usr_ID][1];
+                }else if( window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID]){
+                    sUserName = window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID];
                 }
                 
                 if(sUserName){
@@ -375,6 +376,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                     res[usr_ID] = sUserName;
                     callback.call(this, {status:window.hWin.HAPI4.ResponseStatus.OK, data:res} );
                 }else{
+                    //search on server
                     if(request) request.a = 'usr_names';
                     _callserver('usr_info', request, callback);
                 }

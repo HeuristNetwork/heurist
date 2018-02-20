@@ -214,17 +214,11 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         __addAcc(window.hWin.HAPI4.currentUser['ugr_ID'], 'Personal tags');
         
-        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-        if(groups)
-        for (idx in groups)
-        {
-            if(idx){
-                var groupID = idx;
-                var name = groups[idx][1];
-                if(!window.hWin.HEURIST4.util.isnull(name))
-                {
-                    __addAcc(groupID, name);
-                }
+        for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+        if(groupID>0){
+            var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+            if(!window.hWin.HEURIST4.util.isnull(name)){
+                __addAcc(groupID, name);
             }
         }
         
@@ -477,20 +471,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     _initCompactUI: function(){
         
         var that = this;
-        /*
-        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-        if(!groups){
-                //load detailed info about Workgroups
-                window.hWin.HAPI4.SystemMgr.mygroups(
-                    function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
-                            that._initCompactUI();
-                        }
-                });
-                return;
-        }*/
-        
         
         var idx, panel = this.recordList;
        
@@ -504,11 +484,10 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         //render group divs
         
         var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
-        for (var idx in groups)
+        for (var groupID in groups)
         {
-            if(idx){
-                var groupID = idx;
-                var name = window.hWin.HAPI4.sysinfo.db_usergroups[idx];
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                 if(!window.hWin.HEURIST4.util.isnull(name))
                 {   
                     $('<div><i style="display:inline-block;width:110px;text-align:right;">'+name+':&nbsp;</i></div>')
@@ -560,7 +539,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 
         var sel_group = mdiv.find('select');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(sel_group[0], null, 
-                //by default it takes  window.hWin.HAPI4.currentUser.usr_GroupsList,
             [{key:window.hWin.HAPI4.currentUser['ugr_ID'], title:'Personal tags'}]);
        sel_group.change(function(){
               input_tag.val('');
@@ -704,8 +682,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         var order = recordset.getOrder();
         var recID, label, groupid, record;
 
-        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-        
         for (idx=0;idx<order.length;idx++){
 
             recID = order[idx];
@@ -718,7 +694,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 if(window.hWin.HAPI4.currentUser['ugr_ID']==groupid){
                     res.push(label);    
                 }else{
-                    res.push(groups[groupid][1]+'\\'+label);
+                    var grpName = window.hWin.HAPI4.sysinfo.db_usergroups[groupid];
+                    res.push(grpName+'\\'+label);
                 }
             }
         }

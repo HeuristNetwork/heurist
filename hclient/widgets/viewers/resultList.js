@@ -1009,7 +1009,7 @@ $.widget( "heurist.resultList", {
             pwd = '';
         }
 
-        function __getOwnerName(ugr_id){
+        function __getOwnerName(ugr_id){ //we may use SystemMgr.usr_names however it calls server
             if(ugr_id== window.hWin.HAPI4.currentUser.ugr_ID){
                 return window.hWin.HAPI4.currentUser.ugr_FullName;
             }else if(window.hWin.HAPI4.sysinfo.db_usergroups[ugr_id]){

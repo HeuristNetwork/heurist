@@ -389,62 +389,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     
     function _fillOwnership(){
         
-        /* use instead: window.hWin.HAPI4.sysinfo.db_usergroups and window.hWin.HAPI4.currentUser.ugr_Groups
-        if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
-            var that = this;
-            //get details about Workgroups (names etc)
-            window.hWin.HAPI4.SystemMgr.mygroups(
-                function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                        window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
-                        _fillOwnership();
-                    }
-            });
-            return;
-        }*/
-        
-        
         var fieldSelect = $('#sel_Ownership');
         
-        var sContent = 
-                '<option value="0">Everyone (no restriction)</option>'
-                +'<option value="'+window.hWin.HAPI4.currentUser['ugr_ID']+'">'
-                +window.hWin.HEURIST4.util.htmlEscape(window.hWin.HAPI4.currentUser['ugr_FullName'])+'</option>';
-        
-        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
-        for (var idx in groups)
-        {
-            if(idx){
-                var groupID = idx;
-                var name = window.hWin.HAPI4.sysinfo.db_usergroups[idx];
-                if(!window.hWin.HEURIST4.util.isnull(name))
-                {   
-                    sContent = sContent + '<option value="'+groupID+'">'
-                                + window.hWin.HEURIST4.util.htmlEscape(name)+'</option>';
-                }
-            }
-        }
-        
-
-        /*        
-        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-        for (var idx in groups)
-        {
-            if(idx){
-                var groupID = idx;
-                var name = groups[idx][1];
-                if(!window.hWin.HEURIST4.util.isnull(name))
-                {   
-                    sContent = sContent + '<option value="'+groupID+'">'
-                                + window.hWin.HEURIST4.util.htmlEscape(name)+'</option>';
-                }
-            }
-        }
-        */
-        
-        
-        fieldSelect.html(sContent);
-        
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], null,  //take groups of current user
+                [{key:0, title:'Everyone (no restriction)'}, 
+                 {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
 
         if(action_type=='add_record'){
             $('#sel_Ownership').val(add_rec_prefs[1]);

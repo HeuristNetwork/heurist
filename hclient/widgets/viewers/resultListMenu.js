@@ -571,22 +571,20 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
     convertGroupsForH3: function() {
 
-        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
         var workgroups = [];
         var workgroups2 = {};
-        for (var idx in groups)
-        {
-            if(idx){
-                var groupID = idx;
-                var name = groups[idx][1];
-
-                if(!Hul.isnull(name))
-                {
-                    workgroups.push(groupID);
-                    workgroups2[groupID] = {name: name};
-                }
+        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+        
+        for (var groupID in groups)
+        if(groupID>0){
+            var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+            if(!Hul.isnull(name))
+            {
+                workgroups.push(groupID);
+                workgroups2[groupID] = {name: name};
             }
         }
+        
         if(top.HEURIST){
             top.HEURIST.user.workgroups = workgroups;
             top.HEURIST.workgroups = workgroups2;

@@ -639,7 +639,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 $(sContent).appendTo(panel);
                 
                 //resolve user id to name
-                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_AddedByUGrpID')]},
+                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_AddedByUGrpID')},
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
@@ -752,15 +752,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         ele.editing_input('setValue',[context.owner]);
                         ele.editing_input('isChanged', true);
                         
-                        if(Number(context.owner)==0){
-                            sUserName = window.hWin.HR('Everyone');
-                        }else if(context.owner == window.hWin.HAPI4.currentUser['ugr_ID']){
-                            sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
-                        }else{
-                            sUserName = window.hWin.HAPI4.currentUser.usr_GroupsList[Number(context.owner)][1];
-                        }
-                        
-                        panel.find('#recOwner').html(sUserName);
+                        window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.owner},
+                            function(response){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    panel.find('#recOwner').html(response.data[context.owner]);
+                                }
+                            });
                     }
 
                     ele = that._editing.getFieldByName('rec_NonOwnerVisibility');
@@ -778,7 +775,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
             
             //
-            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_OwnerUGrpID')]},
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_OwnerUGrpID')},
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         panel.find('#recOwner').text(response.data[that._getField('rec_OwnerUGrpID')]);
@@ -917,8 +914,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            //var recordset =  new hRecordSet(response.data);
-                            //that._renderSummaryTags(recordset, panel);
                             panel.empty();
                             var recs = (response.data && response.data.records)?response.data.records:[];
                             
@@ -954,7 +949,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 +'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')+'</div>').appendTo(panel);
 
             //resolve user id to name
-            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_AddedByUGrpID')]},
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_AddedByUGrpID')},
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
@@ -1113,7 +1108,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
              .appendTo(pnl);        
     },
     //
-    // NOT USED anymore
+    // NOT USED anymore TO REMOVE
     //
     _renderSummaryTags: function(recordset, panel){
         
@@ -1127,19 +1122,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .hide().appendTo(panel);
             
             //render group divs
-            var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-            if(groups)
-            for (idx in groups)
-            {
-                if(idx){
-                    var groupID = idx;
-                    var name = groups[idx][1];
-                    if(!window.hWin.HEURIST4.util.isnull(name))
-                    {
+            for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                if(!window.hWin.HEURIST4.util.isnull(name)){
                         $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>')
                             .css({'padding':'0 2 4 2px'})
                             .attr('data-id', groupID).hide().appendTo(panel);
-                    }
                 }
             }
             
@@ -1205,7 +1194,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                                 }
                                             });
                                         //update panel
-                                        that._renderSummaryTags(data.selection, panel);
+                                        //that._renderSummaryTags(data.selection, panel);
                                     }
                                 }
                         });

@@ -1,31 +1,16 @@
 {
         "entityName": "sysBugreport",
-
-        "tableName": "sysBugreport",
-        "tablePrefix": "bug",
-        
-        "helpContent": "",
         
         "entityTitle": "Bug report",
-        "entityTitlePlural": "Bug reports",
 
         "fields": [
-                {
-                    "dtID": "bug_ID",
-                    "keyField": true,
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Role":"primary",
-                        "rst_Display":"hidden"
-                    }
-                },
                 {
                     "dtID": "2-1",
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":60,
                         "rst_DisplayWidth":60,
-                        "rst_DisplayName": "Description",
+                        "rst_DisplayName": "Title",
                         "rst_DisplayHelpText": "Please give a concise but descriptive title for the bug or feature request", 
                         "rst_RequirementType":"required"
                     }
@@ -35,7 +20,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "rst_DisplayWidth":60,
-                        "rst_DisplayName": "First name",
+                        "rst_DisplayName": "Description",
                         "rst_DisplayHelpText": "Please give a detailed description of the bug or feature request"
                     }
                 },

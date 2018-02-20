@@ -28,7 +28,6 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
         
         this.input_search_group = this.element.find('#input_search_group');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, 
-                //by default it takes  window.hWin.HAPI4.currentUser.usr_GroupsList,
             [{key:'any', title:window.hWin.HR('Any')},
              {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:'Personal tags'}]);
         

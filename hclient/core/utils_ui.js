@@ -91,7 +91,7 @@ window.hWin.HEURIST4.ui = {
     addoption: function(sel, value, text, disabled)
     {
         var option = document.createElement("option");
-        option.text = text;
+        option.text = window.hWin.HEURIST4.util.htmlEscape(text);
         option.value = value;
         if(disabled===true){
             option.disabled = true;
@@ -1087,17 +1087,14 @@ window.hWin.HEURIST4.ui = {
         $(selObj).empty();
 
         if(!groups){ //use groups of current user
-            groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-            if(!groups){
-                //looad detailed info about Workgroups
-                window.hWin.HAPI4.SystemMgr.mygroups(
-                    function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            groups = window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
-                            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
-                        }
-                });
-                return;
+        
+            groups = {};
+            for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                if(!window.hWin.HEURIST4.util.isnull(name)){
+                        groups[groupID] = name;
+                }
             }
         }
 
@@ -1123,7 +1120,8 @@ window.hWin.HEURIST4.ui = {
             {
                 if(idx && addedontop.indexOf(idx)<0){
                     var groupID = idx;
-                    var name = groups[idx][1];
+                    var name = groups[idx];
+                    if($.isArray(name)) name = name[1] //backward
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
                         window.hWin.HEURIST4.ui.addoption(selObj, groupID, name);

@@ -212,19 +212,14 @@ $.widget( "heurist.recordDetails", {
         if(this.options.user_Tags)
         {
 
-            var groups = window.hWin.HAPI4.currentUser.usr_GroupsList
-
             //groups.unshift(34);
             this._renderTagsForGroup(window.hWin.HAPI4.currentUser.ugr_ID, window.hWin.HR('Personal Tags') );
 
-            for (var idx in groups)
-            {
-                if(idx){
-                    var groupID = idx;
-                    var groupName = groups[idx][1];
-                    this._renderTagsForGroup(groupID, groupName);
-
-                }
+            var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+            for (var groupID in groups)
+            if(groupID>0){
+                var groupName = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                this._renderTagsForGroup(groupID, groupName);
             }
         }
 
