@@ -40,14 +40,16 @@
         if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
             //if exists file with userid it means need to reload system info
             $reload_user_from_db = (@$_SESSION[$system->dbname_full()]['need_refresh']==1);
+            $const_toinit = true;
             if(!$reload_user_from_db){
+                $const_toinit = false;
                 $system->initPathConstants(@$_REQUEST['db']);
                 $fname = HEURIST_FILESTORE_DIR.$res;
                 $reload_user_from_db = file_exists($fname);
             }
                 
             if($reload_user_from_db){
-                $system->init(@$_REQUEST['db'], false, false); //session and constant are defined already
+                $system->init(@$_REQUEST['db'], false, $const_toinit); //session and constant are defined already
                 $res = $system->getCurrentUserAndSysInfo();
             }else{
                 $res = true;

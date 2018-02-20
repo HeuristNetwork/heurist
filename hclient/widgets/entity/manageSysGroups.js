@@ -57,7 +57,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
 
         //update dialog title
-        if(this.options.isdialog && !this.options.title){
+        if(this.options.isdialog){ //&& !this.options.title){
             var title = null;
             var usr_ID = 0;
             if(this.options.ugl_UserID>0){
