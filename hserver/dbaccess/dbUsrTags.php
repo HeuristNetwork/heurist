@@ -242,8 +242,37 @@ class DbUsrTags extends DbEntityBase
         return parent::delete();
     }
     
+    
+    private function replaceTags(){
+        
+        if(count($this->recordIDs)>0 && count($this->newTagID)>0){
+        
+            $update_query = 'UPDATE usrRecTagLinks set rtl_TagID = '.$this->newTagID[0].' WHERE rtl_TagID in ('
+                 . implode(',', $this->recordIDs) . ')';
+
+            $res = $mysqli->query($update_query);
+            if(!$res){
+                
+                $system->addError(HEURIST_DB_ERROR, 'Cannot replace tags', $mysqli->error );
+                return false;
+            }
+            
+            if(@$this->data['removeOld']==1){
+                return parent::delete();
+            }else{
+                return true;
+            }
+        }
+        
+        $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
+        return false;
+    }
+    
     //
     // batch action for tags - assignment tags for records
+    //
+    // 1) assignment of tags to given set of records - new tags arr completely overwrite old set
+    // 2) replace tagIDs with newTagID
     //
     public function batch_action(){
         
@@ -252,6 +281,11 @@ class DbUsrTags extends DbEntityBase
         if(count($this->recordIDs)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
             return false;
+        }
+
+        $this->newTagID = prepareIds(@$this->data['newTagID']);
+        if(count($this->newTagID)>0){             
+            return $this->replaceTags();   
         }
         
         //record ids
