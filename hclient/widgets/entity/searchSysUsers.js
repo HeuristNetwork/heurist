@@ -25,7 +25,13 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         var that = this;
         
         this.input_search_group = this.element.find('#input_search_group');   //user group
-        window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, [{key:'any',title:'any group'}]);
+        if(window.hWin.HAPI4.is_admin()){
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], 'all_my_first' , 
+                        [{key:'any',title:'any group'}]);
+        }else{
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, 
+                        [{key:'any',title:'any group'}]);
+        }
         
         this._super();
         

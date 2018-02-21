@@ -1018,8 +1018,28 @@ window.hWin.HEURIST4.util = {
                 }
             }
             return r;            
-    }
+    },
     
+    //not strict search - valuable for numeric vs string 
+    findArrayIndex: function(elt, arr /*, from*/)
+    {
+        var len = arr.length;
+
+        var from = Number(arguments[1]) || 0;
+        from = (from < 0)
+        ? Math.ceil(from)
+        : Math.floor(from);
+        if (from < 0)
+            from += len;
+
+        for (; from < len; from++)
+        {
+            if (from in arr &&
+                arr[from] == elt)
+                return from;
+        }
+        return -1;
+    }
         
 
 }//end util
@@ -1060,6 +1080,8 @@ if (!Array.prototype.indexOf)
     };
 }
 
+
+
 /*
 if (!Array.prototype.unique){
 
@@ -1087,7 +1109,6 @@ if (!Array.prototype.unique){
 }
 
 
-
 $.getMultiScripts = function(arr, path) {
     var _arr = $.map(arr, function(scr) {
         return $.getScript( (path||"") + scr );
@@ -1099,3 +1120,4 @@ $.getMultiScripts = function(arr, path) {
 
     return $.when.apply($, _arr);
 }
+

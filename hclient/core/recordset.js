@@ -877,7 +877,7 @@ function hRecordSet(initdata) {
             if(Object.keys(records).length<rec_ids.length){
 
                 for(recID in records)
-                    if(recID && rec_ids.indexOf(recID)>-1) {
+                    if(recID && window.hWin.HEURIST4.util.findArrayIndex(rec_ID, rec_ids)>-1) {
                         _records[recID] = records[recID];
                     }
 
@@ -1298,8 +1298,7 @@ function hRecordSet(initdata) {
         
         removeRecord:function(recID){
             delete records[recID];           //@todo check how it affect select_multi
-            recID = ''+recID;
-            var idx = order.indexOf(recID);
+            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx>=0){
                 order.splice(idx,1);
                 total_count = total_count-1;
@@ -1307,8 +1306,7 @@ function hRecordSet(initdata) {
         },
 
         addRecord:function(recID, record){
-            recID = ''+recID;
-            var idx = order.indexOf(recID);
+            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx<0){ //add new
                 records[recID] = [];
                 if(fields.length>0)records[recID][fields.length-1] = undefined;
@@ -1319,8 +1317,7 @@ function hRecordSet(initdata) {
         },
         
         setRecord:function(recID, record){
-            recID = ''+recID;
-            var idx = order.indexOf(recID);
+            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx>=0){
                 
                 if($.isPlainObject(record)){

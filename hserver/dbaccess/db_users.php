@@ -214,8 +214,8 @@
 
     //@todo verify why it returns db onwer
     function user_getAllWorkgroups($mysqli){
-
-        $query = 'SELECT ugr_ID, ugr_Name FROM sysUGrps WHERE (ugr_Type != "user") OR (ugr_ID=2)';
+//OR (ugr_ID=2) 
+        $query = 'SELECT ugr_ID, ugr_Name FROM sysUGrps WHERE (ugr_Type != "user") ORDER BY ugr_Name';
         $result = mysql__select_assoc2($mysqli, $query);
         
         if($result==null) $result = array();

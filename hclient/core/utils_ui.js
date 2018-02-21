@@ -1086,6 +1086,26 @@ window.hWin.HEURIST4.ui = {
 
         $(selObj).empty();
 
+        if(groups=='all'){  //all groups - sorted by name
+            
+            groups = window.hWin.HAPI4.sysinfo.db_usergroups;
+            
+        }else 
+        if(groups=='all_my_first'){ //all groups by name - my groups first
+            
+            if(!topOptions) topOptions = [];
+            for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                if(!window.hWin.HEURIST4.util.isnull(name)){
+                        topOptions.push({key:groupID, title:name});
+                }
+            }
+            topOptions.push({key:0, title:'------'});
+            
+            groups = window.hWin.HAPI4.sysinfo.db_usergroups;
+            
+        }else 
         if(!groups){ //use groups of current user
         
             groups = {};
@@ -1116,11 +1136,10 @@ window.hWin.HEURIST4.ui = {
         }
         if(groups){
 
-            for (var idx in groups)
+            for (var groupID in groups)
             {
-                if(idx && addedontop.indexOf(idx)<0){
-                    var groupID = idx;
-                    var name = groups[idx];
+                if(groupID>0 && addedontop.indexOf(groupID)<0){
+                    var name = groups[groupID];
                     if($.isArray(name)) name = name[1] //backward
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
