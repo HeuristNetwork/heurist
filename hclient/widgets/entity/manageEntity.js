@@ -27,6 +27,7 @@
 //_recordListHeaderRenderer  - renderer of header for resultlist
 //_recordListItemRenderer    - renderer of item for resultlist
 //_recordListGetFullData     - callback function to retrieve full record info (in case we use 2 steps search: ids then list per page)  
+// _getEditDialog
 //_getEditDialogButtons  - return set of buttons fot edit popup
 //_initDialog - init dialog widget 
 // popupDialog
@@ -620,6 +621,20 @@ $.widget( "heurist.manageEntity", {
         window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     },
     
+    
+    _getEditDialog: function(){
+            if(this.options.edit_mode=='popup' && this._edit_dialog){
+                return this._edit_dialog.parents('.ui-dialog'); 
+            }else if(this.options.edit_mode=='editonly'){
+
+                if(this._as_dialog){
+                    return this._as_dialog.parents('.ui-dialog'); 
+                }else {
+                    return $(document).find('div.ui-widget')[0];
+                }
+            }
+            return null;
+    },
     
     _getEditDialogButtons: function(){
 

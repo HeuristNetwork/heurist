@@ -219,20 +219,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },    
     //override some editing methods
     
-    _getEditDialog: function(){
-            if(this.options.edit_mode=='popup' && this._edit_dialog){
-                return this._edit_dialog.parents('.ui-dialog'); 
-            }else if(this.options.edit_mode=='editonly'){
-
-                if(this._as_dialog){
-                    return this._as_dialog.parents('.ui-dialog'); 
-                }else {
-                    return $(document).find('div.ui-widget')[0];
-                }
-            }
-            return null;
-    },
-    
     _getEditDialogButtons: function(){
                                     
             var that = this;        

@@ -228,11 +228,13 @@ class DbUsrReminders extends DbEntityBase
     //
     public function batch_action(){
         
+        /*
         $recordIDs = prepareIds($this->data['recIDs']);
         if(count($recordIDs)>0){
             //find record by ids  - todo
             
         }
+        */
         
         if(!$this->prepareRecords()){
                 return false;    
@@ -271,13 +273,15 @@ class DbUsrReminders extends DbEntityBase
                     $query = 'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail,usr.ugr_ID '
                                .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
                                .' left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.$record['rem_ID']
-                               .' where ugl_GroupID = '.$record['rem_ToWorkgroupID'].' and isnull(rbl_ID)';
+                               .' where ugl_GroupID = '.$record['rem_ToWorkgroupID'].' and isnull(rbl_RemID)';
                 }else{
                     $query = 'select usr.ugr_FirstName,usr.ugr_LastName,ugr_eMail,usr.ugr_ID'
                                        .' from sysUsrGrpLinks left join sysUGrps usr on ugl_UserID=usr.ugr_ID'
-                                       .'where ugl_GroupID='.$record['rem_ToWorkgroupID'];
+                                       .' where ugl_GroupID='.$record['rem_ToWorkgroupID'];
                 }
                 
+                
+//error_log($query);                
                 $recs = mysql__select_all($mysqli, $query);
                 
                 foreach ($recs as $row)

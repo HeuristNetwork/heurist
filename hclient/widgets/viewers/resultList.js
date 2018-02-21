@@ -461,7 +461,7 @@ $.widget( "heurist.resultList", {
 
     _setOption: function( key, value ) {
         this._super( key, value );
-        if(key == 'rendererHeader'){
+        if(key == 'rendererHeader' || key == 'view_mode'){
             this.applyViewMode(this.options.view_mode, true);
         }
     },
@@ -495,37 +495,6 @@ $.widget( "heurist.resultList", {
         */
         
 
-        //adjust top,height according to visibility settings -----------
-
-        var top = this.options.show_inner_header?3:0;
-        if(this.options.show_inner_header){
-            this.div_header.show();
-        }else{
-            this.div_header.hide();
-        }
-
-        this.div_toolbar.css({'top':top+'em', height:this.options.show_savefilter?'5em':'2.5em'});
-        if(this.options.show_toolbar){
-            this.div_toolbar.show();
-        }else{
-            this.div_toolbar.hide();
-        }
-
-        top = top + (this.options.show_toolbar?2.5:0);
-        top = top + (this.options.show_savefilter?2.5:0);
-
-
-        if(this.div_content_header && this.div_content_header.is(':visible')){
-            top = top + 2;    
-        }
-        
-        this.div_content.css({'top': (top+0.4)+'em'});
-
-        if(this.div_content_header && this.div_content_header.is(':visible')){ //table_header
-            this.div_content_header
-                    .position({my:'left bottom', at:'left top', of:this.div_content});
-        }
-        
         //show/hide elements on toolbar
         if(this.div_actions){
             if(this.options.show_menu){        
@@ -554,6 +523,39 @@ $.widget( "heurist.resultList", {
         this._showHideOnWidth();
     },
 
+    //adjust top,height according to visibility settings -----------
+    _adjustHeadersPos: function(){
+        
+        var top = 0;
+        if(this.options.show_inner_header){
+            this.div_header.show();
+            top = top + this.div_header.height();
+        }else{
+            this.div_header.hide();
+        }
+
+        this.div_toolbar.css({'top':top+'px', height:this.options.show_savefilter?'5em':'2.5em'});
+        if(this.options.show_toolbar){
+            this.div_toolbar.show();
+            top = top + this.div_toolbar.height();
+        }else{
+            this.div_toolbar.hide();
+        }
+
+        var has_content_header = this.div_content_header && this.div_content_header.is(':visible');
+        
+        if(has_content_header){ //table_header
+            top = top + this.div_content_header.height();
+        }
+
+        this.div_content.css({'top': top+4+'px'});
+        
+        if(has_content_header){ //table_header
+            this.div_content_header
+                    .position({my:'left bottom', at:'left top', of:this.div_content});
+        }
+        
+    },
     //
     // show hide pagination and info panel depend on width
     //
@@ -679,31 +681,24 @@ $.widget( "heurist.resultList", {
             this.div_content.removeClass('list icons thumbs thumbs3');
             this.div_content.addClass(newmode);
 
-            //show hide header
+            //show hide table header
             if($.isFunction(this.options.rendererHeader)){
-
-                var header_html = (newmode=='list')
-                ?this.options.rendererHeader()
-                :'';
-
-                var header_height = (this.div_header!=null)?this.div_header.height():0;
                 
-                if(header_html!=''){
-                    if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
+                var header_html = (newmode=='list')?this.options.rendererHeader():'';
+                
+                //create div for table header
+                if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
                         this.div_content_header = $('<div>').addClass('table_header')
                         .insertBefore(this.div_content);
-                    }
-                    
-                    this.div_content_header.show(); 
-                    this.div_content_header.html( header_html )
-                    .position({my:'left bottom', at:'left top', of:this.div_content});
-                    //this.div_content.css('top',header_height+this.div_content_header.height());
-                }else if(!window.hWin.HEURIST4.util.isnull(this.div_content_header)){
-                    //this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
-                    this.div_content_header.hide();        
-                    //this.div_content.css('top',header_height);
-                }   
-            }
+                }
+                if(window.hWin.HEURIST4.util.isempty(header_html)){
+                    this.div_content_header.hide();
+                }else{
+                    this.div_content_header.html( header_html ).show();
+                }
+            } 
+                
+            this._adjustHeadersPos();
 
         }
         //this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);

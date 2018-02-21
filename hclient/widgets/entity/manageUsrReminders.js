@@ -37,6 +37,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
             this.options.height = 600;
+            this.options.beforeClose = function(){}; //to supress default warning
         }else{
            this.options.edit_mode = 'popup'; 
            this.options.list_header = true; //show header for resultList
@@ -92,6 +93,8 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         }else{
             this.searchForm.searchUsrReminders(this.options);
             this.recordList.resultList('option','show_toolbar',false);
+            this.recordList.resultList('option','view_mode','list');
+
             
             this.recordList.find('.div-result-list-content').css({'display':'table','width':'99%'});
             
@@ -158,9 +161,12 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             };
             
             var that = this;                                                
-            //that.loadanimation(true);
+            var dlged = this._getEditDialog();
+            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
+
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgFlash(that.options.entity.entityTitle+' '+window.hWin.HR('has been sent'));
                     }else{
@@ -176,7 +182,6 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             this.closeDialog(true);
         }else{
-console.log(recID);            
             this.getRecordSet().setRecord(recID, fieldvalues);    
             this.recordList.resultList('refreshPage');  
         }

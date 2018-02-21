@@ -262,7 +262,7 @@ class DbEntityBase
             $value = @$fieldvalues[$fieldname];
             
             //ulf_MimeExt is the only nonnumeric resource
-            if($field_config['dty_Type']=='resource' && $fieldname!='ulf_MimeExt'){ 
+            if(@$field_config['dty_Type']=='resource' && $fieldname!='ulf_MimeExt'){ 
                 if(intval($value)<1) $this->data['fields'][$fieldname] = null;
             }
         }
