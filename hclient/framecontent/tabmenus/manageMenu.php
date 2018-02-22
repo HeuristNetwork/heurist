@@ -72,6 +72,20 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
                             Register</a>
                     </li>
+
+                    <li>---- H4 ----</li>                    
+                    
+                    <li><a href="#" id="menulink-database-browse"
+                        data-nologin="1" data-logaction="dbOpen"
+                        title="Open and login to another Heurist database - current database remains open">
+                        Open</a>
+                    </li>
+                    
+                    <li><a href="#" id="menulink-database-properties"
+                        data-nologin="1" data-logaction="dbProperties"
+                        title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
+                        Properties</a>
+                    </li>
                     
                 </ul>
             </div>

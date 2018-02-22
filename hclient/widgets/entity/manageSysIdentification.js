@@ -29,6 +29,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         this.options.layout_mode = 'editonly';
         this.options.width = 1020;
         this.options.height = 800;
+        this.options.use_cache = true;
         
         this._super();
     },

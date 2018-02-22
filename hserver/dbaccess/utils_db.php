@@ -203,7 +203,7 @@
     function mysql__select_value($mysqli, $query) {
         $row = mysql__select_row($mysqli, $query);
 
-        if($row && @$row[0]){
+        if($row && @$row[0]!=null){
             $result = $row[0];
         }else{
             $result = null;

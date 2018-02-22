@@ -245,27 +245,41 @@ class DbUsrTags extends DbEntityBase
     
     private function replaceTags(){
         
+        $ret = false;
+        
         if(count($this->recordIDs)>0 && count($this->newTagID)>0){
         
-            $update_query = 'UPDATE usrRecTagLinks set rtl_TagID = '.$this->newTagID[0].' WHERE rtl_TagID in ('
+            $newTagID = $this->newTagID[0];
+            
+            $update_query = 'UPDATE IGNORE usrRecTagLinks set rtl_TagID = '.$newTagID.' WHERE rtl_TagID in ('
                  . implode(',', $this->recordIDs) . ')';
+                 
+            $mysqli = $this->system->get_mysqli();
 
             $res = $mysqli->query($update_query);
             if(!$res){
-                
-                $system->addError(HEURIST_DB_ERROR, 'Cannot replace tags', $mysqli->error );
-                return false;
+                $this->system->addError(HEURIST_DB_ERROR, 'Cannot replace tags', $mysqli->error );
+            }else{
+                $ret = true;
+                if(@$this->data['removeOld']==1){
+                    $ret = parent::delete();
+                }
+                if($ret){
+                    //calculate new usage
+                    $query = 'SELECT COUNT(*) FROM usrRecTagLinks WHERE rtl_TagID = '.$newTagID;
+                    $ret = mysql__select_value($mysqli, $query);
+                    if($ret==null){
+                        $this->system->addError(HEURIST_DB_ERROR, 'Cannot find tag usage', $mysqli->error );
+                        $ret = false;
+                    }
+                }
             }
             
-            if(@$this->data['removeOld']==1){
-                return parent::delete();
-            }else{
-                return true;
-            }
+        }else{
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');    
         }
         
-        $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
-        return false;
+        return $ret;
     }
     
     //

@@ -34,6 +34,11 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         if(this.options.list_mode!='compact') this.options.list_mode = 'accordions';
         this.options.edit_mode = 'inline'; //inline only
 
+        if(this.options.list_mode!='compact'){
+            this.options.width = 900;    
+            this.options.height = 600;
+        }
+        
         this._super();
 
         if(this.options.list_mode!='compact'){
@@ -58,10 +63,10 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 
                 this._initInlineEditorControls();
                 
-            }else{
-                this.searchForm.css('height','10em');    
-                this.recordList.css('top','10em');    
             }
+
+            this.searchForm.css('height','3.3em');    
+            this.recordList.css('top','3.3em');    
             
         }
       
@@ -70,12 +75,22 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
       
         this.list_div = $('<div class="list_div">')
             .addClass('ui-heurist-header2')
-            .css({'z-index':999999999, height:'auto', 'max-height':'200px', 'padding':'4px', 'font-size':'1.2em',
+            .css({'z-index':999999999, height:'auto', 'max-height':'200px', 'padding':'4px',
                   cursor:'pointer'})
             .appendTo($parent).hide();
         
         
-        
+        if(this.options.list_mode!='compact'){
+            this._on(this.element, {'competency': function(event, level){
+                var top = 3.3;
+                if(level>0 && this.options.select_mode!='manager'){
+                    top = top + 7;
+                }
+                this.searchForm.css('height',top+'em');    
+                this.recordList.css('top',top+'em');    
+                
+            }});
+        }
         
     },
     //  
@@ -257,7 +272,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 
                 var content = this.recordList.find('div[data-id="'+groupid+'"]');
                 
-                var item = '<div  recid="'+recID+'" groupid="'+groupid+'" class="recordDiv tagDiv"'
+                var item = '<div  recid="'+recID+'" groupid="'+groupid+'" usage="'+usage+'" class="recordDiv tagDiv"'
                     //(this.options.selection_ids.indexOf(recID)<0?'in-available':'in-selected')+'"
                             +'><label>'+ label + (usage>0?(' ('+usage+')'):'')
                             +'</label><div class="rec_action_link" data-key="delete"/>'
@@ -315,6 +330,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             this.element.find('#input_search').focus();
     },
 
+    //
+    //
+    //
     onAddTag: function( event ) {
         
         var that = this;
@@ -403,14 +421,20 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                                     item.appendTo( content.find('.available') );
                                 }
                                 
+                            }else if(this.options.select_mode=='select_single'){
+
+                                //this.selectedRecords([recid]);
+                                this.options.selection_ids.push(recid);
+                                this._selectAndClose();
+                                
                             }else{
                                 
                                 this.selectedRecords([recid]);
-                                if(this.options.select_mode=='manager'){
-                                    //this._onActionListener(event, {action:'edit'});
-                                    //replace label with input element to edit/replace
-                                    this._showInlineEditorControls(item);
-                                }
+                                //this._onActionListener(event, {action:'edit'});
+                                //replace label with input element to edit/replace
+                                window.hWin.HEURIST4.util.stopEvent(event);
+                                this._showInlineEditorControls(item);
+                                
                             }
                         }
     },
@@ -454,10 +478,11 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 
             }else{
                 this.recordList.find('div[recid='+recID+'] > label').text(fields['tag_Text']
-                (fields['tag_Usage']>0?(' ('+fields['tag_Usage']+')'):''));
+                +(fields['tag_Usage']>0?(' ('+fields['tag_Usage']+')'):''));
+                
                 //reload
-                var recordset = this.getRecordSet([recID]);
-                this._initEditForm_step4(recordset);
+                //var recordset = this.getRecordSet([recID]);
+                //this._initEditForm_step4(recordset);
             }
     },
     
@@ -467,7 +492,11 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     _afterDeleteEvenHandler: function( recID ){
         this._currentEditID = null;
         //this.addEditRecord(null);
-        if(this._editing)this._editing.initEditForm(null, null); 
+        //if(this._editing)this._editing.initEditForm(null, null); 
+        
+        //detach inline input    
+        if(this.edit_replace_input) this.edit_replace_input.appendTo(this.element);
+            
         this.recordList.find('div.recordDiv[recid='+recID+']').remove();
         this._cachedRecordset.removeRecord(recID);
     },
@@ -748,11 +777,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         },
         'keyup': function(event){
             
-            //var that.edit_replace_input = $(event.target);
-            
             if(that.edit_replace_input.val().length>1){
                 
-                //this.edit_replace_input.parent().attr('recid');
                 var groupid = this.edit_replace_input.parent().attr('groupid');
                 
                 var request = {tag_Text:that.edit_replace_input.val(), tag_UGrpID:groupid };
@@ -770,7 +796,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         recID = order[idx];
                         if(recID && that.options.selection_ids.indexOf(Number(recID))<0 && records[recID]){
                             label = recordset.fld(records[recID],'tag_Text');
-                            $('<div recid="'+recID+'" class="truncate" style="font-size:0.8em !important;">'
+                            $('<div recid="'+recID+'" class="truncate">'
                             +label+'</div>').appendTo(that.list_div)
                             .click( function(event){
                                 $(event.target).hide();
@@ -788,7 +814,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     
                 }else if(that.edit_replace_input.val().length>2){
                     that.list_div.empty();
-                    $('<div><span class="ui-icon ui-icon-check" style="font-size:0.8em !important;display:inline-block;vertical-align:bottom"/>Confirm Rename</div>')
+                    $('<div><span class="ui-icon ui-icon-check" style="display:inline-block;vertical-align:bottom"/>Confirm Rename</div>')
                         .appendTo(that.list_div)
                             .click( function(event){
                                     that._renameTag( 1 );
@@ -807,7 +833,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         );      
 
         this._on($(document), {'click': function(event){
-           if($(event.target).parents('.list_div').length==0) { that.list_div.hide(); };
+           if($(event.target).parents('.list_div').length==0) { 
+                that.list_div.hide(); 
+                
+                if(!$(event.target).is(that.edit_replace_input) && that.edit_replace_input.is(':visible')){
+                    that._hideInlineEditorControls();
+                }
+           };
         }});
         
             
@@ -819,7 +851,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     _renameTag: function(_step){
         
         if(!window.hWin.HEURIST4.msg.checkLength(this.edit_replace_input, 'Tag', null, 3, 0)){
-            return;s
+            return;
         }
         
         var item = this.edit_replace_input.parent();
@@ -848,8 +880,12 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         if(_step>0){
             
-            var fields = {tag_ID:tagID, 'tag_Text':newTagLabel,'tag_UGrpID':groupid};
+            //on edit(rename) - count is not set
+            var usage = item.attr('usage');
+            
+            var fields = {tag_ID:tagID, 'tag_Text':newTagLabel,'tag_UGrpID':groupid, 'tag_Usage':usage };
             that._currentEditID = tagID;
+       
             that._saveEditAndClose( fields );
             that._hideInlineEditorControls(); 
                 
@@ -872,6 +908,16 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         var item = this.edit_replace_input.parent();
         var tagID = item.attr('recid');
+        
+        if(tagID==newTagID){
+            this._hideInlineEditorControls();
+            return;
+        }
+        
+        var groupid = item.attr('groupid');
+        var oldTagLabel = this._getTagLabel(tagID);
+        var newTagLabel = this._getTagLabel(newTagID);
+        
         var that = this;
         
         if(unconditionally===true){
@@ -887,14 +933,19 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                        that._afterDeleteEvenHandler(tagID);
+                        that._afterDeleteEvenHandler(tagID); //remove old tag
+                        
+                        var usage = response.data;
+                        that._currentEditID = newTagID;
+                        var fields = {tag_ID:newTagID, 'tag_Text':newTagLabel,'tag_UGrpID':groupid, 'tag_Usage':usage };
+                        that._afterSaveEventHandler( newTagID, fields ); //to update usage 
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
             
             this._hideInlineEditorControls();
         }else{
-            var oldTagLabel = this._getTagLabel(tagID);
-            var newTagLabel = this._getTagLabel(newTagID);
             
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to replace tag "'+oldTagLabel+'" with tag "'+newTagLabel+'"? Proceed?', 
@@ -944,5 +995,16 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }
     }
     
+    ,_deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this tag? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
+    }
     
 });

@@ -1025,7 +1025,7 @@ window.hWin.HEURIST4.util = {
     {
         var len = arr.length;
 
-        var from = Number(arguments[1]) || 0;
+        var from = Number(arguments[2]) || 0;
         from = (from < 0)
         ? Math.ceil(from)
         : Math.floor(from);

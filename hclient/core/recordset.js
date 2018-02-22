@@ -75,7 +75,7 @@ function hRecordSet(initdata) {
                 rectypes = response.rectypes;
                 structures = response.structures;
                 records = response.records;  //$.isArray(records)
-                order = response.order;
+                order = $.isArray(response.order)?response.order:[response.order];
                 relationship = response.relationship;
                 relations_ids = response.relations;
                 

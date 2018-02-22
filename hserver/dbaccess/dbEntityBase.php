@@ -179,7 +179,10 @@ class DbEntityBase
     //
     public function delete(){
         
-        $this->recordIDs = prepareIds($this->data['recID']);
+        if(!@$this->recordIDs){
+            $this->recordIDs = prepareIds($this->data['recID']);
+        }
+            
 
         if(count($this->recordIDs)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');

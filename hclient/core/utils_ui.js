@@ -111,7 +111,62 @@ window.hWin.HEURIST4.ui = {
         return option;
     },
 
+    //
+    // create checkboxm, radio or select element
+    // options
+    //  type:
+    //  hideclear 
+    //  values: [{key:'',title:''},....]
+    //
+    createInputSelect: function($inpt, options) {
+        
+        if(options.type=='checkbox'){
+            if($inpt==null || !$inpt.is('input')){
+                $inpt = $('<input>');
+            }
+            $inpt.attr('type','checkbox');
+            
+            //@todo
+            
+            return $inpt;
+        }else if(options.type=='radio'){
+            
+            var $inpt_group = $('<div>').attr('radiogroup',1).uniqueId()
+                        .css({background: 'none', padding: '2px'});
+            var id = $inpt_group.attr('id');
+            
+            for (idx in options.values)
+            if(idx>=0){
+                if(window.hWin.HEURIST4.util.isnull(options.values[idx].key) && 
+                   window.hWin.HEURIST4.util.isnull(options.values[idx].title))
+                {
+                    key = options.values[idx];
+                    title = options.values[idx];
+                    disabled = false;
+                }else{
+                    key = options.values[idx].key;
+                    title = options.values[idx].title;
+                }
+                if(!window.hWin.HEURIST4.util.isnull(title)){
+                    $('<label style="padding-right:5px"><input type="radio" value="'
+                            +key+'" name="'+id+'">'
+                            +window.hWin.HEURIST4.util.htmlEscape(title)+'</label>').appendTo($inpt_group);
+                }
+            }
+            
+            return $inpt_group;
+            
+        }else { //select bu default
+            if($inpt==null || !$inpt.is('select')){
+                $inpt = $('<select>').uniqueId();
+            }
+            
+            return window.hWin.HEURIST4.ui.createSelector($inpt[0], options.values);
+        }
+        
     
+    },
+        
     //
     // create SELECT element (if selObj is null) and fill with given options
     // topOptions either array or string
@@ -1240,8 +1295,9 @@ window.hWin.HEURIST4.ui = {
                 }
             }
             
-            if(is_exit) return;
-        
+            $context.trigger('competency', exp_level); //some contexts need specific behaviour to apply the level
+            
+            //if(is_exit) return;
             //window.hWin.HEURIST4.ui.applyCompetencyLevel( exp_level );
     }, 
       
@@ -1905,7 +1961,10 @@ window.hWin.HEURIST4.ui = {
             var scripts = [ path+widgetName+'.js'];
             
             //entities without search option
-            if(!(entityName=='UsrBookmarks' || entityName=='DefDetailTypeGroups' || entityName=='SysBugreport')){ 
+            if(!(entityName=='UsrBookmarks' || 
+                 entityName=='SysIdentification' ||
+                 entityName=='DefDetailTypeGroups' || 
+                 entityName=='SysBugreport')){ 
                 scripts.push(path+'search'+entityName+'.js');
             }
             
