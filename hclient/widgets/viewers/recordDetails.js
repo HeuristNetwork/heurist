@@ -144,6 +144,7 @@ $.widget( "heurist.recordDetails", {
                     // call for tags - on response - draw tags
                     that.options.user_Tags = {}; //reset
                     //load all tags for current user and this groups with usagecount for current record
+                    /* todo replace to entity
                     window.hWin.HAPI4.RecordMgr.tag_get({recIDs:this.recIDloaded, UGrpID:'all'},
                         function(response) {
                             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
@@ -162,6 +163,7 @@ $.widget( "heurist.recordDetails", {
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                     });
+                    */
 
                     /* dynamic load of required js
                     var that = this;
@@ -210,19 +212,14 @@ $.widget( "heurist.recordDetails", {
         if(this.options.user_Tags)
         {
 
-            var groups = window.hWin.HAPI4.currentUser.usr_GroupsList
-
             //groups.unshift(34);
             this._renderTagsForGroup(window.hWin.HAPI4.currentUser.ugr_ID, window.hWin.HR('Personal Tags') );
 
-            for (var idx in groups)
-            {
-                if(idx){
-                    var groupID = idx;
-                    var groupName = groups[idx][1];
-                    this._renderTagsForGroup(groupID, groupName);
-
-                }
+            var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+            for (var groupID in groups)
+            if(groupID>0){
+                var groupName = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                this._renderTagsForGroup(groupID, groupName);
             }
         }
 
@@ -355,7 +352,7 @@ $.widget( "heurist.recordDetails", {
                 var dtID = order[i];
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
-                    (window.hWin.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
+                    ( !window.hWin.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') ) &&
                         rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
                 {
                     continue;

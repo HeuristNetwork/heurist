@@ -58,15 +58,17 @@ $.widget( "heurist.resultListMenu", {
         this.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');
 
         //-----------------------     listener of global events
-        var sevents = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT;
-        /*window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT;
+        var sevents = window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
+                 +window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '
+                 +window.hWin.HAPI4.Event.ON_REC_SELECT;
+        /*window.hWin.HAPI4.Event.ON_CREDENTIALS;
         if(this.options.isapplication){
         sevents = sevents + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
         }*/
 
         $(this.document).on(sevents, function(e, data) {
 
-            if(e.type == window.hWin.HAPI4.Event.LOGIN || e.type == window.hWin.HAPI4.Event.LOGOUT){
+            if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
 
                 that._refresh();
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){
@@ -112,7 +114,7 @@ $.widget( "heurist.resultListMenu", {
     */
     _refresh: function(){
 
-        if(window.hWin.HAPI4.is_logged()){
+        if(window.hWin.HAPI4.has_access()){
 
             this.menu_Selected.find('.logged-in-only').show();
             this.menu_Collected.find('.logged-in-only').show();
@@ -130,7 +132,7 @@ $.widget( "heurist.resultListMenu", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
 
-        $(this.document).off(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT);
+        $(this.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT);
 
         // remove generated elements
         if(this.btn_Search){
@@ -202,7 +204,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                 that._menuActionHandler(ui.item.attr('id')); 
                 return false; }});
 
-            if(window.hWin.HAPI4.is_logged()){
+            if(window.hWin.HAPI4.has_access()){
                 that['menu_'+name].find('.logged-in-only').show();
             }else{
                 that['menu_'+name].find('.logged-in-only').hide();
@@ -569,22 +571,20 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
     convertGroupsForH3: function() {
 
-        var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
         var workgroups = [];
         var workgroups2 = {};
-        for (var idx in groups)
-        {
-            if(idx){
-                var groupID = idx;
-                var name = groups[idx][1];
-
-                if(!Hul.isnull(name))
-                {
-                    workgroups.push(groupID);
-                    workgroups2[groupID] = {name: name};
-                }
+        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+        
+        for (var groupID in groups)
+        if(groupID>0){
+            var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+            if(!Hul.isnull(name))
+            {
+                workgroups.push(groupID);
+                workgroups2[groupID] = {name: name};
             }
         }
+        
         if(top.HEURIST){
             top.HEURIST.user.workgroups = workgroups;
             top.HEURIST.workgroups = workgroups2;

@@ -94,12 +94,12 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         for(var idx in btns){
             if(btns[idx].id=='btnRecRemove'){
                 btns[idx].text = window.hWin.HR('Delete bookmark');
-                btns[idx].click = function(){
+                /*btns[idx].click = function(){
                         window.hWin.HEURIST4.msg.showMsgDlg(
             'Are you sure you wish to delete this bookmark? Proceed?', function(){
                 that._deleteAndClose();
                 }, {title:'Warning',yes:'Proceed',no:'Cancel'});        
-                }
+                }*/
                 break;
             }
         }
@@ -108,6 +108,17 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     },
     
 //----------------------------------------------------------------------------------    
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this bookmark? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
+    },
 
     _saveEditAndClose: function( fields, afteraction ){
         

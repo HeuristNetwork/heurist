@@ -569,7 +569,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             //fill with list of Workgroups in case non bookmark search
             var selObj = svs_ugrid.get(0); //select element
-            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, null,
                 [{key:'bookmark', title:window.hWin.HR('My Bookmarks')}, {key:'all', title:window.hWin.HR('All Records')}],
                 function(){
                     svs_ugrid.val(window.hWin.HAPI4.currentUser.ugr_ID);
@@ -702,7 +702,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             //fill with list of Workgroups in case non bookmark search
             var selObj = svs_ugrid.get(0); //select element
-            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, window.hWin.HAPI4.currentUser.usr_GroupsList,
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, null,
             [{key:'bookmark', title:window.hWin.HR('My Bookmarks')}, {key:'all', title:window.hWin.HR('All Records')}],
             function(){
             svs_ugrid.val(window.hWin.HAPI4.currentUser.ugr_ID);

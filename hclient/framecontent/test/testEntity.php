@@ -53,6 +53,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysIdentification.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysDatabases.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDatabases.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysBugreport.js"></script>
+
         <!--      
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
@@ -413,20 +416,21 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
+                            <option value="SysBugreport">Bug report</option>
                             <option value="Records">Records</option>
                             <option value="SysUsers" >Users +</option>
                             <option value="SysGroups" >Workgroups +</option>
-                            <option value="UsrTags" >Tags +</option>
+                            <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
-                            <option value="UsrReminders">Reminders</option>
-                            <option value="SysIdentification">Database Property</option>
-                            <option value="SysDatabases" selected>Databases</option>
+                            <option value="UsrReminders" >Reminders</option>
+                            <option value="SysIdentification" selected>Database Property</option>
+                            <option value="SysDatabases">Databases</option>
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>
                             <option value="DefRecTypeGroups">Record Type Groups</option>
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
-                            <option value="DefTerms"d>Terms</option>
+                            <option value="DefTerms">Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
                             <option value="RecThreadedComments">Record Comments</option>
                             <option value="Smarty">Smarty Reports</option>

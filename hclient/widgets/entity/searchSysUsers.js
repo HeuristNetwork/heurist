@@ -25,14 +25,13 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         var that = this;
         
         this.input_search_group = this.element.find('#input_search_group');   //user group
-        if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
-            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, [{key:'any',title:'any group'}],
-                function(){ that._initControls() });
-            return;    
+        if(window.hWin.HAPI4.is_admin()){
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], 'all_my_first' , 
+                        [{key:'any',title:'any group'}]);
         }else{
-            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, [{key:'any',title:'any group'}]);
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, 
+                        [{key:'any',title:'any group'}]);
         }
-         
         
         this._super();
         
@@ -129,7 +128,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                     }
                 }
                 
-                if( ( window.hWin.HAPI4.has_access(this.input_search_group.val())>0 )
+                if( window.hWin.HAPI4.has_access( this.input_search_group.val() )
                     && this.options.edit_mode!='none'){
                     this.btn_find_record.show();
                 }

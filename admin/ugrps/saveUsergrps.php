@@ -815,7 +815,6 @@ function changeRole($grpID, $recIds, $newRole, $oldRole, $needCheck, $updateSess
         unset($_SESSION[DATABASE]['ugr_Groups']);    
     }
     
-    
     /*  TEMP - it does not work and affects on request (called several times)
     if($updateSession){
     foreach ($arrUsers as $userID) {

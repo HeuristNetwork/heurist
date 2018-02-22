@@ -37,9 +37,10 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
             this.options.height = 600;
+            this.options.beforeClose = function(){}; //to supress default warning
         }else{
            this.options.edit_mode = 'popup'; 
-           this.options.list_header = true; //show heade for resultList
+           this.options.list_header = true; //show header for resultList
         }
 
         this._super();
@@ -92,6 +93,8 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         }else{
             this.searchForm.searchUsrReminders(this.options);
             this.recordList.resultList('option','show_toolbar',false);
+            this.recordList.resultList('option','view_mode','list');
+
             
             this.recordList.find('.div-result-list-content').css({'display':'table','width':'99%'});
             
@@ -131,7 +134,6 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             ele2.editing_input('setValue', this.options.rem_RecID );
         }
         
-        
         var ele = this._editing.getFieldByName('rem_IsPeriodic');
         var res = ele.editing_input('getValues'); 
         if(res[0]=='now'){
@@ -159,9 +161,12 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             };
             
             var that = this;                                                
-            //that.loadanimation(true);
+            var dlged = this._getEditDialog();
+            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
+
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgFlash(that.options.entity.entityTitle+' '+window.hWin.HR('has been sent'));
                     }else{
@@ -171,10 +176,26 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         
     },    
     
-    _afterSaveEventHandler: function( recID, fields ){
-        this._super( recID, fields );
+    _afterSaveEventHandler: function( recID, fieldvalues ){
+        this._super( recID, fieldvalues );
+        
         if(this.options.edit_mode=='editonly'){
             this.closeDialog(true);
+        }else{
+            this.getRecordSet().setRecord(recID, fieldvalues);    
+            this.recordList.resultList('refreshPage');  
+        }
+    },
+
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this reminder? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
     
@@ -184,38 +205,46 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
     
         var that = this;
         var ele = this._editing.getFieldByName('rem_IsPeriodic');
-        var val = this._getField('rem_StartDate');
         
-        var isManual = window.hWin.HEURIST4.util.isempty(val) || val=='0000-00-00';
+        if(this.options.edit_mode=='editonly'){
         
-        function __onChangeType(){ 
-            var ele1 = that._editing.getFieldByName('rem_Freq');
-            var ele2 = that._editing.getFieldByName('rem_StartDate');
+            var val = this._getField('rem_StartDate');
             
-            var btn_save;
-            if(that._toolbar){
-                btn_save = that._toolbar.find('#btnRecSave');
+            var isManual = window.hWin.HEURIST4.util.isempty(val) || val=='0000-00-00';
+            
+            function __onChangeType(){ 
+                var ele1 = that._editing.getFieldByName('rem_Freq');
+                var ele2 = that._editing.getFieldByName('rem_StartDate');
+                
+                var btn_save;
+                if(that._toolbar){
+                    btn_save = that._toolbar.find('#btnRecSave');
+                }
+                
+                var res = ele.editing_input('getValues'); 
+                if(res[0]=='now'){
+                        ele2.editing_input('setValue', '');
+                        ele1.hide();
+                        ele2.hide();
+                        
+                        if(btn_save) btn_save.button('option','label','Send');
+                }else{
+                        ele1.show();
+                        ele2.show();
+                        
+                        if(btn_save) btn_save.button('option','label','Save');
+                }
             }
             
-            var res = ele.editing_input('getValues'); 
-            if(res[0]=='now'){
-                    ele2.editing_input('setValue', '');
-                    ele1.hide();
-                    ele2.hide();
-                    
-                    if(btn_save) btn_save.button('option','label','Send');
-            }else{
-                    ele1.show();
-                    ele2.show();
-                    
-                    if(btn_save) btn_save.button('option','label','Save');
-            }
+            ele.editing_input('option', 'change', __onChangeType);
+            ele.editing_input('setValue', isManual?'now':'later');
+            __onChangeType();
+        
+        }else{
+            ele.editing_input('option','readonly',true);
+            ele.editing_input('setValue', 'later');
+            ele.hide();
         }
-        
-        ele.editing_input('option', 'change', __onChangeType);
-        ele.editing_input('setValue', isManual?'now':'later');
-        __onChangeType();
-        
         
         var ele1 = this._editing.getFieldByName('rem_ToWorkgroupID');
         var ele2 = this._editing.getFieldByName('rem_ToUserID');
@@ -247,12 +276,13 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
     _recordListHeaderRenderer:function(){
         
         function __cell(colname, width){
-          return '<div style="padding:6px 0 0 4px;display:table-cell;width:'+width+'ex">'+colname+'</div>';            
+          //return '<div style="display:table-cell;width:'+width+'ex">'+colname+'</div>';            
+          return '<div style="width:'+width+'ex">'+colname+'</div>';            
         }
         
-        return '<div style="display:table;height:2em;width:99%;font-size:0.9em">'
-                    +__cell('Record title',18)+__cell('Recipient',17)+__cell('Frequency',10)
-                    +__cell('Date',8)+__cell('Message',40)+__cell('',12);
+        //return '<div style="display:table;height:2em;width:99%;font-size:0.9em">'
+        return __cell('Record title',35)+__cell('Recipient',17)+__cell('Freq',5)
+                    +__cell('Date',13)+__cell('Message',30);//+__cell('',12);
     },
     
     //----------------------
@@ -269,7 +299,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = 'width:'+col_width;
             }
-            return '<div class="truncate" style="padding:6px 0 0 4px;display:table-cell;'+swidth+'">'
+            return '<div class="truncate" style="display:inline-block;'+swidth+'">'
                     +fld(fldname)+'</div>';
         }
         
@@ -282,22 +312,22 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         var recipient = fld('rem_ToWorkgroupName');
         if(!recipient) recipient = fld('rem_ToUserName');
         if(!recipient) recipient = fld('rem_ToEmail');
-        recipient = '<div class="truncate" style="padding:6px 0 0 4px;display:table-cell;width:20ex">'+recipient+'</div>';
+        recipient = '<div class="truncate" style="display:inline-block;width:19ex">'+recipient+'</div>';
         
-        var html = '<div class="recordDiv" style="display:table-row;height:3em" id="rd'+recID+'" recid="'+recID+'">'
-                + fld2('rem_RecTitle','20ex') + ' ' + recipient 
-                + fld2('rem_Freq','10ex')+fld2('rem_StartDate','12ex')+fld2('rem_Message','40ex');
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+                + fld2('rem_RecTitle','39ex') + ' ' + recipient 
+                + fld2('rem_Freq','7ex')+fld2('rem_StartDate','14ex')+fld2('rem_Message','40ex');
         
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
             html = html 
-                + '<div style="display:table-cell;min-width:40px;text-align:right;"><div>'
-                + '<div title="Click to edit reminder" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                + '<div class="rec_view_link logged-in-only" style="width:60px">'
+                + '<div title="Click to edit reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>'
-                +'<div title="Click to delete reminder" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                +'<div title="Click to delete reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-                + '</div></div></div>';
+                + '</div></div>';
         }
         //<div style="float:right"></div>' + '<div style="float:right"></div>
         

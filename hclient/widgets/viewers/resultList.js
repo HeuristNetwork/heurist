@@ -102,7 +102,7 @@ $.widget( "heurist.resultList", {
         //-----------------------     listener of global events
         if(this.options.eventbased)
         {
-            this._events = window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT + " " + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE;
+            this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS + " " + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE;
             if(this.options.isapplication){
                 this._events = this._events + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
@@ -116,14 +116,12 @@ $.widget( "heurist.resultList", {
 
                     that._showHideOnWidth();
 
-
-                }else if(e.type == window.hWin.HAPI4.Event.LOGIN){
-
-                    that._refresh();
-
-                }else  if(e.type == window.hWin.HAPI4.Event.LOGOUT)
+                }else  if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS)
                 {
-                    that._clearAllRecordDivs('');
+                    if(!window.hWin.HAPI4.has_access()){ //logout
+                        that.updateResultSet(null);
+                    }
+                    that._refresh();
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
@@ -418,7 +416,7 @@ $.widget( "heurist.resultList", {
             this.btn_search_save.find('.ui-button-icon-primary').css({'left':'0.1em'});
 
             this._on( this.btn_search_save, {  click: function(){
-                window.hWin.HAPI4.SystemMgr.is_logged(function(){
+                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
                     if(app && app.widget){
                         $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
@@ -463,7 +461,7 @@ $.widget( "heurist.resultList", {
 
     _setOption: function( key, value ) {
         this._super( key, value );
-        if(key == 'rendererHeader'){
+        if(key == 'rendererHeader' || key == 'view_mode'){
             this.applyViewMode(this.options.view_mode, true);
         }
     },
@@ -497,32 +495,6 @@ $.widget( "heurist.resultList", {
         */
         
 
-        //adjust top,height according to visibility settings -----------
-
-        var top = this.options.show_inner_header?3:0;
-        if(this.options.show_inner_header){
-            this.div_header.show();
-        }else{
-            this.div_header.hide();
-        }
-
-        this.div_toolbar.css({'top':top+'em', height:this.options.show_savefilter?'5em':'2.5em'});
-        if(this.options.show_toolbar){
-            this.div_toolbar.show();
-        }else{
-            this.div_toolbar.hide();
-        }
-
-        top = top + (this.options.show_toolbar?2.5:0);
-        top = top + (this.options.show_savefilter?2.5:0);
-
-
-        if(this.div_content_header && this.div_content_header.is(':visible')){
-            top = top + 2;    
-        }
-
-        this.div_content.css({'top': (top+0.4)+'em'});
-
         //show/hide elements on toolbar
         if(this.div_actions){
             if(this.options.show_menu){        
@@ -551,6 +523,39 @@ $.widget( "heurist.resultList", {
         this._showHideOnWidth();
     },
 
+    //adjust top,height according to visibility settings -----------
+    _adjustHeadersPos: function(){
+        
+        var top = 0;
+        if(this.options.show_inner_header){
+            this.div_header.show();
+            top = top + this.div_header.height();
+        }else{
+            this.div_header.hide();
+        }
+
+        this.div_toolbar.css({'top':top+'px', height:this.options.show_savefilter?'5em':'2.5em'});
+        if(this.options.show_toolbar){
+            this.div_toolbar.show();
+            top = top + this.div_toolbar.height();
+        }else{
+            this.div_toolbar.hide();
+        }
+
+        var has_content_header = this.div_content_header && this.div_content_header.is(':visible');
+        
+        if(has_content_header){ //table_header
+            top = top + this.div_content_header.height();
+        }
+
+        this.div_content.css({'top': top+4+'px'});
+        
+        if(has_content_header){ //table_header
+            this.div_content_header
+                    .position({my:'left bottom', at:'left top', of:this.div_content});
+        }
+        
+    },
     //
     // show hide pagination and info panel depend on width
     //
@@ -676,31 +681,24 @@ $.widget( "heurist.resultList", {
             this.div_content.removeClass('list icons thumbs thumbs3');
             this.div_content.addClass(newmode);
 
-            //show hide header
+            //show hide table header
             if($.isFunction(this.options.rendererHeader)){
-
-                var header_html = (newmode=='list')
-                ?this.options.rendererHeader()
-                :'';
-
-                var header_height = (this.div_header!=null)?this.div_header.height():0;
                 
-                if(header_html!=''){
-                    if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
+                var header_html = (newmode=='list')?this.options.rendererHeader():'';
+                
+                //create div for table header
+                if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
                         this.div_content_header = $('<div>').addClass('table_header')
                         .insertBefore(this.div_content);
-                    }
-                    
-                    this.div_content_header.show(); 
-                    this.div_content_header.html( header_html )
-                    .css('top',header_height);       
-                    this.div_content.css('top',header_height+this.div_content_header.height());
-                }else if(!window.hWin.HEURIST4.util.isnull(this.div_content_header)){
-                    //this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
-                    this.div_content_header.hide();        
-                    this.div_content.css('top',header_height);
-                }   
-            }
+                }
+                if(window.hWin.HEURIST4.util.isempty(header_html)){
+                    this.div_content_header.hide();
+                }else{
+                    this.div_content_header.html( header_html ).show();
+                }
+            } 
+                
+            this._adjustHeadersPos();
 
         }
         //this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
@@ -1011,7 +1009,7 @@ $.widget( "heurist.resultList", {
             pwd = '';
         }
 
-        function __getOwnerName(ugr_id){
+        function __getOwnerName(ugr_id){ //we may use SystemMgr.usr_names however it calls server
             if(ugr_id== window.hWin.HAPI4.currentUser.ugr_ID){
                 return window.hWin.HAPI4.currentUser.ugr_FullName;
             }else if(window.hWin.HAPI4.sysinfo.db_usergroups[ugr_id]){
@@ -1815,7 +1813,7 @@ $.widget( "heurist.resultList", {
 
 
         //hide edit link
-        if(!window.hWin.HAPI4.is_logged()){
+        if(!window.hWin.HAPI4.has_access()){
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
 

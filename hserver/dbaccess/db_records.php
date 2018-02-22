@@ -697,7 +697,7 @@
         //1. Can current user edit this record?
         // record is not "everyone" and current user is_admin or itself or member of group
         if ($ownerid_old>0  && !($system->is_admin() || $system->is_member($ownerid_old))){ 
-                                          //!$system->is_admin2($ownerid_old)) { 
+
             $system->addError(HEURIST_REQUEST_DENIED,
                     'Current user does not have sufficient authority to change the record ID:'.$recID
                     .'. User must be either the owner or member of the group that owns this record');
@@ -710,7 +710,7 @@
             $res = true;
             //A. Has rights for current ownership 
             //current user is db admin or itself or admin of currrent onwership group
-            if($ownerid_old>0 && !$system->is_admin('group', $ownerid_old)) {  //changing ownership
+            if($ownerid_old>0 && ! ($system->is_admin() || $system->has_access($ownerid_old)) ) {  //changing ownership
 
                 $system->addError(HEURIST_REQUEST_DENIED,
                     'Cannot change ownership. User does not have ownership rights. '

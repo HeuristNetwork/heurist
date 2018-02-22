@@ -41,6 +41,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/dbDefTerms.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypeGroups.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypes.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbSysBugreport.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysImportFiles.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecThreadedComments.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');

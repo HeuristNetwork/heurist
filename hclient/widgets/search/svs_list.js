@@ -53,7 +53,7 @@ $.widget( "heurist.svs_list", {
 
         this._setOptionFromUrlParam('allowed_UGrpID', 'groupID');
         this._setOptionFromUrlParam('allowed_svsIDs', 'searchIDs');
-        if(window.hWin.HAPI4.is_logged() && this.options.buttons_mode){
+        if(window.hWin.HAPI4.has_access() && this.options.buttons_mode){
             this._setOptionFromUrlParam('treeview_mode','treeViewLoggedIn', 'bool');
             if(this.options.treeview_mode){
                 this.options.buttons_mode= false;
@@ -97,7 +97,7 @@ $.widget( "heurist.svs_list", {
                 .hide();
 
                 this._on( this.btn_search_save, {  click: function(){
-                    window.hWin.HAPI4.SystemMgr.is_logged(function(){
+                    window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                         that.editSavedSearch('saved');
                     });
                 } });
@@ -189,7 +189,7 @@ $.widget( "heurist.svs_list", {
 
 
         //global listener
-        $(this.document).on(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT, function(e, data) {
+        $(this.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
             that.accordeon.empty();
             //that.helper_top = null;
             that.helper_btm = null;
@@ -264,8 +264,8 @@ $.widget( "heurist.svs_list", {
             this._updateAccordeon();
             return;
 
-        }else if(!window.hWin.HAPI4.is_logged()){
-            window.hWin.HAPI4.currentUser.usr_GroupsList = [];
+        }else if(!window.hWin.HAPI4.has_access()){
+            window.hWin.HAPI4.currentUser.ugr_Groups = {};
         }else if (!this.helper_btm) {
 
             //new
@@ -300,17 +300,6 @@ $.widget( "heurist.svs_list", {
                         that._refresh();
                     }
             });
-        }else if(!window.hWin.HAPI4.currentUser.usr_GroupsList){
-
-            //get details about Workgroups (names etc)
-            window.hWin.HAPI4.SystemMgr.mygroups(
-                function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                        window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
-                        that._refresh();
-                    }
-            });
-
         }else{
             this._updateAccordeon();
         }
@@ -370,7 +359,7 @@ $.widget( "heurist.svs_list", {
         this.accordeon.hide();
 
 
-        var islogged = (window.hWin.HAPI4.is_logged());
+        var islogged = (window.hWin.HAPI4.has_access());
         //if not logged in show only "my searches/all records"
 
         this.treeviews = {};
@@ -500,29 +489,21 @@ console.log('saved searches tree was updated');
                 .append( this._defineHeader(window.hWin.HR('My Searches'), 'all'))
                 .append( this._defineContent('all') ));
 
-            var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-
-            if(groups){
-
-                /*    
-                this.helper_btm.before(
-                $('<div>')
-                .addClass('svs-acordeon-group')
-                .html('&nbsp;')); //window.hWin.HR('WORKGROUPS')
-                */
-
-                for (var groupID in groups)
-                {
-                    if(groupID){
-                        var name = groups[groupID][1];
+                
+            var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+            for (var groupID in groups)
+            if(groupID>0){
+                    var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                    if(!window.hWin.HEURIST4.util.isnull(name))
+                    {   
                         this.helper_btm.before(
                             $('<div>')
                             .attr('grpid',  groupID).addClass('svs-acordeon')
                             .append( this._defineHeader(name, groupID))
                             .append( this._defineContent(groupID) ));
                     }
-                }
             }
+            
         }else{
             ($('<div>')
                 .attr('grpid',  'all').addClass('svs-acordeon')
@@ -806,7 +787,7 @@ console.log('saved searches tree was updated');
                     that._redefineContent( groupID );
 
                     window.hWin.HEURIST4.msg.showMsgDlg('The tree structure for the "'+
-                        window.hWin.HAPI4.currentUser.usr_GroupsList[groupID][1]
+                        window.hWin.HAPI4.sysinfo.db_usergroups[groupID]
                         +'" group has been modified by another user. The tree will be reloaded. '
                         +'Please repeat your operation with the new tree');
                 }
@@ -964,7 +945,7 @@ console.log('saved searches tree was updated');
             }
         };
 
-        if(window.hWin.HAPI4.is_logged()){
+        if(window.hWin.HAPI4.has_access()){
 
             fancytree_options['extensions'] = ["edit", "dnd", "filter"];
             fancytree_options['dnd'] = {
@@ -1428,7 +1409,7 @@ console.log('saved searches tree was updated');
     _define_DefaultTreeData: function(){
 
         var treeData;
-        if(window.hWin.HAPI4.is_logged()){
+        if(window.hWin.HAPI4.has_access()){
             treeData = {
                 all: { title: window.hWin.HR('My Searches'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'all') },
                 bookmark:{ title: window.hWin.HR('My Bookmarks'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'bookmark') }
@@ -1442,14 +1423,13 @@ console.log('saved searches tree was updated');
             };
         }
 
-        if(window.hWin.HAPI4.is_logged()){
+        if(window.hWin.HAPI4.has_access()){
 
-            var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-
+            var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
             for (var groupID in groups)
             {
-                if(groupID){
-                    var name = groups[groupID][1];
+                if(groupID>0){
+                    var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                     treeData[groupID] = {title: name, folder: true, expanded: false, children: this._define_SVSlist(groupID) };
                 }
             }

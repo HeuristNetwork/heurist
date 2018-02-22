@@ -212,9 +212,10 @@
         return $result;
     }
 
+    //@todo verify why it returns db onwer
     function user_getAllWorkgroups($mysqli){
-
-        $query = 'SELECT ugr_ID, ugr_Name FROM sysUGrps WHERE (ugr_Type != "user") OR (ugr_ID=2)';
+//OR (ugr_ID=2) 
+        $query = 'SELECT ugr_ID, ugr_Name FROM sysUGrps WHERE (ugr_Type != "user") ORDER BY ugr_Name';
         $result = mysql__select_assoc2($mysqli, $query);
         
         if($result==null) $result = array();
@@ -312,7 +313,7 @@
 
                 $system->addError(HEURIST_REQUEST_DENIED, 'Registration is not allowed for current database');
 
-            }else if ($is_registration || $system->is_admin2($recID)) {
+            }else if ($is_registration || $system->has_access($recID)) {
 
                 //do not allow registration if approvement mail cannot be sent
                 if($is_registration){

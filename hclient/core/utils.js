@@ -453,7 +453,7 @@ window.hWin.HEURIST4.util = {
         "'": '&#039;'
       };
 
-      return text?text.replace(/[&<>"']/g, function(m) { return map[m]; }):'';
+      return text? (''+text).replace(/[&<>"']/g, function(m) { return map[m]; }):'';
     },    
 
     isObject: function (a)
@@ -474,7 +474,7 @@ window.hWin.HEURIST4.util = {
 
     //
     // we have to reduce the usage to minimum. Need to implement method in hapi via central controller
-    // this method is used for call H3 scripts
+    // this method is used for call H3 scripts in H4 code
     //
     sendRequest: function(url, request, caller, callback){
 
@@ -1018,8 +1018,28 @@ window.hWin.HEURIST4.util = {
                 }
             }
             return r;            
-    }
+    },
     
+    //not strict search - valuable for numeric vs string 
+    findArrayIndex: function(elt, arr /*, from*/)
+    {
+        var len = arr.length;
+
+        var from = Number(arguments[2]) || 0;
+        from = (from < 0)
+        ? Math.ceil(from)
+        : Math.floor(from);
+        if (from < 0)
+            from += len;
+
+        for (; from < len; from++)
+        {
+            if (from in arr &&
+                arr[from] == elt)
+                return from;
+        }
+        return -1;
+    }
         
 
 }//end util
@@ -1060,6 +1080,8 @@ if (!Array.prototype.indexOf)
     };
 }
 
+
+
 /*
 if (!Array.prototype.unique){
 
@@ -1087,7 +1109,6 @@ if (!Array.prototype.unique){
 }
 
 
-
 $.getMultiScripts = function(arr, path) {
     var _arr = $.map(arr, function(scr) {
         return $.getScript( (path||"") + scr );
@@ -1099,3 +1120,4 @@ $.getMultiScripts = function(arr, path) {
 
     return $.when.apply($, _arr);
 }
+

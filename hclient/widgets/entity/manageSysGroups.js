@@ -57,9 +57,16 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
 
         //update dialog title
-        if(this.options.isdialog && !this.options.title){
+        if(this.options.isdialog){ //&& !this.options.title){
             var title = null;
             var usr_ID = 0;
+            
+            if(this.options.select_mode=='select_single'){
+               title = 'Select Workgroup'; 
+            }else
+            if(this.options.select_mode=='select_multi'){
+               title = 'Select Workgroups'; 
+            }else
             if(this.options.ugl_UserID>0){
                 usr_ID = this.options.ugl_UserID;
                 title = 'Manage Workgroups for User #'+this.options.ugl_UserID+': '
@@ -151,14 +158,13 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                     var options = {select_mode: 'manager',
                         ugl_GroupID: group_ID,
-                        isdialog: true,
                         edit_mode:'popup',
                         title: ("Manage Users of Workgroup #"+group_ID),
 
                         //before close - count for membership and refresh
                         beforeClose:function(){
                             
-                            if(window.hWin.HAPI4.has_access(group_ID)>0){
+                            if(window.hWin.HAPI4.has_access(group_ID)){ //current user is admin of given group
                                 var request = {
                                     'a'          : 'search',
                                     'entity'     : 'sysGroups',
@@ -263,6 +269,16 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                                     window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
                                 }
+                                
+                                if(that.options.ugl_UserID==window.hWin.HAPI4.currentUser['ugr_ID']){
+                                    if(newRole=='remove'){
+                                        window.hWin.HAPI4.currentUserRemoveGroup(group_ID);
+                                    }else{
+                                        window.hWin.HAPI4.currentUser['ugr_Groups'][group_ID] = newRole;
+                                    }
+                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                                }
+                                
                             }else{
                                 //restore current value - rollback
                                 var restoreRole = item.attr('data-value');
@@ -373,8 +389,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                     if(this.searchForm.find('#input_search_type').val()!='any'){
 
-                        //current user is admin for this group
-                        /*if(window.hWin.HAPI4.has_access(recID)>0){ 
+                        //current user is admin of given group
+                        /*if(window.hWin.HAPI4.has_access(recID)){ 
                         html = html                        
                         + '<select title="Role" style="width:70px;margin:0 4px" class="user-role" data-value="'
                         + fld('ugl_Role')+'">'
@@ -392,7 +408,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 }
 
 
-                if(window.hWin.HAPI4.has_access(recID)>0){
+                if(window.hWin.HAPI4.has_access(recID)){ //current user is admin of given group
                     html = html                                    
                     + '<div title="Click to edit group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
@@ -446,23 +462,39 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
-
-            this._selection = new hRecordSet();
-            //{fields:{}, order:[recID], records:[fieldvalues]});
-            this._selection.addRecord(recID, fieldvalues);
-            this._selectAndClose();
-            return;        
+                this._selection = new hRecordSet();
+                //{fields:{}, order:[recID], records:[fieldvalues]});
+                this._selection.addRecord(recID, fieldvalues);
+                this._selectAndClose();
+                return;       
         }
+        //addition of new group - update fields in recordset and change current user credentials
+        if(this._currentEditID<0){
+            fieldvalues['ugr_Members'] = 1;
+            fieldvalues['ugl_Role'] = 'admin';
+            window.hWin.HAPI4.currentUser['ugr_Groups'][recID] = 'admin';
+            window.hWin.HAPI4.sysinfo.db_usergroups[recID] = fieldvalues['ugr_Name'];
+            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+        }
+//console.log(fieldvalues);
         this._super( recID, fieldvalues );
 
         this.getRecordSet().setRecord(recID, fieldvalues);
         this.recordList.resultList('refreshPage');  
+        
     },
-
+    
+    _afterDeleteEvenHandler: function( recID )   {
+        window.hWin.HAPI4.currentUserRemoveGroup(recID, true);
+        
+        this._super( recID );
+        
+        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+    },
 
     _afterInitEditForm: function(){
         this._super();
-        //hide after edit init btnRecRemove for group=2
+        //hide after edit init btnRecRemove for group=1
         if(this._currentEditID==window.hWin.HAPI4.sysinfo.db_managers_groupid){ //sys_OwnerGroupID
             var ele = this._toolbar;
             ele.find('#btnRecRemove').hide();
@@ -526,6 +558,18 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
 
 
+    }
+    
+    ,_deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this group? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
     }
 
 });

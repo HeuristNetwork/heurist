@@ -256,7 +256,7 @@ class DbSysUsers extends DbEntityBase
             if(!@$this->records[$idx]['ugr_Name']){
                 $this->records[$idx]['ugr_Name'] = $this->records[$idx]['ugr_eMail'];
             }
-            if(!@$this->records[$idx]['ugr_ID'] || $this->records[$idx]['ugr_Type']<0){
+            if(!$this->system->is_admin() && (!@$this->records[$idx]['ugr_ID'] || $this->records[$idx]['ugr_Type']<0)){
                 $this->records[$idx]['ugr_Enabled'] = 'n';
             }
 
@@ -324,6 +324,9 @@ class DbSysUsers extends DbEntityBase
                         $group_role['ugl_Role'] = 'member';
                         
                         $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $group_role);
+                        
+                        $fname = HEURIST_FILESTORE_DIR.$ugr_ID;
+                        fileSave('X',$fname);  //add to group
                     }
                     
                     //send approvement or registration email

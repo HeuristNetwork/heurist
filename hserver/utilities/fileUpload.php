@@ -39,13 +39,14 @@ if($system->init(@$_REQUEST['db'])){
     
     if(!$entity_name){
             $response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
-    }else if ( $system->get_user_id()<1 ) {
+    }else if ( !$system->has_access() ) { //not logged in
             $response = $system->addError(HEURIST_REQUEST_DENIED);
     }else if ($entity_name=='sysGroups' || $entity_name=='sysUsers') {
-            if(!$system->is_admin2($recID)){ //only user or group admin
+            if(!$system->has_access($recID)){ //only user or group admin
               $response = $system->addError(HEURIST_REQUEST_DENIED);
             }
-    }else if($entity_name!='recUploadedFiles'){ //for all other entities other than recUploadedFile must be admin of dbowners group
+    }else if(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
+    { //for all other entities other than recUploadedFile must be admin of dbowners group
             if(!$system->is_admin()){
               $response = $system->addError(HEURIST_REQUEST_DENIED);
             }

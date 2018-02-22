@@ -416,7 +416,9 @@ function hEditing(_options) {
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 
-                if(ele.editing_input('isChanged')) return true;
+                if(ele.editing_input('isChanged')) {
+                    return true;   
+                }
             }
             return false;
         }

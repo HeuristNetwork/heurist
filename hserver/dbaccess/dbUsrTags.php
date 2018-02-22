@@ -242,8 +242,51 @@ class DbUsrTags extends DbEntityBase
         return parent::delete();
     }
     
+    
+    private function replaceTags(){
+        
+        $ret = false;
+        
+        if(count($this->recordIDs)>0 && count($this->newTagID)>0){
+        
+            $newTagID = $this->newTagID[0];
+            
+            $update_query = 'UPDATE IGNORE usrRecTagLinks set rtl_TagID = '.$newTagID.' WHERE rtl_TagID in ('
+                 . implode(',', $this->recordIDs) . ')';
+                 
+            $mysqli = $this->system->get_mysqli();
+
+            $res = $mysqli->query($update_query);
+            if(!$res){
+                $this->system->addError(HEURIST_DB_ERROR, 'Cannot replace tags', $mysqli->error );
+            }else{
+                $ret = true;
+                if(@$this->data['removeOld']==1){
+                    $ret = parent::delete();
+                }
+                if($ret){
+                    //calculate new usage
+                    $query = 'SELECT COUNT(*) FROM usrRecTagLinks WHERE rtl_TagID = '.$newTagID;
+                    $ret = mysql__select_value($mysqli, $query);
+                    if($ret==null){
+                        $this->system->addError(HEURIST_DB_ERROR, 'Cannot find tag usage', $mysqli->error );
+                        $ret = false;
+                    }
+                }
+            }
+            
+        }else{
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');    
+        }
+        
+        return $ret;
+    }
+    
     //
     // batch action for tags - assignment tags for records
+    //
+    // 1) assignment of tags to given set of records - new tags arr completely overwrite old set
+    // 2) replace tagIDs with newTagID
     //
     public function batch_action(){
         
@@ -252,6 +295,11 @@ class DbUsrTags extends DbEntityBase
         if(count($this->recordIDs)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
             return false;
+        }
+
+        $this->newTagID = prepareIds(@$this->data['newTagID']);
+        if(count($this->newTagID)>0){             
+            return $this->replaceTags();   
         }
         
         //record ids

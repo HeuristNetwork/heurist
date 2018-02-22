@@ -203,7 +203,7 @@
     function mysql__select_value($mysqli, $query) {
         $row = mysql__select_row($mysqli, $query);
 
-        if($row && @$row[0]){
+        if($row && @$row[0]!=null){
             $result = $row[0];
         }else{
             $result = null;
@@ -688,20 +688,23 @@ error_log(print_r($params, true));
     //
     function prepareIds($ids){
         
-        if(!is_array($ids)){
-            if(is_int($ids)){
-                $ids = array($ids);
-            }else{
-                /*if(substr($ids, -1) === ','){//remove last comma
-                    $ids = substr($ids,0,-1);
-                }*/
-                $ids = explode(',', $ids);
+        if($ids!=null){
+            if(!is_array($ids)){
+                if(is_int($ids)){
+                    $ids = array($ids);
+                }else{
+                    /*if(substr($ids, -1) === ','){//remove last comma
+                        $ids = substr($ids,0,-1);
+                    }*/
+                    $ids = explode(',', $ids);
+                }
             }
+            $ids = array_filter($ids, function ($v) {
+                 return (is_numeric($v) && $v > 0);
+            });
+        }else{
+            $ids = array();
         }
-        $ids = array_filter($ids, function ($v) {
-             return (is_numeric($v) && $v > 0);
-        });
-        
         return $ids;
     }
 

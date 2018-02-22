@@ -49,7 +49,7 @@ $.widget( "heurist.staticPage", {
         });
 
         
-        $(this.document).on(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT, function(e, data) {
+        $(this.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
             that._loaded_url = null; //reload on login-logout
             that._refresh();
         });

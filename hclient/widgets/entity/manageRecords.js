@@ -219,20 +219,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },    
     //override some editing methods
     
-    _getEditDialog: function(){
-            if(this.options.edit_mode=='popup' && this._edit_dialog){
-                return this._edit_dialog.parents('.ui-dialog'); 
-            }else if(this.options.edit_mode=='editonly'){
-
-                if(this._as_dialog){
-                    return this._as_dialog.parents('.ui-dialog'); 
-                }else {
-                    return $(document).find('div.ui-widget')[0];
-                }
-            }
-            return null;
-    },
-    
     _getEditDialogButtons: function(){
                                     
             var that = this;        
@@ -328,7 +314,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             return btns;
     },
     
-    _initEditForm_step1: function(recID, afterInitCallback){
+    _initEditForm_step1: function(recID){
         if(this.options.edit_mode=='popup'){
 
             var query = null, popup_options={};
@@ -374,7 +360,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             window.hWin.HEURIST4.ui.openRecordEdit( recID, query, popup_options);
             
         }else{
-            this._super( recID, afterInitCallback );
+            this._super( recID );
         }
     },
     
@@ -639,7 +625,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 $(sContent).appendTo(panel);
                 
                 //resolve user id to name
-                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_AddedByUGrpID')]},
+                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_AddedByUGrpID')},
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
@@ -752,15 +738,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         ele.editing_input('setValue',[context.owner]);
                         ele.editing_input('isChanged', true);
                         
-                        if(Number(context.owner)==0){
-                            sUserName = window.hWin.HR('Everyone');
-                        }else if(context.owner == window.hWin.HAPI4.currentUser['ugr_ID']){
-                            sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
-                        }else{
-                            sUserName = window.hWin.HAPI4.currentUser.usr_GroupsList[Number(context.owner)][1];
-                        }
-                        
-                        panel.find('#recOwner').html(sUserName);
+                        window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.owner},
+                            function(response){
+                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    panel.find('#recOwner').html(response.data[context.owner]);
+                                }
+                            });
                     }
 
                     ele = that._editing.getFieldByName('rec_NonOwnerVisibility');
@@ -778,7 +761,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
             
             //
-            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_OwnerUGrpID')]},
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_OwnerUGrpID')},
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         panel.find('#recOwner').text(response.data[that._getField('rec_OwnerUGrpID')]);
@@ -917,12 +900,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            //var recordset =  new hRecordSet(response.data);
-                            //that._renderSummaryTags(recordset, panel);
                             panel.empty();
                             var recs = (response.data && response.data.records)?response.data.records:[];
                             
                             window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                                    isdialog: false,
                                     container: panel,
                                     select_mode:'select_multi', 
                                     layout_mode: '<div class="recordList"/>',
@@ -953,7 +935,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 +'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')+'</div>').appendTo(panel);
 
             //resolve user id to name
-            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:[that._getField('rec_AddedByUGrpID')]},
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_AddedByUGrpID')},
                 function(response){
                     if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                         panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
@@ -1035,7 +1017,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .click(function(){
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
-                                isdialog: true,
                                 edit_mode: 'editonly',
                                 rem_RecID: that._currentEditID,
                                 onClose:function(){
@@ -1101,7 +1082,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .click(function(){
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrBookmarks', {
-                                isdialog: true,
                                 bkm_RecID: that._currentEditID,
                                 height:400,
                                 onClose:function(){
@@ -1114,7 +1094,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
              .appendTo(pnl);        
     },
     //
-    // NOT USED anymore
+    // NOT USED anymore TO REMOVE
     //
     _renderSummaryTags: function(recordset, panel){
         
@@ -1128,19 +1108,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .hide().appendTo(panel);
             
             //render group divs
-            var groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-            if(groups)
-            for (idx in groups)
-            {
-                if(idx){
-                    var groupID = idx;
-                    var name = groups[idx][1];
-                    if(!window.hWin.HEURIST4.util.isnull(name))
-                    {
+            for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                if(!window.hWin.HEURIST4.util.isnull(name)){
                         $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>')
                             .css({'padding':'0 2 4 2px'})
                             .attr('data-id', groupID).hide().appendTo(panel);
-                    }
                 }
             }
             
@@ -1184,7 +1158,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         */
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
-                                isdialog: true,
                                 width: 800,
                                 height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
                                 select_mode:'select_multi', 
@@ -1207,7 +1180,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                                 }
                                             });
                                         //update panel
-                                        that._renderSummaryTags(data.selection, panel);
+                                        //that._renderSummaryTags(data.selection, panel);
                                     }
                                 }
                         });
@@ -1706,7 +1679,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //show coverall to prevnt edit
             //1. No enough premission
             var no_access = that._getField('rec_OwnerUGrpID')>0 &&  //0 is everyone
-                            window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'))<0;
+                            !window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'));
                             //!window.hWin.HAPI4.is_admin()
             
             //2. Popup for resource field

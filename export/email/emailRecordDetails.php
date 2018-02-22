@@ -78,7 +78,6 @@ if($_POST["rectype"] == RT_BUG_REPORT){
     }
 
     $bug_title = $_POST["type:".DT_BUG_REPORT_NAME];
-
     
     $geekMail->from("bugs@HeuristNetwork.org", "Bug reporter"); //'noreply@HeuristNetwork.org', 'Bug Report');
     $geekMail->subject('Bug report or feature request: '.$bug_title[0]);

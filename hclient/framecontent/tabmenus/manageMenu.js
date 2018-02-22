@@ -117,6 +117,47 @@ function hmanageMenu() {
                 return false;
             }
         );
+        
+        $('#menulink-database-browse').click(
+            function(event){
+                
+                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', {
+                    select_mode:'select_single',
+                    //isdialog: false,
+                    //container: ,
+                    onselect:function(event, data){
+
+                        if(data && data.selection && data.selection.length==1){
+                            var db = data.selection[0];
+                            if(db.indexOf('hdb_')===0) db = db.substr(4);
+                            window.open( window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
+                        }
+                                                
+                    }
+                });
+                event.preventDefault();
+                return false;
+            }
+        );
+        
+        $('#menulink-database-properties').click(
+            function(event){
+        
+                window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
+                event.preventDefault();
+                return false;
+            }        
+        );
+
+        $('#menulink-database-new').click(
+        
+        );
+
+        $('#menulink-database-register').click(
+        
+        );
+        
+        
 /*
         $('#menulink-database-admin').click( //.attr('href', 
             function(event){
@@ -143,7 +184,7 @@ function hmanageMenu() {
         if(link && link.attr('data-nologin')!='1'){
             
             //check if login
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                 //window.hWin.HEURIST4.msg.showDialog(url, options);
                 $('.accordion_pnl').find('a').parent().removeClass('item-selected'); //was #menu_container
                 link.parent().addClass('item-selected');

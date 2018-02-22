@@ -108,7 +108,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     $dlg.dialog( "close" );
                     if(response.status==window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED && needlogin){
                             //window.hWin.HAPI4.setCurrentUser(null);
-                            //$(top.document).trigger(window.hWin.HAPI4.Event.LOGOUT);
+                            //$(top.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
                     }
                 }; 
         window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, dlg_title);

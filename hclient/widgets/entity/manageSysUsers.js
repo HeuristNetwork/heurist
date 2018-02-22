@@ -67,21 +67,35 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         //update dialog title
-        if(this.options.isdialog &&  !this.options.title){
+        if(this.options.isdialog){ // &&  !this.options.title
             var title = null;
             var usr_ID = 0;
+            
+            if(this.options.select_mode=='select_single'){
+               title = 'Select User'; 
+            }else
+            if(this.options.select_mode=='select_multi'){
+               title = 'Select Users'; 
+              
+              if(this.options.ugl_GroupID<0){ 
+                    usr_ID = Math.abs(this.options.ugl_GroupID);
+                    title += ' to add to Workgroup #'+usr_ID+': ';
+              }
+               
+            }else
             if(this.options.ugl_GroupID>0){
                 usr_ID = this.options.ugl_GroupID;
                 title = 'Manage Users of Workgroup #'+this.options.ugl_GroupID+': ';
-            }else if(this.options.ugl_GroupID<0){
+            }else /*if(this.options.ugl_GroupID<0){
                 usr_ID = Math.abs(this.options.ugl_GroupID);
                 title = 'Select Users to add to Workgroup #'+usr_ID+': ';
-            }else{
+            }else*/
+            {
                 if(window.hWin.HAPI4.is_admin()){
                     title = 'Manage All Users as Database Administrator';    
                 }else{                    
-                    usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
-                    title = 'Manage workgroups for user #'+window.hWin.HAPI4.currentUser['ugr_ID']+': ';    
+                    //usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+                    title = 'Manage Users';    
                 }
             }
             
@@ -142,7 +156,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     
                         var options = {select_mode: 'select_multi',
                                 ugl_GroupID: -ugl_GroupID,
-                                isdialog: true,
                                 edit_mode:'none',
                                 title: ("Select Users to add to Workgroup #"+ugl_GroupID),
                                 onselect:function(event, data){
@@ -163,6 +176,13 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                                 if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                                                     //reload
                                                     that.searchForm.searchSysUsers('startSearch');
+                                                    
+console.log('ON_CRED???');                                                    
+                                                    if(data.selection.indexOf(window.hWin.HAPI4.currentUser['ugr_ID'])>=0){
+                                                        window.hWin.HAPI4.currentUser['ugr_Groups'][ugl_GroupID] = 'member';
+                                                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                                                    }
+                                                    
                                                 }else{
                                                     window.hWin.HEURIST4.msg.showMsgErr(response);      
                                                 }
@@ -227,6 +247,16 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                     selector.attr('data-value', newRole);
                                     window.hWin.HEURIST4.msg.showMsgFlash('New role applied');      
                                 }
+
+                                if(usr_ID==window.hWin.HAPI4.currentUser['ugr_ID']){
+                                    if(newRole=='remove'){
+                                        window.hWin.HAPI4.currentUserRemoveGroup(ugl_GroupID);
+                                    }else{
+                                        window.hWin.HAPI4.currentUser['ugr_Groups'][ugl_GroupID] = newRole;
+                                    }
+                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                                }
+                                
                             }else{
                                 //restore current value
                                 selector.val( selector.attr('data-value') );
@@ -242,7 +272,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
                     var options = {select_mode: 'manager',
                         ugl_UserID: user_ID,
-                        isdialog: true,
                         edit_mode:'popup',
                         title: ("Manage Membership for User #"+user_ID),
                         //before close - count for membership and refresh
@@ -395,7 +424,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 if(recID==2 && ugl_GroupID==window.hWin.HAPI4.sysinfo.db_managers_groupid){
                     html = html + '<div style="min-width:78px;text-align:center">admin</div>';
                 }else 
-                if(window.hWin.HAPI4.has_access(ugl_GroupID)>0){    //admin of this group
+                if(window.hWin.HAPI4.has_access(ugl_GroupID)){//current user is admin of given group
                     html = html 
                         + '<select title="Role" style="min-width:70px;text-align:center;margin:0 4px;" class="user-role" data-value="'
                         + fld('ugl_Role')+'">'
@@ -412,7 +441,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 //html = html + '<div style="min-width:78px;"></div>';
             }
             
-            if( window.hWin.HAPI4.is_admin() ) { //window.hWin.HAPI4.has_access(recID)>0 ){
+            if( window.hWin.HAPI4.is_admin() ) {//current user is admin of database managers
                 
                 html = html 
                     + '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
@@ -516,11 +545,23 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         this._super( recID, fieldvalues );
         this.getRecordSet().setRecord(recID, fieldvalues);
         
-        
         if(this.options.edit_mode == 'editonly'){
             this.closeDialog(true); //force to avoid warning
         }else{
             this.recordList.resultList('refreshPage');  
         }
     },
+    
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this user? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
+    },
+    
 });

@@ -372,18 +372,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             this._editing_uploadfile.getContainer().hide(); //this form is hidden
             var ele = this._editing_uploadfile.getFieldByName('ulf_FileUpload');    
             ele.find('.fileupload').click(); //open file select dialog
-        /*
-        that._initEditForm_step1(-1, function(){
-            var ele = that._editing.getFieldByName('ulf_FileUpload');
-            ele.editing_input('option', 'change', function(){ 
-                var res = this.getValues(); 
-                var ulf_ID = res[0];
-                that._currentEditID = null;//to prevent warn about save
-                that.addEditRecord(ulf_ID);
-            });
-            ele.find('.fileupload').click();
-        });
-        */
+
     },
     
     

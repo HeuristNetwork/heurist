@@ -179,7 +179,10 @@ class DbEntityBase
     //
     public function delete(){
         
-        $this->recordIDs = prepareIds($this->data['recID']);
+        if(!@$this->recordIDs){
+            $this->recordIDs = prepareIds($this->data['recID']);
+        }
+            
 
         if(count($this->recordIDs)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
@@ -262,7 +265,7 @@ class DbEntityBase
             $value = @$fieldvalues[$fieldname];
             
             //ulf_MimeExt is the only nonnumeric resource
-            if($field_config['dty_Type']=='resource' && $fieldname!='ulf_MimeExt'){ 
+            if(@$field_config['dty_Type']=='resource' && $fieldname!='ulf_MimeExt'){ 
                 if(intval($value)<1) $this->data['fields'][$fieldname] = null;
             }
         }
@@ -364,7 +367,7 @@ class DbEntityBase
     // $tempfile - file to rename to recID
     //
     protected function renameEntityImage($tempfile, $recID){
-        
+
         $entity_name = $this->config['entityName'];
         
         $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
@@ -384,8 +387,32 @@ class DbEntityBase
                   $new_name = $pathname.'/'.$recID.'.'.$extension;
                   rename ($info->getPathname(), $new_name);
               }
-        }        
+        }
     }
+    
+    protected function getTempEntityFile($tempfile){
+        $entity_name = $this->config['entityName'];
+        
+        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
+
+        $directory = new \DirectoryIterator($path);  //RecursiveDirectoryIterator
+        $iterator = new \IteratorIterator($directory);  //Recursive      
+        
+        foreach ($iterator as $filepath => $info) {
+              if(!$info->isFile()) continue;
+              
+              $filename = $info->getFilename();
+              $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
+              //$extension = $info->getExtension(); since 5.3.6
+              
+              if ($filename==$tempfile.'.'.$extension) {
+                    return $info;                  
+              }
+        }
+        return null;
+    }
+        
+        
 
     //
     //

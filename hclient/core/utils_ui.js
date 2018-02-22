@@ -91,7 +91,7 @@ window.hWin.HEURIST4.ui = {
     addoption: function(sel, value, text, disabled)
     {
         var option = document.createElement("option");
-        option.text = text;
+        option.text = window.hWin.HEURIST4.util.htmlEscape(text);
         option.value = value;
         if(disabled===true){
             option.disabled = true;
@@ -111,7 +111,62 @@ window.hWin.HEURIST4.ui = {
         return option;
     },
 
+    //
+    // create checkboxm, radio or select element
+    // options
+    //  type:
+    //  hideclear 
+    //  values: [{key:'',title:''},....]
+    //
+    createInputSelect: function($inpt, options) {
+        
+        if(options.type=='checkbox'){
+            if($inpt==null || !$inpt.is('input')){
+                $inpt = $('<input>');
+            }
+            $inpt.attr('type','checkbox');
+            
+            //@todo
+            
+            return $inpt;
+        }else if(options.type=='radio'){
+            
+            var $inpt_group = $('<div>').attr('radiogroup',1).uniqueId()
+                        .css({background: 'none', padding: '2px'});
+            var id = $inpt_group.attr('id');
+            
+            for (idx in options.values)
+            if(idx>=0){
+                if(window.hWin.HEURIST4.util.isnull(options.values[idx].key) && 
+                   window.hWin.HEURIST4.util.isnull(options.values[idx].title))
+                {
+                    key = options.values[idx];
+                    title = options.values[idx];
+                    disabled = false;
+                }else{
+                    key = options.values[idx].key;
+                    title = options.values[idx].title;
+                }
+                if(!window.hWin.HEURIST4.util.isnull(title)){
+                    $('<label style="padding-right:5px"><input type="radio" value="'
+                            +key+'" name="'+id+'">'
+                            +window.hWin.HEURIST4.util.htmlEscape(title)+'</label>').appendTo($inpt_group);
+                }
+            }
+            
+            return $inpt_group;
+            
+        }else { //select bu default
+            if($inpt==null || !$inpt.is('select')){
+                $inpt = $('<select>').uniqueId();
+            }
+            
+            return window.hWin.HEURIST4.ui.createSelector($inpt[0], options.values);
+        }
+        
     
+    },
+        
     //
     // create SELECT element (if selObj is null) and fill with given options
     // topOptions either array or string
@@ -1086,18 +1141,35 @@ window.hWin.HEURIST4.ui = {
 
         $(selObj).empty();
 
+        if(groups=='all'){  //all groups - sorted by name
+            
+            groups = window.hWin.HAPI4.sysinfo.db_usergroups;
+            
+        }else 
+        if(groups=='all_my_first'){ //all groups by name - my groups first
+            
+            if(!topOptions) topOptions = [];
+            for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                if(!window.hWin.HEURIST4.util.isnull(name)){
+                        topOptions.push({key:groupID, title:name});
+                }
+            }
+            topOptions.push({key:0, title:'------'});
+            
+            groups = window.hWin.HAPI4.sysinfo.db_usergroups;
+            
+        }else 
         if(!groups){ //use groups of current user
-            groups = window.hWin.HAPI4.currentUser.usr_GroupsList;
-            if(!groups){
-                //looad detailed info about Workgroups
-                window.hWin.HAPI4.SystemMgr.mygroups(
-                    function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                            groups = window.hWin.HAPI4.currentUser.usr_GroupsList = response.data;
-                            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
-                        }
-                });
-                return;
+        
+            groups = {};
+            for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                if(!window.hWin.HEURIST4.util.isnull(name)){
+                        groups[groupID] = name;
+                }
             }
         }
 
@@ -1119,11 +1191,11 @@ window.hWin.HEURIST4.ui = {
         }
         if(groups){
 
-            for (var idx in groups)
+            for (var groupID in groups)
             {
-                if(idx && addedontop.indexOf(idx)<0){
-                    var groupID = idx;
-                    var name = groups[idx][1];
+                if(groupID>0 && addedontop.indexOf(groupID)<0){
+                    var name = groups[groupID];
+                    if($.isArray(name)) name = name[1] //backward
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
                         window.hWin.HEURIST4.ui.addoption(selObj, groupID, name);
@@ -1223,8 +1295,9 @@ window.hWin.HEURIST4.ui = {
                 }
             }
             
-            if(is_exit) return;
-        
+            $context.trigger('competency', exp_level); //some contexts need specific behaviour to apply the level
+            
+            //if(is_exit) return;
             //window.hWin.HEURIST4.ui.applyCompetencyLevel( exp_level );
     }, 
       
@@ -1445,7 +1518,6 @@ window.hWin.HEURIST4.ui = {
                 }
                 
                 popup_options = $.extend(popup_options, {
-                    isdialog: true,
                     select_mode: 'manager',
                     edit_mode: 'editonly', //only edit form is visible, list is hidden
                     //height: usrPreferences.height,
@@ -1864,12 +1936,16 @@ window.hWin.HEURIST4.ui = {
         entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1); //entityName.capitalize();
                             
         var widgetName = 'manage'+entityName;
+        
+        if(!options) options = {};
+        if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
         if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
             
             if(!options.container){
+                
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
                     [widgetName]( options );
@@ -1885,7 +1961,10 @@ window.hWin.HEURIST4.ui = {
             var scripts = [ path+widgetName+'.js'];
             
             //entities without search option
-            if(!(entityName=='UsrBookmarks' || entityName=='DefDetailTypeGroups')){ 
+            if(!(entityName=='UsrBookmarks' || 
+                 entityName=='SysIdentification' ||
+                 entityName=='DefDetailTypeGroups' || 
+                 entityName=='SysBugreport')){ 
                 scripts.push(path+'search'+entityName+'.js');
             }
             

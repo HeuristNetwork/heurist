@@ -111,12 +111,12 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Default access outside owner group on bulk imported records (only owners can edit)",
                         "rst_DisplayHelpText": "",
-                        "rst_FieldConfig":[
+                        "rst_FieldConfig":{"type":"select","hideclear":"1","values":[
                             {"key":"viewable","title":"viewable"},
                             {"key":"hidden","title":"hidden"},
                             {"key":"public","title":"public"},
                             {"key":"pending","title":"pending"}
-                        ]
+                        ]}
                     }
                 }, 
                 {
@@ -125,10 +125,11 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Set 'public' to 'pending' when record edited (use to stage record edits)",
                         "rst_DisplayHelpText": "",
-                        "rst_FieldConfig":[
+                        "rst_DefaultValue": "0",
+                        "rst_FieldConfig":{"type":"radio","hideclear":"1","values":[
                             {"key":"0","title":"No"},
                             {"key":"1","title":"Yes"}
-                        ]
+                        ]}
                     }
                 }, 
                 {
@@ -137,10 +138,10 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Allow online registration as user (confirmed by Database Owner)",
                         "rst_DisplayHelpText": "",
-                        "rst_FieldConfig":[
+                        "rst_FieldConfig":{"type":"radio","hideclear":"1","values":[
                             {"key":"0","title":"No"},
                             {"key":"1","title":"Yes"}
-                        ]
+                        ]}
                     }
                 }, 
                 {
@@ -149,10 +150,10 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Carry out nightly URL validation (can overload targets)",
                         "rst_DisplayHelpText": "",
-                        "rst_FieldConfig":[
+                        "rst_FieldConfig":{"type":"radio","hideclear":"1","values":[
                             {"key":"0","title":"No"},
                             {"key":"1","title":"Yes"}
-                        ]
+                        ]}
                     }
                 }
         ]},    

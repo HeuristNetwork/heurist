@@ -465,37 +465,43 @@ $.widget( "heurist.editing_input", {
 
         }else if(this.detailType=='enum' || this.detailType=='relationtype'){
 
-            $input = $( '<select>' )
-            .uniqueId()
-            .addClass('text ui-widget-content ui-corner-all')
-            .css('width','auto')
-            .val(value)
-            .appendTo( $inputdiv );
-
             $input = this._recreateSelector($input, value);
+
+            $input = $($input);
+            
+            $input
+                .addClass('text ui-widget-content ui-corner-all')
+                .css('width','auto')
+                .val(value)
+                .appendTo( $inputdiv );
+
             
             function __onTermChange( event, data ){
                 
-                if($input.hSelect("instance")!=undefined){
-                    
-                    var opt = $input.find('option[value="'+$input.val()+'"]');
-                    var parentTerms = opt.attr('parents');
-                    if(parentTerms){
-                        $input.hSelect("widget").find('.ui-selectmenu-text').text( parentTerms+'.'+opt.text() );    
-                    }    
-                       
-                }else{
-                    //restore plain text value               
-                    $input.find('option[term-view]').each(function(idx,opt){
-                        $(opt).text($(opt).attr('term-view'));
-                    });
-                    
-                    //assign for selected term value in format: parent.child 
-                    var opt = $input.find( "option:selected" );
-                    var parentTerms = opt.attr('parents');
-                    if(parentTerms){
-                         opt.text(parentTerms+'.'+opt.attr('term-orig'));
+                if(! $($input).attr('radiogroup')){
+                
+                    if($input.hSelect("instance")!=undefined){
+                        
+                        var opt = $input.find('option[value="'+$input.val()+'"]');
+                        var parentTerms = opt.attr('parents');
+                        if(parentTerms){
+                            $input.hSelect("widget").find('.ui-selectmenu-text').text( parentTerms+'.'+opt.text() );    
+                        }    
+                           
+                    }else{
+                        //restore plain text value               
+                        $input.find('option[term-view]').each(function(idx,opt){
+                            $(opt).text($(opt).attr('term-view'));
+                        });
+                        
+                        //assign for selected term value in format: parent.child 
+                        var opt = $input.find( "option:selected" );
+                        var parentTerms = opt.attr('parents');
+                        if(parentTerms){
+                             opt.text(parentTerms+'.'+opt.attr('term-orig'));
+                        }
                     }
+                
                 }
                 that.error_message.hide();
                 that._onChange();
@@ -504,10 +510,16 @@ $.widget( "heurist.editing_input", {
             $input.change( __onTermChange );
             
             var allTerms = this.f('rst_FieldConfig');    
+            
+            if($.isPlainObject(allTerms)){
+                this.options.showclear_button = (allTerms.hideclear!=1);
+            }
+            
             //allow edit terms only for true defTerms enum and if not DT_RELATION_TYPE
             
             if(window.hWin.HEURIST4.util.isempty(allTerms) 
-                && (this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])){
+                && (this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
+            {
 
                 allTerms = this.f('rst_FilteredJsonTermIDTree');        
 
@@ -559,7 +571,7 @@ $.widget( "heurist.editing_input", {
                                 if(recset.length()>0){                                  
                                 
                                     window.hWin.HEURIST4.ui.showEntityDialog('DefTerms', 
-                                        {select_mode:'images', recordset:recset, isdialog:true,
+                                        {select_mode:'images', recordset:recset,
                                         onselect:function(event, data){
                                             if(data && data.selection && data.selection.length>0){
                                                 $input.val(data.selection[0]);
@@ -647,7 +659,7 @@ $.widget( "heurist.editing_input", {
             
             }//allow edit terms only for true defTerms enum
             
-
+            
         }else if(this.detailType=='boolean'){
 
             $input = $( '<input>',{type:'checkbox', value:'1'} )
@@ -842,7 +854,6 @@ $.widget( "heurist.editing_input", {
             
             
             var popup_options = {
-                            isdialog: true,
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
                             select_return_mode: 'recordset',
                             edit_mode: 'popup',
@@ -1112,12 +1123,17 @@ $.widget( "heurist.editing_input", {
             })
             .appendTo( $inputdiv );
             
-            if(!(this.options.dtID=='file' || this.detailType=='resource' || this.detailType=='date' || this.detailType=='geo')){
-                $input.keydown(function(e){
+            if(!(this.options.dtID=='file' || this.detailType=='resource' || 
+                 this.detailType=='date' || this.detailType=='geo')){
+                     
+                $input.keydown(function(e){  //Ctrl+A - select all
                     if (e.keyCode == 65 && e.ctrlKey) {
                                         e.target.select()
                     }    
                 });
+                if(this.detailType=='password'){
+                    $input.prop('type','password');
+                }
             }
             
             if(this.options.dtID=='rec_URL' || this.detailType=='url'){
@@ -1956,27 +1972,39 @@ $.widget( "heurist.editing_input", {
         
         if(value===true){
             //keep current
-            value = $input.val();
+            value = ($input)?$input.val():null;
         }
 
-        $input.empty();
+        if($input) $input.empty();
 
         var allTerms = this.f('rst_FieldConfig');
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)){//this is not vocabulary ID, this is something more complex
 
-            if($.isPlainObject(this.configMode))    { //this lookup for entity
+            if($.isPlainObject(this.configMode))    { 
 
-                //create and fill SELECT
-                //this.configMode.entity
-                //this.configMode.filter_group
+                if(this.configMode.entity){ //this lookup for entity
+                    
+                    //create and fill SELECT
+                    //this.configMode.entity
+                    //this.configMode.filter_group
+                    if($input==null) $input = $('<select>').uniqueId();
+;
 
-                //add add/browse buttons
-                window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, true, null);
+                    //add add/browse buttons
+                    window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, true, null);
 
-                if(this.configMode.button_browse){
+                    if(this.configMode.button_browse){
 
+                    }
+                
+                }else{
+                    //type: select, radio, checkbox
+                    //hideclear                    
+                    $input = window.hWin.HEURIST4.ui.createInputSelect($input, allTerms);
+                    
                 }
+                
 
             }else{
 
@@ -1998,11 +2026,17 @@ $.widget( "heurist.editing_input", {
                     //allTerms.unshift({key:'', title:''});
                     
                     //array of key:title objects
+                    if($input==null) $input = $('<select>').uniqueId();
                     window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                 }
             }
             if(!window.hWin.HEURIST4.util.isnull(value)){
-                $input.val(value); 
+                
+                if($($input).attr('radiogroup')){
+                    $($input).find('input[value="'+value+'"]').attr('checked', true);
+                }else{
+                    $($input).val(value); 
+                }
             }  
 
         }else{ //this is usual enumeration from defTerms
@@ -2135,8 +2169,15 @@ $.widget( "heurist.editing_input", {
         var res = null;
         var $input = $(input_id);
 
-        if(!(this.detailType=="resource" || this.detailType=='file' || this.detailType=='date' || this.detailType=='geo')){
-            res = $input.val();
+        if(!(this.detailType=="resource" || this.detailType=='file' 
+            || this.detailType=='date' || this.detailType=='geo'))
+        {
+            if($input.attr('radiogroup')>0){
+                res = $input.find('input:checked').val();
+            }else{
+                res = $input.val();    
+            }
+            
             if(!window.hWin.HEURIST4.util.isnull(res) && res!=''){
                 res = res.trim();
             }

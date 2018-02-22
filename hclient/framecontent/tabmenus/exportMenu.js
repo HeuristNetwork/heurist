@@ -182,7 +182,7 @@ function hexportMenu() {
 
         if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
         }else{
             window.hWin.HEURIST4.msg.showDialog(url, options);
         }        
@@ -201,22 +201,28 @@ function hexportMenu() {
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
         }
         
+        window.hWin.HAPI4.SystemMgr.verify_credentials(
+        function(){
+        
+        
         if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,false)}); // isAll, includeRelated, multifile = separate files
+            _exportHML(true,false,false); // isAll, includeRelated, multifile = separate files
         }else if(action == "menu-export-hml-selected"){ // Currently selected records only
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(false,false,false)});
+            _exportHML(false,false,false);
         }else if(action == "menu-export-hml-plusrelated"){ // Current resulteset plus any related records
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,true,false)});
+            _exportHML(true,true,false);
         }else if(action == "menu-export-hml-multifile"){ // selected + related
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportHML(true,false,true)});
+            _exportHML(true,false,true);
         }else if(action == "menu-export-kml"){
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportKML(true)});
+            _exportKML(true);
         }else if(action == "menu-export-rss"){
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportFeed('rss')});
+            _exportFeed('rss');
         }else if(action == "menu-export-atom"){
-            window.hWin.HAPI4.SystemMgr.is_logged(function(){_exportFeed('atom')});
+            _exportFeed('atom');
         }
       
+        });
+        
         event.preventDefault();
     }    
     

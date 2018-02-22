@@ -27,6 +27,7 @@
 //_recordListHeaderRenderer  - renderer of header for resultlist
 //_recordListItemRenderer    - renderer of item for resultlist
 //_recordListGetFullData     - callback function to retrieve full record info (in case we use 2 steps search: ids then list per page)  
+// _getEditDialog
 //_getEditDialogButtons  - return set of buttons fot edit popup
 //_initDialog - init dialog widget 
 // popupDialog
@@ -129,8 +130,6 @@ $.widget( "heurist.manageEntity", {
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _edit_dialog:null, //keep reference to popup dialog
     _toolbar:null,
-    
-    _afterInitCallback:null,
     
     // the widget's constructor
     _create: function() {
@@ -623,6 +622,20 @@ $.widget( "heurist.manageEntity", {
     },
     
     
+    _getEditDialog: function(){
+            if(this.options.edit_mode=='popup' && this._edit_dialog){
+                return this._edit_dialog.parents('.ui-dialog'); 
+            }else if(this.options.edit_mode=='editonly'){
+
+                if(this._as_dialog){
+                    return this._as_dialog.parents('.ui-dialog'); 
+                }else {
+                    return $(document).find('div.ui-widget')[0];
+                }
+            }
+            return null;
+    },
+    
     _getEditDialogButtons: function(){
 
         var that = this;        
@@ -1020,7 +1033,7 @@ $.widget( "heurist.manageEntity", {
                             fields[ that.options.entity.keyField ] = (''+recID);
                             
                             //update record in cache
-                            if(that.options.use_cache){
+                            if(that.options.use_cache && that._cachedRecordset){
                                 that._cachedRecordset.addRecord(recID, fields);
                             }else{
                                 //add/update record in recordset in _afterSaveEventHandler depends on entity
@@ -1147,14 +1160,12 @@ $.widget( "heurist.manageEntity", {
     //
     //  it creates hEditing object and warns about save previous data
     //
-    _initEditForm_step1: function(recID, afterInitCallback){
+    _initEditForm_step1: function(recID){
         
         if(!this.editForm || this.editForm.length==0) return;
 
         var that = this;
         
-        this._afterInitCallback = afterInitCallback;    
-
         if(!this._editing){
             this._editing = new hEditing({entity:this.options.entity, container:this.editForm, onchange:function(){
                 that.onEditFormChange(this); //this is changed_element
@@ -1393,10 +1404,6 @@ $.widget( "heurist.manageEntity", {
         
         this.onEditFormChange();
         // to EXTEND         
-        
-        if($.isFunction(this._afterInitCallback)){
-            this._afterInitCallback.call();
-        }
         
         //old way window.hWin.HEURIST4.ui.switchHintState('prefs_'+this._entityName, this.element, false);
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm); 

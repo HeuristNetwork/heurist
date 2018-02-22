@@ -287,7 +287,7 @@ $.widget( "heurist.search", {
             .button({icon: 'ui-icon-circle-arrow-s'});
 
             this._on( this.btn_search_save, {  click: function(){
-                window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
+                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){ 
                 var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
                 if(app && app.widget){
                     $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
@@ -310,7 +310,7 @@ $.widget( "heurist.search", {
             .appendTo( this.div_add_record )
             .button()
             .click(function(){ 
-                window.hWin.HAPI4.SystemMgr.is_logged(function(){ 
+                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){ 
                     window.hWin.HEURIST4.msg.showDialog(window.HAPI4.baseURL + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+window.hWin.HAPI4.database,
                     { width:1200, height:600, title:'Manage Structure', 
                       afterclose: function(){ window.hWin.HAPI4.SystemMgr.get_defs_all( false, that.document)}} )
@@ -400,7 +400,7 @@ $.widget( "heurist.search", {
             .appendTo( this.div_add_record )
             .button({label: window.hWin.HR("Add Record"), icon:'ui-icon-plusthick'}) //"ui-icon-circle-plus"
             .click( function(){ 
-                window.hWin.HAPI4.SystemMgr.is_logged(function(){
+                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     if(that.select_rectype_addrec.val()>0){
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                             {new_record_params:{rt:that.select_rectype_addrec.val()}});
@@ -478,7 +478,7 @@ $.widget( "heurist.search", {
         //-----------------------
 
         //global listeners
-        $(this.document).on(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT, function(e, data) {
+        $(this.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
             that._refresh();
         });
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
@@ -529,7 +529,7 @@ $.widget( "heurist.search", {
     /* private function */
     _refresh: function(){
 
-        if(window.hWin.HAPI4.is_logged()){
+        if(window.hWin.HAPI4.has_access()){
             $(this.element).find('.logged-in-only').show();
             //$(this.element).find('.logged-in-only').css('visibility','visible');
             //$(this.element).find('.logged-out-only').css('visibility','hidden');
@@ -1137,7 +1137,7 @@ $.widget( "heurist.search", {
     // revert other modifications here
     ,_destroy: function() {
 
-        $(this.document).off(window.hWin.HAPI4.Event.LOGIN+' '+window.hWin.HAPI4.Event.LOGOUT);
+        $(this.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
         $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
           + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
           + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH

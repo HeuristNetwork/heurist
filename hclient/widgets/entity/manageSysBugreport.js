@@ -1,5 +1,5 @@
 /**
-* manageDefDetailTypeGroups.js - main widget mo manage defDetailTypeGroups
+* manageSysBugreport.js - prepare and send bugreport by email
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -17,41 +17,42 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
-$.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
+//
+// there is no search, select mode for bug report - only add and send by email
+//
+$.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
+   
+    _entityName:'sysBugreport',
     
-    _entityName:'sysIdentification',
+    //keep to refresh after modifications
+    _keepRequest:null,
     
     _init: function() {
-
+        
+        this.options.title = 'Bug Report';
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
-        this.options.width = 1020;
-        this.options.height = 800;
-        this.options.use_cache = true;
-        
+        this.options.width = 640;
+        this.options.height = 480;
+
         this._super();
     },
     
+    //  
+    // invoked from _init after load entity config    
+    //
     _initControls: function() {
-
+        
         if(!this._super()){
             return false;
         }
-
-        var that = this;
         
-
-        window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
-            function(response){
-                that._cachedRecordset = response;
-                that.updateRecordList(null, {recordset:response});
-                that.addEditRecord( response.getOrder()[0] );
-            });
-            
+        // always new report
+        this.addEditRecord(-1);
+        
         return true;
-    }, 
+    },
     
     // change label for remove
     _getEditDialogButtons: function(){
@@ -59,9 +60,8 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         
         var that = this;
         for(var idx in btns){
-            if(btns[idx].id=='btnRecRemove'){
-                //remove this button -    
-                btns.splice(idx,1);
+            if(btns[idx].id=='btnRecSave'){
+                btns[idx].text = window.hWin.HR('Send to heurist development team');
                 break;
             }
         }
@@ -69,18 +69,11 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         return btns;
     },
     
-    
-    _afterInitEditForm: function(){
-
-        //make labels in edit form wider
-        this.editForm.find('.header').css({'min-width':'250px','width':'250px', 'font-size': '0.9em'});
-        
-        this._super();
-    },
-    
+//----------------------------------------------------------------------------------    
     _afterSaveEventHandler: function( recID, fields ){
-        this._super( recID, fields );
+        window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been sent'));
         this.closeDialog(true); //force to avoid warning
     },
+    
     
 });
