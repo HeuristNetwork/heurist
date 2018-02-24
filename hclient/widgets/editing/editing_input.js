@@ -1989,7 +1989,7 @@ $.widget( "heurist.editing_input", {
                     //this.configMode.entity
                     //this.configMode.filter_group
                     if($input==null) $input = $('<select>').uniqueId();
-;
+
 
                     //add add/browse buttons
                     window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, true, null);
@@ -2050,6 +2050,8 @@ $.widget( "heurist.editing_input", {
                 headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
             }
 
+            if($input==null) $input = $('<select>').uniqueId();
+            
             //vocabulary
             $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
                 {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms,
