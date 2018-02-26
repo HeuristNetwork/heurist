@@ -73,6 +73,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             Register</a>
                     </li>
 
+<!--                    
                     <li>---- H4 ----</li>                    
                     
                     <li><a href="#" id="menulink-database-browse"
@@ -86,7 +87,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
                         Properties</a>
                     </li>
-                    
+-->                    
                 </ul>
             </div>
         </div>
