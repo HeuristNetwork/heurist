@@ -81,7 +81,8 @@ function hSvsEdit(args) {
                 domain  = request.w;
                 svs_ugrid.val(svs[_GRPID]==window.hWin.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
 
-                svs_ugrid.parent().hide();
+                //ART 2018-02-26 
+                //svs_ugrid.parent().hide();
                 //svs_ugrid.attr('disabled', true);
 
                 svs_id.val(svsID);
