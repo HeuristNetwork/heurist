@@ -309,7 +309,7 @@ $.widget( "heurist.svs_list", {
     //
     // save current treeview layout
     //
-    _saveTreeData: function( groupToSave, treeData ){
+    _saveTreeData: function( groupToSave, treeData, callback ){
 
         var isPersonal = (groupToSave=="all" || groupToSave=="bookmark");
 
@@ -334,6 +334,9 @@ $.widget( "heurist.svs_list", {
 
             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupToSave].modified = response.data;
+                
+                if($.isFunction(callback)) callback.call(this);
+                
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response, true);
             }
@@ -395,7 +398,7 @@ $.widget( "heurist.svs_list", {
                                         data[groupID].was_cleaned = null;
                                         var treeData = {};
                                         treeData[groupID] = data[groupID];
-console.log('saved searches tree was updated');                                        
+//console.log('saved searches tree was updated');                                        
                                         that._saveTreeData( groupID, treeData );
                                     }
                                 }
@@ -824,6 +827,7 @@ console.log('saved searches tree was updated');
 
         var fancytree_options =
         {
+            groupID: groupID,    
             checkbox: false,
             //titlesTabbable: false,     // Add all node titles to TAB chain
             source: treeData,
@@ -925,7 +929,10 @@ console.log('saved searches tree was updated');
                         qsearch = data.node.data.url;
                         qname   = data.node.title;
                     }else{
-                        if (data.node.key && window.hWin.HAPI4.currentUser.usr_SavedSearch && window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
+                        if (data.node.key && 
+                            window.hWin.HAPI4.currentUser.usr_SavedSearch && 
+                            window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
+                                
                             qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_QUERY];
                             qname   = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_NAME];
                             isfaceted = data.node.data.isfaceted;
@@ -953,22 +960,63 @@ console.log('saved searches tree was updated');
                 preventRecursiveMoves: true,
                 autoExpandMS: 400,
                 dragStart: function(node, data) {
-                    return true;
+                    return (node.key && node.key[0]=='_')?false:true;
                 },
                 dragEnter: function(node, data) {
                     // return ["before", "after"];
-                    if(node.tree._id == data.otherNode.tree._id){
+                    return node.folder ?true :["before", "after"];
+                    
+                    /*allows only the same ID
+                    if(node.tree._id == data.otherNode.tree._id){ 
                         return node.folder ?true :["before", "after"];
                     }else{
                         return false;
-                    }
+                    }*/
 
 
                 },
                 dragDrop: function(node, data) {
                     that._avoidConflictForGroup(groupID, function(){
-                        data.otherNode.moveTo(node, data.hitMode);
-                        that._saveTreeData( groupID );
+                        //data.otherNode - dragging node
+                        //node - target node
+                        if(node.tree._id != data.otherNode.tree._id){
+                        
+                            var mod_node = data.otherNode;
+                            
+                            var newGroupID = node.tree.options.groupID;
+                            var oldGroupID = mod_node.tree.options.groupID;
+                            var newGroupID_for_db = (newGroupID=='all' || newGroupID=='bookmark')
+                                        ? window.hWin.HAPI4.currentUser.ugr_ID :newGroupID; 
+
+//console.log('move '+mod_node.key+'  '+mod_node.title+' from '+oldGroupID
+//+' to '+newGroupID_for_db+' ('+newGroupID+') '+node.key+' '+node.title);
+
+                            var request = { svs_ID: mod_node.key, 
+                                        svs_UGrpID: newGroupID_for_db };
+                            
+                            window.hWin.HAPI4.SystemMgr.ssearch_save(request,
+                                function(response){
+                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+                                        window.hWin.HAPI4.currentUser.usr_SavedSearch[mod_node.key][_GRPID] = newGroupID;
+                                        data.otherNode.tree._id = node.tree._id;
+                                        data.otherNode.moveTo(node, data.hitMode);
+                            
+                                        that._saveTreeData( oldGroupID, null, function(){
+                                            that._saveTreeData( groupID, null, function(){
+                                                
+                                            } );
+                                        } );
+                            
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                                    }
+                                });
+                            
+                        }else{
+                            data.otherNode.moveTo(node, data.hitMode);
+                            that._saveTreeData( groupID );
+                        }
                     });
                 }
             };
@@ -1636,6 +1684,8 @@ console.log('saved searches tree was updated');
         }
     }
 
+    
+    // open edit dialog
     // mode: saved, rules, faceted
     // groupID - current user or workgroup
     // svsID - saved search id

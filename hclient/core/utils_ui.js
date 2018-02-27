@@ -131,8 +131,19 @@ window.hWin.HEURIST4.ui = {
             return $inpt;
         }else if(options.type=='radio'){
             
+            var $parent = null;
+            if($inpt!=null){
+                $parent = $inpt.parent();
+            }
+            
             var $inpt_group = $('<div>').attr('radiogroup',1).uniqueId()
                         .css({background: 'none', padding: '2px'});
+                        
+           if($parent!=null) {
+                $inpt_group.insertBefore($inpt);   
+                $inpt.remove();
+           }
+                        
             var id = $inpt_group.attr('id');
             
             for (idx in options.values)

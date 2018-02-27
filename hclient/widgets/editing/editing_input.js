@@ -465,16 +465,14 @@ $.widget( "heurist.editing_input", {
 
         }else if(this.detailType=='enum' || this.detailType=='relationtype'){
 
-            $input = this._recreateSelector($input, value);
-
-            $input = $($input);
-            
-            $input
+            $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
                 .css('width','auto')
                 .val(value)
                 .appendTo( $inputdiv );
-
+            
+            $input = this._recreateSelector($input, value);
+            $input = $($input);
             
             function __onTermChange( event, data ){
                 
@@ -1988,8 +1986,7 @@ $.widget( "heurist.editing_input", {
                     //create and fill SELECT
                     //this.configMode.entity
                     //this.configMode.filter_group
-                    if($input==null) $input = $('<select>').uniqueId();
-
+                    //if($input==null || $input.length==0) $input = $('<select>').uniqueId();
 
                     //add add/browse buttons
                     window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, true, null);
@@ -2026,7 +2023,7 @@ $.widget( "heurist.editing_input", {
                     //allTerms.unshift({key:'', title:''});
                     
                     //array of key:title objects
-                    if($input==null) $input = $('<select>').uniqueId();
+                    //if($input==null) $input = $('<select>').uniqueId();
                     window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                 }
             }
@@ -2050,7 +2047,7 @@ $.widget( "heurist.editing_input", {
                 headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
             }
 
-            if($input==null) $input = $('<select>').uniqueId();
+            //if($input==null) $input = $('<select>').uniqueId();
             
             //vocabulary
             $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),

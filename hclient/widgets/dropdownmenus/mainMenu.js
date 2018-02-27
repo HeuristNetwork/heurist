@@ -164,8 +164,10 @@ $.widget( "heurist.mainMenu", {
         this.divProfileItems3 = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         this._initMenu('ProfileH3', this.divProfileItems3);
 
+        /* new entityfeatures
         this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         this._initMenu('Profile', this.divProfileItems);
+        */
         
         if(window.hWin.HAPI4.sysinfo['layout']=='original'){
             this._initMenu('Database');
@@ -175,7 +177,7 @@ $.widget( "heurist.mainMenu", {
         this._initMenu('Help');
         
         this.divMainMenuItems.menu();
-        this.divProfileItems.menu();
+        //new this.divProfileItems.menu();
         this.divProfileItems3.menu();
         
         this.divProfileItems3.find('.ui-menu-item').css({'padding':'0em !important'});
@@ -291,11 +293,13 @@ $.widget( "heurist.mainMenu", {
             //this.divCurrentUser.empty();
         }
 
+        /* new
         if(window.hWin.HAPI4.is_admin()){
             this.menu_Profile.find('.admin-only').show();
         }else{
             this.menu_Profile.find('.admin-only').hide();    
         }
+        */
         
         $(this.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
         
@@ -318,7 +322,8 @@ $.widget( "heurist.mainMenu", {
         // remove generated elements
         this.btn_Admin.remove();
         this.btn_Profile.remove();
-        this.menu_Profile.remove();
+        //new this.menu_Profile.remove();
+        this.menu_Profile3.remove();
         this.btn_Database.remove();
         this.menu_Database.remove();
         this.btn_Import.remove();
@@ -377,15 +382,11 @@ $.widget( "heurist.mainMenu", {
                 //that._onPopupLink
             });
 
-        }else if(name=='Profile'){
-
-            //<a href="#" style="padding:2px 24px 0 2px">
-            link = $('<a href="#">'                      // style="width:7em;display:inline-block;text-align:left;"
-            +'<span>Settings</span></a>');
+        //}else if(name=='Profile'){
 
         }else if(name=='ProfileH3'){
-            
-            link = $('<a href="#">'                        // style="vertical-align:middle;"
+
+            link = $('<a href="#"><span style="display:inline-block;padding-right:20px">Settings</span>' 
             +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:10px;vertical-align:bottom;"></div>'
             +'&nbsp;<div class="usrFullName" style="display:inline-block">'
             +window.hWin.HAPI4.currentUser.ugr_FullName

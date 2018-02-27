@@ -124,9 +124,9 @@
     */
     function svsSave($system, $record){
 
-        if(!@$record['svs_Name']){
+        if( !(@$record['svs_ID']>0) && !@$record['svs_Name']){
             $system->addError(HEURIST_INVALID_REQUEST, "Name not defined");
-        }else if(!@$record['svs_Query']){
+        }else if(!(@$record['svs_ID']>0) && !@$record['svs_Query']){
             $system->addError(HEURIST_INVALID_REQUEST, "Query not defined");
         }else{
 
