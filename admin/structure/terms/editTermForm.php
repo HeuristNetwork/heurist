@@ -25,7 +25,20 @@
     require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
     require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
-    if (!is_admin()) {
+    if (!is_logged_in()) {
+        print "<html><head>";
+        print '<meta http-equiv="content-type" content="text/html; charset=utf-8">';
+        print "<link rel=stylesheet href='../../../common/css/global.css'></head>".
+        "<body><div class=wrap><div id=errorMsg>".
+        "<span>You must be logged in to add terms to vocabulary</span>".
+        "<p><a href=".HEURIST_BASE_URL."common/connect/login.php?db=".HEURIST_DBNAME.
+        " target='_top'>Log in</a></p></div></div></body></html>";
+        return;
+    }
+
+    $parent_id = @$_REQUEST['parent'];
+
+    /*    
         print "<html><head>";
         print '<meta http-equiv="content-type" content="text/html; charset=utf-8">';
         print "<link rel=stylesheet href='../../../common/css/global.css'></head>".
@@ -34,9 +47,8 @@
         "<p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
         " target='_top'>Log out</a></p></div></div></body></html>";
         return;
-    }
+    */
 
-    $parent_id = @$_REQUEST['parent'];
     $parent_name = "";
     $term_name = @$_REQUEST['name'];
     $term_desc = @$_REQUEST['description'];
@@ -233,10 +245,16 @@
                 </div>
 
                 <div style="padding-top: 20px;" id="btnPanel">
+<?php
+    if (is_admin()){
+?>
                     <div style="float:left; padding-left:150px;">
                         <input id="btnEditTree" type="button" value="Edit terms tree" onClick="{showOtherTerms();}"
                             title="Add, edit and rearrange terms in the overall tree view of terms defined for this database"/>
                     </div>
+<?php        
+    }
+?>
                     <div style="float:right; padding-left:30px;">
                         <input id="btnSaveAndClose" type="button" value="Done" onClick="{submitAndClose();}"
                             title="Close this window and return to the selection of the vocabulary and terms for this field"/> &nbsp;&nbsp;
