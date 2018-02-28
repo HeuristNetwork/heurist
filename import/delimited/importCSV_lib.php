@@ -1228,7 +1228,10 @@ function validateImport($mysqli, $imp_session, $params){
         }else
         if($ft_vals[$idx_reqtype] == "required"){
             if(!$field_name){
-                array_push($missed, $ft_vals[0]);
+                if(!($ft_vals[$idx_fieldtype] == "file" || $ft_vals[$idx_fieldtype] == "resource")){ //except file and resource
+                    array_push($missed, $ft_vals[0]);    
+                }
+                
             }else{
                 if($ft_vals[$idx_fieldtype] == "resource"){ //|| $ft_vals[$idx_fieldtype] == "enum"){
                     $squery = "not (".$field_name.">0)";

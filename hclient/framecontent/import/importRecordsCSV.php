@@ -351,11 +351,14 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <div class="ent_header" style="border:none;display:none" id="divFieldRolesHeader">
                     <h2>Specify identifier and date columns</h2><br>
                     <div style="font-weight:bold;padding-bottom:1em">Identifiers columns are those that contain a Heurist record ID</div>
+                    
                     <table class="tbfields" style="font-weight:bold"><tr>
-                                <td style="width:200px">Column</td>
+                                <td style="width:150px">Column</td>
+                                <td style="width:50px">&nbsp;</td>
                                 <td style="width:50px;text-align:center">Heurist<br>Identifier</td>
                                 <td style="width:50px;text-align:center">Date</td>
                                 <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></table>
+                    
                 </div>
                 <div class="ent_content" id="divFieldRoles" style="top:7em;bottom:5em;padding: 0.2em 0.5em">
                     list of field roles

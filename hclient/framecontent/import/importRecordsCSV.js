@@ -2187,7 +2187,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             //<tr><th>Column</th><th>Is date?</th><th>Is key?</th><th>For record type</th></tr>
                             //add header for list of columns
                             tbl  = $('<table>').addClass('tbfields').appendTo(container2);
-                          
+                            
                             var id_suggestions = []; 
                             //fill list of columns
                             for(i in response.data.fields){
@@ -3295,10 +3295,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 
                         
                     if(dt_id>0 && detDefs[dt_id]['commonFields'][idx_dt_type]=='enum'){ //button to add terms
-                        s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;"'
-                        +'>'
+                        s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
                         +'Adds '+tabs[k]['values_error'].length+' new terms to the field "'+
-                         detDefs[dt_id]['commonFields'][idx_dt_name]+'"</button><br><br>';     
+                         detDefs[dt_id]['commonFields'][idx_dt_name]+'"</button>';
+                        
+                        s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
+                              +'Adds new terms to all fields</button>';
+                         
+                        s += '<br><br>';     
                     }
     
     
@@ -3433,7 +3437,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
             
             //activate add terms buttons
-            $dlg.find('.add_terms').click(function(event){
+            var btn_ads = $dlg.find('.add_terms');
+            btn_ads.click(function(event){
                 
                 var ele = $(event.target);
                 var tab_idx = ele.attr('tab_id');
@@ -3443,26 +3448,66 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 //alert('add '+wrong_values.join(',')); 
             });
             
+            //activate add ALL terms buttons
+            if(btn_ads.length>1){
+                $dlg.find('.add_all_terms').show().click(function(event){
+                    var prepared_data = [];
+                    _importNewTermsToAllFields($dlg, 0, prepared_data);
+                });
+            }
             
         }
         
     } 
     
+    function _importNewTermsToAllFields($dlg, index, prepared_data){
+
+        var btn_ads = $dlg.find('.add_terms');
+
+        var ele = $(btn_ads[index]);
+        var tab_idx = ele.attr('tab_id');
+        var dt_id = ele.attr('dt_id');
+        var tabs = imp_session['validation']['error'];
+        var wrong_values = tabs[tab_idx]['values_error'];
+        
+        _importNewTerms($dlg, dt_id, wrong_values, -1, '', function(context){
+            
+            if(context && $.isArray(context)){
+                
+                prepared_data = prepared_data.concat(context);
+                
+                if(index<btn_ads.length-1){
+                    //gather all terms to be added
+                    index++;
+                    _importNewTermsToAllFields($dlg, index, prepared_data);
+                }else{
+                    //add all terms in prepared_data
+                    _importTerms($dlg, prepared_data, true);
+                }
+            }
+            
+        });
+        
+    }
     
     //
     // add new terms
     //
-    function _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, trm_ParentLabel){
+    function _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, trm_ParentLabel, callback){
         
         if(window.hWin.HEURIST4.util.isempty(newvalues)) return;
 
         var label_idx = window.hWin.HEURIST4.terms.fieldNamesToIndex['trm_Label'];
+
+        var fi_name =  window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Name'];
+        var fieldname = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_name];
         
         if(!(trm_ParentTermID>0)){
         //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
         
             var fi_term =  window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_JsonTermIDTree'];
             var terms = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_term];
+            
 
             if(window.hWin.HEURIST4.util.isNumber(terms)){ //this is vocabulary
                 trm_ParentTermID = Number(terms);
@@ -3489,7 +3534,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
                             var recIDs = response.data;
                             trm_ParentTermID = Number(recIDs[0]);
-                            _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, 'Auto-added terms');
+                            _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, 'Auto-added terms', callback);
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
@@ -3511,19 +3556,25 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         }else{
             s = newvalues.join(', ');
         }
+
+        if($.isFunction(callback)){
                 
-        window.hWin.HEURIST4.msg.showMsgDlg(
+            _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname, callback);
+            
+        }else{
+            window.hWin.HEURIST4.msg.showMsgDlg(
                 'Terms ' + s +' will be added to the vocabulary "'
                 + trm_ParentLabel +'"'
                 , function(){
-                    _importNewTerms_continue($dlg, newvalues, trm_ParentTermID);
+                    _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname);
                 }); 
+        }
     }
     
     //
     //  continue addition of new terms
     //            
-    function _importNewTerms_continue($dlg, newvalues, trm_ParentTermID){    
+    function _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname, callback){    
         
         var _prepareddata = [], record;
         
@@ -3562,15 +3613,27 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         }//for    
         
         if(_prepareddata.length==0){
-            var s = 'Nothing to import. Validation reports that among proposed terms<br>'
-                +((skip_dup>0)?skip_dup+' already exist; ':' ')
-                +((skip_long>0)?skip_long+' have too long label; ':' ')
-                +((skip_na>0)?skip_na+' label is empty':'');
-            setTimeout(function(){window.hWin.HEURIST4.msg.showMsgErr(s);}, 1000);
+            var s = 'Nothing to import. Validation reports that among proposed terms for field "'+fieldname+'"<br>'
+                    +((skip_dup>0)?skip_dup+' already exist; ':' ')
+                    +((skip_long>0)?skip_long+' have too long label; ':' ')
+                    +((skip_na>0)?skip_na+' label is empty':'');
+            
+            setTimeout(function(){window.hWin.HEURIST4.msg.showMsgErr(s);}, 1000);    
             return;
         }
         
+        if($.isFunction(callback)){
+            callback.call(this, _prepareddata);
+        }else{
+            _importTerms($dlg, _prepareddata, false);
+        }
+    }
     
+    //
+    //
+    //
+    function _importTerms($dlg, _prepareddata, is_all)
+    {
         var request = {
             'a'          : 'save',
             'entity'     : 'defTerms',
@@ -3595,7 +3658,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 var cnt = $dlg.find('.add_terms').length;
                                 var s = recIDs.length+' new term'
                                         +((recIDs.length==1)?' was':'s were')+' imported. ';
-                                if(cnt==1){
+                                if(cnt==1 || is_all){
                                     $dlg.dialog('close');
                                     window.hWin.HEURIST4.msg.showMsgErr(s+'Please repeat "Prepare" action'); 
                                 }else{
