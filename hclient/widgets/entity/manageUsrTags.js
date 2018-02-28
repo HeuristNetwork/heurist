@@ -523,7 +523,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
        
         panel.empty().css({'font-size': '0.9em'});
         
-        $('<div><i style="display:inline-block;width:110px;text-align:right;">Personal:&nbsp;</i></div>')
+        $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>') //width:110px;text-align:right;
             .css({'padding':'3px 4px'})
             .attr('data-id', window.hWin.HAPI4.currentUser['ugr_ID'])
             .hide().appendTo(panel);
@@ -537,7 +537,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                 if(!window.hWin.HEURIST4.util.isnull(name))
                 {   
-                    $('<div><i style="display:inline-block;width:110px;text-align:right;">'+name+':&nbsp;</i></div>')
+                    $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>') //width:110px;text-align:right;
                         .css({'padding':'3px 4px'})
                         .attr('data-id', groupID).hide().appendTo(panel);
                 }

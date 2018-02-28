@@ -352,8 +352,8 @@ $.widget( "heurist.recordDetails", {
                 var dtID = order[i];
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
-                    ( !window.hWin.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') ) &&
-                        rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
+                    (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(recdata.fld('rec_OwnerUGrpID')))
+                     && rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
                 {
                     continue;
                 }

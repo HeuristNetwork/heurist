@@ -673,8 +673,6 @@
     
     function recordCanChangeOwnerwhipAndAccess($system, $recID, &$ownerid, &$access, &$rectypes)
     {
-
-        
         
         $mysqli = $system->get_mysqli();
         //get current values

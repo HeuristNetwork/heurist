@@ -510,7 +510,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 };
 
                 this.editFormPopup.show().layout(layout_opts); //.addClass('ui-heurist-bg-light')
-                if(!this.usrPreferences.summary_tabs) this.usrPreferences.summary_tabs = ['0','1'];
+                //this tabs are open by default
+                if(!this.usrPreferences.summary_tabs) this.usrPreferences.summary_tabs = ['0','1','2','3']; 
 
                 //load content for editFormSummary
                 if(this.editFormSummary.text()=='....'){
@@ -872,8 +873,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                 if(panel.text()!='') return;
                 
-                panel.append('<div class="bookmark" style="min-height:2em;padding:4px 30px 4px 0"/>'
-                +'<div class="reminders" style="min-height:2em;padding:4px 30px 4px 0"/>');
+                panel.append('<div class="bookmark" style="min-height:2em;padding:4px 2px 4px 0;vertical-align:top"/>'
+                +'<div class="reminders" style="min-height:2em;padding:4px 30px 4px 0;border-top: 1px lightgray solid;"/>');
                 
                 //find bookmarks and reminders
                 that._renderSummaryBookmarks(null, panel);
@@ -1038,6 +1039,25 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 pnl = panel.find('.bookmark');
                 
             pnl.empty().css({'font-size': '0.9em'});
+
+            //append/manage button
+            $('<div>').button({label:top.HR('Manage bookmark info'), text:false,
+                icons:{primary:'ui-icon-pencil'}})  //ui-icon-bookmark
+                .addClass('non-owner-disable')
+                .css({float: 'right', height: '18px'}) //position:'absolute',right:'13px',
+                .click(function(){
+                    
+                        window.hWin.HEURIST4.ui.showEntityDialog('usrBookmarks', {
+                                bkm_RecID: that._currentEditID,
+                                height:400,
+                                onClose:function(){
+                                    //refresh
+                                    that._renderSummaryBookmarks(null, panel);
+                                }
+                                
+                        });
+                })
+             .appendTo(pnl);        
         
             if(recordset==null){
                 
@@ -1064,34 +1084,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }else{
                 var rec = recordset.getFirstRecord();
                 var val = recordset.fld(rec, 'bkm_Rating');
-                sContent = 'Rating: '+(!window.hWin.HEURIST4.util.isempty(val)?val:''); 
+                sContent = 'Rating: '+((val>0) ?'*'.repeat(val) :''); 
                 val = recordset.fld(rec, 'bkm_PwdReminder');
-                sContent = sContent + '&nbsp;&nbsp;&nbsp;Pwd: '+((!window.hWin.HEURIST4.util.isempty(val))?val:''); 
+                sContent += '<br>&nbsp;&nbsp;&nbsp;Pwd: '+((!window.hWin.HEURIST4.util.isempty(val))?val:''); 
                 val = recordset.fld(rec, 'bkm_Notes');
-                sContent = sContent + '<br>Notes: '+((!window.hWin.HEURIST4.util.isempty(val))
+                sContent += '<br>&nbsp;Notes: '+((!window.hWin.HEURIST4.util.isempty(val))
                         ?(val.substr(0,500)+(val.length>500?'...':'')):''); 
                 
             }
             pnl.append(sContent);
             
-            //append/manage button
-            $('<div>').button({label:top.HR('Manage bookmark info'), text:false,
-                icons:{primary:'ui-icon-pencil'}})  //ui-icon-bookmark
-                .addClass('non-owner-disable')
-                .css({position:'absolute',right:'13px', height: '18px'})
-                .click(function(){
-                    
-                        window.hWin.HEURIST4.ui.showEntityDialog('usrBookmarks', {
-                                bkm_RecID: that._currentEditID,
-                                height:400,
-                                onClose:function(){
-                                    //refresh
-                                    that._renderSummaryBookmarks(null, panel);
-                                }
-                                
-                        });
-                })
-             .appendTo(pnl);        
     },
     //
     // NOT USED anymore TO REMOVE
@@ -1355,6 +1357,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 */       
                
             }else{
+                
+                //default values for ownership and viewability from preferences
+                var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+                    add_rec_prefs = [0, window.hWin.HAPI4.currentUser['ugr_ID'], 'viewable', '']; //default
+                }
+                
+                if(!(that.options.new_record_params.ro>=0)){
+                    that.options.new_record_params.ro = add_rec_prefs[1];    
+                }
+                if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(add_rec_prefs[1]))) {
+                    that.options.new_record_params.ro = window.hWin.HAPI4.currentUser['ugr_ID'];    
+                }
+                if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.rv)){
+                    that.options.new_record_params.rv = add_rec_prefs[2];
+                }
+                
                 //this._currentEditRecTypeID is set in add button
                 window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
                         function(response){ response.is_insert=true; that._initEditForm_step4(response); });
@@ -1679,7 +1698,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //show coverall to prevnt edit
             //1. No enough premission
             var no_access = that._getField('rec_OwnerUGrpID')>0 &&  //0 is everyone
-                            !window.hWin.HAPI4.has_access(that._getField('rec_OwnerUGrpID'));
+                            !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID')));
                             //!window.hWin.HAPI4.is_admin()
             
             //2. Popup for resource field
@@ -1688,16 +1707,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 var ele = $('<div><div class="edit-button" style="background:#f48642 !important;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
                             +'<h2 style="display:inline-block;color:white">View-only mode</h2>&nbsp;&nbsp;'
-                            +'<a href="#" style="color:white">edit</a><span>No enough rights</span></div></div>')
+                            +'<a href="#" style="color:white">edit</a><span><br>No enough rights</span></div></div>')
                        .addClass('coverall-div-bare')
                        .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto'}) //, bottom: '40px', 'background':'red'
                        .appendTo(dlged);
                 
-                var eles = dlged.find('.ui-layout-center > div');       
+                var eles = dlged.find('.ui-layout-center');
                 if(no_access){
                     eles.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/non-editable-watermark.png)'});                    
                 }else{
-                    dlged.find('.ui-layout-center').css({'background':'lightgray'});    
+                    eles.css({'background':'lightgray'});    
                     //eles.css({'background':'lightgray'});    
                 }
                 that._editing.setDisabled(true);
