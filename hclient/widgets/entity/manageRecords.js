@@ -511,7 +511,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 this.editFormPopup.show().layout(layout_opts); //.addClass('ui-heurist-bg-light')
                 //this tabs are open by default
-                if(!this.usrPreferences.summary_tabs) this.usrPreferences.summary_tabs = ['0','1','2','3']; 
+                //if(!this.usrPreferences.summary_tabs) 
+                this.usrPreferences.summary_tabs = ['0','1','2','3']; //since 2018-03-01 always open
 
                 //load content for editFormSummary
                 if(this.editFormSummary.text()=='....'){
@@ -885,7 +886,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             case 2:   //tags
             
                 if(panel.text()!='') return;
-                panel.text('....');
+                panel.text('requesting....');
             
                 var request = {};
                 request['a']          = 'search'; //action
