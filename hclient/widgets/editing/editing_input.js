@@ -417,6 +417,15 @@ $.widget( "heurist.editing_input", {
     
     
     _onChange: function(event){
+        
+        this.error_message.hide();
+        $(this.element).find('.ui-state-error').each(function(idx,item){
+           if(!$(item).hasClass('heurist-prompt')){
+                $(item).removeClass('ui-state-error');    
+           }
+           
+        });
+        
         if($.isFunction(this.options.change)){
             this.options.change.call( this );    
         }
@@ -501,7 +510,6 @@ $.widget( "heurist.editing_input", {
                     }
                 
                 }
-                that.error_message.hide();
                 that._onChange();
             }
             
@@ -2073,7 +2081,6 @@ $.widget( "heurist.editing_input", {
                     +'Please select from dropdown or modify field definition to include this term';
                 }
                 this.error_message.text(sMsg).show();
-
             }    
             
         }
