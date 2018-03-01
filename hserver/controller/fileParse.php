@@ -382,18 +382,18 @@ function parse_step2($encoded_filename, $original_filename, $limit){
     
     $csv_dateformat = $_REQUEST["csv_dateformat"];
 
-    if($csv_delimiter=="tab") {
+    if($csv_delimiter=='tab') {
         $csv_delimiter = "\t";
     }
 
-    if($csv_linebreak=="auto"){
+    if($csv_linebreak=='auto'){
         ini_set('auto_detect_line_endings', true);
         $lb = null;
-    }else if($csv_linebreak="win"){
+    }else if($csv_linebreak=='win'){
         $lb = "\r\n";
-    }else if($csv_linebreak="nix"){
+    }else if($csv_linebreak=='nix'){
         $lb = "\n";
-    }else if($csv_linebreak="mac"){
+    }else if($csv_linebreak=='mac'){
         $lb = "\r";
     }
     

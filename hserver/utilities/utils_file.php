@@ -112,7 +112,7 @@
     }
 
     
-//-----------------------
+//-----------------------  LOAD REMOTE CONTENT (CURL)
 //
 // if the same server - try to include script instead of full request
 //
@@ -226,6 +226,126 @@ function getScriptOutput($path, $print = FALSE)
         return ob_get_clean();
     else
         echo ob_get_clean();
+}
+ 
+ 
+//----------------------------------------------- PARSING 
+
+//
+// try to read file and detect sepeartors
+// return an aray with suggestions array('csv_delimiter'=>, 'csv_delimiter'=> , 'csv_enclosure'=>)
+//
+// Important: it works only in case file is UTF8
+//
+//    
+function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='"'){
+    
+    $handle = @fopen($filename, 'r');
+    if (!$handle) {
+        $s = null;
+        if (! file_exists($filename)) $s = ' does not exist';
+        else if (! is_readable($filename)) $s = ' is not readable';
+            else $s = ' could not be read';
+            
+        if($s){
+            return array('error'=>('File '.$filename. $s));
+        }
+    }
+    
+    //DETECT End of line
+    if($csv_enclosure=='' || $csv_enclosure=='none'){
+        $csv_enclosure = 'ʰ'; //rare character
+    }
+    
+    $eol = null;
+    if($csv_linebreak=='win'){
+        $eol = "\r\n";
+    }else if($csv_linebreak=='nix'){
+        $eol = "\n";
+    }else if($csv_linebreak=='mac'){
+        $eol = "\r";
+    }
+    
+    if($csv_linebreak=='auto' || $csv_linebreak==null || $eol==null){
+        ini_set('auto_detect_line_endings', true);
+        
+        $line = fgets($handle, 1000000);      //read line and auto detect line break
+        $position = ftell($handle);
+        fseek($handle, $position - 5);
+        $data = fread($handle, 10);
+        rewind($handle);
+
+        if(substr_count($data, "\r\n")>0){
+            $eol = "\r\n";
+        }else if(substr_count($data, "\n")>0){
+            $eol = "\n";
+        }else{
+            $eol = "\r";
+        }
+    }
+
+    //--------- DETECT FIELD SEPARATOR    
+    //fgetcsv и str_getcsv depends on server locale
+    // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
+    setlocale(LC_ALL, 'en_US.utf8');        
+    
+    
+    $delimiters = array("\t"=>0,','=>0,';'=>0,':'=>0,'|'=>0,'-'=>0);
+    
+    foreach ($delimiters as $csv_delimiter=>$val){
+        $line_no = 0;
+        
+        while (!feof($handle)) {
+
+            $line = stream_get_line($handle, 1000000, $eol);
+            /*
+            if(!mb_detect_encoding($line, 'UTF-8', true)){
+                fclose($handle);
+                return array('error'=>('File '.$filename. ' is not UTF-8. It is not possible to autodetect separators'));
+            }
+            */
+            
+            $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
+            
+            $cnt = count($fields);
+            if($cnt>200){ //too many fields 
+                $delimiters[$csv_delimiter] = 0; //not use
+                break;
+            }else{
+                if($line_no==0){
+                    $delimiters[$csv_delimiter] = $cnt; 
+                }else if($delimiters[$csv_delimiter] != $cnt){
+                    $delimiters[$csv_delimiter] = 0; //not use
+                    break;
+                }
+            }
+            
+            if($line_no>10) break;
+            $line_no++;
+        }   
+        rewind($handle); 
+    }//for delimiters
+    fclose($handle);
+    
+    $max = 0;
+    $csv_delimiter = ',';//default
+    foreach ($delimiters as $delimiter=>$cnt){
+        if($cnt>$max){
+            $csv_delimiter = $delimiter;
+            $max = $cnt;
+        }
+    }
+    if($csv_delimiter=="\t") $csv_delimiter = "tab";
+    
+    if($eol=="\r\n"){
+        $csv_linebreak='win';
+    }else if($eol=="\n"){
+        $csv_linebreak='nix';
+    }else if($eol=="\r"){
+        $csv_linebreak='mac';
+    }
+    
+    return array('csv_linebreak'=>$csv_linebreak, 'csv_delimiter'=>$csv_delimiter, 'csv_enclosure'=>$csv_enclosure);
 }
     
 ?>

@@ -81,7 +81,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php', 
         formData: [ {name:'db', value: window.hWin.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
                     {name:'max_file_size', value: _max_upload_size},
-                    {name:'entity', value:'temp'}],  //just place file into scratch folder
+                    {name:'entity', value:'temp'}, //just place file into scratch folder
+                    {name:'autodect', value:1}], //try to detect line and field separator 
         //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
         autoUpload: true,
         sequentialUploads:false,
@@ -123,6 +124,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             upload_file_name = file.name;
                             window.hWin.HEURIST4.util.setDisabled($('#csv_encoding'), false);
                             _showStep(2);
+                            
+                            if(file.csv_params){
+                                $('#csv_delimiter').val(file.csv_params['csv_delimiter']);
+                                $('#csv_linebreak').val(file.csv_params['csv_linebreak']);
+                                $('#csv_enclosure').val(2);
+                            }
                             
                             window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
                             $('#divFieldRolesHeader').hide();
@@ -2208,10 +2215,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                    stype = 'Empty &gt;75%';
                                 }
                                 
-                                $('<tr><td style="width:200px">'+response.data.fields[i]+'</td>'
+                                //since 2018-03-01 only H-ID fields can be identifiers
+                                var is_id_field = (response.data.fields[i].indexOf('H-ID')>=0);
+                                
+                                $('<tr><td style="min-width:150px">'+response.data.fields[i]+'</td>'
                                 +'<td style="width:50px">'+stype+'</td>'
-                                +'<td style="width:50px;text-align:center"><input type="checkbox" id="id_field_'+i+'" value="'+i+'"/></td>'
-                                +'<td style="width:50px;text-align:center"><input type="checkbox" id="d_field_'+i+'" value="'+i+'"/></td>'
+                                +'<td style="min-width:50px;text-align:center">'
+                                    +(is_id_field?'<input type="checkbox" id="id_field_'+i+'" value="'+i
+                                            +'" checked disabled/>':'-')+'</td>'
+                                +'<td style="min-width:50px;text-align:center">'
+                                    +(is_id_field?'':'<input type="checkbox" id="d_field_'+i+'" value="'+i+'"/>')+'</td>'
                                 +'<td style="width:200px"><select id="id_rectype_'
                                 +i+'" class="text ui-widget-content ui-corner-all" style="visibility:hidden"></select></td></tr>').appendTo(tbl);
                             }         
@@ -2247,6 +2260,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             
                             $("input[id^='id_field']").change(function(evt){
                                 var cb = $(evt.target);
+                                cb.prop('checked',true);
                                 window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), false );
                                 $('#divFieldRolesHeader').show();
 

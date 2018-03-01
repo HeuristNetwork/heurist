@@ -20,6 +20,7 @@
 require_once(dirname(__FILE__)."/../System.php");
 require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
 require_once(dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');
+require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 
 $response = null;
 $system = new System();
@@ -35,6 +36,7 @@ if($system->init(@$_REQUEST['db'])){
 
     //define upload folder   HEURIST_FILESTORE_DIR/ $_REQUEST['entity'] /
     $entity_name = @$_REQUEST['entity'];
+    $is_autodect_csv = (@$_REQUEST['autodect']==1);
     $recID = @$_REQUEST['recID'];
     
     if(!$entity_name){
@@ -76,20 +78,20 @@ if($response!=null){
     
     if($entity_name=="terms"){//for terms from old term management - upload term image
 
-    $options = array(
-            'upload_dir' => HEURIST_FILESTORE_DIR.'term-images/',
-            'upload_url' => HEURIST_FILESTORE_URL.'term-images/',
-            'unique_filename' => false,
-            'newfilename' => @$_REQUEST['newfilename'],
-            'correct_image_extensions' => true,
-            'image_versions' => array(
-                ''=>array(
-                    'max_width' => 400,
-                    'max_height' => 400,
-                    'scale_to_png' => true    
+        $options = array(
+                'upload_dir' => HEURIST_FILESTORE_DIR.'term-images/',
+                'upload_url' => HEURIST_FILESTORE_URL.'term-images/',
+                'unique_filename' => false,
+                'newfilename' => @$_REQUEST['newfilename'],
+                'correct_image_extensions' => true,
+                'image_versions' => array(
+                    ''=>array(
+                        'max_width' => 400,
+                        'max_height' => 400,
+                        'scale_to_png' => true    
+                    )
                 )
-            )
-    );
+        );
     
     }else if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
                                    // for example in term list import 
@@ -158,7 +160,7 @@ if($response!=null){
     $response = null;
     $res = $upload_handler->get_response(); //it returns file object
 
-    foreach($res['files'] as $file){
+    foreach($res['files'] as $idx=>$file){
         if(@$file->error){
             $response = $system->addError(HEURIST_UNKNOWN_ERROR, "File cannot be processed ".$file->error, null);
             break;            
@@ -169,6 +171,13 @@ if($response!=null){
                 $response = $system->getError();
             }else{
                 $file->ulf_ID = $ret[0];
+            }
+        }else if($entity_name=="temp" && $is_autodect_csv) {
+            
+            $filename = HEURIST_FILESTORE_DIR.'scratch/'.$file->original_name;
+            $csv_params = autoDetectSeparators( $filename );
+            if(is_array($csv_params) && !@$csv_params['error']){
+                $res['files'][$idx]->csv_params = $csv_params;
             }
         }
     }

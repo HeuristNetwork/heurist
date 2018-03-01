@@ -347,10 +347,13 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <div id="btnParseStep1" style="position:absolute;bottom:1em;left:2em" 
                     title="By clicking on this button Heurist starts to analyse the header of uploaded CSV data according to your parse parameters, extracts column names and verifies encoding and tries to convert it to UTF8">Analyse data</div>
         </fieldset>            
-        <div style="position:absolute;width:520px;left:440px;top:1.2em;bottom:0">
+        <div style="position:absolute;right:10px;left:440px;top:1.2em;bottom:0">
                 <div class="ent_header" style="border:none;display:none" id="divFieldRolesHeader">
                     <h2>Specify identifier and date columns</h2><br>
-                    <div style="font-weight:bold;padding-bottom:1em">Identifiers columns are those that contain a Heurist record ID</div>
+                    <div style="font-weight:bold;padding-bottom:1em">
+                        Identifier columns are those that contain a Heurist record ID.<br>
+                        They MUST contain "H-ID" somewhere in the column name.                    
+                    </div>
                     
                     <table class="tbfields" style="font-weight:bold"><tr>
                                 <td style="width:150px">Column</td>
@@ -360,7 +363,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                                 <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></table>
                     
                 </div>
-                <div class="ent_content" id="divFieldRoles" style="top:7em;bottom:5em;padding: 0.2em 0.5em">
+                <div class="ent_content" id="divFieldRoles" style="top:8em;bottom:5em;padding: 0.2em 0.5em">
                     list of field roles
                 </div>
                 <div  class="ent_footer">
