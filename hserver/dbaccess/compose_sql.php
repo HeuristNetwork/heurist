@@ -1971,21 +1971,37 @@ class BibIDPredicate extends Predicate {
     }
     
     function get_field_value(){
+        global $mysqli;
         
         if (strpos($this->value,"<>")>0) { 
 
             $vals = explode("<>", $this->value);
+            $vals[0] = recordSearchReplacement($mysqli, $vals[0]);
+            $vals[1] = recordSearchReplacement($mysqli, $vals[1]);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
         }else{
             
             $cs_ids = getCommaSepIds($this->value);
             if ($cs_ids) {  
+                
+                $pquery = &$this->getQuery();
+                if(true || $pquery->search_domain == EVERYTHING){
+                    $cs_ids = explode(',', $cs_ids);
+                    $rsvd = array();
+                    foreach($cs_ids as $recid){
+                        array_push($rsvd, recordSearchReplacement($mysqli, $recid));
+                    }
+                    $cs_ids = implode(',',$rsvd);
+                }
+                
             //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
                 // comma-separated list of ids
                 $not = ($this->parent->negate)? ' not' : '';
                 $match_pred = $not.' in ('.$cs_ids.')';
             }else{
+                
+                $this->value = recordSearchReplacement($mysqli, $this->value);
                 
                 $value = intval($this->value);
 

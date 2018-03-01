@@ -29,6 +29,7 @@
 if(!defined('NO_DB_ALLOWED')) define('NO_DB_ALLOWED',1);
 
 require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../records/view/findReplacedRecord.php');
 
 // Input is of the form .../redirects/resolver.php?db=mydatabase&recID=3456
 
@@ -42,7 +43,7 @@ require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 // TODO: the following is a temporary redirect to viewRecord.php which renders a human-readable form
 
 
-         
+$recid = null;         
 if(@$_REQUEST['recID']){
     $recid = $_REQUEST['recID'];    
 }elseif(@$_REQUEST['recid']){
@@ -79,6 +80,10 @@ if ($database_id>0) {
         return;
     }
 
+}
+
+if($recid>0){
+    $recid = get_replacement_bib_id($recid);
 }
 
 if($database_url!=null){ //redirect to resolver for another database

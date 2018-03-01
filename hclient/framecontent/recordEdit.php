@@ -118,7 +118,8 @@
                                         var recset = new hRecordSet(response.data);
                                         if(recset.length()>0){
                                             $container.manageRecords('updateRecordList', null, {recordset:recset});
-                                            $container.manageRecords('addEditRecord', (recID>0)?recID:recset.getOrder()[0]);
+                                            $container.manageRecords('addEditRecord', recset.getOrder()[0]);
+                                            //since recID may be resolved via recForwarding  (recID>0)?recID:recset.getOrder()[0]);
                                         }else{ // if(isPopup){
                                             window.close();  //nothing found
                                         }
