@@ -320,7 +320,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var query = null, popup_options={};
             //NEW WAY open as another widget 
             if(recID<0){
-                popup_options = {selectOnSave:this.options.selectOnSave, 
+                popup_options = {selectOnSave: this.options.selectOnSave, 
+                                 parententity: this.options.parententity,
                                  new_record_params:{rt:this._currentEditRecTypeID}};
                 if(this.options.select_mode!='manager' && this.options.selectOnSave){ 
                     //this is select form that all addition of new record
