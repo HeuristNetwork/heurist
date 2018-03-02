@@ -59,9 +59,11 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     
     if($mode=='list'){
         
+        $forpurpose = @$_REQUEST['for'];
+        
         $rectypeIDs = explode(',', @$_REQUEST['rty_id']);
         foreach ($rectypeIDs as $rectypeID){
-              $res = getRecordTypeTree($rectypeID, 0);
+              $res = getRecordTypeTree($rectypeID, 0, $forpurpose);
               array_push($resVars, $res);
         }        
         
@@ -128,7 +130,7 @@ exit();
 //                  fNNN:array(rt_name: , recID ...... ) //unconstrained pointer or exact constraint
 //                  fNNN:array(array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointers
 //
-function getRecordTypeTree($recTypeId, $recursion_depth){
+function getRecordTypeTree($recTypeId, $recursion_depth, $forpurpose=null){
 
     global $rtStructs, $mode;
     
@@ -147,6 +149,9 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     $res['recURL'] = 'Record URL';
     $res['recModified'] = 'Record Modified';
     $res['recWootText'] = 'Record WootText';
+    if($forpurpose=='smarty'){
+        $res['recTags'] = 'Record Tags';
+    }
     
     if($recTypeId=="Relationship") {
         //add specific Relationship fields
@@ -204,7 +209,7 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
               
         $rtStructs['typedefs'][$recTypeId][DT_PARENT_ENTITY] = $ffr;
         
-        $res_dt = getDetailSection($dtKey, $ffr, $recursion_depth);
+        $res_dt = getDetailSection($dtKey, $ffr, $recursion_depth, $forpurpose);
         if($res_dt){
            if(is_array($res_dt) && count($res_dt)==1){
                $res["f".$dtKey] = $res_dt[0];    
@@ -222,7 +227,7 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
 
         foreach ($details as $dtKey => $dtValue){
 
-            $res_dt = getDetailSection($dtKey, $dtValue, $recursion_depth);
+            $res_dt = getDetailSection($dtKey, $dtValue, $recursion_depth, $forpurpose);
             if($res_dt){
                    if(is_array($res_dt) && count($res_dt)==1){
                        $res["f".$dtKey] = $res_dt[0];    
@@ -238,7 +243,7 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     }
     
     if($recursion_depth==0){
-        $res["Relationship"] = getRecordTypeTree('Relationship', $recursion_depth+1);
+        $res["Relationship"] = getRecordTypeTree('Relationship', $recursion_depth+1, $forpurpose);
     }   
 
     return $res;
@@ -255,7 +260,7 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
  
  
 */
-function getDetailSection($dtKey, $dtValue, $recursion_depth){
+function getDetailSection($dtKey, $dtValue, $recursion_depth, $forpurpose=null){
 
     global $rtStructs, $mode;
     
@@ -312,7 +317,7 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
                     
                     if($pointerRecTypeId==""){ //unconstrainded
                     
-                        $res = getRecordTypeTree(null, $recursion_depth+1);
+                        $res = getRecordTypeTree(null, $recursion_depth+1, $forpurpose);
                         $res['rt_name'] = $dt_label;
                     
                     }else{
@@ -322,7 +327,7 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
                             array_push($res, $dt_label);
                          }
                          foreach($rectype_ids as $rtID){
-                            $rt_res = getRecordTypeTree($rtID, $recursion_depth+1);
+                            $rt_res = getRecordTypeTree($rtID, $recursion_depth+1, $forpurpose);
                             if(count($rectype_ids)==1){
                                 $rt_res['rt_name'] = $dt_label;
                             } 

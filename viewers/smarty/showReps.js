@@ -567,7 +567,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     var selel = $(event.target).val();
                     if(selel>0){
                         var baseurl = top.HEURIST.baseURL + "common/php/recordTypeTree.php";
-                        Hul.getJsonData(baseurl, __onRectypeTree, 'db='+_db+'&mode=list&rty_id='+selel);
+                        Hul.getJsonData(baseurl, __onRectypeTree, 'db='+_db+'&mode=list&for=smarty&rty_id='+selel);
                     }
                 });
 
@@ -1132,6 +1132,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                         }
                     }else if (term.this_id=="Relationship") {
                         is_single = false;
+                    }else if(term.this_id=='recTags'){
+                        //is_single = false;
                     }
 
 

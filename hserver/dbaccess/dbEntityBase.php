@@ -89,8 +89,6 @@ class DbEntityBase
     public function setData($data){
         $this->data = $data; 
     }
-
-    }
     
     //
     // config getter

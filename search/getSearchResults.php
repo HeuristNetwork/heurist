@@ -345,6 +345,17 @@
 	}
 
 
+    function loadPersonalTags($rec_ID) {
+
+        return mysql__select_array(
+            "usrRecTagLinks, usrTags",
+            "tag_Text",
+            "tag_ID = rtl_TagID and
+            tag_UGrpID= ".get_user_id()." and
+            rtl_RecID = $rec_ID
+            order by rtl_Order");        
+    }    
+    
 	function loadUserDependentData(&$record) {
 		$recID = $record["rec_ID"];
 		$res = mysql_query(

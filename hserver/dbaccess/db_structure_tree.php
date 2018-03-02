@@ -112,6 +112,9 @@
     //     NNN - field type ID
     //
     // $mode
+    //  3
+    //  4 faceted search
+    //  5 import csv   
     //
     // $pointer_fields - to avoid recursion for reverse pointers
     //
@@ -134,6 +137,7 @@
             if($mode==3) {
                 array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
                 array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
+                //array_push($children, array('key'=>'recTags',     'type'=>'freetext',  'title'=>'Tags', 'code'=>$recTypeId.":tags"));
             }
         }
 

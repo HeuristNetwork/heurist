@@ -44,6 +44,12 @@ class ReportRecord {
         }
 
         $rec = loadRecord($rec_ID, false, true); //from search/getSearchResults.php
+        
+        if($rec){
+            $rec['rec_Tags'] = loadPersonalTags($rec_ID); //for current user only
+            if(is_array($rec['rec_Tags'])) $rec['rec_Tags'] = implode(',',$rec['rec_Tags']);
+        }
+        
         $res1 = $this->getRecordForSmarty($rec);
         
         return $res1;
@@ -239,9 +245,14 @@ class ReportRecord {
                         $record["recTypeID"] = $recTypeID;
                         $record["recTypeName"] = $this->rtStructs['typedefs'][$value]['commonFields']
                                                             [ $this->rtStructs['typedefs']['commonNamesToIndex']['rty_Name'] ];
-                    }else if ($key=="rec_ID"){ //load woottext once per record
+                    }else if ($key=="rec_Tags"){ 
+                        
+                        $record["recTags"] = $value;
+                        
+                    }else if ($key=="rec_ID"){ //load tags and woottext once per record
 
                         $record["recWootText"] = $this->getWootText($value); //@todo load dynamically 
+                        
                     }
 
                 }
@@ -650,7 +661,10 @@ class ReportRecord {
 
         return $res;
     }
-
+    
+    public function getRecordTags($recID){
+        
+    }
     
     
 }
