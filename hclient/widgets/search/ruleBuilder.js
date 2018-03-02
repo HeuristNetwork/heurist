@@ -397,27 +397,30 @@ $.widget( "heurist.ruleBuilder", {
                                 //verify that selected record type is in this constaint
                                 if(constraints.length<1 || constraints.indexOf(rt_ID)<0) continue;
 
-                                arr_rectypes.push(rtyID);
+                                //temp arr_rectypes.push(rtyID);
 
                                 var isnotfound = true;
                                 var i, len = arr_fields.length;
                                 for (i=0;i<len;i++){
-                                    if(arr_fields[i].key == dtyID){   //this field may be added already
-                                        arr_fields[i].rectypes.push(rtyID);
-
-                                            var tlen = arr_fields[i].title.length;
-                                        if(arr_fields[i].isreverse && tlen<73){
-                                            if(tlen>=70){
-                                                arr_fields[i].title = arr_fields[i].title.substr(0,70)+'...';
-                                            }else{
-                                                var rt_name = alldetails[rtyID].commonFields[0];
-                                                //'<< '+rt_name + ' . ' + name
-                                                arr_fields[i].title = '<< '+rt_name+' | '+arr_fields[i].title.substr(3,tlen-1);
+                                    if( (arr_fields[i].key+'r') == dtyID){   //this reverse field may be added already
+                                        //temp arr_fields[i].rectypes.push(rtyID);
+                                        if(arr_fields[i].isreverse){
+                                            arr_fields[i].rectypes.push(rtyID); //temp
+                                        
+                                            var tlen = arr_fields[i].title.length; //text on dropdown already too long    
+                                            if(tlen<73){
+                                                if(tlen>=70){
+                                                    arr_fields[i].title = arr_fields[i].title.substr(0,70)+'...';
+                                                }else{
+                                                    var rt_name = alldetails[rtyID].commonFields[0];
+                                                    //'<< '+rt_name + ' . ' + name
+                                                    arr_fields[i].title = '<< '+rt_name+' | '+arr_fields[i].title.substr(3,tlen-1);
+                                                }
                                             }
+                                            isnotfound = false;
+                                            break;
                                         }
 
-                                        isnotfound = false;
-                                        break;
                                     }
                                 }//for fields
 
@@ -434,17 +437,21 @@ $.widget( "heurist.ruleBuilder", {
                                         this._has_rev_relation = '1';
 
                                         var temp = details[dtyID][fi_term_dis];
-                                        temp = ( typeof(temp) === "string" && !window.hWin.HEURIST4.util.isempty(temp) ) ?  temp.split(",") :[];
+                                        temp = ( typeof(temp) === "string" && !window.hWin.HEURIST4.util.isempty(temp) ) 
+                                                        ?  temp.split(",") :[];
+                                                        
                                         if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
 
-                                        arr_fields.push({key:dtyID, title:'<< '+rt_name + ' . ' + name, terms:details[dtyID][fi_term],
+                                        arr_fields.push({key:(dtyID+'r'), title:'<< '
+                                                    +rt_name + ' . ' + name, terms:details[dtyID][fi_term],
 
-                                            terms_dis:temp, rectypes:[rtyID], isreverse:true });
+                                            terms_dis:temp, rectypes:[rtyID], isreverse:true, dtyID:dtyID });
 
                                     }else{ // reverse pointer
 
                                         this._has_rev_pointers = '1';
-                                        arr_fields.push({key:dtyID, title:'<< '+rt_name + ' . ' + name, rectypes:[rtyID], isreverse:true });
+                                        arr_fields.push({key:(dtyID+'r'), title:'<< '
+                                                    +rt_name + ' . ' + name, rectypes:[rtyID], isreverse:true, dtyID:dtyID });
                                     }
                                 } // reverse pointer
 
@@ -454,9 +461,6 @@ $.widget( "heurist.ruleBuilder", {
                     }
                 }
         }
-
-
-
 
         arr_rectypes = $.unique(arr_rectypes);
         //arr_terms_dis = $.unique(arr_terms_dis);
@@ -512,15 +516,15 @@ $.widget( "heurist.ruleBuilder", {
     //
     _onSelectFieldtype: function(event){
 
-        var dt_ID = this.select_fields.val(); //event?event.target.value:'',
+        var dt_ID_key = this.select_fields.val(); //event?event.target.value:'',
         is_not_relation = true,
         is_not_selected = true; //field is not defined/selected
-        if(dt_ID!='') {
+        if(dt_ID_key!='') {
 
             var i, len = this._arr_fields.length;
             for (i=0;i<len;i++){
                 var arr_field = this._arr_fields[i];
-                if(arr_field.key == dt_ID){
+                if(arr_field.key == dt_ID_key){
                     if(arr_field.terms){
                         is_not_relation = false;
                         //this.label_3.show();
@@ -676,7 +680,11 @@ $.widget( "heurist.ruleBuilder", {
             }else{
                 linktype = (fld && fld.isreverse)?3:4; //relatiom to/from
             }
+            if(fld && fld.isreverse){
+                dt_ID = fld.dtyID; //without 'r' suffix
+            }
         }
+        
         
         if(window.hWin.HEURIST4.util.isempty(rel_term_id) || rel_term_id<1){
             rel_term_id = '';
@@ -738,7 +746,7 @@ $.widget( "heurist.ruleBuilder", {
                 this.select_source_rectype.val(rt_source);
                 this._onSelectRectype();
 
-                this.select_fields.val(dt_ID);
+                this.select_fields.val( dt_ID + ((linktype==1 || linktype==3)?'r':'') );
                 this._onSelectFieldtype();
 
                 if(isNaN(linktype) || linktype<0 || linktype>4){

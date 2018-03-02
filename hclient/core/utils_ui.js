@@ -91,7 +91,7 @@ window.hWin.HEURIST4.ui = {
     addoption: function(sel, value, text, disabled)
     {
         var option = document.createElement("option");
-        option.text = window.hWin.HEURIST4.util.htmlEscape(text);
+        option.text = text; //window.hWin.HEURIST4.util.htmlEscape(text);
         option.value = value;
         if(disabled===true){
             option.disabled = true;
