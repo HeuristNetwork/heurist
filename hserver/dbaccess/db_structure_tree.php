@@ -337,7 +337,7 @@
             case 'resource': // link to another record type
             case 'relmarker':
 
-                if( ($mode==5 && $recursion_depth<2) || ($mode==4 && $recursion_depth<3) || $recursion_depth<2){
+                if( ($mode==5 && $recursion_depth<3) || ($mode==4 && $recursion_depth<3) || $recursion_depth<2){
 
                     
                     if($reverseRecTypeId!=null){
