@@ -559,7 +559,7 @@
     *                             timemap   - record header + timemap details
     *                             detail    - record header + all details
     *                             structure - record header + all details + record type structure (for editing) - NOT USED
-    *
+    *       tags                  returns with tags for current user (@todo for given user, group)
     *       CLIENT SIDE
     *       id - unque id to sync with client side
     *       source - id of html element that is originator of this search
@@ -584,6 +584,8 @@
         $needThumbField = false;
         $needThumbBackground = false;
         $needCompleteInformation = false; //if true - get all header fields and relations
+        $needTags = (@$params['tags']>0)?$system->get_user_id():0;
+
         $relations = null;
 
         if(@$params['detail']=='complete'){
@@ -1091,7 +1093,7 @@
                     if($needThumbField) array_push($fields, 'rec_ThumbnailURL');
                     if($needThumbBackground) array_push($fields, 'rec_ThumbnailBg');
                     //array_push($fields, 'rec_Icon'); //last one -icon ID
-
+                    if($needTags>0) array_push($fields, 'rec_Tags');
                     
                     // load all records
                     while ($row = $res->fetch_row()) {
@@ -1100,6 +1102,15 @@
                             $tres = fileGetThumbnailURL($system, $row[2], $needThumbBackground);   
                             array_push( $row, $tres['url'] );
                             if($needThumbBackground) array_push( $row, $tres['bg_color'] );
+                        }
+                        if($needTags>0){ //get record tags for given user/group
+                            /*var dbUsrTags = new DbUsrTags($system, array('details'=>'label', 
+                                                                        'tag_UGrpID'=>$needTags, 
+                                                                        'rtl_RecID'=>$row[2] ));*/
+                            
+                            $query = 'SELECT tag_Text FROM usrTags, usrRecTagLinks WHERE tag_ID=rtl_TagID AND tag_UGrpID='
+                                        .$needTags.' AND rtl_RecID='.$row[2];
+                            array_push( $row, mysql__select_list2($mysqli, $query));
                         }
                         
                         //array_push( $row, $row[4] ); //by default icon if record type ID

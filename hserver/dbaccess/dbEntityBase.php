@@ -82,6 +82,15 @@ class DbEntityBase
     //
     public function init(){
     }
+
+    //
+    // assign parameters on server side
+    //
+    public function setData($data){
+        $this->data = $data; 
+    }
+
+    }
     
     //
     // config getter
@@ -336,7 +345,7 @@ class DbEntityBase
                     "Configuration file $entity_file is invalid. Cannot init instance on server");     
            }
         }else{
-           $this->system->addError(HEURIST_INVALID_REQUEST, "Cannot find configuration for entity ".@$data['entity']);     
+           $this->system->addError(HEURIST_INVALID_REQUEST, "Cannot find configuration for entity ".@$this->data['entity']);     
         }
     }
     

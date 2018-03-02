@@ -110,6 +110,11 @@ function getDetailTypes(){
     g_recType = HRecordTypeManager.getRecordTypeById(g_recTypeSelect.value);
     g_detailTypes = HDetailManager.getDetailTypesForRecordType(g_recType);
 
+    
+    addOpt(g_recDetailSelect, 'rec_Title', 'Record Title');    
+    addOpt(g_recDetailSelect, 'rec_URL', 'Record URL');    
+    addOpt(g_recDetailSelect, 'rec_Modified', 'Record Modified');
+    
     //add option for each detail type where the value=index into g_detailTypes and text=detail name (record type specific)
     var l = g_detailTypes.length;
     var dt_idx = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
@@ -123,6 +128,8 @@ function getDetailTypes(){
         }
     }
 
+    addOpt(g_recDetailSelect, 'rec_Tags', 'Record Tags');
+    
     updateExportMap();
 }
 
@@ -165,7 +172,8 @@ function updateExportMap() {
             sel = g_recDetailSelect.options[i];
             if (g_dtIDsCheckbox.checked) {
                 td = tr.appendChild(document.createElement("td"));
-                td.innerHTML = g_detailTypes[sel.value].getID() + ":";
+                var field_id = (sel.value>=0)?g_detailTypes[sel.value].getID():sel.value;
+                td.innerHTML = field_id + ":"; //
             }
             td = tr.appendChild(document.createElement("td"));
             td.innerHTML = sel.text;
@@ -297,6 +305,9 @@ function refreshRecordData(){
 }
 
 
+//
+// not used
+//
 function showRecordData(hRecords) {
 
     g_delimiterSelect = document.getElementById('delimiterSelect');
@@ -333,8 +344,11 @@ function showRecordData(hRecords) {
         line = "";
         for (var j = 0; j < k; j++) {
             if (g_dtIDsCheckbox.checked && j>0) {
-                var hDty = g_detailTypes[g_exportMap[j-1]];
-                line += hDty.getID() + strDelim;
+                var field_id = (g_exportMap[j-1]>=0)
+                                    ?g_detailTypes[g_exportMap[j-1]].getID() 
+                                    :g_exportMap[j-1];
+
+                line += field_id + strDelim;
             }
             line += (g_exportMapNames[j]+strDelim);
         }
@@ -347,8 +361,16 @@ function showRecordData(hRecords) {
         var line = hRecords[i].getID()+ strDelim;
         var k = g_exportMap.length;
         for (var j = 0; j < k; ++j) {
-            var hDty = g_detailTypes[g_exportMap[j]];
-            var baseType = hDty.getVariety();
+            
+            var hDty, baseType = '';  
+            
+            if(g_exportMap[j]>=0){
+                hDty = g_detailTypes[g_exportMap[j]];
+                baseType = hDty.getVariety();
+            }else{
+                //hDty = g_exportMap[j] !!!!
+            }
+            
             if (g_dtIDsCheckbox.checked) {
                 line += hDty.getID() + strDelim;
             }
@@ -462,9 +484,11 @@ function getRecordsByH4(){
         details = [];
     
     for (var j = 0; j < len; j++) {
-        if (j>0) {
+        if (j>0 && g_exportMap[j-1]>=0) {
             var hDty = g_detailTypes[g_exportMap[j-1]];
             details.push( hDty.getID() );
+        }else if(g_exportMap[j-1]=='rec_Tags'){
+            request.tags = 1;
         }
     }
     request.detail = details;
@@ -488,7 +512,9 @@ function _getPointerIDs(recordset) {
         
         var refFields = [];
         var j, k = g_exportMap.length;
-        for (j = 0; j < k; ++j) {
+        for (j = 0; j < k; ++j) 
+        if(g_exportMap[j]>=0)
+        {
                 var hDty = g_detailTypes[g_exportMap[j]];
                 var baseType = hDty.getVariety();
                 if (baseType == HVariety.REFERENCE){
@@ -583,10 +609,14 @@ function _showRecordDataH4(recordset, reference_recordset) {
         for (var j = 0; j < k; j++) {
             
             if (g_dtIDsCheckbox.checked && j>0) {
-                var hDty = g_detailTypes[g_exportMap[j-1]];
-                line += hDty.getID() + strDelim;
+
+                var field_id = (g_exportMap[j-1]>=0)
+                                    ?g_detailTypes[g_exportMap[j-1]].getID() 
+                                    :g_exportMap[j-1];
+                
+                line += field_id + strDelim;
             }
-            if(j>0){
+            if(j>0 && g_exportMap[j-1]>=0){
                 var hDty = g_detailTypes[g_exportMap[j-1]];
                 var baseType = hDty.getVariety();
                 if (baseType == HVariety.REFERENCE){
@@ -617,16 +647,21 @@ function _showRecordDataH4(recordset, reference_recordset) {
             
             var line = recID + strDelim;
             var record = recs[recID];
-            if(!record['d']){
+            /*if(!record['d']){
                 console.log('no detials for recid '+recID+' line:'+i);
                 continue;
-            }
+            }*/
             
             for (j = 0; j < k; ++j) {
+                if(g_exportMap[j]>=0){ //usual fields
+
+                    if(!record['d']) continue; //no details
+                
                     var hDty = g_detailTypes[g_exportMap[j]];
                     
                     if (g_dtIDsCheckbox.checked) {
-                        line += hDty.getID() + strDelim;
+                            line += hDty.getID() + strDelim;
+                            
                     }
                     var baseType = hDty.getVariety();
             
@@ -700,7 +735,27 @@ function _showRecordDataH4(recordset, reference_recordset) {
                         line += ((!top.HEURIST4.util.isempty(field))?dblquote_escape(field):'') + strDelim;
                         
                     }
-                    
+                 
+                }else{ //recTitle, recModified, recURL
+                   
+                    if (g_dtIDsCheckbox.checked) {
+                        line += g_exportMap[j] + strDelim;
+                    }
+                    var val = recordset.values(record, g_exportMap[j]);
+                    if(top.HEURIST4.util.isnull(val)){
+                        line += strDelim;
+                    }else{
+                        
+                        if(top.HEURIST4.util.isArrayNotEmpty(val)){
+                            field = val.join('|');
+                        }else{
+                            field = val;
+                        }
+                        
+                        line += ((!top.HEURIST4.util.isempty(field))?dblquote_escape(field):'') + strDelim; 
+                    }
+                
+                }
                     
             }//for
             lines += line.slice(0,-1) + strRowTerm;

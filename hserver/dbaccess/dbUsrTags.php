@@ -82,6 +82,10 @@ class DbUsrTags extends DbEntityBase
         if(@$this->data['details']=='id'){
         
             $this->data['details'] = 'tag_ID';
+
+        }else if(@$this->data['details']=='label'){
+            
+            $this->data['details'] = 'tag_ID,tag_Text';
             
         }else if(@$this->data['details']=='name'){
 
