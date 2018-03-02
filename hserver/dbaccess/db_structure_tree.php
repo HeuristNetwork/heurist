@@ -111,7 +111,10 @@
     //                  fNNN: array(array(rt_id: , rt_name, recID, recTitle ... ) //constrained pointers
     //     NNN - field type ID
     //
+    // $mode
+    //
     // $pointer_fields - to avoid recursion for reverse pointers
+    //
     function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields){
 
         global $dbs_rtStructs;
@@ -121,17 +124,17 @@
         
         //add default fields
         if($mode<5){
-        if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));
-        array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  
-            'title'=>"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
-            'code'=>$recTypeId.":title", 'name'=>'Record title'));
-        array_push($children, array('key'=>'recModified', 'type'=>'date',
-            'title'=>"Modified  <span style='font-size:0.7em'>(Date)</span>", 'code'=>$recTypeId.":modified", 'name'=>'Record modified'));
-            
-        if($mode==3) {
-            array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
-            array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
-        }
+            if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));
+            array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  
+                'title'=>"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
+                'code'=>$recTypeId.":title", 'name'=>'Record title'));
+            array_push($children, array('key'=>'recModified', 'type'=>'date',
+                'title'=>"Modified  <span style='font-size:0.7em'>(Date)</span>", 'code'=>$recTypeId.":modified", 'name'=>'Record modified'));
+                
+            if($mode==3) {
+                array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
+                array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
+            }
         }
 
         if($recTypeId && is_numeric($recTypeId)){
@@ -280,7 +283,7 @@
 
     returns display name  or if enum array
 
-    $mode - 3 all, 4 for facet treeview
+    $mode - 3 all, 4 for facet treeview, 5 - for import csv(dependencies)
     */
     function __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
@@ -334,7 +337,7 @@
             case 'resource': // link to another record type
             case 'relmarker':
 
-                if( ($mode==5 && $recursion_depth<4) || ($mode==4 && $recursion_depth<3) || $recursion_depth<2){
+                if( ($mode==5 && $recursion_depth<2) || ($mode==4 && $recursion_depth<3) || $recursion_depth<2){
 
                     
                     if($reverseRecTypeId!=null){
