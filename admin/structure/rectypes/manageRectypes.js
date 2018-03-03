@@ -162,10 +162,12 @@ function RectypeManager() {
                 'entity'  : 'defRecTypes',
                 'mode'    : 'record_count'
                 };
+                
+            var topHAPI4 = top.hWin;    
         
             top.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
-                if(response.status == top.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == topwin.HAPI4.ResponseStatus.OK){
                     _rt_counts = response.data;
                     //refresh datatable
                     var _currentTabIndex = tabView.get('activeIndex');
@@ -174,7 +176,7 @@ function RectypeManager() {
                         dt.render();
                     }
                 }else{
-                    top.hWin.HEURIST4.msg.showMsgErr(response);
+                    topwin.HEURIST4.msg.showMsgErr(response);
                 }
             });
             
