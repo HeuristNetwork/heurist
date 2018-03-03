@@ -871,21 +871,21 @@ function EditRecStructure() {
     
     function onCellClickEventHandler(oArgs){
                 
-                    if(_actionInProgress){
-                        return;
-                    }
+        if(_actionInProgress){
+            return;
+        }
 
 
-                    var column = _myDataTable.getColumn(oArgs.target);
+        var column = _myDataTable.getColumn(oArgs.target);
 
-                    //prevent any operation in case of opened popup
-                    if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
-                        (!Hul.isnull(column) && 
-                            (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
-                        { 
-                            //if (!Hul.isnull(popupSelect) || _isServerOperationInProgress) console.log('popup or action-in-progress');
-                            return; 
-                        }
+        //prevent any operation in case of opened popup
+        if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
+            (!Hul.isnull(column) && 
+                (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
+            { 
+                //if (!Hul.isnull(popupSelect) || _isServerOperationInProgress) console.log('popup or action-in-progress');
+                return; 
+            }
 
 
 
@@ -902,6 +902,7 @@ function EditRecStructure() {
         //init inline edit
         var typ = oRecord.getData("dty_Type");
         if(!Hul.isnull(record_id) && 
+            (_expandedRecord==null) &&  //do not allow edit of some field is expanded
                 (column.key === 'rst_RequirementType' || column.key === 'rst_MaxValues' || column.key === 'rst_DisplayName'
                 || (column.key === 'rst_DisplayWidth' && !_isNoWidth(typ))
                 )){
@@ -2119,7 +2120,11 @@ function EditRecStructure() {
             id = allRows[i].id;
             // Clean up any existing Drag instances
             if (myDTDrags[id]) {
-                myDTDrags[id].unreg();
+                try{
+                    myDTDrags[id].unreg();
+                }catch(e){
+                    console.log('cant unreg prev drag');
+                }
                 delete myDTDrags[id];
             }
             // Create a Drag instance for each row
