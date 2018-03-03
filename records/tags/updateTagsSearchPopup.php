@@ -67,6 +67,31 @@ if(@$_REQUEST['recid']){
         <script src="../../common/js/utilsLoad.js"></script>
         <script src="../../common/php/displayPreferences.php"></script>
         <script src="autocompleteTags.js"></script>
+        <script>
+        
+        top.HEURIST.user.topTags = [<?php
+            /* find the top five tags for this user */
+            $res = mysql_query("select tag_Text, count(rtl_ID) as c from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID
+                where tag_UGrpID=".get_user_id()." group by tag_Text order by c desc limit 5");
+            $first = true;
+            while ($row = mysql_fetch_row($res)) {
+                if (! $first) print ",";  print " "; $first = false;
+                print "\"" . addslashes($row[0]) . "\"";
+            }
+        ?> ];
+
+        top.HEURIST.user.recentTags = [<?php
+            /* find the ten most recently used tags for this user */
+            $res = mysql_query("select distinct(tag_Text) from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID
+                where tag_UGrpID=".get_user_id()." group by rtl_TagID order by max(rtl_ID) desc limit 10");
+            $first = true;
+            while ($row = mysql_fetch_row($res)) {
+                if (! $first) print ",";  print " "; $first = false;
+                print "\"" . addslashes($row[0]) . "\"";
+            }
+        ?> ];
+                
+        </script>
 
         <div id="no-tags" style="display: none;">
             <div class="prompt" style="font-weight: bold; padding: 1em; border: 1px solid black; margin: 1em 1em 0 1em;"> You don't have any personal tags set for this record.  Tags are optional, but useful. </div>
