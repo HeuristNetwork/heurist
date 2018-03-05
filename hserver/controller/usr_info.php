@@ -57,10 +57,6 @@
             }
         }
     
-    }else if($action == 'get_url_content_type'){
-        
-       $res = loadRemoteURLContentType(@$_REQUEST['url']); 
-        
     }else if($action=='usr_log'){
         
         $system->initPathConstants(@$_REQUEST['db']);
@@ -193,6 +189,18 @@
 
                 $res = svsGetTreeData($system, @$_REQUEST['UGrpID']);
 
+                
+            }else if($action == 'get_url_content_type'){
+        
+                $mimeType = loadRemoteURLContentType(@$_REQUEST['url']); 
+//error_log($mimeType);                
+                if($mimeType!=null && $mimeType!==false){
+                    $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
+                                .$mimeType.'"';
+                    $extension = mysql__select_value($mysqli, $ext_query);
+                    return ($extension!=null)?$extension:false; 
+                }
+                
             } else {
 
                 $system->addError(HEURIST_INVALID_REQUEST);
