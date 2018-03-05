@@ -24,6 +24,7 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_users.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_svs.php');
+    require_once (dirname(__FILE__).'/../utilities/utils_file.php');
 
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
@@ -55,7 +56,10 @@
                 $res = true;
             }
         }
+    
+    }else if($action == 'get_url_content_type'){
         
+       $res = loadRemoteURLContentType(@$_REQUEST['url']); 
         
     }else if($action=='usr_log'){
         

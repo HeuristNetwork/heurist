@@ -1695,7 +1695,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
         var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
         allowed.splice(allowed.indexOf("separator"),1);
-        allowed.splice(allowed.indexOf("file"),1);
+        //allowed.splice(allowed.indexOf("file"),1);
         allowed.splice(allowed.indexOf("resource"),1);
         //allowed.splice(allowed.indexOf("relmarker"),1);
         if(currentStep==3){ //matching step

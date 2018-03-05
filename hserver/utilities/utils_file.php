@@ -205,7 +205,58 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         return $data;
     }
 }
+
+//
+//
+// alternative2: get_headers()
+// alternative3: https://stackoverflow.com/questions/37731544/get-mime-type-by-url
+// for local file use mime_content_type
+//
+function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
+
+    if(!function_exists("curl_init"))  {
+        return false;
+    }
+    if(!$url){
+        return false;
+    }
+
+    $content_type = false;
     
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_NOBODY, 1);
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);    // timeout after ten seconds
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
+    curl_setopt($ch, CURLOPT_URL, $url);
+
+    if ( (!$bypassProxy) && defined("HEURIST_HTTP_PROXY") ) {
+        curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+        if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+        }
+    }
+
+    $data = curl_exec($ch);
+    $error = curl_error($ch);
+
+    if ($error) {
+        $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+error_log('http code = '.$code.'  curl error='.$error);
+    } else {
+        //if(!$data){
+            $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);    
+        //}
+    }
+    curl_close($ch);
+    
+    return $content_type;
+}
+  
+//----------------------------------  
 //
 //
 //

@@ -26,6 +26,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     _isAdditionOfLocal:false, //flag to enabel "Save" button on file upload completion
     
+    _previousURL:null,
+    
     //
     //
     //
@@ -197,7 +199,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             isLocal = false;
         }
         
-        if(!isLocal){
+        if(!isLocal){ //remote
             var that = this;
             var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
             ele.editing_input('option', 'change', function(){
@@ -205,8 +207,26 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 //auto detect extension of external service
                 var res = ele.editing_input('getValues'); 
                 var ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
-                if(ext==null){
+                if(ext==null && !window.hWin.HEURIST4.util.isempty(res[0])){
+                    
                     ext = window.hWin.HEURIST4.util.getFileExtension(res[0]);
+                    
+                    if(window.hWin.HEURIST4.util.isempty(ext) && res[0]!=that._previousURL){
+                        //request server to detect content type
+                        that._previousURL = res[0];
+                        window.hWin.HAPI4.SystemMgr.get_url_content_type(res[0], function(response){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                var ext = response.data;
+                                var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                                ele2.editing_input('setValue', ext );
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr('Can not retrieve content type for given url.'
+                                +' Please enter it manaully');
+                            }
+                        });
+                        that.onEditFormChange();
+                        return;
+                    }
                 }
                 var ele2 = that._editing.getFieldByName('ulf_MimeExt');
                 ele2.editing_input('setValue', ext );

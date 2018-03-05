@@ -85,6 +85,56 @@ function mysql__select_array3($mysqli, $query, $withindex=true) {
 }
 
 
+// original is in h4/utilities/utils_file.php
+//
+// alternative2: get_headers()
+// alternative3: https://stackoverflow.com/questions/37731544/get-mime-type-by-url
+// for local file use mime_content_type
+//
+function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
+
+    if(!function_exists("curl_init"))  {
+        return false;
+    }
+    if(!$url){
+        return false;
+    }
+
+    $content_type = false;
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_NOBODY, 1);
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);    // timeout after ten seconds
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
+    curl_setopt($ch, CURLOPT_URL, $url);
+
+    if ( (!$bypassProxy) && defined("HEURIST_HTTP_PROXY") ) {
+        curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+        if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+        }
+    }
+
+    $data = curl_exec($ch);
+    $error = curl_error($ch);
+
+    if ($error) {
+        $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+error_log('http code = '.$code.'  curl error='.$error);
+    } else {
+        //if(!$data){
+            $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);    
+        //}
+    }
+    curl_close($ch);
+    
+    return $content_type;
+}
+
 /**
 * insert/update - creates and executes the parmetrized query
 *
@@ -130,7 +180,7 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
             $query = $query.$fieldname.'=?, ';
         }
 
-        $params[0] = $params[0].((substr($fieldname, -2) === 'ID')?'i':'s');
+        $params[0] = $params[0].((substr($fieldname, -2) === 'ID' && $fieldname!='ulf_ObfuscatedFileID')?'i':'s');
         array_push($params, $value);
     }
 
@@ -1228,7 +1278,8 @@ function validateImport($mysqli, $imp_session, $params){
         }else
         if($ft_vals[$idx_reqtype] == "required"){
             if(!$field_name){
-                if(!($ft_vals[$idx_fieldtype] == "file" || $ft_vals[$idx_fieldtype] == "resource")){ //except file and resource
+                //$ft_vals[$idx_fieldtype] == "file" || 
+                if(!($ft_vals[$idx_fieldtype] == "resource")){ //except file and resource
                     array_push($missed, $ft_vals[0]);    
                 }
                 
@@ -2102,6 +2153,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                     }else if($field_type=="scratchpad"){
                         if($row[$index])
                             $details['recordNotes'] = trim($row[$index]);
+                        
                     }else{
 
                         if(substr($field_type, -strlen("_lat")) === "_lat"){
@@ -2191,6 +2243,81 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                             }else if($fieldtype_type == "long"){
                                 //WARNING MILTIVALUE IS NOT SUPPORTED
                                 $long = $r_value;
+                                
+                            }else if($fieldtype_type=="file"){ //it is assumed that value is remote url
+                            
+                                $ulf_ID = null;
+                                
+                                //find if url is already registered
+                                $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
+                                                        .$r_value.'"';
+                                $fres = mysql__select_array2($mysqli, $file_query);
+                                if(is_array($fres) && $fres[0]>0){
+                                    $ulf_ID = $fres[0];
+                                }else{
+                                    //otherwise register as new 
+                                    
+                                    $extension = null;
+                                    //detect mime type
+
+                                    $rname = strtolower($r_value);
+                                    if(strpos($rname, 'youtu.be')!==false || strpos($rname, 'youtube.com')!==false){
+                                        $extension = 'youtube';
+                                    }else if(strpos($rname, 'vimeo.com')!==false){
+                                        $extension = 'vimeo';
+                                    }else if(strpos($rname, 'soundcloud.com')!==false){
+                                        $extension = 'soundcloud';            
+                                    }else{
+                                            //get extension from url - unreliable
+                                            $ap = parse_url($r_value);
+                                            if( array_key_exists('path', $ap) ){
+                                                $path = $ap['path'];
+                                                if($path){
+                                                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                                                }
+                                            }
+                                    }
+   
+                                    if(!$extension){   
+                                        $mimeType = loadRemoteURLContentType($r_value);
+                                        if($mimeType!=null && $mimeType!==false){
+                                            $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
+                                                        .$mimeType.'"';
+                                            $extension = mysql__select_array2($mysqli, $ext_query);
+                                            if(is_array($extension) & count($extension)>0){
+                                                $extension = $extension[0];
+                                            }
+                                        }
+                                    }
+                                    
+                                    if($extension){   
+                                            //add to table
+                                            $ulf_ID = mysql__insertupdate($mysqli, 'recUploadedFiles', 'ulf', 
+                                                array("ulf_ID"=>0,
+                                                    'ulf_OrigFileName'=>'_remote',
+                                                    'ulf_UploaderUGrpID'=> get_user_id(),
+                                                    //'ulf_ObfuscatedFileID'=>$nonce,
+                                                    'ulf_ExternalFileReference'=>$r_value,      
+                                                    'ulf_MimeExt'=>$extension,
+                                                    'ulf_AddedByImport'=>0
+                                                    )
+                                            );
+                           
+                                            if($ulf_ID>0){
+                                                $nonce = addslashes(sha1($ulf_ID.'.'.rand()));
+                                                mysql__insertupdate($mysqli, 'recUploadedFiles', 'ulf', 
+                                                array("ulf_ID"=>$ulf_ID,
+                                                    'ulf_ObfuscatedFileID'=>$nonce
+                                                    ));
+                                                
+                                            }else{
+                                                $ulf_ID = null;
+                                            }
+                                    }
+                                }
+                                
+                                $value = $ulf_ID;
+                                
                             }else{
                                 //double spaces are removed on preprocess stage $value = trim(preg_replace('/([\s])\1+/', ' ', $r_value));
 

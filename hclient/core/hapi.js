@@ -211,6 +211,8 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   ssearch_gettree - get saved search treeview data
     *   get_defs     - get the desired database structure definition
     *   get_defs_all
+    * 
+    *   get_url_content_type - resolve mimetype for given url
     *
     * @returns {Object}
     */
@@ -502,6 +504,11 @@ function hAPI(_db, _oninit) { //, _currentUser
                     }
                 });
 
+            },
+            
+            get_url_content_type: function(url, callback){
+                var request = {a:'get_url_content_type', url: url};
+                _callserver('usr_info', request, callback);
             }
 
 
