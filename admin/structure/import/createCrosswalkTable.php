@@ -486,7 +486,7 @@
                                         dtyStatus = rectypeStructures[rty_ID][i][3];
                                     };
                                     info += "<tr"+ (rectypeStructures[rty_ID][i][5] == 1? ' style="background-color:#CCCCCC;"' : "") +
-                                    "</td><td style='padding-left:20px;'>" + (rectypeStructures[rty_ID][i][5] == 1? "exists" : "NEW") +
+                                    "</td><td style='padding-left:20px;'>" + (rectypeStructures[rty_ID][i][5] == 1? "yes" : "NEW") +
                                     "<td style='padding-left:10px; font-weight:bold'>" + rectypeStructures[rty_ID][i][0] +
                                     "</td><td style='padding-left:10px;'>" + rectypeStructures[rty_ID][i][1] +
                                     "</td><td style='padding-left:10px;'>" + dtlookups[rectypeStructures[rty_ID][i][2]] +
