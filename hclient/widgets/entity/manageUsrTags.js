@@ -118,10 +118,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }else{
             
             var that = this;
-            window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
+            window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, 
+                (window.hWin.HAPI4.NEED_TAG_REFRESH===true),
                 function(response){
                         that.updateRecordList(null, {recordset:response});
                 });
+                
+            window.hWin.HAPI4.NEED_TAG_REFRESH = false;    
         }
         
         return true;

@@ -934,7 +934,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             callback = function(context) {
                         if(context!="" && context!=undefined) {
                             var sMsg = (context==true)?'Link created...':context;
-                            hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
+                            window.hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
                         }
             };            
         }else if(action_type=='ownership'){
@@ -945,6 +945,10 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                                 that.executeAction( "set_wg_and_vis", context );
                         }
             };            
+        }else{
+            callback = function(context){
+                window.hWin.HAPI4.NEED_TAG_REFRESH = true;
+            }
         }
         
         /*

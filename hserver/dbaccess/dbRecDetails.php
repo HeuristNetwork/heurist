@@ -21,7 +21,6 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/db_tags.php');
 require_once (dirname(__FILE__).'/db_records.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 
@@ -114,9 +113,12 @@ class DbRecDetails
             $recIDs = array($recIDs);
         }
         
+        $rtyID = @$this->data['rtyID'];
+        
         $passedRecIDCnt = count(@$recIDs);
         
         if ($passedRecIDCnt>0) {//check editable access for passed records
+        
             if($rtyID){ //filter for record type
                 $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
                                     .implode(",",$recIDs).")");
@@ -768,7 +770,7 @@ class DbRecDetails
                     $baseTag = $baseTag.' '.$type;
                 }
                 
-                $success = tagsAssign($this->system, $recordIds, null, $baseTag);
+                $success = $this->_tagsAssign($recordIds, null, $baseTag);
                 if($success){
                     $this->result_data[$type.'_tag'] = $baseTag;
                 }else{
@@ -777,7 +779,176 @@ class DbRecDetails
             }
         }
     }
-        
     
+    /**
+    * Assign tags to records and bookmark records
+    *
+    * @param mixed $system
+    * @param mixed $record_ids - array of record ids
+    * @param mixed $tag_ids - array of tag ids
+    * @param mixed $tag_names - if tag ids are not defined, we use $tag_names to get ids
+    * @param mixed $ugrID
+    * 
+    * returns false if error
+    *     or array ('tags_added'=>$tag_count, 'bookmarks_added'=>$bookmarks_added)
+    */
+    private function _tagsAssign($record_ids, $tag_ids, $tag_names=null, $ugrID=null){
+
+        $system = $this->system;
+        
+        if($ugrID<1) $ugrID = $system->get_user_id();
+        
+        if (!$system->has_access($ugrID)) {
+            $system->addError(HEURIST_REQUEST_DENIED);
+            return false;
+        }else{
+            //find tag_ids by tag name
+            if($tag_ids==null){
+                if($tag_names==null){
+                    $system->addError(HEURIST_INVALID_REQUEST, 'Tag name is not defined');
+                    return false;
+                }else{
+                    
+//error_log($tag_names);                    
+                    $tag_ids = $this->_tagGetByName(array_filter(explode(',', $tag_names)), true, $ugrID);
+                }
+            }
+            if( !is_array($record_ids) || count($record_ids)<0 ){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Record ids are not defined');
+                return false;
+            }
+
+            if( !is_array($tag_ids) || count($tag_ids)<0 ){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Tags ids either not found or not defined');
+                return false;
+            }
+
+            $mysqli = $system->get_mysqli();
+
+            //assign links
+            $insert_query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
+                . 'select rec_ID, tag_ID from usrTags, Records '
+                . ' where rec_ID in (' . implode(',', $record_ids) . ') '
+                . ' and tag_ID in (' . implode(',', $tag_ids) . ')'
+                . ' and tag_UGrpID = '.$ugrID;
+            $res = $mysqli->query($insert_query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR,"Cannot assign tags", $mysqli->error );
+                return false;
+            }
+            $tag_count = $mysqli->affected_rows;
+
+            /*$new_rec_ids = mysql__select_column($mysqli,
+            'select rec_ID from Records '
+            .' left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.$ugrID
+            .' where bkm_ID is null and rec_ID in (' . join(',', $record_ids) . ')');*/
+
+            //if $ugrID is not a group - create bookmarks
+            $bookmarks_added = 0;
+            if ($ugrID==$system->get_user_id() ||
+                mysql__select_value($mysqli, 'select ugr_Type from sysUGrps where ugr_ID ='.$ugrID)=='user')
+            { //not bookmarked yet
+                $query = 'insert into usrBookmarks '
+                .' (bkm_UGrpID, bkm_Added, bkm_Modified, bkm_recID)'
+                .' select ' . $ugrID . ', now(), now(), rec_ID from Records '
+                .' left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.$ugrID
+                .' where bkm_ID is null and rec_ID in (' . implode(',', $record_ids) . ')';
+
+                //$stmt = $mysqli->query($query);
+
+                $res = $mysqli->prepare($query);
+
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR,"Cannot add bookmarks", $mysqli->error);
+                    return false;
+                }
+                $bookmarks_added = $mysqli->affected_rows;
+            }
+
+            return array('tags_added'=>$tag_count, 'bookmarks_added'=>$bookmarks_added);
+        }
+    }
+    
+    /**
+    * Get tag IDs by tag names
+    *
+    * @param mixed $tag_names
+    * @param mixed $ugrID
+    */
+    private function _tagGetByName($tag_names, $isadd, $ugrID=null){
+
+        $system = $this->system;
+        
+        if (!$ugrID) {
+            $ugrID = $system->get_user_id();
+        }
+        if(!$ugrID) return null;
+
+        if(is_string($tag_names)){
+            $tag_names = explode(",", $tag_names);
+        }
+
+        $tag_ids = array();
+        foreach ($tag_names as $tag_name) {
+            $tag_name = preg_replace('/\\s+/', ' ', trim($tag_name));
+            if(strlen($tag_name)>0){
+
+                $res = mysql__select_value($system->get_mysqli(), 'select tag_ID from usrTags where lower(tag_Text)=lower("'.
+                    $system->get_mysqli()->real_escape_string($tag_name).'") and tag_UGrpID='.$ugrID);
+                if($res){
+                    array_push($tag_ids, $res);
+                }else if($isadd){
+                    $res = $this->_tagSave( array('tag_UGrpID'=>$ugrID, 'tag_Text'=>$tag_name));
+                    if($res){
+                        array_push($tag_ids, $res);
+                    }
+                }
+            }
+        }
+        $tag_ids = array_unique($tag_ids, SORT_NUMERIC);
+
+        return $tag_ids;
+    }        
+
+    /**
+    * insert/update tag
+    *
+    * @param mixed $system
+    * @param mixed $tag  - array [ ID, UGrpID, Text, Description, AddedByImport ]
+    * 
+    * return false or new tag_ID
+    */
+    private function _tagSave($tag){
+        
+        $system = $this->system;
+
+        if(!@$tag['tag_Text']){
+            $system->addError(HEURIST_INVALID_REQUEST, "Text not defined");
+            return false;
+        }
+
+        if (!$system->has_access(@$tag['tag_UGrpID'])) {
+            $system->addError(HEURIST_REQUEST_DENIED);
+            return false;
+        }else{
+
+            if(intval(@$tag['tag_ID'])<1){
+                $samename = $this->_tagGetByName($tag['tag_Text'], false, $tag['tag_UGrpID']);
+
+                if(count($samename)>0){
+                    $tag['tag_ID'] = $samename[0];
+                }
+            }
+
+            $res = mysql__insertupdate($system->get_mysqli(), "usrTags", "tag", $tag);
+            if(is_numeric($res) && $res>0){
+                return $res; //returns affected record id
+            }else{
+                $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
+                return false;
+            }
+
+        }
+    }    
 }
 ?>

@@ -708,6 +708,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
 
             $('body > div:not(.loading)').show();
+            $('body > #ui-datepicker-div').hide();
             $('.loading').hide();
             var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
             if(success){
@@ -751,7 +752,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                                 +'&q=tag:"'+response[key+'_tag']+'"')+
                             '" target="_blank">view</a></span>';
                         }else if(response[key+'_tag_error']){
-                            tag_link = '<span>'+response[key+'_tag_error']+'</span>';
+                            tag_link = '<span>'+response[key+'_tag_error']['message']+'</span>';
                         }else if(key=="processed"){
                             tag_link = '<span><a href="'+
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database

@@ -174,10 +174,10 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
     
     $alpha = 0;
 
+    $bg_color = array(200,200,200);   //gray
     
     if(substr($rectype_id,-5,5) == "m.png") { //for mapping
         $rectype_id = substr($rectype_id, 0, -5);
-        $bg_color = array(200,200,200);   //gray
         //$bg_color = array(0,0,0);   //black
         $filename2 = $path . $rectype_id . "m.png";
         $alpha = 127; //0-127
