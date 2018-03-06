@@ -163,7 +163,7 @@ function RectypeManager() {
                 'mode'    : 'record_count'
                 };
                 
-            var topHAPI4 = top.hWin;    
+            var topwin = top.hWin;    
         
             top.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){

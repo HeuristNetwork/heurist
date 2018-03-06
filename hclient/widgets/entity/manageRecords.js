@@ -1,5 +1,5 @@
 /**
-* manageDefTerms.js - main widget to manage defTerms
+* manageRecords.js - main widget to EDIT Records
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -224,7 +224,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var that = this;        
             var btns = [];
 
-            if(this.options.selectOnSave==true){
+            if(false && this.options.selectOnSave==true){ //always show standard set of buttons
                 var btns = [
                         {text:window.hWin.HR('Cancel'), 
                               css:{'margin-right':'15px'},
@@ -241,7 +241,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 ];
             }else{
-                var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+                
+                if(this.options.selectOnSave==true){
+                    var btns = [];    
+                }else{
+                
+                    var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
                         click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                               
                         {showText:false, icons:{primary:'ui-icon-circle-triangle-w'},title:window.hWin.HR('Previous'),
@@ -287,9 +292,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 }},
                         {text:window.hWin.HR('New'), id:'btnRecSaveAndNew',
                               css:{'margin-left':'0.5em','margin-right':'10em'},
-                              click: function() { that._saveEditAndClose( null, 'newrecord' ); }},
+                              click: function() { that._saveEditAndClose( null, 'newrecord' ); }}
+                              ];
+                }
                                 
-                                
+                btns = btns.concat([               
                                 
                         {text:window.hWin.HR('Save'), id:'btnRecSave',
                               accesskey:"S",
@@ -308,7 +315,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
                               
                               
-                              ]; 
+                              ]); 
                               
             }
             return btns;
@@ -907,6 +914,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             var recs = (response.data && response.data.records)?response.data.records:[];
                             
                             window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                                    refreshtags:true, 
                                     isdialog: false,
                                     container: panel,
                                     select_mode:'select_multi', 
